@@ -120,3 +120,49 @@ func (g *Git) HeadSHA(ctx context.Context) (string, error) {
 	}
 	return strings.TrimSpace(out), nil
 }
+
+// RevertLastCommit creates a NEW commit that inverts the changes introduced
+// by HEAD — the substrate the `/undo` REPL command bridges to (plan T1.1).
+//
+// It deliberately uses `git revert --no-edit` rather than `git reset --hard`:
+// revert NEVER rewrites history (no force-push surface per §11.4.113) and
+// NEVER discards the operator's own uncommitted work, so undoing an agent's
+// last auto-commit is non-destructive and itself recorded in history. The
+// returned SHA is the new revert commit's full 40-char SHA.
+//
+// Errors if HEAD is a merge commit (revert of a merge needs a parent choice
+// — surfaced verbatim so the caller can decide), if the working tree is dirty
+// in a way that conflicts with the revert, or on an unborn HEAD.
+func (g *Git) RevertLastCommit(ctx context.Context) (string, error) {
+	if _, err := g.run(ctx, "revert", "--no-edit", "HEAD"); err != nil {
+		return "", err
+	}
+	return g.HeadSHA(ctx)
+}
+
+// DiffSinceRef returns the verbatim `git diff <ref>` output — every change in
+// the working tree (staged + unstaged) relative to the given ref. This is the
+// substrate the `/diff` REPL command uses to show "everything that changed
+// since <the message/commit the user named>" (plan T1.1).
+//
+// ref is taken verbatim (a SHA, a tag, `HEAD~3`, a branch name, …). An empty
+// ref is rejected rather than silently diffing against the working tree, so a
+// caller bug surfaces immediately instead of producing a misleading diff.
+func (g *Git) DiffSinceRef(ctx context.Context, ref string) (string, error) {
+	ref = strings.TrimSpace(ref)
+	if ref == "" {
+		return "", fmt.Errorf("DiffSinceRef: empty ref")
+	}
+	return g.run(ctx, "diff", ref)
+}
+
+// ShowCommit returns the verbatim `git show <ref>` output — the full patch a
+// single commit introduced, used by `/diff <commit>` to inspect exactly what
+// one agent commit did (plan T1.1). ref is taken verbatim; empty is rejected.
+func (g *Git) ShowCommit(ctx context.Context, ref string) (string, error) {
+	ref = strings.TrimSpace(ref)
+	if ref == "" {
+		return "", fmt.Errorf("ShowCommit: empty ref")
+	}
+	return g.run(ctx, "show", ref)
+}

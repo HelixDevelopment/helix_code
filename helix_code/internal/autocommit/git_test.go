@@ -153,3 +153,95 @@ func TestGit_Commit_MessageRoundTrips(t *testing.T) {
 	require.Contains(t, string(out), "subject line")
 	require.Contains(t, string(out), "body paragraph")
 }
+
+// TestGit_RevertLastCommit_UndoesContent is the `/undo` substrate (plan T1.1):
+// after committing a file's new content then reverting, the file's content
+// MUST be back to its pre-commit state, and a NEW commit MUST exist (history
+// is preserved, not rewritten — non-destructive undo).
+func TestGit_RevertLastCommit_UndoesContent(t *testing.T) {
+	dir := setupRealGitRepo(t)
+	g := NewGit(dir, zap.NewNop())
+	ctx := context.Background()
+
+	// Baseline commit: file says "v1".
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "x.txt"), []byte("v1\n"), 0644))
+	require.NoError(t, g.Add(ctx, "x.txt"))
+	baseSHA, err := g.Commit(ctx, "baseline v1")
+	require.NoError(t, err)
+
+	// Agent-style commit: file changed to "v2".
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "x.txt"), []byte("v2\n"), 0644))
+	require.NoError(t, g.Add(ctx, "x.txt"))
+	v2SHA, err := g.Commit(ctx, "agent change v2")
+	require.NoError(t, err)
+	require.NotEqual(t, baseSHA, v2SHA)
+
+	// Undo the agent change.
+	revertSHA, err := g.RevertLastCommit(ctx)
+	require.NoError(t, err)
+	require.Len(t, revertSHA, 40)
+	require.NotEqual(t, v2SHA, revertSHA, "revert must be a NEW commit")
+
+	// File content is restored to "v1" — the actual user-visible effect.
+	content, err := os.ReadFile(filepath.Join(dir, "x.txt"))
+	require.NoError(t, err)
+	require.Equal(t, "v1\n", string(content), "revert must restore pre-change content")
+
+	// History preserved: HEAD is the revert commit, not a rewind to baseSHA.
+	head, err := g.HeadSHA(ctx)
+	require.NoError(t, err)
+	require.Equal(t, revertSHA, head)
+	require.NotEqual(t, baseSHA, head, "history must NOT be rewritten")
+}
+
+// TestGit_DiffSinceRef_ShowsChangesSinceCommit is the `/diff` substrate:
+// `git diff <baseline>` must surface the working-tree changes made after that
+// commit (here, the new "v2" line).
+func TestGit_DiffSinceRef_ShowsChangesSinceCommit(t *testing.T) {
+	dir := setupRealGitRepo(t)
+	g := NewGit(dir, zap.NewNop())
+	ctx := context.Background()
+
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "x.txt"), []byte("v1\n"), 0644))
+	require.NoError(t, g.Add(ctx, "x.txt"))
+	baseSHA, err := g.Commit(ctx, "baseline")
+	require.NoError(t, err)
+
+	// Change the working tree (not yet committed).
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "x.txt"), []byte("v2\n"), 0644))
+
+	diff, err := g.DiffSinceRef(ctx, baseSHA)
+	require.NoError(t, err)
+	require.Contains(t, diff, "-v1")
+	require.Contains(t, diff, "+v2")
+}
+
+func TestGit_DiffSinceRef_RejectsEmptyRef(t *testing.T) {
+	g := NewGit(setupRealGitRepo(t), zap.NewNop())
+	_, err := g.DiffSinceRef(context.Background(), "  ")
+	require.Error(t, err)
+}
+
+// TestGit_ShowCommit_ShowsPatch is the `/diff <commit>` substrate: `git show`
+// must surface what a single commit introduced.
+func TestGit_ShowCommit_ShowsPatch(t *testing.T) {
+	dir := setupRealGitRepo(t)
+	g := NewGit(dir, zap.NewNop())
+	ctx := context.Background()
+
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "x.txt"), []byte("alpha\n"), 0644))
+	require.NoError(t, g.Add(ctx, "x.txt"))
+	sha, err := g.Commit(ctx, "add alpha")
+	require.NoError(t, err)
+
+	out, err := g.ShowCommit(ctx, sha)
+	require.NoError(t, err)
+	require.Contains(t, out, "add alpha")
+	require.Contains(t, out, "+alpha")
+}
+
+func TestGit_ShowCommit_RejectsEmptyRef(t *testing.T) {
+	g := NewGit(setupRealGitRepo(t), zap.NewNop())
+	_, err := g.ShowCommit(context.Background(), "")
+	require.Error(t, err)
+}
