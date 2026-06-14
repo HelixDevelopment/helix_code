@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HelixCode — LLM Console</title>
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <main class="app">
+    <h1>HelixCode LLM Console</h1>
+    <p class="sub">
+      Sends a real request to <code>POST /api/v1/llm/generate</code>
+      (or <code>/api/v1/llm/stream</code>). The server constructs a real
+      provider and returns the model's actual output — no simulation.
+    </p>
+
+    <form id="gen-form">
+      <label>
+        Provider (optional, e.g. <code>anthropic</code>, <code>ollama</code>)
+        <input id="provider" type="text" placeholder="leave blank for local Ollama default" />
+      </label>
+      <label>
+        Model (optional)
+        <input id="model" type="text" placeholder="e.g. llama3.2" />
+      </label>
+      <label>
+        Prompt
+        <textarea id="prompt" rows="4" placeholder="Ask the model something…" required></textarea>
+      </label>
+      <div class="row">
+        <label class="inline">
+          <input id="stream" type="checkbox" /> Stream (SSE)
+        </label>
+        <button id="send" type="submit">Generate</button>
+      </div>
+    </form>
+
+    <section>
+      <h2>Response</h2>
+      <pre id="output" aria-live="polite"></pre>
+      <p id="meta" class="meta"></p>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

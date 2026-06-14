@@ -291,6 +291,11 @@ func (s *Server) setupRoutes() {
 			llmRoutes.GET("/providers", s.listLLMProviders)
 			llmRoutes.GET("/providers/:id", s.getLLMProvider)
 			llmRoutes.GET("/models", s.listLLMModels)
+			// Real generation surface (CONST-035 / BLUFF-001): both handlers
+			// construct a real llm.Provider per request and call its
+			// Generate / GenerateStream — no simulation. See llm_generate.go.
+			llmRoutes.POST("/generate", s.generateLLM)
+			llmRoutes.POST("/stream", s.streamLLM)
 		}
 
 		// Memory routes
