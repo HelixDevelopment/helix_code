@@ -195,6 +195,12 @@ aurora_os_cli_llm_chat_requires_provider:
 aurora_os_cli_llm_chat_configure_hint:
   other: "Configure your LLM provider (e.g., Ollama) and use the GUI version for interactive chat."
 
+aurora_os_cli_llm_chat_usage:
+  other: "Usage: llm chat <prompt> — sends the prompt to the configured LLM provider and prints the response."
+
+aurora_os_cli_llm_chat_error:
+  other: "LLM chat failed: %v"
+
 aurora_os_cli_info_header:
   other: "=== Aurora OS Information ==="
 

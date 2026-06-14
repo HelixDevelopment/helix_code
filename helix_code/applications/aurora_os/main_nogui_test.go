@@ -5,7 +5,9 @@ package main
 import (
 	"context"
 	"errors"
+	"net"
 	"testing"
+	"time"
 
 	"dev.helix.code/applications/aurora_os/i18n"
 	"github.com/stretchr/testify/assert"
@@ -569,4 +571,65 @@ func TestAccessControl(t *testing.T) {
 	viewerPerms := sm.accessControl["viewer"]
 	assert.Contains(t, viewerPerms, "read")
 	assert.NotContains(t, viewerPerms, "write")
+}
+
+// TestCmdLLMChat_NoPrompt proves the `llm chat` no-prompt path is honest
+// input validation (not a placeholder): with no positional prompt the
+// handler resolves the usage message ID through the Translator seam, does
+// NOT contact any provider, and returns nil. The fakeTranslator.calls seam
+// records the resolved ID so we can assert routing went through Translator.T
+// rather than echoing a literal.
+func TestCmdLLMChat_NoPrompt(t *testing.T) {
+	app := NewCLIApp()
+	ft := &fakeTranslator{prefix: "XL:"}
+	app.SetTranslator(ft)
+
+	// "chat" with no following prompt words.
+	err := app.cmdLLM([]string{"chat"})
+	require.NoError(t, err)
+
+	// The usage message ID MUST have been resolved through the Translator,
+	// proving the handler reached the validation branch (not a stub).
+	assert.Contains(t, ft.calls, "aurora_os_cli_llm_chat_usage",
+		"no-prompt chat must resolve the usage message ID via Translator.T")
+	// And it must NOT have emitted the placeholder requires-provider message
+	// (that was the old bluff; the new flow only uses it in genuine no-provider
+	// remediation alongside a real Generate error, which the no-prompt path
+	// never reaches).
+	assert.NotContains(t, ft.calls, "aurora_os_cli_llm_chat_requires_provider",
+		"no-prompt path must not print the old placeholder requires-provider line")
+}
+
+// TestCmdLLMChat_WithPrompt_RoutesToGenerate proves the `llm chat <prompt>`
+// path is REAL: it routes through the genuine Generate provider path. With a
+// deliberately empty HELIX_LLM_PROVIDER (resolver falls through to the local
+// Ollama default) and no reachable backend, a real prompt MUST surface a real
+// provider error — never a fabricated success. This is the anti-bluff proof
+// that the chat case is wired to real LLM generation, not a placeholder print.
+func TestCmdLLMChat_WithPrompt_RoutesToGenerate(t *testing.T) {
+	t.Setenv("HELIX_LLM_PROVIDER", "")
+
+	// Determinism guard: a real Ollama on :11434 would legitimately answer,
+	// so the negative no-provider assertion would not apply. Skip honestly.
+	if conn, derr := net.DialTimeout("tcp", "localhost:11434", 200*time.Millisecond); derr == nil {
+		_ = conn.Close()
+		t.Skip("SKIP-OK: local Ollama reachable on :11434; negative no-provider path not applicable")
+	}
+
+	app := NewCLIApp()
+	ft := &fakeTranslator{prefix: "XL:"}
+	app.SetTranslator(ft)
+
+	err := app.cmdLLM([]string{"chat", "Say", "hello."})
+
+	// Anti-bluff: a placeholder would print and return nil. The real path
+	// reaches provider.Generate against the unreachable local default and
+	// returns the real error.
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "generate:",
+		"chat error must originate from the real Generate path")
+	// The remediation hint + error message IDs must have been resolved,
+	// proving the error branch (not the success branch) executed.
+	assert.Contains(t, ft.calls, "aurora_os_cli_llm_chat_error")
+	assert.Contains(t, ft.calls, "aurora_os_cli_llm_chat_configure_hint")
 }

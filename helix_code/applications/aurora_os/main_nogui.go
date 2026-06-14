@@ -731,8 +731,26 @@ func (cliApp *CLIApp) cmdLLM(args []string) error {
 		}
 
 	case "chat":
-		fmt.Println(cliApp.t("aurora_os_cli_llm_chat_requires_provider"))
-		fmt.Println(cliApp.t("aurora_os_cli_llm_chat_configure_hint"))
+		// Real LLM chat: the prompt is the positional args after "chat".
+		// e.g. `llm chat What is 2+2?` -> prompt = "What is 2+2?".
+		prompt := strings.TrimSpace(strings.Join(args[1:], " "))
+		if prompt == "" {
+			// Honest input-validation message, not a bluff: nothing to send.
+			fmt.Println(cliApp.t("aurora_os_cli_llm_chat_usage"))
+			return nil
+		}
+		// Anti-bluff (BLUFF-001 / CONST-035 / CONST-036): delegate to the real
+		// Generate path which resolves a genuine llm.Provider and makes a real
+		// provider.Generate call. No simulation, no canned response.
+		out, err := cliApp.Generate(prompt)
+		if err != nil {
+			// Surface the real provider/transport error verbatim, and keep the
+			// configure-hint as the no-provider remediation path.
+			fmt.Printf(cliApp.t("aurora_os_cli_llm_chat_error")+"\n", err)
+			fmt.Println(cliApp.t("aurora_os_cli_llm_chat_configure_hint"))
+			return err
+		}
+		fmt.Println(out)
 
 	default:
 		fmt.Printf(cliApp.t("aurora_os_cli_unknown_subcommand")+"\n", args[0])
