@@ -536,3 +536,14 @@ Expose a gomobile-bound Generate entrypoint so the mobile applications can invok
 
 Reconcile the Phase-1 implementation plan against actually-delivered state so the programme plan reflects reality, not aspiration (commit e3063af1).
 
+## HXC-076 — Web /llm/generate + /llm/stream endpoints with frontend (partial — e2e pending)
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** eafdda36 tests/integration/llm_generate_e2e_test.go: real GIN 200 content:4 provider:ollama qwen2.5:0.5b, conductor-reproduced
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Backend /llm/generate and /llm/stream endpoints plus frontend wiring landed (commit 32e7e5b8); REMAINING: full browser-driven end-to-end test proving real streamed output renders in the UI is not yet captured — keep open until e2e evidence lands.
+
