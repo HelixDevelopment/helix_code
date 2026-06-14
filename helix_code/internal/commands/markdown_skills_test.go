@@ -287,6 +287,63 @@ func TestSkillLoader_ThreeWayPrecedence(t *testing.T) {
 	assert.Contains(t, s.SourcePath(), filepath.Join("project", ".helix", "skills", "p", "SKILL.md"))
 }
 
+// TestSkillLoader_BuiltinTierAvailable verifies the lowest-precedence built-in
+// tier: a skill embedded in the binary is registered even when no user/project
+// skills dir contains it. It exercises the real //go:embed FS — no temp files.
+func TestSkillLoader_BuiltinTierAvailable(t *testing.T) {
+	reg := NewSkillRegistry()
+	// Empty (nonexistent) on-disk dirs: only the built-in tier can supply skills.
+	loader := NewSkillLoader(reg, "", "")
+	require.NoError(t, loader.Load())
+
+	s, ok := reg.Get("conventional-commit")
+	require.True(t, ok, "built-in conventional-commit skill must be available with no user/project dirs")
+	assert.Equal(t, "Draft a Conventional Commits message from a short summary of the change", s.Description())
+	assert.NotEmpty(t, s.triggers, "built-in skill must have compiled triggers")
+	assert.Equal(t, "builtin:conventional-commit/SKILL.md", s.SourcePath())
+
+	// The trigger actually matches realistic input and captures the summary.
+	matched, caps, found := reg.FindMatching("commit message for adding a retry to the LLM client")
+	require.True(t, found)
+	assert.Equal(t, "conventional-commit", matched.Name())
+	assert.Equal(t, "adding a retry to the LLM client", caps["summary"])
+
+	// And it is reported in the loader's snapshot as a builtin source.
+	assert.Equal(t, "builtin:conventional-commit/SKILL.md", loader.Loaded()["conventional-commit"])
+}
+
+// TestSkillLoader_ProjectOverridesBuiltin verifies the full 3-tier precedence
+// including the built-in tier: a project SKILL.md of the same name as a built-in
+// skill OVERRIDES the built-in (project > user > built-in). It uses real temp
+// dirs for the project tier and the real //go:embed for the built-in tier.
+func TestSkillLoader_ProjectOverridesBuiltin(t *testing.T) {
+	root := t.TempDir()
+	projSkills := filepath.Join(root, "project", ".helix", "skills")
+	pkgDir := filepath.Join(projSkills, "conventional-commit")
+	require.NoError(t, os.MkdirAll(pkgDir, 0755))
+
+	// Project packaged manifest for the same name as the built-in skill.
+	require.NoError(t, os.WriteFile(filepath.Join(pkgDir, "SKILL.md"),
+		[]byte("---\ndescription: project override of conventional-commit\ntriggers: [\"^cc\"]\n---\nproject body"), 0644))
+
+	reg := NewSkillRegistry()
+	loader := NewSkillLoader(reg, projSkills, "")
+	require.NoError(t, loader.Load())
+
+	s, ok := reg.Get("conventional-commit")
+	require.True(t, ok)
+	assert.Equal(t, "project override of conventional-commit", s.Description(),
+		"project SKILL.md must override the built-in skill of the same name")
+	// Source path proves the on-disk file won, not the builtin: sentinel.
+	assert.Contains(t, s.SourcePath(),
+		filepath.Join("project", ".helix", "skills", "conventional-commit", "SKILL.md"))
+	assert.NotEqual(t, "builtin:conventional-commit/SKILL.md", s.SourcePath())
+
+	// A built-in skill with no on-disk override is still present (mixed tiers).
+	// (No other built-in exists today, so re-assert the override skill came from disk.)
+	assert.Equal(t, s.SourcePath(), loader.Loaded()["conventional-commit"])
+}
+
 func TestSkillLoader_LoadedReturnsSnapshot(t *testing.T) {
 	projectDir := t.TempDir()
 	skills := filepath.Join(projectDir, ".helix", "skills")
@@ -299,6 +356,11 @@ func TestSkillLoader_LoadedReturnsSnapshot(t *testing.T) {
 	require.NoError(t, loader.Load())
 
 	loaded := loader.Loaded()
-	require.Len(t, loaded, 1)
+	// The snapshot contains the on-disk skill plus the always-present built-in
+	// tier (lowest precedence). Assert the on-disk "x" skill is reported with
+	// its real path, and that the built-in coexists rather than being clobbered.
 	assert.Contains(t, loaded["x"], "x.md")
+	assert.Equal(t, "builtin:conventional-commit/SKILL.md", loaded["conventional-commit"],
+		"the built-in tier must coexist with on-disk skills in the snapshot")
+	assert.GreaterOrEqual(t, len(loaded), 2, "snapshot must include on-disk skill + built-in tier")
 }

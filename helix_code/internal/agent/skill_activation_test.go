@@ -70,5 +70,13 @@ func TestLoadSkillsAndDispatcher_EmptyAndMissingDirsAreSafe(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, reg)
 	require.NotNil(t, disp)
-	assert.Empty(t, reg.List(), "no skills loaded from empty/missing dirs")
+	// Built-in (bundled, //go:embed) skills are always present regardless of the
+	// on-disk dirs. Empty/missing dirs must therefore contribute NO on-disk skill:
+	// every skill in the registry must be a built-in (SourcePath "builtin:...").
+	// This still FAILs if an on-disk skill ever leaked from an empty/missing dir
+	// (the original invariant this test guards), so it is not a tautology.
+	for _, s := range reg.List() {
+		assert.True(t, strings.HasPrefix(s.SourcePath(), "builtin:"),
+			"empty/missing dirs must load no on-disk skill; got %q from %q", s.Name(), s.SourcePath())
+	}
 }

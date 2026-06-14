@@ -1,8 +1,11 @@
 package commands
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -12,6 +15,19 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
+
+// builtinSkillsFS holds the skill manifests bundled into the binary. Each
+// immediate subdirectory of builtin_skills/ that contains a SKILL.md is loaded
+// as a built-in skill named after that subdirectory. These form the
+// lowest-precedence tier: a user or project skill of the same name overrides
+// the built-in (see SkillLoader.Reload). The embedded tree always ships with
+// the binary, so built-in skills work out of the box with no on-disk files.
+//
+//go:embed builtin_skills
+var builtinSkillsFS embed.FS
+
+// builtinSkillsRoot is the directory prefix inside builtinSkillsFS.
+const builtinSkillsRoot = "builtin_skills"
 
 // Skill is an agent-invoked Markdown skill loaded from .helix/skills/*.md.
 type Skill struct {
@@ -215,17 +231,24 @@ func (r *SkillRegistry) FindMatching(input string) (*Skill, map[string]string, b
 // (T1.6); it coexists with the legacy flat "<name>.md" form.
 const skillManifestName = "SKILL.md"
 
-// SkillLoader scans project + user skill directories and registers each
-// skill in the supplied SkillRegistry. Two on-disk layouts are recognised:
+// SkillLoader registers skills from three precedence tiers, lowest to highest:
+//
+//	built-in   skills embedded in the binary (builtin_skills/<name>/SKILL.md)
+//	user       skills under the user skills directory
+//	project    skills under the project skills directory
+//
+// On-disk tiers (user, project) recognise two layouts:
 //
 //	<dir>/<name>.md                   (legacy flat form; name = filename sans .md)
 //	<dir>/<name>/SKILL.md             (packaged manifest form; name = subdir name)
 //
-// Project files override user files of the same name on collision. Within a
-// single directory, the packaged SKILL.md manifest takes precedence over a
-// legacy flat <name>.md of the same skill name. Non-existent directories are
-// silently skipped; per-file parse errors are logged at WARN and do not
-// cause Load/Reload to fail.
+// Resolution is project > user > built-in: a project (or user) skill of a given
+// name overrides a user (or built-in) skill of the same name. Within a single
+// on-disk directory, the packaged SKILL.md manifest takes precedence over a
+// legacy flat <name>.md of the same skill name. The built-in tier carries only
+// the packaged SKILL.md layout. Non-existent directories are silently skipped;
+// per-file parse errors are logged at WARN and do not cause Load/Reload to
+// fail.
 type SkillLoader struct {
 	registry   *SkillRegistry
 	projectDir string
@@ -262,7 +285,12 @@ func (l *SkillLoader) Reload() error {
 	defer l.mu.Unlock()
 
 	want := map[string]*Skill{}
-	// Order: user first, then project (project overrides user on collision).
+	// Lowest-precedence tier first: built-in skills embedded in the binary.
+	// They are written into `want` before the on-disk passes, so a user or
+	// project skill of the same name overrides the built-in (later writes to
+	// `want[name]` win). Precedence: project > user > built-in.
+	l.loadBuiltinSkills(want)
+	// Then user, then project (project overrides user, both override built-in).
 	for _, dir := range []string{l.userDir, l.projectDir} {
 		if dir == "" {
 			continue
@@ -340,6 +368,44 @@ func (l *SkillLoader) loadSkillFile(name, path string) *Skill {
 		return nil
 	}
 	return s
+}
+
+// loadBuiltinSkills walks the embedded builtin_skills tree and registers each
+// builtin_skills/<name>/SKILL.md manifest into want under the directory name,
+// reusing the same parse path as on-disk skills. Built-in skills are the
+// lowest-precedence tier; the caller invokes this first so on-disk skills can
+// override by name. Per-manifest read/parse errors are logged at WARN and the
+// manifest is skipped — they never abort Reload. The source path is recorded as
+// "builtin:<name>/SKILL.md" so callers can tell a built-in skill apart from an
+// on-disk one.
+func (l *SkillLoader) loadBuiltinSkills(want map[string]*Skill) {
+	entries, err := fs.ReadDir(builtinSkillsFS, builtinSkillsRoot)
+	if err != nil {
+		// The embedded tree is compiled in; a read error here is unexpected.
+		l.log.Warn("skill loader: read builtin skills", zap.Error(err))
+		return
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		// embed.FS always uses forward slashes regardless of host OS.
+		manifestPath := path.Join(builtinSkillsRoot, name, skillManifestName)
+		data, readErr := builtinSkillsFS.ReadFile(manifestPath)
+		if readErr != nil {
+			// Subdirectory without a SKILL.md (or unreadable): not a skill.
+			continue
+		}
+		sourcePath := "builtin:" + path.Join(name, skillManifestName)
+		s, parseErr := parseSkillFile(name, string(data), sourcePath)
+		if parseErr != nil {
+			l.log.Warn("skill loader: parse builtin skill",
+				zap.String("name", name), zap.Error(parseErr))
+			continue
+		}
+		want[name] = s
+	}
 }
 
 // Loaded returns a snapshot of skill name → source path for all skills
