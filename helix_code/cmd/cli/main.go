@@ -60,6 +60,10 @@ import (
 	"dev.helix.code/internal/workflow"
 	"dev.helix.code/internal/workflow/planmode"
 	"dev.helix.code/internal/workspace"
+	speckitconfig "digital.vasic.helixspecifier/pkg/config"
+	"digital.vasic.helixspecifier/pkg/speckit"
+	speckittypes "digital.vasic.helixspecifier/pkg/types"
+	"github.com/sirupsen/logrus"
 	"go.uber.org/zap"
 )
 
@@ -2211,6 +2215,15 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 			_ = c.handleDebate(ctx, topic)
 			continue
 		}
+		// /specify <request> — runs the HelixSpecifier speckit Specify phase,
+		// backed by the REAL debate responder over the REAL llm provider.
+		// Prefix-matched (remainder of the line is the spec request), mirroring
+		// /debate.
+		if strings.HasPrefix(lower, "/specify ") || lower == "/specify" {
+			request := strings.TrimSpace(strings.TrimPrefix(input, "/specify"))
+			_ = c.handleSpecify(ctx, request)
+			continue
+		}
 		// Unknown slash command: surface clearly, don't send to LLM
 		if strings.HasPrefix(input, "/") {
 			fmt.Println(tr(ctx, "cli_repl_unknown_slash", map[string]any{"Input": input}))
@@ -2511,6 +2524,105 @@ func (c *CLI) handleDebate(ctx context.Context, topic string) error {
 	return nil
 }
 
+// handleSpecify runs HelixSpecifier's speckit Specify phase against the CLI's
+// REAL llm provider. It mirrors handleDebate's provider→responder wiring, then
+// drives the real speckit engine:
+//
+//	pillar := speckit.NewPillar(config.DefaultConfig(), logger)
+//	pillar.SetDebateFunc(speckit.LLMBackedDebateFunc(responder))
+//	result, err := pillar.ExecutePhase(ctx, types.PhaseSpecify, &types.PhaseInput{...})
+//
+// Anti-bluff (§11.4 / CONST-035): the responder round-trips every phase debate
+// turn through a REAL provider.Generate call — no simulated output. The speckit
+// engine itself REQUIRES a real DebateFunc: a nil DebateFunc returns
+// speckit.ErrDebateFuncNotConfigured (the round-28 §11.4 audit removed the prior
+// fabricating branch). When no provider/model is configured, OR the engine/debate
+// returns an error, the command surfaces the REAL error rather than fabricating
+// any phase output.
+func (c *CLI) handleSpecify(ctx context.Context, request string) error {
+	request = strings.TrimSpace(request)
+	if request == "" {
+		fmt.Println("usage: /specify <request>")
+		return nil
+	}
+	if c.llmProvider == nil {
+		fmt.Println(tr(ctx, "cli_repl_no_provider", nil))
+		return nil
+	}
+
+	// Resolve the provider's first advertised model (same guard as /debate):
+	// the responder's RegisterProvider + the provider's Generate both require a
+	// non-empty model name (§11.4.6 no-guessing).
+	provider := c.llmProvider
+	modelName := ""
+	if models := provider.GetModels(); len(models) > 0 {
+		modelName = models[0].Name
+	}
+	if strings.TrimSpace(modelName) == "" {
+		fmt.Println("❌ /specify: active provider advertises no models; cannot run the specify phase")
+		return nil
+	}
+
+	// Wrap the REAL CLI provider into the adapter's ProviderInvoker shape —
+	// identical honest seam to handleDebate.
+	invoker := func(ictx context.Context, prompt string) (string, error) {
+		resp, err := provider.Generate(ictx, &llm.LLMRequest{
+			Model:       modelName,
+			MaxTokens:   1000,
+			Temperature: 0.7,
+			Messages:    []llm.Message{{Role: "user", Content: prompt}},
+		})
+		if err != nil {
+			return "", err
+		}
+		if resp == nil {
+			return "", fmt.Errorf("provider returned nil response")
+		}
+		return resp.Content, nil
+	}
+
+	responder, err := speckit_debate_adapter.NewLLMBackedResponder(
+		invoker,
+		[]speckit_debate_adapter.AgentSpec{
+			{Provider: provider.GetName(), Model: modelName, Score: 0.9},
+		},
+	)
+	if err != nil {
+		fmt.Printf("❌ /specify setup failed: %v\n", err)
+		return err
+	}
+
+	// Build the real speckit pillar and wire the REAL debate responder into it
+	// via the canonical SetDebateFunc(LLMBackedDebateFunc(responder)) path. A nil
+	// DebateFunc would make ExecutePhase return ErrDebateFuncNotConfigured.
+	pillar := speckit.NewPillar(speckitconfig.DefaultConfig(), logrus.New())
+	pillar.SetDebateFunc(speckit.LLMBackedDebateFunc(responder))
+
+	result, err := pillar.ExecutePhase(ctx, speckittypes.PhaseSpecify, &speckittypes.PhaseInput{
+		UserRequest: request,
+	})
+	if err != nil {
+		// Surfaces the REAL error verbatim — including
+		// speckit.ErrDebateFuncNotConfigured and any debate/provider failure.
+		// Never a fabricated phase output (§11.4 / CONST-035).
+		fmt.Printf("❌ /specify failed: %v\n", err)
+		return err
+	}
+	if result == nil {
+		err := fmt.Errorf("speckit ExecutePhase returned nil result")
+		fmt.Printf("❌ /specify failed: %v\n", err)
+		return err
+	}
+
+	fmt.Printf("# Specify phase (quality score %.3f, debate %s)\n",
+		result.QualityScore, result.DebateID)
+	fmt.Print(result.Output)
+	if !strings.HasSuffix(result.Output, "\n") {
+		fmt.Println()
+	}
+	return nil
+}
+
 // handleUndo reverts the last commit via autocommit.Git.RevertLastCommit
 // (`git revert --no-edit HEAD` — a NEW commit that inverts HEAD, never a
 // history rewrite, so it is force-push-free per §11.4.113) and prints the
@@ -2553,6 +2665,8 @@ func (c *CLI) showHelp(ctx context.Context) {
 	// they stay consistent across locales and don't require new i18n keys.
 	fmt.Println("/diff [ref]      - Show working-tree git diff (optionally since <ref>)")
 	fmt.Println("/undo            - Revert the last commit (git revert HEAD)")
+	fmt.Println("/debate <topic>  - Run a real LLM-backed debate on <topic>")
+	fmt.Println("/specify <req>   - Run the speckit Specify phase (real LLM-backed) for <req>")
 	fmt.Println(tr(ctx, "cli_help_cmd_help", nil))
 	fmt.Println(tr(ctx, "cli_help_cmd_exit", nil))
 	fmt.Println("")
