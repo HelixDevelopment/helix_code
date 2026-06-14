@@ -49,8 +49,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 	"sync"
 	"time"
+
+	"dev.helix.code/internal/llm"
 )
 
 // HarmonyDistributedEngine manages distributed task scheduling across
@@ -685,4 +689,127 @@ func (ds *HarmonyDataSync) GetSyncStatus() (bool, time.Time, int, error) {
 	defer ds.mu.RUnlock()
 
 	return ds.syncEnabled, ds.lastSync, len(ds.syncedDevices), ds.lastSyncErr
+}
+
+// HarmonyLLMCore is the Harmony OS parity surface for real LLM
+// generation, mirroring the proven shared/mobile_core MobileCore.Generate
+// path so the Harmony client reaches the SAME canonical llm.Provider
+// pipeline cmd/cli and the mobile bindings use. It lives in distributed.go
+// (no build tag) so it compiles under BOTH the GUI (`!nogui`) and headless
+// (`nogui`) builds and is exercisable on hosts without the Fyne/X11
+// toolchain.
+//
+// Anti-bluff (BLUFF-001 / CONST-035 / CONST-036): Generate returns the
+// provider's genuine output, never a canned/fabricated string. It resolves
+// a REAL llm.Provider via the same selector path (llm.Select ->
+// llm.NewCloudProvider, falling back to a local Ollama provider) and makes
+// a REAL provider.Generate call. When no provider is reachable (e.g. Ollama
+// not running and no cloud credentials configured) the underlying transport
+// error is surfaced verbatim — never swallowed into a fake success.
+type HarmonyLLMCore struct {
+	mu          sync.Mutex
+	llmProvider llm.Provider
+}
+
+// NewHarmonyLLMCore constructs an empty core. The real llm.Provider is
+// resolved lazily on the first Generate call.
+func NewHarmonyLLMCore() *HarmonyLLMCore {
+	return &HarmonyLLMCore{}
+}
+
+// Generate performs real LLM generation for the Harmony OS client. The
+// signature (string in, string + error out) matches MobileCore.Generate so
+// the Harmony client has the same flat, binding-friendly contract.
+func (h *HarmonyLLMCore) Generate(prompt string) (string, error) {
+	return h.generateInternal(context.Background(), prompt)
+}
+
+// generateInternal lazily resolves and caches a real llm.Provider, builds a
+// real *llm.LLMRequest carrying the prompt as a user message, and calls
+// provider.Generate. The returned text is the provider's actual response
+// content.
+func (h *HarmonyLLMCore) generateInternal(ctx context.Context, prompt string) (string, error) {
+	if strings.TrimSpace(prompt) == "" {
+		return "", fmt.Errorf("generate: prompt must not be empty")
+	}
+
+	provider, err := h.ensureLLMProvider(ctx)
+	if err != nil {
+		return "", fmt.Errorf("generate: no LLM provider available: %w", err)
+	}
+
+	req := &llm.LLMRequest{
+		Messages: []llm.Message{
+			{Role: "user", Content: prompt},
+		},
+	}
+
+	resp, err := provider.Generate(ctx, req)
+	if err != nil {
+		return "", fmt.Errorf("generate: provider call failed: %w", err)
+	}
+	if resp == nil {
+		return "", fmt.Errorf("generate: provider returned nil response")
+	}
+	return resp.Content, nil
+}
+
+// ensureLLMProvider returns the cached llm.Provider, constructing a real one
+// on first use. The construction mirrors shared/mobile_core: it resolves the
+// cloud provider type from the HELIX_LLM_PROVIDER environment variable via
+// llm.Select, constructs it via llm.NewCloudProvider, and falls back to a
+// local Ollama provider on the standard port when no cloud provider is
+// configured or its construction fails.
+//
+// Anti-bluff: this never returns a stub/fake provider. If even the local
+// Ollama provider cannot be constructed, the error is surfaced.
+func (h *HarmonyLLMCore) ensureLLMProvider(ctx context.Context) (llm.Provider, error) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	if h.llmProvider != nil {
+		return h.llmProvider, nil
+	}
+
+	if provider := buildHarmonyLLMProvider(ctx); provider != nil {
+		h.llmProvider = provider
+		return provider, nil
+	}
+
+	return nil, fmt.Errorf("could not construct any LLM provider (cloud unconfigured and local Ollama unreachable)")
+}
+
+// buildHarmonyLLMProvider resolves a real cloud provider from the
+// environment, falling back to a local Ollama provider. Returns nil only
+// when no provider at all could be constructed (the caller turns that into
+// an explicit error).
+func buildHarmonyLLMProvider(_ context.Context) llm.Provider {
+	selectorInput := llm.SelectorInput{
+		Env: os.Getenv("HELIX_LLM_PROVIDER"),
+	}
+	ptype, selErr := llm.Select(selectorInput)
+	switch {
+	case errors.Is(selErr, llm.ErrNoProviderConfigured):
+		// No cloud provider configured — fall through to the local default.
+	case selErr != nil:
+		// Unknown provider name — log and fall back rather than aborting.
+		log.Printf("harmony: provider selector error: %v (falling back to local default)", selErr)
+	default:
+		entry := llm.ProviderConfigEntry{Type: ptype}
+		cloud, cErr := llm.NewCloudProvider(ptype, entry)
+		if cErr == nil && cloud != nil {
+			return cloud
+		}
+		log.Printf("harmony: failed to construct cloud provider %q (%v); falling back to local default", ptype, cErr)
+	}
+
+	provider, err := llm.NewOllamaProvider(llm.OllamaConfig{
+		DefaultModel: "llama3.2",
+		BaseURL:      "http://localhost:11434",
+	})
+	if err != nil {
+		log.Printf("harmony: default Ollama provider construction failed: %v", err)
+		return nil
+	}
+	return provider
 }
