@@ -22,6 +22,7 @@ import (
 	"dev.helix.code/internal/helixqa"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/mcp"
+	"dev.helix.code/internal/memory"
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/plugins"
 	"dev.helix.code/internal/project"
@@ -56,6 +57,15 @@ type TerminalUI struct {
 	projectManager     *project.Manager
 	sessionManager     *session.Manager
 	qaEngine           *helixqa.Engine
+
+	// Durable cross-session memory (HelixMemory, §11.4.74 reuse). Wired
+	// default-on with a zero-config local SQLite backend so a fact stated in
+	// one session is recalled in a fresh session OUT-OF-THE-BOX. memoryProvider
+	// is nil only when the local store could not be opened (honest degrade to
+	// the legacy in-process behaviour, never a fake "remembered").
+	memoryManager  *memory.Manager
+	memoryProvider *memory.HelixMemoryProvider
+	memoryConvID   string
 
 	// UI Components
 	pages     *tview.Pages
@@ -229,6 +239,30 @@ func (tui *TerminalUI) Initialize() error {
 
 	// Initialize session manager
 	tui.sessionManager = session.NewManager()
+
+	// Initialize durable cross-session memory (HelixMemory zero-config local
+	// store). Default-on: persists OUT-OF-THE-BOX with no API keys at
+	// <user-config>/helix_memory/memory.db (override via HELIX_MEMORY_DB). On
+	// open failure the TUI still runs with the legacy in-process behaviour —
+	// honest degrade, never a fake recall.
+	if memProvider, memErr := memory.NewHelixMemoryProviderDefault(); memErr != nil {
+		log.Printf("⚠️  TUI: durable memory unavailable (%v); chat history will not persist across sessions", memErr)
+	} else {
+		tui.memoryProvider = memProvider
+		tui.memoryManager = memory.NewManagerWithProvider(memProvider)
+		// Hydrate prior memories so recall works on launch.
+		hydrateCtx, hydrateCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		if hErr := tui.memoryManager.HydrateFromProvider(hydrateCtx); hErr != nil {
+			log.Printf("⚠️  TUI: memory hydrate failed (%v); starting with empty recall", hErr)
+		}
+		hydrateCancel()
+		// A stable active conversation for this TUI's persisted turns.
+		if conv, cErr := tui.memoryManager.CreateConversation("tui-chat"); cErr == nil {
+			tui.memoryConvID = conv.ID
+			_ = tui.memoryManager.SetActive(conv.ID)
+		}
+		log.Printf("✅ TUI: durable memory active (HelixMemory local store at %s)", memProvider.DBPath())
+	}
 
 	// Initialize QA engine
 	qaEngine, err := helixqa.NewEngine(cfg)
@@ -1609,6 +1643,26 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 		Content: message,
 	})
 
+	// Durable memory: persist the user turn (write-through to HelixMemory) AND
+	// recall any prior remembered context relevant to this message, prepending
+	// it as a system turn so a fact stated in a PREVIOUS session surfaces in the
+	// model's context now. No-op when durable memory is unavailable.
+	if tui.memoryManager != nil {
+		tui.persistChatTurn(memory.RoleUser, message)
+		recallCtx, recallCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if recall, rErr := tui.memoryManager.RecallContext(recallCtx, message, 5); rErr == nil && strings.TrimSpace(recall) != "" {
+			// Insert recalled context as a system turn BEFORE the user message so
+			// the model sees the remembered fact without it polluting the visible
+			// transcript ordering (it is appended to chatHistory; the model reads
+			// the full slice).
+			tui.chatHistory = append(tui.chatHistory, llm.Message{
+				Role:    "system",
+				Content: recall,
+			})
+		}
+		recallCancel()
+	}
+
 	// Update display
 	tui.chatOutput.SetText(tui.formatChatHistory())
 	tui.chatOutput.ScrollToEnd()
@@ -1803,6 +1857,10 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 				}
 				tui.chatHistory[assistantIdx].Content = finalAnswer
 
+				// Durable memory: persist the assistant answer so it is recalled
+				// in future sessions (write-through to HelixMemory).
+				tui.persistChatTurn(memory.RoleAssistant, finalAnswer)
+
 				// Surface the agentic tool trace so the operator SEES each
 				// tool call ("tool: git_status … <real output>").
 				if len(result.Trace) > 0 {
@@ -1847,12 +1905,32 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 				tui.chatHistory[assistantIdx].Content = fmt.Sprintf("[Error: %v]", streamErr)
 				tui.statusBar.SetText(fmt.Sprintf("[red]Error: %v", streamErr))
 			} else {
+				// Durable memory: persist the streamed assistant answer.
+				tui.persistChatTurn(memory.RoleAssistant, tui.chatHistory[assistantIdx].Content)
 				tui.statusBar.SetText("[green]" + tui.td("terminal_ui_chat_response_received", map[string]any{"Tokens": totalTokens}))
 			}
 			tui.chatOutput.SetText(tui.formatChatHistory())
 			tui.chatOutput.ScrollToEnd()
 		})
 	}()
+}
+
+// persistChatTurn write-throughs a single chat turn to durable memory so it
+// survives a process restart. It is a no-op when durable memory is unavailable
+// (honest degrade — never a fake "remembered"). Empty content is skipped.
+func (tui *TerminalUI) persistChatTurn(role memory.Role, content string) {
+	if tui.memoryManager == nil || tui.memoryConvID == "" || strings.TrimSpace(content) == "" {
+		return
+	}
+	_ = tui.memoryManager.AddMessage(tui.memoryConvID, memory.NewMessage(role, content))
+}
+
+// closeMemory checkpoints + releases the durable memory store. Called on TUI
+// shutdown so the on-disk DB is folded back from its WAL sidecars.
+func (tui *TerminalUI) closeMemory() {
+	if tui.memoryProvider != nil {
+		_ = tui.memoryProvider.Close()
+	}
 }
 
 // adaptToolTrace converts the agent loop's []agent.ToolTraceEntry into the
@@ -2811,6 +2889,9 @@ func (tui *TerminalUI) Close() error {
 			log.Printf("⚠️  TUI: LSP manager shutdown failed: %v", err)
 		}
 	}
+	// Checkpoint + release the durable memory store so the on-disk DB is folded
+	// back from its WAL sidecars before exit.
+	tui.closeMemory()
 	return nil
 }
 

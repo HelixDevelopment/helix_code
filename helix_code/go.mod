@@ -9,9 +9,11 @@ require (
 	digital.vasic.concurrency v0.0.0-00010101000000-000000000000
 	digital.vasic.containers v0.0.0-00010101000000-000000000000
 	digital.vasic.debate v0.0.0-00010101000000-000000000000
+	digital.vasic.helixmemory v0.0.0
 	digital.vasic.helixqa v0.0.0-00010101000000-000000000000
 	digital.vasic.helixspecifier v0.0.0-00010101000000-000000000000
 	digital.vasic.lazy v0.0.0-00010101000000-000000000000
+	digital.vasic.memory v0.0.0-00010101000000-000000000000
 	fyne.io/fyne/v2 v2.7.0
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.22.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
@@ -30,7 +32,7 @@ require (
 	github.com/getzep/zep-go/v3 v3.23.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
-	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd
+	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/hashicorp/golang-lru/v2 v2.0.7
@@ -105,6 +107,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fredbi/uri v1.1.1 // indirect
 	github.com/fyne-io/gl-js v0.2.0 // indirect
 	github.com/fyne-io/glfw-js v0.3.0 // indirect
@@ -152,6 +155,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -161,6 +165,7 @@ require (
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.59.0 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rymdport/portal v0.4.2 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
@@ -187,6 +192,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.22.0 // indirect
+	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
 	golang.org/x/image v0.32.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	gonum.org/v1/gonum v0.17.0 // indirect
@@ -194,6 +200,10 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260401024825-9d38bb4040a9 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/neurosnap/sentences.v1 v1.0.6 // indirect
+	modernc.org/libc v1.67.6 // indirect
+	modernc.org/mathutil v1.7.1 // indirect
+	modernc.org/memory v1.11.0 // indirect
+	modernc.org/sqlite v1.44.2 // indirect
 )
 
 replace digital.vasic.concurrency => ../submodules/concurrency
@@ -217,6 +227,10 @@ replace digital.vasic.debate => ../submodules/debate_orchestrator
 replace digital.vasic.helixspecifier => ../submodules/helix_specifier
 
 replace digital.vasic.lazy => ../submodules/lazy
+
+replace digital.vasic.helixmemory => ../submodules/helix_memory
+
+replace digital.vasic.memory => ../submodules/memory
 
 replace dev.helix.agent => ../submodules/helix_agent
 

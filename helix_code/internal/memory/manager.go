@@ -19,6 +19,7 @@ type Manager struct {
 	onMessage        []MessageCallback        // Callbacks on message addition
 	onClear          []ConversationCallback   // Callbacks on conversation clear
 	onDelete         []ConversationCallback   // Callbacks on conversation deletion
+	persist          *persistenceState        // Durable write-through provider (nil = legacy in-memory only)
 }
 
 // ConversationCallback is called for conversation events
