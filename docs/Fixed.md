@@ -547,3 +547,14 @@ Reconcile the Phase-1 implementation plan against actually-delivered state so th
 
 Backend /llm/generate and /llm/stream endpoints plus frontend wiring landed (commit 32e7e5b8); REMAINING: full browser-driven end-to-end test proving real streamed output renders in the UI is not yet captured — keep open until e2e evidence lands.
 
+## HXC-079 — debate_orchestrator consensus emits unresolved i18n key
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** debate_orchestrator 4df3874: embed-bundle translator resolves consensus key; GREEN test 'Debate on <topic> completed across N round(s).', RED/GREEN polarity §11.4.115
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Live /debate e2e (debate_e2e_test.go) shows CONCLUSION/Summary print literal 'debate.orchestrator.consensus_conclusion' i18n message-key instead of resolved prose; per-agent LLM content is real, consensus synthesis layer in submodules/debate_orchestrator does not resolve the key. §11.4.118 discovery finding.
+

@@ -586,13 +586,3 @@ Context-window usage percentage indicator scaffolded (commit 3c9d3495, task T1.5
 
 SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6); REMAINING: full precedence-conflict resolution + tests covering overlapping skill definitions still outstanding — keep open until precedence is fully resolved and tested.
 
-## HXC-079 — debate_orchestrator consensus emits unresolved i18n key
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Live /debate e2e (debate_e2e_test.go) shows CONCLUSION/Summary print literal 'debate.orchestrator.consensus_conclusion' i18n message-key instead of resolved prose; per-agent LLM content is real, consensus synthesis layer in submodules/debate_orchestrator does not resolve the key. §11.4.118 discovery finding.
-
