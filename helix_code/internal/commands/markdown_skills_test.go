@@ -187,6 +187,106 @@ func TestSkillLoader_NonExistentDirsAreSkipped(t *testing.T) {
 	require.NoError(t, loader.Load())
 }
 
+// TestSkillLoader_SkillMdManifestRecognised verifies the packaged
+// "<name>/SKILL.md" manifest form (T1.6) is loaded with the skill name taken
+// from the containing directory, while a stray flat "SKILL.md" in the skills
+// dir root is NOT registered under the bogus name "SKILL".
+func TestSkillLoader_SkillMdManifestRecognised(t *testing.T) {
+	root := t.TempDir()
+	skills := filepath.Join(root, ".helix", "skills")
+	pkgDir := filepath.Join(skills, "deploy")
+	require.NoError(t, os.MkdirAll(pkgDir, 0755))
+
+	// Packaged manifest: <skills>/deploy/SKILL.md -> skill name "deploy".
+	require.NoError(t, os.WriteFile(filepath.Join(pkgDir, "SKILL.md"),
+		[]byte("---\ndescription: packaged deploy\ntriggers: [\"^deploy\"]\n---\ndeploy body"), 0644))
+	// A flat SKILL.md at the skills-dir root must be ignored (no name of its own).
+	require.NoError(t, os.WriteFile(filepath.Join(skills, "SKILL.md"),
+		[]byte("---\ndescription: stray\ntriggers: [\"^stray\"]\n---\nstray body"), 0644))
+
+	reg := NewSkillRegistry()
+	loader := NewSkillLoader(reg, skills, "")
+	require.NoError(t, loader.Load())
+
+	s, ok := reg.Get("deploy")
+	require.True(t, ok, "packaged deploy/SKILL.md must register as skill \"deploy\"")
+	assert.Equal(t, "packaged deploy", s.Description())
+	assert.Contains(t, s.SourcePath(), filepath.Join("deploy", "SKILL.md"))
+
+	_, ok = reg.Get("SKILL")
+	assert.False(t, ok, "a flat SKILL.md must not register under the name \"SKILL\"")
+}
+
+// TestSkillLoader_ManifestOverridesFlatInSameDir verifies that within a single
+// directory the packaged "<name>/SKILL.md" manifest takes precedence over a
+// legacy flat "<name>.md" of the same skill name.
+func TestSkillLoader_ManifestOverridesFlatInSameDir(t *testing.T) {
+	root := t.TempDir()
+	skills := filepath.Join(root, ".helix", "skills")
+	pkgDir := filepath.Join(skills, "review")
+	require.NoError(t, os.MkdirAll(pkgDir, 0755))
+
+	// Flat legacy form.
+	require.NoError(t, os.WriteFile(filepath.Join(skills, "review.md"),
+		[]byte("---\ndescription: flat review\ntriggers: [\"^review\"]\n---\nflat body"), 0644))
+	// Packaged manifest form (should win).
+	require.NoError(t, os.WriteFile(filepath.Join(pkgDir, "SKILL.md"),
+		[]byte("---\ndescription: manifest review\ntriggers: [\"^review\"]\n---\nmanifest body"), 0644))
+
+	reg := NewSkillRegistry()
+	loader := NewSkillLoader(reg, skills, "")
+	require.NoError(t, loader.Load())
+
+	s, ok := reg.Get("review")
+	require.True(t, ok)
+	assert.Equal(t, "manifest review", s.Description(),
+		"packaged SKILL.md manifest must override flat review.md in the same dir")
+}
+
+// TestSkillLoader_ThreeWayPrecedence asserts the full T1.6 precedence chain for
+// a single skill name across user + project dirs and the two on-disk forms:
+// project SKILL.md  >  project flat  >  user SKILL.md  >  user flat.
+func TestSkillLoader_ThreeWayPrecedence(t *testing.T) {
+	type variant struct {
+		dirRoot string // the skills dir passed to the loader
+		pkg     bool   // packaged (<name>/SKILL.md) vs flat (<name>.md)
+		desc    string
+	}
+	mkSkill := func(t *testing.T, v variant, name string) {
+		t.Helper()
+		body := []byte("---\ndescription: " + v.desc + "\ntriggers: [\"^p\"]\n---\nbody")
+		if v.pkg {
+			d := filepath.Join(v.dirRoot, name)
+			require.NoError(t, os.MkdirAll(d, 0755))
+			require.NoError(t, os.WriteFile(filepath.Join(d, "SKILL.md"), body, 0644))
+			return
+		}
+		require.NoError(t, os.MkdirAll(v.dirRoot, 0755))
+		require.NoError(t, os.WriteFile(filepath.Join(v.dirRoot, name+".md"), body, 0644))
+	}
+
+	root := t.TempDir()
+	projSkills := filepath.Join(root, "project", ".helix", "skills")
+	userSkills := filepath.Join(root, "user", ".config", "helixcode", "skills")
+
+	// Seed all four sources for the same skill name "p".
+	mkSkill(t, variant{userSkills, false, "user-flat"}, "p")
+	mkSkill(t, variant{userSkills, true, "user-manifest"}, "p")
+	mkSkill(t, variant{projSkills, false, "project-flat"}, "p")
+	mkSkill(t, variant{projSkills, true, "project-manifest"}, "p")
+
+	reg := NewSkillRegistry()
+	loader := NewSkillLoader(reg, projSkills, userSkills)
+	require.NoError(t, loader.Load())
+
+	s, ok := reg.Get("p")
+	require.True(t, ok)
+	// project dir processed last; within it the manifest pass runs last.
+	assert.Equal(t, "project-manifest", s.Description(),
+		"precedence must be project-SKILL.md > project-flat > user-SKILL.md > user-flat")
+	assert.Contains(t, s.SourcePath(), filepath.Join("project", ".helix", "skills", "p", "SKILL.md"))
+}
+
 func TestSkillLoader_LoadedReturnsSnapshot(t *testing.T) {
 	projectDir := t.TempDir()
 	skills := filepath.Join(projectDir, ".helix", "skills")

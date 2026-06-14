@@ -209,9 +209,21 @@ func (r *SkillRegistry) FindMatching(input string) (*Skill, map[string]string, b
 	return nil, nil, false
 }
 
+// skillManifestName is the canonical filename for a packaged skill manifest.
+// A directory <skills-dir>/<name>/SKILL.md is loaded as the skill named after
+// its containing directory. This is the first-class skill-manifest convention
+// (T1.6); it coexists with the legacy flat "<name>.md" form.
+const skillManifestName = "SKILL.md"
+
 // SkillLoader scans project + user skill directories and registers each
-// .md file as a Skill in the supplied SkillRegistry. Project files override
-// user files of the same name on collision. Non-existent directories are
+// skill in the supplied SkillRegistry. Two on-disk layouts are recognised:
+//
+//	<dir>/<name>.md                   (legacy flat form; name = filename sans .md)
+//	<dir>/<name>/SKILL.md             (packaged manifest form; name = subdir name)
+//
+// Project files override user files of the same name on collision. Within a
+// single directory, the packaged SKILL.md manifest takes precedence over a
+// legacy flat <name>.md of the same skill name. Non-existent directories are
 // silently skipped; per-file parse errors are logged at WARN and do not
 // cause Load/Reload to fail.
 type SkillLoader struct {
@@ -263,23 +275,38 @@ func (l *SkillLoader) Reload() error {
 			l.log.Warn("skill loader: read dir", zap.String("dir", dir), zap.Error(err))
 			continue
 		}
+		// First pass: legacy flat "<name>.md" files in this directory.
 		for _, entry := range entries {
 			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
 				continue
 			}
+			// A flat file literally named SKILL.md has no skill name of its own
+			// (the name comes from a containing directory in the packaged form),
+			// so skip it here; the packaged-manifest pass handles subdirectories.
+			if entry.Name() == skillManifestName {
+				continue
+			}
 			name := strings.TrimSuffix(entry.Name(), ".md")
 			path := filepath.Join(dir, entry.Name())
-			data, err := os.ReadFile(path)
-			if err != nil {
-				l.log.Warn("skill loader: read file", zap.String("path", path), zap.Error(err))
+			if s := l.loadSkillFile(name, path); s != nil {
+				want[name] = s
+			}
+		}
+		// Second pass: packaged "<name>/SKILL.md" manifests. These take
+		// precedence over a legacy flat file of the same skill name within
+		// this same directory (manifest form is the first-class T1.6 layout).
+		for _, entry := range entries {
+			if !entry.IsDir() {
 				continue
 			}
-			s, err := parseSkillFile(name, string(data), path)
-			if err != nil {
-				l.log.Warn("skill loader: parse error", zap.String("path", path), zap.Error(err))
+			manifest := filepath.Join(dir, entry.Name(), skillManifestName)
+			if info, statErr := os.Stat(manifest); statErr != nil || info.IsDir() {
 				continue
 			}
-			want[name] = s
+			name := entry.Name()
+			if s := l.loadSkillFile(name, manifest); s != nil {
+				want[name] = s
+			}
 		}
 	}
 
@@ -296,6 +323,23 @@ func (l *SkillLoader) Reload() error {
 		l.loaded[name] = s.SourcePath()
 	}
 	return nil
+}
+
+// loadSkillFile reads and parses a single skill file at path under the given
+// skill name. Read or parse errors are logged at WARN and reported as a nil
+// return (the caller skips the file); they never abort Reload.
+func (l *SkillLoader) loadSkillFile(name, path string) *Skill {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		l.log.Warn("skill loader: read file", zap.String("path", path), zap.Error(err))
+		return nil
+	}
+	s, err := parseSkillFile(name, string(data), path)
+	if err != nil {
+		l.log.Warn("skill loader: parse error", zap.String("path", path), zap.Error(err))
+		return nil
+	}
+	return s
 }
 
 // Loaded returns a snapshot of skill name → source path for all skills
