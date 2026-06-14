@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2026-06-14" />
+  <title>QA Evidence — All ~/api_keys.sh Providers + Positive-Codebase-Answer + Real LLMsVerifier Consumption</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">QA Evidence — All ~/api_keys.sh Providers +
+Positive-Codebase-Answer + Real LLMsVerifier Consumption</h1>
+<p class="date">2026-06-14</p>
+</header>
+<h1
+id="qa-evidence-all-api_keys.sh-providers-positive-codebase-answer-guarantee-and-real-llmsverifier-consumption">QA
+Evidence: All <code>~/api_keys.sh</code> Providers,
+Positive-Codebase-Answer Guarantee, and Real LLMsVerifier
+Consumption</h1>
+<p><strong>Date:</strong> 2026-06-14 <strong>Scope:</strong> HelixCode
+(<code>helix_code/</code>) + HelixAgent + LLMsVerifier submodules
+<strong>Commit under test:</strong> <code>a99a5e9d</code> —
+<em>feat(tui,llm,verifier): use all ~/api_keys.sh providers + guarantee
+positive codebase answer + real LLMsVerifier consumption</em>
+<strong>Anti-bluff posture (CONST-035 / Article XI §11.9):</strong> This
+document states only what was observed in this session. Where a thing
+was NOT proven, it is explicitly flagged as such. <strong>No API key
+value is printed anywhere in this document.</strong></p>
+<hr />
+<h2 id="verdict">1. Verdict</h2>
+<p><strong>PASS (with honest limitations).</strong> Three
+independently-verified outcomes:</p>
+<ol type="1">
+<li><strong>Provider breadth</strong> — HelixCode’s TUI live provider
+count went <strong>5 → 18</strong>, with 8 newly-added OpenAI-compatible
+providers registering live models at startup and the remaining
+unreachable ones gracefully skipping (no crash, no fake entries).</li>
+<li><strong>Positive-codebase-answer guarantee</strong> — proven live:
+the agent issues a real tool call before any codebase claim and answered
+affirmatively with the real <code>git_status</code> file list (captured
+frame).</li>
+<li><strong>Real LLMsVerifier consumption (CONST-036)</strong> — proven:
+HelixCode in remote mode received <strong>all 78 real models</strong>
+populated in the verifier DB, not the 7 embedded fallback entries.</li>
+</ol>
+<p>The following are explicitly <strong>NOT</strong> claimed as working
+and are documented in §7 (Honest Limitations): several free-tier keys
+are invalid/suspended; one provider hit a rate limit on a heavy prompt;
+one HelixAgent provider has no chat-entitled model yet; one key was
+excluded entirely.</p>
+<hr />
+<h2 id="what-changed">2. What Changed</h2>
+<h3 id="helixcode-helix_code">2.1 HelixCode
+(<code>helix_code/</code>)</h3>
+<ul>
+<li><strong><code>internal/llm/openai_compatible_catalogue.go</code></strong>
+(new, +254 lines) — a <strong>data-driven catalogue</strong> of hosted
+OpenAI-compatible providers. Base URLs are sourced from HelixAgent’s
+verified provider table (not hand-invented). Each entry is keyed off an
+env var; a provider only activates when its key is present.</li>
+<li><strong><code>GetType()</code> collision fix</strong> —
+<code>GetType()</code> now derives a distinct type per catalogue
+provider, fixing a collision that previously conflated multiple
+OpenAI-compatible providers.</li>
+<li><strong><code>applications/terminal_ui/env_providers.go</code></strong>
+(new, +20 lines) — a <strong>registration loop</strong> that registers
+every present-key catalogue provider into the TUI provider manager at
+startup.</li>
+<li><strong><code>applications/terminal_ui/main.go</code></strong> (+48
+lines) — the positive-codebase-answer changes (see §4): system-prompt
+instruction requiring a tool call before any codebase claim,
+<code>resolveRepoRoot</code> pinning <code>git_status</code> to the git
+root, and ensemble-first picker behaviour.</li>
+<li>Tests added alongside:
+<code>openai_compatible_catalogue_test.go</code> (+224),
+<code>env_providers_test.go</code> (+11).</li>
+</ul>
+<h3 id="helixagent-submodule">2.2 HelixAgent (submodule)</h3>
+<ul>
+<li>Builds and boots.</li>
+<li>From the same keyset, discovered a <strong>25-provider / 993-model
+catalogue</strong>.</li>
+<li><strong>6 providers live-verified</strong>: cerebras, codestral,
+deepseek, groq, mistral, openrouter.</li>
+<li>A new <strong>INFERENCE</strong> provider was added but its account
+currently has no chat-entitled model (see §7).</li>
+</ul>
+<h3 id="llmsverifier-submodule">2.3 LLMsVerifier (submodule)</h3>
+<ul>
+<li>Builds and serves on <strong><code>:8095</code></strong>.</li>
+<li>DB populated with <strong>78 real models</strong>: groq 16, deepseek
+4, mistral 58.</li>
+<li>The HelixCode verifier client was <strong>reconciled</strong> to the
+verifier’s actual contract: envelope shape, <code>/api/providers</code>
+endpoint, Unix timestamp handling, and numeric <code>id</code> +
+<code>model_id</code> fields.</li>
+</ul>
+<hr />
+<h2 id="provider-support-matrix">3. Provider-Support Matrix</h2>
+<p>Live model counts below are from the HelixCode TUI startup log
+captured this session. “Wired in HelixCode” = registered via the
+catalogue/registration loop at <code>a99a5e9d</code>.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 25%" />
+<col style="width: 29%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th style="text-align: center;">Key present</th>
+<th style="text-align: center;">Wired in HelixCode</th>
+<th style="text-align: center;">Live models (startup)</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cerebras</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">2</td>
+<td>Registered live. Hit 429 RPM on heavy multi-turn prompt (see
+§7).</td>
+</tr>
+<tr>
+<td>hyperbolic</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">5</td>
+<td>Registered live.</td>
+</tr>
+<tr>
+<td>novita</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">138</td>
+<td>Registered live.</td>
+</tr>
+<tr>
+<td>sambanova</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">6</td>
+<td>Registered live.</td>
+</tr>
+<tr>
+<td>nvidia</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">121</td>
+<td>Registered live.</td>
+</tr>
+<tr>
+<td>zai</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">7</td>
+<td>Registered live.</td>
+</tr>
+<tr>
+<td>venice</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">90</td>
+<td>Registered live.</td>
+</tr>
+<tr>
+<td>chutes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">13</td>
+<td>Registered live.</td>
+</tr>
+<tr>
+<td>siliconflow</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">69</td>
+<td><strong>Fixed</strong> this session: base URL <code>.cn</code> →
+<code>.com</code>. Now registers 69 models.</td>
+</tr>
+<tr>
+<td>fireworks</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">0</td>
+<td>Gracefully skipped (account suspended — 401/403/404/412 class).
+Documented key-side.</td>
+</tr>
+<tr>
+<td>kimi</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">0</td>
+<td>Gracefully skipped (invalid key). Documented key-side.</td>
+</tr>
+<tr>
+<td>upstage</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">excluded</td>
+<td style="text-align: center;">—</td>
+<td>Excluded: no <code>/models</code> endpoint to enumerate.</td>
+</tr>
+<tr>
+<td>codestral</td>
+<td style="text-align: center;">yes</td>
+<td style="text-align: center;">excluded</td>
+<td style="text-align: center;">—</td>
+<td>Excluded: no <code>/models</code> endpoint to enumerate.
+(Live-verified separately in HelixAgent.)</td>
+</tr>
+<tr>
+<td>tencent</td>
+<td style="text-align: center;">invalid</td>
+<td style="text-align: center;">no</td>
+<td style="text-align: center;">—</td>
+<td><code>TENCENT_CLOUD</code> key invalid — <strong>not
+added</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes.</strong> - The 8 providers cerebras / hyperbolic /
+novita / sambanova / nvidia / zai / venice / chutes are the ones whose
+live registration drove the 5 → 18 count. - fireworks and kimi are
+<em>wired</em> but return 0 live models because their keys are unusable;
+they skip gracefully rather than emitting placeholder entries
+(anti-bluff: no fabricated models). - upstage and codestral were
+excluded from the catalogue because they expose no <code>/models</code>
+listing endpoint; this is a deliberate exclusion, not a silent
+failure.</p>
+<hr />
+<h2 id="positive-codebase-answer-proof">4. Positive-Codebase-Answer
+Proof</h2>
+<p><strong>What was built.</strong> Three coordinated changes in
+<code>applications/terminal_ui/main.go</code>: 1. <strong>System
+prompt</strong> (<code>buildToolLoopSystemPrompt</code>) instructs the
+agent it operates INSIDE the repository and must <strong>make a tool
+call before any codebase claim</strong>, then confirm concretely. 2.
+<strong><code>resolveRepoRoot</code></strong> pins the
+<code>git_status</code> tool to the actual git root, so the agent reads
+real repository state. 3. <strong>Picker is ensemble-first</strong>, so
+a capable model handles the codebase question.</p>
+<p><strong>Live proof (captured frame).</strong> Using cerebras
+<code>gpt-oss-120b</code>, the agent answered:</p>
+<blockquote>
+<p>“I can see your repository… So yes—I have direct read access to the
+codebase and its git state”</p>
+</blockquote>
+<p>and rendered the <strong>real <code>git_status</code> file
+list</strong> in the same response. The affirmative claim was backed by
+an actual tool call returning real repository state — not a hardcoded or
+simulated answer.</p>
+<p><strong>Honest scope of this proof.</strong> This was verified for
+the cerebras <code>gpt-oss-120b</code> path in a single captured frame.
+It demonstrates the mechanism works end-to-end; it is not a claim that
+every one of the 18 providers was individually exercised through the
+same flow.</p>
+<hr />
+<h2 id="real-verifier-consumption-proof-const-036">5.
+Real-Verifier-Consumption Proof (CONST-036)</h2>
+<p><strong>Claim under test.</strong> HelixCode consumes LLMsVerifier as
+the single source of truth, not embedded fallback data.</p>
+<p><strong>Setup.</strong> LLMsVerifier built, served on
+<code>:8095</code>, DB populated with <strong>78 real models</strong>
+(groq 16, deepseek 4, mistral 58). HelixCode run in <strong>remote
+mode</strong> against the verifier.</p>
+<p><strong>Result.</strong> HelixCode received <strong>all 78
+models</strong> from the verifier — <strong>not</strong> the <strong>7
+embedded fallback</strong> entries it would use when the verifier is
+unreachable. Receiving 78 (the live DB count) rather than 7 (the static
+fallback count) is the discriminating evidence that real verifier
+consumption occurred.</p>
+<p><strong>Reconciliation work that made this real.</strong> The
+HelixCode verifier client was aligned to the verifier’s actual API
+contract: response envelope shape, the <code>/api/providers</code>
+endpoint, Unix-timestamp parsing, and numeric <code>id</code> +
+<code>model_id</code> fields. Before reconciliation the client did not
+correctly parse the verifier’s real responses.</p>
+<hr />
+<h2 id="commit-reference">6. Commit Reference</h2>
+<p>All of the above landed at commit
+<strong><code>a99a5e9d</code></strong>:</p>
+<blockquote>
+<p><code>feat(tui,llm,verifier): use all ~/api_keys.sh providers + guarantee positive codebase answer + real LLMsVerifier consumption</code></p>
+</blockquote>
+<p>Touched (per <code>git show --stat</code>):
+<code>internal/llm/openai_compatible_catalogue.go</code> (+254),
+<code>internal/llm/openai_compatible_catalogue_test.go</code> (+224),
+<code>applications/terminal_ui/env_providers.go</code> (+20),
+<code>applications/terminal_ui/env_providers_test.go</code> (+11),
+<code>applications/terminal_ui/main.go</code> (+48).</p>
+<hr />
+<h2 id="honest-limitations-anti-bluff">7. Honest Limitations
+(anti-bluff)</h2>
+<p>These are real, in-session findings. None is hidden behind a green
+summary line.</p>
+<ol type="1">
+<li><strong>Invalid / suspended free-tier keys.</strong>
+<code>fireworks</code> (account suspended), <code>kimi</code> (invalid
+key), <code>upstage</code>, and <code>tencent</code> keys are not
+usable. fireworks and kimi are wired but contribute 0 live models and
+skip gracefully; tencent (<code>TENCENT_CLOUD</code>) was invalid and
+<strong>not added</strong>.</li>
+<li><strong>Rate limit on heavy prompt.</strong> The <strong>cerebras
+free tier hit a 429 RPM limit</strong> on the heavy multi-turn AGENTS.md
+prompt. The provider is registered and works for normal prompts; the
+limit is a free-tier throughput ceiling, not a wiring defect.</li>
+<li><strong>HelixAgent INFERENCE provider has no chat-entitled model
+yet.</strong> The INFERENCE provider was added to HelixAgent, but its
+account currently exposes no chat-entitled model, so it cannot yet serve
+chat completions.</li>
+<li><strong>upstage / codestral excluded from the HelixCode
+catalogue.</strong> Reason: neither exposes a <code>/models</code>
+enumeration endpoint. codestral itself IS live-verified inside
+HelixAgent (one of the 6), so this is a HelixCode-catalogue listing
+limitation, not a provider-dead finding.</li>
+<li><strong>Coverage scope of the positive-answer proof.</strong> Proven
+for the cerebras <code>gpt-oss-120b</code> path (§4). Not every one of
+the 18 wired providers was individually driven through the
+codebase-answer flow this session.</li>
+</ol>
+<hr />
+<h2 id="reproduction-pointers">8. Reproduction Pointers</h2>
+<ul>
+<li>Catalogue definition:
+<code>helix_code/internal/llm/openai_compatible_catalogue.go</code></li>
+<li>TUI registration loop:
+<code>helix_code/applications/terminal_ui/env_providers.go</code></li>
+<li>Positive-answer prompt + repo-root pin:
+<code>helix_code/applications/terminal_ui/main.go</code>
+(<code>buildToolLoopSystemPrompt</code>,
+<code>resolveRepoRoot</code>)</li>
+<li>Catalogue unit tests:
+<code>helix_code/internal/llm/openai_compatible_catalogue_test.go</code></li>
+<li>Verifier endpoint observed:
+<code>http://localhost:8095/api/providers</code></li>
+</ul>
+</body>
+</html>
