@@ -312,12 +312,35 @@ func (p *Provider) buildChatRequest(request *llm.LLMRequest, stream bool) chatRe
 	// feeds back across turns.
 	msgs := make([]chatMessage, 0, len(request.Messages))
 	for _, m := range request.Messages {
+		toolCalls := toWireSendToolCalls(m.ToolCalls)
+		content := m.Content
+		// HelixAgent enforces "an assistant message MUST have content or
+		// tool_calls" and rejects the whole request (HTTP 400,
+		// "messages[N]: assistant message must have content or tool_calls")
+		// BEFORE provider dispatch when an assistant message arrives with BOTH
+		// empty content AND no tool_calls. Such a message is a real outcome of a
+		// multi-prompt conversation: any caller (the TUI's chatHistory, a
+		// streaming-final turn that emitted no text, an ensemble panel that
+		// produced no lines) can store an empty assistant turn, and once it is
+		// replayed in the history of the NEXT request the strict server 400s the
+		// entire conversation — breaking every subsequent prompt. Sanitize at the
+		// wire layer so the adapter is tolerant of ANY caller: an assistant
+		// message with empty content and no tool_calls gets a single-space
+		// content placeholder (the minimal non-empty content the server
+		// accepts), which satisfies the "content or tool_calls" rule without
+		// altering the semantics of the turn. Only the assistant role is
+		// affected; user/system/tool messages are serialized verbatim (a tool
+		// result legitimately has empty content paired with its tool_call_id, and
+		// user/system messages are never empty in practice).
+		if m.Role == "assistant" && strings.TrimSpace(content) == "" && len(toolCalls) == 0 {
+			content = " "
+		}
 		msgs = append(msgs, chatMessage{
 			Role:       m.Role,
-			Content:    m.Content,
+			Content:    content,
 			Name:       m.Name,
 			ToolCallID: m.ToolCallID,
-			ToolCalls:  toWireSendToolCalls(m.ToolCalls),
+			ToolCalls:  toolCalls,
 		})
 	}
 	cr := chatRequest{

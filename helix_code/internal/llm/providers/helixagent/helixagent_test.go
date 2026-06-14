@@ -13,6 +13,7 @@ package helixagent
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -395,6 +396,121 @@ func TestGenerate_NoTools_OmitsToolsOnWire(t *testing.T) {
 	assert.Nil(t, resp.ToolCalls, "plain chat response has no tool_calls")
 	assert.NotContains(t, string(body), `"tools"`, "plain chat request must omit the tools key")
 	assert.NotContains(t, string(body), `"tool_choice"`, "plain chat request must omit tool_choice")
+}
+
+// TestGenerate_SanitizesEmptyAssistant proves the adapter NEVER sends an
+// assistant message with empty content AND no tool_calls to the wire. HelixAgent
+// rejects such a message ("messages[N]: assistant message must have content or
+// tool_calls", HTTP 400), which broke the second prompt of every multi-prompt
+// TUI conversation. RED before the wire-layer sanitiser: the body contains
+// `"role":"assistant","content":""`. GREEN after: it carries a single-space
+// placeholder so the strict server accepts it.
+func TestGenerate_SanitizesEmptyAssistant(t *testing.T) {
+	var body []byte
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/chat/completions", func(w http.ResponseWriter, r *http.Request) {
+		body, _ = io.ReadAll(r.Body)
+		// Mimic HelixAgent's strict validation: reject an assistant message with
+		// no content and no tool_calls BEFORE producing a reply.
+		var parsed struct {
+			Messages []struct {
+				Role      string            `json:"role"`
+				Content   string            `json:"content"`
+				ToolCalls []json.RawMessage `json:"tool_calls"`
+			} `json:"messages"`
+		}
+		_ = json.Unmarshal(body, &parsed)
+		for i, m := range parsed.Messages {
+			// Mirror the REAL HelixAgent rule (verified live): an assistant
+			// message is rejected only when content is the EMPTY string and there
+			// are no tool_calls. A single-space content is accepted (it satisfies
+			// "has content"), so the fake must NOT TrimSpace here.
+			if m.Role == "assistant" && m.Content == "" && len(m.ToolCalls) == 0 {
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{
+					"error": map[string]interface{}{
+						"code":    400,
+						"message": fmt.Sprintf("messages[%d]: assistant message must have content or tool_calls", i),
+						"type":    "invalid_request",
+					},
+				})
+				return
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"id":    "x",
+			"model": "helixagent-llm",
+			"choices": []map[string]interface{}{
+				{"index": 0, "message": map[string]string{"role": "assistant", "content": "ok"}, "finish_reason": "stop"},
+			},
+		})
+	})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	p := New(srv.URL)
+	// The exact multi-prompt history shape: [user, assistant(""), user]. The
+	// empty assistant turn (no content, no tool_calls) is what 400s a strict
+	// server when it is replayed in the next request's history.
+	resp, err := p.Generate(context.Background(), &llm.LLMRequest{
+		ID: uuid.New(),
+		Messages: []llm.Message{
+			{Role: "user", Content: "Do you see my codebase?"},
+			{Role: "assistant", Content: ""},
+			{Role: "user", Content: "Do you need an AGENTS.md?"},
+		},
+	})
+	require.NoError(t, err, "the strict server must not 400 — the empty assistant was sanitized")
+	require.NotNil(t, resp)
+	assert.Equal(t, "ok", resp.Content)
+	// The wire body must NOT carry an empty-content assistant; it gets a
+	// single-space placeholder instead.
+	assert.NotContains(t, string(body), `"role":"assistant","content":""`,
+		"empty assistant content must be sanitized on the wire")
+	assert.Contains(t, string(body), `"role":"assistant","content":" "`,
+		"empty assistant content must become a single-space placeholder")
+}
+
+// TestGenerate_KeepsEmptyContentWhenToolCallsPresent proves the sanitiser does
+// NOT touch an assistant turn that legitimately has empty content paired with
+// tool_calls (the canonical tool-request turn) — that turn already satisfies the
+// "content or tool_calls" rule, so its empty content is preserved verbatim.
+func TestGenerate_KeepsEmptyContentWhenToolCallsPresent(t *testing.T) {
+	var body []byte
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/chat/completions", func(w http.ResponseWriter, r *http.Request) {
+		body, _ = io.ReadAll(r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"id":    "x",
+			"model": "helixagent-llm",
+			"choices": []map[string]interface{}{
+				{"index": 0, "message": map[string]string{"role": "assistant", "content": "ok"}, "finish_reason": "stop"},
+			},
+		})
+	})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	p := New(srv.URL)
+	_, err := p.Generate(context.Background(), &llm.LLMRequest{
+		ID: uuid.New(),
+		Messages: []llm.Message{
+			{Role: "user", Content: "list files"},
+			{Role: "assistant", Content: "", ToolCalls: []llm.ToolCall{{
+				ID: "call_1", Type: "function",
+				Function: llm.ToolCallFunc{Name: "glob", Arguments: map[string]interface{}{"pattern": "*"}},
+			}}},
+			{Role: "tool", ToolCallID: "call_1", Name: "glob", Content: "a.go"},
+		},
+	})
+	require.NoError(t, err)
+	// The tool-request assistant turn keeps empty content (it has tool_calls).
+	assert.Contains(t, string(body), `"role":"assistant","content":""`,
+		"assistant with tool_calls keeps its empty content (not placeholder-substituted)")
+	// The tool result message keeps its empty/non-empty content untouched too.
+	assert.Contains(t, string(body), `"tool_call_id":"call_1"`)
 }
 
 func TestGenerateStream_EmitsDeltasAndDone(t *testing.T) {
