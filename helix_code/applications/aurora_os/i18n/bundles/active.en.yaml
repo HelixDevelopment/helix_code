@@ -1014,6 +1014,15 @@ aurora_os_chat_provider_unavailable_fmt:
 aurora_os_chat_llm_not_initialized_fmt:
   other: "[AI (%s/%s)]: LLM service not initialized. Please restart the application or check configuration.\n"
 
+aurora_os_chat_user_message_fmt:
+  other: "\n[User]: %s\n"
+
+aurora_os_chat_ai_response_fmt:
+  other: "[AI (%s/%s)]: %s\n"
+
+aurora_os_chat_ai_error_fmt:
+  other: "[AI (%s/%s)]: Error: %v\n"
+
 aurora_os_btn_clear_chat:
   other: "Clear Chat"
 

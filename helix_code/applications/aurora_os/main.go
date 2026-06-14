@@ -1542,7 +1542,7 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 		// Add user message to history
 		currentHistory := auroraApp.chatHistory.Text
 		userMessage := auroraApp.chatInput.Text
-		userMsg := fmt.Sprintf("\n[User]: %s\n", userMessage)
+		userMsg := fmt.Sprintf(auroraApp.t("aurora_os_chat_user_message_fmt"), userMessage)
 		auroraApp.chatHistory.SetText(currentHistory + userMsg)
 
 		// Log the interaction
@@ -1578,9 +1578,9 @@ func (auroraApp *AuroraApp) createLLMTab() fyne.CanvasObject {
 
 					response, err := provider.Generate(ctx, request)
 					if err != nil {
-						responseMsg = fmt.Sprintf("[AI (%s/%s)]: Error: %v\n", providerName, modelName, err)
+						responseMsg = fmt.Sprintf(auroraApp.t("aurora_os_chat_ai_error_fmt"), providerName, modelName, err)
 					} else {
-						responseMsg = fmt.Sprintf("[AI (%s/%s)]: %s\n", providerName, modelName, response.Content)
+						responseMsg = fmt.Sprintf(auroraApp.t("aurora_os_chat_ai_response_fmt"), providerName, modelName, response.Content)
 					}
 				} else {
 					responseMsg = fmt.Sprintf(auroraApp.t("aurora_os_chat_provider_unavailable_fmt"),
