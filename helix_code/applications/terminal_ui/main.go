@@ -1655,8 +1655,21 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 					return
 				}
 
-				// Set the final answer on the placeholder assistant turn.
-				tui.chatHistory[assistantIdx].Content = result.FinalContent
+				// Set the final answer on the placeholder assistant turn. Guard
+				// against an empty/whitespace FinalContent: an empty assistant
+				// turn left in chatHistory breaks the NEXT provider request for
+				// strict providers (HelixAgent rejects an assistant message with
+				// no content and no tool_calls), 400ing the whole conversation.
+				// RunToolLoop already guarantees non-empty FinalContent; this is
+				// defense-in-depth so the stored history is always well-formed.
+				finalAnswer := result.FinalContent
+				if strings.TrimSpace(finalAnswer) == "" {
+					finalAnswer = tui.td("terminal_ui_chat_no_answer", nil)
+					if strings.TrimSpace(finalAnswer) == "" {
+						finalAnswer = "(no answer produced)"
+					}
+				}
+				tui.chatHistory[assistantIdx].Content = finalAnswer
 
 				// Surface the agentic tool trace so the operator SEES each
 				// tool call ("tool: git_status … <real output>").

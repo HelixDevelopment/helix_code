@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/llm"
@@ -205,7 +206,16 @@ func RunToolLoop(ctx context.Context, provider llm.Provider, registry *tools.Too
 
 		// No tool calls ⇒ this is the final answer.
 		if len(resp.ToolCalls) == 0 {
-			result.FinalContent = resp.Content
+			// Never return an empty (or whitespace-only) FinalContent. A final
+			// turn with empty content + no tool calls is a real provider
+			// outcome (an under-specified prompt, a model that ran its tools
+			// then emitted nothing). If that empty string escapes, a caller
+			// (e.g. the TUI) stores it as an assistant turn — and a strict
+			// provider (HelixAgent: "assistant message must have content or
+			// tool_calls") then 400s the NEXT request, breaking the whole
+			// conversation. Synthesize a non-empty answer from the trace so the
+			// assistant turn is always well-formed.
+			result.FinalContent = nonEmptyFinal(resp.Content, result.Trace)
 			result.FinalMetadata = resp.ProviderMetadata
 			return result, nil
 		}
@@ -285,12 +295,40 @@ func RunToolLoop(ctx context.Context, provider llm.Provider, registry *tools.Too
 	// from the final turn that was made.
 	result.MaxTurnsHit = true
 	result.FinalMetadata = lastMetadata
-	if lastContent != "" {
+	if strings.TrimSpace(lastContent) != "" {
 		result.FinalContent = lastContent + "\n\n" + MaxTurnsExceededMarker
 	} else {
-		result.FinalContent = MaxTurnsExceededMarker
+		// No usable final content from the last turn. Synthesize an answer from
+		// the trace (so the operator gets the gathered tool output, not a bare
+		// marker) and still flag the truncation.
+		synth := nonEmptyFinal("", result.Trace)
+		result.FinalContent = synth + "\n\n" + MaxTurnsExceededMarker
 	}
 	return result, nil
+}
+
+// nonEmptyFinal returns a guaranteed-non-empty final answer. When content is
+// non-blank it is returned unchanged. When content is empty/whitespace-only it
+// synthesizes a brief answer from the trace: the last successful tool result is
+// the most relevant artefact for the user's question (the model just ran it),
+// so it is summarized; if no successful tool ran, a clear fallback sentence is
+// returned. The result is NEVER empty — that is the whole point: an empty
+// assistant turn breaks strict providers (HelixAgent) on the next request.
+func nonEmptyFinal(content string, trace []ToolTraceEntry) string {
+	if strings.TrimSpace(content) != "" {
+		return content
+	}
+	// Walk the trace backwards for the last successful (Err=="") tool result.
+	for i := len(trace) - 1; i >= 0; i-- {
+		e := trace[i]
+		if e.Err == "" && strings.TrimSpace(e.Output) != "" {
+			return fmt.Sprintf("I inspected your codebase using the %s tool. Here is what it returned:\n\n%s",
+				e.ToolName, strings.TrimSpace(e.Output))
+		}
+	}
+	// No content and no usable tool output. Return a clear, non-empty fallback
+	// rather than an empty string (CONST: never feed an empty assistant turn).
+	return "I could not produce a final answer for this request. Please try rephrasing or asking a more specific question."
 }
 
 // registryToLLMTools converts every tool registered in registry into an

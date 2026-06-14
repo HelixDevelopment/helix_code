@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -553,4 +554,60 @@ func TestRunToolLoop_MaxToolResultCharsOverride(t *testing.T) {
 	require.LessOrEqual(t, len([]rune(toolMsg.Content)), 500+200,
 		"override bound (500) must be honored")
 	require.Contains(t, toolMsg.Content, "[truncated")
+}
+
+// ---------------------------------------------------------------------------
+// Empty-final-content guard (bug: HelixAgent agentic loop produced an empty
+// final answer for the first prompt; the empty assistant turn then violated
+// HelixAgent's strict "assistant message must have content or tool_calls"
+// validation on the NEXT request, 400ing the whole conversation).
+//
+// RunToolLoop MUST NEVER return an empty FinalContent. When the model's final
+// turn (no tool calls) carries empty content, the loop must synthesize a
+// non-empty answer (e.g. from the trace) so the caller never feeds an empty
+// assistant message back to a strict provider.
+// ---------------------------------------------------------------------------
+
+// Test: final turn has empty content AND no tool calls — after running a tool
+// in an earlier turn. FinalContent MUST be non-empty.
+func TestRunToolLoop_EmptyFinalAfterToolNeverEmpty(t *testing.T) {
+	var calls int32
+	reg := newEchoRegistry(t, &calls)
+
+	provider := &scriptedProvider{responses: []llm.LLMResponse{
+		// Turn 1: ask for a tool call.
+		{ToolCalls: []llm.ToolCall{{ID: "c1", Function: llm.ToolCallFunc{
+			Name: "echo", Arguments: map[string]interface{}{"text": "hi"}}}}},
+		// Turn 2: FINAL turn — no tool calls, EMPTY content (the bug trigger).
+		{Content: "", FinishReason: "stop"},
+	}}
+
+	res, err := RunToolLoop(context.Background(), provider, reg,
+		[]llm.Message{{Role: "user", Content: "Do you see my codebase?"}},
+		ToolLoopOptions{Model: "scripted-model-1", MaxTurns: 6})
+	require.NoError(t, err)
+	require.NotNil(t, res)
+	require.NotEmpty(t, res.FinalContent,
+		"FinalContent MUST NOT be empty: an empty assistant turn breaks the next provider request")
+	require.NotEqual(t, "", strings.TrimSpace(res.FinalContent),
+		"FinalContent MUST NOT be whitespace-only")
+}
+
+// Test: final turn empty content + no tool calls AND no prior tools (the loop's
+// very first response is an empty stop). Still must never be empty.
+func TestRunToolLoop_EmptyFinalNoToolsNeverEmpty(t *testing.T) {
+	var calls int32
+	reg := newEchoRegistry(t, &calls)
+
+	provider := &scriptedProvider{responses: []llm.LLMResponse{
+		{Content: "", FinishReason: "stop"}, // first + final turn, empty.
+	}}
+
+	res, err := RunToolLoop(context.Background(), provider, reg,
+		[]llm.Message{{Role: "user", Content: "Anything?"}},
+		ToolLoopOptions{Model: "scripted-model-1", MaxTurns: 6})
+	require.NoError(t, err)
+	require.NotNil(t, res)
+	require.NotEmpty(t, strings.TrimSpace(res.FinalContent),
+		"FinalContent MUST NOT be empty/whitespace even when the only turn was an empty stop")
 }
