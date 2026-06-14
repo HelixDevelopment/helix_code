@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sort"
 	"strings"
 	"syscall"
@@ -242,6 +243,10 @@ func (tui *TerminalUI) Initialize() error {
 		if wdErr != nil {
 			repoDir = "."
 		}
+		// Pin git_status to the enclosing git repository root (walk up for .git)
+		// so it inspects the real repo even when the TUI is launched from a
+		// subdirectory; falls back to the working directory when no .git is found.
+		repoDir = resolveRepoRoot(repoDir)
 		reg.Register(git.NewGitStatusTool(repoDir))
 		// fs_read / glob / grep are auto-registered by NewToolRegistry
 		// (all three are LevelReadOnly). They are present already; the
@@ -1721,6 +1726,24 @@ func adaptToolTrace(entries []agent.ToolTraceEntry) []ToolTraceLine {
 	return out
 }
 
+// resolveRepoRoot walks up from start looking for a directory containing a
+// .git entry and returns it (the enclosing git repository root). When no .git
+// is found on the way to the filesystem root, it returns start unchanged — so
+// git_status still operates on the working directory as a sensible fallback.
+func resolveRepoRoot(start string) string {
+	dir := start
+	for {
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return start
+		}
+		dir = parent
+	}
+}
+
 // buildToolLoopSystemPrompt composes a SHORT structural system prompt from the
 // registry's live tool names (CONST-046: metadata-composed, not a hardcoded
 // catalogue). The tool-name list adapts to whatever is actually registered.
@@ -1730,9 +1753,18 @@ func buildToolLoopSystemPrompt(registry *tools.ToolRegistry) string {
 		names = append(names, t.Name())
 	}
 	sort.Strings(names)
-	return "You are the Helix coding agent. You have these tools available: " +
-		strings.Join(names, ", ") +
-		". Use them to answer questions about the user's codebase and git state. " +
+	// The prompt is structural agent-steering composed from the live tool names
+	// (CONST-046 — not hardcoded user-facing content). It asserts the agent is
+	// operating INSIDE the user's real codebase and REQUIRES a tool call before
+	// any claim about the codebase, so a model can never answer "I cannot see
+	// your files" from memory — it has genuine read access via these tools.
+	return "You are the Helix coding agent, operating INSIDE the user's real codebase at the current working directory. " +
+		"You have these tools available: " + strings.Join(names, ", ") + ". " +
+		"These tools give you genuine read access to the user's files and git state — you CAN see the codebase. " +
+		"When the user asks whether you can see or access their codebase (or anything about its files, structure, or git state), " +
+		"you MUST call a tool FIRST (e.g. glob to list files, git_status to inspect the repo, fs_read to read a file) and then " +
+		"answer from what the tool actually returned — concretely (how many files, which languages, the repository's state). " +
+		"NEVER claim you cannot see or access the codebase without first calling a tool: you have both the tools and the access. " +
 		"Prefer calling a tool over guessing."
 }
 
@@ -1859,6 +1891,16 @@ func (tui *TerminalUI) showModelSelector() {
 	// (GetAvailableModels iterates a map, so order would otherwise vary).
 	models := tui.llmManager.GetAvailableModels()
 	sort.Slice(models, func(i, j int) bool {
+		// The Helix Agent ensemble is the flagship "model" (it fans every prompt
+		// across all configured providers), so it always sorts FIRST — it keeps
+		// the digit-1 shortcut even as many providers from ~/api_keys.sh push the
+		// alphabetical list past the 9 digit-selectable slots. Then deterministic
+		// (provider, name) order for everything else (stable picker shortcuts).
+		iEns := models[i].Provider == llm.ProviderTypeEnsemble
+		jEns := models[j].Provider == llm.ProviderTypeEnsemble
+		if iEns != jEns {
+			return iEns
+		}
 		if models[i].Provider != models[j].Provider {
 			return models[i].Provider < models[j].Provider
 		}

@@ -27,7 +27,10 @@ func TestNewOpenAICompatibleProvider(t *testing.T) {
 	require.NotNil(t, provider)
 
 	assert.Equal(t, "test-provider", provider.GetName())
-	assert.Equal(t, ProviderTypeLocal, provider.GetType()) // Falls back to local for unknown names
+	// Reconciled per §11.4.120: a non-local custom name now reports a distinct
+	// ProviderType derived from the name (not the generic "local"), so hosted
+	// OpenAI-compatible catalogue providers are attributed to the right provider.
+	assert.Equal(t, ProviderType("test-provider"), provider.GetType())
 	assert.Equal(t, config.Timeout, provider.httpClient.Timeout)
 	assert.True(t, provider.isRunning)
 
@@ -77,7 +80,14 @@ func TestProviderTypeMapping(t *testing.T) {
 		{"tabbyapi", ProviderTypeTabbyAPI},
 		{"mlx", ProviderTypeMLX},
 		{"mistralrs", ProviderTypeMistralRS},
-		{"unknown", ProviderTypeLocal}, // Falls back to local
+		// Reconciled per §11.4.120: a non-local, unknown name (e.g. a hosted
+		// OpenAI-compatible catalogue provider) now reports a DISTINCT type
+		// derived from its name so per-provider model attribution does not
+		// collide into one "local" bucket. Genuinely-local / unnamed backends
+		// still map to ProviderTypeLocal.
+		{"unknown", ProviderType("unknown")},
+		{"local", ProviderTypeLocal},
+		{"", ProviderTypeLocal},
 	}
 
 	for _, tt := range tests {

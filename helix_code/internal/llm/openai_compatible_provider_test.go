@@ -148,7 +148,11 @@ func TestOpenAICompatibleProvider_GetType(t *testing.T) {
 		{"TabbyAPI", "tabbyapi", ProviderTypeTabbyAPI},
 		{"MLX", "mlx", ProviderTypeMLX},
 		{"MistralRS", "mistralrs", ProviderTypeMistralRS},
-		{"Unknown", "custom", ProviderTypeLocal},
+		// Reconciled per §11.4.120: a non-local custom name now reports a
+		// distinct ProviderType derived from the name (no longer the generic
+		// "local"), so hosted catalogue providers are attributed correctly.
+		{"Custom", "custom", ProviderType("custom")},
+		{"Local", "local", ProviderTypeLocal},
 	}
 
 	for _, tc := range testCases {

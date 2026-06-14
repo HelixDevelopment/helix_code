@@ -20,6 +20,17 @@ func clearAllProviderKeys(t *testing.T) {
 			}
 		}
 	}
+	// Also clear the hosted OpenAI-compatible catalogue's key aliases — the
+	// operator's shell exports the full ~/api_keys.sh set, so without this the
+	// catalogue providers would register from the inherited env and the
+	// no-key-path assertions would not hold. Stays auto-synced with the catalogue.
+	for _, h := range llm.HostedOpenAICompatibleCatalogue() {
+		for _, alias := range h.KeyEnvAliases {
+			if _, ok := os.LookupEnv(alias); ok {
+				t.Setenv(alias, "")
+			}
+		}
+	}
 }
 
 // TestRegisterEnvProviders_RegistersWhenKeyPresent proves that, when a provider

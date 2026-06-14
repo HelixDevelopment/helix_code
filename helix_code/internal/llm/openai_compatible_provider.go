@@ -164,8 +164,18 @@ func (p *OpenAICompatibleProvider) GetType() ProviderType {
 		return ProviderTypeMLX
 	case "mistralrs":
 		return ProviderTypeMistralRS
-	default:
+	case "", "local":
+		// Genuinely-unnamed / explicitly-local backends keep the generic type.
 		return ProviderTypeLocal
+	default:
+		// Hosted OpenAI-compatible catalogue providers (cerebras, fireworks,
+		// novita, …) are constructed with a distinct name. Returning the generic
+		// ProviderTypeLocal here would mislabel EVERY such provider's
+		// ModelInfo.Provider as "local" and collide them into one bucket. Derive a
+		// stable distinct ProviderType from the name instead so each provider's
+		// models are attributed to the correct provider (CONST-036 single-source
+		// attribution). Known local backends are handled by the cases above.
+		return ProviderType(p.name)
 	}
 }
 

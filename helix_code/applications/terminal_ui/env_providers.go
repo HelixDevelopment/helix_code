@@ -134,6 +134,26 @@ func registerEnvProviders(manager *llm.ModelManager) int {
 		registered++
 	}
 
+	// Register every hosted OpenAI-Chat-Completions-compatible provider whose key
+	// is present in the environment (~/api_keys.sh). These reuse the generic
+	// OpenAICompatibleProvider over a verified per-provider base URL (the
+	// catalogue carries its own key-env aliases + placeholder rejection), so a
+	// user with e.g. CEREBRAS_API_KEY / FIREWORKS_API_KEY / NVIDIA_API_KEY set
+	// gets those providers in the picker AND in the ensemble — "use all of it".
+	// A construction failure (key absent/placeholder) skips that provider only.
+	for _, h := range llm.HostedOpenAICompatibleCatalogue() {
+		provider, err := llm.NewHostedOpenAICompatibleProvider(h)
+		if err != nil {
+			continue // key absent / placeholder — silent skip, never aborts the rest
+		}
+		if err := manager.RegisterProvider(provider); err != nil {
+			log.Printf("⚠️  TUI: skipping hosted provider %s (registration failed: %v)", h.Name, err)
+			continue
+		}
+		ensembleMembers = append(ensembleMembers, provider)
+		registered++
+	}
+
 	registered += registerEnsembleProvider(manager, ensembleMembers)
 
 	return registered

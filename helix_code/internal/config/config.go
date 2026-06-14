@@ -326,6 +326,7 @@ func Load() (*Config, error) {
 
 	// LLMsVerifier env var bindings
 	v.BindEnv("verifier.enabled", "HELIX_VERIFIER_ENABLED")
+	v.BindEnv("verifier.mode", "HELIX_VERIFIER_MODE")
 	v.BindEnv("verifier.endpoint", "HELIX_VERIFIER_ENDPOINT")
 	v.BindEnv("verifier.api_key", "HELIX_VERIFIER_API_KEY")
 	v.BindEnv("verifier.timeout", "HELIX_VERIFIER_TIMEOUT")
