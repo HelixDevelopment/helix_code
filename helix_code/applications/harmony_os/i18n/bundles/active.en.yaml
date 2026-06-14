@@ -60,7 +60,7 @@ harmony_os_cli_help_body:
       sessions      Manage sessions (list, create, start, pause, complete)
       tasks         Manage tasks (list, create, cancel)
       workers       Manage workers (list, add, remove)
-      llm           LLM operations (providers, models, chat)
+      llm           LLM operations (providers, models, chat/generate <prompt>)
       distributed   Distributed device operations (discover, list, sync)
       interactive   Start interactive mode
 
@@ -73,6 +73,7 @@ harmony_os_cli_help_body:
       helix-harmony tasks create --type building --desc "Build the project"
       helix-harmony distributed discover
       helix-harmony llm providers
+      helix-harmony llm chat "Explain HarmonyOS distributed scheduling"
       helix-harmony interactive
 
     Harmony OS Features:
@@ -252,6 +253,12 @@ harmony_os_cli_llm_chat_needs_provider:
 
 harmony_os_cli_llm_chat_configure_hint:
   other: "Configure your LLM provider (e.g., Ollama) and use the GUI version for interactive chat."
+
+harmony_os_cli_llm_chat_usage:
+  other: "Usage: helix-harmony llm chat <prompt>   (alias: generate)"
+
+harmony_os_cli_llm_chat_generating:
+  other: "Generating..."
 
 harmony_os_cli_distributed_subcommands:
   other: "Available subcommands: status, discover, sync"

@@ -705,6 +705,37 @@ func (cliApp *HarmonyCLIApp) cmdLLM(args []string) error {
 	ctx := context.Background()
 
 	switch args[0] {
+	case "chat", "generate":
+		// Round-XXX §11.4 / BLUFF-001 fix: the previous `chat` case was
+		// a placeholder — it printed two i18n hints
+		// (harmony_os_cli_llm_chat_needs_provider +
+		// harmony_os_cli_llm_chat_configure_hint) and never performed a
+		// real generation, telling the user to "use the GUI version".
+		// It now drives the REAL llm.Provider pipeline via
+		// HarmonyLLMCore.Generate (defined in distributed.go, no build
+		// tag) — the SAME canonical path cmd/cli + the mobile bindings
+		// use. The prompt comes from the remaining args; the provider's
+		// genuine output is printed; a real transport/provider error is
+		// surfaced verbatim (never swallowed into a fake success).
+		prompt := strings.TrimSpace(strings.Join(args[1:], " "))
+		if prompt == "" {
+			// CONST-046: usage notice sourced from the harmony_os i18n
+			// bundle via injected Translator; NoopTranslator echoes the ID.
+			fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_chat_usage", nil))
+			return fmt.Errorf("llm chat: prompt required")
+		}
+		core := NewHarmonyLLMCore()
+		// CONST-046: "generating" status line via Translator.
+		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_chat_generating", nil))
+		out, err := core.Generate(prompt)
+		if err != nil {
+			// Surface the real provider/transport error verbatim (the
+			// underlying error already carries the honest "no LLM
+			// provider available" / "provider call failed" context).
+			return fmt.Errorf("llm chat: %w", err)
+		}
+		fmt.Println(out)
+
 	case "providers":
 		health := cliApp.llmManager.HealthCheck(ctx)
 		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_providers_header", nil))
@@ -726,10 +757,6 @@ func (cliApp *HarmonyCLIApp) cmdLLM(args []string) error {
 		for _, m := range models {
 			fmt.Printf("- %s (%s) - Context: %d\n", m.Name, m.Provider, m.ContextSize)
 		}
-
-	case "chat":
-		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_chat_needs_provider", nil))
-		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_llm_chat_configure_hint", nil))
 
 	default:
 		fmt.Println(cliApp.tr(ctx, "harmony_os_cli_unknown_subcommand", map[string]any{"Subcommand": args[0]}))

@@ -251,10 +251,62 @@ func TestCmdLLM_Models_UsesTranslator(t *testing.T) {
 	assertTranslated(t, out, "harmony_os_cli_llm_models_header", "=== Available Models ===")
 }
 
-func TestCmdLLM_Chat_UsesTranslator(t *testing.T) {
+// TestCmdLLM_Chat_EmptyPrompt_UsesTranslator: `llm chat` with no prompt
+// is a usage error — it MUST print the translated usage notice (via the
+// injected Translator) and MUST NOT reach the real Generate path. This
+// replaces the pre-wiring placeholder test that asserted the old
+// "LLM chat requires a running provider." stub message.
+func TestCmdLLM_Chat_EmptyPrompt_UsesTranslator(t *testing.T) {
 	app := newCLIAppForTest(t)
-	out := captureStdout(t, func() { _ = app.cmdLLM([]string{"chat"}) })
-	assertTranslated(t, out, "harmony_os_cli_llm_chat_needs_provider", "LLM chat requires a running provider.")
+	var out string
+	var err error
+	out = captureStdout(t, func() { err = app.cmdLLM([]string{"chat"}) })
+	if err == nil {
+		t.Fatalf("cmdLLM chat with empty prompt: expected a usage error, got nil")
+	}
+	if !strings.Contains(out, "<TRANSLATED:harmony_os_cli_llm_chat_usage>") {
+		t.Fatalf("cmdLLM chat empty-prompt output missing usage translator sentinel.\nFull:\n%s", out)
+	}
+	// The pre-wiring placeholder hint MUST be gone (the chat case no
+	// longer tells the user to "use the GUI version").
+	if strings.Contains(out, "use the GUI version for interactive chat") {
+		t.Fatalf("output still contains the old placeholder hint — real-generation wiring reverted.\nFull:\n%s", out)
+	}
+}
+
+// TestCmdLLM_Chat_RoutesToRealGenerate_HonestError: `llm chat <prompt>`
+// MUST route to the REAL HarmonyLLMCore.Generate path. In a unit-test
+// environment with no cloud credentials and no local Ollama reachable,
+// Generate surfaces a genuine "no LLM provider available" transport
+// error verbatim — proving the placeholder was replaced by the real
+// pipeline (a placeholder would have returned nil / printed a canned
+// hint instead of attempting a real provider call). Anti-bluff: we
+// assert the error is the honest provider/transport error, NOT a fake
+// success and NOT the old stub message.
+func TestCmdLLM_Chat_RoutesToRealGenerate_HonestError(t *testing.T) {
+	app := newCLIAppForTest(t)
+	// No cloud provider configured; buildHarmonyLLMProvider falls back to
+	// a local Ollama provider on http://localhost:11434. In a unit-test
+	// environment that port is not serving Ollama, so provider.Generate
+	// fails with a real connection error — the honest no-provider path.
+	t.Setenv("HELIX_LLM_PROVIDER", "")
+	out := captureStdout(t, func() {
+		err := app.cmdLLM([]string{"chat", "hello", "harmony"})
+		if err == nil {
+			t.Fatalf("cmdLLM chat <prompt> with no reachable provider: expected honest provider error, got nil (fake success)")
+		}
+		if !strings.Contains(err.Error(), "llm chat:") {
+			t.Fatalf("cmdLLM chat error not wrapped by the chat call site: %v", err)
+		}
+	})
+	// The "generating" status line MUST come from the translator (the
+	// real flow was entered), and the old stub hint MUST be absent.
+	if !strings.Contains(out, "<TRANSLATED:harmony_os_cli_llm_chat_generating>") {
+		t.Fatalf("cmdLLM chat did not enter the real-generation path (missing generating sentinel).\nFull:\n%s", out)
+	}
+	if strings.Contains(out, "use the GUI version for interactive chat") {
+		t.Fatalf("output still contains the old placeholder hint — real-generation wiring reverted.\nFull:\n%s", out)
+	}
 }
 
 func TestCmdLLM_UnknownSubcommand_UsesTranslator(t *testing.T) {
