@@ -1,4 +1,4 @@
-package main
+package ensembleui
 
 import (
 	"strings"
@@ -99,8 +99,8 @@ func TestFormatEnsemblePanel_RendersEveryMember(t *testing.T) {
 // TestFormatEnsemblePanel_RendersPerMemberModel is the per-member MODEL
 // visibility proof: each member line MUST show the model it served (chosen via
 // LLMsVerifier) AND the "(via LLMsVerifier)" provenance AND that member's own
-// excerpt — for >=2 members. This is the TUI half of the "operator sees which
-// model each ensemble member used" feature.
+// excerpt — for >=2 members. This is the "operator sees which model each
+// ensemble member used" feature — now shared by TUI + desktop.
 func TestFormatEnsemblePanel_RendersPerMemberModel(t *testing.T) {
 	meta := map[string]interface{}{
 		"ensemble":                      true,

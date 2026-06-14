@@ -8,6 +8,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sort"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -19,8 +21,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"dev.helix.code/applications/desktop/i18n"
+	"dev.helix.code/internal/agent"
+	"dev.helix.code/internal/clientcore"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
+	"dev.helix.code/internal/ensembleui"
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/notification"
 	"dev.helix.code/internal/project"
@@ -216,6 +221,22 @@ type DesktopApp struct {
 	server             *server.Server
 	themeManager       *ThemeManager
 
+	// Agentic capability core (wired at parity with the TUI via the shared
+	// internal/clientcore package — §11.4.74 reuse-over-reimplement).
+	//
+	// agenticTools holds the read-only tool registry (git_status + fs_read/
+	// glob/grep) with LSP diagnostics + MCP tools merged in. Its Registry
+	// drives the chat tool loop via agent.RunToolLoopStream(ReadOnlyOnly);
+	// nil when registry construction failed (the chat then falls back to the
+	// plain streaming path). skills holds the loaded skill dispatcher + plugin
+	// loader (graceful-nil when absent). Both are released in Close.
+	agenticTools *clientcore.AgenticTools
+	skills       *clientcore.Skills
+	// selectedModel is the model id chosen in the LLM tab's chat controls. It
+	// is sent as the tool-loop opts.Model on every chat turn; empty falls back
+	// to the provider's first model.
+	selectedModel string
+
 	// UI Components
 	tabs           *container.AppTabs
 	statusBar      *widget.Label
@@ -325,8 +346,34 @@ func (da *DesktopApp) Initialize() error {
 	// Initialize session manager
 	da.sessionManager = session.NewManager()
 
-	// Initialize LLM manager
+	// Initialize LLM manager and register VERIFIER-DRIVEN providers at parity
+	// with the TUI (CONST-036/037/040, BLUFF-002 — NO hardcoded provider list).
+	// Wire LLMsVerifier FIRST so the Helix Agent ensemble resolves each member's
+	// model from verified, chat-capable catalogue entries, then register every
+	// cloud provider whose API key is present in the environment + the dynamic
+	// OpenAI-compatible providers + the ensemble + the reachable HelixAgent
+	// adapter. A no-key environment honestly registers zero providers rather
+	// than a fabricated list (anti-bluff §11.4). This shared call REPLACES the
+	// old hardcoded widget.NewSelect([]string{"ollama","openai",...}) source.
 	da.llmManager = llm.NewModelManager()
+	if clientcore.WireVerifierAdapter(da.llmManager, cfg) {
+		log.Printf("✅ Desktop: LLMsVerifier wired (ensemble model resolution is verifier-driven)")
+	}
+	if n := clientcore.RegisterEnvProviders(da.llmManager, cfg); n > 0 {
+		log.Printf("✅ Desktop: registered %d LLM provider(s) from the verifier-driven path", n)
+	}
+
+	// Build the read-only agentic tool registry + LSP + MCP at parity with the
+	// TUI (§11.4.74). Default-on; degrades gracefully when gopls/npx absent or
+	// registry construction fails (chat falls back to plain streaming).
+	if at, atErr := clientcore.WireAgenticTools(".helixcode/mcp.yml"); atErr != nil {
+		log.Printf("⚠️  Desktop: agentic tool registry unavailable (%v); chat falls back to plain streaming", atErr)
+	} else {
+		da.agenticTools = at
+	}
+
+	// Load skills + plugins at parity with the TUI (graceful-nil when absent).
+	da.skills = clientcore.LoadSkillsAndPlugins("plugins")
 
 	// Initialize notification engine
 	da.notificationEngine = notification.NewNotificationEngine()
@@ -986,6 +1033,32 @@ func (da *DesktopApp) createSessionsTab() fyne.CanvasObject {
 	return container.NewBorder(nil, nil, nil, actions, leftPanel)
 }
 
+// buildVerifierModelChoices enumerates EVERY (provider/model) pair the
+// verifier-backed ModelManager actually registered and returns: the display
+// labels for the chat model picker ("<provider>/<model>"), a label→model-id
+// map, and a label→provider-type map. This is the verifier-driven source that
+// REPLACES the desktop's old hardcoded provider list (CONST-036/037, BLUFF-002)
+// — a no-key environment yields an empty slice, so the picker is honestly empty
+// rather than fake.
+func (da *DesktopApp) buildVerifierModelChoices() (labels []string, labelToID map[string]string, labelToProvider map[string]llm.ProviderType) {
+	labelToID = make(map[string]string)
+	labelToProvider = make(map[string]llm.ProviderType)
+	if da.llmManager == nil {
+		return labels, labelToID, labelToProvider
+	}
+	for _, m := range da.llmManager.GetAvailableModels() {
+		label := fmt.Sprintf("%s/%s", m.Provider, m.Name)
+		if _, exists := labelToID[label]; exists {
+			continue
+		}
+		labels = append(labels, label)
+		labelToID[label] = m.ID
+		labelToProvider[label] = m.Provider
+	}
+	sort.Strings(labels)
+	return labels, labelToID, labelToProvider
+}
+
 // createLLMTab creates the LLM tab
 func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 	// Available models list
@@ -1055,13 +1128,26 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 	da.chatInput.SetPlaceHolder(da.tr(ctxLLM, "desktop_chat_input_placeholder", nil))
 	da.chatInput.SetMinRowsVisible(3)
 
-	// Provider/model selection for chat
-	da.llmProviderSel = widget.NewSelect([]string{"ollama", "openai", "anthropic", "gemini", "local"}, nil)
-	da.llmProviderSel.SetSelected("ollama")
+	// Provider/model selection for chat — VERIFIER-DRIVEN (CONST-036/037/040,
+	// BLUFF-002). The model picker lists EVERY (provider/model) pair the
+	// verifier-backed ModelManager actually registered, so the desktop chat
+	// dispatches to a REAL, verified model — NOT the old hardcoded
+	// []string{"ollama","openai","anthropic","gemini","local"} list. A no-key
+	// environment honestly shows an empty picker rather than fake entries.
+	modelChoices, modelLabelToID, modelLabelToProvider := da.buildVerifierModelChoices()
+	da.llmProviderSel = widget.NewSelect(modelChoices, nil)
+	if len(modelChoices) > 0 {
+		da.llmProviderSel.SetSelected(modelChoices[0])
+		da.selectedModel = modelLabelToID[modelChoices[0]]
+	}
+	da.llmProviderSel.OnChanged = func(label string) {
+		da.selectedModel = modelLabelToID[label]
+	}
 
+	// Manual model-name override (advanced): typed value wins when non-empty,
+	// e.g. for a local model not in the verifier catalogue.
 	modelNameEntry := widget.NewEntry()
 	modelNameEntry.SetPlaceHolder(da.tr(ctxLLM, "desktop_chat_model_name_placeholder", nil))
-	modelNameEntry.SetText("llama2")
 
 	sendButton := widget.NewButton("Send Message", func() {
 		if da.chatInput.Text == "" {
@@ -1077,76 +1163,105 @@ func (da *DesktopApp) createLLMTab() fyne.CanvasObject {
 		// Clear input immediately
 		da.chatInput.SetText("")
 
+		// Resolve the model id: the manual override wins when non-empty,
+		// otherwise the verifier-driven picker selection. Captured up-front so
+		// the goroutine reads a stable value.
+		modelName := strings.TrimSpace(modelNameEntry.Text)
+		if modelName == "" {
+			modelName = da.selectedModel
+		}
+		selectedLabel := da.llmProviderSel.Selected
+		providerType := modelLabelToProvider[selectedLabel]
+
 		// Make LLM call in goroutine to not block UI
-		go func(msg string) {
-			var responseMsg string
-			providerName := da.llmProviderSel.Selected
-			modelName := modelNameEntry.Text
-
-			if da.llmManager != nil {
-				// Get provider from manager using provider type
-				providerType := llm.ProviderType(providerName)
-				provider, err := da.llmManager.GetProviderForModel(modelName, providerType)
-				if err == nil && provider != nil {
-					// Create LLM request
-					ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-					defer cancel()
-
-					// P1-T07 (speed programme Phase 1): the desktop chat
-					// consumes the streaming provider API (GenerateStream)
-					// instead of buffering the whole reply via Generate. Each
-					// streamed chunk is appended to the chat history widget
-					// the moment it arrives, so the user sees token-by-token
-					// output (time-to-first-visible-token) rather than a
-					// frozen panel until the completion lands.
-					//
-					// Threading: this block already runs in a goroutine (the
-					// Send button handler dispatched it). Fyne's
-					// (*widget.Entry).SetText is goroutine-safe — it marshals
-					// the refresh onto Fyne's render queue — so growing the
-					// transcript chunk-by-chunk from here is correct.
-					//
-					// No-regression: the assistant reply is the concatenation
-					// of every streamed chunk, byte-identical to the buffered
-					// Generate result for any conformant provider; only WHEN
-					// the text appears changes.
-					request := &llm.LLMRequest{
-						Messages: []llm.Message{
-							{Role: "user", Content: msg},
-						},
-						Model:       modelName,
-						MaxTokens:   1024,
-						Temperature: 0.7,
-						Stream:      true,
-					}
-
-					prefix := fmt.Sprintf("[AI (%s/%s)]: ", providerName, modelName)
-					streamErr := streamDesktopChat(ctx, provider, request, prefix, da.chatHistory)
-					if streamErr != nil {
-						da.chatHistory.SetText(da.chatHistory.Text +
-							fmt.Sprintf("\n[AI (%s/%s)]: Error: %v\n", providerName, modelName, streamErr))
-					} else {
-						da.chatHistory.SetText(da.chatHistory.Text + "\n")
-					}
-					return
-				}
-				// CONST-046: provider-unavailable message resolved via i18n bundle.
-				responseMsg = da.tr(ctxLLM, "desktop_chat_provider_unavailable", map[string]any{
-					"Provider": providerName,
-					"Model":    modelName,
-				}) + "\n"
-			} else {
-				// No LLM manager configured - show informative message
+		go func(msg, model string, ptype llm.ProviderType) {
+			if da.llmManager == nil {
 				// CONST-046: llm-not-initialized message resolved via i18n bundle.
-				responseMsg = da.tr(ctxLLM, "desktop_chat_llm_not_initialized", map[string]any{
-					"Provider": providerName,
-					"Model":    modelName,
-				}) + "\n"
+				da.chatHistory.SetText(da.chatHistory.Text + da.tr(ctxLLM, "desktop_chat_llm_not_initialized", map[string]any{
+					"Provider": string(ptype),
+					"Model":    model,
+				}) + "\n")
+				return
 			}
 
-			// Update UI on main thread
-			da.chatHistory.SetText(da.chatHistory.Text + responseMsg)
-		}(userMessage)
+			provider, err := da.llmManager.GetProviderForModel(model, ptype)
+			if err != nil || provider == nil {
+				// CONST-046: provider-unavailable message resolved via i18n bundle.
+				da.chatHistory.SetText(da.chatHistory.Text + da.tr(ctxLLM, "desktop_chat_provider_unavailable", map[string]any{
+					"Provider": string(ptype),
+					"Model":    model,
+				}) + "\n")
+				return
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+			defer cancel()
+
+			prefix := fmt.Sprintf("[AI (%s/%s)]: ", ptype, model)
+
+			// AGENTIC PATH (parity with the TUI, §11.4.74): when the read-only
+			// tool registry is wired, drive the chat turn through the shared
+			// multi-turn tool loop so prompts like "Check git status" actually
+			// execute a read-only git/fs tool and the operator SEES the tool
+			// trace + (for ensemble responses) every member's answer and the
+			// vote. ReadOnlyOnly=true (§11.4.133): the registry has no approval
+			// manager, so the loop is restricted to read-only tools — nothing
+			// destructive is reachable.
+			if da.agenticTools != nil && da.agenticTools.Registry != nil {
+				registry := da.agenticTools.Registry
+				systemPrompt := clientcore.BuildToolLoopSystemPrompt(registry)
+				history := []llm.Message{{Role: "user", Content: msg}}
+
+				da.chatHistory.SetText(da.chatHistory.Text + prefix)
+				onFinalChunk := func(chunk string) {
+					// (*widget.Entry).SetText is goroutine-safe in Fyne.
+					da.chatHistory.SetText(da.chatHistory.Text + chunk)
+				}
+				result, loopErr := agent.RunToolLoopStream(ctx, provider, registry, history, agent.ToolLoopOptions{
+					Model:              model,
+					MaxTurns:           6,
+					SystemPrompt:       systemPrompt,
+					MaxToolResultChars: 800,
+					ReadOnlyOnly:       true,
+				}, onFinalChunk)
+				if loopErr != nil {
+					da.chatHistory.SetText(da.chatHistory.Text + fmt.Sprintf("\n[Error: %v]\n", loopErr))
+					return
+				}
+				da.chatHistory.SetText(da.chatHistory.Text + "\n")
+
+				// Surface the agentic tool trace so the operator SEES each tool
+				// call ("tool: git_status … <real output>").
+				if len(result.Trace) > 0 {
+					if traceLines := ensembleui.FormatToolTrace(clientcore.AdaptToolTrace(result.Trace)); len(traceLines) > 0 {
+						da.chatHistory.SetText(da.chatHistory.Text + "\n" + strings.Join(traceLines, "\n") + "\n")
+					}
+				}
+
+				// Surface the ensemble panel (empty for non-ensemble responses)
+				// — the SAME shared renderer the TUI uses — so the operator SEES
+				// every member + the winning vote.
+				if panelLines := ensembleui.FormatEnsemblePanel(result.FinalMetadata); len(panelLines) > 0 {
+					da.chatHistory.SetText(da.chatHistory.Text + "\n" + strings.Join(panelLines, "\n") + "\n")
+				}
+				return
+			}
+
+			// PLAIN STREAMING PATH (registry nil) — unchanged, no regression.
+			request := &llm.LLMRequest{
+				Messages:    []llm.Message{{Role: "user", Content: msg}},
+				Model:       model,
+				MaxTokens:   1024,
+				Temperature: 0.7,
+				Stream:      true,
+			}
+			if streamErr := streamDesktopChat(ctx, provider, request, prefix, da.chatHistory); streamErr != nil {
+				da.chatHistory.SetText(da.chatHistory.Text +
+					fmt.Sprintf("\n[AI (%s/%s)]: Error: %v\n", ptype, model, streamErr))
+			} else {
+				da.chatHistory.SetText(da.chatHistory.Text + "\n")
+			}
+		}(userMessage, modelName, providerType)
 	})
 
 	clearButton := widget.NewButton("Clear Chat", func() {
@@ -1346,6 +1461,10 @@ func (da *DesktopApp) Close() error {
 	if da.stopUpdate != nil {
 		close(da.stopUpdate)
 	}
+
+	// Release the agentic capability sub-managers (MCP child processes, LSP
+	// server processes) at parity with the TUI's shutdown. Nil-safe.
+	da.agenticTools.Close()
 
 	// Close database connection
 	if da.db != nil {
