@@ -178,28 +178,40 @@ test-docs:
 
 .PHONY: test-infra-up test-infra-down test-infra-status test-full test-unit-full test-integration-full test-e2e-full test-security-full
 
+# Compose runner auto-detection (Rule 4 / §11.4.76): prefer `docker compose`
+# when docker is on PATH, otherwise fall back to `podman compose` (or the
+# standalone `podman-compose` binary if that is the available subcommand).
+# Keeps behaviour identical on docker hosts; podman-only hosts (e.g. macOS dev
+# boxes per CLAUDE.md Rule 4) no longer fail with `docker: command not found`.
+COMPOSE := $(shell \
+	if command -v docker >/dev/null 2>&1; then echo "docker compose"; \
+	elif podman compose version >/dev/null 2>&1; then echo "podman compose"; \
+	elif command -v podman-compose >/dev/null 2>&1; then echo "podman-compose"; \
+	elif command -v podman >/dev/null 2>&1; then echo "podman compose"; \
+	else echo "docker compose"; fi)
+
 # Start full test infrastructure with all dependencies
 test-infra-up:
-	@echo "🚀 Starting full test infrastructure..."
-	@docker compose -f docker-compose.full-test.yml up -d
+	@echo "🚀 Starting full test infrastructure (compose runner: $(COMPOSE))..."
+	@$(COMPOSE) -f docker-compose.full-test.yml up -d
 	@echo "⏳ Waiting for services to be healthy..."
 	@sleep 30
 	@echo "📦 Pulling Ollama test model..."
-	@docker compose -f docker-compose.full-test.yml exec -T ollama ollama pull llama2:7b 2>/dev/null || echo "⚠️ Model pull skipped"
+	@$(COMPOSE) -f docker-compose.full-test.yml exec -T ollama ollama pull llama2:7b 2>/dev/null || echo "⚠️ Model pull skipped"
 	@echo "✅ Test infrastructure ready!"
 	@echo ""
 	@echo "To run all tests: make test-full"
 
 # Stop full test infrastructure
 test-infra-down:
-	@echo "🛑 Stopping full test infrastructure..."
-	@docker compose -f docker-compose.full-test.yml down -v
+	@echo "🛑 Stopping full test infrastructure (compose runner: $(COMPOSE))..."
+	@$(COMPOSE) -f docker-compose.full-test.yml down -v
 	@echo "✅ Test infrastructure stopped"
 
 # Check test infrastructure status
 test-infra-status:
-	@echo "📊 Test infrastructure status:"
-	@docker compose -f docker-compose.full-test.yml ps
+	@echo "📊 Test infrastructure status (compose runner: $(COMPOSE)):"
+	@$(COMPOSE) -f docker-compose.full-test.yml ps
 
 # Run ALL tests with full infrastructure (ZERO skipped tests)
 # P5-T01: -p/-parallel tuned for faster wall-time. -count=1 is KEPT — these
@@ -602,7 +614,7 @@ aurora-harmony: aurora-os harmony-os
 # Authority: CONST-035 — All builds MUST be containerized.
 # ============================================================
 
-COMPOSE_BUILDER := docker compose -f docker-compose.builder.yml
+COMPOSE_BUILDER := $(COMPOSE) -f docker-compose.builder.yml
 BUILDER_SERVICE := builder
 
 .PHONY: container-builder-image container-build container-test container-lint container-shell container-dev-up container-dev-down container-clean
