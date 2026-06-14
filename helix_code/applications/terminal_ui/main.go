@@ -226,7 +226,7 @@ func (tui *TerminalUI) Initialize() error {
 	if wireVerifierAdapter(tui.llmManager, cfg) {
 		log.Printf("✅ TUI: LLMsVerifier wired (ensemble model resolution is verifier-driven)")
 	}
-	if n := registerEnvProviders(tui.llmManager); n > 0 {
+	if n := registerEnvProviders(tui.llmManager, cfg); n > 0 {
 		log.Printf("✅ TUI: registered %d cloud LLM provider(s) from environment keys", n)
 	}
 	tui.chatHistory = make([]llm.Message, 0)

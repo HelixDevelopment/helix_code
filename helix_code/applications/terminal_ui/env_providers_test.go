@@ -31,6 +31,12 @@ func clearAllProviderKeys(t *testing.T) {
 			}
 		}
 	}
+	// Pin the dynamic-catalogue verifier endpoint at an unreachable address so
+	// these hermetic tests never contact a real LLMsVerifier that may be running
+	// on the developer's machine (localhost:8095). With the verifier unreachable,
+	// buildOpenAICompatibleProviders deterministically uses the offline fallback
+	// catalogue path, whose providers are themselves key-gated by clearAllProviderKeys.
+	t.Setenv("HELIX_VERIFIER_ENDPOINT", "http://127.0.0.1:1")
 }
 
 // TestRegisterEnvProviders_RegistersWhenKeyPresent proves that, when a provider
@@ -50,7 +56,7 @@ func TestRegisterEnvProviders_RegistersWhenKeyPresent(t *testing.T) {
 	t.Setenv("DEEPSEEK_API_KEY", "sk-test-deepseek-real-looking-credential-0123456789")
 
 	manager := llm.NewModelManager()
-	got := registerEnvProviders(manager)
+	got := registerEnvProviders(manager, nil)
 
 	if got < 1 {
 		t.Fatalf("registerEnvProviders registered %d providers, want >= 1 when DEEPSEEK_API_KEY is set", got)
@@ -83,7 +89,7 @@ func TestRegisterEnvProviders_RegistersNoneWhenUnset(t *testing.T) {
 	clearAllProviderKeys(t)
 
 	manager := llm.NewModelManager()
-	got := registerEnvProviders(manager)
+	got := registerEnvProviders(manager, nil)
 
 	if got != 0 {
 		t.Fatalf("registerEnvProviders registered %d providers with all keys cleared, want 0", got)
@@ -95,7 +101,7 @@ func TestRegisterEnvProviders_RegistersNoneWhenUnset(t *testing.T) {
 
 // TestRegisterEnvProviders_NilManagerSafe guards the defensive nil path.
 func TestRegisterEnvProviders_NilManagerSafe(t *testing.T) {
-	if got := registerEnvProviders(nil); got != 0 {
-		t.Fatalf("registerEnvProviders(nil) = %d, want 0", got)
+	if got := registerEnvProviders(nil, nil); got != 0 {
+		t.Fatalf("registerEnvProviders(nil, nil) = %d, want 0", got)
 	}
 }

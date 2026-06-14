@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"strings"
+	"time"
 
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/llm"
@@ -92,7 +95,7 @@ var envProviderCandidates = []envProviderCandidate{
 // the credential. A construction or registration error for one provider is
 // logged and skipped (it never aborts the others), so a single misbehaving key
 // cannot take the whole chat surface down.
-func registerEnvProviders(manager *llm.ModelManager) int {
+func registerEnvProviders(manager *llm.ModelManager, cfg *config.Config) int {
 	if manager == nil {
 		return 0
 	}
@@ -134,20 +137,21 @@ func registerEnvProviders(manager *llm.ModelManager) int {
 		registered++
 	}
 
-	// Register every hosted OpenAI-Chat-Completions-compatible provider whose key
-	// is present in the environment (~/api_keys.sh). These reuse the generic
-	// OpenAICompatibleProvider over a verified per-provider base URL (the
-	// catalogue carries its own key-env aliases + placeholder rejection), so a
-	// user with e.g. CEREBRAS_API_KEY / FIREWORKS_API_KEY / NVIDIA_API_KEY set
-	// gets those providers in the picker AND in the ensemble — "use all of it".
-	// A construction failure (key absent/placeholder) skips that provider only.
-	for _, h := range llm.HostedOpenAICompatibleCatalogue() {
-		provider, err := llm.NewHostedOpenAICompatibleProvider(h)
-		if err != nil {
-			continue // key absent / placeholder — silent skip, never aborts the rest
-		}
+	// PRIMARY PATH (CONST-036 / CONST-046): source the OpenAI-compatible
+	// providers DYNAMICALLY from LLMsVerifier's /api/providers — each provider's
+	// base URL is the verifier's api_url (NO hardcoded URL). When the verifier is
+	// reachable, this REPLACES the hardcoded HostedOpenAICompatibleCatalogue() as
+	// the source of these providers. The hosted catalogue is engaged ONLY as a
+	// degraded offline fallback below, when the verifier is unreachable.
+	hostedProviders, usedDynamic := buildOpenAICompatibleProviders(cfg)
+	if usedDynamic {
+		log.Printf("✅ TUI: OpenAI-compatible providers sourced DYNAMICALLY from LLMsVerifier (verifier api_url is the base URL — no hardcoded catalogue)")
+	} else {
+		log.Printf("⚠️  TUI: LLMsVerifier unreachable — using the hardcoded HostedOpenAICompatibleCatalogue() as a DEGRADED OFFLINE FALLBACK only")
+	}
+	for _, provider := range hostedProviders {
 		if err := manager.RegisterProvider(provider); err != nil {
-			log.Printf("⚠️  TUI: skipping hosted provider %s (registration failed: %v)", h.Name, err)
+			log.Printf("⚠️  TUI: skipping hosted provider %s (registration failed: %v)", provider.GetName(), err)
 			continue
 		}
 		ensembleMembers = append(ensembleMembers, provider)
@@ -195,4 +199,71 @@ func registerEnsembleProvider(manager *llm.ModelManager, members []llm.Provider)
 
 	log.Printf("✅ TUI: registered Helix Agent ensemble over %d providers", len(members))
 	return 1
+}
+
+// buildOpenAICompatibleProviders is the PRIMARY/FALLBACK switch for the hosted
+// OpenAI-Chat-Completions-compatible providers.
+//
+//   - PRIMARY (returns usedDynamic=true): if a LLMsVerifier endpoint is
+//     configured/reachable, query /api/providers and build each provider from the
+//     verifier's api_url (CONST-036 single source of truth; CONST-046 no hardcoded
+//     URL). Only providers whose key is present are built.
+//   - FALLBACK (returns usedDynamic=false): if the verifier is unreachable, fall
+//     back to the hardcoded HostedOpenAICompatibleCatalogue() — clearly a degraded
+//     offline safety net, NOT the primary source. Backward-compatible: the TUI
+//     still lists providers when the verifier is down.
+//
+// The fallback is gated STRICTLY on verifier reachability: GetProviders returns
+// an error (never a silent empty slice) when the verifier is unreachable, so a
+// reachable-but-empty verifier does NOT silently re-engage the hardcoded list.
+func buildOpenAICompatibleProviders(cfg *config.Config) (providers []llm.Provider, usedDynamic bool) {
+	endpoint, apiKey, timeout := resolveVerifierEndpoint(cfg)
+	if endpoint != "" {
+		client := verifier.NewClient(endpoint, apiKey, timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+		recs, err := client.GetProviders(ctx)
+		if err == nil {
+			// Verifier reachable → dynamic path is authoritative, even if it
+			// yields zero providers for the present key set.
+			return llm.BuildDynamicOpenAICompatibleProviders(recs), true
+		}
+		log.Printf("⚠️  TUI: LLMsVerifier GetProviders failed (%v) — falling back to hardcoded catalogue", err)
+	}
+
+	// Degraded offline fallback: hardcoded catalogue.
+	fallback := make([]llm.Provider, 0)
+	for _, h := range llm.HostedOpenAICompatibleCatalogue() {
+		provider, err := llm.NewHostedOpenAICompatibleProvider(h)
+		if err != nil {
+			continue // key absent / placeholder — silent skip, never aborts the rest
+		}
+		fallback = append(fallback, provider)
+	}
+	return fallback, false
+}
+
+// resolveVerifierEndpoint resolves the LLMsVerifier REST endpoint (+ api key +
+// timeout) the dynamic catalogue queries, in precedence order:
+//  1. an explicit, enabled config.Verifier endpoint (mode "remote");
+//  2. the HELIX_VERIFIER_ENDPOINT env var;
+//  3. the conventional local default http://localhost:8095.
+//
+// Returns an empty endpoint only when none can be resolved (never happens given
+// the default, but kept explicit so a future opt-out is a single edit).
+func resolveVerifierEndpoint(cfg *config.Config) (endpoint, apiKey string, timeout time.Duration) {
+	timeout = 5 * time.Second
+	if cfg != nil && cfg.Verifier != nil && cfg.Verifier.Enabled {
+		apiKey = cfg.Verifier.APIKey
+		if cfg.Verifier.Timeout > 0 {
+			timeout = cfg.Verifier.Timeout
+		}
+		if e := strings.TrimSpace(cfg.Verifier.Endpoint); e != "" {
+			return e, apiKey, timeout
+		}
+	}
+	if e := strings.TrimSpace(os.Getenv("HELIX_VERIFIER_ENDPOINT")); e != "" {
+		return e, apiKey, timeout
+	}
+	return "http://localhost:8095", apiKey, timeout
 }

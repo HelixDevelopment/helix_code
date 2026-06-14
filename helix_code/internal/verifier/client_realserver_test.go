@@ -104,6 +104,49 @@ func TestClient_GetProviderScores_RealServer_FallsBackToProviders(t *testing.T) 
 	assert.Equal(t, 8.9, scores["anthropic"])
 }
 
+// TestClient_GetModels_RealServer_EmptyEnvelope proves a legitimate "zero
+// models" result from the real server — `{"models":[],"count":0}` — yields an
+// empty slice and NO error. The earlier `len(envelope.Models) > 0` branch
+// condition fell through to the bare-array path on an empty `models` array,
+// which then tried to unmarshal the whole `{...}` object as a JSON array and
+// returned a decode error for a perfectly valid empty result.
+func TestClient_GetModels_RealServer_EmptyEnvelope(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"models":[],"count":0}`))
+	}))
+	defer server.Close()
+
+	c := NewClient(server.URL, "", 0)
+	models, err := c.GetModels(context.Background())
+	require.NoError(t, err, "an empty {\"models\":[]} envelope must NOT error")
+	assert.Empty(t, models, "an empty envelope must yield zero models")
+}
+
+// TestClient_GetModels_RealServer_EmptyEnvelopeVariants proves the
+// envelope-vs-bare-array detection keys on "is the body an object" rather than
+// "does the models array contain elements". An envelope object MUST take the
+// envelope path even when `models` is empty, `null`, or absent — never fall
+// through to the bare-array path which would try to unmarshal the whole `{...}`
+// object as a JSON array and return a spurious decode error.
+func TestClient_GetModels_RealServer_EmptyEnvelopeVariants(t *testing.T) {
+	cases := []struct {
+		name string
+		body string
+	}{
+		{"empty array", `{"models":[],"count":0}`},
+		{"null models", `{"models":null,"count":0}`},
+		{"absent models key", `{"count":0}`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			models, err := decodeModels([]byte(tc.body))
+			require.NoError(t, err, "object envelope %q must NOT error", tc.body)
+			assert.Empty(t, models, "object envelope %q must yield zero models", tc.body)
+		})
+	}
+}
+
 // TestClient_GetModels_EmbeddedShape_StillWorks proves the reconciliation did
 // NOT break the legacy bare-array shape served by the embedded server.
 func TestClient_GetModels_EmbeddedShape_StillWorks(t *testing.T) {

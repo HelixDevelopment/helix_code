@@ -134,15 +134,48 @@ func (c *Client) GetModels(ctx context.Context) ([]*VerifiedModel, error) {
 // The bare-array path is attempted first so existing behaviour / tests are
 // preserved; the envelope path is the new reconciliation for the real server.
 func decodeModels(body []byte) ([]*VerifiedModel, error) {
-	// Real-server envelope: `{"models":[...]}`.
-	var envelope struct {
-		Models json.RawMessage `json:"models"`
-	}
-	if err := json.Unmarshal(body, &envelope); err == nil && len(envelope.Models) > 0 {
+	// Detect the shape by the first non-whitespace byte rather than by the
+	// length of the `models` array: `[` is the legacy embedded-server bare
+	// array, `{` is the real-server envelope `{"models":[...],"count":N}`.
+	// Keying on `len(envelope.Models) > 0` mis-handled a legitimate "zero
+	// models" envelope (`{"models":[],"count":0}` / `{"models":null}` /
+	// `{"count":0}`): it fell through to the bare-array path which then tried
+	// to unmarshal the whole `{...}` object as a JSON array and returned a
+	// spurious decode error instead of an empty slice.
+	switch firstJSONByte(body) {
+	case '{':
+		// Real-server envelope. Decode `models` (present-but-empty, null, or
+		// absent all yield an empty slice with no error).
+		var envelope struct {
+			Models json.RawMessage `json:"models"`
+		}
+		if err := json.Unmarshal(body, &envelope); err != nil {
+			return nil, fmt.Errorf("failed to decode models envelope: %w", err)
+		}
+		if len(envelope.Models) == 0 {
+			// `models` key absent → nothing to decode.
+			return []*VerifiedModel{}, nil
+		}
 		return unmarshalModelArray(envelope.Models)
+	default:
+		// Legacy embedded-server bare array (or empty body).
+		return unmarshalModelArray(body)
 	}
-	// Legacy embedded-server bare array.
-	return unmarshalModelArray(body)
+}
+
+// firstJSONByte returns the first non-whitespace byte of body, or 0 if body is
+// empty / all-whitespace. Used to discriminate a JSON object (`{`) from a JSON
+// array (`[`) without a speculative full unmarshal.
+func firstJSONByte(body []byte) byte {
+	for _, b := range body {
+		switch b {
+		case ' ', '\t', '\r', '\n':
+			continue
+		default:
+			return b
+		}
+	}
+	return 0
 }
 
 // unmarshalModelArray decodes a JSON array of model objects, reconciling the

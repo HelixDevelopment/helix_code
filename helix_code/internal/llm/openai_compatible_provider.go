@@ -139,6 +139,15 @@ func NewOpenAICompatibleProvider(name string, config OpenAICompatibleConfig) (*O
 	return provider, nil
 }
 
+// BaseURL returns the provider's configured base URL. Exposed so out-of-package
+// callers (and tests) can assert which URL a provider was constructed with —
+// load-bearing for the CONST-036/CONST-046 guarantee that the dynamic catalogue
+// uses the verifier's api_url rather than a hardcoded literal. Carries no
+// credential (CONST-042).
+func (p *OpenAICompatibleProvider) BaseURL() string {
+	return p.config.BaseURL
+}
+
 // GetType returns the provider type
 func (p *OpenAICompatibleProvider) GetType() ProviderType {
 	switch p.name {
