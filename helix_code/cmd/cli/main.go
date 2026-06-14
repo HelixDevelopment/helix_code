@@ -2503,8 +2503,12 @@ func (c *CLI) handleDebate(ctx context.Context, topic string) error {
 
 	responder, err := speckit_debate_adapter.NewLLMBackedResponder(
 		invoker,
+		// Two agents (same provider/model, distinct scores) — the debate orchestrator
+		// requires >=2 participants (MinAgentsPerDebate); a single agent fails at
+		// runtime with "insufficient agents (have 1, need 2)" (HXC-080).
 		[]speckit_debate_adapter.AgentSpec{
 			{Provider: provider.GetName(), Model: modelName, Score: 0.9},
+			{Provider: provider.GetName(), Model: modelName, Score: 0.85},
 		},
 	)
 	if err != nil {
@@ -2583,8 +2587,12 @@ func (c *CLI) handleSpecify(ctx context.Context, request string) error {
 
 	responder, err := speckit_debate_adapter.NewLLMBackedResponder(
 		invoker,
+		// Two agents (same provider/model, distinct scores) — the debate orchestrator
+		// requires >=2 participants (MinAgentsPerDebate); a single agent fails at
+		// runtime with "insufficient agents (have 1, need 2)" (HXC-080).
 		[]speckit_debate_adapter.AgentSpec{
 			{Provider: provider.GetName(), Model: modelName, Score: 0.9},
+			{Provider: provider.GetName(), Model: modelName, Score: 0.85},
 		},
 	)
 	if err != nil {
