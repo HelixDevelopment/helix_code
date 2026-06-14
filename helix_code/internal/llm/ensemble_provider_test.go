@@ -129,6 +129,75 @@ func TestEnsembleProvider_Generate_OrchestratesMultipleProviders(t *testing.T) {
 	}
 }
 
+// TestEnsembleProvider_Generate_PopulatesPerMemberModels asserts the
+// per-member model-visibility metadata: ProviderMetadata["ensemble_models"] maps
+// each successful participant's provider name → the model id it actually served
+// (resolved via the resilient sentinel path — verifier/cache/catalogue). This is
+// the LOCAL half of the "operator sees which model each ensemble member used"
+// feature; the TUI render (FormatEnsemblePanel) consumes this exact map.
+func TestEnsembleProvider_Generate_PopulatesPerMemberModels(t *testing.T) {
+	a := &ensembleStubProvider{ptype: ProviderTypeDeepSeek, name: "DeepSeek", content: "The answer is OK from A.", finish: "stop", tokens: 12}
+	b := &ensembleStubProvider{ptype: ProviderTypeGroq, name: "Groq", content: "The answer is OK from B too.", finish: "stop", tokens: 10}
+
+	ens := NewEnsembleProvider(EnsembleProviderConfig{
+		Members:  []Provider{a, b},
+		Strategy: "confidence_weighted",
+		Timeout:  10 * time.Second,
+	})
+
+	// Sentinel model ⇒ each member resolves its own served model via the
+	// resilient resolver (catalogue fallback here: "<ptype>-m").
+	req := &LLMRequest{ID: uuid.New(), Model: EnsembleModelName, Messages: []Message{{Role: "user", Content: "Reply OK"}}}
+	resp, err := ens.Generate(context.Background(), req)
+	if err != nil {
+		t.Fatalf("Generate returned error: %v", err)
+	}
+
+	models, ok := resp.ProviderMetadata["ensemble_models"].(map[string]string)
+	if !ok {
+		t.Fatalf("ensemble_models metadata missing or wrong type: %T", resp.ProviderMetadata["ensemble_models"])
+	}
+	// BOTH successful participants MUST carry a non-empty model id.
+	if len(models) != 2 {
+		t.Fatalf("ensemble_models = %v, want 2 entries (one per successful participant)", models)
+	}
+	wantA := string(ProviderTypeDeepSeek) + "-m"
+	wantB := string(ProviderTypeGroq) + "-m"
+	if models["DeepSeek"] != wantA {
+		t.Errorf("ensemble_models[DeepSeek] = %q, want %q", models["DeepSeek"], wantA)
+	}
+	if models["Groq"] != wantB {
+		t.Errorf("ensemble_models[Groq] = %q, want %q", models["Groq"], wantB)
+	}
+}
+
+// TestEnsembleProvider_Generate_PerMemberModels_NonSentinel asserts that when
+// the caller passes an explicit (non-sentinel) model, the per-member model
+// metadata records THAT model for each participant (the single-attempt path).
+func TestEnsembleProvider_Generate_PerMemberModels_NonSentinel(t *testing.T) {
+	a := &ensembleStubProvider{ptype: ProviderTypeDeepSeek, name: "DeepSeek", content: "The answer is OK from A.", finish: "stop", tokens: 12}
+	b := &ensembleStubProvider{ptype: ProviderTypeGroq, name: "Groq", content: "The answer is OK from B.", finish: "stop", tokens: 10}
+
+	ens := NewEnsembleProvider(EnsembleProviderConfig{
+		Members: []Provider{a, b},
+		Timeout: 10 * time.Second,
+	})
+
+	const explicit = "explicit-model-xyz"
+	req := &LLMRequest{ID: uuid.New(), Model: explicit, Messages: []Message{{Role: "user", Content: "Reply OK"}}}
+	resp, err := ens.Generate(context.Background(), req)
+	if err != nil {
+		t.Fatalf("Generate returned error: %v", err)
+	}
+	models, ok := resp.ProviderMetadata["ensemble_models"].(map[string]string)
+	if !ok || len(models) != 2 {
+		t.Fatalf("ensemble_models = %v, want 2 entries", resp.ProviderMetadata["ensemble_models"])
+	}
+	if models["DeepSeek"] != explicit || models["Groq"] != explicit {
+		t.Errorf("ensemble_models = %v, want both members to report %q", models, explicit)
+	}
+}
+
 func TestEnsembleProvider_Generate_SurvivesPartialFailure(t *testing.T) {
 	good := &ensembleStubProvider{ptype: ProviderTypeDeepSeek, name: "DeepSeek", content: "OK from the healthy provider.", finish: "stop", tokens: 8}
 	bad := &ensembleStubProvider{ptype: ProviderTypeGroq, name: "Groq", err: errors.New("429 rate limited")}

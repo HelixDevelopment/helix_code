@@ -59,6 +59,35 @@ func newFakeHelixAgent(t *testing.T) *httptest.Server {
 		_ = json.NewEncoder(w).Encode(resp)
 	})
 
+	// The ensemble model routes here (PART 4). Returns the per-member ensemble
+	// shape the adapter maps into panel metadata.
+	mux.HandleFunc("/v1/ensemble/completions", func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, http.MethodPost, r.Method)
+		var req chatRequest
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+		require.Equal(t, EnsembleModel, req.Model)
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"id":     "ens-fake",
+			"object": "ensemble.completion",
+			"model":  "Groq",
+			"choices": []map[string]interface{}{{
+				"index":         0,
+				"message":       map[string]string{"role": "assistant", "content": knownContent},
+				"finish_reason": "stop",
+			}},
+			"usage": map[string]int{"prompt_tokens": 11, "completion_tokens": 9, "total_tokens": 20},
+			"ensemble": map[string]interface{}{
+				"voting_method":     "confidence_weighted",
+				"responses_count":   1,
+				"selected_provider": "Groq",
+				"members": []map[string]interface{}{
+					{"provider_name": "Groq", "model": "llama-3.3-70b-versatile", "content": knownContent, "selection_score": 0.9, "selected": true},
+				},
+			},
+		})
+	})
+
 	mux.HandleFunc("/v1/models", func(w http.ResponseWriter, r *http.Request) {
 		require.Equal(t, http.MethodGet, r.Method)
 		w.Header().Set("Content-Type", "application/json")
@@ -85,6 +114,103 @@ func newFakeHelixAgent(t *testing.T) *httptest.Server {
 	srv := httptest.NewServer(mux)
 	t.Cleanup(srv.Close)
 	return srv
+}
+
+// TestGenerate_EnsembleModel_MapsPerMemberMetadata proves PART 4: when the
+// caller selects the ensemble model, the adapter (1) routes to the server's
+// /v1/ensemble/completions endpoint and (2) maps the server's per-member
+// ensemble payload into the EXACT ProviderMetadata keys the TUI panel consumes —
+// so the operator SEES each member's content + model (chosen via LLMsVerifier) +
+// score + the winner for the HelixAgent ensemble.
+func TestGenerate_EnsembleModel_MapsPerMemberMetadata(t *testing.T) {
+	var ensembleHit bool
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/ensemble/completions", func(w http.ResponseWriter, r *http.Request) {
+		ensembleHit = true
+		require.Equal(t, http.MethodPost, r.Method)
+		var req chatRequest
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+		require.Equal(t, EnsembleModel, req.Model)
+
+		w.Header().Set("Content-Type", "application/json")
+		// Mirror the server's /v1/ensemble/completions JSON shape (router.go).
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"id":     "ens-test",
+			"object": "ensemble.completion",
+			"model":  "Groq",
+			"choices": []map[string]interface{}{{
+				"index":         0,
+				"message":       map[string]string{"role": "assistant", "content": "winning answer is 42"},
+				"finish_reason": "stop",
+			}},
+			"usage": map[string]int{"prompt_tokens": 5, "completion_tokens": 5, "total_tokens": 10},
+			"ensemble": map[string]interface{}{
+				"voting_method":     "confidence_weighted",
+				"responses_count":   2,
+				"selected_provider": "Groq",
+				"name_scores":       map[string]float64{"DeepSeek": 0.71, "Groq": 0.94},
+				"members": []map[string]interface{}{
+					{"provider_name": "DeepSeek", "model": "deepseek-chat", "content": "DeepSeek thinks it is 42.", "confidence": 0.7, "selection_score": 0.71, "selected": false},
+					{"provider_name": "Groq", "model": "llama-3.3-70b-versatile", "content": "Groq says 42.", "confidence": 0.9, "selection_score": 0.94, "selected": true},
+				},
+			},
+		})
+	})
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+
+	p := New(srv.URL)
+	resp, err := p.Generate(context.Background(), &llm.LLMRequest{
+		ID:       uuid.New(),
+		Model:    EnsembleModel,
+		Messages: []llm.Message{{Role: "user", Content: "what is the answer?"}},
+	})
+	require.NoError(t, err)
+	require.True(t, ensembleHit, "ensemble model MUST route to /v1/ensemble/completions")
+
+	m := resp.ProviderMetadata
+	require.NotNil(t, m)
+	assert.Equal(t, true, m["ensemble"])
+	assert.Equal(t, "confidence_weighted", m["ensemble_strategy"])
+	assert.Equal(t, "Groq", m["ensemble_selected_provider"])
+	assert.Equal(t, 2, m["ensemble_total_providers"])
+	assert.Equal(t, 2, m["ensemble_successful_providers"])
+
+	parts, ok := m["ensemble_participants"].([]string)
+	require.True(t, ok, "ensemble_participants type %T", m["ensemble_participants"])
+	assert.ElementsMatch(t, []string{"DeepSeek", "Groq"}, parts)
+
+	scores, ok := m["ensemble_scores"].(map[string]float64)
+	require.True(t, ok)
+	assert.InDelta(t, 0.94, scores["Groq"], 0.001)
+	assert.InDelta(t, 0.71, scores["DeepSeek"], 0.001)
+
+	models, ok := m["ensemble_models"].(map[string]string)
+	require.True(t, ok, "ensemble_models type %T", m["ensemble_models"])
+	assert.Equal(t, "deepseek-chat", models["DeepSeek"])
+	assert.Equal(t, "llama-3.3-70b-versatile", models["Groq"])
+
+	excerpts, ok := m["ensemble_excerpts"].(map[string]string)
+	require.True(t, ok)
+	assert.Equal(t, "DeepSeek thinks it is 42.", excerpts["DeepSeek"])
+	assert.Equal(t, "Groq says 42.", excerpts["Groq"])
+}
+
+// TestGenerate_NonEnsembleModel_NoEnsembleMetadata proves the chat path is
+// unchanged: a non-ensemble model still hits /v1/chat/completions and carries NO
+// ensemble metadata.
+func TestGenerate_NonEnsembleModel_NoEnsembleMetadata(t *testing.T) {
+	srv := newFakeHelixAgent(t)
+	p := New(srv.URL)
+	resp, err := p.Generate(context.Background(), &llm.LLMRequest{
+		ID:       uuid.New(),
+		Model:    DefaultModel,
+		Messages: []llm.Message{{Role: "user", Content: "hi"}},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, knownContent, resp.Content)
+	_, hasEnsemble := resp.ProviderMetadata["ensemble"]
+	assert.False(t, hasEnsemble, "non-ensemble response must not carry ensemble metadata")
 }
 
 func TestNew_DefaultsBaseURLWhenEmpty(t *testing.T) {
@@ -135,18 +261,31 @@ func TestGenerate_ReturnsEngineContent(t *testing.T) {
 	assert.Equal(t, DefaultModel, resp.ProviderMetadata["helixagent_model"])
 }
 
+// TestGenerate_HonorsExplicitEnsembleModel — RECONCILED per §11.4.120: this
+// test previously asserted the ensemble model routed through
+// /v1/chat/completions and echoed "helixagent-ensemble" in metadata. The PART 4
+// fix CORRECTLY changed that — the ensemble model now routes through
+// /v1/ensemble/completions (the per-member-visibility endpoint), and the
+// engine-reported winning provider model is echoed. The assertions are rewritten
+// to the new correct behaviour: the request is honoured and carries ensemble
+// metadata.
 func TestGenerate_HonorsExplicitEnsembleModel(t *testing.T) {
 	srv := newFakeHelixAgent(t)
 	p := New(srv.URL)
 
 	req := &llm.LLMRequest{
 		ID:       uuid.New(),
-		Model:    "helixagent-ensemble",
+		Model:    EnsembleModel,
 		Messages: []llm.Message{{Role: "user", Content: "hi"}},
 	}
 	resp, err := p.Generate(context.Background(), req)
 	require.NoError(t, err)
-	assert.Equal(t, "helixagent-ensemble", resp.ProviderMetadata["helixagent_model"])
+	// Ensemble path engaged: per-member visibility metadata is present.
+	assert.Equal(t, true, resp.ProviderMetadata["ensemble"])
+	assert.Equal(t, "Groq", resp.ProviderMetadata["ensemble_selected_provider"])
+	models, ok := resp.ProviderMetadata["ensemble_models"].(map[string]string)
+	require.True(t, ok)
+	assert.Equal(t, "llama-3.3-70b-versatile", models["Groq"])
 }
 
 func TestGenerate_HTTPErrorSurfaced(t *testing.T) {

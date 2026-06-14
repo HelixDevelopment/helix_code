@@ -157,6 +157,10 @@ func FormatEnsemblePanel(meta map[string]interface{}) []string {
 	participants := metaStringSlice(meta, "ensemble_participants")
 	scores := metaFloatMap(meta, "ensemble_scores")
 	excerpts := metaStringMap(meta, "ensemble_excerpts")
+	// Per-member model ids: which model (chosen via LLMsVerifier) each member
+	// actually served. Optional — absent for older metadata; when present each
+	// member line is annotated with "→ <model> (via LLMsVerifier)".
+	models := metaStringMap(meta, "ensemble_models")
 
 	// Determine the iteration order: prefer the (already-sorted) participant
 	// list; otherwise derive a stable order from whatever keys we do have.
@@ -197,6 +201,12 @@ func FormatEnsemblePanel(meta map[string]interface{}) []string {
 			head = fmt.Sprintf("  %s%s  score=%.2f", marker, name, score)
 		} else {
 			head = fmt.Sprintf("  %s%s", marker, name)
+		}
+		// Annotate the member with the model it served (chosen via LLMsVerifier)
+		// when the metadata carries it — so the operator SEES which model each
+		// ensemble member used, not just the member's provider name.
+		if mdl := strings.TrimSpace(models[name]); mdl != "" {
+			head += "  → " + mdl + " (via LLMsVerifier)"
 		}
 		lines = append(lines, head)
 		if ex := strings.TrimSpace(excerpts[name]); ex != "" {

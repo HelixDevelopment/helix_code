@@ -210,6 +210,12 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 		name string
 		resp *LLMResponse
 		err  error
+		// model is the model id the member ACTUALLY served this turn — the
+		// verifier-chosen (or cached/catalogue) model resolved on the sentinel
+		// path, or the caller-supplied model on the non-sentinel single-attempt
+		// path. It is surfaced per-participant in ProviderMetadata so the
+		// operator sees WHICH model each ensemble member used.
+		model string
 	}
 	outCh := make(chan memberOutcome, len(members))
 
@@ -244,7 +250,10 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 			sentinel := base.Model == "" || base.Model == EnsembleModelName || base.Model == string(ProviderTypeEnsemble)
 			if !sentinel {
 				r, err := p.Generate(fanCtx, &base)
-				outCh <- memberOutcome{name: p.GetName(), resp: r, err: err}
+				// The caller honoured an explicit model — record it as the model
+				// this member served so the per-member model visibility still
+				// shows it on the non-sentinel path.
+				outCh <- memberOutcome{name: p.GetName(), resp: r, err: err, model: base.Model}
 				return
 			}
 			// Sentinel/empty model: resolve a model the member ACTUALLY serves,
@@ -264,7 +273,7 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 			if err == nil && responseIsParticipant(resp) && model != "" {
 				e.rememberWorkingModel(p.GetName(), model)
 			}
-			outCh <- memberOutcome{name: p.GetName(), resp: resp, err: err}
+			outCh <- memberOutcome{name: p.GetName(), resp: resp, err: err, model: model}
 		}(m)
 	}
 	go func() { wg.Wait(); close(outCh) }()
@@ -272,6 +281,11 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 	results := make([]ensembleResult, 0, len(members))
 	participants := make([]string, 0, len(members))
 	excerpts := make(map[string]string, len(members))
+	// models maps a successful participant's provider name → the model id it
+	// actually served (verifier-chosen via LLMsVerifier, cached, or
+	// caller-supplied). Surfaced in ProviderMetadata so the operator SEES which
+	// model each ensemble member used.
+	memberModels := make(map[string]string, len(members))
 	failures := 0
 	var firstErr error
 
@@ -291,6 +305,9 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 		}
 		participants = append(participants, oc.name)
 		excerpts[oc.name] = participantExcerpt(oc.resp)
+		if strings.TrimSpace(oc.model) != "" {
+			memberModels[oc.name] = oc.model
+		}
 		results = append(results, ensembleResult{providerName: oc.name, resp: oc.resp})
 	}
 
@@ -335,6 +352,9 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 	out.ProviderMetadata["ensemble_selected_provider"] = selected.providerName
 	out.ProviderMetadata["ensemble_scores"] = scores
 	out.ProviderMetadata["ensemble_excerpts"] = excerpts
+	// Per-member model visibility: the model id each successful participant
+	// actually served, resolved via LLMsVerifier (CONST-036) / cache / catalogue.
+	out.ProviderMetadata["ensemble_models"] = memberModels
 	return &out, nil
 }
 

@@ -54,6 +54,13 @@ const (
 	// engine; "helixagent-ensemble" is the verifier-driven ensemble path.
 	DefaultModel = "helixagent-llm"
 
+	// EnsembleModel is the logical model that routes through HelixAgent's REAL
+	// verifier-driven ensemble. When the caller selects it, Generate hits the
+	// server's /v1/ensemble/completions endpoint (which exposes per-member
+	// content + model + score), not the single-model /v1/chat/completions path,
+	// so the per-member ensemble visibility reaches the operator.
+	EnsembleModel = "helixagent-ensemble"
+
 	// providerType is the llm.ProviderType label this adapter reports.
 	providerType llm.ProviderType = "helixagent"
 
@@ -279,6 +286,36 @@ type chatResponse struct {
 	Error *struct {
 		Message string `json:"message"`
 	} `json:"error,omitempty"`
+	// Ensemble is present ONLY on responses from the server's
+	// /v1/ensemble/completions endpoint. It carries the per-member visibility
+	// data (each member's content + the model it served + its score + whether it
+	// won) so the HelixCode TUI can render the SAME ensemble panel for the
+	// HelixAgent ensemble as for the local ensemble. Absent (nil) on ordinary
+	// /v1/chat/completions responses.
+	Ensemble *ensembleEnvelope `json:"ensemble,omitempty"`
+}
+
+// ensembleEnvelope mirrors the HelixAgent server's /v1/ensemble/completions
+// `ensemble` JSON object (router.go). Decoupled DTO — it models only the fields
+// the TUI panel consumes.
+type ensembleEnvelope struct {
+	VotingMethod     string             `json:"voting_method"`
+	ResponsesCount   int                `json:"responses_count"`
+	SelectedProvider string             `json:"selected_provider"`
+	NameScores       map[string]float64 `json:"name_scores"`
+	Members          []ensembleMember   `json:"members"`
+}
+
+// ensembleMember mirrors one entry of the server's ensemble.members[] array:
+// the participating provider's name, the model it served (chosen via
+// LLMsVerifier), its produced content, its score, and whether it was selected.
+type ensembleMember struct {
+	ProviderName   string  `json:"provider_name"`
+	Model          string  `json:"model"`
+	Content        string  `json:"content"`
+	Confidence     float64 `json:"confidence"`
+	SelectionScore float64 `json:"selection_score"`
+	Selected       bool    `json:"selected"`
 }
 
 type chatStreamChunk struct {
@@ -368,7 +405,17 @@ func (p *Provider) Generate(ctx context.Context, request *llm.LLMRequest) (*llm.
 		return nil, fmt.Errorf("helixagent: marshal request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, p.baseURL+"/v1/chat/completions", bytes.NewReader(body))
+	// Route the verifier-driven ensemble model through the server's ensemble
+	// endpoint, which exposes per-member content + model + score. Every other
+	// model uses the single-model chat endpoint. The chat-request body shape is
+	// accepted by both endpoints (the ensemble handler binds the same
+	// messages/model/temperature fields).
+	endpoint := "/v1/chat/completions"
+	if strings.TrimSpace(request.Model) == EnsembleModel {
+		endpoint = "/v1/ensemble/completions"
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, p.baseURL+endpoint, bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("helixagent: build http request: %w", err)
 	}
@@ -385,7 +432,7 @@ func (p *Provider) Generate(ctx context.Context, request *llm.LLMRequest) (*llm.
 		return nil, fmt.Errorf("helixagent: read response body: %w", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("helixagent: chat completion failed (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(raw)))
+		return nil, fmt.Errorf("helixagent: completion failed (HTTP %d) at %s: %s", resp.StatusCode, endpoint, strings.TrimSpace(string(raw)))
 	}
 
 	var cr chatResponse
@@ -407,6 +454,18 @@ func (p *Provider) Generate(ctx context.Context, request *llm.LLMRequest) (*llm.
 		toolCalls = parseRecvToolCalls(cr.Choices[0].Message.ToolCalls)
 	}
 
+	meta := map[string]interface{}{
+		"helixagent_model": cr.Model,
+	}
+	// When the server returned ensemble data (the /v1/ensemble/completions
+	// path), translate it into the EXACT metadata keys the HelixCode TUI panel
+	// (applications/terminal_ui.FormatEnsemblePanel) consumes — so the HelixAgent
+	// ensemble renders with per-member content + per-member model + scores +
+	// winner, identical to the local ensemble, with NO TUI change.
+	if cr.Ensemble != nil && len(cr.Ensemble.Members) > 0 {
+		populateEnsembleMetadata(meta, cr.Ensemble)
+	}
+
 	return &llm.LLMResponse{
 		ID:        uuid.New(),
 		RequestID: request.ID,
@@ -417,13 +476,61 @@ func (p *Provider) Generate(ctx context.Context, request *llm.LLMRequest) (*llm.
 			CompletionTokens: cr.Usage.CompletionTokens,
 			TotalTokens:      cr.Usage.TotalTokens,
 		},
-		FinishReason:   finishReason,
-		ProcessingTime: time.Since(start),
-		CreatedAt:      time.Now(),
-		ProviderMetadata: map[string]interface{}{
-			"helixagent_model": cr.Model,
-		},
+		FinishReason:     finishReason,
+		ProcessingTime:   time.Since(start),
+		CreatedAt:        time.Now(),
+		ProviderMetadata: meta,
 	}, nil
+}
+
+// ensembleExcerptMaxRunes bounds each member's content excerpt in the panel
+// metadata so a verbose member answer cannot blow up the rendered panel.
+const ensembleExcerptMaxRunes = 160
+
+// populateEnsembleMetadata writes the per-member ensemble visibility data into
+// meta using the EXACT keys FormatEnsemblePanel reads, so the HelixAgent
+// ensemble shares the local ensemble's renderer verbatim.
+func populateEnsembleMetadata(meta map[string]interface{}, env *ensembleEnvelope) {
+	participants := make([]string, 0, len(env.Members))
+	scores := make(map[string]float64, len(env.Members))
+	excerpts := make(map[string]string, len(env.Members))
+	models := make(map[string]string, len(env.Members))
+	successful := 0
+	for _, m := range env.Members {
+		name := strings.TrimSpace(m.ProviderName)
+		if name == "" {
+			continue
+		}
+		participants = append(participants, name)
+		scores[name] = m.SelectionScore
+		excerpts[name] = excerptRunes(m.Content, ensembleExcerptMaxRunes)
+		if mdl := strings.TrimSpace(m.Model); mdl != "" {
+			models[name] = mdl
+		}
+		successful++
+	}
+
+	meta["ensemble"] = true
+	meta["ensemble_strategy"] = env.VotingMethod
+	meta["ensemble_total_providers"] = env.ResponsesCount
+	meta["ensemble_successful_providers"] = successful
+	meta["ensemble_selected_provider"] = env.SelectedProvider
+	meta["ensemble_participants"] = participants
+	meta["ensemble_scores"] = scores
+	meta["ensemble_excerpts"] = excerpts
+	meta["ensemble_models"] = models
+}
+
+// excerptRunes returns up to n runes of s (trimmed), appending an ellipsis when
+// truncated. Mirrors the local ensemble's excerpt helper so both panels render
+// consistently.
+func excerptRunes(s string, n int) string {
+	s = strings.TrimSpace(s)
+	r := []rune(s)
+	if len(r) <= n {
+		return s
+	}
+	return string(r[:n]) + "…"
 }
 
 // GenerateStream sends a streaming chat completion and emits one llm.LLMResponse

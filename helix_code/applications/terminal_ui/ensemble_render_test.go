@@ -96,6 +96,73 @@ func TestFormatEnsemblePanel_RendersEveryMember(t *testing.T) {
 	}
 }
 
+// TestFormatEnsemblePanel_RendersPerMemberModel is the per-member MODEL
+// visibility proof: each member line MUST show the model it served (chosen via
+// LLMsVerifier) AND the "(via LLMsVerifier)" provenance AND that member's own
+// excerpt — for >=2 members. This is the TUI half of the "operator sees which
+// model each ensemble member used" feature.
+func TestFormatEnsemblePanel_RendersPerMemberModel(t *testing.T) {
+	meta := map[string]interface{}{
+		"ensemble":                      true,
+		"ensemble_strategy":             "verifier-weighted",
+		"ensemble_total_providers":      3,
+		"ensemble_successful_providers": 3,
+		"ensemble_participants":         []string{"DeepSeek", "Groq", "Mistral"},
+		"ensemble_selected_provider":    "Groq",
+		"ensemble_scores": map[string]float64{
+			"DeepSeek": 0.71, "Groq": 0.94, "Mistral": 0.66,
+		},
+		"ensemble_excerpts": map[string]string{
+			"DeepSeek": "DeepSeek says the answer is forty-two.",
+			"Groq":     "Groq concludes the result is 42 precisely.",
+			"Mistral":  "Mistral reasons it is about 42.",
+		},
+		"ensemble_models": map[string]string{
+			"DeepSeek": "deepseek-chat",
+			"Groq":     "llama-3.3-70b-versatile",
+			"Mistral":  "mistral-small-latest",
+		},
+	}
+
+	lines := FormatEnsemblePanel(meta)
+	if len(lines) == 0 {
+		t.Fatalf("expected non-empty panel, got empty slice")
+	}
+	blob := joinLines(lines)
+
+	// Each member's model id MUST be visible AND on the SAME line as its name,
+	// annotated with the LLMsVerifier provenance.
+	cases := []struct{ name, model, excerpt string }{
+		{"DeepSeek", "deepseek-chat", "DeepSeek says the answer is forty-two."},
+		{"Groq", "llama-3.3-70b-versatile", "Groq concludes the result is 42 precisely."},
+		{"Mistral", "mistral-small-latest", "Mistral reasons it is about 42."},
+	}
+	shown := 0
+	for _, c := range cases {
+		var memberLine string
+		for _, ln := range lines {
+			if strings.Contains(ln, c.name) && strings.Contains(ln, c.model) {
+				memberLine = ln
+				break
+			}
+		}
+		if memberLine == "" {
+			t.Errorf("no line shows member %q WITH its model %q\npanel:\n%s", c.name, c.model, blob)
+			continue
+		}
+		if !strings.Contains(memberLine, "(via LLMsVerifier)") {
+			t.Errorf("member %q line missing LLMsVerifier provenance: %q", c.name, memberLine)
+		}
+		if !strings.Contains(blob, c.excerpt) {
+			t.Errorf("panel missing excerpt for %q: %q\npanel:\n%s", c.name, c.excerpt, blob)
+		}
+		shown++
+	}
+	if shown < 2 {
+		t.Fatalf("anti-bluff: expected >=2 members showing their model, saw %d\npanel:\n%s", shown, blob)
+	}
+}
+
 // TestFormatEnsemblePanel_DefensiveFloat64 proves numeric counts arriving as
 // float64 (the JSON / interface{}-channel path) are handled, not just int.
 func TestFormatEnsemblePanel_DefensiveFloat64(t *testing.T) {
