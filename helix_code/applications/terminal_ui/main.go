@@ -2076,6 +2076,16 @@ func (tui *TerminalUI) handleChatCommand(cmd string) {
 	case cmd == "/model":
 		tui.showModelSelector()
 		return
+	case strings.HasPrefix(cmd, "/specify"):
+		// Real speckit Specify phase against tui.llmProvider (mirrors
+		// cmd/cli handleSpecify). Argument = everything after the verb.
+		tui.handleSpecifyCommand(strings.TrimSpace(strings.TrimPrefix(cmd, "/specify")))
+		return
+	case strings.HasPrefix(cmd, "/debate"):
+		// Real debate orchestrator against tui.llmProvider (mirrors
+		// cmd/cli handleDebate).
+		tui.handleDebateCommand(strings.TrimSpace(strings.TrimPrefix(cmd, "/debate")))
+		return
 	case cmd == "/info":
 		info := tui.t("terminal_ui_chat_info_no_model")
 		if tui.llmProvider != nil {

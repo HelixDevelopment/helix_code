@@ -263,7 +263,22 @@ terminal_ui_chat_welcome_body:
   other: "[::b]Welcome to HelixCode AI Chat[white]\n\nStart a conversation by typing a message below.\nUse the buttons to select a model or configure settings.\n\n[::b]Tips:[white]\n- Type your message and press Enter to send\n- Use /help for available commands\n- Select a model before chatting for best results\n\n[gray]No messages yet..."
 
 terminal_ui_chat_help_commands_body:
-  other: "Available Commands:\n/help - Show this help message\n/clear - Clear chat history\n/model - Show model selector\n/system <prompt> - Set system prompt\n/info - Show current model info"
+  other: "Available Commands:\n/help - Show this help message\n/clear - Clear chat history\n/model - Show model selector\n/system <prompt> - Set system prompt\n/info - Show current model info\n/specify <request> - Run the HelixSpecifier Specify phase on your request\n/debate <topic> - Run the multi-agent debate orchestrator on a topic"
+
+terminal_ui_chat_specify_usage:
+  other: "usage: /specify <request>"
+
+terminal_ui_chat_specify_running:
+  other: "Running Specify phase..."
+
+terminal_ui_chat_debate_usage:
+  other: "usage: /debate <topic>"
+
+terminal_ui_chat_debate_running:
+  other: "Running debate..."
+
+terminal_ui_chat_phase_failed:
+  other: "{{.Command}} failed: {{.Error}}"
 
 terminal_ui_models_configure_ollama:
   other: "Configure Ollama"
