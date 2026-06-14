@@ -123,6 +123,17 @@ type Message struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 	Name    string `json:"name,omitempty"`
+	// ToolCallID links a role:"tool" result message back to the assistant's
+	// tool_calls[].id it answers. The OpenAI/Groq protocol REQUIRES it on
+	// every tool-result message ("for 'role:tool' the 'tool_call_id' is
+	// missing" otherwise). omitempty ⇒ plain chat/system/user messages
+	// serialise byte-identically to the pre-tool-loop wire.
+	ToolCallID string `json:"tool_call_id,omitempty"`
+	// ToolCalls carries the assistant turn's requested tool calls so the next
+	// Generate sees the model's own tool-call request in context. Required so
+	// each fed-back role:"tool" message has a matching assistant tool_call.
+	// omitempty ⇒ messages without tool calls serialise byte-identically.
+	ToolCalls []ToolCall `json:"tool_calls,omitempty"`
 }
 
 type Tool struct {

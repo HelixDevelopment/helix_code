@@ -80,8 +80,9 @@ func NewDeepSeekProvider(config ProviderConfigEntry) (*DeepSeekProvider, error) 
 	return p, nil
 }
 
-func (dp *DeepSeekProvider) GetType() ProviderType  { return ProviderTypeDeepSeek }
-func (dp *DeepSeekProvider) GetName() string        { return "DeepSeek" }
+func (dp *DeepSeekProvider) GetType() ProviderType { return ProviderTypeDeepSeek }
+func (dp *DeepSeekProvider) GetName() string       { return "DeepSeek" }
+
 // GetModels returns available models. CONST-036 / F6-D-5: refreshed LIVE from
 // DeepSeek's GET /models on first call (cached); seed list is offline fallback.
 func (dp *DeepSeekProvider) GetModels() []ModelInfo {
@@ -240,7 +241,7 @@ func (dp *DeepSeekProvider) initializeModels() {
 	log.Printf("✅ DeepSeek provider initialized with %d models", len(dp.models))
 }
 
-func (dp *DeepSeekProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRequest, error) {
+func (dp *DeepSeekProvider) convertToOpenAIRequest(request *LLMRequest) (*deepseekChatRequest, error) {
 	var messages []OpenAIMessage
 	var systemMsg string
 	for _, msg := range request.Messages {
@@ -248,8 +249,10 @@ func (dp *DeepSeekProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAI
 			systemMsg = msg.Content
 		}
 		openaiMsg := OpenAIMessage{
-			Role:    msg.Role,
-			Content: msg.Content,
+			Role:       msg.Role,
+			Content:    msg.Content,
+			ToolCallID: msg.ToolCallID,
+			ToolCalls:  toWireSendToolCalls(msg.ToolCalls),
 		}
 		if msg.Name != "" {
 			openaiMsg.Name = msg.Name
@@ -263,20 +266,26 @@ func (dp *DeepSeekProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAI
 	// request body is byte-identical to the pre-P1-T05 behaviour.
 	trackPromptCachePrefixGeneric(dp.prefixDetector, "deepseek", systemMsg, request.Tools)
 
-	return &OpenAIRequest{
+	return &deepseekChatRequest{
 		Model:       request.Model,
 		Messages:    messages,
 		MaxTokens:   request.MaxTokens,
 		Temperature: request.Temperature,
 		TopP:        request.TopP,
 		Stream:      request.Stream,
+		// OpenAI-compatible function-calling: forward the agent's tool
+		// definitions + tool_choice. omitempty ⇒ plain-chat wire unchanged.
+		Tools:      request.Tools,
+		ToolChoice: request.ToolChoice,
 	}, nil
 }
 
-func (dp *DeepSeekProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
+func (dp *DeepSeekProvider) convertFromOpenAIResponse(openaiResp *deepseekChatResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
 	var content string
+	var toolCalls []ToolCall
 	if len(openaiResp.Choices) > 0 {
 		content = openaiResp.Choices[0].Message.Content
+		toolCalls = parseOpenAIWireToolCalls(openaiResp.Choices[0].Message.ToolCalls)
 	}
 
 	finish := ""
@@ -288,6 +297,7 @@ func (dp *DeepSeekProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse
 		ID:        uuid.New(),
 		RequestID: requestID,
 		Content:   content,
+		ToolCalls: toolCalls,
 		Usage: Usage{
 			PromptTokens:     openaiResp.Usage.PromptTokens,
 			CompletionTokens: openaiResp.Usage.CompletionTokens,
@@ -315,7 +325,7 @@ func (dp *DeepSeekProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse
 	return resp
 }
 
-func (dp *DeepSeekProvider) makeOpenAIRequest(ctx context.Context, request *OpenAIRequest) (*OpenAIResponse, error) {
+func (dp *DeepSeekProvider) makeOpenAIRequest(ctx context.Context, request *deepseekChatRequest) (*deepseekChatResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
@@ -339,14 +349,14 @@ func (dp *DeepSeekProvider) makeOpenAIRequest(ctx context.Context, request *Open
 		return nil, fmt.Errorf("DeepSeek API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
-	var response OpenAIResponse
+	var response deepseekChatResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
 	return &response, nil
 }
 
-func (dp *DeepSeekProvider) makeOpenAIStreamRequest(ctx context.Context, request *OpenAIRequest, ch chan<- LLMResponse, requestID uuid.UUID) error {
+func (dp *DeepSeekProvider) makeOpenAIStreamRequest(ctx context.Context, request *deepseekChatRequest, ch chan<- LLMResponse, requestID uuid.UUID) error {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return err
@@ -432,4 +442,43 @@ func (dp *DeepSeekProvider) updateHealth(status string, latency time.Duration, e
 	dp.lastHealth.Latency = latency
 	dp.lastHealth.ErrorCount = errorCount
 	dp.lastHealth.LastCheck = time.Now()
+}
+
+// deepseekChatRequest mirrors the shared OpenAIRequest but adds the
+// OpenAI-compatible function-calling fields (DeepSeek is OpenAI Chat
+// Completions–compatible). omitempty keeps plain-chat requests byte-identical.
+type deepseekChatRequest struct {
+	Model       string          `json:"model"`
+	Messages    []OpenAIMessage `json:"messages"`
+	MaxTokens   int             `json:"max_tokens,omitempty"`
+	Temperature float64         `json:"temperature,omitempty"`
+	TopP        float64         `json:"top_p,omitempty"`
+	Stream      bool            `json:"stream,omitempty"`
+	Tools       []Tool          `json:"tools,omitempty"`
+	ToolChoice  interface{}     `json:"tool_choice,omitempty"`
+}
+
+// deepseekChatResponse mirrors the shared OpenAIResponse but adds
+// message.tool_calls parsing. It preserves the implicit-prompt-cache usage
+// fields so convertFromOpenAIResponse's cacheMetadata() call still works.
+type deepseekChatResponse struct {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Created int64  `json:"created"`
+	Model   string `json:"model"`
+	Choices []struct {
+		Index   int `json:"index"`
+		Message struct {
+			Role      string               `json:"role"`
+			Content   string               `json:"content"`
+			ToolCalls []openAIWireToolCall `json:"tool_calls,omitempty"`
+		} `json:"message"`
+		FinishReason string `json:"finish_reason"`
+	} `json:"choices"`
+	Usage struct {
+		PromptTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+		TotalTokens      int `json:"total_tokens"`
+		openAICacheUsageFields
+	} `json:"usage"`
 }

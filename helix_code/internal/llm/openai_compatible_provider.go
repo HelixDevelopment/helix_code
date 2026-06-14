@@ -38,16 +38,20 @@ type OpenAICompatibleConfig struct {
 	ChatEndpoint     string            `json:"chat_endpoint"`
 }
 
-// OpenAICompatibleRequest represents an OpenAI-compatible API request
+// OpenAICompatibleRequest represents an OpenAI-compatible API request.
+// Messages uses OpenAIMessage (not llm.Message) so the assistant turn's
+// tool_calls[].function.arguments serialises as a JSON STRING via
+// wireSendToolCall — local backends fronted here (VLLM, LMStudio, …) follow the
+// same OpenAI contract requiring string-encoded arguments.
 type OpenAICompatibleRequest struct {
-	Model       string      `json:"model"`
-	Messages    []Message   `json:"messages"`
-	MaxTokens   int         `json:"max_tokens,omitempty"`
-	Temperature float64     `json:"temperature,omitempty"`
-	TopP        float64     `json:"top_p,omitempty"`
-	Stream      bool        `json:"stream,omitempty"`
-	Tools       []Tool      `json:"tools,omitempty"`
-	ToolChoice  interface{} `json:"tool_choice,omitempty"`
+	Model       string          `json:"model"`
+	Messages    []OpenAIMessage `json:"messages"`
+	MaxTokens   int             `json:"max_tokens,omitempty"`
+	Temperature float64         `json:"temperature,omitempty"`
+	TopP        float64         `json:"top_p,omitempty"`
+	Stream      bool            `json:"stream,omitempty"`
+	Tools       []Tool          `json:"tools,omitempty"`
+	ToolChoice  interface{}     `json:"tool_choice,omitempty"`
 }
 
 // OpenAICompatibleResponse represents an OpenAI-compatible API response
@@ -68,18 +72,24 @@ type OpenAICompatibleChoice struct {
 	FinishReason string                  `json:"finish_reason"`
 }
 
-// OpenAICompatibleMessage represents a message in the response
+// OpenAICompatibleMessage represents a message in the response.
+// ToolCalls uses openAIWireToolCall (not llm.ToolCall) because
+// `function.arguments` arrives as a JSON STRING on the wire (OpenAI's canonical
+// encoding); decoding straight into llm.ToolCall.Function.Arguments
+// (map[string]interface{}) fails. parseOpenAIWireToolCalls handles both the
+// string-encoded and raw-object forms — the same path the Groq/DeepSeek/
+// Mistral/OpenRouter providers use.
 type OpenAICompatibleMessage struct {
-	Role      string     `json:"role"`
-	Content   string     `json:"content"`
-	ToolCalls []ToolCall `json:"tool_calls,omitempty"`
+	Role      string               `json:"role"`
+	Content   string               `json:"content"`
+	ToolCalls []openAIWireToolCall `json:"tool_calls,omitempty"`
 }
 
 // OpenAICompatibleDelta represents a delta in streaming response
 type OpenAICompatibleDelta struct {
-	Role      string     `json:"role,omitempty"`
-	Content   string     `json:"content,omitempty"`
-	ToolCalls []ToolCall `json:"tool_calls,omitempty"`
+	Role      string               `json:"role,omitempty"`
+	Content   string               `json:"content,omitempty"`
+	ToolCalls []openAIWireToolCall `json:"tool_calls,omitempty"`
 }
 
 // OpenAICompatibleUsage represents token usage information
@@ -390,9 +400,27 @@ func (p *OpenAICompatibleProvider) discoverModels() error {
 }
 
 func (p *OpenAICompatibleProvider) convertToOpenAIRequest(request *LLMRequest) *OpenAICompatibleRequest {
+	// Convert each message to the OpenAI wire shape so the assistant turn's
+	// tool_calls serialise function.arguments as a JSON STRING (the
+	// OpenAI-compatible contract); marshalling llm.Message directly would emit
+	// the object form the backends reject. omitempty keeps plain-chat messages
+	// (no tool_calls) byte-identical on the wire.
+	messages := make([]OpenAIMessage, 0, len(request.Messages))
+	for _, msg := range request.Messages {
+		m := OpenAIMessage{
+			Role:       msg.Role,
+			Content:    msg.Content,
+			ToolCallID: msg.ToolCallID,
+			ToolCalls:  toWireSendToolCalls(msg.ToolCalls),
+		}
+		if msg.Name != "" {
+			m.Name = msg.Name
+		}
+		messages = append(messages, m)
+	}
 	return &OpenAICompatibleRequest{
 		Model:       p.getModelName(request.Model),
-		Messages:    request.Messages,
+		Messages:    messages,
 		MaxTokens:   request.MaxTokens,
 		Temperature: request.Temperature,
 		TopP:        request.TopP,
@@ -415,7 +443,7 @@ func (p *OpenAICompatibleProvider) convertFromOpenAIResponse(response *OpenAICom
 	if len(response.Choices) > 0 {
 		choice := response.Choices[0]
 		llmResponse.Content = choice.Message.Content
-		llmResponse.ToolCalls = choice.Message.ToolCalls
+		llmResponse.ToolCalls = parseOpenAIWireToolCalls(choice.Message.ToolCalls)
 		llmResponse.FinishReason = choice.FinishReason
 		// Round-53 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
 		// the OpenAICompatibleProvider fans out to ~11 backends (VLLM,

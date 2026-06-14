@@ -530,6 +530,69 @@ type OpenAIMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 	Name    string `json:"name,omitempty"`
+	// Tool-conversation protocol fields, shared by every OpenAI-compatible
+	// provider that reuses this type (DeepSeek, Mistral, OpenRouter). omitempty
+	// ⇒ plain-chat messages serialise byte-identically. ToolCallID is REQUIRED
+	// on every role:"tool" result message; ToolCalls carries the assistant
+	// turn's requested calls so each result has a matching call.
+	//
+	// SEND-side wire type: ToolCalls uses wireSendToolCall (NOT llm.ToolCall)
+	// because OpenAI/Groq/DeepSeek/Mistral/OpenRouter REQUIRE
+	// function.arguments to be a JSON-encoded STRING (`"arguments":"{}"`), not
+	// a JSON object. Marshalling llm.ToolCall directly emits the object form
+	// and the provider rejects it: 'messages.N.tool_calls.0.function.arguments'
+	// : value must be a string. Convert via toWireSendToolCalls at the
+	// assignment site.
+	ToolCallID string             `json:"tool_call_id,omitempty"`
+	ToolCalls  []wireSendToolCall `json:"tool_calls,omitempty"`
+}
+
+// wireSendToolCall is the SEND-side on-wire shape of a single assistant
+// tool_calls[] entry for OpenAI Chat Completions–compatible providers (OpenAI,
+// Groq, DeepSeek, Mistral, OpenRouter, and the OpenAI-compatible local fan-out).
+// Its `function.arguments` is a STRING (a serialized JSON object) — the
+// canonical OpenAI encoding the providers require. It is the symmetric inverse
+// of openAIWireToolCall / parseOpenAIWireToolCalls (which decode the same shape
+// on the PARSE side).
+type wireSendToolCall struct {
+	ID       string `json:"id"`
+	Type     string `json:"type"`
+	Function struct {
+		Name      string `json:"name"`
+		Arguments string `json:"arguments"`
+	} `json:"function"`
+}
+
+// toWireSendToolCalls converts []llm.ToolCall into []wireSendToolCall, encoding
+// each call's Function.Arguments map as a JSON STRING. Rules:
+//   - Type defaults to "function" when empty.
+//   - A nil/empty arguments map (or a map that fails to marshal) is encoded as
+//     the literal "{}" — never an empty string, never "null".
+//
+// Returns nil for an empty/absent input so plain-chat messages (no tool_calls)
+// serialise byte-identically with omitempty.
+func toWireSendToolCalls(cs []ToolCall) []wireSendToolCall {
+	if len(cs) == 0 {
+		return nil
+	}
+	out := make([]wireSendToolCall, 0, len(cs))
+	for _, c := range cs {
+		args := "{}"
+		if len(c.Function.Arguments) > 0 {
+			if raw, err := json.Marshal(c.Function.Arguments); err == nil && len(raw) > 0 {
+				args = string(raw)
+			}
+		}
+		callType := c.Type
+		if callType == "" {
+			callType = "function"
+		}
+		w := wireSendToolCall{ID: c.ID, Type: callType}
+		w.Function.Name = c.Function.Name
+		w.Function.Arguments = args
+		out = append(out, w)
+	}
+	return out
 }
 
 type OpenAIResponse struct {

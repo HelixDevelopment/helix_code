@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"dev.helix.code/applications/terminal_ui/i18n"
+	"dev.helix.code/internal/agent"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/helixqa"
@@ -23,6 +24,8 @@ import (
 	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/task"
+	"dev.helix.code/internal/tools"
+	"dev.helix.code/internal/tools/git"
 	"dev.helix.code/internal/worker"
 
 	"github.com/gdamore/tcell/v2"
@@ -59,6 +62,12 @@ type TerminalUI struct {
 	chatHistory []llm.Message
 	chatInput   *tview.InputField
 	chatOutput  *tview.TextView
+	// toolRegistry holds the read-only agentic tool set (git_status, fs_read,
+	// glob, grep) the chat tool loop uses. Built once in Initialize; nil when
+	// registry construction failed (the TUI still runs, falling back to the
+	// plain streaming chat path). Only LevelReadOnly tools are registered, so
+	// no approval manager is wired — nothing destructive is reachable.
+	toolRegistry *tools.ToolRegistry
 	// selectedModel is the model id chosen via the model picker. It is sent
 	// as LLMRequest.Model on every chat turn — without it the provider call
 	// goes out with an empty model id and the API rejects it (e.g. groq 404
@@ -220,6 +229,27 @@ func (tui *TerminalUI) Initialize() error {
 		log.Printf("✅ TUI: registered %d cloud LLM provider(s) from environment keys", n)
 	}
 	tui.chatHistory = make([]llm.Message, 0)
+
+	// Build the read-only agentic tool registry ONCE (§11.4.133 safety: only
+	// LevelReadOnly tools are registered, so the approval gate is bypassed and
+	// the recording stays unattended-safe — nothing destructive is reachable).
+	// On any construction failure the TUI still runs: toolRegistry stays nil
+	// and sendChatMessage falls back to the plain streaming chat path.
+	if reg, regErr := tools.NewToolRegistry(nil); regErr != nil {
+		log.Printf("⚠️  TUI: tool registry unavailable (%v); chat falls back to plain streaming", regErr)
+	} else {
+		repoDir, wdErr := os.Getwd()
+		if wdErr != nil {
+			repoDir = "."
+		}
+		reg.Register(git.NewGitStatusTool(repoDir))
+		// fs_read / glob / grep are auto-registered by NewToolRegistry
+		// (all three are LevelReadOnly). They are present already; the
+		// explicit git_status registration above adds the read-only git
+		// inspection capability. No write/exec tool is added.
+		tui.toolRegistry = reg
+		log.Printf("✅ TUI: agentic tool registry ready (read-only: git_status, fs_read, glob, grep)")
+	}
 
 	// Initialize server for API calls
 	tui.server = server.New(cfg, db, rds)
@@ -1580,6 +1610,72 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 	assistantIdx := len(tui.chatHistory) - 1
 	provider := tui.llmProvider
 
+	// history is the conversation up to and including the user turn — i.e.
+	// WITHOUT the empty placeholder assistant turn just appended. request.Messages
+	// was snapshotted before the placeholder, so it is exactly that prefix.
+	history := request.Messages
+
+	// Agentic path: when the read-only tool registry is wired, drive the chat
+	// turn through the multi-turn tool loop so prompts like "Check git status"
+	// actually execute a read-only git tool and the operator SEES the tool
+	// trace + (for ensemble responses) every member's answer and the vote.
+	if tui.toolRegistry != nil {
+		registry := tui.toolRegistry
+		systemPrompt := buildToolLoopSystemPrompt(registry)
+		go func() {
+			result, loopErr := agent.RunToolLoop(ctx, provider, registry, history, agent.ToolLoopOptions{
+				Model:        tui.selectedModel,
+				MaxTurns:     6,
+				SystemPrompt: systemPrompt,
+				// SAFETY (§11.4.133): the TUI registry is built with
+				// tools.NewToolRegistry(nil) — no approval manager wired, so the
+				// registry's applyApprovalGate would let EVERY tool through
+				// (including fs_write/fs_edit/shell). This unattended loop must
+				// never reach a write/shell tool, so restrict it to read-only
+				// tools at both the offer and execute layers.
+				ReadOnlyOnly: true,
+			})
+			tui.app.QueueUpdateDraw(func() {
+				if loopErr != nil {
+					tui.chatHistory[assistantIdx].Content = fmt.Sprintf("[Error: %v]", loopErr)
+					tui.statusBar.SetText(fmt.Sprintf("[red]Error: %v", loopErr))
+					tui.chatOutput.SetText(tui.formatChatHistory())
+					tui.chatOutput.ScrollToEnd()
+					return
+				}
+
+				// Set the final answer on the placeholder assistant turn.
+				tui.chatHistory[assistantIdx].Content = result.FinalContent
+
+				// Surface the agentic tool trace so the operator SEES each
+				// tool call ("tool: git_status … <real output>").
+				if len(result.Trace) > 0 {
+					if traceLines := FormatToolTrace(adaptToolTrace(result.Trace)); len(traceLines) > 0 {
+						tui.chatHistory = append(tui.chatHistory, llm.Message{
+							Role:    "assistant",
+							Content: strings.Join(traceLines, "\n"),
+						})
+					}
+				}
+
+				// Surface the ensemble panel (empty for non-ensemble responses)
+				// so the operator SEES every member + the winning vote.
+				if panelLines := FormatEnsemblePanel(result.FinalMetadata); len(panelLines) > 0 {
+					tui.chatHistory = append(tui.chatHistory, llm.Message{
+						Role:    "assistant",
+						Content: strings.Join(panelLines, "\n"),
+					})
+				}
+
+				tui.statusBar.SetText("[green]" + tui.td("terminal_ui_chat_response_received", map[string]any{"Tokens": 0}))
+				tui.chatOutput.SetText(tui.formatChatHistory())
+				tui.chatOutput.ScrollToEnd()
+			})
+		}()
+		return
+	}
+
+	// Plain streaming path (registry nil) — unchanged, no regression.
 	go func() {
 		streamErr, totalTokens := consumeChatStream(ctx, provider, request, func(content string) {
 			// onChunk: applied on the tview event loop (tview is not
@@ -1601,6 +1697,37 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 			tui.chatOutput.ScrollToEnd()
 		})
 	}()
+}
+
+// adaptToolTrace converts the agent loop's []agent.ToolTraceEntry into the
+// terminal_ui-local []ToolTraceLine that FormatToolTrace consumes, so this
+// package never has to expose internal/agent's type to the render helper.
+func adaptToolTrace(entries []agent.ToolTraceEntry) []ToolTraceLine {
+	out := make([]ToolTraceLine, len(entries))
+	for i, e := range entries {
+		out[i] = ToolTraceLine{
+			ToolName:  e.ToolName,
+			Output:    e.Output,
+			Err:       e.Err,
+			Arguments: e.Arguments,
+		}
+	}
+	return out
+}
+
+// buildToolLoopSystemPrompt composes a SHORT structural system prompt from the
+// registry's live tool names (CONST-046: metadata-composed, not a hardcoded
+// catalogue). The tool-name list adapts to whatever is actually registered.
+func buildToolLoopSystemPrompt(registry *tools.ToolRegistry) string {
+	names := make([]string, 0)
+	for _, t := range registry.List() {
+		names = append(names, t.Name())
+	}
+	sort.Strings(names)
+	return "You are the Helix coding agent. You have these tools available: " +
+		strings.Join(names, ", ") +
+		". Use them to answer questions about the user's codebase and git state. " +
+		"Prefer calling a tool over guessing."
 }
 
 // consumeChatStream drives one TUI chat turn over the provider's streaming

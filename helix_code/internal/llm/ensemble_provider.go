@@ -256,7 +256,12 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 			// is cached. p.GetModels()[0] is never trusted: catalogues routinely
 			// lead with decommissioned, paid-402, or embedding models.
 			resp, err, model := e.generateMemberResilient(fanCtx, p, base)
-			if err == nil && resp != nil && strings.TrimSpace(resp.Content) != "" && model != "" {
+			// Cache the resolved model when it produced a real participant response
+			// (non-empty content OR a tool-call request) — mirroring the resolver's
+			// own success predicate so a tool-calling turn (empty content, non-empty
+			// tool calls) on the live tool-loop path still caches its working model
+			// for 1-call/member reuse next prompt.
+			if err == nil && responseIsParticipant(resp) && model != "" {
 				e.rememberWorkingModel(p.GetName(), model)
 			}
 			outCh <- memberOutcome{name: p.GetName(), resp: resp, err: err}
@@ -271,7 +276,13 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 	var firstErr error
 
 	for oc := range outCh {
-		if oc.err != nil || oc.resp == nil || strings.TrimSpace(oc.resp.Content) == "" {
+		// A member is a SUCCESS/participant when it returned without error and its
+		// response carries EITHER non-empty content OR a non-empty tool-call
+		// request. A tool-calling turn legitimately has empty Content (the model is
+		// asking to run tools, not answering yet) — treating that as a failure would
+		// make the ensemble unusable inside a tool loop, so it counts as a real
+		// participant here.
+		if oc.err != nil || oc.resp == nil || !responseIsParticipant(oc.resp) {
 			failures++
 			if firstErr == nil && oc.err != nil {
 				firstErr = oc.err
@@ -279,7 +290,7 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 			continue
 		}
 		participants = append(participants, oc.name)
-		excerpts[oc.name] = excerpt(oc.resp.Content, 160)
+		excerpts[oc.name] = participantExcerpt(oc.resp)
 		results = append(results, ensembleResult{providerName: oc.name, resp: oc.resp})
 	}
 
@@ -299,6 +310,19 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 
 	out := *selected.resp
 	out.RequestID = request.ID
+
+	// Tool-loop compatibility: if ANY participant requested tool calls, the
+	// ensemble is on a tool-request turn and MUST surface tool calls so the
+	// caller's tool loop can execute them. Pick the tool-calling participant
+	// DETERMINISTICALLY (the one whose provider name sorts first) and carry its
+	// Content (may be empty) + ToolCalls. When NO participant requested tools
+	// (the normal final-answer turn), this is a no-op and the voted winner is
+	// returned unchanged — keeping the existing content-voting path byte-identical.
+	if tc := firstToolCallParticipant(results); tc != nil {
+		out.Content = tc.resp.Content
+		out.ToolCalls = tc.resp.ToolCalls
+	}
+
 	if out.ProviderMetadata == nil {
 		out.ProviderMetadata = make(map[string]interface{})
 	}
@@ -312,6 +336,51 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 	out.ProviderMetadata["ensemble_scores"] = scores
 	out.ProviderMetadata["ensemble_excerpts"] = excerpts
 	return &out, nil
+}
+
+// responseIsParticipant reports whether a member's response counts as a real
+// ensemble participant: it has non-empty content OR a non-empty tool-call
+// request. A tool-calling turn (empty Content + non-empty ToolCalls) is a VALID
+// tool request, not a failure.
+func responseIsParticipant(resp *LLMResponse) bool {
+	if resp == nil {
+		return false
+	}
+	return strings.TrimSpace(resp.Content) != "" || len(resp.ToolCalls) > 0
+}
+
+// participantExcerpt renders the per-member evidence excerpt. A content-bearing
+// member contributes a short content excerpt; a tool-calling member (empty
+// content) contributes a "[tool: <names>]" marker naming the requested tools so
+// the metadata still records what that member asked for.
+func participantExcerpt(resp *LLMResponse) string {
+	if strings.TrimSpace(resp.Content) != "" {
+		return excerpt(resp.Content, 160)
+	}
+	if len(resp.ToolCalls) > 0 {
+		names := make([]string, 0, len(resp.ToolCalls))
+		for _, tc := range resp.ToolCalls {
+			names = append(names, tc.Function.Name)
+		}
+		return "[tool: " + strings.Join(names, ", ") + "]"
+	}
+	return ""
+}
+
+// firstToolCallParticipant returns the participant with tool calls whose provider
+// name sorts first (a stable, deterministic choice independent of fan-out
+// completion order), or nil when no participant requested tools.
+func firstToolCallParticipant(results []ensembleResult) *ensembleResult {
+	var chosen *ensembleResult
+	for i := range results {
+		if len(results[i].resp.ToolCalls) == 0 {
+			continue
+		}
+		if chosen == nil || results[i].providerName < chosen.providerName {
+			chosen = &results[i]
+		}
+	}
+	return chosen
 }
 
 // vote scores every member response (confidence-weighted by default, mirroring
@@ -409,7 +478,19 @@ func (e *EnsembleProvider) generateMemberResilient(ctx context.Context, p Provid
 		reqCopy := base
 		reqCopy.Model = mdl
 		r, err := p.Generate(ctx, &reqCopy)
-		if err == nil && r != nil && strings.TrimSpace(r.Content) != "" {
+		// A model is RESOLVED-WORKING when it returns either non-empty content OR a
+		// non-empty tool-call request — the SAME participant predicate the outer
+		// Generate loop uses (responseIsParticipant). A tool-calling turn legitimately
+		// has EMPTY Content (the model is asking to run tools, not answering yet); on
+		// the live TUI tool-loop path the request carries Tools and the cached
+		// chat-working model responds with tool calls + empty content. Requiring
+		// non-empty Content here REJECTED that working response and made the resolver
+		// walk the rest of the catalogue until every candidate failed
+		// ("all N member(s) failed" — the decommissioned tail model surfaced as the
+		// first error). Accepting a tool-call response fixes the tool path while
+		// leaving the plain-chat path byte-identical (a content-bearing reply still
+		// satisfies responseIsParticipant via its non-empty content).
+		if err == nil && responseIsParticipant(r) {
 			return r, nil, mdl
 		}
 		// A DEFINITIVE non-retryable failure (model decommissioned / not found /
@@ -545,7 +626,12 @@ func (e *EnsembleProvider) WarmCache(ctx context.Context) {
 			defer wg.Done()
 			base := LLMRequest{ID: uuid.New(), Messages: probeMessages}
 			resp, err, model := e.generateMemberResilient(warmCtx, p, base)
-			if err == nil && resp != nil && strings.TrimSpace(resp.Content) != "" && model != "" {
+			// Same participant-based caching predicate as the resilient resolver and
+			// the live Generate path: a non-empty content OR a tool-call response is a
+			// resolved working model. The warm probe is a no-tools "ping" so it
+			// normally elicits content, but routing the cache gate through
+			// responseIsParticipant keeps all three call sites consistent.
+			if err == nil && responseIsParticipant(resp) && model != "" {
 				e.rememberWorkingModel(p.GetName(), model)
 			}
 		}(m)

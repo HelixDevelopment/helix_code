@@ -68,6 +68,7 @@ func NewMistralProvider(config ProviderConfigEntry) (*MistralProvider, error) {
 
 func (mp *MistralProvider) GetType() ProviderType { return ProviderTypeMistral }
 func (mp *MistralProvider) GetName() string       { return "Mistral" }
+
 // GetModels returns available models. CONST-036 / F6-D-5: refreshed LIVE from
 // Mistral's GET /models on first call (cached); seed list is offline fallback.
 func (mp *MistralProvider) GetModels() []ModelInfo {
@@ -249,12 +250,14 @@ func (mp *MistralProvider) initializeModels() {
 	log.Printf("✅ Mistral provider initialized with %d models", len(mp.models))
 }
 
-func (mp *MistralProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRequest, error) {
+func (mp *MistralProvider) convertToOpenAIRequest(request *LLMRequest) (*mistralChatRequest, error) {
 	var messages []OpenAIMessage
 	for _, msg := range request.Messages {
 		openaiMsg := OpenAIMessage{
-			Role:    msg.Role,
-			Content: msg.Content,
+			Role:       msg.Role,
+			Content:    msg.Content,
+			ToolCallID: msg.ToolCallID,
+			ToolCalls:  toWireSendToolCalls(msg.ToolCalls),
 		}
 		if msg.Name != "" {
 			openaiMsg.Name = msg.Name
@@ -262,20 +265,26 @@ func (mp *MistralProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIR
 		messages = append(messages, openaiMsg)
 	}
 
-	return &OpenAIRequest{
+	return &mistralChatRequest{
 		Model:       request.Model,
 		Messages:    messages,
 		MaxTokens:   request.MaxTokens,
 		Temperature: request.Temperature,
 		TopP:        request.TopP,
 		Stream:      request.Stream,
+		// OpenAI-compatible function-calling: forward the agent's tool
+		// definitions + tool_choice. omitempty ⇒ plain-chat wire unchanged.
+		Tools:      request.Tools,
+		ToolChoice: request.ToolChoice,
 	}, nil
 }
 
-func (mp *MistralProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
+func (mp *MistralProvider) convertFromOpenAIResponse(openaiResp *mistralChatResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
 	var content string
+	var toolCalls []ToolCall
 	if len(openaiResp.Choices) > 0 {
 		content = openaiResp.Choices[0].Message.Content
+		toolCalls = parseOpenAIWireToolCalls(openaiResp.Choices[0].Message.ToolCalls)
 	}
 
 	finish := ""
@@ -287,6 +296,7 @@ func (mp *MistralProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse,
 		ID:        uuid.New(),
 		RequestID: requestID,
 		Content:   content,
+		ToolCalls: toolCalls,
 		Usage: Usage{
 			PromptTokens:     openaiResp.Usage.PromptTokens,
 			CompletionTokens: openaiResp.Usage.CompletionTokens,
@@ -322,7 +332,7 @@ func mapMistralFinishReasonToErr(reason string) error {
 	}
 }
 
-func (mp *MistralProvider) makeOpenAIRequest(ctx context.Context, request *OpenAIRequest) (*OpenAIResponse, error) {
+func (mp *MistralProvider) makeOpenAIRequest(ctx context.Context, request *mistralChatRequest) (*mistralChatResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
@@ -346,14 +356,14 @@ func (mp *MistralProvider) makeOpenAIRequest(ctx context.Context, request *OpenA
 		return nil, fmt.Errorf("Mistral API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
-	var response OpenAIResponse
+	var response mistralChatResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
 	return &response, nil
 }
 
-func (mp *MistralProvider) makeOpenAIStreamRequest(ctx context.Context, request *OpenAIRequest, ch chan<- LLMResponse, requestID uuid.UUID) error {
+func (mp *MistralProvider) makeOpenAIStreamRequest(ctx context.Context, request *mistralChatRequest, ch chan<- LLMResponse, requestID uuid.UUID) error {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return err
@@ -439,4 +449,41 @@ func (mp *MistralProvider) updateHealth(status string, latency time.Duration, er
 	mp.lastHealth.Latency = latency
 	mp.lastHealth.ErrorCount = errorCount
 	mp.lastHealth.LastCheck = time.Now()
+}
+
+// mistralChatRequest mirrors the shared OpenAIRequest but adds the
+// OpenAI-compatible function-calling fields (Mistral is OpenAI Chat
+// Completions–compatible). omitempty keeps plain-chat requests byte-identical.
+type mistralChatRequest struct {
+	Model       string          `json:"model"`
+	Messages    []OpenAIMessage `json:"messages"`
+	MaxTokens   int             `json:"max_tokens,omitempty"`
+	Temperature float64         `json:"temperature,omitempty"`
+	TopP        float64         `json:"top_p,omitempty"`
+	Stream      bool            `json:"stream,omitempty"`
+	Tools       []Tool          `json:"tools,omitempty"`
+	ToolChoice  interface{}     `json:"tool_choice,omitempty"`
+}
+
+// mistralChatResponse mirrors the shared OpenAIResponse but adds
+// message.tool_calls parsing.
+type mistralChatResponse struct {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Created int64  `json:"created"`
+	Model   string `json:"model"`
+	Choices []struct {
+		Index   int `json:"index"`
+		Message struct {
+			Role      string               `json:"role"`
+			Content   string               `json:"content"`
+			ToolCalls []openAIWireToolCall `json:"tool_calls,omitempty"`
+		} `json:"message"`
+		FinishReason string `json:"finish_reason"`
+	} `json:"choices"`
+	Usage struct {
+		PromptTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+		TotalTokens      int `json:"total_tokens"`
+	} `json:"usage"`
 }

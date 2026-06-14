@@ -366,13 +366,15 @@ func (orp *OpenRouterProvider) initializeModels() {
 	log.Printf("✅ OpenRouter provider initialized with %d models (fallback seed list)", len(orp.models))
 }
 
-func (orp *OpenRouterProvider) convertToOpenAIRequest(request *LLMRequest) (*OpenAIRequest, error) {
+func (orp *OpenRouterProvider) convertToOpenAIRequest(request *LLMRequest) (*openRouterChatRequest, error) {
 	// Convert messages to OpenAI format
 	var messages []OpenAIMessage
 	for _, msg := range request.Messages {
 		openaiMsg := OpenAIMessage{
-			Role:    msg.Role,
-			Content: msg.Content,
+			Role:       msg.Role,
+			Content:    msg.Content,
+			ToolCallID: msg.ToolCallID,
+			ToolCalls:  toWireSendToolCalls(msg.ToolCalls),
 		}
 		if msg.Name != "" {
 			openaiMsg.Name = msg.Name
@@ -380,30 +382,37 @@ func (orp *OpenRouterProvider) convertToOpenAIRequest(request *LLMRequest) (*Ope
 		messages = append(messages, openaiMsg)
 	}
 
-	return &OpenAIRequest{
+	return &openRouterChatRequest{
 		Model:       request.Model,
 		Messages:    messages,
 		MaxTokens:   request.MaxTokens,
 		Temperature: request.Temperature,
 		TopP:        request.TopP,
 		Stream:      request.Stream,
+		// OpenAI-compatible function-calling: forward the agent's tool
+		// definitions + tool_choice. omitempty ⇒ plain-chat wire unchanged.
+		Tools:      request.Tools,
+		ToolChoice: request.ToolChoice,
 	}, nil
 }
 
-func (orp *OpenRouterProvider) convertFromOpenAIResponse(openaiResp *OpenAIResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
+func (orp *OpenRouterProvider) convertFromOpenAIResponse(openaiResp *openRouterChatResponse, requestID uuid.UUID, processingTime time.Duration) *LLMResponse {
 	var content string
 	var finish string
+	var toolCalls []ToolCall
 
 	if len(openaiResp.Choices) > 0 {
 		choice := openaiResp.Choices[0]
 		content = choice.Message.Content
 		finish = choice.FinishReason
+		toolCalls = parseOpenAIWireToolCalls(choice.Message.ToolCalls)
 	}
 
 	return &LLMResponse{
 		ID:        uuid.New(),
 		RequestID: requestID,
 		Content:   content,
+		ToolCalls: toolCalls,
 		Usage: Usage{
 			PromptTokens:     openaiResp.Usage.PromptTokens,
 			CompletionTokens: openaiResp.Usage.CompletionTokens,
@@ -428,7 +437,7 @@ func (orp *OpenRouterProvider) convertFromOpenAIResponse(openaiResp *OpenAIRespo
 	}
 }
 
-func (orp *OpenRouterProvider) makeOpenAIRequest(ctx context.Context, request *OpenAIRequest) (*OpenAIResponse, error) {
+func (orp *OpenRouterProvider) makeOpenAIRequest(ctx context.Context, request *openRouterChatRequest) (*openRouterChatResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
@@ -455,7 +464,7 @@ func (orp *OpenRouterProvider) makeOpenAIRequest(ctx context.Context, request *O
 		return nil, fmt.Errorf("OpenRouter API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
-	var response OpenAIResponse
+	var response openRouterChatResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
@@ -463,7 +472,7 @@ func (orp *OpenRouterProvider) makeOpenAIRequest(ctx context.Context, request *O
 	return &response, nil
 }
 
-func (orp *OpenRouterProvider) makeOpenAIStreamRequest(ctx context.Context, request *OpenAIRequest, ch chan<- LLMResponse, requestID uuid.UUID) error {
+func (orp *OpenRouterProvider) makeOpenAIStreamRequest(ctx context.Context, request *openRouterChatRequest, ch chan<- LLMResponse, requestID uuid.UUID) error {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return err
@@ -557,3 +566,41 @@ func (orp *OpenRouterProvider) updateHealth(status string, latency time.Duration
 
 // Note: OpenAI API types are reused for OpenRouter compatibility
 // They are declared in openai_provider.go and used here since they're in the same package
+
+// openRouterChatRequest mirrors the shared OpenAIRequest but adds the
+// OpenAI-compatible function-calling fields. OpenRouter normalises every
+// backend to the OpenAI Chat Completions wire. omitempty keeps plain-chat
+// requests byte-identical.
+type openRouterChatRequest struct {
+	Model       string          `json:"model"`
+	Messages    []OpenAIMessage `json:"messages"`
+	MaxTokens   int             `json:"max_tokens,omitempty"`
+	Temperature float64         `json:"temperature,omitempty"`
+	TopP        float64         `json:"top_p,omitempty"`
+	Stream      bool            `json:"stream,omitempty"`
+	Tools       []Tool          `json:"tools,omitempty"`
+	ToolChoice  interface{}     `json:"tool_choice,omitempty"`
+}
+
+// openRouterChatResponse mirrors the shared OpenAIResponse but adds
+// message.tool_calls parsing.
+type openRouterChatResponse struct {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Created int64  `json:"created"`
+	Model   string `json:"model"`
+	Choices []struct {
+		Index   int `json:"index"`
+		Message struct {
+			Role      string               `json:"role"`
+			Content   string               `json:"content"`
+			ToolCalls []openAIWireToolCall `json:"tool_calls,omitempty"`
+		} `json:"message"`
+		FinishReason string `json:"finish_reason"`
+	} `json:"choices"`
+	Usage struct {
+		PromptTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+		TotalTokens      int `json:"total_tokens"`
+	} `json:"usage"`
+}

@@ -375,8 +375,10 @@ func (gp *GroqProvider) buildGroqRequest(request *LLMRequest) (*GroqRequest, err
 	var messages []GroqMessage
 	for _, msg := range request.Messages {
 		groqMsg := GroqMessage{
-			Role:    msg.Role,
-			Content: msg.Content,
+			Role:       msg.Role,
+			Content:    msg.Content,
+			ToolCallID: msg.ToolCallID,
+			ToolCalls:  toWireSendToolCalls(msg.ToolCalls),
 		}
 		if msg.Name != "" {
 			groqMsg.Name = msg.Name
@@ -391,6 +393,12 @@ func (gp *GroqProvider) buildGroqRequest(request *LLMRequest) (*GroqRequest, err
 		Temperature: request.Temperature,
 		TopP:        request.TopP,
 		Stream:      request.Stream,
+		// OpenAI-compatible function-calling: forward the agent's tool
+		// definitions + tool_choice so the model can actually request a
+		// tool. omitempty keeps the wire byte-identical for plain chat
+		// (request.Tools empty → field elided).
+		Tools:      request.Tools,
+		ToolChoice: request.ToolChoice,
 	}, nil
 }
 
@@ -408,6 +416,7 @@ func (gp *GroqProvider) convertFromGroqResponse(groqResp *GroqResponse, requestI
 		ID:        uuid.New(),
 		RequestID: requestID,
 		Content:   content,
+		ToolCalls: groqResp.toolCalls,
 		Usage: Usage{
 			PromptTokens:     groqResp.Usage.PromptTokens,
 			CompletionTokens: groqResp.Usage.CompletionTokens,
@@ -451,12 +460,37 @@ func (gp *GroqProvider) makeGroqRequest(ctx context.Context, request *GroqReques
 		return nil, gp.handleGroqError(resp.StatusCode, body)
 	}
 
-	var response GroqResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
 		return nil, err
 	}
 
+	var response GroqResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+
+	// Parse OpenAI-compatible function-calling tool_calls out-of-band so the
+	// public GroqResponse.Choices struct stays byte-compatible with existing
+	// literals (see GroqResponse.toolCalls doc). Groq returns tool_calls
+	// nested under choices[0].message.tool_calls exactly like OpenAI.
+	var toolEnv groqToolCallsEnvelope
+	if err := json.Unmarshal(body, &toolEnv); err == nil && len(toolEnv.Choices) > 0 {
+		response.toolCalls = parseOpenAIWireToolCalls(toolEnv.Choices[0].Message.ToolCalls)
+	}
+
 	return &response, nil
+}
+
+// groqToolCallsEnvelope extracts ONLY choices[].message.tool_calls from a Groq
+// Chat Completions response, used as a second decode pass in makeGroqRequest so
+// the public GroqResponse shape is left untouched.
+type groqToolCallsEnvelope struct {
+	Choices []struct {
+		Message struct {
+			ToolCalls []openAIWireToolCall `json:"tool_calls"`
+		} `json:"message"`
+	} `json:"choices"`
 }
 
 func (gp *GroqProvider) makeGroqStreamRequest(ctx context.Context, request *GroqRequest, ch chan<- LLMResponse, requestID uuid.UUID, startTime time.Time) error {
@@ -645,12 +679,27 @@ type GroqRequest struct {
 	Temperature float64       `json:"temperature,omitempty"`
 	TopP        float64       `json:"top_p,omitempty"`
 	Stream      bool          `json:"stream,omitempty"`
+	// OpenAI-compatible function-calling fields. omitempty ⇒ plain-chat
+	// requests (no tools) serialise byte-identically to the prior wire.
+	Tools      []Tool      `json:"tools,omitempty"`
+	ToolChoice interface{} `json:"tool_choice,omitempty"`
 }
 
 type GroqMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 	Name    string `json:"name,omitempty"`
+	// Tool-conversation protocol fields. omitempty ⇒ plain-chat messages
+	// serialise byte-identically to the prior wire. ToolCallID is REQUIRED by
+	// Groq on every role:"tool" result message; ToolCalls carries the
+	// assistant turn's requested calls so each result has a matching call.
+	//
+	// SEND-side wire type: ToolCalls uses wireSendToolCall so
+	// function.arguments serialises as a JSON STRING (Groq rejects the object
+	// form: 'messages.N.tool_calls.0.function.arguments' : value must be a
+	// string). Convert via toWireSendToolCalls in buildGroqRequest.
+	ToolCallID string             `json:"tool_call_id,omitempty"`
+	ToolCalls  []wireSendToolCall `json:"tool_calls,omitempty"`
 }
 
 type GroqResponse struct {
@@ -671,6 +720,12 @@ type GroqResponse struct {
 		CompletionTokens int `json:"completion_tokens"`
 		TotalTokens      int `json:"total_tokens"`
 	} `json:"usage"`
+
+	// toolCalls holds the parsed function-calling tool_calls of the FIRST
+	// choice. It is populated out-of-band by makeGroqRequest (NOT a JSON tag
+	// on GroqResponse) so the public anonymous Choices struct shape stays
+	// byte-compatible with existing GroqResponse literals in tests.
+	toolCalls []ToolCall
 }
 
 type GroqStreamChunk struct {
@@ -699,4 +754,65 @@ type GroqError struct {
 		Type    string `json:"type"`
 		Code    string `json:"code"`
 	} `json:"error"`
+}
+
+// openAIWireToolCall is the on-wire shape of a single `tool_calls[]` entry as
+// emitted by OpenAI Chat Completions–compatible providers (Groq, DeepSeek,
+// Mistral, OpenRouter, …). The crucial divergence from llm.ToolCall is that
+// `function.arguments` arrives as a JSON **string** (a serialized object),
+// not a JSON object — so it is captured as json.RawMessage and decoded by
+// parseOpenAIWireToolCalls into the map[string]interface{} that
+// llm.ToolCallFunc.Arguments (and every downstream tool-loop consumer) expects.
+type openAIWireToolCall struct {
+	ID       string `json:"id"`
+	Type     string `json:"type"`
+	Function struct {
+		Name      string          `json:"name"`
+		Arguments json.RawMessage `json:"arguments"`
+	} `json:"function"`
+}
+
+// parseOpenAIWireToolCalls converts the OpenAI-compatible wire `tool_calls`
+// array into []llm.ToolCall, decoding `function.arguments` whether the
+// provider sent it as a JSON-string-encoded object (OpenAI's canonical form,
+// e.g. "{\"path\":\".\"}") or as a raw JSON object (some compatible servers).
+// Returns nil for an empty/absent array so plain-chat responses are unchanged.
+func parseOpenAIWireToolCalls(wire []openAIWireToolCall) []ToolCall {
+	if len(wire) == 0 {
+		return nil
+	}
+	out := make([]ToolCall, 0, len(wire))
+	for _, w := range wire {
+		args := map[string]interface{}{}
+		if raw := []byte(w.Function.Arguments); len(raw) > 0 {
+			// First try: arguments is a JSON string holding an object
+			// (the OpenAI canonical encoding).
+			var asString string
+			if err := json.Unmarshal(raw, &asString); err == nil {
+				if asString != "" {
+					if uerr := json.Unmarshal([]byte(asString), &args); uerr != nil {
+						args = map[string]interface{}{}
+					}
+				}
+			} else {
+				// Fallback: arguments is already a JSON object.
+				if uerr := json.Unmarshal(raw, &args); uerr != nil {
+					args = map[string]interface{}{}
+				}
+			}
+		}
+		callType := w.Type
+		if callType == "" {
+			callType = "function"
+		}
+		out = append(out, ToolCall{
+			ID:   w.ID,
+			Type: callType,
+			Function: ToolCallFunc{
+				Name:      w.Function.Name,
+				Arguments: args,
+			},
+		})
+	}
+	return out
 }

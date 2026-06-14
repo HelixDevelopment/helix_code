@@ -67,6 +67,7 @@ temp/
 
 # Cache directories
 .cache/
+.helix.cache/
 node_modules/
 
 # Documentation build output

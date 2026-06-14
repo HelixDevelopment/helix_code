@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -319,7 +320,10 @@ func TestConvertToOpenAIRequest(t *testing.T) {
 	apiRequest := provider.convertToOpenAIRequest(request)
 
 	assert.Equal(t, "specific-model", apiRequest.Model)
-	assert.Equal(t, request.Messages, apiRequest.Messages)
+	// apiRequest.Messages is the OpenAI wire shape ([]OpenAIMessage) — the
+	// conversion maps Role/Content/Name/ToolCallID and encodes any tool_calls'
+	// function.arguments as a JSON string (none here).
+	assert.Equal(t, []OpenAIMessage{{Role: "user", Content: "Hello"}}, apiRequest.Messages)
 	assert.Equal(t, 100, apiRequest.MaxTokens)
 	assert.Equal(t, 0.5, apiRequest.Temperature)
 	assert.Equal(t, 0.9, apiRequest.TopP)
@@ -350,13 +354,18 @@ func TestConvertFromOpenAIResponse(t *testing.T) {
 				Message: OpenAICompatibleMessage{
 					Role:    "assistant",
 					Content: "Hello world",
-					ToolCalls: []ToolCall{
+					// Wire shape: function.arguments is a JSON STRING (OpenAI's
+					// canonical encoding) decoded by parseOpenAIWireToolCalls.
+					ToolCalls: []openAIWireToolCall{
 						{
 							ID:   "tool-call-id",
 							Type: "function",
-							Function: ToolCallFunc{
+							Function: struct {
+								Name      string          `json:"name"`
+								Arguments json.RawMessage `json:"arguments"`
+							}{
 								Name:      "test_function",
-								Arguments: map[string]interface{}{"arg1": "value1"},
+								Arguments: json.RawMessage(`"{\"arg1\":\"value1\"}"`),
 							},
 						},
 					},
@@ -378,6 +387,10 @@ func TestConvertFromOpenAIResponse(t *testing.T) {
 	assert.Equal(t, "stop", llmResponse.FinishReason)
 	assert.Len(t, llmResponse.ToolCalls, 1)
 	assert.Equal(t, "tool-call-id", llmResponse.ToolCalls[0].ID)
+	assert.Equal(t, "test_function", llmResponse.ToolCalls[0].Function.Name)
+	// The JSON-string-encoded arguments must decode into the map downstream
+	// tool-loop consumers expect.
+	assert.Equal(t, "value1", llmResponse.ToolCalls[0].Function.Arguments["arg1"])
 	assert.Equal(t, 10, llmResponse.Usage.PromptTokens)
 	assert.Equal(t, 5, llmResponse.Usage.CompletionTokens)
 	assert.Equal(t, 15, llmResponse.Usage.TotalTokens)

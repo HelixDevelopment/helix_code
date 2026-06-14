@@ -767,6 +767,127 @@ func TestEnsembleProvider_DoesNotForwardStreamToMembers(t *testing.T) {
 	}
 }
 
+// toolCallStub is a unit-test-only member provider that returns a tool-call
+// request (non-empty ToolCalls, EMPTY Content) — the shape a real provider
+// produces on a tool-calling turn. Pre-fix the ensemble treated empty Content as
+// a failure; this stub proves the tool-request turn is now a valid participant.
+type toolCallStub struct {
+	ptype     ProviderType
+	name      string
+	toolName  string
+	toolArgs  map[string]interface{}
+	calls     int32
+}
+
+func (s *toolCallStub) GetType() ProviderType { return s.ptype }
+func (s *toolCallStub) GetName() string        { return s.name }
+func (s *toolCallStub) GetModels() []ModelInfo {
+	return []ModelInfo{{ID: string(s.ptype) + "-chat", Name: string(s.ptype) + "-chat", Provider: s.ptype, Capabilities: []ModelCapability{CapabilityTextGeneration}}}
+}
+func (s *toolCallStub) GetCapabilities() []ModelCapability {
+	return []ModelCapability{CapabilityTextGeneration}
+}
+func (s *toolCallStub) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
+	atomic.AddInt32(&s.calls, 1)
+	return &LLMResponse{
+		ID:        uuid.New(),
+		RequestID: request.ID,
+		Content:   "", // tool-calling turn: empty content is VALID, not a failure
+		ToolCalls: []ToolCall{{
+			ID:       "call-" + s.name,
+			Type:     "function",
+			Function: ToolCallFunc{Name: s.toolName, Arguments: s.toolArgs},
+		}},
+		FinishReason: "tool_calls",
+		CreatedAt:    time.Now(),
+	}, nil
+}
+func (s *toolCallStub) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
+	r, err := s.Generate(ctx, request)
+	if err != nil {
+		return err
+	}
+	ch <- *r
+	close(ch)
+	return nil
+}
+func (s *toolCallStub) IsAvailable(ctx context.Context) bool { return true }
+func (s *toolCallStub) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+	return &ProviderHealth{Status: "healthy", ModelCount: 1}, nil
+}
+func (s *toolCallStub) Close() error                      { return nil }
+func (s *toolCallStub) GetContextWindow() int             { return 8192 }
+func (s *toolCallStub) CountTokens(t string) (int, error) { return len(t) / 4, nil }
+
+// TestEnsemble_ToolCallPassthrough proves the ensemble is tool-loop compatible:
+//
+//  1. Members that return ToolCalls with EMPTY Content are SUCCESS/participants,
+//     NOT failures — so the ensemble does NOT return "all N member(s) failed".
+//  2. The returned response carries non-empty ToolCalls (so a caller's tool loop
+//     can execute them), chosen DETERMINISTICALLY (provider name sorts first).
+//  3. The existing no-tools voting path is UNCHANGED: content-only members still
+//     return the voted winner with NO tool calls.
+//
+// Paired §1.1 mutation: reverting the success condition to
+// `strings.TrimSpace(oc.resp.Content) == ""` makes both tool-calling members
+// count as failures → the ensemble returns the "all N member(s) failed" error →
+// this test FAILs, proving the assertion catches the regression.
+func TestEnsemble_ToolCallPassthrough(t *testing.T) {
+	// (A) Tool-request turn: both members ask to call a tool (empty content).
+	// "Apple" sorts before "Zebra", so the deterministic pick is Apple's tool call.
+	apple := &toolCallStub{ptype: ProviderTypeDeepSeek, name: "Apple", toolName: "read_file", toolArgs: map[string]interface{}{"path": "a.go"}}
+	zebra := &toolCallStub{ptype: ProviderTypeGroq, name: "Zebra", toolName: "list_dir", toolArgs: map[string]interface{}{"path": "."}}
+
+	ens := NewEnsembleProvider(EnsembleProviderConfig{Members: []Provider{zebra, apple}, Timeout: 10 * time.Second})
+	resp, err := ens.Generate(context.Background(), &LLMRequest{ID: uuid.New(), Model: "DeepSeek-chat", Messages: []Message{{Role: "user", Content: "open a.go"}}})
+	if err != nil {
+		t.Fatalf("a tool-calling turn must NOT be an all-failed error; got: %v", err)
+	}
+	if resp == nil {
+		t.Fatal("expected a response carrying tool calls, got nil")
+	}
+	// The response MUST carry tool calls for the caller's loop to execute.
+	if len(resp.ToolCalls) == 0 {
+		t.Fatalf("ensemble must surface ToolCalls on a tool-request turn, got none (content=%q)", resp.Content)
+	}
+	// Deterministic selection: Apple's provider name sorts first → its tool call.
+	if resp.ToolCalls[0].Function.Name != "read_file" {
+		t.Fatalf("deterministic tool-call selection expected Apple's %q, got %q", "read_file", resp.ToolCalls[0].Function.Name)
+	}
+	// Both members participated; none counted as a failure.
+	if n, _ := resp.ProviderMetadata["ensemble_successful_providers"].(int); n != 2 {
+		t.Fatalf("ensemble_successful_providers = %v, want 2 (tool-calling members are participants)", resp.ProviderMetadata["ensemble_successful_providers"])
+	}
+	if n, _ := resp.ProviderMetadata["ensemble_failed_providers"].(int); n != 0 {
+		t.Fatalf("ensemble_failed_providers = %v, want 0", resp.ProviderMetadata["ensemble_failed_providers"])
+	}
+	parts, _ := resp.ProviderMetadata["ensemble_participants"].([]string)
+	if len(parts) != 2 {
+		t.Fatalf("expected 2 participants, got %v", resp.ProviderMetadata["ensemble_participants"])
+	}
+	// The tool-calling member's excerpt names the requested tool.
+	exc, _ := resp.ProviderMetadata["ensemble_excerpts"].(map[string]string)
+	if !strings.Contains(exc["Apple"], "[tool: read_file]") {
+		t.Fatalf("tool-calling member excerpt must name the tool, got %q", exc["Apple"])
+	}
+
+	// (B) The existing no-tools content-voting path is UNCHANGED: content-only
+	// members still return the voted winner with NO tool calls.
+	good := &ensembleStubProvider{ptype: ProviderTypeDeepSeek, name: "DeepSeek", content: "The answer is a clear, well-formed reply.", finish: "stop", tokens: 10}
+	short := &ensembleStubProvider{ptype: ProviderTypeGroq, name: "Groq", content: "ok", finish: "stop", tokens: 1}
+	ens2 := NewEnsembleProvider(EnsembleProviderConfig{Members: []Provider{good, short}, Timeout: 10 * time.Second})
+	cresp, cerr := ens2.Generate(context.Background(), &LLMRequest{ID: uuid.New(), Messages: []Message{{Role: "user", Content: "hi"}}})
+	if cerr != nil {
+		t.Fatalf("content-only voting path must still work, got: %v", cerr)
+	}
+	if len(cresp.ToolCalls) != 0 {
+		t.Fatalf("no-tools path must return NO tool calls, got %d", len(cresp.ToolCalls))
+	}
+	if strings.TrimSpace(cresp.Content) == "" {
+		t.Fatalf("no-tools path must return the voted content winner, got empty")
+	}
+}
+
 // defaultModelForLegacy reproduces the pre-fix models[0] selection for the RED
 // reproduction above (the bug the fix removed).
 func defaultModelForLegacy(p Provider) string {
@@ -840,5 +961,167 @@ func TestEnsembleProvider_OrderedCandidatesSkipsDeadModel(t *testing.T) {
 	}
 	if !found {
 		t.Fatalf("orderedCandidates dropped a live model; got %v", cands)
+	}
+}
+
+// deadThenToolCallStub is a unit-test-only member provider whose catalogue LEADS
+// with a decommissioned model and is FOLLOWED by a tool-capable model that
+// returns a tool-call turn (EMPTY Content + non-empty ToolCalls — the real shape
+// a provider produces when the model decides to call a tool). It is the unit
+// mirror of the live root cause: on the sentinel+Tools resolution path, the
+// resolver must (1) skip the dead lead model AND (2) ACCEPT the working model's
+// tool-call response as success — even though its Content is empty.
+type deadThenToolCallStub struct {
+	ptype     ProviderType
+	name      string
+	deadID    string
+	goodID    string
+	toolName  string
+	mu        sync.Mutex
+	perModel  map[string]int
+}
+
+func (s *deadThenToolCallStub) GetType() ProviderType { return s.ptype }
+func (s *deadThenToolCallStub) GetName() string        { return s.name }
+func (s *deadThenToolCallStub) GetModels() []ModelInfo {
+	return []ModelInfo{
+		{ID: s.deadID, Name: s.deadID, Provider: s.ptype, Capabilities: []ModelCapability{CapabilityTextGeneration}},
+		{ID: s.goodID, Name: s.goodID, Provider: s.ptype, Capabilities: []ModelCapability{CapabilityTextGeneration}},
+	}
+}
+func (s *deadThenToolCallStub) GetCapabilities() []ModelCapability {
+	return []ModelCapability{CapabilityTextGeneration}
+}
+func (s *deadThenToolCallStub) callsFor(id string) int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.perModel[id]
+}
+func (s *deadThenToolCallStub) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
+	s.mu.Lock()
+	if s.perModel == nil {
+		s.perModel = map[string]int{}
+	}
+	s.perModel[request.Model]++
+	s.mu.Unlock()
+	if request.Model == s.goodID {
+		// Working, tool-capable model: a tool-calling turn — EMPTY Content +
+		// non-empty ToolCalls. This is the exact live behaviour proven by the
+		// per-member DIRECT probe (content="" toolcalls=1 finish="tool_calls").
+		return &LLMResponse{
+			ID:        uuid.New(),
+			RequestID: request.ID,
+			Content:   "",
+			ToolCalls: []ToolCall{{
+				ID:       "call-" + s.name,
+				Type:     "function",
+				Function: ToolCallFunc{Name: s.toolName, Arguments: map[string]interface{}{}},
+			}},
+			FinishReason: "tool_calls",
+			CreatedAt:    time.Now(),
+		}, nil
+	}
+	// Decommissioned-class definitive error (the live groq gemma-7b-it message).
+	return nil, errors.New("invalid request: The model `" + request.Model + "` has been decommissioned")
+}
+func (s *deadThenToolCallStub) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
+	r, err := s.Generate(ctx, request)
+	if err != nil {
+		return err
+	}
+	ch <- *r
+	close(ch)
+	return nil
+}
+func (s *deadThenToolCallStub) IsAvailable(ctx context.Context) bool { return true }
+func (s *deadThenToolCallStub) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+	return &ProviderHealth{Status: "healthy", ModelCount: 2}, nil
+}
+func (s *deadThenToolCallStub) Close() error                      { return nil }
+func (s *deadThenToolCallStub) GetContextWindow() int             { return 8192 }
+func (s *deadThenToolCallStub) CountTokens(t string) (int, error) { return len(t) / 4, nil }
+
+// TestEnsemble_SentinelToolResolution_AcceptsToolCallModel is the RED→GREEN guard
+// for the live root cause: on the sentinel ("helix-agent-ensemble") + Tools path,
+// the resilient resolver (generateMemberResilient) must ACCEPT a tool-capable
+// model whose response is a tool-call turn (EMPTY Content + non-empty ToolCalls)
+// as SUCCESS — instead of rejecting it for empty Content and walking the rest of
+// the catalogue until every candidate is exhausted ("all N member(s) failed").
+//
+// Construction mirrors the live failure precisely:
+//   - the catalogue LEADS with a decommissioned model (skipped/dead) and the
+//     ONLY working model is NOT first — so resolution genuinely runs;
+//   - the request carries the ensemble sentinel model AND Tools — the exact TUI
+//     tool-loop request shape — so generateMemberResilient is exercised (a
+//     non-sentinel model would bypass it).
+//
+// Paired §1.1 mutation: reverting generateMemberResilient's success predicate to
+// `strings.TrimSpace(r.Content) != ""` (ignoring tool calls) makes the working
+// tool-call model be rejected → the resolver returns the "no chat-capable model
+// returned content" error → the ensemble returns "all N member(s) failed" →
+// this test FAILs, proving the assertion genuinely catches the regression.
+func TestEnsemble_SentinelToolResolution_AcceptsToolCallModel(t *testing.T) {
+	stub := &deadThenToolCallStub{
+		ptype:    ProviderTypeGroq,
+		name:     "Groq",
+		deadID:   "gemma-7b-it",          // decommissioned lead — must be skipped
+		goodID:   "llama-3.3-70b-versatile", // working, tool-capable, NOT first
+		toolName: "git_status",
+	}
+	// A second tool-capable member so the ensemble has >1 participant on a tool turn.
+	stub2 := &deadThenToolCallStub{
+		ptype:    ProviderTypeDeepSeek,
+		name:     "DeepSeek",
+		deadID:   "deepseek-dead",
+		goodID:   "deepseek-chat",
+		toolName: "git_status",
+	}
+	ens := NewEnsembleProvider(EnsembleProviderConfig{Members: []Provider{stub, stub2}, Timeout: 10 * time.Second})
+
+	req := &LLMRequest{
+		ID:    uuid.New(),
+		Model: EnsembleModelName, // SENTINEL — forces generateMemberResilient
+		Messages: []Message{
+			{Role: "system", Content: "Call git_status to inspect the repo."},
+			{Role: "user", Content: "What is the git status?"},
+		},
+		Tools: []Tool{{
+			Type:     "function",
+			Function: ToolFunction{Name: "git_status", Description: "show status", Parameters: map[string]interface{}{"type": "object", "properties": map[string]interface{}{}}},
+		}},
+		ToolChoice: "auto",
+	}
+
+	resp, err := ens.Generate(context.Background(), req)
+	if err != nil {
+		t.Fatalf("sentinel+tools resolution must succeed (tool-call model is a working model); got error: %v", err)
+	}
+	if resp == nil {
+		t.Fatal("expected a response carrying tool calls, got nil")
+	}
+	// The ensemble MUST surface the tool call so the caller's tool loop can run it.
+	if len(resp.ToolCalls) == 0 {
+		t.Fatalf("ensemble must surface ToolCalls on a sentinel+tools turn, got none (content=%q)", resp.Content)
+	}
+	if resp.ToolCalls[0].Function.Name != "git_status" {
+		t.Fatalf("expected git_status tool call, got %q", resp.ToolCalls[0].Function.Name)
+	}
+	// Both members participated (each resolved its working tool-call model).
+	if n, _ := resp.ProviderMetadata["ensemble_successful_providers"].(int); n != 2 {
+		t.Fatalf("ensemble_successful_providers = %v, want 2", resp.ProviderMetadata["ensemble_successful_providers"])
+	}
+	// The dead lead model was attempted (and recorded dead), the working model won.
+	if stub.callsFor("gemma-7b-it") < 1 {
+		t.Fatalf("dead lead model should have been attempted once during resolution")
+	}
+	if stub.callsFor("llama-3.3-70b-versatile") < 1 {
+		t.Fatalf("working tool-call model must have been reached during resolution")
+	}
+	// The working tool-call model must be CACHED so the next prompt is 1 call/member.
+	ens.mu.RLock()
+	cached := ens.workingModel["Groq"]
+	ens.mu.RUnlock()
+	if cached != "llama-3.3-70b-versatile" {
+		t.Fatalf("working tool-call model must be cached for reuse; cached=%q", cached)
 	}
 }
