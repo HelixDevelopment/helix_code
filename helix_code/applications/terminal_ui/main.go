@@ -1894,12 +1894,27 @@ func (tui *TerminalUI) showModelSelector() {
 		// The Helix Agent ensemble is the flagship "model" (it fans every prompt
 		// across all configured providers), so it always sorts FIRST — it keeps
 		// the digit-1 shortcut even as many providers from ~/api_keys.sh push the
-		// alphabetical list past the 9 digit-selectable slots. Then deterministic
-		// (provider, name) order for everything else (stable picker shortcuts).
-		iEns := models[i].Provider == llm.ProviderTypeEnsemble
-		jEns := models[j].Provider == llm.ProviderTypeEnsemble
-		if iEns != jEns {
-			return iEns
+		// alphabetical list past the 9 digit-selectable slots. The HelixAgent
+		// provider (HelixAgent's own full-capacity 25-provider engine + ensemble,
+		// reached over its REST server) sorts SECOND — right after the local
+		// ensemble — so its logical models ("helixagent-llm" / "helixagent-
+		// ensemble") land on low digits (2,3) and stay reliably digit-selectable.
+		// Tiers are compared by provider TYPE (not hardcoded model names) so this
+		// stays CONST-046-safe. Then deterministic (provider, name) order for
+		// everything else (stable picker shortcuts).
+		const helixAgentProviderType llm.ProviderType = "helixagent"
+		rank := func(m *llm.ModelInfo) int {
+			switch m.Provider {
+			case llm.ProviderTypeEnsemble:
+				return 0
+			case helixAgentProviderType:
+				return 1
+			default:
+				return 2
+			}
+		}
+		if ri, rj := rank(models[i]), rank(models[j]); ri != rj {
+			return ri < rj
 		}
 		if models[i].Provider != models[j].Provider {
 			return models[i].Provider < models[j].Provider

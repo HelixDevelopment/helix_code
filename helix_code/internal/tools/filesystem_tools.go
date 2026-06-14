@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"dev.helix.code/internal/approval"
@@ -57,13 +58,34 @@ func (t *FSReadTool) Validate(params map[string]interface{}) error {
 
 func (t *FSReadTool) Execute(ctx context.Context, params map[string]interface{}) (interface{}, error) {
 	path := params["path"].(string)
+	reader := t.registry.filesystem.Reader()
 
+	var result *filesystem.FileContent
+	var err error
 	if startLine, ok := params["start_line"].(int); ok {
 		endLine := params["end_line"].(int)
-		return t.registry.filesystem.Reader().ReadLines(ctx, path, startLine, endLine)
+		result, err = reader.ReadLines(ctx, path, startLine, endLine)
+	} else {
+		result, err = reader.Read(ctx, path)
 	}
 
-	return t.registry.filesystem.Reader().Read(ctx, path)
+	// Graceful directory handling: when fs_read is invoked on a directory the
+	// reader returns an is_directory error. Instead of surfacing that NEGATIVE
+	// error to the model, fall back to a readable, bounded directory listing
+	// (a helpful "ls") so the model gets a positive, usable result.
+	if err != nil && isDirectoryError(err) {
+		return reader.ListDir(ctx, path)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// isDirectoryError reports whether err is the filesystem "is_directory" error.
+func isDirectoryError(err error) bool {
+	var fsErr *filesystem.FileSystemError
+	return errors.As(err, &fsErr) && fsErr.Type == filesystem.ErrorIsDirectory
 }
 
 // FSWriteTool implements file writing

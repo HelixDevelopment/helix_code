@@ -37,6 +37,12 @@ func clearAllProviderKeys(t *testing.T) {
 	// buildOpenAICompatibleProviders deterministically uses the offline fallback
 	// catalogue path, whose providers are themselves key-gated by clearAllProviderKeys.
 	t.Setenv("HELIX_VERIFIER_ENDPOINT", "http://127.0.0.1:1")
+	// Pin the HelixAgent base URL at an unreachable address too, so the
+	// no-key-path assertions hold even if a real HelixAgent server happens to be
+	// running on the developer's machine (default localhost:7061). With it
+	// unreachable, registerHelixAgentProvider deterministically returns 0 and
+	// registers nothing.
+	t.Setenv("HELIXAGENT_BASE_URL", "http://127.0.0.1:1")
 }
 
 // TestRegisterEnvProviders_RegistersWhenKeyPresent proves that, when a provider

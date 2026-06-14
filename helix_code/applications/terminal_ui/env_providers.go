@@ -9,6 +9,7 @@ import (
 
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/llm/providers/helixagent"
 	"dev.helix.code/internal/verifier"
 )
 
@@ -160,7 +161,61 @@ func registerEnvProviders(manager *llm.ModelManager, cfg *config.Config) int {
 
 	registered += registerEnsembleProvider(manager, ensembleMembers)
 
+	// The HelixAgent adapter is its OWN ensemble (HelixAgent's real 25-provider
+	// engine + ensemble fronted over its REST server). It is deliberately NOT
+	// added to ensembleMembers above — fanning the local EnsembleProvider into a
+	// remote ensemble would double-orchestrate the same prompt. It registers as a
+	// standalone provider so its logical models ("helixagent-llm" /
+	// "helixagent-ensemble") appear in the picker on their own.
+	registered += registerHelixAgentProvider(manager)
+
 	return registered
+}
+
+// registerHelixAgentProvider registers the HelixAgent adapter (the full-capacity
+// HelixAgent engine + ensemble, consumed over its running REST server) into
+// manager — but ONLY when that server is actually reachable. The base URL is
+// resolved from HELIXAGENT_BASE_URL (falling back to the adapter's documented
+// DefaultBaseURL), and a short-timeout IsAvailable health probe gates the
+// registration so the /model picker never lists a dead "HelixAgent" entry when
+// the agent isn't running (an anti-bluff guarantee — §11.4 / CONST-035: a listed
+// model is a claim it can be used). On success it returns 1; otherwise it logs a
+// single honest info line and returns 0.
+//
+// CONST-036/037: the adapter sources its model list from HelixAgent's live
+// /v1/models — no hardcoded list is introduced here. CONST-051(B): no
+// project-specific context is injected into the helixagent sub-package; the base
+// URL is resolved here (env/default) and passed in via the constructor.
+func registerHelixAgentProvider(manager *llm.ModelManager) int {
+	if manager == nil {
+		return 0
+	}
+
+	baseURL := strings.TrimSpace(os.Getenv("HELIXAGENT_BASE_URL"))
+	if baseURL == "" {
+		baseURL = helixagent.DefaultBaseURL
+	}
+
+	provider := helixagent.New(baseURL)
+
+	// Quick liveness probe with a short timeout: only register when the HelixAgent
+	// server is actually reachable and exposing at least one provider in its
+	// engine roster. An unreachable agent yields a clean no-op (return 0), never a
+	// dead picker entry.
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if !provider.IsAvailable(ctx) {
+		log.Printf("ℹ️  TUI: HelixAgent not reachable at %s — skipping (start the HelixAgent server to make its full engine selectable)", baseURL)
+		return 0
+	}
+
+	if err := manager.RegisterProvider(provider); err != nil {
+		log.Printf("⚠️  TUI: skipping HelixAgent provider (registration failed: %v)", err)
+		return 0
+	}
+
+	log.Printf("✅ TUI: registered HelixAgent provider (full-capacity engine + ensemble) at %s", baseURL)
+	return 1
 }
 
 // registerEnsembleProvider registers the "Helix Agent ensemble" meta-provider —

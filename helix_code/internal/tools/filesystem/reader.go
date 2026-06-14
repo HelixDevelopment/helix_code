@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -20,6 +21,11 @@ type FileReader interface {
 
 	// ReadLines reads specific lines from a file
 	ReadLines(ctx context.Context, path string, start, end int) (*FileContent, error)
+
+	// ListDir lists the entries of a directory (bounded, read-only). It exists
+	// so fs_read on a directory path returns a useful listing instead of an
+	// is_directory error.
+	ListDir(ctx context.Context, path string) (*DirListing, error)
 
 	// ReadWithLimit reads file with size limit
 	ReadWithLimit(ctx context.Context, path string, maxBytes int64) (*FileContent, error)
@@ -63,6 +69,50 @@ func (fc *FileContent) String() string {
 		header = fmt.Sprintf("%s:\n", fc.Path)
 	}
 	return header + string(fc.Content)
+}
+
+// maxDirListingEntries caps how many directory entries a single fs_read on a
+// directory will surface, so a huge directory cannot flood the model context.
+const maxDirListingEntries = 500
+
+// DirEntry is a single entry of a directory listing.
+type DirEntry struct {
+	Name  string // entry name (not the full path)
+	IsDir bool
+	Size  int64 // size in bytes for regular files (0 for directories)
+}
+
+// DirListing is the read-only result of listing a directory. It renders as
+// readable text (fmt.Stringer) so the agent tool-loop can feed it back to the
+// model as a positive, usable "ls"-style result instead of an is_directory
+// error.
+type DirListing struct {
+	Path      string
+	Entries   []DirEntry
+	Total     int  // total entries found before any cap was applied
+	Truncated bool // true when Total exceeded maxDirListingEntries
+}
+
+// String renders the directory listing as readable text. A short header names
+// the path and the entry count, followed by the sorted entries (directories
+// marked with a trailing slash, files annotated with their byte size).
+func (d *DirListing) String() string {
+	if d == nil {
+		return ""
+	}
+	var b strings.Builder
+	fmt.Fprintf(&b, "%s (directory, %d entries):\n", d.Path, d.Total)
+	for _, e := range d.Entries {
+		if e.IsDir {
+			fmt.Fprintf(&b, "  %s/\n", e.Name)
+		} else {
+			fmt.Fprintf(&b, "  %s (%d bytes)\n", e.Name, e.Size)
+		}
+	}
+	if d.Truncated {
+		fmt.Fprintf(&b, "  ...(truncated; showing %d of %d entries)\n", len(d.Entries), d.Total)
+	}
+	return b.String()
 }
 
 // FileInfo contains file metadata
@@ -275,6 +325,77 @@ func (r *fileReader) ReadLines(ctx context.Context, path string, start, end int)
 	}
 
 	return fileContent, nil
+}
+
+// ListDir lists the entries of a directory (bounded, read-only). It validates
+// and permission-checks the path exactly like Read, then returns a *DirListing
+// instead of erroring, so fs_read on a directory yields a useful "ls"-style
+// result rather than an is_directory error.
+func (r *fileReader) ListDir(ctx context.Context, path string) (*DirListing, error) {
+	// Validate path (same security posture as Read).
+	validationResult, err := r.fs.pathValidator.Validate(path)
+	if err != nil {
+		return nil, err
+	}
+	normalizedPath := validationResult.NormalizedPath
+
+	// Check permissions.
+	if err := r.fs.permissionChecker.CheckPermission(normalizedPath, OpRead); err != nil {
+		return nil, err
+	}
+
+	// Confirm it exists and is a directory.
+	info, err := os.Stat(normalizedPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, NewFileNotFoundError(normalizedPath)
+		}
+		return nil, fmt.Errorf("failed to stat path: %w", err)
+	}
+	if !info.IsDir() {
+		return nil, NewNotDirectoryError(normalizedPath)
+	}
+
+	dirEntries, err := os.ReadDir(normalizedPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read directory: %w", err)
+	}
+
+	// Check for context cancellation.
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+
+	// Sort entries by name for deterministic, readable output.
+	sort.Slice(dirEntries, func(i, j int) bool {
+		return dirEntries[i].Name() < dirEntries[j].Name()
+	})
+
+	listing := &DirListing{
+		Path:  normalizedPath,
+		Total: len(dirEntries),
+	}
+
+	for _, de := range dirEntries {
+		if len(listing.Entries) >= maxDirListingEntries {
+			listing.Truncated = true
+			break
+		}
+		entry := DirEntry{
+			Name:  de.Name(),
+			IsDir: de.IsDir(),
+		}
+		if !de.IsDir() {
+			if fi, statErr := de.Info(); statErr == nil {
+				entry.Size = fi.Size()
+			}
+		}
+		listing.Entries = append(listing.Entries, entry)
+	}
+
+	return listing, nil
 }
 
 // ReadWithLimit reads file with size limit
