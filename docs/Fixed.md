@@ -448,3 +448,91 @@ helix_code/internal/database/database_integration_test.go hardcodes Config{Host:
 
 helix_code/internal/redis/redis_stress_test.go:38-39 reads TEST_REDIS_HOST/TEST_REDIS_PORT (default localhost:6379) instead of the standard HELIX_REDIS_HOST/HELIX_REDIS_PORT contract; causes false 100%-error FAIL against booted Redis on 16379. Pointed at TEST_REDIS_PORT=16379 it's GREEN. Env-var-contract inconsistency (harness).
 
+## HXC-068 — speckit debate adapter wireable into agentic debate flow
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** commit:95b7385c speckit debate adapter wireable
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Wire the speckit debate adapter so the agentic debate flow can invoke it end-to-end; adapter is constructable and dispatchable from the orchestrator (commit 95b7385c).
+
+## HXC-069 — HelixMemory default-on durable persistence with graceful fallback
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** commit:ac3ad237 HelixMemory default-on persist+fallback
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+HelixMemory persists cross-session memory by default and falls back gracefully when the backend store is unavailable, so recall works out of the box (commit ac3ad237).
+
+## HXC-070 — HelixMemory persist log no longer misreports success on failure
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** commit:a0239f52 honest HelixMemory persist log
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+The HelixMemory persistence log now reports the real outcome instead of an unconditional success line, removing a §11.4 honest-logging bluff (commit a0239f52).
+
+## HXC-071 — Web LLM handler httptest coverage for generate and stream
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** commit:6f382b95 web handler httptest coverage
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Add httptest-based handler tests exercising the web /llm/generate and /llm/stream endpoints with real request/response round-trips (commit 6f382b95).
+
+## HXC-072 — CLI /undo and /diff slash commands over autocommit substrate
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** commit:bd5228f8 CLI /undo + /diff commands
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Implement CLI /undo and /diff commands that revert and show changes against the git autocommit substrate, giving users real edit history control (commit bd5228f8).
+
+## HXC-073 — Autocommit git substrate backing CLI edit history
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** commit:61d7167e autocommit git substrate
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Add an autocommit git substrate that snapshots edits so /undo and /diff operate on real commits rather than in-memory state (commit 61d7167e).
+
+## HXC-074 — Mobile gomobile Generate binding for on-device LLM calls
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** commit:28465071 mobile gomobile Generate binding
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Expose a gomobile-bound Generate entrypoint so the mobile applications can invoke the LLM provider through the shared client core (commit 28465071).
+
+## HXC-075 — Phase-1 CLI-Agent Fusion plan reconciliation with delivered state
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** commit:e3063af1 Phase-1 plan reconciliation
+**Severity:** Low
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Reconcile the Phase-1 implementation plan against actually-delivered state so the programme plan reflects reality, not aspiration (commit e3063af1).
+
