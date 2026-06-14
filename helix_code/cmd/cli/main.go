@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"dev.helix.code/cmd/cli/i18n"
+	"dev.helix.code/internal/adapters/speckit_debate_adapter"
 	"dev.helix.code/internal/agent"
 	"dev.helix.code/internal/agent/subagent"
 	"dev.helix.code/internal/approval"
@@ -2201,6 +2202,15 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 			_ = c.handleDiff(ctx, ref)
 			continue
 		}
+		// /debate <prompt> — runs the prompt through the DebateOrchestrator
+		// 8-phase MASTER protocol wired to the CLI's REAL llm provider via
+		// speckit_debate_adapter.NewLLMBackedResponder. Prefix-matched (takes
+		// the remainder of the line as the debate topic), mirroring /diff.
+		if strings.HasPrefix(lower, "/debate ") || lower == "/debate" {
+			topic := strings.TrimSpace(strings.TrimPrefix(input, "/debate"))
+			_ = c.handleDebate(ctx, topic)
+			continue
+		}
 		// Unknown slash command: surface clearly, don't send to LLM
 		if strings.HasPrefix(input, "/") {
 			fmt.Println(tr(ctx, "cli_repl_unknown_slash", map[string]any{"Input": input}))
@@ -2411,6 +2421,88 @@ func (c *CLI) handleDiff(ctx context.Context, ref string) error {
 	if strings.TrimSpace(out) == "" {
 		fmt.Println("(no changes)")
 		return nil
+	}
+	fmt.Print(out)
+	if !strings.HasSuffix(out, "\n") {
+		fmt.Println()
+	}
+	return nil
+}
+
+// handleDebate runs the given topic through DebateOrchestrator's 8-phase
+// MASTER protocol, wired to the CLI's REAL llm provider. This is the
+// production call-site for speckit_debate_adapter.NewLLMBackedResponder:
+// the orchestrator's ProviderInvoker is supplied by wrapping the CLI's
+// existing *llm.Provider.Generate (the same provider the REPL uses for plain
+// prompts) into the (ctx, prompt) (string, error) shape the adapter requires.
+//
+// Anti-bluff (§11.4 / CONST-035): the invoker makes a REAL provider.Generate
+// call — no simulated/synthesised output. When no provider is configured the
+// command refuses cleanly rather than fabricating a debate. The adapter
+// itself refuses (ErrSpeckitDebateInvokerNotProvided) if a nil invoker were
+// ever passed, and surfaces orchestrator errors verbatim.
+func (c *CLI) handleDebate(ctx context.Context, topic string) error {
+	topic = strings.TrimSpace(topic)
+	if topic == "" {
+		fmt.Println("usage: /debate <topic>")
+		return nil
+	}
+	if c.llmProvider == nil {
+		fmt.Println(tr(ctx, "cli_repl_no_provider", nil))
+		return nil
+	}
+
+	// Resolve the provider's first advertised model. The orchestrator's
+	// RegisterProvider requires a non-empty model name, and the provider's
+	// Generate needs one too, so a provider with zero models cannot drive a
+	// debate — refuse cleanly rather than hand the adapter an empty spec
+	// that RegisterProvider would reject (§11.4.6 no-guessing).
+	provider := c.llmProvider
+	modelName := ""
+	if models := provider.GetModels(); len(models) > 0 {
+		modelName = models[0].Name
+	}
+	if strings.TrimSpace(modelName) == "" {
+		fmt.Println("❌ /debate: active provider advertises no models; cannot run a debate")
+		return nil
+	}
+
+	// Wrap the REAL CLI provider into the adapter's ProviderInvoker shape.
+	// provider.Generate is (ctx, *LLMRequest) (*LLMResponse, error); the
+	// orchestrator wants (ctx, prompt) (string, error). This closure is the
+	// honest seam: every debate agent turn round-trips through a real LLM
+	// call against c.llmProvider.
+	invoker := func(ictx context.Context, prompt string) (string, error) {
+		resp, err := provider.Generate(ictx, &llm.LLMRequest{
+			Model:       modelName,
+			MaxTokens:   1000,
+			Temperature: 0.7,
+			Messages:    []llm.Message{{Role: "user", Content: prompt}},
+		})
+		if err != nil {
+			return "", err
+		}
+		if resp == nil {
+			return "", fmt.Errorf("provider returned nil response")
+		}
+		return resp.Content, nil
+	}
+
+	responder, err := speckit_debate_adapter.NewLLMBackedResponder(
+		invoker,
+		[]speckit_debate_adapter.AgentSpec{
+			{Provider: provider.GetName(), Model: modelName, Score: 0.9},
+		},
+	)
+	if err != nil {
+		fmt.Printf("❌ /debate setup failed: %v\n", err)
+		return err
+	}
+
+	out, err := responder.Generate(ctx, topic)
+	if err != nil {
+		fmt.Printf("❌ /debate failed: %v\n", err)
+		return err
 	}
 	fmt.Print(out)
 	if !strings.HasSuffix(out, "\n") {
