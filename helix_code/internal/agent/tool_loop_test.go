@@ -26,10 +26,10 @@ type writeTool struct {
 	level      approval.ApprovalLevel
 }
 
-func (w *writeTool) Name() string                  { return "fs_write_test" }
-func (w *writeTool) Description() string            { return "writes a sentinel (real side effect)" }
-func (w *writeTool) Category() tools.ToolCategory   { return tools.CategoryFileSystem }
-func (w *writeTool) Validate(map[string]interface{}) error { return nil }
+func (w *writeTool) Name() string                             { return "fs_write_test" }
+func (w *writeTool) Description() string                      { return "writes a sentinel (real side effect)" }
+func (w *writeTool) Category() tools.ToolCategory             { return tools.CategoryFileSystem }
+func (w *writeTool) Validate(map[string]interface{}) error    { return nil }
 func (w *writeTool) RequiresApproval() approval.ApprovalLevel { return w.level }
 
 func (w *writeTool) Schema() tools.ToolSchema {
@@ -65,10 +65,10 @@ type echoTool struct {
 	calls *int32
 }
 
-func (e *echoTool) Name() string             { return "echo" }
-func (e *echoTool) Description() string       { return "echoes the text argument back" }
-func (e *echoTool) Category() tools.ToolCategory { return tools.CategoryFileSystem }
-func (e *echoTool) Validate(map[string]interface{}) error { return nil }
+func (e *echoTool) Name() string                             { return "echo" }
+func (e *echoTool) Description() string                      { return "echoes the text argument back" }
+func (e *echoTool) Category() tools.ToolCategory             { return tools.CategoryFileSystem }
+func (e *echoTool) Validate(map[string]interface{}) error    { return nil }
 func (e *echoTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
 
 func (e *echoTool) Schema() tools.ToolSchema {
@@ -97,10 +97,11 @@ func (e *echoTool) Execute(_ context.Context, params map[string]interface{}) (in
 // ---------------------------------------------------------------------------
 
 type scriptedProvider struct {
-	responses  []llm.LLMResponse
-	calls      int32
-	lastReqHad bool     // whether the last request carried Tools
-	lastTools  []string // names of the tools offered on the LAST request (offer-filter evidence)
+	responses   []llm.LLMResponse
+	calls       int32
+	lastReqHad  bool            // whether the last request carried Tools
+	lastTools   []string        // names of the tools offered on the LAST request (offer-filter evidence)
+	reqMessages [][]llm.Message // a snapshot of req.Messages captured per Generate call (turn N == index N)
 }
 
 func (p *scriptedProvider) Generate(_ context.Context, req *llm.LLMRequest) (*llm.LLMResponse, error) {
@@ -110,6 +111,12 @@ func (p *scriptedProvider) Generate(_ context.Context, req *llm.LLMRequest) (*ll
 		names = append(names, t.Function.Name)
 	}
 	p.lastTools = names
+	// Capture a snapshot of the messages this turn saw (the model-facing
+	// conversation), so a test can assert what the loop fed back from a prior
+	// tool result. Copy the slice so later mutation of convo can't alias it.
+	snap := make([]llm.Message, len(req.Messages))
+	copy(snap, req.Messages)
+	p.reqMessages = append(p.reqMessages, snap)
 	i := int(atomic.AddInt32(&p.calls, 1)) - 1
 	if i >= len(p.responses) {
 		return nil, fmt.Errorf("scriptedProvider: no response scripted for Generate call #%d", i+1)
@@ -118,8 +125,8 @@ func (p *scriptedProvider) Generate(_ context.Context, req *llm.LLMRequest) (*ll
 	return &resp, nil
 }
 
-func (p *scriptedProvider) GetType() llm.ProviderType                 { return llm.ProviderTypeLocal }
-func (p *scriptedProvider) GetName() string                           { return "scripted" }
+func (p *scriptedProvider) GetType() llm.ProviderType { return llm.ProviderTypeLocal }
+func (p *scriptedProvider) GetName() string           { return "scripted" }
 func (p *scriptedProvider) GetModels() []llm.ModelInfo {
 	return []llm.ModelInfo{{ID: "scripted-1", Name: "scripted-model-1", SupportsTools: true}}
 }
@@ -131,8 +138,8 @@ func (p *scriptedProvider) IsAvailable(context.Context) bool { return true }
 func (p *scriptedProvider) GetHealth(context.Context) (*llm.ProviderHealth, error) {
 	return &llm.ProviderHealth{Status: "ok"}, nil
 }
-func (p *scriptedProvider) Close() error             { return nil }
-func (p *scriptedProvider) GetContextWindow() int    { return 8192 }
+func (p *scriptedProvider) Close() error                    { return nil }
+func (p *scriptedProvider) GetContextWindow() int           { return 8192 }
 func (p *scriptedProvider) CountTokens(string) (int, error) { return 0, nil }
 
 func newEchoRegistry(t *testing.T, calls *int32) *tools.ToolRegistry {
@@ -393,4 +400,157 @@ func TestRunToolLoop_DefaultMode_OffersAndExecutesWriteTool(t *testing.T) {
 		"write tool must execute in default mode — proves the ReadOnlyOnly flag is load-bearing")
 	require.Len(t, res.Trace, 1)
 	require.Empty(t, res.Trace[0].Err)
+}
+
+// ---------------------------------------------------------------------------
+// bigOutputTool — a REAL read-only tool that returns a LARGE output (size runes
+// of 'A'). Models the real-world case of fs_read of a big governance file or a
+// long grep/git-log whose full output would otherwise accumulate across turns
+// and overflow the model's context window. Not a loop stub — Execute really runs
+// and really returns the big string.
+// ---------------------------------------------------------------------------
+
+type bigOutputTool struct {
+	size int
+}
+
+func (b *bigOutputTool) Name() string                             { return "big_read" }
+func (b *bigOutputTool) Description() string                      { return "returns a large output" }
+func (b *bigOutputTool) Category() tools.ToolCategory             { return tools.CategoryFileSystem }
+func (b *bigOutputTool) Validate(map[string]interface{}) error    { return nil }
+func (b *bigOutputTool) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }
+
+func (b *bigOutputTool) Schema() tools.ToolSchema {
+	return tools.ToolSchema{
+		Type:        "object",
+		Properties:  map[string]interface{}{},
+		Description: "returns a large output",
+	}
+}
+
+func (b *bigOutputTool) Execute(_ context.Context, _ map[string]interface{}) (interface{}, error) {
+	r := make([]rune, b.size)
+	for i := range r {
+		r[i] = 'A'
+	}
+	return string(r), nil
+}
+
+// Test 5 — context-bounding (the multi-turn context-overflow fix).
+//
+// A multi-turn loop where turn 1 calls a real tool returning a 20,000-char
+// output, then turn 2 produces the final answer. The model-facing role:"tool"
+// message fed back into turn 2 MUST be truncated to MaxToolResultChars (default
+// 4000) WITH the truncation marker — NOT the full 20,000 chars — so accumulated
+// multi-turn context stays bounded regardless of tool/model/file size. The
+// ToolTraceEntry keeps its own independent short excerpt (~300 chars).
+//
+// §1.1 mutation note: removing the truncateForModel call in tool_loop.go (feeding
+// back the full output) makes the turn-2 tool message carry all 20,000 chars,
+// failing the length + non-contains assertions below.
+func TestRunToolLoop_BoundsToolResultContext(t *testing.T) {
+	const bigSize = 20000
+
+	r, err := tools.NewToolRegistry(tools.DefaultRegistryConfig())
+	require.NoError(t, err)
+	r.Register(&bigOutputTool{size: bigSize})
+
+	provider := &scriptedProvider{responses: []llm.LLMResponse{
+		// Turn 1: model asks to call the big-output tool.
+		{
+			ID: uuid.New(),
+			ToolCalls: []llm.ToolCall{{
+				ID:   "call-1",
+				Type: "function",
+				Function: llm.ToolCallFunc{
+					Name:      "big_read",
+					Arguments: map[string]interface{}{},
+				},
+			}},
+		},
+		// Turn 2: final text answer (no tool calls).
+		{ID: uuid.New(), Content: "read it"},
+	}}
+
+	res, err := RunToolLoop(context.Background(), provider, r, []llm.Message{
+		{Role: "user", Content: "read the big file"},
+	}, ToolLoopOptions{})
+	require.NoError(t, err)
+	require.NotNil(t, res)
+	require.Equal(t, "read it", res.FinalContent)
+	require.Equal(t, 2, res.Turns)
+
+	// Capture the messages the provider saw on TURN 2 (index 1).
+	require.Len(t, provider.reqMessages, 2)
+	turn2 := provider.reqMessages[1]
+
+	// Find the role:"tool" message carrying the big_read result.
+	var toolMsg *llm.Message
+	for i := range turn2 {
+		if turn2[i].Role == "tool" && turn2[i].Name == "big_read" {
+			toolMsg = &turn2[i]
+			break
+		}
+	}
+	require.NotNil(t, toolMsg, "turn-2 conversation must contain the role:tool big_read result")
+
+	// The fed-back tool result MUST be bounded to MaxToolResultChars (default
+	// 4000) plus the truncation marker — NOT the full 20,000 chars.
+	feedRunes := []rune(toolMsg.Content)
+	require.Less(t, len(feedRunes), bigSize,
+		"fed-back tool result must be bounded, not the full 20,000 chars")
+	require.LessOrEqual(t, len(feedRunes), 4000+200,
+		"fed-back tool result must be ~MaxToolResultChars + a short marker")
+	require.Contains(t, toolMsg.Content, "[truncated",
+		"truncated tool result must carry the truncation marker")
+	// The marker MUST report the original size so the model knows it was cut.
+	require.Contains(t, toolMsg.Content, fmt.Sprintf("of %d", bigSize))
+
+	// The ToolTraceEntry keeps its OWN independent short excerpt (~300-char cap),
+	// distinct from the model-facing feedback bound.
+	require.Len(t, res.Trace, 1)
+	traceRunes := []rune(res.Trace[0].Output)
+	require.LessOrEqual(t, len(traceRunes), traceOutputMaxLen+1,
+		"trace excerpt keeps its own ~300-char cap")
+}
+
+// Test 5b — explicit MaxToolResultChars override is honored (load-bearing).
+func TestRunToolLoop_MaxToolResultCharsOverride(t *testing.T) {
+	const bigSize = 20000
+
+	r, err := tools.NewToolRegistry(tools.DefaultRegistryConfig())
+	require.NoError(t, err)
+	r.Register(&bigOutputTool{size: bigSize})
+
+	provider := &scriptedProvider{responses: []llm.LLMResponse{
+		{
+			ID: uuid.New(),
+			ToolCalls: []llm.ToolCall{{
+				ID:       "call-1",
+				Type:     "function",
+				Function: llm.ToolCallFunc{Name: "big_read", Arguments: map[string]interface{}{}},
+			}},
+		},
+		{ID: uuid.New(), Content: "ok"},
+	}}
+
+	res, err := RunToolLoop(context.Background(), provider, r, []llm.Message{
+		{Role: "user", Content: "read"},
+	}, ToolLoopOptions{MaxToolResultChars: 500})
+	require.NoError(t, err)
+	require.NotNil(t, res)
+
+	require.Len(t, provider.reqMessages, 2)
+	turn2 := provider.reqMessages[1]
+	var toolMsg *llm.Message
+	for i := range turn2 {
+		if turn2[i].Role == "tool" && turn2[i].Name == "big_read" {
+			toolMsg = &turn2[i]
+			break
+		}
+	}
+	require.NotNil(t, toolMsg)
+	require.LessOrEqual(t, len([]rune(toolMsg.Content)), 500+200,
+		"override bound (500) must be honored")
+	require.Contains(t, toolMsg.Content, "[truncated")
 }

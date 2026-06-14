@@ -46,6 +46,25 @@ type FileContent struct {
 	LineEndings LineEndingType
 }
 
+// String renders the file content as readable text for any consumer that
+// stringifies the value (e.g. the agent tool-loop feeding fs_read's result
+// back to the model). Without this, fmt.Sprintf("%v", fc) would render the
+// Content []byte field as a decimal byte array ("&{/path [35 32 ...]}"),
+// which models misread as a binary/corrupted file. A short header naming the
+// path (and the line range for a partial read) precedes the actual file text.
+func (fc *FileContent) String() string {
+	if fc == nil {
+		return ""
+	}
+	var header string
+	if fc.IsPartial {
+		header = fmt.Sprintf("%s (lines %d-%d of %d):\n", fc.Path, fc.StartLine, fc.EndLine, fc.TotalLines)
+	} else {
+		header = fmt.Sprintf("%s:\n", fc.Path)
+	}
+	return header + string(fc.Content)
+}
+
 // FileInfo contains file metadata
 type FileInfo struct {
 	Path          string

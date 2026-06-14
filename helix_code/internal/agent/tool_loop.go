@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"dev.helix.code/internal/approval"
@@ -28,6 +29,15 @@ const (
 	defaultMaxTurns = 6
 	// traceOutputMaxLen caps the per-call Output excerpt recorded in the trace.
 	traceOutputMaxLen = 300
+	// defaultMaxToolResultChars bounds the MODEL-FACING tool-result feedback
+	// content (the role:"tool" message) when ToolLoopOptions.MaxToolResultChars
+	// <= 0. A large tool output (e.g. fs_read of a 40KB governance file, or a
+	// long grep / git log) fed back in full accumulates across turns and
+	// overflows the model's context window — especially for smaller-context
+	// ensemble members ("Please reduce the length of the messages or
+	// completion"). Bounding each fed-back result keeps accumulated multi-turn
+	// context bounded regardless of tool / model / file size.
+	defaultMaxToolResultChars = 4000
 )
 
 // MaxTurnsExceededMarker is appended to FinalContent when the loop hits MaxTurns
@@ -97,6 +107,16 @@ type ToolLoopOptions struct {
 	// registry, where applyApprovalGate would otherwise let every tool through)
 	// can never reach a write/shell tool. Default (false) ⇒ behaviour unchanged.
 	ReadOnlyOnly bool
+	// MaxToolResultChars bounds, in runes, the MODEL-FACING content of each
+	// fed-back role:"tool" message (both permitted-tool outputs AND read-only
+	// "not permitted" refusals). A tool output longer than this is truncated on
+	// a rune boundary with a clear "…[truncated N of M chars]" marker before it
+	// is appended to the conversation, so accumulated multi-turn context stays
+	// bounded regardless of tool / model / file size. <= 0 ⇒
+	// defaultMaxToolResultChars (4000). This is independent of the
+	// ToolTraceEntry.Output display excerpt, which keeps its own
+	// traceOutputMaxLen (~300) cap.
+	MaxToolResultChars int
 }
 
 // RunToolLoop runs a multi-turn agentic tool-execution loop against provider.
@@ -130,6 +150,13 @@ func RunToolLoop(ctx context.Context, provider llm.Provider, registry *tools.Too
 	maxTurns := opts.MaxTurns
 	if maxTurns <= 0 {
 		maxTurns = defaultMaxTurns
+	}
+
+	// maxToolResultChars bounds the model-facing tool-result feedback content so
+	// large outputs cannot accumulate across turns and overflow the context.
+	maxToolResultChars := opts.MaxToolResultChars
+	if maxToolResultChars <= 0 {
+		maxToolResultChars = defaultMaxToolResultChars
 	}
 
 	// readOnlyAllow is the set of tool names that may be offered AND executed
@@ -240,6 +267,10 @@ func RunToolLoop(ctx context.Context, provider llm.Provider, registry *tools.Too
 			if errStr != "" {
 				feedback = "error: " + errStr
 			}
+			// Bound the MODEL-FACING feedback so a large tool output cannot
+			// accumulate across turns and overflow the model's context window.
+			// Applied uniformly to permitted outputs AND read-only refusals.
+			feedback = truncateForModel(feedback, maxToolResultChars)
 			convo = append(convo, llm.Message{
 				Role:       "tool",
 				ToolCallID: call.ID,
@@ -367,13 +398,32 @@ func callOutput(dispatched []ToolDispatchResult, i int, call llm.ToolCall) (outp
 }
 
 // stringifyResult renders a tool's return value as text for the trace + the
-// feedback message. Strings pass through; everything else uses %v.
+// feedback message fed back to the model. It renders common types readably so
+// a tool returning a struct/[]byte/Stringer is never delivered to the model as
+// a raw %v dump (the canonical bug: fs_read returns *filesystem.FileContent,
+// whose Content []byte field rendered via %v as a decimal byte array
+// "&{/path [35 32 ...]}", which models misread as a binary/corrupted file).
+//
+// Order matters: nil → ""; string → as-is; error → .Error(); []byte →
+// string(b); fmt.Stringer → .String() (this is the FileContent path, now that
+// it implements String()); otherwise marshal to JSON, falling back to %v only
+// if marshalling fails. This is defense-in-depth: ANY tool returning a
+// Stringer, a []byte, or a JSON-able value renders readably for the model.
 func stringifyResult(v interface{}) string {
-	if v == nil {
+	switch t := v.(type) {
+	case nil:
 		return ""
+	case string:
+		return t
+	case error:
+		return t.Error()
+	case []byte:
+		return string(t)
+	case fmt.Stringer:
+		return t.String()
 	}
-	if s, ok := v.(string); ok {
-		return s
+	if b, err := json.MarshalIndent(v, "", "  "); err == nil {
+		return string(b)
 	}
 	return fmt.Sprintf("%v", v)
 }
@@ -385,4 +435,21 @@ func truncate(s string, n int) string {
 		return s
 	}
 	return string(r[:n]) + "…"
+}
+
+// truncateForModel caps the MODEL-FACING content s to at most max runes,
+// appending a clear "…[truncated N of M chars]" marker when cut so the model
+// knows the result was bounded (N = runes kept, M = original rune count). It
+// truncates on a RUNE boundary so a multibyte rune is never split. max <= 0 is
+// treated as the default bound (defaultMaxToolResultChars) — the caller already
+// normalises, but this keeps the helper safe in isolation.
+func truncateForModel(s string, max int) string {
+	if max <= 0 {
+		max = defaultMaxToolResultChars
+	}
+	r := []rune(s)
+	if len(r) <= max {
+		return s
+	}
+	return string(r[:max]) + fmt.Sprintf("\n…[truncated %d of %d chars]", max, len(r))
 }

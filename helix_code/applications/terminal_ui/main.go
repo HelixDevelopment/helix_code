@@ -1627,6 +1627,12 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 				Model:        tui.selectedModel,
 				MaxTurns:     6,
 				SystemPrompt: systemPrompt,
+				// Bound each tool result fed back into the conversation so a deep
+				// multi-tool investigation (many fs_read/grep/git_status results
+				// across turns) cannot overflow the SMALLEST member's context window
+				// — the ensemble fans to free-tier members, one of which may carry
+				// only an 8K context. The display trace keeps its own short excerpt.
+				MaxToolResultChars: 800,
 				// SAFETY (§11.4.133): the TUI registry is built with
 				// tools.NewToolRegistry(nil) — no approval manager wired, so the
 				// registry's applyApprovalGate would let EVERY tool through

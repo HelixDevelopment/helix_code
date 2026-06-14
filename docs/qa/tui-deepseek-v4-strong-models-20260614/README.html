@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="/Volumes/T7/Projects/helix_code/docs/_progress-style.css" />
+</head>
+<body>
+<h1
+id="deepseek-v4-strong-models-real-tools-re-record-qa-evidence-2026-06-14">DeepSeek
+V4 + strong-models real-tools re-record — QA evidence (2026-06-14)</h1>
+<p><strong>Run-id:</strong>
+<code>tui-deepseek-v4-strong-models-20260614</code> <strong>Operator
+request (2026-06-14):</strong> <em>“repeat everything with deep seek v4
+models and similar strong available models! let us know when videos are
+ready!”</em></p>
+<h2 id="verdict-pass-both-videos-captured-frame-evidence">Verdict: PASS
+(both videos, captured-frame evidence)</h2>
+<p>Live model discovery confirmed <strong>DeepSeek V4 is
+available</strong> (<code>deepseek-v4-pro</code>,
+<code>deepseek-v4-flash</code>) alongside other strong models (Mistral
+<code>mistral-large-2512</code>, Groq
+<code>gpt-oss-120b</code>/<code>qwen3-32b</code>). Re-recorded the
+two-video structure with <strong>DeepSeek V4 Pro</strong> as the
+headline single model and the <strong>ensemble</strong> (which now
+resolves a DeepSeek <strong>V4</strong> member alongside
+Mistral/Groq/OpenRouter).</p>
+<ul>
+<li><strong>Video 1</strong> — DeepSeek V4 Pro
+(<code>deepseek-v4-pro</code>, picker digit 2):
+<code>~/Downloads/video1-deepseek-v4-pro.mp4</code> (200 s). All 3
+prompts; the model autonomously calls <code>git_status</code> with
+<code>status</code>/<code>log</code>/<code>diff</code>/<code>show</code>
+subcommands (real diffs of the in-flight changes + real commits),
+<code>glob</code>/<code>grep</code>/<code>fs_read</code> for the
+codebase + AGENTS.md, and the read-only guard refuses <code>shell</code>
+on video.</li>
+<li><strong>Video 2</strong> — Ensemble with strong members (picker
+digit 9): <code>~/Downloads/video2-ensemble-strong-models.mp4</code>
+(267 s). All 3 prompts complete with multiple members visible: prompt 1
+(codebase) <strong>3/4 members</strong>, prompt 3 (git status)
+<strong>3/4 members</strong> each with rich real summaries; prompt 2
+(AGENTS.md — the heaviest) <strong>2/4 members</strong>, resolves
+cleanly.</li>
+</ul>
+<h3 id="captured-frames-frames">Captured frames
+(<code>frames/</code>)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Frame</th>
+<th>Proves</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>video1-deepseek-v4-pro-p3-gitstatus-diff-show.png</code></td>
+<td>DeepSeek V4 Pro: <code>git_status</code> diff
+(<code>4 files changed, 255 insertions</code>) + <code>show</code> (real
+commit <code>d2eaaf5d</code>); <code>shell</code> refused.</td>
+</tr>
+<tr>
+<td><code>video2-ensemble-p1-codebase-3of4.png</code></td>
+<td>Ensemble 3/4 members (DeepSeek V4 / Mistral / OpenRouter) describing
+the real codebase via <code>glob</code>+<code>git_status</code>.</td>
+</tr>
+<tr>
+<td><code>video2-ensemble-p2-agentsmd-2of4-resolves.png</code></td>
+<td>The heaviest prompt resolves (no overflow, no byte-array garbage;
+<code>codebase_map</code> renders as clean JSON).</td>
+</tr>
+<tr>
+<td><code>video2-ensemble-p3-gitstatus-3of4.png</code></td>
+<td>Ensemble 3/4 members each with a real git-status summary (the actual
+4-file diff).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="fixes-landed-this-run-all-tdd-redgreen-paired-1.1">Fixes landed
+this run (all TDD RED→GREEN, paired §1.1)</h2>
+<p>The DeepSeek-V4 single-model path worked immediately (128k context).
+The <strong>ensemble</strong> with smaller free-tier members surfaced
+two real robustness bugs, both fixed:</p>
+<ol type="1">
+<li><strong>Context overflow on deep multi-tool investigations</strong>
+— the AGENTS.md prompt triggers many
+<code>glob</code>/<code>grep</code>/<code>fs_read</code> calls; full
+tool outputs accumulated across turns and overflowed the ensemble’s
+smallest member (Groq 8K-context), failing the whole loop
+(<code>Please reduce the length of the messages</code>). →
+<code>RunToolLoop</code> now bounds each model-facing tool result
+(<code>ToolLoopOptions.MaxToolResultChars</code>, TUI sets 800; the
+display trace keeps its own excerpt).</li>
+<li><strong><code>fs_read</code> returned byte arrays</strong> —
+<code>*filesystem.FileContent</code> (with a <code>[]byte</code> content
+field) reached the model as decimal numbers (<code>[35 32 65 …]</code>)
+via <code>%v</code>, so models reported files as “binary/corrupted.” →
+<code>FileContent.String()</code> renders readable text;
+<code>stringifyResult</code> now handles
+<code>string</code>/<code>error</code>/<code>[]byte</code>/<code>fmt.Stringer</code>/JSON
+(defense-in-depth for every tool).</li>
+</ol>
+<h2 id="honest-note-11.4.6-11.4.123">Honest note (§11.4.6 /
+§11.4.123)</h2>
+<p>The ensemble’s heaviest deep-investigation prompt (AGENTS.md) is
+inherently harder for free-tier small-context members; it resolves
+reliably now (no crash/garbage) but with fewer participating members
+(2/4) and thinner answers than the lighter prompts (3/4, rich). A single
+large-context model (DeepSeek V4 Pro, Video 1) handles every prompt
+richly. This is a free-tier-infrastructure characteristic, not a code
+defect.</p>
+<h2 id="reproduce">Reproduce</h2>
+<pre><code>source /tmp/helix_keys.sh
+cd helix_code &amp;&amp; go build -o bin/helix-tui ./applications/terminal_ui/
+vhs /tmp/v1_ds.tape       # Video 1 — DeepSeek V4 Pro (digit 2)
+vhs /tmp/v2_strong.tape   # Video 2 — ensemble (digit 9, 75s/prompt)</code></pre>
+<h2 id="sources-verified-2026-06-14">Sources verified 2026-06-14</h2>
+<ul>
+<li>DeepSeek live catalog (<code>https://api.deepseek.com/models</code>)
+→ <code>deepseek-v4-pro</code>, <code>deepseek-v4-flash</code>.</li>
+<li>OpenRouter / Mistral / Groq live <code>/models</code> endpoints for
+the strong-model inventory.</li>
+</ul>
+</body>
+</html>
