@@ -1712,7 +1712,7 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 		// Previously the CLI swallowed this telemetry — the user
 		// got the response but no insight into cost/usage.
 		if resp != nil {
-			printGenerationStats(resp)
+			printGenerationStats(resp, contextWindowForModel(provider, modelName))
 		}
 	}
 
@@ -1724,7 +1724,14 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 // users can see consumption like they'd see in Claude Code / Aider / Cline.
 // Anti-bluff: only prints fields that the provider populated; absence-of-data
 // is honestly shown rather than fabricated zero counts.
-func printGenerationStats(resp *llm.LLMResponse) {
+//
+// contextWindow is the active model's REAL context-window size (in tokens),
+// resolved from the provider's model catalogue (ModelInfo.ContextSize). When
+// it is > 0 the render adds a `context: <used>/<window> (NN%)` indicator so
+// the user can see how close they are to the model limit. When it is 0 (the
+// provider did not report a window for the active model) the indicator is
+// OMITTED entirely — never fabricated with a guessed denominator (CONST-035).
+func printGenerationStats(resp *llm.LLMResponse, contextWindow int) {
 	if resp == nil {
 		return
 	}
@@ -1736,6 +1743,12 @@ func printGenerationStats(resp *llm.LLMResponse) {
 	fmt.Printf("\n📊 %s", trc("cli_tokens_summary", map[string]any{
 		"In": in, "Out": out, "Total": in + out,
 	}))
+	// Context-window USED-% indicator. Computed from the REAL total token
+	// count (prompt+completion) against the REAL model window. Emitted only
+	// when the window is known; formatContextUsage returns "" otherwise.
+	if usage := formatContextUsage(in+out, contextWindow); usage != "" {
+		fmt.Print(usage)
+	}
 	if resp.ProcessingTime > 0 {
 		fmt.Printf("   time: %s", resp.ProcessingTime.Round(time.Millisecond))
 		if out > 0 && resp.ProcessingTime.Seconds() > 0 {
@@ -1747,6 +1760,61 @@ func printGenerationStats(resp *llm.LLMResponse) {
 		fmt.Printf("   finish: %s", resp.FinishReason)
 	}
 	fmt.Println()
+}
+
+// formatContextUsage renders the context-window USED-% indicator as a pure
+// function so it is unit-testable in isolation.
+//
+//   - When window <= 0 (the model's context-window size is NOT reliably known
+//     for the active model) it returns "" — the caller OMITS the indicator
+//     rather than printing a fabricated percentage against a guessed window.
+//     This is the honest-conditional mandated by CONST-035: no fake denominator.
+//   - When window > 0 it returns "   context: <used>/<window> (NN%)" where NN
+//     is the integer percentage of used/window. used is clamped to >= 0; the
+//     percentage is allowed to exceed 100 (an honest signal that the reported
+//     token total ran past the catalogue window) rather than being silently
+//     capped, but never goes negative.
+func formatContextUsage(used, window int) string {
+	if window <= 0 {
+		return ""
+	}
+	if used < 0 {
+		used = 0
+	}
+	pct := used * 100 / window
+	return fmt.Sprintf("   context: %d/%d (%d%%)", used, window, pct)
+}
+
+// contextWindowForModel resolves the REAL context-window size (in tokens) for
+// the named model. It returns 0 when no real window is reachable — in which
+// case the caller honestly omits the indicator (CONST-035: never substitute a
+// guessed window).
+//
+// Resolution order, both REAL sources (no hardcoded fallback):
+//  1. The provider's model catalogue (ModelInfo.ContextSize) matched by Name
+//     then ID, mirroring how modelName is resolved on the request path — the
+//     most precise per-model figure.
+//  2. The provider's GetContextWindow() — the active model's window reported
+//     by the provider — used when the catalogue has no matching entry or it
+//     reports 0 for that model.
+func contextWindowForModel(provider llm.Provider, modelName string) int {
+	if provider == nil {
+		return 0
+	}
+	if modelName != "" {
+		for _, m := range provider.GetModels() {
+			if m.Name == modelName || m.ID == modelName {
+				if m.ContextSize > 0 {
+					return m.ContextSize
+				}
+				break
+			}
+		}
+	}
+	if w := provider.GetContextWindow(); w > 0 {
+		return w
+	}
+	return 0
 }
 
 // expandAtMentions scans `*prompt` for `@<path>` tokens and, for each
@@ -2187,7 +2255,7 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 			conversation = append(conversation, llm.Message{Role: "assistant", Content: assembled})
 		}
 		if stats != nil {
-			printGenerationStats(stats)
+			printGenerationStats(stats, contextWindowForModel(c.llmProvider, modelName))
 		}
 	}
 }
