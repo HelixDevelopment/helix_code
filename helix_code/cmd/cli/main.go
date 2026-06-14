@@ -2115,6 +2115,23 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 			conversation = conversation[:0]
 			fmt.Println("(conversation history cleared)")
 			continue
+		case "/undo", "undo":
+			_ = c.handleUndo(ctx)
+			continue
+		}
+		// /diff [ref] — takes an optional ref argument, so it is matched by
+		// prefix (the bare-case switch above matches the whole line). Both
+		// "/diff" and the legacy bare "diff" are recognised, mirroring the
+		// other dual-form commands.
+		if lower == "/diff" || lower == "diff" ||
+			strings.HasPrefix(lower, "/diff ") || strings.HasPrefix(lower, "diff ") {
+			fields := strings.Fields(input)
+			ref := ""
+			if len(fields) > 1 {
+				ref = fields[1]
+			}
+			_ = c.handleDiff(ctx, ref)
+			continue
 		}
 		// Unknown slash command: surface clearly, don't send to LLM
 		if strings.HasPrefix(input, "/") {
@@ -2279,6 +2296,80 @@ func drainProviderStream(chunkChan chan llm.LLMResponse, errCh chan error, onChu
 	}
 }
 
+// replGit constructs an *autocommit.Git rooted at the process working
+// directory — the same construction the F22 auto-committer uses at bootstrap
+// (NewAutoCommitter with WorkingDir: os.Getwd()). It returns an error if the
+// working directory cannot be determined or is not inside a git work tree, so
+// the /diff and /undo REPL handlers refuse cleanly instead of shelling out
+// into a non-repo. The Git handle is cheap (two fields) and stateless across
+// reads, so building it per-command keeps the CLI struct unchanged.
+func (c *CLI) replGit(ctx context.Context) (*autocommit.Git, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return nil, fmt.Errorf("cannot determine working directory: %w", err)
+	}
+	g := autocommit.NewGit(cwd, zap.NewNop())
+	isRepo, err := g.IsRepo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !isRepo {
+		return nil, fmt.Errorf("%s is not a git repository", cwd)
+	}
+	return g, nil
+}
+
+// handleDiff prints the real working-tree diff. With no argument it shows the
+// unstaged diff (`git diff` — "what changed in my working tree"); with a ref
+// argument it shows `git diff <ref>` (everything since that commit/tag/ref).
+// Output is verbatim git output — no placeholder text.
+func (c *CLI) handleDiff(ctx context.Context, ref string) error {
+	g, err := c.replGit(ctx)
+	if err != nil {
+		fmt.Printf("❌ /diff: %v\n", err)
+		return err
+	}
+	ref = strings.TrimSpace(ref)
+	var out string
+	if ref == "" {
+		out, err = g.DiffUnstaged(ctx)
+	} else {
+		out, err = g.DiffSinceRef(ctx, ref)
+	}
+	if err != nil {
+		fmt.Printf("❌ /diff failed: %v\n", err)
+		return err
+	}
+	if strings.TrimSpace(out) == "" {
+		fmt.Println("(no changes)")
+		return nil
+	}
+	fmt.Print(out)
+	if !strings.HasSuffix(out, "\n") {
+		fmt.Println()
+	}
+	return nil
+}
+
+// handleUndo reverts the last commit via autocommit.Git.RevertLastCommit
+// (`git revert --no-edit HEAD` — a NEW commit that inverts HEAD, never a
+// history rewrite, so it is force-push-free per §11.4.113) and prints the
+// resulting HEAD SHA. Real git result only.
+func (c *CLI) handleUndo(ctx context.Context) error {
+	g, err := c.replGit(ctx)
+	if err != nil {
+		fmt.Printf("❌ /undo: %v\n", err)
+		return err
+	}
+	head, err := g.RevertLastCommit(ctx)
+	if err != nil {
+		fmt.Printf("❌ /undo failed: %v\n", err)
+		return err
+	}
+	fmt.Printf("✅ reverted last commit; HEAD is now %s\n", head)
+	return nil
+}
+
 // showHelp displays available commands.
 //
 // Round-202 §11.4 (CONST-046 Phase 4 round 85, 2026-05-19): the seven
@@ -2297,6 +2388,11 @@ func (c *CLI) showHelp(ctx context.Context) {
 	fmt.Println(tr(ctx, "cli_help_cmd_workers", nil))
 	fmt.Println(tr(ctx, "cli_help_cmd_models", nil))
 	fmt.Println(tr(ctx, "cli_help_cmd_health", nil))
+	// /diff and /undo are git command tokens (machine-stable, like the
+	// flag-name help lines below): plain literals rather than tr() keys so
+	// they stay consistent across locales and don't require new i18n keys.
+	fmt.Println("/diff [ref]      - Show working-tree git diff (optionally since <ref>)")
+	fmt.Println("/undo            - Revert the last commit (git revert HEAD)")
 	fmt.Println(tr(ctx, "cli_help_cmd_help", nil))
 	fmt.Println(tr(ctx, "cli_help_cmd_exit", nil))
 	fmt.Println("")
