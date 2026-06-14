@@ -3,10 +3,13 @@ package core
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -250,6 +253,25 @@ func (mc *MobileCore) GetAvailableThemes() string {
 //export Close
 func (mc *MobileCore) Close() error {
 	return mc.closeInternal()
+}
+
+// Generate sends a prompt to the configured LLM provider and returns the
+// generated text. The signature uses only gomobile-compatible types
+// (string in, string + error out — no channels or interfaces cross the
+// binding boundary), so it binds cleanly via `gomobile bind`.
+//
+// Anti-bluff (BLUFF-001 / CONST-035 / CONST-036): this returns the provider's
+// genuine output, never a canned/fabricated string.
+// It resolves a REAL llm.Provider via the same path cmd/cli uses
+// (llm.Select -> llm.NewCloudProvider, falling back to a local Ollama
+// provider) and makes a REAL provider.Generate call. When no provider is
+// reachable (e.g. Ollama not running and no cloud credentials configured),
+// the underlying provider returns a real transport error which is surfaced
+// here verbatim — never swallowed into a fake success.
+//
+//export Generate
+func (mc *MobileCore) Generate(prompt string) (string, error) {
+	return mc.generateInternal(context.Background(), prompt)
 }
 
 // Internal methods (renamed to avoid conflicts)
@@ -563,4 +585,93 @@ func (mc *MobileCore) closeInternal() error {
 
 	log.Println("Mobile core closed")
 	return nil
+}
+
+// generateInternal performs the real LLM generation. It lazily resolves and
+// caches a real llm.Provider, builds a real *llm.LLMRequest carrying the
+// prompt as a user message, and calls provider.Generate. The returned text is
+// the provider's actual response content.
+func (mc *MobileCore) generateInternal(ctx context.Context, prompt string) (string, error) {
+	if strings.TrimSpace(prompt) == "" {
+		return "", fmt.Errorf("generate: prompt must not be empty")
+	}
+
+	provider, err := mc.ensureLLMProvider(ctx)
+	if err != nil {
+		return "", fmt.Errorf("generate: no LLM provider available: %w", err)
+	}
+
+	req := &llm.LLMRequest{
+		Messages: []llm.Message{
+			{Role: "user", Content: prompt},
+		},
+	}
+
+	resp, err := provider.Generate(ctx, req)
+	if err != nil {
+		return "", fmt.Errorf("generate: provider call failed: %w", err)
+	}
+	if resp == nil {
+		return "", fmt.Errorf("generate: provider returned nil response")
+	}
+	return resp.Content, nil
+}
+
+// ensureLLMProvider returns the cached llm.Provider, constructing a real one on
+// first use. The construction mirrors cmd/cli's buildSubagentLLMProvider: it
+// resolves the cloud provider type from the HELIX_LLM_PROVIDER environment
+// variable via llm.Select, constructs it via llm.NewCloudProvider, and falls
+// back to a local Ollama provider on the standard port when no cloud provider
+// is configured or its construction fails.
+//
+// Anti-bluff: this never returns a stub/fake provider. If even the local
+// Ollama provider cannot be constructed, the error is surfaced.
+func (mc *MobileCore) ensureLLMProvider(ctx context.Context) (llm.Provider, error) {
+	mc.mu.Lock()
+	defer mc.mu.Unlock()
+
+	if mc.llmProvider != nil {
+		return mc.llmProvider, nil
+	}
+
+	if provider := buildMobileLLMProvider(ctx); provider != nil {
+		mc.llmProvider = provider
+		return provider, nil
+	}
+
+	return nil, fmt.Errorf("could not construct any LLM provider (cloud unconfigured and local Ollama unreachable)")
+}
+
+// buildMobileLLMProvider resolves a real cloud provider from the environment,
+// falling back to a local Ollama provider. Returns nil only when no provider
+// at all could be constructed (the caller turns that into an explicit error).
+func buildMobileLLMProvider(_ context.Context) llm.Provider {
+	selectorInput := llm.SelectorInput{
+		Env: os.Getenv("HELIX_LLM_PROVIDER"),
+	}
+	ptype, selErr := llm.Select(selectorInput)
+	switch {
+	case errors.Is(selErr, llm.ErrNoProviderConfigured):
+		// No cloud provider configured — fall through to the local default.
+	case selErr != nil:
+		// Unknown provider name — log and fall back rather than aborting.
+		log.Printf("mobile: provider selector error: %v (falling back to local default)", selErr)
+	default:
+		entry := llm.ProviderConfigEntry{Type: ptype}
+		cloud, cErr := llm.NewCloudProvider(ptype, entry)
+		if cErr == nil && cloud != nil {
+			return cloud
+		}
+		log.Printf("mobile: failed to construct cloud provider %q (%v); falling back to local default", ptype, cErr)
+	}
+
+	provider, err := llm.NewOllamaProvider(llm.OllamaConfig{
+		DefaultModel: "llama3.2",
+		BaseURL:      "http://localhost:11434",
+	})
+	if err != nil {
+		log.Printf("mobile: default Ollama provider construction failed: %v", err)
+		return nil
+	}
+	return provider
 }
