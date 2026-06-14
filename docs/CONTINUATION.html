@@ -4,11 +4,157 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>HelixCode Continuation</title>
+  <title>HelixCode CONTINUATION</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
@@ -24,15 +170,181 @@
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
-  <link rel="stylesheet" href="_progress-style.css" />
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">HelixCode Continuation</h1>
+<h1 class="title">HelixCode CONTINUATION</h1>
 </header>
 <h1
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
+<p><strong>Last updated: 2026-06-14 (close-out¹⁶⁹ — Two autonomous
+rounds landed + pushed (meta HEAD <code>e3063af1</code>, helix_agent
+HEAD <code>a0239f52</code>). FOUR deliverables, all
+COMPILE/TEST-verified (Go <code>go build</code>/<code>go test</code>
+green) but — honestly — NOT yet runtime-e2e-proven for the web path: (1)
+</strong>autocommit T1.1 substrate** <code>61d7167e</code> — real git
+substrate (commit-per-change snapshots) for <code>/undo</code> +
+<code>/diff</code>; <strong>CLI REPL wiring</strong>
+<code>bd5228f8</code> wires <code>/undo</code> and <code>/diff</code>
+commands onto that substrate (cli_agents porting task T1.1). (2)
+<strong>web POST <code>/llm/generate</code> +
+<code>/llm/stream</code></strong> <code>32e7e5b8</code> — real server
+endpoints + a minimal web client frontend; backed by a real
+<code>httptest</code>-based handler test <code>6f382b95</code>. HONEST
+GAP: handler unit/httptest-verified only — NO full runtime e2e (no live
+browser→server→provider round-trip captured yet); runtime-e2e proof per
+§11.4.108 layer-3/4 is still owed. (3) <strong>speckit debate adapter
+wireable</strong> <code>95b7385c</code> — the previously-dormant debate
+adapter is now wireable to a real provider. HONEST GAP: no production
+call-site yet — the adapter is reachable but not yet invoked from any
+shipped flow. (4) <strong>helix_agent memory default-on persist</strong>
+<code>ac3ad237</code> (pointer-bumped into meta at
+<code>e7266263</code>) — durable memory persists by default with a local
+fallback, and a store error no longer silently swallows/stops;
+<code>a0239f52</code> makes the persist log honest (pointer-bumped at
+<code>ca1dc60f</code>). HONEST GAP: the local fallback is
+process-lifetime in-memory, NOT disk-durable — recall survives within a
+process but is lost on restart unless the durable backend is configured.
+Plus <code>e3063af1</code> reconciled the stale Phase-1 plan status
+against HEAD (plan Revision 1→2). VERIFICATION POSTURE (anti-bluff
+§11.4): these are compile- and unit/httptest-verified, NOT
+runtime-e2e-proven for the web endpoints; the three honest gaps above
+(web e2e, speckit call-site, disk-durable memory fallback) are owed and
+tracked. Prior close-out¹⁶⁸ below.** **Last updated: 2026-06-14
+(close-out¹⁶⁸ — DeepSeek-V4 + strong-models real-tools re-record.
+Operator: “repeat everything with deep seek v4 models and similar strong
+available models!” Live discovery confirmed DeepSeek V4 IS available
+(deepseek-v4-pro/flash) + Mistral-large-2512 / Groq gpt-oss-120b /
+qwen3-32b. Re-recorded the 2-video structure: Video 1 = DeepSeek V4 Pro
+(picker digit 2), Video 2 = ensemble (digit 9, now resolving a DeepSeek
+V4 member alongside Mistral/Groq/OpenRouter). DeepSeek V4 Pro path
+worked first try (128k ctx) — all 3 prompts, rich tool use (git_status
+status/log/diff/show, glob/grep/fs_read), shell refused on video. The
+ENSEMBLE surfaced + fixed two real robustness bugs (TDD, paired §1.1):
+(1) deep multi-tool investigations (AGENTS.md) overflowed the smallest
+free-tier member’s 8K context — fixed by
+ToolLoopOptions.MaxToolResultChars (TUI=800) bounding each model-facing
+tool result; (2) fs_read returned its *FileContent []byte as decimal
+byte arrays ([35 32 …]) — fixed via FileContent.String() +
+stringifyResult handling string/error/[]byte/Stringer/JSON. VALIDATED
+LIVE (captured frames): Video 1 all 3 prompts rich; Video 2 all 3
+prompts complete w/ multiple members (p1 codebase 3/4, p3 git 3/4 rich;
+p2 AGENTS.md 2/4 — heaviest, resolves cleanly, no overflow/garbage).
+Both mp4s → ~/Downloads (video1-deepseek-v4-pro.mp4,
+video2-ensemble-strong-models.mp4); evidence
+docs/qa/tui-deepseek-v4-strong-models-20260614/. Code-review GO (zero
+blocking; nil-guard + gofmt NITs applied). go build ./… =0, tests green.
+HONEST NOTE: the ensemble’s heaviest deep-investigation prompt is
+inherently harder for free-tier small-context members (fewer members,
+thinner answers) — a single large-context model (DeepSeek V4 Pro)
+handles every prompt richly; free-tier characteristic, not a defect.
+Prior close-out¹⁶⁷ below.<strong> </strong>Last updated: 2026-06-14
+(close-out¹⁶⁷ — TUI REAL-TOOLS + VISIBLE-ENSEMBLE-MEMBERS re-record.
+Operator (2026-06-14): “record both videos with models that work with
+tooling so all requests resolve positive; WHY have we not seen multiple
+ensemble members responses in action?!” ROOT CAUSES
+(systematic-debugging §11.4.102 + LIVE repro): (1) ensemble returned
+only the voted WINNER — every member’s answer sat in ProviderMetadata
+the TUI never rendered; (2) the TUI was a pure chat client — it never
+used the existing internal/agent + internal/tools infra; (3)
+Groq/DeepSeek/Mistral/OpenRouter (+ the shared OpenAI types) DROPPED
+tools on the wire and the tool-call CONVERSATION protocol was incomplete
+(missing tool_call_id linkage; function.arguments must be a JSON STRING
+both send+parse); (4) the ensemble member-resolver used a content-only
+success predicate, so it REJECTED a member’s valid
+empty-content+tool_calls turn and walked the catalogue to the
+decommissioned gemma-7b-it ⇒ “all 4 members failed”; (5) read-only
+SAFETY hole — NewToolRegistry(nil)+nil approval-manager ALLOWS
+write/shell tools. FIXES (all TDD RED→GREEN, paired §1.1): new reusable
+internal/agent.RunToolLoop driver (multi-turn
+Generate→tool-calls→ExecuteToolBatch→feed-back) with ReadOnlyOnly
+defense-in-depth (offers+executes ONLY LevelReadOnly tools);
+applications/terminal_ui FormatEnsemblePanel + FormatToolTrace render;
+new read-only internal/tools/git git_status tool (allowlist
+status/log/diff/branch/show, reject-test proves no mutation); full
+OpenAI tool-calling completed across 5 providers
+(groq/deepseek/mistral/openrouter/openai_compatible) incl. wire-byte
+protocol tests; ensemble responseIsParticipant predicate (content OR
+tool_calls) at all 3 resolution sites; TUI submit path wired to
+RunToolLoop over a read-only registry. VALIDATED LIVE 2026-06-14
+(captured frames, anti-bluff §11.4.107/.123): Video 1 (Groq
+llama-3.3-70b, picker 7) — model autonomously calls git_status TWICE
+(status + subcommand=log), real modified-files + real commit log,
+coherent summary across all 3 prompts; Video 2 (Helix Agent ensemble,
+picker 9, 268s) — 3-4 members visible per prompt with scores + [winner],
+real tools (grep/glob/git_status/codebase_map), and the read-only guard
+VISIBLY refuses <code>tool: shell</code> (“not permitted in read-only
+mode”) on video. Both mp4s at ~/Downloads; evidence
+docs/qa/tui-ensemble-videos-20260614/ (README = §11.4.138 bluff-audit +
+§11.4.135 regression-guard list + 4 captured frames). go build ./… =0,
+touched-package tests green, code-review GO (zero blocking). Known
+pre-existing (NOT this session):
+applications/harmony_os/distributed.go:238 “For now” anti-bluff hit
+(untouched platform). Prior close-out¹⁶⁶ below.<strong> </strong>Last
+updated: 2026-06-13 (close-out¹⁶⁶ — TUI model-interaction videos + Helix
+Agent ensemble. Operator task: the AGENT drives the standalone
+<code>helix-tui</code>, records two model-interaction videos (3 prompts
+each: “Do you see my codebase?” / “Do you need an AGENTS.md…” / “Check
+git status…”), and validates each for real replies + no errors via
+Panoptic OCR — everything dynamic, ZERO hardcoded model names,
+reuse-don’t-reimplement, no bluff.<strong> </strong>DONE+validated —
+Video 1 (strongest single model, LLMsVerifier-selected Groq
+<code>llama-3.3-70b-versatile</code>):<strong> agent-recorded,
+<code>panoptic recvalidate</code> </strong>5/5 PASS<strong> over 68
+frames (<code>no_error_tokens</code>,
+<code>prompt_{1,2,3}_has_reply</code> with real prose + “Response
+received (tokens: …)”, <code>intended_model_selected</code>); mp4 →
+<code>~/Downloads/video1-strongest-model.mp4</code>; evidence
+<code>docs/qa/tui-ensemble-videos-20260613/</code>
+(<code>README.md</code> +
+<code>video1-strongest-model-validation.json</code>). </strong>Helix
+Agent ensemble (real, working in isolation):<strong> a multi-provider
+VOTING ensemble fanning each prompt to all env-key cloud providers
+(DeepSeek/Mistral/Groq/OpenRouter) and voting on confidence/quality —
+ZERO hardcoded model names, verifier-driven member-model resolution
+(CONST-036/040) with capability-filtered catalogue fallback +
+warm-cache; </strong>4/4 members work in isolation<strong> (captured: “2
+plus 2 equals 4.”, winner Groq); code-review GO; unit + live tested.
+</strong>DONE+validated — Video 2 (Helix Agent ensemble, TUI picker
+digit 9):<strong> agent-recorded multi-provider VOTING ensemble;
+<code>panoptic recvalidate</code> </strong>5/5 PASS<strong> (real voted
+ensemble replies, <code>no_error_tokens</code>,
+<code>prompt_{1,2,3}_has_reply</code>, zero defect tokens); mp4 →
+<code>~/Downloads/video2-helix-agent-ensemble.mp4</code>; evidence
+<code>docs/qa/tui-ensemble-videos-20260613/video2-ensemble-validation.json</code>.
+</strong>Root-causes fixed (RED→GREEN, paired §1.1):<strong> TUI
+Enter-submit deadlock (<code>app.Draw()</code> off the event loop,
+<code>4375d16a</code>); ensemble live
+<code>Stream=true</code>→members’-non-streaming-Generate SSE-decode
+all-fail (now <code>Stream=false</code> per member,
+<code>c96820bd</code>); decommissioned-model re-trial burst tripping
+free-tier rate-limits — fixed by a PERSISTED dead-model set so
+decommissioned models are NEVER re-tried (complements the CONST-036
+verifier path that resolves each member’s verified model first-try,
+<code>c96820bd</code>); resolver alphabetical-sort that destroyed
+provider native order (removed, <code>180292f1</code>); typed-nil
+DB-degraded panic in <code>task.NewTaskManager</code> (reflect
+normalization, +7 other callers, <code>36bdee6a</code>). Committed +
+pushed to all mirrors at HEAD <code>36bdee6a</code>. </strong>Tooling
+reused/extended (§11.4.74):<strong> Panoptic <code>recvalidate</code>
+de-hardcoded (consumer-supplied
+<code>--chrome-pattern</code>/<code>--reply-marker</code>,
+golden-good/golden-bad self-validation §11.4.107(10);
+<code>submodules/panoptic</code> <code>84147a1</code>) + HelixQA
+<code>pkg/recordingqa</code> +
+<code>banks/tui-recording-validation.yaml</code>
+<code>TRV-ENSEMBLE-001</code> (<code>submodules/helix_qa</code>
+<code>d2b65ea</code>). </strong>Live state:<strong> meta
+<code>180292f1</code> (after <code>4375d16a</code>);
+<code>./bin/helixcode</code> server up keeping
+<code>postgres:55432</code>+<code>redis:56379</code> (the TUI needs the
+DB); keys in <code>/tmp/helix_keys.sh</code> (env, redacted).
+Session-resumption file <code>.remember/remember.md</code> rewritten
+moment-valid for this phase (§11.4.131). Constraints: anti-bluff §11.4,
+no-force-push §11.4.113 (ff-only all mirrors), everything dynamic / no
+hardcoded model names, reuse-don’t-reimplement §11.4.74. All prior
+close-out content preserved verbatim below.</strong></p>
 <p><strong>Last updated: 2026-06-13 (close-out¹⁶⁵ — G-2 go.mod-wiring
 follow-up DELIVERED: <code>dev.helix.dag</code> +
 <code>dev.helix.pipeline</code> wired into REAL consumers (not just
