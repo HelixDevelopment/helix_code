@@ -115,6 +115,9 @@ terminal_ui_chat_no_provider_status:
 terminal_ui_chat_generating:
   other: "Generating response..."
 
+terminal_ui_chat_skill_applied:
+  other: "A matching skill was applied — the rendered skill body was sent to the model."
+
 terminal_ui_chat_response_received:
   other: "Response received (tokens: {{.Tokens}})"
 

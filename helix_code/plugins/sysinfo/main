@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# sysinfo plugin — READ-ONLY system information.
+#
+# Invoked by internal/plugins.ExecutePlugin as: <entrypoint> <action> [args...]
+# It is deliberately read-only: it only READS system + repo state and never
+# mutates anything (no writes, no network, no destructive commands).
+#
+# Per CONST-033 it performs NO host power-management of any kind.
+set -euo pipefail
+
+action="${1:-info}"
+
+case "$action" in
+  info)
+    printf 'sysinfo plugin v1.0.0\n'
+    printf 'uname: %s\n' "$(uname -a)"
+    # Resolve the repo this script lives in (read-only); tolerate non-repo CWD.
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+    if git_head="$(git -C "$script_dir" rev-parse --short HEAD 2>/dev/null)"; then
+      printf 'git_head: %s\n' "$git_head"
+    else
+      printf 'git_head: <not-a-git-repo>\n'
+    fi
+    printf 'hostname: %s\n' "$(hostname)"
+    ;;
+  *)
+    printf 'sysinfo: unknown action %q (supported: info)\n' "$action" >&2
+    exit 2
+    ;;
+esac

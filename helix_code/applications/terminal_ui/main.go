@@ -16,11 +16,14 @@ import (
 
 	"dev.helix.code/applications/terminal_ui/i18n"
 	"dev.helix.code/internal/agent"
+	"dev.helix.code/internal/commands"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/helixqa"
 	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/plugins"
 	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/redis"
 	"dev.helix.code/internal/server"
@@ -33,6 +36,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/google/uuid"
 	"github.com/rivo/tview"
+	"go.uber.org/zap"
 )
 
 // TerminalUI represents the main terminal user interface
@@ -70,6 +74,24 @@ type TerminalUI struct {
 	// plain streaming chat path). Only LevelReadOnly tools are registered, so
 	// no approval manager is wired — nothing destructive is reachable.
 	toolRegistry *tools.ToolRegistry
+
+	// mcpManager / lspManager are the capability building blocks wired onto
+	// toolRegistry in Initialize. They are retained on the struct so Close can
+	// release their resources (MCP child processes / LSP server processes) on
+	// shutdown. Either may be nil when its wiring failed or no servers are
+	// configured/installed — the TUI degrades gracefully in that case.
+	mcpManager *mcp.Manager
+	lspManager *tools.LSPManager
+
+	// skillDispatcher matches a user prompt against loaded `.md` skills and
+	// renders the matched skill body (which then replaces the outgoing prompt).
+	// skillRegistry is retained for /skills introspection. pluginLoader runs
+	// `@plugin:<name> <action>` invocations. All three are graceful-nil when
+	// their load failed or nothing is installed; sendChatMessage skips the
+	// corresponding step when nil.
+	skillDispatcher *agent.SkillDispatcher
+	skillRegistry   *commands.SkillRegistry
+	pluginLoader    *plugins.Loader
 	// selectedModel is the model id chosen via the model picker. It is sent
 	// as LLMRequest.Model on every chat turn — without it the provider call
 	// goes out with an empty model id and the API rejects it (e.g. groq 404
@@ -253,8 +275,65 @@ func (tui *TerminalUI) Initialize() error {
 		// (all three are LevelReadOnly). They are present already; the
 		// explicit git_status registration above adds the read-only git
 		// inspection capability. No write/exec tool is added.
+
+		// Wire LSP — registers the two read-only diagnostics tools
+		// (lsp_get_diagnostics, lsp_analyze_diagnostic). WireLSP always
+		// returns a non-nil manager even when no LSP server is on PATH (its
+		// spec set is then empty and every call is a no-op), so the wiring is
+		// branch-free and degrades gracefully. The diagnostics tools are
+		// LevelReadOnly, so they pass the ReadOnlyOnly agent loop unchanged.
+		tui.lspManager = tools.WireLSP(reg, repoDir, zap.NewNop())
+		log.Printf("✅ TUI: LSP diagnostics tools wired (lsp_get_diagnostics, lsp_analyze_diagnostic)")
+
+		// Wire MCP — merge the user + project (.helixcode/mcp.yml) MCP server
+		// configs, start the alwaysLoad servers, and register their tools onto
+		// the registry. Servers marked readOnly:true in config register their
+		// tools at LevelReadOnly so they pass the ReadOnlyOnly agent loop.
+		// Graceful: a missing config, a Start failure (e.g. npx not installed),
+		// or zero tools all log + continue — the TUI still runs without MCP.
+		mcpUserPath := filepath.Join(os.Getenv("HOME"), ".helixcode", "mcp.yml")
+		mcpCfg, mcpErr := mcp.LoadMerged(mcpUserPath, ".helixcode/mcp.yml")
+		if mcpErr != nil {
+			log.Printf("⚠️  TUI: MCP config load failed (%v); continuing without MCP tools", mcpErr)
+		} else if mcpCfg == nil || len(mcpCfg.Servers) == 0 {
+			log.Printf("ℹ️  TUI: no MCP servers configured; continuing without MCP tools")
+		} else {
+			mgr := mcp.NewManager()
+			mgr.SetConfig(mcpCfg)
+			// Start dials alwaysLoad servers; a per-server connect failure does
+			// not error the call (only a build/transport failure does). Start
+			// BEFORE RegisterMCPManager so the registry sees ready clients' tools.
+			if startErr := mgr.Start(context.Background()); startErr != nil {
+				log.Printf("⚠️  TUI: MCP start failed (%v); continuing without MCP tools", startErr)
+			} else {
+				reg.RegisterMCPManager(mgr)
+				tui.mcpManager = mgr
+				log.Printf("✅ TUI: MCP wired — %d tool(s) registered from %d server(s)", len(mgr.Tools()), len(mcpCfg.Servers))
+			}
+		}
+
 		tui.toolRegistry = reg
-		log.Printf("✅ TUI: agentic tool registry ready (read-only: git_status, fs_read, glob, grep)")
+		log.Printf("✅ TUI: agentic tool registry ready (read-only: git_status, fs_read, glob, grep + LSP/MCP tools)")
+	}
+
+	// Load skills + plugins ONCE at startup. Both degrade gracefully: a load
+	// error or a missing directory yields a nil dispatcher / loader and
+	// sendChatMessage simply skips the corresponding step. Skills are scanned
+	// from the user skills dir (~/.helix/skills) then the project dir
+	// (.helix/skills); the project dir comes last so it overrides on collision.
+	userSkillsDir := filepath.Join(os.Getenv("HOME"), ".helix", "skills")
+	if skReg, skDisp, skErr := agent.LoadSkillsAndDispatcher([]string{userSkillsDir, ".helix/skills"}); skErr != nil {
+		log.Printf("⚠️  TUI: skills unavailable (%v); chat continues without skill triggers", skErr)
+	} else {
+		tui.skillRegistry = skReg
+		tui.skillDispatcher = skDisp
+		log.Printf("✅ TUI: skills loaded (%d skill(s) registered)", len(skReg.List()))
+	}
+	if loader, plErr := plugins.LoadPlugins(context.Background(), "plugins"); plErr != nil {
+		log.Printf("⚠️  TUI: plugins unavailable (%v); chat continues without @plugin: invocations", plErr)
+	} else {
+		tui.pluginLoader = loader
+		log.Printf("✅ TUI: plugins loaded (%d plugin(s) available)", len(loader.List()))
 	}
 
 	// Initialize server for API calls
@@ -1534,6 +1613,53 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 	tui.chatOutput.SetText(tui.formatChatHistory())
 	tui.chatOutput.ScrollToEnd()
 
+	// Capability dispatch BEFORE the LLM call (after the /-command check):
+	//
+	//   (a) Plugin invocation — `@plugin:<name> <action> <args>`. When the
+	//       prompt matches the syntax, MaybeRunPlugin executes the plugin's
+	//       real entrypoint (os/exec, no simulation) and we render its output
+	//       as the assistant turn and RETURN — the LLM is skipped entirely.
+	//       A matched-but-failed invocation (ran=true, err!=nil) surfaces the
+	//       error as the assistant turn rather than silently sending it to the
+	//       LLM.
+	//
+	//   (b) Skill trigger — a `.md` skill whose trigger regex matches the
+	//       prompt. DispatchSkill renders the skill body; we REPLACE the
+	//       outgoing prompt sent to the LLM with that rendered body (note it in
+	//       the chat) and continue to the LLM. The user's original message stays
+	//       visible in history; only what the model receives changes.
+	if tui.pluginLoader != nil {
+		if out, ran, plErr := plugins.MaybeRunPlugin(context.Background(), tui.pluginLoader, message); ran {
+			content := out
+			if plErr != nil {
+				content = fmt.Sprintf("[plugin error: %v]", plErr)
+			}
+			tui.chatHistory = append(tui.chatHistory, llm.Message{
+				Role:    "assistant",
+				Content: content,
+			})
+			tui.chatOutput.SetText(tui.formatChatHistory())
+			tui.chatOutput.ScrollToEnd()
+			tui.statusBar.SetText("[green]" + tui.t("terminal_ui_status_bar_default"))
+			return
+		}
+	}
+
+	// llmPrompt is what the model actually receives — the user's message by
+	// default, or the rendered skill body when a skill trigger matches.
+	llmPrompt := message
+	if tui.skillDispatcher != nil {
+		if rendered, matched := agent.DispatchSkill(tui.skillDispatcher, message); matched {
+			llmPrompt = rendered
+			tui.chatHistory = append(tui.chatHistory, llm.Message{
+				Role:    "system",
+				Content: tui.t("terminal_ui_chat_skill_applied"),
+			})
+			tui.chatOutput.SetText(tui.formatChatHistory())
+			tui.chatOutput.ScrollToEnd()
+		}
+	}
+
 	// Check if provider is available
 	if tui.llmProvider == nil {
 		tui.chatHistory = append(tui.chatHistory, llm.Message{
@@ -1565,10 +1691,25 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 	// of every streamed chunk — byte-identical to the buffered Generate
 	// result for any conformant provider. Only WHEN the text appears changes.
 	ctx := context.Background()
+	// Snapshot the conversation the model receives. When a skill matched,
+	// llmPrompt holds the rendered skill body — substitute it for the user's
+	// last (raw) message in the model-facing snapshot so the model acts on the
+	// rendered instruction, while the user's original text stays visible in the
+	// on-screen chatHistory. When no skill matched, llmPrompt == message, so the
+	// substitution is a no-op.
+	modelMessages := append([]llm.Message(nil), tui.chatHistory...)
+	if llmPrompt != message {
+		for i := len(modelMessages) - 1; i >= 0; i-- {
+			if modelMessages[i].Role == "user" {
+				modelMessages[i].Content = llmPrompt
+				break
+			}
+		}
+	}
 	request := &llm.LLMRequest{
 		ID:          uuid.New(),
 		Model:       tui.selectedModel,
-		Messages:    append([]llm.Message(nil), tui.chatHistory...),
+		Messages:    modelMessages,
 		MaxTokens:   2048,
 		Temperature: 0.7,
 		Stream:      true,
@@ -1604,7 +1745,22 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 		registry := tui.toolRegistry
 		systemPrompt := buildToolLoopSystemPrompt(registry)
 		go func() {
-			result, loopErr := agent.RunToolLoop(ctx, provider, registry, history, agent.ToolLoopOptions{
+			// onFinalChunk streams the FINAL (tool-call-free) answer
+			// token-by-token onto the placeholder assistant turn the instant
+			// each chunk arrives — mirroring the plain consumeChatStream path
+			// below. Every chunk grows assistantIdx's Content and is funnelled
+			// through QueueUpdateDraw (tview is not goroutine-safe). After the
+			// stream completes, the guarded result.FinalContent (byte-identical
+			// to the accumulated chunks for a conformant provider) is set on the
+			// turn, and the trace + ensemble panel render after.
+			onFinalChunk := func(chunk string) {
+				tui.app.QueueUpdateDraw(func() {
+					tui.chatHistory[assistantIdx].Content += chunk
+					tui.chatOutput.SetText(tui.formatChatHistory())
+					tui.chatOutput.ScrollToEnd()
+				})
+			}
+			result, loopErr := agent.RunToolLoopStream(ctx, provider, registry, history, agent.ToolLoopOptions{
 				Model:        tui.selectedModel,
 				MaxTurns:     6,
 				SystemPrompt: systemPrompt,
@@ -1621,7 +1777,7 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 				// never reach a write/shell tool, so restrict it to read-only
 				// tools at both the offer and execute layers.
 				ReadOnlyOnly: true,
-			})
+			}, onFinalChunk)
 			tui.app.QueueUpdateDraw(func() {
 				if loopErr != nil {
 					tui.chatHistory[assistantIdx].Content = fmt.Sprintf("[Error: %v]", loopErr)
@@ -2642,6 +2798,18 @@ func (tui *TerminalUI) Run() error {
 func (tui *TerminalUI) Close() error {
 	if tui.db != nil {
 		tui.db.Close()
+	}
+	// Release the capability building blocks wired in Initialize so their
+	// child processes (MCP servers, LSP servers) are torn down on shutdown.
+	if tui.mcpManager != nil {
+		if err := tui.mcpManager.Close(); err != nil {
+			log.Printf("⚠️  TUI: MCP manager close failed: %v", err)
+		}
+	}
+	if tui.lspManager != nil {
+		if err := tui.lspManager.Shutdown(context.Background()); err != nil {
+			log.Printf("⚠️  TUI: LSP manager shutdown failed: %v", err)
+		}
 	}
 	return nil
 }

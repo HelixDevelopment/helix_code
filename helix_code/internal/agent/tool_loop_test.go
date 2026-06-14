@@ -103,6 +103,26 @@ type scriptedProvider struct {
 	lastReqHad  bool            // whether the last request carried Tools
 	lastTools   []string        // names of the tools offered on the LAST request (offer-filter evidence)
 	reqMessages [][]llm.Message // a snapshot of req.Messages captured per Generate call (turn N == index N)
+
+	// streamChunks, when non-empty, is the sequence of content chunks
+	// GenerateStream emits (one LLMResponse per chunk). It models a provider that
+	// streams the FINAL answer token-by-token. streamMeta (when non-nil) is
+	// carried on the LAST emitted chunk's ProviderMetadata, mirroring how the
+	// ensemble surfaces its panel data on the streamed result.
+	streamChunks []string
+	streamMeta   map[string]interface{}
+	// streamCalls counts how many times GenerateStream was invoked (proves the
+	// FINAL turn — and only the final turn — was streamed).
+	streamCalls int32
+	// streamCloseChan controls the channel-close contract under test: when true
+	// (default) GenerateStream closes the chunk channel (Anthropic/OpenAI family);
+	// when false it returns WITHOUT closing (Ollama family) — both must drain
+	// correctly.
+	streamCloseChan bool
+	// lastResp records the most recent response Generate returned, so the
+	// GenerateStream fallback can re-emit the SAME final answer the buffered
+	// Generate produced (a real provider streams the same content it would buffer).
+	lastResp llm.LLMResponse
 }
 
 func (p *scriptedProvider) Generate(_ context.Context, req *llm.LLMRequest) (*llm.LLMResponse, error) {
@@ -123,6 +143,7 @@ func (p *scriptedProvider) Generate(_ context.Context, req *llm.LLMRequest) (*ll
 		return nil, fmt.Errorf("scriptedProvider: no response scripted for Generate call #%d", i+1)
 	}
 	resp := p.responses[i]
+	p.lastResp = resp
 	return &resp, nil
 }
 
@@ -132,7 +153,40 @@ func (p *scriptedProvider) GetModels() []llm.ModelInfo {
 	return []llm.ModelInfo{{ID: "scripted-1", Name: "scripted-model-1", SupportsTools: true}}
 }
 func (p *scriptedProvider) GetCapabilities() []llm.ModelCapability { return nil }
-func (p *scriptedProvider) GenerateStream(context.Context, *llm.LLMRequest, chan<- llm.LLMResponse) error {
+
+// GenerateStream models a provider streaming the FINAL answer. When streamChunks
+// is scripted it emits each entry as its own chunk (carrying streamMeta on the
+// last). When streamChunks is empty it falls back to emitting the NEXT scripted
+// Generate response's Content as a single chunk (with its ProviderMetadata) —
+// exactly what a real provider does: the streamed final answer equals the
+// buffered final answer. This keeps the existing non-streaming RunToolLoop tests
+// green (the loop now drives the final turn via GenerateStream, and the fake
+// streams the same content Generate would have returned).
+//
+// It honours the non-uniform channel-close contract: when streamCloseChan it
+// closes the channel from inside (Anthropic/OpenAI family); otherwise it returns
+// without closing (Ollama family).
+func (p *scriptedProvider) GenerateStream(_ context.Context, _ *llm.LLMRequest, ch chan<- llm.LLMResponse) error {
+	atomic.AddInt32(&p.streamCalls, 1)
+	if len(p.streamChunks) > 0 {
+		for i, c := range p.streamChunks {
+			chunk := llm.LLMResponse{Content: c}
+			if i == len(p.streamChunks)-1 && p.streamMeta != nil {
+				chunk.ProviderMetadata = p.streamMeta
+			}
+			ch <- chunk
+		}
+	} else {
+		// Fallback: re-emit the SAME response the preceding Generate returned, as
+		// one chunk — so the streamed final answer mirrors the buffered final
+		// answer (a real provider streams the same content it would buffer). The
+		// loop calls Generate on the final turn and THEN streams it, so lastResp
+		// is the just-confirmed tool-call-free final response.
+		ch <- llm.LLMResponse{Content: p.lastResp.Content, ProviderMetadata: p.lastResp.ProviderMetadata}
+	}
+	if p.streamCloseChan {
+		close(ch)
+	}
 	return nil
 }
 func (p *scriptedProvider) IsAvailable(context.Context) bool { return true }
@@ -591,6 +645,139 @@ func TestRunToolLoop_EmptyFinalAfterToolNeverEmpty(t *testing.T) {
 		"FinalContent MUST NOT be empty: an empty assistant turn breaks the next provider request")
 	require.NotEqual(t, "", strings.TrimSpace(res.FinalContent),
 		"FinalContent MUST NOT be whitespace-only")
+}
+
+// ---------------------------------------------------------------------------
+// RunToolLoopStream — streaming of the FINAL turn (the primary model-data path).
+// ---------------------------------------------------------------------------
+
+// Test S1: a single final-answer turn (no tools) streams 3 chunks
+// "Hel","lo"," world". RunToolLoopStream MUST invoke onFinalChunk exactly 3
+// times with those chunks in order, accumulate FinalContent=="Hello world", and
+// have streamed the FINAL turn (streamCalls==1). Tests both channel-close
+// contracts (closing + non-closing provider families).
+func TestRunToolLoopStream_StreamsFinalChunks(t *testing.T) {
+	for _, closeChan := range []bool{true, false} {
+		closeChan := closeChan
+		name := "providerCloses"
+		if !closeChan {
+			name = "providerDoesNotClose"
+		}
+		t.Run(name, func(t *testing.T) {
+			provider := &scriptedProvider{
+				// One Generate call confirms the final (tool-call-free) turn; the
+				// stream then re-issues it with the 3 scripted chunks.
+				responses:       []llm.LLMResponse{{ID: uuid.New(), Content: "Hello world"}},
+				streamChunks:    []string{"Hel", "lo", " world"},
+				streamCloseChan: closeChan,
+			}
+
+			var got []string
+			res, err := RunToolLoopStream(context.Background(), provider, nil,
+				[]llm.Message{{Role: "user", Content: "greet"}},
+				ToolLoopOptions{}, func(chunk string) { got = append(got, chunk) })
+			require.NoError(t, err)
+			require.NotNil(t, res)
+
+			// onFinalChunk invoked exactly 3 times with the 3 chunks in order.
+			require.Equal(t, []string{"Hel", "lo", " world"}, got)
+			// Accumulated FinalContent is the byte-exact concatenation.
+			require.Equal(t, "Hello world", res.FinalContent)
+			// The FINAL turn was streamed exactly once.
+			require.Equal(t, int32(1), atomic.LoadInt32(&provider.streamCalls))
+		})
+	}
+}
+
+// Test S2: a tool-then-final 2-turn loop streams ONLY the final turn. Turn 1 is a
+// tool-call turn (non-streamed Generate → tool dispatch). Turn 2 is the final
+// answer, streamed in 2 chunks. onFinalChunk MUST see only the final-turn chunks
+// (the intermediate tool-dispatch turn is NEVER streamed), GenerateStream is
+// called exactly once, and FinalContent is the concatenation.
+func TestRunToolLoopStream_ToolThenFinalStreamsOnlyFinal(t *testing.T) {
+	var calls int32
+	registry := newEchoRegistry(t, &calls)
+
+	provider := &scriptedProvider{
+		responses: []llm.LLMResponse{
+			// Turn 1: tool-call turn (must NOT stream).
+			{
+				ID: uuid.New(),
+				ToolCalls: []llm.ToolCall{{
+					ID:   "call-1",
+					Type: "function",
+					Function: llm.ToolCallFunc{
+						Name:      "echo",
+						Arguments: map[string]interface{}{"text": "hi"},
+					},
+				}},
+			},
+			// Turn 2: final answer (Generate confirms no tool calls; then streamed).
+			{ID: uuid.New(), Content: "Hello world"},
+		},
+		streamChunks:    []string{"Hello", " world"},
+		streamCloseChan: true,
+	}
+
+	var got []string
+	res, err := RunToolLoopStream(context.Background(), provider, registry,
+		[]llm.Message{{Role: "user", Content: "echo hi"}},
+		ToolLoopOptions{}, func(chunk string) { got = append(got, chunk) })
+	require.NoError(t, err)
+	require.NotNil(t, res)
+
+	// Only the FINAL turn's chunks were forwarded — the tool-dispatch turn was not.
+	require.Equal(t, []string{"Hello", " world"}, got)
+	require.Equal(t, "Hello world", res.FinalContent)
+	require.Equal(t, 2, res.Turns)
+	require.Len(t, res.Trace, 1)
+	require.Equal(t, "echo", res.Trace[0].ToolName)
+	// The real echo tool executed exactly once (the intermediate turn ran).
+	require.Equal(t, int32(1), atomic.LoadInt32(&calls))
+	// GenerateStream was invoked exactly once — only for the final turn.
+	require.Equal(t, int32(1), atomic.LoadInt32(&provider.streamCalls))
+}
+
+// Test S3: the streamed final turn's ProviderMetadata (carried on the last chunk,
+// mirroring the ensemble) is surfaced as res.FinalMetadata — so ensemble panel
+// data survives the streaming path.
+func TestRunToolLoopStream_FinalMetadataFromStream(t *testing.T) {
+	streamMeta := map[string]interface{}{
+		"ensemble":                   true,
+		"ensemble_selected_provider": "Groq",
+	}
+	provider := &scriptedProvider{
+		responses:       []llm.LLMResponse{{ID: uuid.New(), Content: "Hello world"}},
+		streamChunks:    []string{"Hello", " world"},
+		streamMeta:      streamMeta,
+		streamCloseChan: true,
+	}
+
+	res, err := RunToolLoopStream(context.Background(), provider, nil,
+		[]llm.Message{{Role: "user", Content: "greet"}},
+		ToolLoopOptions{}, nil)
+	require.NoError(t, err)
+	require.NotNil(t, res)
+	require.Equal(t, "Hello world", res.FinalContent)
+	require.NotNil(t, res.FinalMetadata)
+	require.Equal(t, true, res.FinalMetadata["ensemble"])
+	require.Equal(t, "Groq", res.FinalMetadata["ensemble_selected_provider"])
+}
+
+// Test S4: a nil onFinalChunk is safe — RunToolLoop (the no-op-callback wrapper)
+// still drives the final turn via streaming and accumulates FinalContent.
+func TestRunToolLoopStream_NilCallbackSafe(t *testing.T) {
+	provider := &scriptedProvider{
+		responses:       []llm.LLMResponse{{ID: uuid.New(), Content: "Hello world"}},
+		streamChunks:    []string{"Hello", " world"},
+		streamCloseChan: true,
+	}
+	res, err := RunToolLoopStream(context.Background(), provider, nil,
+		[]llm.Message{{Role: "user", Content: "greet"}},
+		ToolLoopOptions{}, nil)
+	require.NoError(t, err)
+	require.Equal(t, "Hello world", res.FinalContent)
+	require.Equal(t, int32(1), atomic.LoadInt32(&provider.streamCalls))
 }
 
 // Test: final turn empty content + no tool calls AND no prior tools (the loop's

@@ -32,6 +32,10 @@ type recordingProvider struct {
 	calls     int32
 	// turnMessages[i] is a copy of the messages handed to Generate call i+1.
 	turnMessages [][]llm.Message
+	// lastResp records the most recent response Generate returned, so the
+	// GenerateStream final-turn re-issue streams the SAME final answer the
+	// buffered Generate produced (a real provider streams the content it buffers).
+	lastResp llm.LLMResponse
 }
 
 func (p *recordingProvider) Generate(_ context.Context, req *llm.LLMRequest) (*llm.LLMResponse, error) {
@@ -40,6 +44,7 @@ func (p *recordingProvider) Generate(_ context.Context, req *llm.LLMRequest) (*l
 	p.turnMessages = append(p.turnMessages, snapshot)
 	i := int(atomic.AddInt32(&p.calls, 1)) - 1
 	resp := p.responses[i]
+	p.lastResp = resp
 	return &resp, nil
 }
 
@@ -49,7 +54,14 @@ func (p *recordingProvider) GetModels() []llm.ModelInfo {
 	return []llm.ModelInfo{{ID: "rec-1", Name: "recording-model-1", SupportsTools: true}}
 }
 func (p *recordingProvider) GetCapabilities() []llm.ModelCapability { return nil }
-func (p *recordingProvider) GenerateStream(context.Context, *llm.LLMRequest, chan<- llm.LLMResponse) error {
+
+// GenerateStream re-emits the SAME response the preceding Generate returned as a
+// single chunk (then closes), so the streamed final answer mirrors the buffered
+// one — exactly what a real provider does. The loop calls Generate on the final
+// turn and THEN streams it, so lastResp is the just-confirmed final response.
+func (p *recordingProvider) GenerateStream(_ context.Context, _ *llm.LLMRequest, ch chan<- llm.LLMResponse) error {
+	ch <- llm.LLMResponse{Content: p.lastResp.Content, ProviderMetadata: p.lastResp.ProviderMetadata}
+	close(ch)
 	return nil
 }
 func (p *recordingProvider) IsAvailable(context.Context) bool { return true }

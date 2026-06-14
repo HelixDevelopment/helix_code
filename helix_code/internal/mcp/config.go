@@ -28,6 +28,14 @@ type ServerSpec struct {
 	SSEURL     string            `yaml:"sseURL,omitempty"`
 	OAuth      OAuthSpec         `yaml:"oauth,omitempty"`
 	AlwaysLoad bool              `yaml:"alwaysLoad,omitempty"`
+	// ReadOnly marks every tool this server exposes as a pure read
+	// (approval.LevelReadOnly) when registered with the agent tool
+	// registry. Set it for servers that only expose non-mutating tools
+	// (e.g. a filesystem server limited to read_file/list_directory/search)
+	// so the ReadOnlyOnly agent tool loop is allowed to offer + execute them.
+	// When false (default), the server's tools keep the conservative
+	// LevelEdit default and are blocked by a read-only-only loop.
+	ReadOnly bool `yaml:"readOnly,omitempty"`
 }
 
 // OAuthSpec describes the OAuth configuration for a server.

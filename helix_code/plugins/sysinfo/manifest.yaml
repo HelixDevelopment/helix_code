@@ -1,0 +1,9 @@
+name: sysinfo
+version: "1.0.0"
+description: Read-only system information plugin (uname + git short HEAD).
+author: HelixCode
+api_version: v1
+entrypoint: main
+sandbox: true
+capabilities:
+  - info

@@ -136,7 +136,43 @@ type ToolLoopOptions struct {
 //     nil error.
 //
 // Model defaults to provider.GetModels()[0].Name when opts.Model == "".
+//
+// RunToolLoop is a thin wrapper over RunToolLoopStream with a no-op onFinalChunk
+// callback — every existing caller and test is unchanged, and the final turn is
+// still driven by streaming (the chunks are simply not forwarded anywhere). The
+// accumulated FinalContent is byte-identical to the old non-streaming path for
+// any conformant provider.
 func RunToolLoop(ctx context.Context, provider llm.Provider, registry *tools.ToolRegistry, messages []llm.Message, opts ToolLoopOptions) (*ToolLoopResult, error) {
+	return RunToolLoopStream(ctx, provider, registry, messages, opts, nil)
+}
+
+// RunToolLoopStream runs the same multi-turn agentic tool-execution loop as
+// RunToolLoop, but STREAMS the FINAL (tool-call-free) turn token-by-token.
+//
+// Why only the final turn streams: an intermediate (tool-dispatch) turn must be
+// inspected for ToolCalls, which cannot be reliably parsed from a half-stream —
+// providers emit tool_calls as structured frames at the end of the stream, not
+// interleaved with text. So intermediate turns reuse the existing non-streaming
+// provider.Generate path (identical behaviour to RunToolLoop), and ONLY the turn
+// that returns no tool calls is streamed via provider.GenerateStream.
+//
+// Behaviour vs RunToolLoop:
+//   - Identical conversation construction, tool offering/execution, ReadOnlyOnly
+//     guarding, MaxToolResultChars bounding, nonEmptyFinal synthesis, MaxTurns
+//     handling, and trace recording.
+//   - On the FINAL turn, each non-empty chunk's Content is forwarded to
+//     onFinalChunk (when non-nil) the instant it arrives, accumulated into
+//     result.FinalContent, and result.FinalMetadata is captured from the last
+//     chunk carrying ProviderMetadata (so ensemble panel data survives streaming).
+//   - The same nonEmptyFinal guard applies to the accumulated streamed content:
+//     an empty streamed final answer is synthesized from the trace, never returned
+//     empty.
+//
+// onFinalChunk may be nil (RunToolLoop passes nil) — then the final turn still
+// streams but the chunks are not forwarded.
+//
+// Model defaults to provider.GetModels()[0].Name when opts.Model == "".
+func RunToolLoopStream(ctx context.Context, provider llm.Provider, registry *tools.ToolRegistry, messages []llm.Message, opts ToolLoopOptions, onFinalChunk func(string)) (*ToolLoopResult, error) {
 	if provider == nil {
 		return nil, fmt.Errorf("tool loop: provider is nil")
 	}
@@ -204,8 +240,23 @@ func RunToolLoop(ctx context.Context, provider llm.Provider, registry *tools.Too
 		lastContent = resp.Content
 		lastMetadata = resp.ProviderMetadata
 
-		// No tool calls ⇒ this is the final answer.
+		// No tool calls ⇒ this is the FINAL answer turn. Re-issue it as a STREAM
+		// so the answer can be rendered token-by-token. The Generate response
+		// above already confirmed (deterministically) that this turn produces no
+		// tool calls; the streamed re-issue carries the same conversation + tools
+		// and forwards each chunk to onFinalChunk.
 		if len(resp.ToolCalls) == 0 {
+			streamedContent, streamedMeta, serr := streamFinalTurn(ctx, provider, req, onFinalChunk)
+			if serr != nil {
+				return nil, fmt.Errorf("tool loop: generate stream (turn %d): %w", turn+1, serr)
+			}
+			// Prefer the streamed metadata; fall back to the Generate response's
+			// metadata when the stream carried none (some degenerate single-chunk
+			// streams may omit it — though the ensemble emits it).
+			finalMeta := streamedMeta
+			if finalMeta == nil {
+				finalMeta = resp.ProviderMetadata
+			}
 			// Never return an empty (or whitespace-only) FinalContent. A final
 			// turn with empty content + no tool calls is a real provider
 			// outcome (an under-specified prompt, a model that ran its tools
@@ -215,8 +266,8 @@ func RunToolLoop(ctx context.Context, provider llm.Provider, registry *tools.Too
 			// tool_calls") then 400s the NEXT request, breaking the whole
 			// conversation. Synthesize a non-empty answer from the trace so the
 			// assistant turn is always well-formed.
-			result.FinalContent = nonEmptyFinal(resp.Content, result.Trace)
-			result.FinalMetadata = resp.ProviderMetadata
+			result.FinalContent = nonEmptyFinal(streamedContent, result.Trace)
+			result.FinalMetadata = finalMeta
 			return result, nil
 		}
 
@@ -329,6 +380,81 @@ func nonEmptyFinal(content string, trace []ToolTraceEntry) string {
 	// No content and no usable tool output. Return a clear, non-empty fallback
 	// rather than an empty string (CONST: never feed an empty assistant turn).
 	return "I could not produce a final answer for this request. Please try rephrasing or asking a more specific question."
+}
+
+// streamFinalTurn re-issues the final (tool-call-free) turn as a stream via
+// provider.GenerateStream, forwarding each non-empty chunk's Content to
+// onFinalChunk (when non-nil) the instant it arrives. It accumulates the full
+// streamed answer (returned) and captures the ProviderMetadata of the last chunk
+// that carried one (so the ensemble panel data — ensemble_participants /
+// ensemble_selected_provider / ... — survives the streaming path).
+//
+// Channel-close robustness: the llm.Provider streaming contract is NOT uniform —
+// some providers (Anthropic/OpenAI/Groq/DeepSeek, and the ensemble) close the
+// chunk channel from inside GenerateStream; others (Ollama, the OpenAI-compatible
+// provider) return without closing. This mirrors the TUI's
+// consumeChatStream/drainProviderStream: it selects on BOTH the chunk channel AND
+// the provider's return signal, so it terminates for either provider family — a
+// naive `for range chunkChan` would deadlock against the non-closing providers.
+//
+// The request copy forces Stream=true so providers that branch on the flag take
+// their streaming path.
+func streamFinalTurn(ctx context.Context, provider llm.Provider, req *llm.LLMRequest, onFinalChunk func(string)) (content string, metadata map[string]interface{}, err error) {
+	streamReq := *req
+	streamReq.Stream = true
+
+	chunkChan := make(chan llm.LLMResponse, 100)
+	errCh := make(chan error, 1)
+	go func() { errCh <- provider.GenerateStream(ctx, &streamReq, chunkChan) }()
+
+	var sb strings.Builder
+	onChunk := func(chunk llm.LLMResponse) {
+		if chunk.ProviderMetadata != nil {
+			metadata = chunk.ProviderMetadata
+		}
+		if chunk.Content != "" {
+			sb.WriteString(chunk.Content)
+			if onFinalChunk != nil {
+				onFinalChunk(chunk.Content)
+			}
+		}
+	}
+
+	streamErr := drainProviderStream(chunkChan, errCh, onChunk)
+	return sb.String(), metadata, streamErr
+}
+
+// drainProviderStream consumes every chunk a provider's GenerateStream emits onto
+// chunkChan, invoking onChunk for each, and returns the provider's error. It
+// copes with the non-uniform channel-close contract across llm.Provider
+// implementations: some close chunkChan from inside GenerateStream, some return
+// without closing. It selects on both chunkChan and errCh — on channel close it
+// joins errCh; on an errCh send it drains the remaining buffered chunks
+// non-blockingly and returns. Terminates for both provider families. This mirrors
+// the TUI's drainProviderStream (applications/terminal_ui/main.go); duplicated
+// here so internal/agent does not import the TUI (no UI dependency in the loop).
+func drainProviderStream(chunkChan chan llm.LLMResponse, errCh chan error, onChunk func(llm.LLMResponse)) error {
+	for {
+		select {
+		case chunk, ok := <-chunkChan:
+			if !ok {
+				return <-errCh
+			}
+			onChunk(chunk)
+		case provErr := <-errCh:
+			for {
+				select {
+				case chunk, ok := <-chunkChan:
+					if !ok {
+						return provErr
+					}
+					onChunk(chunk)
+				default:
+					return provErr
+				}
+			}
+		}
+	}
 }
 
 // registryToLLMTools converts every tool registered in registry into an

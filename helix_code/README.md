@@ -392,6 +392,14 @@ Access Grafana at `http://localhost:3000` (default credentials: admin/admin)
 
 This project is licensed under the terms specified in the LICENSE file.
 
+## Documentation
+
+- [TUI Capabilities Guide](docs/CAPABILITIES.md) — streaming, MCP tools, LSP
+  diagnostics, skills, plugins, the agentic read-only tool loop, the Helix Agent
+  ensemble (visible members + per-member model via LLMsVerifier), environment
+  providers, and the HelixAgent full-capacity provider, each with a real trigger
+  and example prompt.
+
 ## Support
 
 For support and questions:

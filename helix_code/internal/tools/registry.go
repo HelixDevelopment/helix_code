@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 
 	"dev.helix.code/internal/approval"
@@ -879,6 +880,19 @@ func (r *ToolRegistry) ExportSchemas() ([]byte, error) {
 // must invoke RegisterMCPManager again. (Reconciliation will be addressed
 // in a follow-up.)
 func (r *ToolRegistry) RegisterMCPManager(m *mcp.Manager) {
+	// Build a per-server read-only allowlist from the loaded config so a
+	// server marked `readOnly: true` has all its tools registered at
+	// approval.LevelReadOnly (otherwise the ReadOnlyOnly agent tool loop
+	// blocks every MCP tool, since the default level is LevelEdit).
+	readOnlyServers := map[string]bool{}
+	if cfg := m.Config(); cfg != nil {
+		for _, s := range cfg.Servers {
+			if s.ReadOnly {
+				readOnlyServers[s.Name] = true
+			}
+		}
+	}
+
 	for _, t := range m.Tools() {
 		name := t.Server + ":" + t.Name
 		if _, err := r.Get(name); err == nil {
@@ -890,31 +904,80 @@ func (r *ToolRegistry) RegisterMCPManager(m *mcp.Manager) {
 		if desc == "" {
 			desc = t.Title
 		}
+		// Decide the approval level for this tool. A server explicitly
+		// marked read-only in config has every tool registered as
+		// LevelReadOnly. Otherwise, individual tools whose names match a
+		// well-known read-only pattern (read_file, list_directory,
+		// search, …) are also LevelReadOnly; everything else keeps the
+		// conservative LevelEdit default.
+		level := approval.LevelEdit
+		if readOnlyServers[server] || isReadOnlyMCPToolName(toolName) {
+			level = approval.LevelReadOnly
+		}
 		r.Register(&mcpTool{
-			registry: r,
-			mcpMgr:   m,
-			server:   server,
-			toolName: toolName,
-			name:     name,
-			desc:     desc,
+			registry:      r,
+			mcpMgr:        m,
+			server:        server,
+			toolName:      toolName,
+			name:          name,
+			desc:          desc,
+			approvalLevel: level,
 		})
 	}
 }
 
+// readOnlyMCPToolNames is the set of MCP tool names that are pure reads
+// (no side effects) for well-known MCP servers — notably the official
+// @modelcontextprotocol/server-filesystem. A tool matched here is
+// registered at approval.LevelReadOnly even when its server is not
+// explicitly flagged `readOnly: true`, so the ReadOnlyOnly agent tool
+// loop can offer + execute it. The match is conservative: anything not
+// listed keeps the LevelEdit default.
+var readOnlyMCPToolNames = map[string]bool{
+	"read_file":                 true,
+	"read_text_file":            true,
+	"read_media_file":           true,
+	"read_multiple_files":       true,
+	"list_directory":            true,
+	"list_directory_with_sizes": true,
+	"directory_tree":            true,
+	"search_files":              true,
+	"search":                    true,
+	"get_file_info":             true,
+	"list_allowed_directories":  true,
+}
+
+// isReadOnlyMCPToolName reports whether an MCP tool name is a known
+// pure-read operation. Case-insensitive on the bare tool name (NOT the
+// server-prefixed name).
+func isReadOnlyMCPToolName(name string) bool {
+	return readOnlyMCPToolNames[strings.ToLower(name)]
+}
+
 // mcpTool is an internal Tool adapter that routes Execute to an mcp.Manager.
 type mcpTool struct {
-	approval.DefaultLevelEdit // F21: conservative default — per-server
-	// MCP capability metadata may override in F21.5 (spec §3.6 footnote).
 	registry *ToolRegistry
 	mcpMgr   *mcp.Manager
 	server   string
 	toolName string
 	name     string
 	desc     string
+	// approvalLevel is the level this tool reports from RequiresApproval.
+	// Set by RegisterMCPManager: LevelReadOnly for read-only servers /
+	// known read-only tool names, LevelEdit otherwise (the conservative
+	// default for an unclassified, possibly-mutating tool).
+	approvalLevel approval.ApprovalLevel
 }
 
-func (t *mcpTool) Name() string           { return t.name }
-func (t *mcpTool) Description() string    { return t.desc }
+func (t *mcpTool) Name() string        { return t.name }
+func (t *mcpTool) Description() string { return t.desc }
+
+// RequiresApproval reports the per-server / per-tool approval level chosen
+// at registration time. A read-only-configured server's tools report
+// LevelReadOnly so the ReadOnlyOnly agent loop can run them; everything
+// else reports LevelEdit (the conservative default).
+func (t *mcpTool) RequiresApproval() approval.ApprovalLevel { return t.approvalLevel }
+
 func (t *mcpTool) Category() ToolCategory { return ToolCategory("mcp") }
 
 func (t *mcpTool) Schema() ToolSchema {
@@ -1072,10 +1135,10 @@ type ToolCallRequest struct {
 // ExecuteBatch has one BatchResult per input ToolCallRequest, in the SAME order
 // as the input slice (request order), never completion order.
 type BatchResult struct {
-	ID         string
-	Name       string
-	Result     interface{}
-	Err        error
+	ID     string
+	Name   string
+	Result interface{}
+	Err    error
 	// RanParallel is true when this call was dispatched in the concurrent
 	// wave rather than the serial wave. Diagnostic only — does not affect the
 	// result value.

@@ -228,6 +228,7 @@ func specEqual(a, b ServerSpec) bool {
 	if a.Name != b.Name || a.Transport != b.Transport ||
 		a.URL != b.URL || a.SSEURL != b.SSEURL ||
 		a.Cwd != b.Cwd || a.AlwaysLoad != b.AlwaysLoad ||
+		a.ReadOnly != b.ReadOnly ||
 		a.OAuth != b.OAuth {
 		return false
 	}

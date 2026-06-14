@@ -836,6 +836,47 @@ func TestEnsembleProvider_DoesNotForwardStreamToMembers(t *testing.T) {
 	}
 }
 
+// TestEnsembleProvider_GenerateStream_CarriesProviderMetadata proves the chunk
+// the ensemble emits over GenerateStream carries the ensemble panel metadata
+// (ensemble / ensemble_participants / ensemble_selected_provider / ...), NOT a
+// bare content-only chunk. The streaming tool-loop path (RunToolLoopStream)
+// captures result.FinalMetadata from the streamed chunk, so a metadata-less
+// stream chunk would silently drop the ensemble panel data. The ensemble emits
+// the full voted *resp (which Generate populated with the metadata), so the
+// emitted chunk carries it — this test makes that guarantee load-bearing.
+func TestEnsembleProvider_GenerateStream_CarriesProviderMetadata(t *testing.T) {
+	ens := NewEnsembleProvider(EnsembleProviderConfig{Members: []Provider{
+		&ensembleStubProvider{ptype: ProviderTypeGroq, name: "Groq", content: "answer A", finish: "stop", tokens: 2},
+		&ensembleStubProvider{ptype: ProviderTypeDeepSeek, name: "DeepSeek", content: "answer B", finish: "stop", tokens: 2},
+	}})
+
+	ch := make(chan LLMResponse, 8)
+	err := ens.GenerateStream(context.Background(), &LLMRequest{ID: uuid.New(), Messages: []Message{{Role: "user", Content: "hi"}}}, ch)
+	if err != nil {
+		t.Fatalf("GenerateStream must succeed, got: %v", err)
+	}
+
+	// Find the chunk carrying ProviderMetadata.
+	var meta map[string]interface{}
+	for c := range ch {
+		if c.ProviderMetadata != nil {
+			meta = c.ProviderMetadata
+		}
+	}
+	if meta == nil {
+		t.Fatal("streamed ensemble chunk MUST carry ProviderMetadata (ensemble panel data), got nil")
+	}
+	if ok, _ := meta["ensemble"].(bool); !ok {
+		t.Errorf("streamed chunk metadata[ensemble] = %v, want true", meta["ensemble"])
+	}
+	if parts, ok := meta["ensemble_participants"].([]string); !ok || len(parts) != 2 {
+		t.Errorf("streamed chunk metadata[ensemble_participants] = %v, want 2 named members", meta["ensemble_participants"])
+	}
+	if sel, _ := meta["ensemble_selected_provider"].(string); sel == "" {
+		t.Error("streamed chunk metadata[ensemble_selected_provider] must be non-empty")
+	}
+}
+
 // toolCallStub is a unit-test-only member provider that returns a tool-call
 // request (non-empty ToolCalls, EMPTY Content) — the shape a real provider
 // produces on a tool-calling turn. Pre-fix the ensemble treated empty Content as
