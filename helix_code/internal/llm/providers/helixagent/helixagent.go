@@ -133,10 +133,115 @@ func (p *Provider) Close() error {
 
 // ---- OpenAI-compatible wire shapes -----------------------------------------
 
+// wireSendToolCall is the SEND-side on-wire shape of a single assistant
+// tool_calls[] entry. Its `function.arguments` is a JSON-encoded STRING — the
+// canonical OpenAI/HelixAgent encoding the engine requires; emitting the object
+// form (`"arguments":{...}`) is rejected. It is the symmetric inverse of
+// wireRecvToolCall (which decodes the same shape on the PARSE side). This
+// mirrors internal/llm's unexported wireSendToolCall verbatim; the shared
+// helper is not exported from internal/llm, so it is replicated minimally here
+// (the only legal option for this sub-package).
+type wireSendToolCall struct {
+	ID       string `json:"id"`
+	Type     string `json:"type"`
+	Function struct {
+		Name      string `json:"name"`
+		Arguments string `json:"arguments"`
+	} `json:"function"`
+}
+
+// wireRecvToolCall is the PARSE-side on-wire shape: `function.arguments` arrives
+// as a JSON STRING (OpenAI canonical), captured as json.RawMessage so
+// parseRecvToolCalls can decode both the string-encoded and raw-object forms.
+// Mirrors internal/llm's unexported openAIWireToolCall.
+type wireRecvToolCall struct {
+	ID       string `json:"id"`
+	Type     string `json:"type"`
+	Function struct {
+		Name      string          `json:"name"`
+		Arguments json.RawMessage `json:"arguments"`
+	} `json:"function"`
+}
+
+// toWireSendToolCalls converts []llm.ToolCall into []wireSendToolCall, encoding
+// each call's Function.Arguments map as a JSON STRING. A nil/empty arguments map
+// (or one that fails to marshal) is encoded as the literal "{}". Returns nil for
+// an empty input so plain-chat messages serialise byte-identically with
+// omitempty. Mirrors internal/llm's unexported toWireSendToolCalls.
+func toWireSendToolCalls(cs []llm.ToolCall) []wireSendToolCall {
+	if len(cs) == 0 {
+		return nil
+	}
+	out := make([]wireSendToolCall, 0, len(cs))
+	for _, c := range cs {
+		args := "{}"
+		if len(c.Function.Arguments) > 0 {
+			if raw, err := json.Marshal(c.Function.Arguments); err == nil && len(raw) > 0 {
+				args = string(raw)
+			}
+		}
+		callType := c.Type
+		if callType == "" {
+			callType = "function"
+		}
+		w := wireSendToolCall{ID: c.ID, Type: callType}
+		w.Function.Name = c.Function.Name
+		w.Function.Arguments = args
+		out = append(out, w)
+	}
+	return out
+}
+
+// parseRecvToolCalls converts the wire `tool_calls` array into []llm.ToolCall,
+// decoding `function.arguments` whether the engine sent it as a JSON-string
+// (OpenAI canonical, e.g. "{\"path\":\".\"}") or a raw JSON object. Returns nil
+// for an empty array so plain-chat responses are unchanged. Mirrors
+// internal/llm's unexported parseOpenAIWireToolCalls.
+func parseRecvToolCalls(wire []wireRecvToolCall) []llm.ToolCall {
+	if len(wire) == 0 {
+		return nil
+	}
+	out := make([]llm.ToolCall, 0, len(wire))
+	for _, w := range wire {
+		args := map[string]interface{}{}
+		if raw := []byte(w.Function.Arguments); len(raw) > 0 {
+			var asString string
+			if err := json.Unmarshal(raw, &asString); err == nil {
+				if asString != "" {
+					if uerr := json.Unmarshal([]byte(asString), &args); uerr != nil {
+						args = map[string]interface{}{}
+					}
+				}
+			} else if uerr := json.Unmarshal(raw, &args); uerr != nil {
+				args = map[string]interface{}{}
+			}
+		}
+		callType := w.Type
+		if callType == "" {
+			callType = "function"
+		}
+		out = append(out, llm.ToolCall{
+			ID:   w.ID,
+			Type: callType,
+			Function: llm.ToolCallFunc{
+				Name:      w.Function.Name,
+				Arguments: args,
+			},
+		})
+	}
+	return out
+}
+
+// chatMessage is the on-wire message shape. ToolCallID is REQUIRED on every
+// role:"tool" result message; ToolCalls (assistant turns) serialise
+// function.arguments as a JSON STRING via toWireSendToolCalls. omitempty ⇒
+// plain-chat messages serialise byte-identically.
 type chatMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-	Name    string `json:"name,omitempty"`
+	Role       string             `json:"role"`
+	Content    string             `json:"content"`
+	Name       string             `json:"name,omitempty"`
+	ToolCallID string             `json:"tool_call_id,omitempty"`
+	ToolCalls  []wireSendToolCall `json:"tool_calls,omitempty"`
 }
 
 type chatRequest struct {
@@ -145,6 +250,11 @@ type chatRequest struct {
 	Stream      bool          `json:"stream,omitempty"`
 	Temperature float64       `json:"temperature,omitempty"`
 	MaxTokens   int           `json:"max_tokens,omitempty"`
+	// Tools + ToolChoice are forwarded only when request.Tools is non-empty so
+	// plain-chat requests stay byte-identical (omitempty). Tools reuses
+	// llm.Tool verbatim (the OpenAI tool-definition shape the engine expects).
+	Tools      []llm.Tool  `json:"tools,omitempty"`
+	ToolChoice interface{} `json:"tool_choice,omitempty"`
 }
 
 type chatUsage struct {
@@ -159,8 +269,9 @@ type chatResponse struct {
 	Choices []struct {
 		Index   int `json:"index"`
 		Message struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
+			Role      string             `json:"role"`
+			Content   string             `json:"content"`
+			ToolCalls []wireRecvToolCall `json:"tool_calls,omitempty"`
 		} `json:"message"`
 		FinishReason string `json:"finish_reason"`
 	} `json:"choices"`
@@ -173,7 +284,8 @@ type chatResponse struct {
 type chatStreamChunk struct {
 	Choices []struct {
 		Delta struct {
-			Content string `json:"content"`
+			Content   string             `json:"content"`
+			ToolCalls []wireRecvToolCall `json:"tool_calls,omitempty"`
 		} `json:"delta"`
 		FinishReason string `json:"finish_reason"`
 	} `json:"choices"`
@@ -193,17 +305,35 @@ func (p *Provider) buildChatRequest(request *llm.LLMRequest, stream bool) chatRe
 	if model == "" {
 		model = DefaultModel
 	}
+	// Serialise each message verbatim — including role:"tool" result messages
+	// (ToolCallID set) and assistant turns carrying tool_calls (arguments encoded
+	// as a JSON STRING via toWireSendToolCalls). This preserves the full
+	// tool-conversation protocol the TUI tool loop (internal/agent.RunToolLoop)
+	// feeds back across turns.
 	msgs := make([]chatMessage, 0, len(request.Messages))
 	for _, m := range request.Messages {
-		msgs = append(msgs, chatMessage{Role: m.Role, Content: m.Content, Name: m.Name})
+		msgs = append(msgs, chatMessage{
+			Role:       m.Role,
+			Content:    m.Content,
+			Name:       m.Name,
+			ToolCallID: m.ToolCallID,
+			ToolCalls:  toWireSendToolCalls(m.ToolCalls),
+		})
 	}
-	return chatRequest{
+	cr := chatRequest{
 		Model:       model,
 		Messages:    msgs,
 		Stream:      stream,
 		Temperature: request.Temperature,
 		MaxTokens:   request.MaxTokens,
 	}
+	// Forward tools + tool_choice only when the caller supplied tools, so plain
+	// chat requests stay byte-identical on the wire (omitempty).
+	if len(request.Tools) > 0 {
+		cr.Tools = request.Tools
+		cr.ToolChoice = request.ToolChoice
+	}
+	return cr
 }
 
 // Generate sends a non-streaming chat completion to the running HelixAgent
@@ -244,15 +374,21 @@ func (p *Provider) Generate(ctx context.Context, request *llm.LLMRequest) (*llm.
 	}
 
 	var content, finishReason string
+	var toolCalls []llm.ToolCall
 	if len(cr.Choices) > 0 {
 		content = cr.Choices[0].Message.Content
 		finishReason = cr.Choices[0].FinishReason
+		// An assistant message with empty content + tool_calls is valid: the
+		// engine requested tool execution. parseRecvToolCalls returns nil for an
+		// absent array so plain-chat responses keep ToolCalls nil.
+		toolCalls = parseRecvToolCalls(cr.Choices[0].Message.ToolCalls)
 	}
 
 	return &llm.LLMResponse{
 		ID:        uuid.New(),
 		RequestID: request.ID,
 		Content:   content,
+		ToolCalls: toolCalls,
 		Usage: llm.Usage{
 			PromptTokens:     cr.Usage.PromptTokens,
 			CompletionTokens: cr.Usage.CompletionTokens,
@@ -323,12 +459,19 @@ func (p *Provider) GenerateStream(ctx context.Context, request *llm.LLMRequest, 
 
 		delta := chunk.Choices[0].Delta.Content
 		finishReason := chunk.Choices[0].FinishReason
+		// Tool-call deltas (engine streamed a tool request). Each frame carrying
+		// tool_calls is surfaced so a streaming tool-loop consumer sees them;
+		// parseRecvToolCalls returns nil for plain-text deltas. The engine
+		// commonly sends complete tool_calls (id+name+arguments) in the frame
+		// preceding finish_reason:"tool_calls" rather than fragmenting them.
+		toolCalls := parseRecvToolCalls(chunk.Choices[0].Delta.ToolCalls)
 
-		if delta != "" {
+		if delta != "" || len(toolCalls) > 0 {
 			ch <- llm.LLMResponse{
 				ID:        uuid.New(),
 				RequestID: request.ID,
 				Content:   delta,
+				ToolCalls: toolCalls,
 				CreatedAt: time.Now(),
 			}
 		}
