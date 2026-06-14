@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -322,49 +323,24 @@ func (tui *TerminalUI) setupUI() {
 	tui.showDashboard()
 }
 
-// loadASCIIArt loads the ASCII art logo from file
+// embeddedLogoASCII is the colored (tview-tagged) nautilus-spiral ASCII art of
+// the brand logo (assets/Logo.png), embedded at build time so the dashboard logo
+// always renders — matching the logo in shape AND colour (green→teal gradient) —
+// regardless of the process working directory. Regenerate via
+// scripts/gen_logo_ascii.go (the §11.4.77 mechanism for this derivative).
+//
+//go:embed logo-ascii.txt
+var embeddedLogoASCII string
+
+// loadASCIIArt returns the colored ASCII logo. It prefers a runtime override file
+// (assets/images/logo-ascii.txt relative to cwd) so the art can be edited without
+// a rebuild, and otherwise returns the build-time embedded copy — so the colored
+// logo shows even when the TUI is launched from a different directory.
 func (tui *TerminalUI) loadASCIIArt() string {
-	// Try to load from assets
-	asciiPath := "assets/images/logo-ascii.txt"
-	if data, err := ioutil.ReadFile(asciiPath); err == nil {
+	if data, err := ioutil.ReadFile("assets/images/logo-ascii.txt"); err == nil && len(data) > 0 {
 		return string(data)
 	}
-
-	// Fallback to default ASCII art
-	return `
-                 :=+**##**+-:
-              :+##%#######%%#+-
-            :*############**+*#*-
-          .+#############*++***##*.
-         :#############*++****#####:
-        =#############+++****#######:
-       =#*##########*+++****#########.
-      =#**#########*++*****#########%*
-     -#****#######*+++**#############%-
-    .#*******#####++******#############
-    +#**********#*+*+:.    :+#########%=
-   :#**********#**+:         :*%#######*
-   **************+             *%######%:
-  :#************+    :=++=-.    #######%=
-  +*************.  :***####*-   :%#####%+
-  ************#-  -#***+--+##-   *######*
- :#************  -#***.    :**   -%######
- =***********#=  ****.  :-. -#-  :%######
- +#**********#: -#*#-  +##*. #=  .#######
- =++++++++++++. +**#. :#**#- *+  .######*
-                +***. -#*##. #-  :%####%+
-                +**#. .#**. =#   =%####%-
-                +#*#-  =##-+#:   #######.
-                =#*#*   -+*=.   =%####%*
-                :#**#=         -######%:
-                 *####=       =######%+
-                 -#*####=---+**+****#*
-                  +###########**+++**.
-                   *##############%*.
-                    +###########%#=
-                     -*#%%##%%%#+.
-                       :-++*+=:
-`
+	return embeddedLogoASCII
 }
 
 // showDashboard displays the main dashboard
