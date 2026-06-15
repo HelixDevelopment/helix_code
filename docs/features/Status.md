@@ -64,7 +64,324 @@ else is marked truthfully. Population is an ongoing program, NOT a one-shot clai
 
 ## Feature inventory
 
-_Populated incrementally from `docs/features/inventory/*.md` (one file per slice)._
+_Aggregated from docs/features/inventory/*.md by scripts/generate_features_status.sh (docs_chain §11.4.106)._
+
+
+## CLI / TUI / Web / Desktop / Mobile clients + cmd tools
+
+Inventory slice for `helix_code/cmd/*` (cmd tools) and `helix_code/applications/*` +
+`helix_code/web/*` (client applications). Assessed from source evidence per the
+anti-bluff covenant (CONST-035 / §11.4.107). **📹 Video is `no` for every row** —
+device/display recordings are only just starting; the conductor owns video
+confirmation. `Overall` is therefore never `confirmed`; honest rollups are
+`working-untaped` / `partial` / `gap`.
+
+Recordability per client (for the conductor): **CLI, TUI, Web = feasible now**
+(terminal + headless HTTP). **Desktop (Fyne) = host-display required**. **Mobile:**
+Aurora OS / Harmony OS are Go/Fyne desktop-class binaries (recordable on a Linux
+display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
+**iOS needs a built app (no Xcode project present → not buildable yet)**.
+
+| Area | Component | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| application(cli) | cmd/cli REPL | Plain-text prompt → real LLM (streaming via provider.GenerateStream) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/models` list models via providerManager.GetProviders (BLUFF-002 resolved) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/workers` list workers | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/health` health check | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/diff [ref]` real git diff (os/exec) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/debate <prompt>` DebateOrchestrator over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/specify <request>` HelixSpecifier Specify phase over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/checkpoint [create/list/restore]` workspace snapshots | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/undo` revert last action | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/clear` `/reset` clear conversation history | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/help` help; `/exit` `/quit` exit | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | @-file mentions (real os.ReadFile context attach) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | Context-window tracking + generation stats | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli `commands` | list / show / run / reload markdown commands | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli `hooks` | list / enable / disable / validate / test git hooks | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli `lsp` | status / list-servers / restart / stop LSP servers | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli `mcp` | add / remove / list / test / auth / logs MCP servers | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli `permissions` | list / add / remove / check tool permissions | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli `sessions` | list / show / delete sessions | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli `skills` | list / show / invoke / reload skills | done | yes | yes | unit | no | no | no | native | working-untaped |
+| service | cmd/server | HTTP/gRPC/WebSocket server boot (bin/helixcode) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| application(web) | web/frontend | LLM streaming console (SSE, POST /api/v1/llm/stream) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| application(web) | web/frontend | Specify phase form (POST /api/v1/specify) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| application(web) | web/frontend | Response/metadata rendering (no client simulation) | done | yes | yes | e2e | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/llm/stream real provider.GenerateStream (SSE) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/specify real speckit Specify phase | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/llm/providers, /llm/models list | done | yes | yes | none | no | no | no | native | partial |
+| service | internal/server (HTTP API) | /api/v1/auth register / login / logout / refresh (JWT) | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/users me get/update/delete | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/workers CRUD + heartbeat + metrics | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/tasks CRUD + assign/start/complete/fail/retry/checkpoint | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/projects CRUD + sessions + planning/building/testing/refactoring workflows | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/sessions CRUD | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/system stats + status | done | yes | yes | none | no | no | no | native | partial |
+| service | internal/server (HTTP API) | /api/v1/memory systems + stats | done | yes | yes | none | no | no | no | native | partial |
+| service | internal/server (HTTP API) | /api/v1/qa session start/list/status/report/screenshot/cancel | done | yes | unknown | none | no | no | no | native | partial |
+| service | internal/server (HTTP API) | /api/v1/screenshot engines + capture | done | yes | unknown | none | no | no | no | native | partial |
+| service | internal/server (HTTP API) | /ws MCP WebSocket bridge | done | yes | yes | none | no | no | no | native | partial |
+| service | internal/server (HTTP API) | /health, /api/v1/health, /metrics, /api/v1/server/info | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /debug/pprof/* (opt-in profiling) | done | yes | yes | none | no | no | no | native | partial |
+| application(tui) | applications/terminal_ui | LLM chat (real provider, verifier-driven model discovery) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| application(tui) | applications/terminal_ui | Dashboard / Tasks / Workers / Projects / Sessions panels (real managers) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(tui) | applications/terminal_ui | Sidebar nav + key bindings (d/t/w/p/s/l/q/c) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(tui) | applications/terminal_ui | Skill dispatcher + tool registry (git/fs/grep/LSP/MCP, graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(tui) | applications/terminal_ui | HelixMemory durable cross-session store (SQLite, default-on) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| application(tui) | applications/terminal_ui | Status bar (DB/Redis/LLM status, context %), notifications, themes, i18n | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(tui) | applications/terminal_ui | QA engine panel (helixqa.Engine wired) | partial | yes | unknown | unit | no | no | no | native | partial |
+| application(desktop) | applications/desktop (Fyne) | LLM chat tab (real provider, verifier-driven models) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| application(desktop) | applications/desktop (Fyne) | Dashboard / Tasks / Workers / Projects / Sessions tabs (real managers) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(desktop) | applications/desktop (Fyne) | Settings tab (theme, server config, shortcuts; desktop.yaml) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(desktop) | applications/desktop (Fyne) | Agentic tools + skills/plugins wiring (graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(desktop) | applications/desktop (Fyne) | NoGUI build mode (-tags nogui CLI fallback) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(desktop) | applications/desktop (Fyne) | TUI-parity wiring (parity_wiring_test.go) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(mobile) | applications/aurora_os (Go/Fyne) | Full multi-page GUI: dashboard/projects/sessions/tasks/LLM/workers/system | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| application(mobile) | applications/aurora_os (Go/Fyne) | NoGUI CLI mode (cobra) + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(mobile) | applications/harmony_os (Go/Fyne) | 10-tab GUI incl. distributed engine + multi-device scheduling | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| application(mobile) | applications/harmony_os (Go/Fyne) | NoGUI CLI + interactive shell + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(mobile) | applications/android (Kotlin) | Connect + task list (RecyclerView) over Go mobile-core bridge | partial | partial | no | none | no | no | no | native | gap |
+| application(mobile) | applications/android (Kotlin) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
+| application(mobile) | applications/ios (Swift) | Connect + task list (UITableView) over Go mobile-core bridge | partial | partial | no | none | no | no | no | native | gap |
+| application(mobile) | applications/ios (Swift) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
+| application(cli) | cmd/helix_config | Interactive provider/credential config wizard → YAML/.env | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/config_test | Config + provider-credential validator | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/i18n | i18n bundle/translator tooling (library, no main) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/infrastructure | Container / k8s / registry readiness checks | done | yes | unknown | unit | no | no | no | native | partial |
+| application(cli) | cmd/performance_optimization | pprof profiling + bottleneck analysis + benchmarks | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/security_test | Security test harness (PoC execution + verification) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/security_fix | Finding ingestion + policy-driven fix + re-scan validation | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/security_fix_standalone | Batch parallel security fix + audit-trail reporting | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/security_scan | AST/pattern code scan + leak detect + SARIF report | done | yes | unknown | none | no | no | no | native | gap |
+
+### Honesty notes (anti-bluff)
+
+- **`cmd/security_scan` has ZERO tests** (only `main.go`) — marked `Tests=none`, `Overall=gap`. Untested scanner = bluff risk per CONST-048/CONST-050.
+- **iOS / Android are scaffolds**: real source (JSON parse, list bind, Go mobile-core bridge) but single-screen, hardcoded localhost test server, **no Xcode project / no Gradle+manifest** → not buildable, not recordable. `Real-use=no`, `Overall=gap`.
+- **Aurora OS / Harmony OS are genuine Go/Fyne apps** (buildable via `make aurora-os` / `make harmony-os`, comprehensive unit+integration tests) — but integration features need real PostgreSQL/Redis/LLM backends, and full HAP/multi-device exercise needs the actual OS environment.
+- **Web LLM endpoints** (`/llm/generate`, `/llm/stream`, `/specify`) have real Ollama-backed e2e tests (`tests/integration/{llm_generate,llm_stream,specify_server}_e2e_test.go`, build tag `integration`, honest SKIP-OK when Ollama unreachable) → `Tests=e2e`, `V&V=yes(docs/qa/web-llm-e2e-20260615/)`. The 60+ CRUD/auth/workflow endpoints are real but tested at the manager/service layer, not at the HTTP-transport layer → `Tests=integ`/`none` honestly.
+- **No row is `confirmed`** — every `📹 Video=no`; rollups are `working-untaped` (real + tested, no video), `partial` (real but thin/unverified test coverage), or `gap` (scaffold or untested).
+
+**Feature count: 67 rows** (CLI REPL 14, CLI subcommand groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7, desktop 6, mobile 8, other cmd tools 11 + security_scan 1).
+
+
+## Deepened inventory (round 2)
+
+Round-2 deepening of packages flagged shallow/partial/unknown in round 1
+(`internal_services.md` coverage notes + the owned-submodule umbrella rows).
+Each previously-thin entry is enumerated into discrete features in the SAME
+12-column schema as `internal_services.md` (legend in `docs/features/Status.md`
+§ "Status dimensions"). Assessed from real code evidence (impl reality, wiring,
+`*_test.go` presence) per CONST-035 / §11.4.107 anti-bluff.
+
+> **Anti-bluff caveats (read before trusting a row).**
+> - `📹 Video` is **`no` for every row** — no analyzed recording exists; the
+>   conductor owns video confirmation. `Overall` is therefore **never
+>   `confirmed`**; honest rollups are `working-untaped` / `partial` / `gap`.
+> - `Origin` is `native` (all own-org code).
+> - **Round-1 stub claims corrected here from direct source reads** (a round-2
+>   exploration subagent reported these as stubs WITHOUT reading the code —
+>   verified false): `workspace` docker `Stop`/`Remove` are real
+>   (`docker stop` / `docker rm -f`, `manager.go:21-37`); `voice` recorder
+>   `Stop` is real (`Process.Signal(os.Interrupt)` then `Kill()`,
+>   `recorder.go:63-80`); `roocode` `CodeReviewer.Review` is real (reads the
+>   file + scans for TODO/issue patterns, `reviewer.go:16-30`). They are
+>   `done`/`partial` (impl real) but `Real-use=unknown` (shipped-flow wiring
+>   unconfirmed), not stubs.
+> - Submodule-side `Wired` follows `internal_services.md`'s wiring model:
+>   `helix_agent` is imported directly (`Wired=yes` where HelixCode consumes it),
+>   transitively-reachable own-org deps are `Wired=partial`, repo-present-but-not-
+>   in-build-graph are `Wired=no`. `helix_specifier`/`helix_qa` are imported by
+>   module path (`Wired=yes`); `panoptic` is a Challenge/recording submodule not
+>   in HelixCode's Go build graph (`Wired=no`).
+> - Submodule `Tests` reflects `*_test.go` presence in/near the package; it is
+>   NOT a coverage-percentage claim. README-cited coverage figures
+>   (helix_agent "65.6%", panoptic "78%") are NOT used as evidence — unverified.
+
+### Internal packages (round-1 `partial`/`unknown` → deepened)
+
+| Area | Component | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| infrastructure | internal/clientcore | agentic tool registry wiring (git/fs/LSP/MCP, live-built) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/clientcore | LSP read-only diagnostics tool wiring | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/clientcore | MCP config-merge + server startup + tool registration | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/clientcore | tool-loop system-prompt generation (from registry names) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/clientcore | tool-trace adapter (agent → ensembleui) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/clientcore | skills + plugins loader (graceful-on-failure) | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/clientcore | verifier adapter wiring (CONST-036/037 single-source) | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/clientcore | env-provider registration (cloud API keys, zero-hardcode) | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/clientcore | HelixAgent provider registration (when server reachable) | done | partial | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/agentbridge | verifier bridge config wrapper | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/agentbridge | VerifyModel real HTTP call to verifier service | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/agentbridge | test request/result marshal+unmarshal | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/checkpoint | git-backed snapshot (stash/write-tree/read-tree) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/checkpoint | file-copy fallback backend (real os.Read/Write) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/checkpoint | checkpoint create (capture) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/checkpoint | checkpoint restore (undo, writes real bytes) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/checkpoint | metadata persistence (label/timestamp JSON) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/checkpoint | multi-backend auto-selection (git else files) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| service | internal/ensembleui | tool-trace formatting (text/markdown render) | done | yes | unknown | unit | no | no | no | native | partial |
+| service | internal/ensembleui | metadata extraction helpers (int/string/slice) | done | yes | unknown | unit | no | no | no | native | partial |
+| service | internal/ensembleui | multi-model response assembly | done | yes | unknown | unit | no | no | no | native | partial |
+| service | internal/ensembleui | per-model token-usage aggregation | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/substrate | Unit interface (task contract) | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/substrate | queue-based scheduler (enqueue + dispatch) | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/substrate | serial FIFO execution (single worker) | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/substrate | context-cancellation propagation to Execute | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/workspace | workspace create (project bootstrap) | done | partial | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/workspace | docker runner start/stop/remove/list (real os/exec) | done | partial | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/workspace | workspace status tracking (enum + DB persist) | done | partial | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/workspace | CLI tools (create/delete/list registration) | done | yes | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/workspace | i18n translator seam | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/workspace | auto-cleanup / TTL teardown | partial | no | unknown | unit | no | no | no | native | gap |
+| service | internal/voice | audio device detection (arecord/sox/parec probe) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/voice | audio capture start (real exec.Command) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/voice | audio capture stop (Signal(Interrupt)→Kill) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/voice | Whisper API transcription (real multipart HTTP POST) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/voice | WAV validation before transcribe | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/voice | local whisper.cpp fallback transcription | partial | no | unknown | unit | no | no | no | native | gap |
+| service | internal/roocode | in-memory conversation store (create/add-message) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/roocode | task delegation (TaskSpec build; no real dispatch) | partial | no | unknown | unit | no | no | no | native | gap |
+| service | internal/roocode | code generation (Generate/Bootstrap scaffold) | partial | no | unknown | unit | no | no | no | native | gap |
+| service | internal/roocode | code review (file read + TODO/issue scan) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/roocode | i18n translator seam | done | yes | yes | unit | no | no | no | native | working-untaped |
+| service | internal/telemetry | OpenTelemetry provider bootstrap (OTLP exporter) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| service | internal/telemetry | agent instrumentation (spans + iteration counter) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| service | internal/telemetry | LLM instrumentation (traced-provider wrapper) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| service | internal/telemetry | tool instrumentation (call spans) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| service | internal/telemetry | config-from-env (OTEL_* vars + exporter-kind resolve) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/verifier | flexible timestamp parse (Unix + RFC3339) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/verifier | adapter facade (cache+health+client, IsEnabled/Reachable) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/verifier | two-tier cache (TTL + Redis) | done | partial | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/verifier | health monitor (background liveness goroutine) | done | partial | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/verifier | background poller (interval model-sync) | done | partial | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/verifier | bootstrap (embedded-or-remote stack init) | done | yes | unknown | unit,integ | no | no | no | native | working-untaped |
+| infrastructure | internal/verifier | embedded verifier server (fallback) | partial | partial | unknown | unit | no | no | no | native | partial |
+| infrastructure | internal/verifier | fallback model list (offline mode) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/verifier | real-server integration test (live LLMsVerifier) | done | yes | unknown | integ | no | no | no | native | working-untaped |
+| service | internal/worker | consensus manager (Raft state machine, election/heartbeat) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/worker | vote-transport abstraction (decoupled from wire) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/worker | single-node fallback (nil-transport safe step-down) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| service | internal/worker | worker isolation: sandbox dir create (0750) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/worker | worker isolation: resource limits (cgroup writes) | done | partial | unknown | unit | no | no | no | native | partial |
+| service | internal/worker | SSH client pool (persistent connection reuse) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| service | internal/worker | consensus stress + chaos tests (concurrent votes, SIGKILL) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| service | internal/worker | worker-pool isolation stress test | done | yes | yes | unit | no | no | no | native | working-untaped |
+| service | internal/server | Gin server + JWT auth middleware | done | yes | unknown | unit,integ | no | no | no | native | working-untaped |
+| service | internal/server | project list/register handlers (user-from-context) | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server | LLM generate endpoint (real provider stream) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| service | internal/server | LLM model-list endpoint (verifier-queried) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| service | internal/server | worker/task/project CRUD handlers | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server | QA session start handler (helix_qa integration) | done | yes | unknown | unit | no | no | no | native | partial |
+| service | internal/server | specify endpoint (spec from prompt) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| service | internal/server | stats / pprof / error-categorize (400-vs-500) helpers | done | yes | yes | unit | no | no | no | native | working-untaped |
+| service | internal/server | i18n translator seam (context-aware) | done | yes | yes | unit | no | no | no | native | working-untaped |
+
+### Owned submodules (round-1 umbrella rows → deepened principal packages)
+
+| Area | Component | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| submodule | helix_agent | internal/llm multi-provider interface (Claude/DeepSeek/Gemini/Mistral/Qwen/xAI/OpenRouter/Ollama/llama.cpp/Bedrock/Azure) | done | yes | unknown | unit,integ | no | no | no | native | working-untaped |
+| submodule | helix_agent | internal/ensemble multi-model debate/fusion orchestrator | done | yes | yes | unit,integ,e2e | no | no | no | native | working-untaped |
+| submodule | helix_agent | internal/provider+providers per-provider abstraction layer | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_agent | internal/verifier LLMsVerifier single-source-of-truth | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_agent | internal/server HTTP(Gin)+WebSocket API (completions/ensemble/stream) | done | yes | unknown | unit,integ,e2e | no | no | no | native | working-untaped |
+| submodule | helix_agent | internal/handlers per-route request/response handlers | done | yes | unknown | unit | no | no | no | native | partial |
+| submodule | helix_agent | internal/database PostgreSQL persistence (pgx/v5, migrations) | done | partial | unknown | integ | no | no | no | native | partial |
+| submodule | helix_agent | internal/redis caching layer (go-redis/v9) | done | partial | unknown | integ | no | no | no | native | partial |
+| submodule | helix_agent | internal/auth JWT + bcrypt/argon2 + OAuth2 | done | partial | unknown | unit,integ | no | no | no | native | partial |
+| submodule | helix_agent | internal/security PII redaction + guardrails bridge | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_agent | internal/streaming SSE/WebSocket token-level streaming | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_agent | internal/cache semantic (embeddings dedup) caching | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_agent | internal/knowledge RAG / vector-DB (zep) bridge | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_agent | internal/monitoring Prometheus metrics | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_agent | internal/logging structured JSON + gRPC tracing | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_agent | internal/mcp Model Context Protocol server/client | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_agent | internal/skills+plugins hot-reload plugin system | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_agent | internal/analytics usage telemetry + warehouse export | partial | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_agent | pkg/sdk Go + Python client SDKs | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/guardrails content guardrail engine (severity rules) | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/pii PII detect+redact (email/phone/SSN/CC-Luhn/IPv4) | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/content composable filter chains (length/pattern/keyword) | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/policy rule-based policy enforce (allow/deny/audit) | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/scanner vuln-scan interface + report aggregation | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/headers HTTP security headers middleware (CSP/HSTS/...) | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/securestorage AES-256-GCM + Argon2id key derivation | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/e2ee end-to-end encryption (ChaCha20-Poly1305) | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/ssrf SSRF prevention (outbound HTTP guard) | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | security | pkg/attestation + pkg/gpuattest platform/GPU attestation | partial | no | unknown | unit | no | no | no | native | partial |
+| submodule | helix_specifier | parallel execution (bounded-concurrency dispatch) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_specifier | constitution-as-code (machine-readable rule enforce) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_specifier | Nyquist TDD (≥2x test-to-impl ratio enforce) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_specifier | debate architecture (multi-round spec refinement) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| submodule | helix_specifier | skill learning (running-avg proficiency tracking) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_specifier | brownfield analysis (legacy pattern/dep detection) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_specifier | predictive specification (future-req prediction) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_specifier | cross-project transfer (shared knowledge base) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_specifier | adaptive ceremony (dynamic level by quality metrics) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_specifier | spec memory (persistent index + semantic search) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_qa | pkg/autonomous autonomous QA session engine (~9.5k loc, 21 tests) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_qa | pkg/orchestrator QA run orchestration | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_qa | pkg/navigator UI navigation/driving (~3.8k loc, 16 tests) | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_qa | pkg/detector + pkg/issuedetector issue/error detection | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_qa | pkg/recordingqa recording-validator (anti-bluff §11.4.107) | done | yes | unknown | unit | no | no | no | native | partial |
+| submodule | helix_qa | pkg/regression standing regression-guard suite | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_qa | pkg/evidence captured-evidence management | done | yes | unknown | unit | no | no | no | native | partial |
+| submodule | helix_qa | pkg/challengegen Challenge generation | partial | yes | unknown | unit | no | no | no | native | partial |
+| submodule | helix_qa | pkg/reporter QA reporting | done | yes | unknown | unit | no | no | no | native | working-untaped |
+| submodule | helix_qa | pkg/conduit + pkg/bridge sync-channel / agent bridge (§11.4.116) | done | yes | unknown | unit | no | no | no | native | partial |
+| submodule | helix_qa | pkg/replay + pkg/reproduce replay / defect reproduction | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_qa | pkg/distributed + pkg/maestro distributed/maestro coordination | partial | partial | unknown | unit | no | no | no | native | partial |
+| submodule | helix_qa | banks/ test-bank corpus (JSON/YAML suites) | done | yes | unknown | none | no | no | no | native | partial |
+| submodule | helix_qa | cmd/* tooling (axtree/capture/recvalidate/omniparser/uitars/lpips/...) | done | partial | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | internal/launcher multi-platform test launcher (web/desktop/mobile) | done | no | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | internal/executor UI automation executor | done | no | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | internal/vision computer-vision element detection | done | no | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | internal/ocr OCR text extraction | done | no | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | internal/recvalidate recording validator | done | no | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | internal/ai AI test generation/enhancement | done | no | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | internal/cloud cloud storage/integration | done | no | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | internal/platforms per-platform automation adapters | done | no | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | screenshot + video recording capture | done | no | unknown | unit | no | no | no | native | partial |
+| submodule | panoptic | cmd/record + cmd/vision + cmd/testgen CLI tooling | done | no | unknown | unit | no | no | no | native | partial |
+
+### Round-2 coverage notes
+
+- **Internal deepening:** the 12 round-1-flagged packages
+  (`clientcore`, `agentbridge`, `checkpoint`, `ensembleui`, `substrate`,
+  `workspace`, `voice`, `roocode`, `telemetry`, `verifier`, `worker`, `server`)
+  are now broken out into 73 discrete feature rows. `checkpoint`, `telemetry`,
+  most of `verifier`, `server`, and several `worker` features upgrade from
+  round-1 `partial` to `working-untaped` on direct-source evidence (real git
+  plumbing, real OTEL exporter, real Raft + cgroup writes, real Gin handlers
+  with integration tests). `roocode` task-delegation/code-gen and
+  `voice`/`workspace` auto-cleanup remain honest `gap` (real types, no shipped
+  wiring / incomplete impl).
+- **Stub-claim corrections** (see top caveat): three round-2-explorer "stub"
+  reports were verified FALSE by direct read and corrected to `done`/`partial`.
+  Logged here so the conductor does not propagate the wrong call.
+- **Submodule `Real-use=unknown` throughout:** each submodule package compiles
+  and has tests, but genuine end-user reachability THROUGH HelixCode (vs the
+  submodule's own standalone tests) was not confirmed by static inspection —
+  honestly `unknown`, never green.
+- **`helix_agent` `Wired`:** `yes` for the packages HelixCode consumes via the
+  direct `dev.helix.agent` import (llm/ensemble/server/provider/verifier/
+  streaming surface reachable through the agent dependency); `partial` for
+  packages reachable only transitively (database/redis/auth/monitoring/etc).
+- **`panoptic` `Wired=no`:** present as an equal-codebase submodule
+  (CONST-051) but NOT in HelixCode's Go build graph — it is a
+  Challenge/recording framework consumed out-of-process, not imported.
+- Every `Real-use=unknown` / `working-untaped` row is a candidate for a
+  recorded scenario; none is video-confirmed (📹 `no` throughout).
+
+**Round-2 deepened feature count: 145 rows** (73 internal across 12 packages +
+72 submodule across helix_agent 19, security 11, helix_specifier 10,
+helix_qa 14, panoptic 10, distributed across the wiring model).
+
 
 ## Internal services + infrastructure
 
@@ -342,106 +659,74 @@ conductor's job once a real analyzed recording exists); `Overall` is never
 
 233 features inventoried across 72 packages.
 
-## CLI / TUI / Web / Desktop / Mobile clients + cmd tools
 
-Inventory slice for `helix_code/cmd/*` (cmd tools) and `helix_code/applications/*` +
-`helix_code/web/*` (client applications). Assessed from source evidence per the
-anti-bluff covenant (CONST-035 / §11.4.107). **📹 Video is `no` for every row** —
-device/display recordings are only just starting; the conductor owns video
-confirmation. `Overall` is therefore never `confirmed`; honest rollups are
-`working-untaped` / `partial` / `gap`.
+## Ported cli_agents capabilities
 
-Recordability per client (for the conductor): **CLI, TUI, Web = feasible now**
-(terminal + headless HTTP). **Desktop (Fyne) = host-display required**. **Mobile:**
-Aurora OS / Harmony OS are Go/Fyne desktop-class binaries (recordable on a Linux
-display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
-**iOS needs a built app (no Xcode project present → not buildable yet)**.
+Evidence-backed inventory of capabilities **actually ported into HelixCode** from the
+`cli_agents/` reference catalogue (51 vendored reference agents). Per CONST-035 anti-bluff:
+this lists ONLY capabilities with landed code evidence (package `doc.go` origin headers,
+CONTINUATION.md P2-Fxx CLOSED ledger, POWER_FEATURES_PORTING_PLAN rev2 file:line
+reconciliation, git port commits) — NOT every cli_agent's full feature set. Planned-but-not-landed
+items are marked `Dev=absent`/`partial` honestly. **No feature is `📹 yes`** (no recordings analyzed
+for ported features). **Overall is never `confirmed`** (a confirmed rollup requires an analyzed video).
 
-| Area | Component | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
+Evidence basis: (1) CONTINUATION.md ports ledger lists `P2-F21..P2-F30` as CLOSED with landing
+packages; (2) each landed package's `doc.go` names its source agent ("aider voice input port P2-F27",
+"Roo-code CLI agent port", "Continue.dev IDE integration", "Go port of upstream gptme's profile mechanism");
+(3) POWER_FEATURES_PORTING_PLAN.md rev2 reconciles Phase-1 against HEAD with file:line;
+(4) `HXC-031-codex-cline-port.md` is DRAFT (plan only, NO code) — codex multimodal + cline computer-use are PLANNED, not landed.
+
+| Area | Component (HelixCode pkg) | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| application(cli) | cmd/cli REPL | Plain-text prompt → real LLM (streaming via provider.GenerateStream) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/models` list models via providerManager.GetProviders (BLUFF-002 resolved) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/workers` list workers | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/health` health check | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/diff [ref]` real git diff (os/exec) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/debate <prompt>` DebateOrchestrator over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/specify <request>` HelixSpecifier Specify phase over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/checkpoint [create/list/restore]` workspace snapshots | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/undo` revert last action | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/clear` `/reset` clear conversation history | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/help` help; `/exit` `/quit` exit | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | @-file mentions (real os.ReadFile context attach) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | Context-window tracking + generation stats | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli `commands` | list / show / run / reload markdown commands | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli `hooks` | list / enable / disable / validate / test git hooks | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli `lsp` | status / list-servers / restart / stop LSP servers | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli `mcp` | add / remove / list / test / auth / logs MCP servers | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli `permissions` | list / add / remove / check tool permissions | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli `sessions` | list / show / delete sessions | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli `skills` | list / show / invoke / reload skills | done | yes | yes | unit | no | no | no | native | working-untaped |
-| service | cmd/server | HTTP/gRPC/WebSocket server boot (bin/helixcode) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
-| application(web) | web/frontend | LLM streaming console (SSE, POST /api/v1/llm/stream) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
-| application(web) | web/frontend | Specify phase form (POST /api/v1/specify) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
-| application(web) | web/frontend | Response/metadata rendering (no client simulation) | done | yes | yes | e2e | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/llm/stream real provider.GenerateStream (SSE) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/specify real speckit Specify phase | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/llm/providers, /llm/models list | done | yes | yes | none | no | no | no | native | partial |
-| service | internal/server (HTTP API) | /api/v1/auth register / login / logout / refresh (JWT) | done | yes | yes | integ | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/users me get/update/delete | done | yes | yes | integ | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/workers CRUD + heartbeat + metrics | done | yes | yes | integ | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/tasks CRUD + assign/start/complete/fail/retry/checkpoint | done | yes | yes | integ | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/projects CRUD + sessions + planning/building/testing/refactoring workflows | done | yes | yes | integ | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/sessions CRUD | done | yes | yes | integ | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/system stats + status | done | yes | yes | none | no | no | no | native | partial |
-| service | internal/server (HTTP API) | /api/v1/memory systems + stats | done | yes | yes | none | no | no | no | native | partial |
-| service | internal/server (HTTP API) | /api/v1/qa session start/list/status/report/screenshot/cancel | done | yes | unknown | none | no | no | no | native | partial |
-| service | internal/server (HTTP API) | /api/v1/screenshot engines + capture | done | yes | unknown | none | no | no | no | native | partial |
-| service | internal/server (HTTP API) | /ws MCP WebSocket bridge | done | yes | yes | none | no | no | no | native | partial |
-| service | internal/server (HTTP API) | /health, /api/v1/health, /metrics, /api/v1/server/info | done | yes | yes | integ | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /debug/pprof/* (opt-in profiling) | done | yes | yes | none | no | no | no | native | partial |
-| application(tui) | applications/terminal_ui | LLM chat (real provider, verifier-driven model discovery) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(tui) | applications/terminal_ui | Dashboard / Tasks / Workers / Projects / Sessions panels (real managers) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(tui) | applications/terminal_ui | Sidebar nav + key bindings (d/t/w/p/s/l/q/c) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(tui) | applications/terminal_ui | Skill dispatcher + tool registry (git/fs/grep/LSP/MCP, graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(tui) | applications/terminal_ui | HelixMemory durable cross-session store (SQLite, default-on) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(tui) | applications/terminal_ui | Status bar (DB/Redis/LLM status, context %), notifications, themes, i18n | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(tui) | applications/terminal_ui | QA engine panel (helixqa.Engine wired) | partial | yes | unknown | unit | no | no | no | native | partial |
-| application(desktop) | applications/desktop (Fyne) | LLM chat tab (real provider, verifier-driven models) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(desktop) | applications/desktop (Fyne) | Dashboard / Tasks / Workers / Projects / Sessions tabs (real managers) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(desktop) | applications/desktop (Fyne) | Settings tab (theme, server config, shortcuts; desktop.yaml) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(desktop) | applications/desktop (Fyne) | Agentic tools + skills/plugins wiring (graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(desktop) | applications/desktop (Fyne) | NoGUI build mode (-tags nogui CLI fallback) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(desktop) | applications/desktop (Fyne) | TUI-parity wiring (parity_wiring_test.go) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(mobile) | applications/aurora_os (Go/Fyne) | Full multi-page GUI: dashboard/projects/sessions/tasks/LLM/workers/system | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(mobile) | applications/aurora_os (Go/Fyne) | NoGUI CLI mode (cobra) + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(mobile) | applications/harmony_os (Go/Fyne) | 10-tab GUI incl. distributed engine + multi-device scheduling | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(mobile) | applications/harmony_os (Go/Fyne) | NoGUI CLI + interactive shell + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(mobile) | applications/android (Kotlin) | Connect + task list (RecyclerView) over Go mobile-core bridge | partial | partial | no | none | no | no | no | native | gap |
-| application(mobile) | applications/android (Kotlin) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
-| application(mobile) | applications/ios (Swift) | Connect + task list (UITableView) over Go mobile-core bridge | partial | partial | no | none | no | no | no | native | gap |
-| application(mobile) | applications/ios (Swift) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
-| application(cli) | cmd/helix_config | Interactive provider/credential config wizard → YAML/.env | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/config_test | Config + provider-credential validator | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/i18n | i18n bundle/translator tooling (library, no main) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/infrastructure | Container / k8s / registry readiness checks | done | yes | unknown | unit | no | no | no | native | partial |
-| application(cli) | cmd/performance_optimization | pprof profiling + bottleneck analysis + benchmarks | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/security_test | Security test harness (PoC execution + verification) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/security_fix | Finding ingestion + policy-driven fix + re-scan validation | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/security_fix_standalone | Batch parallel security fix + audit-trail reporting | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/security_scan | AST/pattern code scan + leak detect + SARIF report | done | yes | unknown | none | no | no | no | native | gap |
+| service | internal/approval | Approval/exec-policy modes (per-tool yes/no, autopilot tiers) | done | yes | unknown | unit | no | no | no | ported:codex | working-untaped |
+| service | internal/autocommit | Git auto-commit per change (generated msg, secret-filter, summariser) | done | yes | unknown | unit | no | no | no | ported:aider | working-untaped |
+| service | internal/tools/browser | Browser tool suite (launch/click/type/scroll/screenshot via chromedp) | done | yes | unknown | unit | no | no | no | ported:cline | working-untaped |
+| service | internal/projectmemory | Project-memory context files (AGENTS.md/.clinerules-style loader+watcher) | done | yes | unknown | unit | no | no | no | ported:codex | working-untaped |
+| service | internal/plantree | Plan trees (branching persistent implementation plans, JSON-backed) | done | yes | unknown | unit | no | no | no | ported:plandex | working-untaped |
+| service | internal/session (condense.go) | Context compaction / history condense (CompactIfNeeded/ShouldCompact) | done | yes | unknown | unit | no | no | no | ported:plandex | working-untaped |
+| service | internal/workspace | Container per-task workspace (Docker/Podman mount, TTL cleanup) | done | partial | unknown | unit | no | no | no | ported:openhands | partial |
+| service | internal/voice | Voice-to-code input (arecord/sox capture, Whisper API + whisper.cpp fallback) | done | yes | unknown | unit | no | no | no | ported:aider | working-untaped |
+| service | internal/repomap | Repo-map (tree-sitter ranked incremental project map) | done | yes | unknown | unit | no | no | no | ported:aider | working-untaped |
+| service | internal/kilocode | AST-aware refactoring (cross-file rename, impact/call-graph, extract/move/inline) | done | yes | unknown | unit | no | no | no | ported:kilo-code | working-untaped |
+| service | internal/roocode | Roo-code full port (task delegation, template gen, diff review, conv memory) | done | yes | unknown | unit | no | no | no | ported:roo-code | working-untaped |
+| application | internal/continua | Continue.dev IDE integration (inline completions, editor, chat panel, diff, model selector) | done | partial | unknown | unit | no | no | no | ported:continue | partial |
+| service | internal/agent/profiles | Verifier work profile + RoleVerify posture (subagent review/validation) | done | yes | unknown | unit | no | no | no | ported:gptme | working-untaped |
+| application | cmd/cli (main.go:2118,2326) + autocommit/git.go | /undo + /diff (git-aware, force-push-free revert) | done | yes | unknown | unit | no | no | no | ported:aider | working-untaped |
+| service | internal/workflow/autonomy | Configurable autonomy presets (None/Basic/BasicPlus/SemiAuto/FullAuto, 5 tiers) | done | yes | unknown | unit | no | no | no | ported:plandex | working-untaped |
+| service | internal/workflow/planmode | First-class Plan/Act mode controller (tool-gated by mode) | done | yes | unknown | unit | no | no | no | ported:cline | working-untaped |
+| service | internal/tools/askuser | ask_user interactive clarification tool | done | yes | unknown | unit | no | no | no | ported:gemini-cli | working-untaped |
+| service | internal/commands (markdown_skills.go) | Markdown skills subsystem (project>user 2-tier precedence) | partial | yes | unknown | unit | no | no | no | ported:gemini-cli | partial |
+| service | internal/checkpoint | Workspace file-snapshot checkpoint + /checkpoint create/list/restore | done | yes | unknown | unit | no | no | no | ported:cline | working-untaped |
+| application | cmd/cli (main.go:1727) | Per-request token-usage counter (real provider Usage, anti-fabrication) | done | yes | unknown | unit | no | no | no | ported:codai | working-untaped |
+| service | (no production code) | Context-window-% indicator | absent | no | no | none | no | no | no | ported:codai (planned) | gap |
+| service | (no production code) | TODO/step tracker surface (/tasks is background-job list, not TODO tracker) | partial | partial | no | none | no | no | no | ported:gemini-cli (planned) | partial |
+| service | markdown_skills.go | SKILL.md built-in/bundled tier + canonical SKILL.md filename | absent | no | no | none | no | no | no | ported:gemini-cli (planned) | gap |
+| service | internal/llm (HXC-031 plan) | Codex multimodal image-content LLM request surface | absent | no | no | none | no | no | no | ported:codex (planned/DRAFT) | gap |
+| service | internal/tools/browser (HXC-031 plan) | Cline computer-use feedback loop (screenshot-per-action coord control) | absent | no | no | none | no | no | no | ported:cline (planned/DRAFT) | gap |
+| service | (planned, POWER_FEATURES F22) | Cumulative diff-review sandbox (stage-before-apply, apply/reject hunks) | absent | no | no | none | no | no | no | ported:plandex (planned) | gap |
+| service | (planned, POWER_FEATURES F25) | Conversation branches / fork | absent | no | no | none | no | no | no | ported:plandex (planned) | gap |
+| service | (planned, POWER_FEATURES F36/F43) | /rewind + Tangent mode | absent | no | no | none | no | no | no | ported:gemini-cli/amazon-q (planned) | gap |
+| service | (planned, POWER_FEATURES F18) | Messaging connectors (Slack/Telegram/Discord) | absent | no | no | none | no | no | no | ported:cline (planned) | gap |
+| service | (planned, POWER_FEATURES F35) | ACP mode (Agent Client Protocol over stdio) | absent | no | no | none | no | no | no | ported:gemini-cli (planned) | gap |
+| service | (planned, POWER_FEATURES F56) | OpenAI-compatible server endpoints | absent | no | no | none | no | no | no | ported:shai/aichat (planned) | gap |
+| service | (planned, POWER_FEATURES F61) | Spec-driven workflow surface (specify→plan→tasks→implement) | absent | no | no | none | no | no | no | ported:spec-kit (planned) | gap |
+| service | (planned, POWER_FEATURES F33) | OS-level exec sandbox (Seatbelt/Landlock/bwrap) | absent | no | no | none | no | no | no | ported:codex (planned) | gap |
 
-### Honesty notes (anti-bluff)
+Count: 33 rows total — **20 landed ports** (`Dev=done`, working-untaped), **3 partial-landed**
+(workspace, continua, markdown-skills), **10 planned/not-landed** (`Dev=absent`/`partial`, `gap`).
+Zero `📹 yes`; zero `confirmed`.
 
-- **`cmd/security_scan` has ZERO tests** (only `main.go`) — marked `Tests=none`, `Overall=gap`. Untested scanner = bluff risk per CONST-048/CONST-050.
-- **iOS / Android are scaffolds**: real source (JSON parse, list bind, Go mobile-core bridge) but single-screen, hardcoded localhost test server, **no Xcode project / no Gradle+manifest** → not buildable, not recordable. `Real-use=no`, `Overall=gap`.
-- **Aurora OS / Harmony OS are genuine Go/Fyne apps** (buildable via `make aurora-os` / `make harmony-os`, comprehensive unit+integration tests) — but integration features need real PostgreSQL/Redis/LLM backends, and full HAP/multi-device exercise needs the actual OS environment.
-- **Web LLM endpoints** (`/llm/generate`, `/llm/stream`, `/specify`) have real Ollama-backed e2e tests (`tests/integration/{llm_generate,llm_stream,specify_server}_e2e_test.go`, build tag `integration`, honest SKIP-OK when Ollama unreachable) → `Tests=e2e`, `V&V=yes(docs/qa/web-llm-e2e-20260615/)`. The 60+ CRUD/auth/workflow endpoints are real but tested at the manager/service layer, not at the HTTP-transport layer → `Tests=integ`/`none` honestly.
-- **No row is `confirmed`** — every `📹 Video=no`; rollups are `working-untaped` (real + tested, no video), `partial` (real but thin/unverified test coverage), or `gap` (scaffold or untested).
+Honest assessment: The **Phase-2 port wave (P2-F21..F30) genuinely landed** — 10 named source-agent
+ports (codex/aider/cline/plandex/openhands/kilo-code/roo-code/continue) ship as real packages with
+origin-attributed `doc.go` headers, unit tests, and CONTINUATION CLOSED records, plus the gptme
+verifier-profile port. The **POWER_FEATURES Phase-1 wrap (autonomy/Plan-Act/undo-diff/ask_user/skills/
+token-count/checkpoint) is largely landed** per the rev2 file:line reconciliation. Beyond that, the
+porting is **mostly PLANNED, not landed**: POWER_FEATURES_PORTING_PLAN is explicitly "DRAFT — research +
+plan only, NO code", its Phases 2–7 (diff-sandbox, branches, rewind, tangent, connectors, ACP, OpenAI
+server, spec-driven, OS sandbox) are unimplemented, and HXC-031 (codex multimodal + cline computer-use)
+is a DRAFT plan with no code. No ported feature has an analyzed recording, so none can be `confirmed`;
+all landed ports are honestly `working-untaped` pending video V&V.
 
-**Feature count: 67 rows** (CLI REPL 14, CLI subcommand groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7, desktop 6, mobile 8, other cmd tools 11 + security_scan 1).
 
 ## Owned-submodule capabilities
 
@@ -564,76 +849,11 @@ Assessed from each submodule's `README.md`, exported package surface, and
   `docs_chain`, `challenges` (and `containers`/`helix_qa`/`panoptic` included
   only as the capabilities HelixCode consumes, marked QA/infra).
 
-## Ported cli_agents capabilities
-
-Evidence-backed inventory of capabilities **actually ported into HelixCode** from the
-`cli_agents/` reference catalogue (51 vendored reference agents). Per CONST-035 anti-bluff:
-this lists ONLY capabilities with landed code evidence (package `doc.go` origin headers,
-CONTINUATION.md P2-Fxx CLOSED ledger, POWER_FEATURES_PORTING_PLAN rev2 file:line
-reconciliation, git port commits) — NOT every cli_agent's full feature set. Planned-but-not-landed
-items are marked `Dev=absent`/`partial` honestly. **No feature is `📹 yes`** (no recordings analyzed
-for ported features). **Overall is never `confirmed`** (a confirmed rollup requires an analyzed video).
-
-Evidence basis: (1) CONTINUATION.md ports ledger lists `P2-F21..P2-F30` as CLOSED with landing
-packages; (2) each landed package's `doc.go` names its source agent ("aider voice input port P2-F27",
-"Roo-code CLI agent port", "Continue.dev IDE integration", "Go port of upstream gptme's profile mechanism");
-(3) POWER_FEATURES_PORTING_PLAN.md rev2 reconciles Phase-1 against HEAD with file:line;
-(4) `HXC-031-codex-cline-port.md` is DRAFT (plan only, NO code) — codex multimodal + cline computer-use are PLANNED, not landed.
-
-| Area | Component (HelixCode pkg) | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| service | internal/approval | Approval/exec-policy modes (per-tool yes/no, autopilot tiers) | done | yes | unknown | unit | no | no | no | ported:codex | working-untaped |
-| service | internal/autocommit | Git auto-commit per change (generated msg, secret-filter, summariser) | done | yes | unknown | unit | no | no | no | ported:aider | working-untaped |
-| service | internal/tools/browser | Browser tool suite (launch/click/type/scroll/screenshot via chromedp) | done | yes | unknown | unit | no | no | no | ported:cline | working-untaped |
-| service | internal/projectmemory | Project-memory context files (AGENTS.md/.clinerules-style loader+watcher) | done | yes | unknown | unit | no | no | no | ported:codex | working-untaped |
-| service | internal/plantree | Plan trees (branching persistent implementation plans, JSON-backed) | done | yes | unknown | unit | no | no | no | ported:plandex | working-untaped |
-| service | internal/session (condense.go) | Context compaction / history condense (CompactIfNeeded/ShouldCompact) | done | yes | unknown | unit | no | no | no | ported:plandex | working-untaped |
-| service | internal/workspace | Container per-task workspace (Docker/Podman mount, TTL cleanup) | done | partial | unknown | unit | no | no | no | ported:openhands | partial |
-| service | internal/voice | Voice-to-code input (arecord/sox capture, Whisper API + whisper.cpp fallback) | done | yes | unknown | unit | no | no | no | ported:aider | working-untaped |
-| service | internal/repomap | Repo-map (tree-sitter ranked incremental project map) | done | yes | unknown | unit | no | no | no | ported:aider | working-untaped |
-| service | internal/kilocode | AST-aware refactoring (cross-file rename, impact/call-graph, extract/move/inline) | done | yes | unknown | unit | no | no | no | ported:kilo-code | working-untaped |
-| service | internal/roocode | Roo-code full port (task delegation, template gen, diff review, conv memory) | done | yes | unknown | unit | no | no | no | ported:roo-code | working-untaped |
-| application | internal/continua | Continue.dev IDE integration (inline completions, editor, chat panel, diff, model selector) | done | partial | unknown | unit | no | no | no | ported:continue | partial |
-| service | internal/agent/profiles | Verifier work profile + RoleVerify posture (subagent review/validation) | done | yes | unknown | unit | no | no | no | ported:gptme | working-untaped |
-| application | cmd/cli (main.go:2118,2326) + autocommit/git.go | /undo + /diff (git-aware, force-push-free revert) | done | yes | unknown | unit | no | no | no | ported:aider | working-untaped |
-| service | internal/workflow/autonomy | Configurable autonomy presets (None/Basic/BasicPlus/SemiAuto/FullAuto, 5 tiers) | done | yes | unknown | unit | no | no | no | ported:plandex | working-untaped |
-| service | internal/workflow/planmode | First-class Plan/Act mode controller (tool-gated by mode) | done | yes | unknown | unit | no | no | no | ported:cline | working-untaped |
-| service | internal/tools/askuser | ask_user interactive clarification tool | done | yes | unknown | unit | no | no | no | ported:gemini-cli | working-untaped |
-| service | internal/commands (markdown_skills.go) | Markdown skills subsystem (project>user 2-tier precedence) | partial | yes | unknown | unit | no | no | no | ported:gemini-cli | partial |
-| service | internal/checkpoint | Workspace file-snapshot checkpoint + /checkpoint create/list/restore | done | yes | unknown | unit | no | no | no | ported:cline | working-untaped |
-| application | cmd/cli (main.go:1727) | Per-request token-usage counter (real provider Usage, anti-fabrication) | done | yes | unknown | unit | no | no | no | ported:codai | working-untaped |
-| service | (no production code) | Context-window-% indicator | absent | no | no | none | no | no | no | ported:codai (planned) | gap |
-| service | (no production code) | TODO/step tracker surface (/tasks is background-job list, not TODO tracker) | partial | partial | no | none | no | no | no | ported:gemini-cli (planned) | partial |
-| service | markdown_skills.go | SKILL.md built-in/bundled tier + canonical SKILL.md filename | absent | no | no | none | no | no | no | ported:gemini-cli (planned) | gap |
-| service | internal/llm (HXC-031 plan) | Codex multimodal image-content LLM request surface | absent | no | no | none | no | no | no | ported:codex (planned/DRAFT) | gap |
-| service | internal/tools/browser (HXC-031 plan) | Cline computer-use feedback loop (screenshot-per-action coord control) | absent | no | no | none | no | no | no | ported:cline (planned/DRAFT) | gap |
-| service | (planned, POWER_FEATURES F22) | Cumulative diff-review sandbox (stage-before-apply, apply/reject hunks) | absent | no | no | none | no | no | no | ported:plandex (planned) | gap |
-| service | (planned, POWER_FEATURES F25) | Conversation branches / fork | absent | no | no | none | no | no | no | ported:plandex (planned) | gap |
-| service | (planned, POWER_FEATURES F36/F43) | /rewind + Tangent mode | absent | no | no | none | no | no | no | ported:gemini-cli/amazon-q (planned) | gap |
-| service | (planned, POWER_FEATURES F18) | Messaging connectors (Slack/Telegram/Discord) | absent | no | no | none | no | no | no | ported:cline (planned) | gap |
-| service | (planned, POWER_FEATURES F35) | ACP mode (Agent Client Protocol over stdio) | absent | no | no | none | no | no | no | ported:gemini-cli (planned) | gap |
-| service | (planned, POWER_FEATURES F56) | OpenAI-compatible server endpoints | absent | no | no | none | no | no | no | ported:shai/aichat (planned) | gap |
-| service | (planned, POWER_FEATURES F61) | Spec-driven workflow surface (specify→plan→tasks→implement) | absent | no | no | none | no | no | no | ported:spec-kit (planned) | gap |
-| service | (planned, POWER_FEATURES F33) | OS-level exec sandbox (Seatbelt/Landlock/bwrap) | absent | no | no | none | no | no | no | ported:codex (planned) | gap |
-
-Count: 33 rows total — **20 landed ports** (`Dev=done`, working-untaped), **3 partial-landed**
-(workspace, continua, markdown-skills), **10 planned/not-landed** (`Dev=absent`/`partial`, `gap`).
-Zero `📹 yes`; zero `confirmed`.
-
-Honest assessment: The **Phase-2 port wave (P2-F21..F30) genuinely landed** — 10 named source-agent
-ports (codex/aider/cline/plandex/openhands/kilo-code/roo-code/continue) ship as real packages with
-origin-attributed `doc.go` headers, unit tests, and CONTINUATION CLOSED records, plus the gptme
-verifier-profile port. The **POWER_FEATURES Phase-1 wrap (autonomy/Plan-Act/undo-diff/ask_user/skills/
-token-count/checkpoint) is largely landed** per the rev2 file:line reconciliation. Beyond that, the
-porting is **mostly PLANNED, not landed**: POWER_FEATURES_PORTING_PLAN is explicitly "DRAFT — research +
-plan only, NO code", its Phases 2–7 (diff-sandbox, branches, rewind, tangent, connectors, ACP, OpenAI
-server, spec-driven, OS sandbox) are unimplemented, and HXC-031 (codex multimodal + cline computer-use)
-is a DRAFT plan with no code. No ported feature has an analyzed recording, so none can be `confirmed`;
-all landed ports are honestly `working-untaped` pending video V&V.
 
 ## Inventory sources
 
-- `docs/features/inventory/internal_services.md`
 - `docs/features/inventory/cmd_and_clients.md`
-- `docs/features/inventory/submodules.md`
+- `docs/features/inventory/deepened_round2.md`
+- `docs/features/inventory/internal_services.md`
 - `docs/features/inventory/ported_cli_agents.md`
+- `docs/features/inventory/submodules.md`
