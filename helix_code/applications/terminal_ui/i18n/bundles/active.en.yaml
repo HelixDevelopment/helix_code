@@ -121,6 +121,9 @@ terminal_ui_chat_skill_applied:
 terminal_ui_chat_response_received:
   other: "Response received (tokens: {{.Tokens}})"
 
+terminal_ui_chat_context_usage:
+  other: "Context: {{.Usage}}"
+
 terminal_ui_chat_unknown_command:
   other: "Unknown command: {{.Command}}. Type /help for available commands."
 

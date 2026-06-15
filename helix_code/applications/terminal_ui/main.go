@@ -108,6 +108,15 @@ type TerminalUI struct {
 	// "The model `` does not exist").
 	selectedModel string
 
+	// sessionUsedTokens accumulates the REAL per-session token total reported
+	// by the provider's streaming telemetry (prompt+completion as the provider
+	// reports it via Usage.TotalTokens on each turn). It backs the honest
+	// context-window USED-% indicator rendered on the status bar — mirroring the
+	// proven CLI implementation (cmd/cli formatContextUsage / contextWindowForModel).
+	// CONST-035: never a fabricated or hardcoded number; only grows from values
+	// consumeChatStream actually returns.
+	sessionUsedTokens int
+
 	// Current state
 	currentUser    string
 	currentSession string
@@ -1907,7 +1916,18 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 			} else {
 				// Durable memory: persist the streamed assistant answer.
 				tui.persistChatTurn(memory.RoleAssistant, tui.chatHistory[assistantIdx].Content)
-				tui.statusBar.SetText("[green]" + tui.td("terminal_ui_chat_response_received", map[string]any{"Tokens": totalTokens}))
+				// Accumulate the REAL per-session token total from the provider's
+				// streaming telemetry (consumeChatStream returns Usage.TotalTokens
+				// from the telemetry-carrying chunk; 0 when the provider reported
+				// none this turn — then the running total simply does not grow).
+				tui.sessionUsedTokens += totalTokens
+				status := "[green]" + tui.td("terminal_ui_chat_response_received", map[string]any{"Tokens": totalTokens})
+				// Append the honest context-window USED-% indicator when the active
+				// model's REAL window is known; omitted entirely otherwise (CONST-035).
+				if usage := tui.contextUsageStatus(); usage != "" {
+					status += "  " + usage
+				}
+				tui.statusBar.SetText(status)
 			}
 			tui.chatOutput.SetText(tui.formatChatHistory())
 			tui.chatOutput.ScrollToEnd()
@@ -2060,6 +2080,85 @@ func drainProviderStream(chunkChan chan llm.LLMResponse, errCh chan error, onChu
 			}
 		}
 	}
+}
+
+// formatContextUsage renders the context-window USED-% indicator as a pure
+// function so it is unit-testable in isolation. It mirrors the proven CLI
+// implementation (cmd/cli/main.go formatContextUsage) byte-for-byte in policy:
+//
+//   - When window <= 0 (the model's context-window size is NOT reliably known
+//     for the active model) it returns "" — the caller OMITS the indicator
+//     rather than rendering a fabricated percentage against a guessed window.
+//     This is the honest-conditional mandated by CONST-035: no fake denominator.
+//   - When window > 0 it returns "context: <used>/<window> (NN%)" where NN is the
+//     integer percentage of used/window. used is clamped to >= 0; the percentage
+//     is allowed to exceed 100 (an honest signal that the reported token total
+//     ran past the catalogue window) rather than being silently capped, but never
+//     goes negative.
+//
+// The TUI prefixes/joins this fragment onto the status line; the leading-spaces
+// padding the CLI uses for terminal alignment is intentionally omitted here so
+// the indicator composes cleanly with the status-bar i18n string.
+func formatContextUsage(used, window int) string {
+	if window <= 0 {
+		return ""
+	}
+	if used < 0 {
+		used = 0
+	}
+	pct := used * 100 / window
+	// Pure language-neutral numeric body (CONST-046 metadata-composed); the
+	// localisable "Context:" label is supplied by the i18n bundle key via
+	// contextUsageStatus, not hardcoded here.
+	return fmt.Sprintf("%d/%d (%d%%)", used, window, pct)
+}
+
+// contextWindowForModel resolves the REAL context-window size (in tokens) for
+// the named model, mirroring cmd/cli/main.go contextWindowForModel. It returns
+// 0 when no real window is reachable — in which case the caller honestly omits
+// the indicator (CONST-035: never substitute a guessed window).
+//
+// Resolution order, both REAL sources (no hardcoded fallback):
+//  1. The provider's model catalogue (ModelInfo.ContextSize) matched by Name
+//     then ID, mirroring how the model id is resolved on the request path — the
+//     most precise per-model figure.
+//  2. The provider's GetContextWindow() — the active model's window reported by
+//     the provider — used when the catalogue has no matching entry or it reports
+//     0 for that model.
+func contextWindowForModel(provider llm.Provider, modelName string) int {
+	if provider == nil {
+		return 0
+	}
+	if modelName != "" {
+		for _, m := range provider.GetModels() {
+			if m.Name == modelName || m.ID == modelName {
+				if m.ContextSize > 0 {
+					return m.ContextSize
+				}
+				break
+			}
+		}
+	}
+	if w := provider.GetContextWindow(); w > 0 {
+		return w
+	}
+	return 0
+}
+
+// contextUsageStatus composes the honest context-window USED-% status fragment
+// for the active provider/model from the REAL accumulated session token total.
+// It returns "" when the window is unknown (formatContextUsage's honest-omit) so
+// the caller can append it conditionally without ever showing a fabricated
+// denominator. The string is i18n-routed (CONST-046) via tui.td so non-English
+// operators see a localised label; the numeric body is composed from runtime
+// data per CONST-046's metadata-composed allowance.
+func (tui *TerminalUI) contextUsageStatus() string {
+	window := contextWindowForModel(tui.llmProvider, tui.selectedModel)
+	body := formatContextUsage(tui.sessionUsedTokens, window)
+	if body == "" {
+		return ""
+	}
+	return tui.td("terminal_ui_chat_context_usage", map[string]any{"Usage": body})
 }
 
 // handleChatCommand handles chat commands
