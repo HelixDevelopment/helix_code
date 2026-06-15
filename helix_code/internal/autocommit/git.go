@@ -148,21 +148,33 @@ func (g *Git) RevertLastCommit(ctx context.Context) (string, error) {
 // ref is taken verbatim (a SHA, a tag, `HEAD~3`, a branch name, …). An empty
 // ref is rejected rather than silently diffing against the working tree, so a
 // caller bug surfaces immediately instead of producing a misleading diff.
+//
+// Security (CWE-88): the ref is operator/agent-supplied (the `/diff <ref>` REPL
+// command). It is passed AFTER git's `--end-of-options` sentinel so a ref that
+// begins with `-` (e.g. `--output=/path`) is forced to be an operand, never an
+// option — closing an argument-injection → arbitrary-file-write vector. Without
+// the sentinel, `git diff --output=<path>` writes the patch to an attacker-
+// chosen host path. See git_security_test.go.
 func (g *Git) DiffSinceRef(ctx context.Context, ref string) (string, error) {
 	ref = strings.TrimSpace(ref)
 	if ref == "" {
 		return "", fmt.Errorf("DiffSinceRef: empty ref")
 	}
-	return g.run(ctx, "diff", ref)
+	return g.run(ctx, "diff", "--end-of-options", ref)
 }
 
 // ShowCommit returns the verbatim `git show <ref>` output — the full patch a
 // single commit introduced, used by `/diff <commit>` to inspect exactly what
 // one agent commit did (plan T1.1). ref is taken verbatim; empty is rejected.
+//
+// Security (CWE-88): like DiffSinceRef, the ref is passed AFTER git's
+// `--end-of-options` sentinel so a `-`-prefixed ref (e.g. `--output=/path`)
+// cannot be parsed as an option — closing the same argument-injection →
+// arbitrary-file-write vector. See git_security_test.go.
 func (g *Git) ShowCommit(ctx context.Context, ref string) (string, error) {
 	ref = strings.TrimSpace(ref)
 	if ref == "" {
 		return "", fmt.Errorf("ShowCommit: empty ref")
 	}
-	return g.run(ctx, "show", ref)
+	return g.run(ctx, "show", "--end-of-options", ref)
 }
