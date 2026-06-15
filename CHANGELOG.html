@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CHANGELOG</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CHANGELOG</h1>
+</header>
+<h1 id="changelog">Changelog</h1>
+<p>All notable changes to HelixCode are recorded here. Format loosely
+follows <a href="https://keepachangelog.com/">Keep a Changelog</a>.
+Release tags are <strong>helixcode-prefixed semver</strong>:
+<code>helixcode-vX.Y.Z</code>.</p>
+<h2 id="helixcode-v1.0.0-2026-06-15">[helixcode-v1.0.0] —
+2026-06-15</h2>
+<p>First release tag.</p>
+<h3 id="release-gate-evidence-all-green">Release-gate evidence (all
+green)</h3>
+<ul>
+<li><code>go build ./...</code> → exit 0 (whole inner module
+<code>dev.helix.code</code>).</li>
+<li>Unit suite <code>go test -short ./...</code> → <strong>188 packages,
+0 failures</strong>.</li>
+<li>Anti-bluff smoke (CONST-035) → <strong>0 real production
+bluffs</strong>.</li>
+<li>Integration e2e against a <strong>live LLM provider</strong> (real
+round-trips, no mocks): <code>POST /api/v1/llm/generate</code>,
+<code>POST /api/v1/llm/stream</code> (token-by-token SSE +
+<code>[DONE]</code>), <code>browser → server → provider → browser</code>
+(chromedp, real DOM), and <code>POST /api/v1/specify</code> (real
+2-agent speckit debate) — all PASS.</li>
+<li>Durable cross-session memory (sqlite <code>DiskStore</code>):
+persist → restart → recall proven.</li>
+</ul>
+<p>Runtime evidence: <code>docs/qa/web-llm-e2e-20260615/</code>.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Honest TUI context-window USED-% indicator — real per-session token
+accounting, omits when the model window is unknown (CONST-035)
+(HXC-077).</li>
+<li>Overlapping-skill precedence guard — deterministic lexicographic
+resolution coverage (HXC-078).</li>
+<li>Internal-package i18n wiring on <strong>all</strong> entry paths
+(<code>cmd/server</code>, TUI, desktop, aurora_os, harmony_os) so
+user-facing strings resolve for real users while the loud raw-key
+default is preserved (HXC-099).</li>
+<li>Runtime e2e suites for the web LLM endpoints —
+<code>/generate</code>, <code>/stream</code>, browser,
+<code>/specify</code> (HXC-103, HXC-105).</li>
+<li>helix_agent durable-fallback path-resolver test coverage —
+persist→restart→recall through the production-chosen disk store
+(HXC-106).</li>
+</ul>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li><code>streamLLM</code> production hang: <code>chunkChan</code> was
+never closed, so <code>[DONE]</code> was never emitted and
+<strong>every</strong> <code>/api/v1/llm/stream</code> request hung
+until the 120s deadline (HXC-104).</li>
+<li><code>security</code> TLS test: removed a live external-network
+dependency and a nil-deref panic that crashed the whole
+<code>security</code> test binary (HXC-101).</li>
+<li>Out-of-box config: a <code>config.json</code> omitting
+<code>version</code>/<code>server.port</code> no longer fails validation
+— the JSON load path now merges viper defaults (HXC-098).</li>
+<li>harmony_os REPL <code>Goodbye!</code>/<code>Error</code> strings
+routed through i18n (HXC-102).</li>
+<li><code>/specify</code> + <code>/debate</code> min-agents wiring and
+model-tag parsing (earlier in cycle).</li>
+</ul>
+<h3 id="docs-hygiene">Docs / hygiene</h3>
+<ul>
+<li><code>docs/CONTINUATION.md</code> de-bloated (line-1 header 54,856 →
+2,931 chars) and resynced; CONST-064 metadata table + ToC restored
+(HXC-100).</li>
+<li>SQLite-backed workable-items tracker kept in sync; every closure
+carries captured RED→GREEN evidence.</li>
+</ul>
+<h3 id="known-gaps-not-headlessly-validated-in-this-release-gate">Known
+gaps (NOT headlessly validated in this release gate)</h3>
+<ul>
+<li>Mobile clients (iOS / Android / Aurora OS / Harmony OS) and GUI
+desktop feature recordings require simulator / device / display
+access.</li>
+</ul>
+</body>
+</html>
