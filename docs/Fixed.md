@@ -580,3 +580,25 @@ handleDebate/handleSpecify (cmd/cli) + TUI registered ONE AgentSpec but orchestr
 
 Live /specify run shows 'Topic: helixspecifier_speckit_topic_specify%!(EXTRA string=...)' — the speckit phase prompt emits a raw i18n message-key with a Go Sprintf arg-count mismatch instead of resolved prose. Same class as HXC-079, in submodules/helix_specifier. Captured in specify_e2e_test.go output.
 
+## HXC-082 — performance optimizer fabricates success — 8 apply methods sleep and return Success true
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** optimizer.go: 8 methods Success:false+ErrOptimizationNotWired (honest), GC kept real; §11.4.120 reconcile + RED-polarity; build/test 0, go build ./... 0, smoke clean
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+internal/performance/optimizer.go:540-760: applyCPU/Memory/Concurrency/Cache/Network/Database/Worker/LLM Optimization each time.Sleep(200ms) doing NO real work then return Success:true with fabricated MetricsChange. User-reachable via cmd/performance_optimization/main.go:89. Rule 2 / §11.4 bluff. Fix: real tuning OR honest ErrOptimizationNotWired sentinel.
+
+## HXC-083 — production_deployer fabricates rollback env-prep server-validation and strategy differentiation
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** production_deployer.go: 5 bluff sites honest (rollback/env/validate/strategy/monitoring); RED/GREEN polarity; build/test 0, go build ./... 0, smoke clean
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+internal/deployment/production_deployer.go: triggerRollback(1028) sleeps+logs success no real rollback; prepareEnvironment(810)+validateTargetServers(820) sleep+log success; executeBlueGreen/Canary/Rolling/Recreate(962) all just call executeProductionDeploy (no-op differentiation); executeMonitoring(758) ends with success notification contradicting its honest gap-log. §11.4 bluffs. Fix: real work or honest sentinels.
+
