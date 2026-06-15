@@ -536,14 +536,44 @@ func (ai *AIIntegration) ListProviders() []string {
 	return providers
 }
 
+// providerEntry is a name/provider pair used for lock-free iteration of a
+// point-in-time snapshot of the provider map.
+type providerEntry struct {
+	name     string
+	provider AIProvider
+}
+
+// snapshotProviders returns a point-in-time copy of the registered providers,
+// taken under ai.mu.RLock(). Callers iterate the returned slice lock-free; the
+// underlying map is only ever read while the lock is held, so a concurrent
+// guarded writer (Initialize) cannot race the iteration.
+func (ai *AIIntegration) snapshotProviders() []providerEntry {
+	ai.mu.RLock()
+	defer ai.mu.RUnlock()
+
+	snapshot := make([]providerEntry, 0, len(ai.providers))
+	for name, provider := range ai.providers {
+		snapshot = append(snapshot, providerEntry{name: name, provider: provider})
+	}
+	return snapshot
+}
+
 // GetStats returns statistics about AI integration
 func (ai *AIIntegration) GetStats(ctx context.Context) (*AIStats, error) {
 	stats := &AIStats{
 		Providers: make(map[string]*AIProviderStats),
 	}
 
+	// Snapshot the provider map under the read lock. ai.providers is mutated
+	// under ai.mu.Lock() by Initialize; iterating it here without the lock is a
+	// data race (concurrent map read while a guarded writer adds entries). Copy
+	// the entries into a local slice while holding the lock, then operate on the
+	// snapshot lock-free.
+	providersSnapshot := ai.snapshotProviders()
+
 	// Get stats from each provider
-	for name, provider := range ai.providers {
+	for _, entry := range providersSnapshot {
+		name, provider := entry.name, entry.provider
 		if aiProvider, ok := provider.(AIStatsProvider); ok {
 			providerStats, err := aiProvider.GetStats()
 			if err == nil {
@@ -580,7 +610,12 @@ func (ai *AIIntegration) HealthCheck(ctx context.Context) (*AIHealthStatus, erro
 	healthyCount := 0
 	totalCount := 0
 
-	for name, provider := range ai.providers {
+	// Snapshot the provider map under the read lock (see GetStats) so the
+	// iteration below does not race Initialize's guarded writes to ai.providers.
+	providersSnapshot := ai.snapshotProviders()
+
+	for _, entry := range providersSnapshot {
+		name, provider := entry.name, entry.provider
 		totalCount++
 		// Simple health check - try to generate a small text
 		result, err := provider.GenerateText(ctx, "test", &GenerationOptions{MaxTokens: 10})
@@ -1342,6 +1377,11 @@ func (p *NotImplementedProvider) GetCostInfo() *CostInfo {
 type LLMProviderAdapter struct {
 	provider     llm.Provider
 	providerName string
+
+	// costMu guards lastCostInfo. GenerateText / GenerateChat update the cost
+	// info after each call while GetCostInfo (and concurrent generations) read
+	// it; without this lock those accesses are a data race.
+	costMu       sync.Mutex
 	lastCostInfo *CostInfo
 }
 
@@ -1381,9 +1421,7 @@ func (a *LLMProviderAdapter) GenerateText(ctx context.Context, prompt string, op
 	}
 
 	// Update cost tracking
-	a.lastCostInfo.InputTokens = resp.Usage.PromptTokens
-	a.lastCostInfo.OutputTokens = resp.Usage.CompletionTokens
-	a.lastCostInfo.TotalTokens = resp.Usage.TotalTokens
+	a.updateCostInfo(resp.Usage.PromptTokens, resp.Usage.CompletionTokens, resp.Usage.TotalTokens)
 
 	return &GenerationResult{
 		Text:         resp.Content,
@@ -1450,9 +1488,7 @@ func (a *LLMProviderAdapter) GenerateChat(ctx context.Context, messages []*ChatM
 	}
 
 	// Update cost tracking
-	a.lastCostInfo.InputTokens = resp.Usage.PromptTokens
-	a.lastCostInfo.OutputTokens = resp.Usage.CompletionTokens
-	a.lastCostInfo.TotalTokens = resp.Usage.TotalTokens
+	a.updateCostInfo(resp.Usage.PromptTokens, resp.Usage.CompletionTokens, resp.Usage.TotalTokens)
 
 	// Build response message
 	responseMessage := &ChatMessage{
@@ -1576,7 +1612,25 @@ func (a *LLMProviderAdapter) GetCapabilities() []string {
 }
 
 func (a *LLMProviderAdapter) GetCostInfo() *CostInfo {
-	return a.lastCostInfo
+	a.costMu.Lock()
+	defer a.costMu.Unlock()
+
+	// Return a copy, not the live stored pointer: handing the caller the same
+	// *CostInfo the next Generate call mutates is a snapshot-getter race even
+	// with the lock (the lock would not protect the caller's later reads).
+	costCopy := *a.lastCostInfo
+	return &costCopy
+}
+
+// updateCostInfo records the token usage of the most recent generation under
+// the cost lock.
+func (a *LLMProviderAdapter) updateCostInfo(promptTokens, completionTokens, totalTokens int) {
+	a.costMu.Lock()
+	defer a.costMu.Unlock()
+
+	a.lastCostInfo.InputTokens = promptTokens
+	a.lastCostInfo.OutputTokens = completionTokens
+	a.lastCostInfo.TotalTokens = totalTokens
 }
 
 // Helper functions for LLMProviderAdapter
@@ -1763,6 +1817,7 @@ func NewAnthropicProvider(config *AIProviderConfig) AIProvider {
 
 	return NewLLMProviderAdapter(provider, "Anthropic")
 }
+
 // The following providers are not yet implemented in internal/llm.
 // They return clear errors indicating the functionality is not available.
 // To add support: implement the provider in internal/llm package, then update the factory here.

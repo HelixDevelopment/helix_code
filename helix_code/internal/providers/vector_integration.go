@@ -115,17 +115,37 @@ func (vi *VectorIntegration) StoreVector(ctx context.Context, vector *VectorData
 
 // StoreVectorInProvider stores a vector in a specific provider
 func (vi *VectorIntegration) StoreVectorInProvider(ctx context.Context, providerName string, vector *VectorData) error {
+	// Snapshot vi.manager under the read lock: Initialize assigns it under
+	// vi.mu.Lock(), so reading the field unlocked here is a data race against
+	// the guarded write. Capture into a local while holding the lock, then use
+	// the local on the non-nil path.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
 	// Convert to provider format
 	providerVector := vi.convertToProviderVector(vector)
 
 	// Store using provider manager
-	return vi.manager.Store(ctx, []*providers.VectorData{providerVector})
+	return manager.Store(ctx, []*providers.VectorData{providerVector})
 }
 
 // RetrieveVector retrieves a vector by ID
 func (vi *VectorIntegration) RetrieveVector(ctx context.Context, id string) (*VectorData, error) {
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
 	// Retrieve using provider manager
-	results, err := vi.manager.Retrieve(ctx, []string{id})
+	results, err := manager.Retrieve(ctx, []string{id})
 	if err != nil {
 		return nil, err
 	}
@@ -140,11 +160,20 @@ func (vi *VectorIntegration) RetrieveVector(ctx context.Context, id string) (*Ve
 
 // SearchVectors searches for similar vectors
 func (vi *VectorIntegration) SearchVectors(ctx context.Context, query *VectorSearchQuery) ([]*VectorSearchResult, error) {
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
 	// Convert to provider format
 	providerQuery := vi.convertToProviderQuery(query)
 
 	// Search using provider manager
-	result, err := vi.manager.Search(ctx, providerQuery)
+	result, err := manager.Search(ctx, providerQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -166,8 +195,17 @@ func (vi *VectorIntegration) SearchVectors(ctx context.Context, query *VectorSea
 
 // FindSimilarVectors finds vectors similar to given vector
 func (vi *VectorIntegration) FindSimilarVectors(ctx context.Context, embedding []float64, k int, filters map[string]interface{}) ([]*VectorSearchResult, error) {
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
 	// Find similar using provider manager
-	results, err := vi.manager.FindSimilar(ctx, embedding, k, filters)
+	results, err := manager.FindSimilar(ctx, embedding, k, filters)
 	if err != nil {
 		return nil, err
 	}
@@ -197,18 +235,45 @@ func (vi *VectorIntegration) CreateVectorIndex(ctx context.Context, indexName st
 		Description: config.Description,
 	}
 
-	return vi.manager.CreateCollection(ctx, indexName, providerConfig)
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
+	return manager.CreateCollection(ctx, indexName, providerConfig)
 }
 
 // DeleteVectorIndex deletes a vector index
 func (vi *VectorIntegration) DeleteVectorIndex(ctx context.Context, indexName string) error {
-	return vi.manager.DeleteCollection(ctx, indexName)
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
+	return manager.DeleteCollection(ctx, indexName)
 }
 
 // ListVectorIndexes lists all vector indexes
 func (vi *VectorIntegration) ListVectorIndexes(ctx context.Context) ([]*VectorIndexInfo, error) {
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
 	// List collections using provider manager
-	collections, err := vi.manager.ListCollections(ctx)
+	collections, err := manager.ListCollections(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -233,13 +298,21 @@ func (vi *VectorIntegration) ListVectorIndexes(ctx context.Context) ([]*VectorIn
 
 // GetVectorStats returns statistics about vector storage
 func (vi *VectorIntegration) GetVectorStats(ctx context.Context) (*VectorStats, error) {
+	// Read vi.manager under the read lock: Initialize assigns vi.manager under
+	// vi.mu.Lock(), so reading it here without the lock is a data race (a
+	// concurrent caller invoking GetVectorStats while Initialize runs). Capture
+	// the pointer into a local while holding the lock, then operate on the local.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+
 	// Check if manager is initialized
-	if vi.manager == nil {
+	if manager == nil {
 		return &VectorStats{}, nil
 	}
 
 	// Get stats from provider manager
-	stats, err := vi.manager.GetStats()
+	stats, err := manager.GetStats()
 	if err != nil {
 		return nil, err
 	}
@@ -263,8 +336,17 @@ func (vi *VectorIntegration) GetVectorStats(ctx context.Context) (*VectorStats, 
 
 // HealthCheck performs a health check on all vector providers
 func (vi *VectorIntegration) HealthCheck(ctx context.Context) (*VectorHealthStatus, error) {
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return nil, fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
 	// Get health status from provider manager
-	healthStatuses, err := vi.manager.Health(ctx)
+	healthStatuses, err := manager.Health(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -296,17 +378,44 @@ func (vi *VectorIntegration) HealthCheck(ctx context.Context) (*VectorHealthStat
 
 // OptimizeIndexes optimizes all vector indexes
 func (vi *VectorIntegration) OptimizeIndexes(ctx context.Context) error {
-	return vi.manager.Optimize(ctx)
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
+	return manager.Optimize(ctx)
 }
 
 // BackupVectors backs up all vector data
 func (vi *VectorIntegration) BackupVectors(ctx context.Context, backupPath string) error {
-	return vi.manager.Backup(ctx, backupPath)
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
+	return manager.Backup(ctx, backupPath)
 }
 
 // RestoreVectors restores vector data from backup
 func (vi *VectorIntegration) RestoreVectors(ctx context.Context, backupPath string) error {
-	return vi.manager.Restore(ctx, backupPath)
+	// Snapshot vi.manager under the read lock (see StoreVectorInProvider) so the
+	// read does not race Initialize's guarded write.
+	vi.mu.RLock()
+	manager := vi.manager
+	vi.mu.RUnlock()
+	if manager == nil {
+		return fmt.Errorf("%s", tr(ctx, "internal_providers_vector_not_initialized", nil))
+	}
+
+	return manager.Restore(ctx, backupPath)
 }
 
 // convertToProviderVector converts to provider vector format
