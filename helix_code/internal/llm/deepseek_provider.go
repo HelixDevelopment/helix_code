@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -380,11 +382,36 @@ func (dp *DeepSeekProvider) makeOpenAIStreamRequest(ctx context.Context, request
 		return fmt.Errorf("DeepSeek API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
-	decoder := json.NewDecoder(resp.Body)
-	for decoder.More() {
+	// DeepSeek (OpenAI-compatible) streams Server-Sent Events: each event is a
+	// `data: {json}` line, events separated by blank lines, terminated by a
+	// `data: [DONE]` sentinel. A raw json.Decoder over the body chokes on the
+	// `data:` prefix ("invalid character 'd' looking for beginning of value"),
+	// so parse line-by-line, strip the SSE field prefix, skip keep-alives and
+	// the [DONE] sentinel, and json.Unmarshal each event payload.
+	scanner := bufio.NewScanner(resp.Body)
+	// SSE event payloads can exceed bufio's default 64 KiB line cap (large
+	// tool-call argument deltas); raise the buffer ceiling to 1 MiB.
+	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		if !strings.HasPrefix(line, "data:") {
+			// Non-data SSE fields (event:, id:, retry:, comments) are ignored.
+			continue
+		}
+		payload := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
+		if payload == "" || payload == "[DONE]" {
+			if payload == "[DONE]" {
+				break
+			}
+			continue
+		}
+
 		var streamResp OpenAIStreamResponse
-		if err := decoder.Decode(&streamResp); err != nil {
-			return err
+		if err := json.Unmarshal([]byte(payload), &streamResp); err != nil {
+			return fmt.Errorf("decode stream event: %w", err)
 		}
 
 		if len(streamResp.Choices) > 0 {
@@ -428,6 +455,9 @@ func (dp *DeepSeekProvider) makeOpenAIStreamRequest(ctx context.Context, request
 			}
 			break
 		}
+	}
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("read stream: %w", err)
 	}
 
 	return nil
