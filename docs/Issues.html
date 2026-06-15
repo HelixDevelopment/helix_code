@@ -2159,27 +2159,9 @@ closed <code>Implemented (→ Fixed.md)</code>. To update
 Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
-hand-maintained).* ## HXC-099 — Systemic i18n raw-key sweep redo
-(CONST-046) — corrected, regression-free, with default-translator
-contract decision</p>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
-Claude</p>
-<p>First mechanical sweep (stash@{0}, agent a55802ad) wired a real
-embedded-English bundle translator as package default across 36
-internal/ packages but INTRODUCED 13 regressions vs green HEAD d85f6962:
-(1) real Go-template bug — internal/project messages render ‘<no value>’
-(error-detail param dropped); (2) defeats intentional
-NoopTranslator-echoes-raw-key anti-bluff guards in 9 pkgs
-(tools,voice,plantree,repomap,context,hardware,persistence,mcp,template);
-(3) autocommit+project tests assert real message text now broken. Redo
-MUST fix templating + needs operator decision: missing i18n key echoes
-raw key (loud default) OR falls back to embedded English (polished,
-risks hiding missing translations). Work in git stash; green tree
-restored (build exit 0, 13/13 pass).</p>
-<h2 id="hxc-102-harmony_os-main_nogui.go-2-user-facing-strings-goodbye-error-v-bypass-i18n-const-046-low-severity">HXC-102
-— harmony_os main_nogui.go — 2 user-facing strings (‘Goodbye!’, ‘Error:
-%v’) bypass i18n (CONST-046, low severity)</h2>
+hand-maintained).* ## HXC-102 — harmony_os main_nogui.go — 2 user-facing
+strings (‘Goodbye!’, ‘Error: %v’) bypass i18n (CONST-046, low
+severity)</p>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>

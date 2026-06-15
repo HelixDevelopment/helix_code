@@ -2916,5 +2916,33 @@ return -&gt; defer resp.Body.Close() with resp==nil -&gt; SIGSEGV panic
 that crashed the entire security test binary (took every other test in
 the package down). Fixed: hermetic httptest.NewTLSServer + t.Fatalf on
 error path.</p>
+<h2 id="hxc-099-systemic-i18n-raw-key-sweep-redo-const-046-corrected-regression-free-with-default-translator-contract-decision">HXC-099
+— Systemic i18n raw-key sweep redo (CONST-046) — corrected,
+regression-free, with default-translator contract decision</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> Corrected redo
+per operator decision (preserve loud raw-key NoopTranslator default — NO
+default swap; 9 guards pass unchanged). GOAL A: WireAll() was only
+called from cmd/cli; added entry-path init() wiring to cmd/server + 4
+apps so internal-package strings resolve for real users. GOAL B: removed
+redundant {{.Err}} placeholder from 8 internal/project messages
+(nil-data -&gt; ‘<no value>’). RED→GREEN guards captured (non-tautology
+proven); 9 guards green -count=1; all touched pkgs pass; build exit 0;
+vet clean; no mutation residue. Commit a02a8aa8. (B’s rejected
+default-swap approach preserved in git stash@{0}.)
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>First mechanical sweep (stash@{0}, agent a55802ad) wired a real
+embedded-English bundle translator as package default across 36
+internal/ packages but INTRODUCED 13 regressions vs green HEAD d85f6962:
+(1) real Go-template bug — internal/project messages render ‘<no value>’
+(error-detail param dropped); (2) defeats intentional
+NoopTranslator-echoes-raw-key anti-bluff guards in 9 pkgs
+(tools,voice,plantree,repomap,context,hardware,persistence,mcp,template);
+(3) autocommit+project tests assert real message text now broken. Redo
+MUST fix templating + needs operator decision: missing i18n key echoes
+raw key (loud default) OR falls back to embedded English (polished,
+risks hiding missing translations). Work in git stash; green tree
+restored (build exit 0, 13/13 pass).</p>
 </body>
 </html>
