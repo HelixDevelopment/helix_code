@@ -298,6 +298,11 @@ func (s *Server) setupRoutes() {
 			llmRoutes.POST("/stream", s.streamLLM)
 		}
 
+		// Real HelixSpecifier "Specify" phase surface (CONST-035): drives the
+		// real speckit engine via a real provider-backed debate responder — no
+		// simulation. See specify.go.
+		api.POST("/specify", s.specifyHandler)
+
 		// Memory routes
 		memory := api.Group("/memory")
 		{
