@@ -586,7 +586,7 @@ Context-window usage percentage indicator scaffolded (commit 3c9d3495, task T1.5
 
 SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6); REMAINING: full precedence-conflict resolution + tests covering overlapping skill definitions still outstanding — keep open until precedence is fully resolved and tested.
 
-## HXC-093 — helix_code module graph has phantom digital.vasic.* requires + private transitive blocking go list -m all / gomobile bind
+## HXC-098 — out-of-box config fails 'version required' validation — blocks client status/system commands
 
 **Status:** Queued
 **Type:** Bug
@@ -594,5 +594,5 @@ SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6);
 **Created-By:** Claude
 **Assigned-To:** Claude
 
-gomobile bind fails because go list -m -json all errors: ~22 digital.vasic.{cache,database,eventbus,...,vectordb} module paths are required with NO replace + NO remote ('no such host'), and github.com/HelixDevelopment/helix_agent/Toolkit (private, separate from the replaced dev.helix.agent) needs interactive git creds. go build ./... works (imported subset only); full-graph tooling (gomobile, go list -m all) is blocked. Fix (repo-side, careful — editing go.mod risks the build): add replace directives for the phantom paths OR prune them, make Toolkit resolvable (replace/GOPRIVATE+SSH), persist x/mobile as a tool directive. Toolchain+NDK+Xcode all present; gobind codegen already works -> artifact achievable once graph resolves.
+Default config/config.yaml + the operator's ~/.config/helixcode/config.json have no top-level Version -> config validation fails with 'version is required' (internal_config_validate_version_required), blocking desktop/aurora/harmony status/system/version (and CLI subsystems) for a fresh user. Found while recording client videos (had to use a throwaway minimal valid config). Fix: ship a valid default Version in config/config.yaml (+ docs), or default it in config.Load when absent.
 
