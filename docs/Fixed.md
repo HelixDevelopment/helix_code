@@ -723,3 +723,14 @@ helixcli --prompt/--stream + /debate + /specify hit 'API request failed: API ret
 
 applications/desktop/main_nogui.go status/help output prints raw message keys (desktop_cli_status_header, desktop_cli_help_body) + a Printf arg-count mismatch (%!(EXTRA int=0...)) in status. Same i18n-resolution class as HXC-079/081. CLI binary unaffected. Found while assessing desktop for video.
 
+## HXC-097 — SYSTEMIC: standalone binaries + internal/config + internal/database never wire i18n Translator -> raw keys at runtime
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** Systemic unwired-translator fixed across aurora_os (842551d3) + harmony_os (6dcf64aa) + internal/config + internal/database: real bundle translator wired (binaries: SetTranslator in main(); libs: init() default). Before/after raw-key->prose captured each; §11.4.115 guards. Broader follow-up: other CONST-046 pkgs may share the WireAll-only-on-CLI-path class (init()-default pattern is the fleet fix).
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Same unwired-translator bug as HXC-095 found across the fleet: aurora_os standalone nogui (aurora_os_cli_version_banner + %!(EXTRA) at runtime) — round-7's aurora/harmony 'i18n fix' added KEYS but never wired SetTranslator in main(), so keys still echo raw (§11.4.108 fixed-in-source-not-at-runtime). Also internal/config (internal_config_info_using_config_file) + internal/database (internal_database_ping_failed) echo raw keys in CLI output. Fix: wire a real Translator (embed-bundle pattern) at each binary's main()/package init; add runtime guards that assert resolved prose (not just key-presence).
+
