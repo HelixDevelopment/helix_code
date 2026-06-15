@@ -725,12 +725,37 @@ func (cliApp *CLIApp) cmdInteractive() error {
 func main() {
 	app := NewCLIApp()
 
+	// Wire the real CONST-046 translator (embedded active.en.yaml
+	// bundle) onto the app BEFORE any user-facing output, replacing the
+	// NoopTranslator{} message-ID-echo default installed by NewCLIApp.
+	// Without this, every command (help/status/...) leaks raw message
+	// keys (`desktop_cli_status_header`, ...) and any Printf call site
+	// passing args to an unresolved bare-key "format" emits Go's
+	// `%!(EXTRA ...)` noise — a §11.4 / CONST-046 PASS-bluff. On bundle
+	// load failure the loud NoopTranslator{} echo is preserved (never a
+	// silent swallow). Mirrors applications/terminal_ui/i18n_boot_wire.go.
+	if tr, err := i18n.NewTranslator(); err != nil {
+		log.Printf("⚠️  i18n: falling back to message-ID echo (bundle load failed): %v", err)
+	} else {
+		app.SetTranslator(tr)
+	}
+
+	args := os.Args[1:]
+
+	// help/version-style requests must resolve and print without
+	// requiring full initialization (config/db/redis). This also keeps
+	// `help` working on hosts without a complete config — matching the
+	// aurora_os/harmony_os nogui boot ordering.
+	if len(args) == 0 || args[0] == "help" || args[0] == "-h" || args[0] == "--help" {
+		app.printHelp()
+		return
+	}
+
 	if err := app.Initialize(); err != nil {
 		log.Fatalf("Failed to initialize: %v", err)
 	}
 	defer app.Close()
 
-	args := os.Args[1:]
 	if err := app.Run(args); err != nil {
 		os.Exit(1)
 	}
