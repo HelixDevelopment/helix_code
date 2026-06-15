@@ -24,12 +24,19 @@ package substrate
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"digital.vasic.concurrency/pkg/pool"
 	"digital.vasic.concurrency/pkg/queue"
 )
+
+// ErrDispatcherShutdown is returned by Dispatch when the Dispatcher has already
+// been shut down. Dispatching onto a shut-down pool must fail cleanly, never
+// panic with "send on closed channel".
+var ErrDispatcherShutdown = errors.New("substrate: dispatcher is shut down")
 
 // Priority mirrors the concurrency queue's four-level priority so callers of
 // the substrate do not need to import the concurrency package directly.
@@ -176,6 +183,27 @@ func (r *Resolver) CanRun(u Unit) bool {
 type Dispatcher struct {
 	pool     *pool.WorkerPool
 	resolver *Resolver
+
+	// mu serializes Dispatch against Shutdown. Dispatch holds RLock across the
+	// pool submit (the `p.tasks <- task` send inside SubmitWait); Shutdown holds
+	// the exclusive write Lock across the pool teardown (the `close(p.tasks)`).
+	// Because RLock excludes the write Lock, a send can never run concurrently
+	// with the close — closing the "panic: send on closed channel" race that a
+	// concurrent Dispatch/Shutdown otherwise hits (DATA RACE reproduced under
+	// `go test -race`). Concurrent Dispatches still run in parallel (shared
+	// RLock); only Shutdown is exclusive.
+	//
+	// KNOWN LIMITATION (not reachable by any current code, §11.4.6): a Unit whose
+	// Execute() calls d.Shutdown() on THIS dispatcher would deadlock (the running
+	// Dispatch holds RLock; Shutdown waits for the write Lock; the unit can't
+	// finish until Shutdown returns). No Unit in the codebase does this — the
+	// only Unit.Execute impls (UnitFunc, unitTask) run caller fns that dispatch
+	// work, never tear down their own dispatcher. Documented rather than guarded
+	// against with extra machinery that would add its own failure surface.
+	mu           sync.RWMutex
+	shutdown     bool
+	shutdownOnce sync.Once
+	shutdownErr  error
 }
 
 // NewDispatcher creates a Dispatcher backed by a real concurrency worker pool
@@ -205,6 +233,13 @@ func (d *Dispatcher) Dispatch(ctx context.Context, u Unit) Result {
 				u.Requires(), u.ID(),
 			),
 		}
+	}
+	// Hold RLock across the submit so Shutdown's pool teardown (write Lock)
+	// cannot close the task channel underneath an in-flight send.
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	if d.shutdown {
+		return Result{UnitID: u.ID(), Err: ErrDispatcherShutdown}
 	}
 	res, err := d.pool.SubmitWait(ctx, unitTask{unit: u})
 	if err != nil {
@@ -236,6 +271,20 @@ func (d *Dispatcher) Drain(ctx context.Context, s *Scheduler) []Result {
 // Shutdown gracefully stops the underlying worker pool, waiting up to timeout
 // for in-flight units to finish. A non-positive timeout uses the pool's
 // configured shutdown grace period.
+// Shutdown is idempotent and safe to call concurrently with Dispatch. It takes
+// the exclusive write Lock (which waits for every in-flight Dispatch to release
+// its RLock), marks the dispatcher shut down so subsequent Dispatch calls fail
+// cleanly with ErrDispatcherShutdown, and tears the pool down exactly once via
+// shutdownOnce. Holding the write Lock across the teardown guarantees no
+// concurrent Dispatch is mid-submit when the pool closes its task channel. A
+// second (or concurrent) Shutdown returns the same teardown result without
+// re-closing anything.
 func (d *Dispatcher) Shutdown(timeout time.Duration) error {
-	return d.pool.Shutdown(timeout)
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.shutdown = true
+	d.shutdownOnce.Do(func() {
+		d.shutdownErr = d.pool.Shutdown(timeout)
+	})
+	return d.shutdownErr
 }
