@@ -15,8 +15,8 @@ import (
 	hqaConfig "digital.vasic.helixqa/pkg/config"
 	hqaEvidence "digital.vasic.helixqa/pkg/evidence"
 	hqaOrchestrator "digital.vasic.helixqa/pkg/orchestrator"
-	hqaScreenshot "digital.vasic.helixqa/pkg/screenshot"
 	"digital.vasic.helixqa/pkg/reporter"
+	hqaScreenshot "digital.vasic.helixqa/pkg/screenshot"
 )
 
 // SessionState tracks a single QA session within the HelixCode server.
@@ -119,11 +119,11 @@ func (e *Engine) StartSession(ctx context.Context, id string, platforms, banks [
 
 	sessionCtx, cancel := context.WithCancel(ctx)
 	state := &SessionState{
-		ID:        id,
-		Status:    "pending",
-		Platforms: platforms,
-		Banks:     banks,
-		StartTime: time.Now(),
+		ID:         id,
+		Status:     "pending",
+		Platforms:  platforms,
+		Banks:      banks,
+		StartTime:  time.Now(),
 		CancelFunc: cancel,
 	}
 
@@ -229,13 +229,40 @@ func (e *Engine) CancelSession(id string) error {
 	}
 	s.Mu.Lock()
 	defer s.Mu.Unlock()
+	// A session that has already reached a terminal state
+	// (completed/failed/cancelled) MUST NOT be relabelled "cancelled".
+	// CancelFunc is set once at StartSession and never cleared, so
+	// gating on `CancelFunc != nil` alone would clobber the truthful
+	// terminal status of an already-finished run (e.g. a stale "stop"
+	// click on a completed session) — a §11.4 PASS-bluff: a session
+	// that genuinely completed with a real Result/ReportPath would be
+	// silently reported as "cancelled". Only non-terminal sessions are
+	// transitioned. The cancel func is still invoked to release the
+	// context resources regardless (idempotent no-op once done).
 	if s.CancelFunc != nil {
 		s.CancelFunc()
+	}
+	// Only transition a NON-terminal session — never clobber the truthful
+	// record of a session that already finished (isTerminalStatus is the single
+	// source of truth so a future terminal status can't silently fall through).
+	if !isTerminalStatus(s.Status) {
 		s.Status = "cancelled"
 		now := time.Now()
 		s.EndTime = &now
 	}
 	return nil
+}
+
+// isTerminalStatus reports whether a QA session status marks the run as
+// finished. It is the single source of truth for terminal-state checks; update
+// this set whenever StartSession's goroutine introduces a new terminal status.
+func isTerminalStatus(status string) bool {
+	switch status {
+	case "completed", "failed", "cancelled":
+		return true
+	default:
+		return false
+	}
 }
 
 // ListSessions returns all session states.

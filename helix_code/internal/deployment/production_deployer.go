@@ -254,6 +254,19 @@ func (pd *ProductionDeployer) StartProductionDeployment(ctx context.Context) (*D
 	}
 
 	for _, phase := range phases {
+		// §11.4.101 reversible-abort / ctx-cancel guard: if the caller has
+		// cancelled (or the deadline expired) we MUST stop BEFORE executing the
+		// next phase rather than driving the remaining phases — most critically
+		// the deployment phase, whose per-server loop pushes binaries to real
+		// servers (an irreversible side effect). Proceeding past a cancelled
+		// context would deploy after the operator signalled abort. We record the
+		// cancellation as the phase failure cause so the status is honest about
+		// WHY the deployment stopped.
+		if cerr := ctx.Err(); cerr != nil {
+			pd.failDeployment(phase, fmt.Errorf("deployment aborted before phase %s: %w", phase, cerr))
+			return pd.status, nil
+		}
+
 		log.Printf("\n🔧 Executing Phase: %s", phase)
 		pd.status.CurrentPhase = string(phase)
 
@@ -536,6 +549,18 @@ func (pd *ProductionDeployer) executeProductionDeploy(ctx context.Context) (bool
 	successfulDeployments := 0
 
 	for i, server := range pd.config.TargetServers {
+		// §11.4.101 reversible-abort / ctx-cancel guard at the irreversible
+		// boundary: deployToServer pushes a binary to a real server. If the
+		// caller cancelled (or the deadline expired) mid-rollout we MUST stop
+		// BEFORE touching the next server rather than continuing to deploy after
+		// abort. Servers already deployed in this run stay recorded; we surface
+		// the cancellation so the caller learns the rollout was partial-by-abort,
+		// not a silent full success.
+		if cerr := ctx.Err(); cerr != nil {
+			log.Printf("   🛑 Deployment aborted before server %d/%d (%s): %v", i+1, len(pd.config.TargetServers), server, cerr)
+			return false, fmt.Errorf("deployment aborted after %d/%d servers: %w", successfulDeployments, len(pd.config.TargetServers), cerr)
+		}
+
 		log.Printf("   📦 Deploying to server %d/%d: %s", i+1, len(pd.config.TargetServers), server)
 
 		// Real deployment attempt: deployToServer honestly loud-fails (returns
@@ -549,8 +574,15 @@ func (pd *ProductionDeployer) executeProductionDeploy(ctx context.Context) (bool
 			log.Printf("      ❌ Server deployment failed")
 		}
 
-		// Small delay between deployments
-		time.Sleep(200 * time.Millisecond)
+		// Small delay between deployments — ctx-aware so a cancellation during
+		// the delay aborts immediately instead of waiting out the full window
+		// (the next-iteration ctx.Err() guard would otherwise add up to 200ms
+		// of post-cancel latency per server).
+		select {
+		case <-time.After(200 * time.Millisecond):
+		case <-ctx.Done():
+			return false, fmt.Errorf("deployment aborted during inter-server delay: %w", ctx.Err())
+		}
 	}
 
 	log.Printf("   📊 Deployment Results:")
@@ -583,9 +615,19 @@ func (pd *ProductionDeployer) deployToServer(ctx context.Context, server string)
 	_, _ = pd.config.Credentials["ssh_user"]
 	sshKeyPath, _ := pd.config.Credentials["ssh_key_path"]
 
-	log.Printf("      📝 Credentials check: deploy_key=%s, ssh_key_path=%s", 
-		func() string { if deployKey != "" { return "present" }; return "absent" }(),
-		func() string { if sshKeyPath != "" { return sshKeyPath }; return "absent" }())
+	log.Printf("      📝 Credentials check: deploy_key=%s, ssh_key_path=%s",
+		func() string {
+			if deployKey != "" {
+				return "present"
+			}
+			return "absent"
+		}(),
+		func() string {
+			if sshKeyPath != "" {
+				return sshKeyPath
+			}
+			return "absent"
+		}())
 
 	if deployKey == "" && sshKeyPath == "" {
 		log.Printf("      ⚠️  No SSH key or deploy_key configured for %s", server)
@@ -599,7 +641,7 @@ func (pd *ProductionDeployer) deployToServer(ctx context.Context, server string)
 	if sshUser == "" {
 		sshUser = "helix"
 	}
-	
+
 	// Loud-fail path: real SSH transport is not wired into this binary
 	// today (would require golang.org/x/crypto/ssh + SFTP for binary
 	// upload, remote service-control invocation, and post-start health
@@ -701,9 +743,9 @@ func (pd *ProductionDeployer) executeHealthCheck(ctx context.Context) (bool, err
 // rather than fabricating a healthy/unhealthy reading.
 //
 // A real implementation would dispatch one of:
-//   1. SSH to server and probe the service status, or
-//   2. HTTP request against a /healthz endpoint, or
-//   3. Query an external monitoring system (Prometheus, etc.).
+//  1. SSH to server and probe the service status, or
+//  2. HTTP request against a /healthz endpoint, or
+//  3. Query an external monitoring system (Prometheus, etc.).
 //
 // All three require real infrastructure that this package does not own;
 // returning a sentinel error is the honest contract (round-33 §11.4
@@ -879,10 +921,10 @@ func (pd *ProductionDeployer) runSecurityScan(ctx context.Context) (*security.Fe
 	if _, err := os.Stat(pd.config.BinaryPath); os.IsNotExist(err) {
 		return &security.FeatureScanResult{
 			FeatureName: "production_deployment",
-			Success:      false,
-			CanProceed:   false,
-			Issues:       []interface{}{"Binary not found: " + pd.config.BinaryPath},
-			Timestamp:    time.Now(),
+			Success:     false,
+			CanProceed:  false,
+			Issues:      []interface{}{"Binary not found: " + pd.config.BinaryPath},
+			Timestamp:   time.Now(),
 		}, fmt.Errorf("binary not found: %w", err)
 	}
 
