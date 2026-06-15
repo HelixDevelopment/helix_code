@@ -2159,6 +2159,56 @@ closed <code>Implemented (→ Fixed.md)</code>. To update
 Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
-hand-maintained).*</p>
+hand-maintained).* ## HXC-077 — T1.5 context-window percentage indicator
+(partial)</p>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Feature
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Context-window usage percentage indicator scaffolded (commit
+3c9d3495, task T1.5); REMAINING: live token-accounting wiring + UI
+verification across TUI/desktop still pending — keep open until the
+indicator reflects real per-session usage.</p>
+<h2 id="hxc-078-t1.6-skill.md-precedence-resolution-partial">HXC-078 —
+T1.6 SKILL.md precedence resolution (partial)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>SKILL.md precedence ordering partially implemented (commit 51302bf8,
+task T1.6); REMAINING: full precedence-conflict resolution + tests
+covering overlapping skill definitions still outstanding — keep open
+until precedence is fully resolved and tested.</p>
+<h2 id="hxc-098-out-of-box-config-fails-version-required-validation-blocks-client-statussystem-commands">HXC-098
+— out-of-box config fails ‘version required’ validation — blocks client
+status/system commands</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Default config/config.yaml + the operator’s
+~/.config/helixcode/config.json have no top-level Version -&gt; config
+validation fails with ‘version is required’
+(internal_config_validate_version_required), blocking
+desktop/aurora/harmony status/system/version (and CLI subsystems) for a
+fresh user. Found while recording client videos (had to use a throwaway
+minimal valid config). Fix: ship a valid default Version in
+config/config.yaml (+ docs), or default it in config.Load when
+absent.</p>
+<h2 id="hxc-099-systemic-i18n-raw-key-sweep-redo-const-046-corrected-regression-free-with-default-translator-contract-decision">HXC-099
+— Systemic i18n raw-key sweep redo (CONST-046) — corrected,
+regression-free, with default-translator contract decision</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>First mechanical sweep (stash@{0}, agent a55802ad) wired a real
+embedded-English bundle translator as package default across 36
+internal/ packages but INTRODUCED 13 regressions vs green HEAD d85f6962:
+(1) real Go-template bug — internal/project messages render ‘<no value>’
+(error-detail param dropped); (2) defeats intentional
+NoopTranslator-echoes-raw-key anti-bluff guards in 9 pkgs
+(tools,voice,plantree,repomap,context,hardware,persistence,mcp,template);
+(3) autocommit+project tests assert real message text now broken. Redo
+MUST fix templating + needs operator decision: missing i18n key echoes
+raw key (loud default) OR falls back to embedded English (polished,
+risks hiding missing translations). Work in git stash; green tree
+restored (build exit 0, 13/13 pass).</p>
 </body>
 </html>

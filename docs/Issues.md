@@ -596,3 +596,12 @@ SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6);
 
 Default config/config.yaml + the operator's ~/.config/helixcode/config.json have no top-level Version -> config validation fails with 'version is required' (internal_config_validate_version_required), blocking desktop/aurora/harmony status/system/version (and CLI subsystems) for a fresh user. Found while recording client videos (had to use a throwaway minimal valid config). Fix: ship a valid default Version in config/config.yaml (+ docs), or default it in config.Load when absent.
 
+## HXC-099 — Systemic i18n raw-key sweep redo (CONST-046) — corrected, regression-free, with default-translator contract decision
+
+**Status:** Queued
+**Type:** Task
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+First mechanical sweep (stash@{0}, agent a55802ad) wired a real embedded-English bundle translator as package default across 36 internal/ packages but INTRODUCED 13 regressions vs green HEAD d85f6962: (1) real Go-template bug — internal/project messages render '<no value>' (error-detail param dropped); (2) defeats intentional NoopTranslator-echoes-raw-key anti-bluff guards in 9 pkgs (tools,voice,plantree,repomap,context,hardware,persistence,mcp,template); (3) autocommit+project tests assert real message text now broken. Redo MUST fix templating + needs operator decision: missing i18n key echoes raw key (loud default) OR falls back to embedded English (polished, risks hiding missing translations). Work in git stash; green tree restored (build exit 0, 13/13 pass).
+
