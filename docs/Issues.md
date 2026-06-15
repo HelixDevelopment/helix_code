@@ -586,16 +586,6 @@ Context-window usage percentage indicator scaffolded (commit 3c9d3495, task T1.5
 
 SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6); REMAINING: full precedence-conflict resolution + tests covering overlapping skill definitions still outstanding — keep open until precedence is fully resolved and tested.
 
-## HXC-090 — panoptic tracks test-generated audit.json users.json (CONST-053 hygiene)
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Low
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-panoptic internal/enterprise/{audit,users}.json are version-tracked but overwritten by the enterprise test suite every run (timestamps/random IDs) -> perpetual dirty tree. CONST-053: test-generated data should be gitignored + a fixture template used. Pre-existing, low severity.
-
 ## HXC-093 — helix_code module graph has phantom digital.vasic.* requires + private transitive blocking go list -m all / gomobile bind
 
 **Status:** Queued

@@ -734,3 +734,14 @@ applications/desktop/main_nogui.go status/help output prints raw message keys (d
 
 Same unwired-translator bug as HXC-095 found across the fleet: aurora_os standalone nogui (aurora_os_cli_version_banner + %!(EXTRA) at runtime) — round-7's aurora/harmony 'i18n fix' added KEYS but never wired SetTranslator in main(), so keys still echo raw (§11.4.108 fixed-in-source-not-at-runtime). Also internal/config (internal_config_info_using_config_file) + internal/database (internal_database_ping_failed) echo raw keys in CLI output. Fix: wire a real Translator (embed-bundle pattern) at each binary's main()/package init; add runtime guards that assert resolved prose (not just key-presence).
 
+## HXC-090 — panoptic tracks test-generated audit.json users.json (CONST-053 hygiene)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** panoptic a77228e: enterprise TestMain runs from temp dir; tree stays clean post-test x2, tests PASS, no production change. Guard via §11.4.135 (HXC-096) committed separately.
+**Severity:** Low
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+panoptic internal/enterprise/{audit,users}.json are version-tracked but overwritten by the enterprise test suite every run (timestamps/random IDs) -> perpetual dirty tree. CONST-053: test-generated data should be gitignored + a fixture template used. Pre-existing, low severity.
+
