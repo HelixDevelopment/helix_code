@@ -117,11 +117,20 @@ func (w *Workflow) GetStepResult(stepID string) (*task.Result, bool) {
 	return result, ok
 }
 
-// IsStepReady checks if a step's dependencies are satisfied
+// IsStepReady checks if a step's dependencies are satisfied. It acquires the
+// read lock itself; callers that already hold w.mu MUST use isStepReadyLocked
+// instead to avoid a reentrant RLock that can deadlock against a queued writer
+// (Go's RWMutex does not support recursive read-locking).
 func (w *Workflow) IsStepReady(step *WorkflowStep) bool {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
+	return w.isStepReadyLocked(step)
+}
 
+// isStepReadyLocked is the body of IsStepReady WITHOUT acquiring w.mu. The
+// caller MUST already hold w.mu (read or write lock). This is the only variant
+// safe to call from another method that already holds the lock.
+func (w *Workflow) isStepReadyLocked(step *WorkflowStep) bool {
 	// Check if all dependencies are completed successfully
 	for _, depID := range step.DependsOn {
 		result, ok := w.Results[depID]
@@ -157,8 +166,9 @@ func (w *Workflow) GetReadySteps() []*WorkflowStep {
 		if _, executed := w.Results[step.ID]; executed {
 			continue
 		}
-		// Check if dependencies are satisfied
-		if w.IsStepReady(step) {
+		// Already holding w.mu — use the unlocked helper, NOT IsStepReady,
+		// which would re-acquire the read lock and risk a deadlock.
+		if w.isStepReadyLocked(step) {
 			ready = append(ready, step)
 		}
 	}

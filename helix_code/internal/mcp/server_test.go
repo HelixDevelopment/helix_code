@@ -257,7 +257,9 @@ func TestHandleCallTool(t *testing.T) {
 		assert.NoError(t, err)
 
 		params := map[string]interface{}{
-			"name":      "echo-tool",
+			// Spec clients call by the advertised tool Name (from tools/list),
+			// not by the internal ID.
+			"name":      "Echo Tool",
 			"arguments": map[string]interface{}{"message": "hello world"},
 		}
 		paramsJSON, _ := json.Marshal(params)
@@ -326,7 +328,7 @@ func TestHandleCallTool(t *testing.T) {
 		assert.NoError(t, err)
 
 		params := map[string]interface{}{
-			"name":      "failing-tool",
+			"name":      "Failing Tool",
 			"arguments": map[string]interface{}{},
 		}
 		paramsJSON, _ := json.Marshal(params)

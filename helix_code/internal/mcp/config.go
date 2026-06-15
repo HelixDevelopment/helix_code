@@ -36,6 +36,22 @@ type ServerSpec struct {
 	// When false (default), the server's tools keep the conservative
 	// LevelEdit default and are blocked by a read-only-only loop.
 	ReadOnly bool `yaml:"readOnly,omitempty"`
+
+	// rawEnv preserves the ORIGINAL (unexpanded) values of Env / URL / SSEURL /
+	// Cwd / Command exactly as they appeared on disk — before any ${ENV}
+	// reference was expanded into a plaintext runtime value. SaveConfig writes
+	// these originals back so an expanded plaintext secret (CONST-042/§11.4.10)
+	// is NEVER persisted to disk. Unexported + non-serialised: it is recomputed
+	// on every LoadConfig and never marshalled into the YAML itself.
+	rawEnv     map[string]string `yaml:"-"`
+	rawURL     string            `yaml:"-"`
+	rawSSEURL  string            `yaml:"-"`
+	rawCwd     string            `yaml:"-"`
+	rawCommand []string          `yaml:"-"`
+	// rawSet marks that the raw originals above were captured from disk (so
+	// SaveConfig knows it may safely restore them). Programmatically-built
+	// configs (e.g. via the CLI) leave it false and are saved as-is.
+	rawSet bool `yaml:"-"`
 }
 
 // OAuthSpec describes the OAuth configuration for a server.
@@ -86,6 +102,20 @@ func LoadConfig(path string) (*Config, error) {
 	}
 	for i := range cfg.Servers {
 		s := &cfg.Servers[i]
+		// Capture the ORIGINAL (unexpanded) values before expansion so
+		// SaveConfig can write the ${ENV} references back instead of the
+		// expanded plaintext secret (CONST-042/§11.4.10). ${ENV} expansion
+		// then happens only into the live runtime fields.
+		s.rawURL = s.URL
+		s.rawSSEURL = s.SSEURL
+		s.rawCwd = s.Cwd
+		s.rawCommand = append([]string(nil), s.Command...)
+		s.rawEnv = make(map[string]string, len(s.Env))
+		for k, v := range s.Env {
+			s.rawEnv[k] = v
+		}
+		s.rawSet = true
+
 		s.URL = expand(s.URL)
 		s.SSEURL = expand(s.SSEURL)
 		s.Cwd = expand(s.Cwd)
@@ -156,15 +186,48 @@ func LoadMerged(userPath, projectPath string) (*Config, error) {
 }
 
 // SaveConfig writes the config back to YAML at path.
+//
+// Two CONST-042/§11.4.10 defense-in-depth guarantees:
+//  1. The file is written mode 0600 (owner-only) so an MCP config can never be
+//     world-readable.
+//  2. For any server loaded from disk, the ORIGINAL (unexpanded) ${ENV}
+//     references are written back instead of the expanded plaintext values, so
+//     a load->save round-trip never persists a secret to disk. Servers built
+//     programmatically (rawSet == false) are saved as-is.
 func SaveConfig(path string, cfg *Config) error {
 	if err := cfg.Validate(); err != nil {
 		return err
 	}
-	data, err := yaml.Marshal(cfg)
+	out := cfg.forPersist()
+	data, err := yaml.Marshal(out)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, data, 0644)
+	return os.WriteFile(path, data, 0600)
+}
+
+// forPersist returns a copy of the config in which every server loaded from
+// disk has its expanded ${ENV} values replaced by the original unexpanded
+// references captured at load time. The receiver is never mutated.
+func (c *Config) forPersist() *Config {
+	out := &Config{Servers: make([]ServerSpec, len(c.Servers))}
+	for i, s := range c.Servers {
+		if s.rawSet {
+			s.URL = s.rawURL
+			s.SSEURL = s.rawSSEURL
+			s.Cwd = s.rawCwd
+			s.Command = append([]string(nil), s.rawCommand...)
+			if s.rawEnv != nil {
+				env := make(map[string]string, len(s.rawEnv))
+				for k, v := range s.rawEnv {
+					env[k] = v
+				}
+				s.Env = env
+			}
+		}
+		out.Servers[i] = s
+	}
+	return out
 }
 
 // Validate checks the config for required fields.

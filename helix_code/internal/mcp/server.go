@@ -111,16 +111,23 @@ func NewMCPServer() *MCPServer {
 	}
 }
 
-// RegisterTool registers a new tool with the MCP server
+// RegisterTool registers a new tool with the MCP server.
+//
+// The tool map is keyed by tool.Name — the SAME identifier that handleListTools
+// advertises and handleCallTool dispatches on. Per the MCP spec a client lists
+// tools (receiving their Name) then calls them by that Name, so registration,
+// advertisement, and dispatch MUST all agree on Name; keying by tool.ID instead
+// made any tool whose ID differs from its Name uncallable (-32601 Tool not
+// found) by a spec-conformant client.
 func (s *MCPServer) RegisterTool(tool *Tool) error {
 	s.toolMux.Lock()
 	defer s.toolMux.Unlock()
 
-	if _, exists := s.tools[tool.ID]; exists {
-		return fmt.Errorf("%s", tr(context.Background(), "internal_mcp_server_tool_already_registered", map[string]any{"ToolID": tool.ID}))
+	if _, exists := s.tools[tool.Name]; exists {
+		return fmt.Errorf("%s", tr(context.Background(), "internal_mcp_server_tool_already_registered", map[string]any{"ToolID": tool.Name}))
 	}
 
-	s.tools[tool.ID] = tool
+	s.tools[tool.Name] = tool
 	log.Print(tr(context.Background(), "internal_mcp_server_tool_registered", map[string]any{"ToolName": tool.Name, "ToolID": tool.ID}))
 	return nil
 }

@@ -46,6 +46,9 @@ internal_agent_no_available_agent_found:
 internal_agent_result_not_found:
   other: "result not found: {{.TaskID}}"
 
+internal_agent_nil_result_without_error:
+  other: "agent {{.AgentID}} returned nil result without error"
+
 internal_agent_failed_shutdown_agent:
   other: "failed to shutdown agent {{.AgentID}}: {{.Err}}"
 

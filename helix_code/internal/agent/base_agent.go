@@ -44,6 +44,7 @@ type BaseAgent struct {
 	taskQueue    chan *Task
 	resultChan   chan *TaskResult
 	stopChan     chan struct{}
+	stopOnce     sync.Once
 	wg           sync.WaitGroup
 	mu           sync.RWMutex
 
@@ -1315,9 +1316,15 @@ func (a *BaseAgent) Start(ctx context.Context) error {
 	return nil
 }
 
-// Stop stops the agent
+// Stop stops the agent. Stop is terminal and idempotent: calling it (or
+// Shutdown, which calls Stop) more than once — e.g. a Coordinator.Shutdown
+// retry — is a safe no-op rather than a `close of closed channel` panic. The
+// sync.Once guards the single close of stopChan; the wg.Wait() below still
+// blocks every caller until the processing goroutine has exited.
 func (a *BaseAgent) Stop() {
-	close(a.stopChan)
+	a.stopOnce.Do(func() {
+		close(a.stopChan)
+	})
 	a.wg.Wait()
 }
 

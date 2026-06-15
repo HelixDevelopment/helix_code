@@ -128,6 +128,15 @@ func (c *Coordinator) ExecuteTask(ctx context.Context, taskID string) (*task.Res
 		return nil, err
 	}
 
+	// An agent that returns (nil, nil) signals success with no payload. Treat
+	// it as a failure rather than dereferencing result.Output (nil-deref crash)
+	// or storing a nil result as a success.
+	if result == nil {
+		failErr := fmt.Errorf("%s", tr(ctx, "internal_agent_nil_result_without_error", map[string]any{"AgentID": agent.ID()}))
+		t.Fail(failErr.Error())
+		return nil, failErr
+	}
+
 	t.Complete(result.Output)
 
 	c.mu.Lock()
