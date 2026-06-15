@@ -789,3 +789,13 @@ Context-window usage percentage indicator scaffolded (commit 3c9d3495, task T1.5
 
 SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6); REMAINING: full precedence-conflict resolution + tests covering overlapping skill definitions still outstanding — keep open until precedence is fully resolved and tested.
 
+## HXC-100 — Resync docs/CONTINUATION.md to current HEAD + de-bloat the 32k-token line-1 header (CONST-044/§12.10 + CONST-064 hygiene)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** CONTINUATION.md resynced to HEAD 3aacfa9f + line-1 header de-bloated (max line 54856->2931 chars). History preserved: 4 mega-prose lines replaced by CONST-064 metadata table + ToC + condensed close-out 143-169 table; close-outs 131-142 dedicated sections intact; this session's 5 rows added. git diff +143/-8 (additive, no content loss); exports rendered=2 failed=0 fresh. Gated independently by conductor.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+CONTINUATION.md is stale (Last updated 2026-06-14, refs HEAD e3063af1; current is 80e62afa after HXC-098 fix + HXC-099 i18n-sweep finding). Per CONST-044/§12.10 out-of-sync CONTINUATION is a CRITICAL DEFECT. ALSO: line 1 ('Last updated' header) has accreted ~32k tokens into a SINGLE line across rounds — pathological; Read/Edit of lines 1-12 alone exceeds 25k tokens, making safe edits hard and risking corruption with blind sed. Overnight zero-risk policy => queued for careful daytime fix: (1) refactor the bloated header into a normal metadata table + a round-by-round table row, (2) add rounds for this session (B i18n sweep discarded+stashed -> HXC-099; HXC-098 config-default fix), (3) restore CONST-064 ToC parity, (4) regen .html/.pdf. Live resumption currently served by the up-to-date .remember/remember.md (§11.4.131).
+

@@ -48,8 +48,7 @@
 | HXC-036 | Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID keys because boot-time translator wiring was never implemented |  | Fixed (→ Fixed.md) |  | the CONST-046 migration built 74 `SetTranslator` seams + bundles but never wired a real translator at boot (0 `.SetTranslator(` call sites module-wide). Fix:… |
 | HXC-035 | `POST /api/v1/auth/register` returns 400 `internal_auth_failed_create_user` on the live server (blocks all authenticated flows) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE (confirmed via direct psql INSERT → `ERROR: column "display_name" of relation "users" does not exist`): `createSchemaSQL`'s `CREATE TABLE users`… |
 | HXC-099 | Systemic i18n raw-key sweep redo (CONST-046) — corrected, regression-free, with default-translator contract decision | Task | Queued |  | Systemic i18n raw-key sweep redo (CONST-046) — corrected, regression-free, with default-translator contract decision |
-| HXC-100 | Resync docs/CONTINUATION.md to current HEAD + de-bloat the 32k-token line-1 header (CONST-044/§12.10 + CONST-064 hygiene) | Task | Queued |  | Resync docs/CONTINUATION.md to current HEAD + de-bloat the 32k-token line-1 header (CONST-044/§12.10 + CONST-064 hygiene) |
 
-**Counts**: 43 tracked item-sections in `docs/Issues.md` — **2 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
+**Counts**: 42 tracked item-sections in `docs/Issues.md` — **1 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
 *Last regenerated: 2026-06-15 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
