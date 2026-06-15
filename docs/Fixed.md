@@ -668,3 +668,14 @@ llm_orchestrator pkg/agent/opencode_agent.go runCapture set cmd.Cancel but WaitD
 
 panoptic internal/platforms: web.go Fill/Click/Submit page.Element on unbounded ctx -> missing selector retries forever (9m hang); screencast.go relied only on async CDP events -> 0 frames on immediate start/stop. Fixed: bounded page.Timeout + synchronous initial Screenshot frame.
 
+## HXC-091 — containers custom health-check duration can be 0 (timer-resolution flake)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** containers a36a435: duration floor 1ns; test 0/20 fail post-fix, pkg/health ok
+**Severity:** Low
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+containers pkg/health/custom.go NewCustomCheckFunc duration=time.Since(start) returns 0 for a no-op check -> TestNewCustomCheckFunc_Success NotZero flake. Fixed: floor to time.Nanosecond when <=0 (no fabricated delay).
+
