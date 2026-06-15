@@ -56,6 +56,7 @@ import (
 	"dev.helix.code/internal/tools/task"
 	"dev.helix.code/internal/tools/worktree"
 	"dev.helix.code/internal/verifier"
+	"dev.helix.code/internal/version"
 	"dev.helix.code/internal/voice"
 	"dev.helix.code/internal/worker"
 	"dev.helix.code/internal/workflow"
@@ -1231,8 +1232,20 @@ func (c *CLI) Run() error {
 		// zero behaviour change to the CLI's normal path. The captured profiles
 		// are the anti-bluff baseline evidence for the Phase 0 measurement gate.
 		pprofDir = flag.String("pprof", "", "P0-T01 speed programme: write CPU+heap pprof profiles to this directory (off by default; also via HELIX_PPROF env)")
+
+		versionFlag = flag.Bool("version", false, "Print the HelixCode brand banner + version, then exit")
 	)
 	flag.Parse()
+
+	// --version: print the HelixCode brand banner (lime/teal wordmark,
+	// NO_COLOR / non-TTY aware) followed by the resolved version string, then
+	// exit. Placed immediately after flag.Parse() so it short-circuits before
+	// any subsystem or LLM-provider construction.
+	if *versionFlag {
+		fmt.Print(brandBanner())
+		fmt.Println("  " + version.GetFullVersion())
+		return nil
+	}
 
 	// P0-T01: start opt-in pprof capture immediately after flag parsing so the
 	// profile covers as much of the run as possible. pprofutil.Start returns a
@@ -2173,8 +2186,12 @@ func (c *CLI) handleCommand(ctx context.Context, command string) error {
 // LLM provider and the response is printed. Multi-turn context is
 // preserved across turns within a single REPL session.
 func (c *CLI) handleInteractive(ctx context.Context) error {
-	fmt.Println(tr(ctx, "cli_repl_header", nil))
-	fmt.Println(tr(ctx, "cli_repl_intro", nil))
+	// Brand identity: print the lime/teal HelixCode wordmark banner at REPL
+	// startup. brandBanner() is NO_COLOR / non-TTY aware (no escapes emitted
+	// when color is disabled), so piped/redirected sessions stay clean.
+	fmt.Print(brandBanner())
+	fmt.Println(brandHeading(tr(ctx, "cli_repl_header", nil)))
+	fmt.Println(brandInfo(tr(ctx, "cli_repl_intro", nil)))
 	if c.llmProvider != nil {
 		if models := c.llmProvider.GetModels(); len(models) > 0 {
 			fmt.Println(tr(ctx, "cli_provider_default_model", map[string]any{
@@ -2207,7 +2224,7 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 		default:
 		}
 
-		fmt.Print("\nhelix> ")
+		fmt.Print("\n" + brandPrompt("helix>") + " ")
 		if !scanner.Scan() {
 			if err := scanner.Err(); err != nil {
 				return fmt.Errorf("REPL read error: %w", err)

@@ -3,11 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0E1310" />
   <title>HelixCode — LLM Console</title>
+  <link rel="icon" type="image/png" href="/static/logo.png" />
   <link rel="stylesheet" href="/static/app.css" />
 </head>
 <body>
   <main class="app">
+    <header class="brand">
+      <img class="logo" src="/static/logo.png" alt="HelixCode logo — lime-green to teal nautilus spiral" width="48" height="48" />
+      <div>
+        <p class="wordmark"><span class="helix">Helix</span><span class="code">Code</span></p>
+        <p class="tagline">Distributed AI development platform</p>
+      </div>
+    </header>
+
     <h1>HelixCode LLM Console</h1>
     <p class="sub">
       Sends a real request to <code>POST /api/v1/llm/generate</code>

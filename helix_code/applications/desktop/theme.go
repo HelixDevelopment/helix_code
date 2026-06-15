@@ -13,6 +13,24 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+// HelixCode brand palette (FACT hex values, derived from assets/Logo.png — a
+// lime-green→teal nautilus spiral on near-black). These are the canonical brand
+// colors applied to the Fyne desktop client. The brand theme is always dark.
+const (
+	hxcBGBase     = "#0E1310" // window background — near-black, faint green tint
+	hxcBGSurface  = "#18201A" // panels / inputs
+	hxcBGRaised   = "#202A22" // buttons / raised surfaces
+	hxcBorder     = "#2A352C" // separators / borders / shadows
+	hxcPrimary    = "#A8DD22" // lime — primary accent: focus, primary buttons, selection
+	hxcPrimaryDim = "#7FA81B" // dimmed lime — selection background, pressed
+	hxcSecondary  = "#8FC9B8" // teal — hyperlinks, secondary/info accents
+	hxcFGText     = "#ECF3E8" // foreground text
+	hxcFGMuted    = "#9DB0A0" // disabled / placeholder text
+	hxcSuccess    = "#A8DD22" // success (lime)
+	hxcError      = "#E06A5A" // error
+	hxcWarning    = "#E0C040" // warning
+)
+
 // Theme represents a UI theme
 type Theme struct {
 	Name       string
@@ -27,6 +45,16 @@ type Theme struct {
 	Warning    string
 	Error      string
 	Info       string
+
+	// HelixCode brand extension. When IsBrand is true, the CustomTheme.Color
+	// mapping uses the full brand palette (distinct surface/raised/muted/dim
+	// tones) instead of the legacy 6-field approximation, and forces the dark
+	// Fyne variant regardless of the host OS appearance setting.
+	IsBrand      bool
+	BGSurface    string // panel / input background
+	BGRaised     string // button / raised-surface background
+	PrimaryDim   string // selection background / pressed accent
+	TextMuted    string // disabled / placeholder text
 }
 
 // Available themes
@@ -61,19 +89,28 @@ var (
 		Info:       "#2196F3",
 	}
 
+	// HelixTheme is the HelixCode brand dark theme derived from assets/Logo.png
+	// (the lime-green→teal nautilus spiral). It is always dark and uses the full
+	// brand palette (IsBrand=true) so the CustomTheme.Color mapping resolves the
+	// distinct surface / raised / muted / dim brand tones.
 	HelixTheme = Theme{
 		Name:       "Helix",
 		IsDark:     true,
-		Primary:    "#C2E95B",
-		Secondary:  "#C0E853",
-		Accent:     "#B8ECD7",
-		Text:       "#2D3047",
-		Background: "#1A1A1A",
-		Border:     "#404040",
-		Success:    "#4CAF50",
-		Warning:    "#FF9800",
-		Error:      "#F44336",
-		Info:       "#2196F3",
+		IsBrand:    true,
+		Primary:    hxcPrimary,
+		Secondary:  hxcSecondary,
+		Accent:     hxcPrimary,
+		Text:       hxcFGText,
+		Background: hxcBGBase,
+		Border:     hxcBorder,
+		Success:    hxcSuccess,
+		Warning:    hxcWarning,
+		Error:      hxcError,
+		Info:       hxcSecondary,
+		BGSurface:  hxcBGSurface,
+		BGRaised:   hxcBGRaised,
+		PrimaryDim: hxcPrimaryDim,
+		TextMuted:  hxcFGMuted,
 	}
 )
 
@@ -109,20 +146,15 @@ func (tm *ThemeManager) detectSystemTheme() *Theme {
 		}
 	}
 
-	// macOS appearance integration: a full implementation would shell
-	// out to `defaults read -g AppleInterfaceStyle` (Dark when set,
-	// absent for Light) or call NSAppearance via cgo. Until that
-	// integration lands the documented contract is "macOS defaults to
-	// the Dark theme"; HELIX_THEME env var (checked above) is the
-	// operator escape hatch (round-33 §11.4 comment rewrite — previous
-	// "For now" lead-in implied an unfinished stub when the function
-	// is in fact the honest documented fallback;
-	// CONST-035 / Article XI §11.9).
-	if runtime.GOOS == "darwin" {
-		return &DarkTheme
-	}
-
-	// Default to helix theme
+	// HelixCode brand default: the brand dark theme (derived from
+	// assets/Logo.png) is applied on EVERY platform regardless of the host OS
+	// appearance setting — the Fyne client renders in the HelixCode brand
+	// identity, not the system light/dark preference. HELIX_THEME env var
+	// (checked above) remains the operator escape hatch to select "dark" or
+	// "light" explicitly. runtime is still imported for callers that branch on
+	// GOOS elsewhere; the brand theme intentionally ignores it here so macOS,
+	// Linux, and Windows all show the same brand identity.
+	_ = runtime.GOOS
 	return &HelixTheme
 }
 
@@ -334,9 +366,10 @@ func parseHexColor(hex string) color.Color {
 		hex = hex[1:]
 	}
 
-	// Parse hex color
-	if len(hex) == 6 {
+	// Parse hex color (RRGGBB or RRGGBBAA)
+	if len(hex) == 6 || len(hex) == 8 {
 		var r, g, b uint8
+		a := uint8(255)
 		if n, err := parseHexPair(hex[0:2]); err == nil {
 			r = n
 		}
@@ -346,7 +379,12 @@ func parseHexColor(hex string) color.Color {
 		if n, err := parseHexPair(hex[4:6]); err == nil {
 			b = n
 		}
-		return color.RGBA{r, g, b, 255}
+		if len(hex) == 8 {
+			if n, err := parseHexPair(hex[6:8]); err == nil {
+				a = n
+			}
+		}
+		return color.NRGBA{R: r, G: g, B: b, A: a}
 	}
 
 	// Default to black if parsing fails
@@ -362,45 +400,120 @@ func (ct *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant
 	if ct.currentTheme == nil {
 		ct.currentTheme = NewThemeManager().GetCurrentTheme()
 	}
+
+	// HelixCode brand mapping: when the active theme is the brand theme, map
+	// EVERY Fyne ColorName onto the full brand palette so the rendered GUI
+	// carries the brand identity end-to-end. The brand theme is always dark, so
+	// the `variant` argument is intentionally ignored — the brand colors apply
+	// regardless of the host OS light/dark setting.
+	t := ct.currentTheme
+	if t.IsBrand {
+		switch name {
+		case theme.ColorNamePrimary:
+			return parseHexColor(t.Primary) // lime
+		case theme.ColorNameBackground:
+			return parseHexColor(t.Background) // BG_BASE
+		case theme.ColorNameForeground:
+			return parseHexColor(t.Text) // FG_TEXT
+		case theme.ColorNameButton:
+			return parseHexColor(t.BGRaised) // BG_RAISED
+		case theme.ColorNameDisabledButton:
+			return parseHexColor(t.BGSurface)
+		case theme.ColorNameDisabled:
+			return parseHexColor(t.TextMuted) // FG_MUTED
+		case theme.ColorNamePlaceHolder:
+			return parseHexColor(t.TextMuted) // FG_MUTED
+		case theme.ColorNameInputBackground:
+			return parseHexColor(t.BGSurface) // BG_SURFACE
+		case theme.ColorNameHyperlink:
+			return parseHexColor(t.Secondary) // teal
+		case theme.ColorNameError:
+			return parseHexColor(t.Error)
+		case theme.ColorNameSuccess:
+			return parseHexColor(t.Success)
+		case theme.ColorNameWarning:
+			return parseHexColor(t.Warning)
+		case theme.ColorNameFocus:
+			return parseHexColor(t.Primary) // lime focus ring
+		case theme.ColorNamePressed:
+			return parseHexColor(t.PrimaryDim)
+		case theme.ColorNameSelection:
+			return parseHexColor(t.PrimaryDim) // PRIMARY_DIM
+		case theme.ColorNameSeparator:
+			return parseHexColor(t.Border) // BORDER
+		case theme.ColorNameShadow:
+			return parseHexColor(t.Border) // BORDER
+		case theme.ColorNameScrollBar:
+			return parseHexColor(t.Border)
+		case theme.ColorNameMenuBackground:
+			return parseHexColor(t.BGSurface)
+		case theme.ColorNameOverlayBackground:
+			return parseHexColor(t.BGBaseOverlay())
+		case theme.ColorNameInputBorder:
+			return parseHexColor(t.Border)
+		case theme.ColorNameHeaderBackground:
+			return parseHexColor(t.BGSurface)
+		case theme.ColorNameHover:
+			return parseHexColor(t.BGRaised)
+		case theme.ColorNameScrollBarBackground:
+			return parseHexColor(t.BGSurface)
+		// On bright brand accents (lime primary/success, amber warning) the
+		// legible foreground is the near-black base, not the light FG_TEXT.
+		case theme.ColorNameForegroundOnPrimary, theme.ColorNameForegroundOnSuccess, theme.ColorNameForegroundOnWarning:
+			return parseHexColor(t.Background)
+		case theme.ColorNameForegroundOnError:
+			return parseHexColor(t.Text)
+		default:
+			return parseHexColor(t.Text)
+		}
+	}
+
 	switch name {
 	case theme.ColorNamePrimary:
-		return parseHexColor(ct.currentTheme.Primary)
+		return parseHexColor(t.Primary)
 	case theme.ColorNameBackground:
-		return parseHexColor(ct.currentTheme.Background)
+		return parseHexColor(t.Background)
 	case theme.ColorNameButton:
-		return parseHexColor(ct.currentTheme.Secondary)
+		return parseHexColor(t.Secondary)
 	case theme.ColorNameDisabledButton:
-		return parseHexColor(ct.currentTheme.Border)
+		return parseHexColor(t.Border)
 	case theme.ColorNameError:
-		return parseHexColor(ct.currentTheme.Error)
+		return parseHexColor(t.Error)
 	case theme.ColorNameFocus:
-		return parseHexColor(ct.currentTheme.Accent)
+		return parseHexColor(t.Accent)
 	case theme.ColorNameForeground:
-		return parseHexColor(ct.currentTheme.Text)
+		return parseHexColor(t.Text)
 	case theme.ColorNameDisabled:
-		return parseHexColor(ct.currentTheme.Border)
+		return parseHexColor(t.Border)
 	case theme.ColorNamePlaceHolder:
-		return parseHexColor(ct.currentTheme.Border)
+		return parseHexColor(t.Border)
 	case theme.ColorNamePressed:
-		return parseHexColor(ct.currentTheme.Accent)
+		return parseHexColor(t.Accent)
 	case theme.ColorNameScrollBar:
-		return parseHexColor(ct.currentTheme.Border)
+		return parseHexColor(t.Border)
 	case theme.ColorNameShadow:
 		return color.RGBA{0, 0, 0, 100}
 	case theme.ColorNameInputBackground:
-		if ct.currentTheme.IsDark {
+		if t.IsDark {
 			return parseHexColor("#2A2A2A")
 		}
 		return parseHexColor("#F5F5F5")
 	case theme.ColorNameMenuBackground:
-		return parseHexColor(ct.currentTheme.Background)
+		return parseHexColor(t.Background)
 	case theme.ColorNameOverlayBackground:
 		return color.RGBA{0, 0, 0, 150}
 	case theme.ColorNameSeparator:
-		return parseHexColor(ct.currentTheme.Border)
+		return parseHexColor(t.Border)
 	default:
-		return parseHexColor(ct.currentTheme.Text)
+		return parseHexColor(t.Text)
 	}
+}
+
+// BGBaseOverlay returns a translucent variant of the brand base background used
+// for modal/overlay scrims. It composes the brand base color with ~80% alpha so
+// dialogs dim the content behind them while staying on-brand.
+func (th *Theme) BGBaseOverlay() string {
+	return th.Background + "CC" // RRGGBB + AA(0xCC ≈ 80%)
 }
 
 // Font returns the font for the given theme font style

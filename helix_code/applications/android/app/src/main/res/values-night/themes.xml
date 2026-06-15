@@ -1,27 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-      HelixCode brand dark theme. Forced dark (lime-green -> teal nautilus brand).
-      Parent is a MaterialComponents DayNight DarkActionBar theme so the existing
-      ActionBar behaviour is preserved while the brand palette is applied.
+      Night-qualified HelixCode brand theme. The brand is always dark, so the
+      night variant mirrors the base brand palette exactly to guarantee a
+      consistent dark experience regardless of system day/night state.
     -->
     <style name="Theme.HelixCode" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Brand primary (lime) -->
         <item name="colorPrimary">@color/helix_primary</item>
         <item name="colorPrimaryDark">@color/helix_primary_dim</item>
         <item name="colorPrimaryVariant">@color/helix_primary_dim</item>
-        <!-- Dark text/icons on the lime primary surfaces -->
         <item name="colorOnPrimary">@color/helix_bg_base</item>
 
-        <!-- Brand secondary (teal) -->
         <item name="colorSecondary">@color/helix_secondary</item>
         <item name="colorSecondaryVariant">@color/helix_secondary</item>
         <item name="colorOnSecondary">@color/helix_bg_base</item>
 
-        <!-- Accent used by AppCompat widgets -->
         <item name="colorAccent">@color/helix_primary</item>
 
-        <!-- Background + surface -->
         <item name="android:colorBackground">@color/helix_bg_base</item>
         <item name="android:windowBackground">@color/helix_bg_base</item>
         <item name="colorSurface">@color/helix_bg_surface</item>
@@ -30,11 +25,9 @@
         <item name="android:textColorPrimary">@color/helix_fg_text</item>
         <item name="android:textColorSecondary">@color/helix_fg_muted</item>
 
-        <!-- Error -->
         <item name="colorError">@color/helix_error</item>
         <item name="colorOnError">@color/helix_bg_base</item>
 
-        <!-- Status / navigation bar -->
         <item name="android:statusBarColor">@color/helix_bg_base</item>
         <item name="android:navigationBarColor">@color/helix_bg_base</item>
     </style>

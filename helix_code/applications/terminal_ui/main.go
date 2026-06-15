@@ -393,6 +393,12 @@ func (tui *TerminalUI) Initialize() error {
 
 // setupUI initializes the user interface components
 func (tui *TerminalUI) setupUI() {
+	// Force the HelixCode brand dark palette onto tview.Styles BEFORE any
+	// widget is constructed below — tview widgets snapshot their default
+	// colors from tview.Styles at creation time, so this must run first
+	// (and well before app.Run) for the whole TUI to inherit the brand.
+	initHelixTheme()
+
 	// Create main pages container
 	tui.pages = tview.NewPages()
 
@@ -469,13 +475,22 @@ func (tui *TerminalUI) loadASCIIArt() string {
 func (tui *TerminalUI) showDashboard() {
 	dashboard := tview.NewFlex().SetDirection(tview.FlexRow)
 
-	// Header with ASCII logo
+	// Header with ASCII logo + brand banner. The banner is a compact
+	// lime-on-teal text header referencing the HelixCode brand (terminals
+	// can't render the PNG nautilus spiral, so we use a Unicode spiral
+	// glyph + colored wordmark). Colors are the brand palette constants
+	// from theme.go (PRIMARY lime / SECONDARY teal).
 	asciiArt := tui.loadASCIIArt()
+	banner := fmt.Sprintf(
+		"[%s::b]🐚 HelixCode[-:-:-]\n[%s]Enterprise distributed AI development platform[-]",
+		hxcPrimaryHex, hxcSecondaryHex,
+	)
 	header := tview.NewTextView().
-		SetText(asciiArt).
+		SetText(banner + "\n\n" + asciiArt).
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true)
 	header.SetBorder(true).SetTitle("HelixCode")
+	header.SetBorderColor(hxcPrimary).SetTitleColor(hxcPrimary)
 
 	// Stats grid
 	statsGrid := tview.NewGrid().SetRows(3, 3, 3).SetColumns(30, 30, 30).SetBorders(true)

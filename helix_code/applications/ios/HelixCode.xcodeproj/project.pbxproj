@@ -10,6 +10,8 @@
 		AA0000000000000000000101 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000001 /* AppDelegate.swift */; };
 		AA0000000000000000000102 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000002 /* ViewController.swift */; };
 		AA0000000000000000000103 /* MobileCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000003 /* MobileCore.swift */; };
+		AA0000000000000000000106 /* HelixTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000006 /* HelixTheme.swift */; };
+		AA0000000000000000000107 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000007 /* Assets.xcassets */; };
 		AA0000000000000000000104 /* HelixCore.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000004 /* HelixCore.xcframework */; };
 		AA0000000000000000000105 /* HelixCore.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000004 /* HelixCore.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -32,6 +34,8 @@
 		AA0000000000000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AA0000000000000000000002 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AA0000000000000000000003 /* MobileCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileCore.swift; sourceTree = "<group>"; };
+		AA0000000000000000000006 /* HelixTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelixTheme.swift; sourceTree = "<group>"; };
+		AA0000000000000000000007 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA0000000000000000000004 /* HelixCore.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = HelixCore.xcframework; path = Frameworks/HelixCore.xcframework; sourceTree = "<group>"; };
 		AA0000000000000000000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA00000000000000000000FF /* HelixCode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelixCode.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,6 +51,17 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA0000000000000000000451 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000000000000000000107 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXGroup section */
 		AA0000000000000000000501 = {
@@ -72,6 +87,8 @@
 				AA0000000000000000000001 /* AppDelegate.swift */,
 				AA0000000000000000000002 /* ViewController.swift */,
 				AA0000000000000000000003 /* MobileCore.swift */,
+				AA0000000000000000000006 /* HelixTheme.swift */,
+				AA0000000000000000000007 /* Assets.xcassets */,
 				AA0000000000000000000005 /* Info.plist */,
 			);
 			path = HelixCode;
@@ -94,6 +111,7 @@
 			buildPhases = (
 				AA0000000000000000000201 /* Sources */,
 				AA0000000000000000000401 /* Frameworks */,
+				AA0000000000000000000451 /* Resources */,
 				AA0000000000000000000301 /* Embed Frameworks */,
 			);
 			buildRules = (
@@ -146,6 +164,7 @@
 				AA0000000000000000000101 /* AppDelegate.swift in Sources */,
 				AA0000000000000000000102 /* ViewController.swift in Sources */,
 				AA0000000000000000000103 /* MobileCore.swift in Sources */,
+				AA0000000000000000000106 /* HelixTheme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

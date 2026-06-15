@@ -6,8 +6,65 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
+
+// HelixCode brand dark-theme palette (FACT colors derived from
+// assets/Logo.png — the lime-green→teal nautilus spiral). These hex
+// values are the single source of truth for the tcell colors below and
+// for the tview.Styles applied at startup by initHelixTheme().
+const (
+	hxcBgBaseHex    = "#0E1310" // base background
+	hxcBgSurfaceHex = "#18201A" // surface / input fields
+	hxcBorderHex    = "#2A352C" // unfocused borders
+	hxcPrimaryHex   = "#A8DD22" // lime — titles, focused border, highlights
+	hxcSecondaryHex = "#8FC9B8" // teal — secondary/info text, graphics
+	hxcFgTextHex    = "#ECF3E8" // primary text
+	hxcFgMutedHex   = "#9DB0A0" // secondary / tertiary text
+	hxcErrorHex     = "#E06A5A" // error
+)
+
+// hxc* are the resolved tcell colors for the brand palette. tcell.GetColor
+// parses the "#RRGGBB" literals above into true-color values, so terminals
+// that support 24-bit color render the exact brand hues.
+var (
+	hxcBgBase    = tcell.GetColor(hxcBgBaseHex)
+	hxcBgSurface = tcell.GetColor(hxcBgSurfaceHex)
+	hxcBorder    = tcell.GetColor(hxcBorderHex)
+	hxcPrimary   = tcell.GetColor(hxcPrimaryHex)
+	hxcSecondary = tcell.GetColor(hxcSecondaryHex)
+	hxcFgText    = tcell.GetColor(hxcFgTextHex)
+	hxcFgMuted   = tcell.GetColor(hxcFgMutedHex)
+	hxcError     = tcell.GetColor(hxcErrorHex)
+)
+
+// initHelixTheme forces the HelixCode brand dark palette onto the global
+// tview.Styles BEFORE the application runs. tview widgets read their
+// default colors from this struct at construction time, so calling this
+// once at startup (from setupUI, which runs before app.Run) themes every
+// widget — sidebar, content panes, status bar, forms, lists, tables,
+// modals — without per-widget overrides.
+//
+// This is the application-wide theme setter tview lacks: there is no
+// app.SetTheme() verb, so the package-level Styles struct is the only
+// global seam. Calling it is idempotent and side-effect-free beyond the
+// Styles assignment.
+func initHelixTheme() {
+	tview.Styles = tview.Theme{
+		PrimitiveBackgroundColor:    hxcBgBase,
+		ContrastBackgroundColor:     hxcBgSurface,
+		MoreContrastBackgroundColor: hxcBgSurface,
+		BorderColor:                 hxcBorder,
+		TitleColor:                  hxcPrimary,
+		GraphicsColor:               hxcSecondary,
+		PrimaryTextColor:            hxcFgText,
+		SecondaryTextColor:          hxcFgMuted,
+		TertiaryTextColor:           hxcFgMuted,
+		InverseTextColor:            hxcBgBase,
+		ContrastSecondaryTextColor:  hxcPrimary,
+	}
+}
 
 // Theme represents a UI theme
 type Theme struct {
@@ -57,19 +114,24 @@ var (
 		Info:       "#2196F3",
 	}
 
+	// HelixTheme is the brand theme served by ThemeManager.GetColor/FormatColor
+	// (and detectSystemTheme on non-macOS). Its values MUST mirror the FACT brand
+	// palette constants above so ThemeManager-driven colors stay consistent with
+	// the tview.Styles that initHelixTheme() applies (lime #A8DD22 + teal #8FC9B8,
+	// derived from assets/Logo.png).
 	HelixTheme = Theme{
 		Name:       "Helix",
 		IsDark:     true,
-		Primary:    "#C2E95B",
-		Secondary:  "#C0E853",
-		Accent:     "#B8ECD7",
-		Text:       "#2D3047",
-		Background: "#1A1A1A",
-		Border:     "#404040",
-		Success:    "#4CAF50",
-		Warning:    "#FF9800",
-		Error:      "#F44336",
-		Info:       "#2196F3",
+		Primary:    hxcPrimaryHex,   // lime #A8DD22
+		Secondary:  hxcSecondaryHex, // teal #8FC9B8
+		Accent:     hxcPrimaryHex,
+		Text:       hxcFgTextHex,    // #ECF3E8
+		Background: hxcBgBaseHex,    // #0E1310
+		Border:     hxcBorderHex,    // #2A352C
+		Success:    hxcPrimaryHex,
+		Warning:    "#E0C040",
+		Error:      hxcErrorHex,     // #E06A5A
+		Info:       hxcSecondaryHex,
 	}
 )
 

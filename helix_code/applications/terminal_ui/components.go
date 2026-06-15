@@ -170,7 +170,8 @@ func (uc *UIComponents) CreateStatusBar() *tview.TextView {
 	status := tview.NewTextView()
 	status.SetDynamicColors(true)
 	status.SetTextAlign(tview.AlignCenter)
-	status.SetText("[green]Ready")
+	// Brand lime (PRIMARY) for the ready indicator instead of raw green.
+	status.SetText(fmt.Sprintf("[%s]Ready", hxcPrimaryHex))
 
 	status.SetBorder(true)
 	status.SetTitle("Status")
@@ -206,7 +207,9 @@ func (uc *UIComponents) formatProgressBar(current, total int, percentage float64
 		}
 	}
 
-	return fmt.Sprintf("[green]%s[white] %d/%d (%.1f%%)", bar, current, total, percentage)
+	// Brand lime (PRIMARY) for the filled bar, brand text (FG_TEXT) for the
+	// trailing label — replaces the raw green/white tags.
+	return fmt.Sprintf("[%s]%s[%s] %d/%d (%.1f%%)", hxcPrimaryHex, bar, hxcFgTextHex, current, total, percentage)
 }
 
 // FormField represents a form field configuration

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- HelixCode brand dark palette (FACT palette from assets/Logo.png) -->
+    <color name="helix_bg_base">#0E1310</color>
+    <color name="helix_bg_surface">#18201A</color>
+    <color name="helix_bg_raised">#202A22</color>
+    <color name="helix_border">#2A352C</color>
+
+    <color name="helix_primary">#A8DD22</color>
+    <color name="helix_primary_dim">#7FA81B</color>
+    <color name="helix_secondary">#8FC9B8</color>
+
+    <color name="helix_fg_text">#ECF3E8</color>
+    <color name="helix_fg_muted">#9DB0A0</color>
+    <color name="helix_error">#E06A5A</color>
+</resources>

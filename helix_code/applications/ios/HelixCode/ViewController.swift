@@ -26,6 +26,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var connectButton: UIButton!
 
     // Programmatic views (always created — guarantee a visible, recordable UI).
+    private let logoImageView = UIImageView()
     private let headerLabel = UILabel()
     private let statusLabel = UILabel()
     private let userInfoLabel = UILabel()
@@ -37,44 +38,52 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Force the HelixCode brand dark appearance regardless of system setting.
+        overrideUserInterfaceStyle = .dark
         buildProgrammaticUI()
         seedDemoData()
         updateUI()
     }
 
     private func buildProgrammaticUI() {
-        view.backgroundColor = UIColor(red: 0.118, green: 0.118, blue: 0.118, alpha: 1.0) // #1E1E1E
+        view.backgroundColor = .helixBgBase // #0E1310 brand base
         title = "HelixCode"
+
+        // Brand logo (nautilus spiral) loaded from the asset catalog.
+        logoImageView.image = UIImage(named: "Logo")
+        logoImageView.contentMode = .scaleAspectFit
+        logoImageView.accessibilityLabel = "HelixCode"
 
         headerLabel.text = "HelixCode iOS"
         headerLabel.font = .systemFont(ofSize: 28, weight: .bold)
-        headerLabel.textColor = UIColor(red: 0.18, green: 0.525, blue: 0.671, alpha: 1.0) // #2E86AB
+        headerLabel.textColor = .helixPrimary // #A8DD22 lime
         headerLabel.textAlignment = .center
 
         statusLabel.font = .systemFont(ofSize: 20, weight: .semibold)
         statusLabel.textAlignment = .center
 
         userInfoLabel.font = .systemFont(ofSize: 16)
-        userInfoLabel.textColor = .white
+        userInfoLabel.textColor = .helixFgText // #ECF3E8
         userInfoLabel.textAlignment = .center
 
         coreInfoLabel.font = .monospacedSystemFont(ofSize: 13, weight: .regular)
-        coreInfoLabel.textColor = UIColor(red: 0.945, green: 0.561, blue: 0.004, alpha: 1.0) // #F18F01
+        coreInfoLabel.textColor = .helixSecondary // #8FC9B8 teal
         coreInfoLabel.numberOfLines = 0
         coreInfoLabel.textAlignment = .center
 
         actionButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-        actionButton.backgroundColor = UIColor(red: 0.18, green: 0.525, blue: 0.671, alpha: 1.0)
-        actionButton.setTitleColor(.white, for: .normal)
+        actionButton.backgroundColor = .helixPrimary // #A8DD22 lime accent
+        actionButton.setTitleColor(.helixBgBase, for: .normal) // dark text on lime for contrast
         actionButton.layer.cornerRadius = 10
         actionButton.addTarget(self, action: #selector(connectTapped), for: .touchUpInside)
 
         table.backgroundColor = .clear
+        table.separatorColor = .helixBorder // #2A352C
         table.delegate = self
         table.dataSource = self
         table.register(UITableViewCell.self, forCellReuseIdentifier: "TaskCell")
 
-        let stack = UIStackView(arrangedSubviews: [headerLabel, statusLabel, userInfoLabel, coreInfoLabel, actionButton])
+        let stack = UIStackView(arrangedSubviews: [logoImageView, headerLabel, statusLabel, userInfoLabel, coreInfoLabel, actionButton])
         stack.axis = .vertical
         stack.spacing = 14
         stack.alignment = .fill
@@ -88,6 +97,7 @@ class ViewController: UIViewController {
             stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            logoImageView.heightAnchor.constraint(equalToConstant: 96),
             actionButton.heightAnchor.constraint(equalToConstant: 48),
 
             table.topAnchor.constraint(equalTo: stack.bottomAnchor, constant: 16),
@@ -108,7 +118,7 @@ class ViewController: UIViewController {
         let isConnected = MobileCore.shared.isConnected()
 
         statusLabel.text = isConnected ? "Connected" : "Disconnected"
-        statusLabel.textColor = isConnected ? .systemGreen : .systemRed
+        statusLabel.textColor = isConnected ? .helixPrimary : .helixError
         connectionStatusLabel?.text = statusLabel.text
         connectionStatusLabel?.textColor = statusLabel.textColor
 
@@ -159,7 +169,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let name = task["name"] as? String ?? "(unnamed)"
         let status = task["status"] as? String ?? "pending"
         cell.textLabel?.text = "\(name) — \(status)"
-        cell.textLabel?.textColor = .white
+        cell.textLabel?.textColor = .helixFgText
         cell.backgroundColor = .clear
         return cell
     }

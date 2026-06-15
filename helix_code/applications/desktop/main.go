@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -16,6 +17,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
@@ -35,6 +37,22 @@ import (
 	"dev.helix.code/internal/task"
 	"dev.helix.code/internal/worker"
 )
+
+// hxcLogoPNG is the HelixCode brand logo (the lime-green→teal nautilus spiral,
+// copied from the meta-repo's assets/Logo.png into the package so go:embed can
+// bundle it into the binary — Fyne needs the bytes available at runtime with no
+// external file dependency). It is surfaced as the window icon and in the
+// dashboard header.
+//
+//go:embed Logo.png
+var hxcLogoPNG []byte
+
+// hxcLogoResource wraps the embedded brand logo as a fyne.Resource so it can be
+// used for the window icon (App.SetIcon / Window.SetIcon) and as the source for
+// a canvas.Image in the dashboard header.
+func hxcLogoResource() fyne.Resource {
+	return fyne.NewStaticResource("HelixCodeLogo.png", hxcLogoPNG)
+}
 
 // streamDesktopChat drives one desktop-chat turn over the provider's
 // streaming API (P1-T07, speed programme Phase 1).
@@ -272,6 +290,9 @@ func NewDesktopApp() *DesktopApp {
 	// HXC: use the constructor — a zero-value &CustomTheme{} has a nil
 	// currentTheme and crashes Fyne's canvas color lookups (SIGSEGV on launch).
 	fyneApp.Settings().SetTheme(NewCustomTheme())
+	// HelixCode brand identity: set the embedded brand logo as the application
+	// icon (taskbar / dock / about). The per-window icon is set in setupUI.
+	fyneApp.SetIcon(hxcLogoResource())
 
 	return &DesktopApp{
 		fyneApp:      fyneApp,
@@ -456,6 +477,7 @@ func (da *DesktopApp) setupUI() {
 	ctx := context.Background()
 	da.mainWindow = da.fyneApp.NewWindow(da.tr(ctx, "desktop_window_title", nil))
 	da.mainWindow.SetMaster()
+	da.mainWindow.SetIcon(hxcLogoResource()) // HelixCode brand window icon
 	da.mainWindow.Resize(fyne.NewSize(1200, 800))
 
 	// Create tabs
@@ -482,12 +504,19 @@ func (da *DesktopApp) setupUI() {
 
 // createDashboardTab creates the dashboard tab
 func (da *DesktopApp) createDashboardTab() fyne.CanvasObject {
-	// Header with integrated logo
-	// CONST-046: dashboard header resolved via i18n bundle.
+	// Header with integrated HelixCode brand logo (embedded brand mark beside
+	// the i18n-resolved title — CONST-046: header text resolved via i18n bundle).
 	ctx := context.Background()
 	header := widget.NewLabel(da.tr(ctx, "desktop_dashboard_header", nil))
 	header.Alignment = fyne.TextAlignCenter
 	header.TextStyle = fyne.TextStyle{Bold: true}
+
+	// Brand logo (embedded). FillContain preserves the spiral's aspect ratio; a
+	// fixed min size keeps the header compact.
+	logoImage := canvas.NewImageFromResource(hxcLogoResource())
+	logoImage.FillMode = canvas.ImageFillContain
+	logoImage.SetMinSize(fyne.NewSize(48, 48))
+	brandHeader := container.NewHBox(logoImage, header)
 
 	// Stats cards with dynamic data
 	workerStatsLabel := widget.NewLabel("Total: 0\nActive: 0\nHealthy: 0")
@@ -567,7 +596,7 @@ func (da *DesktopApp) createDashboardTab() fyne.CanvasObject {
 
 	bottomContainer := container.NewGridWithColumns(2, activityCard, actionsCard)
 
-	return container.NewVBox(header, statsContainer, bottomContainer)
+	return container.NewVBox(brandHeader, statsContainer, bottomContainer)
 }
 
 // createTasksTab creates the tasks tab
@@ -1465,8 +1494,13 @@ func (da *DesktopApp) Close() error {
 	}
 
 	// Release the agentic capability sub-managers (MCP child processes, LSP
-	// server processes) at parity with the TUI's shutdown. Nil-safe.
-	da.agenticTools.Close()
+	// server processes) at parity with the TUI's shutdown. Nil-safe: agenticTools
+	// is only assigned when clientcore.WireAgenticTools succeeds (Initialize),
+	// so guard before Close to avoid a shutdown-time nil dereference when agentic
+	// wiring was unavailable (no gopls/npx, missing MCP config).
+	if da.agenticTools != nil {
+		da.agenticTools.Close()
+	}
 
 	// Close database connection
 	if da.db != nil {
