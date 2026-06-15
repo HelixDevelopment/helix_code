@@ -4,18 +4,30 @@
 //
 //  Created by HelixCode on 2025-11-02.
 //
+//  Swift bridge over the gomobile-produced binding
+//  (dev.helix.code/shared/mobile_core, Go package `core`, module HelixCore).
+//
+//  The real Go core (HelixCore.xcframework) backs every call here — there is
+//  no simulation. `CoreNewMobileCore()` is the gobind C factory function; the
+//  returned `CoreMobileCore` proxy dispatches over cgo into the Go runtime.
+//  Symbol names mirror the generated Core.objc.h:
+//    - class    `CoreMobileCore`
+//    - factory  `CoreNewMobileCore()`
+//    - throwing methods carry a trailing NSError** in C, surfaced as Swift
+//      `throws` (initialize/connect/disconnect/close/generate).
+//
 
 import Foundation
+import HelixCore
 
-// MobileCore provides access to the shared Go mobile core
 class MobileCore {
     static let shared = MobileCore()
 
-    private var core: HelixCoreMobileCore?
+    private var core: CoreMobileCore?
 
     private init() {
-        // Initialize the Go mobile core
-        core = HelixCoreNewMobileCore()
+        // Initialize the Go mobile core via the gobind factory.
+        core = CoreNewMobileCore()
     }
 
     func initialize() {
@@ -60,7 +72,7 @@ class MobileCore {
     func getDashboardData() -> [String: Any]? {
         guard let core = core else { return nil }
         let jsonString = core.getDashboardData()
-        return parseJSON(jsonString)
+        return parseJSON(jsonString) as? [String: Any]
     }
 
     func getTasks() -> [[String: Any]]? {
@@ -86,12 +98,24 @@ class MobileCore {
     func createTask(name: String, description: String) -> [String: Any]? {
         guard let core = core else { return nil }
         let jsonString = core.createTask(name, description: description)
-        return parseJSON(jsonString)
+        return parseJSON(jsonString) as? [String: Any]
+    }
+
+    func generate(prompt: String) -> String {
+        guard let core = core else { return "" }
+        // gomobile maps Go's (string, error) return to a non-throwing method
+        // taking an explicit NSError out-parameter (the string is non-null).
+        var err: NSError?
+        let result = core.generate(prompt, error: &err)
+        if let err = err {
+            print("Failed to generate: \(err)")
+        }
+        return result
     }
 
     func sendNotification(title: String, message: String, type: String) -> Bool {
         guard let core = core else { return false }
-        let jsonString = core.sendNotification(title, message: message, type: type)
+        let jsonString = core.sendNotification(title, message: message, notificationType: type)
         guard let data = parseJSON(jsonString) as? [String: Any],
               let success = data["success"] as? Bool else {
             return false
@@ -102,7 +126,7 @@ class MobileCore {
     func getTheme() -> [String: Any]? {
         guard let core = core else { return nil }
         let jsonString = core.getTheme()
-        return parseJSON(jsonString)
+        return parseJSON(jsonString) as? [String: Any]
     }
 
     func setTheme(_ themeName: String) -> Bool {

@@ -1,0 +1,47 @@
+# XcodeGen spec for the HelixCode iOS client.
+#
+# This is the canonical, declarative source for the Xcode project. The
+# checked-in HelixCode.xcodeproj is generated from this file. To regenerate
+# after installing XcodeGen (`brew install xcodegen`):
+#
+#     cd helix_code/applications/ios && xcodegen generate
+#
+# The app embeds HelixCore.xcframework (produced by
+#   gomobile bind -target=ios -o Frameworks/HelixCore.xcframework \
+#       ./helix_code/shared/mobile_core
+# from the meta-repo root). The Swift sources call the real Go core over cgo;
+# there is no simulation.
+name: HelixCode
+options:
+  bundleIdPrefix: dev.helix.code
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGNING_ALLOWED: "NO"
+    CODE_SIGNING_REQUIRED: "NO"
+    CODE_SIGN_IDENTITY: ""
+    TARGETED_DEVICE_FAMILY: "1,2"
+targets:
+  HelixCode:
+    type: application
+    platform: iOS
+    sources:
+      - path: HelixCode
+        excludes:
+          - "Base.lproj/Main.storyboard"
+    dependencies:
+      - framework: Frameworks/HelixCore.xcframework
+        embed: true
+    info:
+      path: HelixCode/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.helix.code.ios
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: NO
+        ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+        # gomobile's Go net package needs the libresolv DNS resolver symbols
+        # (res_9_ninit / res_9_nclose / res_9_nsearch) on Apple platforms.
+        OTHER_LDFLAGS: "$(inherited) -lresolv"
