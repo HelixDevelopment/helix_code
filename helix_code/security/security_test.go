@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -47,31 +48,46 @@ func TestSecureByDesign(t *testing.T) {
 }
 
 func TestTLSConfiguration(t *testing.T) {
-	// Test TLS 1.2+ enforcement for remote connections
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				MinVersion: tls.VersionTLS12,
-			},
-		},
-		Timeout: 5 * time.Second,
-	}
+	// Test TLS 1.2+ enforcement against a LOCAL TLS test server.
+	//
+	// Anti-bluff / determinism (§11.4.98): this test used to call the live
+	// external host https://httpbin.org/get, making it non-deterministic (it
+	// FAILed whenever that host was slow/unreachable) AND it nil-deref panicked
+	// on the error path — `t.Errorf` without a `return` fell through to
+	// `defer resp.Body.Close()` with resp == nil (SIGSEGV that crashed the whole
+	// `security` test binary, taking every other test in the package down with
+	// it). Both are fixed here: a local httptest.NewTLSServer makes the test
+	// hermetic, and t.Fatalf on the error path stops the test cleanly before any
+	// nil dereference.
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
 
-	// Test connection to known secure endpoint
-	resp, err := client.Get("https://httpbin.org/get")
+	// server.Client() trusts the server's self-signed cert; layer the property
+	// under test — a TLS 1.2 minimum — onto its transport without clobbering the
+	// RootCAs the test server installed.
+	client := server.Client()
+	tr, ok := client.Transport.(*http.Transport)
+	if !ok || tr.TLSClientConfig == nil {
+		t.Fatalf("unexpected test-server client transport: %T", client.Transport)
+	}
+	tr.TLSClientConfig.MinVersion = tls.VersionTLS12
+	client.Timeout = 5 * time.Second
+
+	resp, err := client.Get(server.URL)
 	if err != nil {
-		t.Errorf("TLS connection failed: %v", err)
+		t.Fatalf("TLS connection to local test server failed: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.TLS == nil {
-		t.Error("No TLS connection established")
-		return
+		t.Fatal("No TLS connection established")
 	}
 
-	// Verify TLS version is 1.2 or higher
+	// Verify the negotiated TLS version is 1.2 or higher.
 	if resp.TLS.Version < tls.VersionTLS12 {
-		t.Errorf("Insecure TLS version: %v", resp.TLS.Version)
+		t.Errorf("Insecure TLS version negotiated: 0x%04x", resp.TLS.Version)
 	}
 }
 

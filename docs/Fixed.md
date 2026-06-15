@@ -799,3 +799,13 @@ SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6);
 
 CONTINUATION.md is stale (Last updated 2026-06-14, refs HEAD e3063af1; current is 80e62afa after HXC-098 fix + HXC-099 i18n-sweep finding). Per CONST-044/§12.10 out-of-sync CONTINUATION is a CRITICAL DEFECT. ALSO: line 1 ('Last updated' header) has accreted ~32k tokens into a SINGLE line across rounds — pathological; Read/Edit of lines 1-12 alone exceeds 25k tokens, making safe edits hard and risking corruption with blind sed. Overnight zero-risk policy => queued for careful daytime fix: (1) refactor the bloated header into a normal metadata table + a round-by-round table row, (2) add rounds for this session (B i18n sweep discarded+stashed -> HXC-099; HXC-098 config-default fix), (3) restore CONST-064 ToC parity, (4) regen .html/.pdf. Live resumption currently served by the up-to-date .remember/remember.md (§11.4.131).
 
+## HXC-101 — security/security_test.go TestTLSConfiguration — external-network dependency + nil-deref panic crashes the whole security test binary
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** Replaced live httpbin.org call with hermetic httptest.NewTLSServer + t.Fatalf on error path (no nil-deref fall-through). Verified: TestTLSConfiguration PASS 3/3 (-count=3) deterministic, no external net; full security pkg ok (0.223s); go build ./... exit 0; gofmt clean.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Discovery sweep (§11.4.118) found the only failing package in a ~270-pkg sweep. TestTLSConfiguration called live https://httpbin.org/get (non-deterministic, §11.4.98) and on the error path did t.Errorf without return -> defer resp.Body.Close() with resp==nil -> SIGSEGV panic that crashed the entire security test binary (took every other test in the package down). Fixed: hermetic httptest.NewTLSServer + t.Fatalf on error path.
+

@@ -2899,5 +2899,22 @@ i18n sweep discarded+stashed -&gt; HXC-099; HXC-098 config-default fix),
 (3) restore CONST-064 ToC parity, (4) regen .html/.pdf. Live resumption
 currently served by the up-to-date .remember/remember.md
 (§11.4.131).</p>
+<h2 id="hxc-101-securitysecurity_test.go-testtlsconfiguration-external-network-dependency-nil-deref-panic-crashes-the-whole-security-test-binary">HXC-101
+— security/security_test.go TestTLSConfiguration — external-network
+dependency + nil-deref panic crashes the whole security test binary</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Replaced live httpbin.org call with
+hermetic httptest.NewTLSServer + t.Fatalf on error path (no nil-deref
+fall-through). Verified: TestTLSConfiguration PASS 3/3 (-count=3)
+deterministic, no external net; full security pkg ok (0.223s); go build
+./… exit 0; gofmt clean. <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Discovery sweep (§11.4.118) found the only failing package in a
+~270-pkg sweep. TestTLSConfiguration called live https://httpbin.org/get
+(non-deterministic, §11.4.98) and on the error path did t.Errorf without
+return -&gt; defer resp.Body.Close() with resp==nil -&gt; SIGSEGV panic
+that crashed the entire security test binary (took every other test in
+the package down). Fixed: hermetic httptest.NewTLSServer + t.Fatalf on
+error path.</p>
 </body>
 </html>
