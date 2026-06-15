@@ -24,9 +24,10 @@ import (
 // pure classification/helper functions (countCriticalIssues / countHighIssues
 // / calculateAverageResponseTime / parseDuration / generateDeploymentID).
 //
-// What we deliberately do NOT stress: the real deployment phases that sleep
-// (prepareEnvironment sleeps 1s, validateTargetServers sleeps 200ms/server)
-// or reach for real infrastructure (deployToServer requires SSH transport,
+// What we deliberately do NOT stress: the deployment phases that only log an
+// honest gap (prepareEnvironment / validateTargetServers do no real work after
+// the HXC-083 anti-bluff repair removed their no-op sleeps + fabricated success
+// logs) or reach for real infrastructure (deployToServer requires SSH transport,
 // checkServerHealth requires HTTP/SSH access — both honestly refuse without
 // it). Driving those in a hot loop would be slow and would exercise infra we
 // do not own, not the in-process state machine. They are covered for the

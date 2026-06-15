@@ -531,7 +531,8 @@ func (pd *ProductionDeployer) executeProductionDeploy(ctx context.Context) (bool
 	for i, server := range pd.config.TargetServers {
 		log.Printf("   📦 Deploying to server %d/%d: %s", i+1, len(pd.config.TargetServers), server)
 
-		// Simulate deployment to server
+		// Real deployment attempt: deployToServer honestly loud-fails (returns
+		// false) when SSH transport is not wired, rather than simulating.
 		success := pd.deployToServer(ctx, server)
 		if success {
 			pd.status.ServersDeployed = append(pd.status.ServersDeployed, server)
@@ -778,11 +779,21 @@ func (pd *ProductionDeployer) executeMonitoring(ctx context.Context) (bool, erro
 		}
 
 		log.Printf("✅ Production monitoring process-local hooks attached for %d servers (per-server agent installation pending real implementation)", len(pd.status.ServersDeployed))
+
+		// Anti-bluff (CONST-035 / Article XI §11.9): the previous code ended
+		// with addNotification("monitoring_implemented", "Production monitoring
+		// implemented for N servers", ...) — a success notification that
+		// directly CONTRADICTED the honest gap-log above (per-server monitoring
+		// registration is NOT wired in). Operators reading the notification
+		// ledger were told monitoring was fully implemented while the body
+		// admitted it was not. We emit an honest notification matching the
+		// gap-log instead of fabricating "implemented".
+		pd.addNotification("monitoring_partial", fmt.Sprintf("Process-local monitoring hooks attached for %d server(s); per-server agent registration not wired (§11.4 honest gap)", len(pd.status.ServersDeployed)), "monitoring")
 	} else {
 		log.Printf("⏭️  Monitoring disabled - skipping")
+		pd.addNotification("monitoring_skipped", "Monitoring disabled - skipping monitoring setup", "monitoring")
 	}
 
-	pd.addNotification("monitoring_implemented", fmt.Sprintf("Production monitoring implemented for %d servers", len(pd.status.ServersDeployed)), "monitoring")
 	return true, nil
 }
 
@@ -810,23 +821,39 @@ func (pd *ProductionDeployer) checkPrerequisites() error {
 func (pd *ProductionDeployer) prepareEnvironment() error {
 	log.Printf("   🌍 Preparing deployment environment...")
 
-	// Simulate environment preparation
-	time.Sleep(1 * time.Second)
-
-	log.Printf("   ✅ Environment prepared")
+	// Anti-bluff (CONST-035 / CONST-050(A)): the previous body was a bare
+	// `time.Sleep(1 * time.Second)` followed by `log "✅ Environment
+	// prepared"`. The sleep performed NO real preparation (no directory
+	// creation, no remote staging, no dependency check) — the success line
+	// told operators the environment was prepared when nothing happened. We
+	// remove the no-op sleep and stop claiming "prepared". Real environment
+	// preparation (remote staging dirs, artifact upload paths, dependency
+	// verification) needs the same SSH transport deployToServer honestly
+	// refuses to fabricate; this function does no remote work, so it makes no
+	// success claim. It returns nil because there is nothing it can verify
+	// locally to fail on — not because preparation succeeded.
+	log.Printf("   ⚠️  Real environment preparation is not wired in this build (no remote staging/dependency checks); proceeding without a verified-prepared claim (§11.4 honest gap)")
 	return nil
 }
 
 func (pd *ProductionDeployer) validateTargetServers() error {
-	log.Printf("   🖥️  Validating %d target servers...", len(pd.config.TargetServers))
+	log.Printf("   🖥️  %d target server(s) configured", len(pd.config.TargetServers))
 
+	// Anti-bluff (CONST-035 / CONST-050(A)): the previous body slept 200ms
+	// per server inside the loop and then logged "✅ All target servers
+	// validated". No server was actually validated — no reachability probe,
+	// no auth check, no capability verification — yet the success line claimed
+	// all were validated. We remove the no-op sleep and stop claiming
+	// validation. Genuine reachability validation happens later in
+	// checkServerHealth (a real TCP dial); this function only enumerates the
+	// configured servers and honestly states that no validation was performed
+	// here. It returns nil because it has nothing to fail on locally, not
+	// because the servers were verified.
 	for i, server := range pd.config.TargetServers {
-		log.Printf("      Validating server %d/%d: %s", i+1, len(pd.config.TargetServers), server)
-		// Simulate server validation
-		time.Sleep(200 * time.Millisecond)
+		log.Printf("      Server %d/%d configured: %s (not validated here; real reachability is probed later in checkServerHealth)", i+1, len(pd.config.TargetServers), server)
 	}
 
-	log.Printf("   ✅ All target servers validated")
+	log.Printf("   ⚠️  Target-server validation not performed in this phase (§11.4 honest gap); reachability is checked at health-check time")
 	return nil
 }
 
@@ -958,28 +985,37 @@ func (pd *ProductionDeployer) runPerformanceValidation(ctx context.Context) (*Pe
 	}, nil
 }
 
-// Additional deployment strategy implementations
+// Additional deployment strategy implementations.
+//
+// Anti-bluff (CONST-035 / Article XI §11.9): each of these four functions
+// previously carried a `// Simulate <strategy> deployment` comment and then
+// delegated to executeProductionDeploy — implying per-strategy logic
+// (blue-green slot swap, canary subset + promote, rolling batches, recreate
+// stop-then-start) that does NOT exist. The differentiation was a bluff: all
+// four behave identically. We remove the "Simulate" comments and state the
+// truth — there is currently NO per-strategy logic; every strategy delegates
+// to the direct production-deploy path, which itself honestly refuses to
+// fabricate success without real SSH transport (deployToServer loud-fail).
+// When real per-strategy orchestration is implemented, replace the delegation
+// with the strategy-specific connect→upload→switch→verify pipeline.
+
 func (pd *ProductionDeployer) executeBlueGreenDeploy(ctx context.Context) (bool, error) {
-	log.Printf("🟢🔵 Executing blue-green deployment...")
-	// Simulate blue-green deployment
+	log.Printf("🟢🔵 Blue-green strategy requested; no per-strategy slot-swap logic is wired yet — delegating to the direct production-deploy path (§11.4 honest gap)")
 	return pd.executeProductionDeploy(ctx)
 }
 
 func (pd *ProductionDeployer) executeCanaryDeploy(ctx context.Context) (bool, error) {
-	log.Printf("🐤 Executing canary deployment...")
-	// Simulate canary deployment
+	log.Printf("🐤 Canary strategy requested; no per-strategy subset-promote logic is wired yet — delegating to the direct production-deploy path (§11.4 honest gap)")
 	return pd.executeProductionDeploy(ctx)
 }
 
 func (pd *ProductionDeployer) executeRollingDeploy(ctx context.Context) (bool, error) {
-	log.Printf("🔄 Executing rolling deployment...")
-	// Simulate rolling deployment
+	log.Printf("🔄 Rolling strategy requested; no per-strategy batched-rollout logic is wired yet — delegating to the direct production-deploy path (§11.4 honest gap)")
 	return pd.executeProductionDeploy(ctx)
 }
 
 func (pd *ProductionDeployer) executeRecreateDeploy(ctx context.Context) (bool, error) {
-	log.Printf("🔄 Executing recreate deployment...")
-	// Simulate recreate deployment
+	log.Printf("🔄 Recreate strategy requested; no per-strategy stop-then-start logic is wired yet — delegating to the direct production-deploy path (§11.4 honest gap)")
 	return pd.executeProductionDeploy(ctx)
 }
 
@@ -1030,29 +1066,39 @@ func (pd *ProductionDeployer) triggerRollback(reason string) {
 	pd.status.RollbackReason = reason
 	pd.status.CurrentPhase = string(PhaseRollback)
 
-	rollbackStartTime := time.Now()
+	// Anti-bluff (CONST-035 / Article XI §11.9 / CONST-050(A)): the previous
+	// loop body was `time.Sleep(300 * time.Millisecond)` per server, after
+	// which it appended every server to ServersRollback, set RollbackServers/
+	// RollbackTime, logged "✅ Rollback completed successfully" and emitted a
+	// "rollback_complete: N servers rolled back" notification — NO real
+	// rollback was performed. Operators (and the monitoring ledger) were told
+	// the previously-deployed binary had been reverted when in fact nothing
+	// happened server-side. Real rollback requires the same SSH transport that
+	// deployToServer honestly refuses to fabricate (connect → restore the
+	// prior artifact/symlink → restart the service → verify health). Until
+	// that transport is wired in, we MUST NOT claim the rollback completed.
+	//
+	// Honest contract (mirrors deployToServer's loud-fail guard): leave
+	// ServersRollback EMPTY (nothing was rolled back), record zero rolled-back
+	// servers, surface the gap on RollbackReason, and emit a
+	// "rollback_not_completed" notification so downstream tooling reacts to a
+	// failed rollback rather than a fabricated success.
+	pd.status.Metrics.RollbackServers = 0
+	pd.status.Metrics.RollbackTime = 0
 
-	log.Printf("🔄 Executing rollback to %d servers...", len(pd.status.ServersDeployed))
-
-	rollbackCount := 0
+	pendingServers := len(pd.status.ServersDeployed)
+	log.Printf("🔄 Rollback requested for %d deployed server(s) (reason: %s)", pendingServers, reason)
 	for _, server := range pd.status.ServersDeployed {
-		log.Printf("   🔄 Rolling back server: %s", server)
-
-		// Simulate rollback
-		time.Sleep(300 * time.Millisecond)
-
-		pd.status.ServersRollback = append(pd.status.ServersRollback, server)
-		rollbackCount++
+		log.Printf("   ⚠️  Rollback of %s NOT performed: real SSH rollback transport is not wired in this build (§11.4 PASS-bluff guard; previous code slept 300ms and claimed success). Wire golang.org/x/crypto/ssh restore→restart→verify to enable.", server)
 	}
 
-	pd.status.Metrics.RollbackTime = time.Since(rollbackStartTime)
-	pd.status.Metrics.RollbackServers = rollbackCount
-
-	log.Printf("✅ Rollback completed successfully")
-	log.Printf("   Servers Rolled Back: %d", rollbackCount)
-	log.Printf("   Rollback Time: %v", pd.status.Metrics.RollbackTime)
-
-	pd.addNotification("rollback_complete", fmt.Sprintf("Rollback completed: %d servers rolled back", rollbackCount), "rollback")
+	// NOTE: pd.status.RollbackReason keeps the caller-supplied reason verbatim
+	// (it records WHY rollback was triggered, e.g. the deployment-failure
+	// cause); the NOT-completed gap is surfaced via the log line and the
+	// rollback_not_completed notification below, not by overloading the reason.
+	gapNote := fmt.Sprintf("rollback NOT completed: real SSH rollback transport not wired (0/%d servers reverted)", pendingServers)
+	log.Printf("❌ Rollback NOT completed: %s", gapNote)
+	pd.addNotification("rollback_not_completed", gapNote, "rollback")
 }
 
 // deploymentIDCounter ensures every generated deployment ID is unique even when
