@@ -72,9 +72,17 @@ func (p *SSHWorkerPool) GetConsensusTerm() int {
 	return p.consensus.GetCurrentTerm()
 }
 
-// StopConsensus stops the pool's consensus protocol (timers + loop). Safe to
-// call on a pool whose consensus was never started.
+// StopConsensus stops the pool's consensus protocol (timers + loop). It cancels
+// the pool's consensus context (joining the ConsensusManager run() loop) and
+// stops the manager's timers. Safe to call on a pool whose consensus was never
+// started or was already stopped. Prefer Close() to also stop the sandbox
+// cleanup goroutine; StopConsensus only addresses the consensus subsystem.
 func (p *SSHWorkerPool) StopConsensus() {
+	p.cancelOnce.Do(func() {
+		if p.cancel != nil {
+			p.cancel()
+		}
+	})
 	if p.consensus != nil {
 		p.consensus.Stop()
 	}

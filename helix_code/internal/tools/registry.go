@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"log"
 	"strings"
 	"sync"
@@ -869,10 +870,13 @@ func (r *ToolRegistry) ExportSchemas() ([]byte, error) {
 	return json.MarshalIndent(schemas, "", "  ")
 }
 
-// RegisterMCPManager exposes external MCP server tools to the agent.
-// Tool names are prefixed "<server>:<tool>" so they are unambiguous.
-// Only tools from servers currently in StateReady are registered; call
-// this after Manager.Start has had time to connect alwaysLoad servers.
+// RegisterMCPManager exposes external MCP server tools to the agent. Each tool
+// is registered under an OpenAI/DeepSeek-compatible key (HXC-113 — server+tool
+// joined with "__", disallowed characters replaced) computed by
+// registerMCPToolKey, which also disambiguates colliding keys so no tool is
+// silently shadowed. Only tools from servers currently in StateReady are
+// registered; call this after Manager.Start has had time to connect alwaysLoad
+// servers.
 //
 // LIMITATION: This is called once at startup. After mcp.Manager.Reload, the
 // tool registry is NOT automatically reconciled — new tools are invisible
@@ -880,57 +884,118 @@ func (r *ToolRegistry) ExportSchemas() ([]byte, error) {
 // must invoke RegisterMCPManager again. (Reconciliation will be addressed
 // in a follow-up.)
 func (r *ToolRegistry) RegisterMCPManager(m *mcp.Manager) {
-	// Build a per-server read-only allowlist from the loaded config so a
-	// server marked `readOnly: true` has all its tools registered at
-	// approval.LevelReadOnly (otherwise the ReadOnlyOnly agent tool loop
-	// blocks every MCP tool, since the default level is LevelEdit).
+	// Two per-server trust sets, both keyed by the config server Name:
+	//   readOnlyServers       — server explicitly flagged readOnly:true in
+	//                           config → ALL its tools are LevelReadOnly.
+	//   nameAllowlistServers  — server is a well-known, trustworthy read-only
+	//                           server (the official @modelcontextprotocol
+	//                           filesystem server) → the bare-name read-only
+	//                           allowlist (read_file, list_directory, search, …)
+	//                           may apply to its tools.
+	//
+	// SECURITY (approval-gate bypass fix): the bare-name allowlist MUST NOT be
+	// applied to an arbitrary server. A mutating tool literally named "search"
+	// (plausible on a SQL/DB/index server) would otherwise be misclassified
+	// LevelReadOnly, and applyApprovalGate short-circuits LevelReadOnly
+	// unconditionally — executing a mutating tool WITHOUT approval. A
+	// non-readOnly, non-well-known server's tools therefore default to
+	// LevelEdit regardless of name.
 	readOnlyServers := map[string]bool{}
+	nameAllowlistServers := map[string]bool{}
 	if cfg := m.Config(); cfg != nil {
 		for _, s := range cfg.Servers {
 			if s.ReadOnly {
 				readOnlyServers[s.Name] = true
 			}
+			if serverTrustedForNameAllowlist(s) {
+				nameAllowlistServers[s.Name] = true
+			}
 		}
 	}
 
 	for _, t := range m.Tools() {
-		// HXC-113: register under an OpenAI/DeepSeek-compatible function name
-		// (^[A-Za-z0-9_-]+$). The old "server:name" join contains a colon, which
-		// OpenAI-compatible providers reject ("invalid 'tools[].function.name'"),
-		// returning HTTP 400 and breaking LLM chat whenever any MCP tool is
-		// registered. mcpTool.Execute routes via t.server/t.toolName (the
-		// originals), so sanitising the registry/display name is safe — the
-		// reverse mapping is automatic.
-		name := mcpToolRegisteredName(t.Server, t.Name)
-		if _, err := r.Get(name); err == nil {
-			log.Printf("WARN tools: MCP tool %q replaces existing registration", name)
-		}
 		// Capture loop variables so the closure references the correct values.
 		server, toolName := t.Server, t.Name
 		desc := t.Desc
 		if desc == "" {
 			desc = t.Title
 		}
-		// Decide the approval level for this tool. A server explicitly
-		// marked read-only in config has every tool registered as
-		// LevelReadOnly. Otherwise, individual tools whose names match a
-		// well-known read-only pattern (read_file, list_directory,
-		// search, …) are also LevelReadOnly; everything else keeps the
-		// conservative LevelEdit default.
+		// Decide the approval level for this tool. A server explicitly marked
+		// read-only in config has every tool registered as LevelReadOnly.
+		// Otherwise, the well-known read-only filesystem server's tools whose
+		// names match the read-only allowlist (read_file, list_directory,
+		// search, …) are LevelReadOnly. For ANY other (untrusted) server every
+		// tool keeps the conservative LevelEdit default regardless of name, so
+		// the approval gate is never silently bypassed.
 		level := approval.LevelEdit
-		if readOnlyServers[server] || isReadOnlyMCPToolName(toolName) {
+		if readOnlyServers[server] ||
+			(nameAllowlistServers[server] && isReadOnlyMCPToolName(toolName)) {
 			level = approval.LevelReadOnly
 		}
-		r.Register(&mcpTool{
+		r.registerMCPToolKey(&mcpTool{
 			registry:      r,
 			mcpMgr:        m,
 			server:        server,
 			toolName:      toolName,
-			name:          name,
 			desc:          desc,
 			approvalLevel: level,
 		})
 	}
+}
+
+// registerMCPToolKey computes a collision-safe registry/display name for the
+// given mcpTool, sets t.name, registers it, and returns the final key.
+//
+// HXC-113: the base key is mcpToolRegisteredName(server, tool) — an
+// OpenAI/DeepSeek-compatible function name (^[A-Za-z0-9_-]+$). That mapping is
+// many-to-one (every disallowed char → '_'), so distinct (server,tool) pairs
+// can collide onto one base key (e.g. ("a:b","c") and ("a_b","c") both →
+// "a_b__c"). Pre-fix, Register was last-write-wins and only logged a WARN, so
+// the shadowed tool became permanently uncallable AND the survivor's
+// approvalLevel could differ from the caller's intent (a silent security flip).
+//
+// Collision handling (deterministic):
+//   - If the base key is free, OR already maps to the SAME (server,tool) pair
+//     (a genuine re-registration), use the base key.
+//   - If the base key already maps to a DIFFERENT (server,tool) pair, append a
+//     short stable hash of the original "server\x00tool" so the second tool
+//     gets its OWN distinct, callable key. The disambiguator is itself
+//     sanitised + uniquified in the (astronomically unlikely) event of a
+//     secondary collision.
+//
+// Dispatch is unaffected: mcpTool.Execute routes via t.server/t.toolName (the
+// captured originals), never the registry key.
+func (r *ToolRegistry) registerMCPToolKey(t *mcpTool) string {
+	base := mcpToolRegisteredName(t.server, t.toolName)
+	key := base
+
+	r.mu.Lock()
+	if existing, ok := r.tools[base]; ok {
+		if em, isMCP := existing.(*mcpTool); isMCP &&
+			em.server == t.server && em.toolName == t.toolName {
+			// Same logical tool — genuine re-register, reuse the base key.
+		} else {
+			// Genuine collision with a DIFFERENT tool. Disambiguate the new
+			// tool's key with a short stable hash of its original identity so
+			// neither tool is shadowed away.
+			suffix := mcpKeyDisambiguator(t.server, t.toolName)
+			key = base + "_" + suffix
+			for i := 0; ; i++ {
+				if _, taken := r.tools[key]; !taken {
+					break
+				}
+				// Secondary collision (different tool already at the disambiguated
+				// key): extend deterministically until free.
+				key = fmt.Sprintf("%s_%s%d", base, suffix, i)
+			}
+			log.Printf("WARN tools: MCP tool key %q collides with a different (server,tool); registering %q under disambiguated key %q (original was uncallable before this fix)",
+				base, t.server+":"+t.toolName, key)
+		}
+	}
+	t.name = key
+	r.tools[key] = t
+	r.mu.Unlock()
+	return key
 }
 
 // readOnlyMCPToolNames is the set of MCP tool names that are pure reads
@@ -957,8 +1022,49 @@ var readOnlyMCPToolNames = map[string]bool{
 // isReadOnlyMCPToolName reports whether an MCP tool name is a known
 // pure-read operation. Case-insensitive on the bare tool name (NOT the
 // server-prefixed name).
+//
+// SECURITY NOTE: a true result here is NECESSARY but NOT SUFFICIENT to class a
+// tool LevelReadOnly. The name allowlist may only be trusted for the
+// well-known read-only filesystem server (see serverTrustedForNameAllowlist).
+// On an arbitrary server a tool named "search" may mutate state, so callers
+// MUST gate this predicate behind a per-server trust check.
 func isReadOnlyMCPToolName(name string) bool {
 	return readOnlyMCPToolNames[strings.ToLower(name)]
+}
+
+// serverTrustedForNameAllowlist reports whether the bare read-only tool-name
+// allowlist may be applied to a server that is NOT explicitly flagged
+// readOnly:true. It is true ONLY for the well-known, trustworthy official
+// filesystem server (@modelcontextprotocol/server-filesystem), identified by
+// its launch command — the server the allowlist was written for. Every other
+// server is untrusted for the name heuristic: its tools default to LevelEdit
+// regardless of name, so a mutating tool named "search" can never silently
+// bypass the approval gate.
+//
+// A server that wants all its tools treated as reads MUST set readOnly:true in
+// config (the explicit, audited path) rather than rely on tool names.
+func serverTrustedForNameAllowlist(s mcp.ServerSpec) bool {
+	for _, arg := range s.Command {
+		if strings.Contains(strings.ToLower(arg), "@modelcontextprotocol/server-filesystem") {
+			return true
+		}
+	}
+	return false
+}
+
+// mcpKeyDisambiguator returns a short, stable, provider-compatible
+// (^[A-Za-z0-9_-]+$) suffix derived from the original (server,tool) identity.
+// Used to give a colliding MCP tool its own distinct, callable registry key so
+// no tool is silently shadowed (see registerMCPToolKey). FNV-1a keeps it
+// dependency-free and deterministic; the original identity (server\x00tool) is
+// hashed so DIFFERENT pairs that share a sanitised base key get DIFFERENT
+// suffixes.
+func mcpKeyDisambiguator(server, tool string) string {
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(server))
+	_, _ = h.Write([]byte{0})
+	_, _ = h.Write([]byte(tool))
+	return fmt.Sprintf("%08x", h.Sum32())
 }
 
 // mcpToolRegisteredName builds an OpenAI/DeepSeek-compatible function name
@@ -991,9 +1097,12 @@ type mcpTool struct {
 	name     string
 	desc     string
 	// approvalLevel is the level this tool reports from RequiresApproval.
-	// Set by RegisterMCPManager: LevelReadOnly for read-only servers /
-	// known read-only tool names, LevelEdit otherwise (the conservative
-	// default for an unclassified, possibly-mutating tool).
+	// Set by RegisterMCPManager: LevelReadOnly when the server is flagged
+	// readOnly:true, OR when the server is the well-known read-only filesystem
+	// server AND the tool name is in the read-only allowlist. LevelEdit
+	// otherwise (the conservative default for an unclassified, possibly-mutating
+	// tool — including ANY tool on an untrusted server regardless of name, so
+	// the approval gate is never silently bypassed).
 	approvalLevel approval.ApprovalLevel
 }
 

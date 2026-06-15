@@ -376,10 +376,29 @@ func dedupePreserveOrder(items []string) []string {
 	return out
 }
 
-// sortedUnique returns items deduplicated and sorted — used for file paths
-// where a stable order aids diffing the summary across runs.
+// sortedUnique returns items deduplicated and sorted — used where a stable
+// order aids diffing the summary across runs AND no recency-cap is applied.
+//
+// NOTE: do NOT use this to feed capFacts. capFacts keeps the TAIL of its input
+// as "most recent"; an alphabetical pre-sort makes the tail the alpha-last
+// entries, not the most-recent ones, dropping recency-critical items (the C1
+// regression). To both honour recency AND get a stable display order, cap
+// FIRST on a recency-ordered (dedupePreserveOrder) slice, then sortedCopy the
+// already-capped result.
 func sortedUnique(items []string) []string {
 	out := dedupePreserveOrder(items)
+	sort.Strings(out)
+	return out
+}
+
+// sortedCopy returns an alphabetically-sorted COPY of items, leaving the input
+// slice untouched. It does NOT dedupe (the caller is expected to have already
+// deduped + recency-capped). Used to give FilesTouched a stable display order
+// AFTER the recency cap has selected which entries survive, so a stable diff
+// order is achieved without disturbing which entries were kept.
+func sortedCopy(items []string) []string {
+	out := make([]string, len(items))
+	copy(out, items)
 	sort.Strings(out)
 	return out
 }

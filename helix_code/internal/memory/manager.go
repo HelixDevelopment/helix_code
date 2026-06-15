@@ -475,23 +475,40 @@ func (m *Manager) GetStatistics() *ManagerStatistics {
 	return stats
 }
 
-// OnCreate registers a callback for conversation creation
+// OnCreate registers a callback for conversation creation.
+//
+// The callback slices are read under m.mu by the operation methods
+// (CreateConversation/AddMessage/ClearConversation/DeleteConversation range
+// them while holding the lock), so registration MUST take the write lock to
+// append — otherwise a concurrent register-during-operation is an
+// unsynchronised read/write of the slice header (data race).
 func (m *Manager) OnCreate(callback ConversationCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onCreate = append(m.onCreate, callback)
 }
 
-// OnMessage registers a callback for message addition
+// OnMessage registers a callback for message addition. See OnCreate for the
+// locking rationale.
 func (m *Manager) OnMessage(callback MessageCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onMessage = append(m.onMessage, callback)
 }
 
-// OnClear registers a callback for conversation clear
+// OnClear registers a callback for conversation clear. See OnCreate for the
+// locking rationale.
 func (m *Manager) OnClear(callback ConversationCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onClear = append(m.onClear, callback)
 }
 
-// OnDelete registers a callback for conversation deletion
+// OnDelete registers a callback for conversation deletion. See OnCreate for the
+// locking rationale.
 func (m *Manager) OnDelete(callback ConversationCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onDelete = append(m.onDelete, callback)
 }
 

@@ -197,6 +197,7 @@ type WorkerPool struct {
 	scheduler Scheduler
 	config    *config.WorkersConfig
 	stopChan  chan struct{}
+	stopOnce  sync.Once // guards stopChan against double-close (Stop is idempotent)
 	wg        sync.WaitGroup
 	mu        sync.RWMutex
 }
@@ -308,13 +309,22 @@ func (wp *WorkerPool) GetPoolStats() map[string]interface{} {
 		}
 	}
 
+	// Guard against the 0/0 = NaN case: with no workers utilization is 0, not
+	// NaN. A NaN here is not merely cosmetic — encoding/json rejects NaN, so an
+	// unguarded NaN makes the whole stats map un-marshalable (json.Marshal
+	// returns an *UnsupportedValueError), silently breaking any API/UI consumer.
+	utilizationRate := 0.0
+	if totalWorkers > 0 {
+		utilizationRate = float64(busyWorkers) / float64(totalWorkers) * 100
+	}
+
 	return map[string]interface{}{
 		"total_workers":     totalWorkers,
 		"available_workers": availableWorkers,
 		"busy_workers":      busyWorkers,
 		"offline_workers":   offlineWorkers,
 		"error_workers":     errorWorkers,
-		"utilization_rate":  float64(busyWorkers) / float64(totalWorkers) * 100,
+		"utilization_rate":  utilizationRate,
 	}
 }
 
@@ -348,9 +358,15 @@ func (wp *WorkerPool) Start(ctx context.Context) error {
 	return nil
 }
 
-// Stop stops the worker pool
+// Stop stops the worker pool. It is idempotent: stopChan is closed at most once
+// (guarded by stopOnce), so repeated or concurrent Stop() calls never panic with
+// "close of closed channel". Every call still blocks on wp.wg.Wait() until the
+// healthCheckLoop goroutine has drained, so callers may rely on Stop() returning
+// only after the loop has exited.
 func (wp *WorkerPool) Stop() {
-	close(wp.stopChan)
+	wp.stopOnce.Do(func() {
+		close(wp.stopChan)
+	})
 	wp.wg.Wait()
 }
 

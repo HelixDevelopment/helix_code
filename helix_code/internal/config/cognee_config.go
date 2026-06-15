@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -262,22 +261,19 @@ func LoadCogneeConfig(configPath string) (*CogneeConfig, error) {
 	return &config, nil
 }
 
-// SaveCogneeConfig saves Cognee configuration to file
+// SaveCogneeConfig saves Cognee configuration to file.
+//
+// CONST-042 / §12.1: the Cognee config persists plaintext credentials
+// (RemoteAPI.APIKey and per-provider API keys), so it is written owner-only
+// (0600) into an owner-only-traversable (0700) directory via writeSecretFile.
 func SaveCogneeConfig(config *CogneeConfig, configPath string) error {
-	// Ensure directory exists
-	dir := filepath.Dir(configPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create config directory: %w", err)
-	}
-
 	// Convert to JSON
 	data, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal Cognee config: %w", err)
 	}
 
-	// Write file
-	if err := os.WriteFile(configPath, data, 0644); err != nil {
+	if err := writeSecretFile(configPath, data); err != nil {
 		return fmt.Errorf("failed to write Cognee config: %w", err)
 	}
 

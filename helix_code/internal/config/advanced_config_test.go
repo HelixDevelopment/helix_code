@@ -617,8 +617,18 @@ func TestConfigurationValidationIntegration(t *testing.T) {
 	assert.True(t, errorCodes["CUSTOM_RULE_ERROR"])
 }
 
-// TestConfigurationMigrationBackup tests migration backup functionality
+// TestConfigurationMigrationBackup tests migration backup functionality.
+//
+// §11.4.120 reconciliation (CONST-042): migration backups previously landed in
+// the shared, world-traversable os.TempDir() at world-readable mode — a secret
+// leak (config backups carry plaintext credentials). The fix moved them into a
+// user-PRIVATE 0700 directory at owner-only 0600 file mode. This test now
+// asserts the NEW secure location, not the old leaky /tmp one. The home dir is
+// redirected via HELIX_CONFIG_PATH so the real ~/.config is never touched.
 func TestConfigurationMigrationBackup(t *testing.T) {
+	tmpHome := t.TempDir()
+	t.Setenv("HELIX_CONFIG_PATH", filepath.Join(tmpHome, ".config", "helixcode", "config.json"))
+
 	migrator := NewConfigurationMigrator("1.0.0")
 
 	config := &Config{
@@ -651,11 +661,25 @@ func TestConfigurationMigrationBackup(t *testing.T) {
 	assert.Equal(t, "1.1.0", config.Version)
 	assert.Equal(t, "Migrated", config.Application.Description)
 
-	// Check that backup was created (in temp dir)
-	tempDir := os.TempDir()
-	backupFiles, err := filepath.Glob(filepath.Join(tempDir, "helix_config_backup_*.json"))
+	// Check that a backup was created in the PRIVATE backup dir (NOT shared /tmp).
+	backupDir := configBackupDir()
+	backupFiles, err := filepath.Glob(filepath.Join(backupDir, "helix_config_backup_*.json"))
 	assert.NoError(t, err)
-	assert.NotEmpty(t, backupFiles)
+	assert.NotEmpty(t, backupFiles, "backup must land in the private backup dir")
+
+	// CONST-042: the private dir must be 0700 and each backup file 0600.
+	if di, derr := os.Stat(backupDir); assert.NoError(t, derr) {
+		assert.Equal(t, os.FileMode(0o700), di.Mode().Perm(), "backup dir must be owner-only")
+	}
+	for _, f := range backupFiles {
+		fi, ferr := os.Stat(f)
+		assert.NoError(t, ferr)
+		assert.Equal(t, os.FileMode(0o600), fi.Mode().Perm(), "backup file must be owner-only")
+	}
+
+	// No secret-bearing backup may leak into shared os.TempDir().
+	leaked, _ := filepath.Glob(filepath.Join(os.TempDir(), "helix_config_backup_*.json"))
+	assert.Empty(t, leaked, "no backup may land in shared TempDir (CONST-042)")
 }
 
 // TestAdvancedConfigurationPerformance tests performance of advanced config operations

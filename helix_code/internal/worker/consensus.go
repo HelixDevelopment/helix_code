@@ -61,6 +61,15 @@ type ConsensusManager struct {
 	heartbeatTimer *time.Timer
 	electionTimer  *time.Ticker
 
+	// Lifecycle plumbing for the run() loop. Start() derives runCancel (a
+	// cancelable child of the caller-supplied ctx) and run() closes runDone on
+	// exit. Stop() calls runCancel and waits on runDone, so Stop() genuinely
+	// tears down + joins run() even when the ctx passed to Start() is never
+	// cancelled (e.g. context.Background()). stopOnce makes Stop idempotent.
+	runCancel context.CancelFunc
+	runDone   chan struct{}
+	stopOnce  sync.Once
+
 	// Callbacks
 	onLeaderElected func(string)
 	onStateChanged  func(NodeState)
@@ -157,22 +166,49 @@ func NewConsensusManager(config ConsensusConfig) *ConsensusManager {
 	return cm
 }
 
-// Start begins the consensus protocol
+// Start begins the consensus protocol. It launches the run() loop on a
+// cancelable child of ctx so Stop() can terminate the loop regardless of whether
+// the caller's ctx is ever cancelled.
 func (cm *ConsensusManager) Start(ctx context.Context) error {
 	log.Printf("Starting Raft consensus for node %s", cm.nodeID)
 
-	go cm.run(ctx)
+	cm.mutex.Lock()
+	runCtx, cancel := context.WithCancel(ctx)
+	cm.runCancel = cancel
+	cm.runDone = make(chan struct{})
+	cm.mutex.Unlock()
+
+	go cm.run(runCtx)
 	return nil
 }
 
-// Stop stops the consensus protocol
+// Stop stops the consensus protocol: it cancels the run() loop, waits for the
+// loop goroutine to exit, and stops the heartbeat + election timers. It is
+// idempotent and safe to call on a manager that was never Start()ed (then it
+// only stops the timers). Previously Stop() stopped only the timers and left the
+// run() goroutine selecting forever on the (often non-cancellable) Start ctx,
+// leaking it.
 func (cm *ConsensusManager) Stop() {
-	if cm.heartbeatTimer != nil {
-		cm.heartbeatTimer.Stop()
-	}
-	if cm.electionTimer != nil {
-		cm.electionTimer.Stop()
-	}
+	cm.stopOnce.Do(func() {
+		cm.mutex.Lock()
+		cancel := cm.runCancel
+		done := cm.runDone
+		cm.mutex.Unlock()
+
+		if cancel != nil {
+			cancel()
+		}
+		if done != nil {
+			<-done // join the run() goroutine
+		}
+
+		if cm.heartbeatTimer != nil {
+			cm.heartbeatTimer.Stop()
+		}
+		if cm.electionTimer != nil {
+			cm.electionTimer.Stop()
+		}
+	})
 }
 
 // IsLeader returns true if this node is the current leader
@@ -254,8 +290,16 @@ func (cm *ConsensusManager) Reconfigure(peers []string, transport VoteTransport)
 	}
 }
 
-// run is the main consensus loop
+// run is the main consensus loop. It closes cm.runDone on exit so Stop() can
+// join it.
 func (cm *ConsensusManager) run(ctx context.Context) {
+	cm.mutex.RLock()
+	done := cm.runDone
+	cm.mutex.RUnlock()
+	if done != nil {
+		defer close(done)
+	}
+
 	for {
 		select {
 		case <-ctx.Done():

@@ -2,6 +2,8 @@ package config
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -661,14 +663,10 @@ func validateConfig(cfg *Config) error {
 	return nil
 }
 
-// CreateDefaultConfig creates a default configuration file
+// CreateDefaultConfig creates a default configuration file. The directory tree
+// and the file are created owner-only (0700/0600) by writeSecretFile below —
+// the config tree holds plaintext credentials (CONST-042 / §12.1).
 func CreateDefaultConfig(path string) error {
-	// Ensure directory exists
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create config directory: %v", err)
-	}
-
 	// Create default config content
 	configContent := `# HelixCode Server Configuration
 
@@ -725,8 +723,9 @@ logging:
   output: "stdout"
 `
 
-	// Write config file
-	if err := os.WriteFile(path, []byte(configContent), 0644); err != nil {
+	// Write config file with owner-only perms — the config tree holds plaintext
+	// credentials (CONST-042 / §12.1).
+	if err := writeSecretFile(path, []byte(configContent)); err != nil {
 		return fmt.Errorf("failed to write config file: %v", err)
 	}
 
@@ -952,15 +951,10 @@ func (m *ConfigManager) saveConfigLocked() error {
 	}
 
 	// Fresh-install safety: the config dir (e.g. ~/.config/helixcode/) may not
-	// exist yet on a clean machine. Create the parent tree before writing so
-	// SaveHelixConfig / `helix-config reset --force` succeed on first run.
-	if dir := filepath.Dir(m.configPath); dir != "" {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return fmt.Errorf("failed to create config directory %q: %w", dir, err)
-		}
-	}
-
-	return os.WriteFile(m.configPath, data, 0644)
+	// exist yet on a clean machine. writeSecretFile creates the parent tree
+	// (mode 0700) and writes the file owner-only (0600) — the config persists
+	// plaintext credentials (CONST-042 / §12.1).
+	return writeSecretFile(m.configPath, data)
 }
 
 // AddWatcher adds a configuration change watcher.
@@ -978,14 +972,10 @@ func (m *ConfigManager) ExportConfig(path string) error {
 	if err != nil {
 		return err
 	}
-	// Create the destination directory tree if the caller-supplied path points
-	// into a non-existent directory (same fresh-install gap as saveConfigLocked).
-	if dir := filepath.Dir(path); dir != "" {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return fmt.Errorf("failed to create export directory %q: %w", dir, err)
-		}
-	}
-	return os.WriteFile(path, data, 0644)
+	// Exported config carries the same plaintext credentials as the live config
+	// — write owner-only (CONST-042 / §12.1). writeSecretFile creates any missing
+	// parent tree (mode 0700).
+	return writeSecretFile(path, data)
 }
 
 // ImportConfig imports the configuration from a file. Write-locked: decode into
@@ -1014,15 +1004,10 @@ func (m *ConfigManager) BackupConfig(path string) error {
 	if err != nil {
 		return err
 	}
-	// Create the destination directory tree if the caller-supplied backup path
-	// points into a non-existent directory (same fresh-install gap as
-	// saveConfigLocked / ExportConfig).
-	if dir := filepath.Dir(path); dir != "" {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return fmt.Errorf("failed to create backup directory %q: %w", dir, err)
-		}
-	}
-	return os.WriteFile(path, data, 0644)
+	// Backups carry the same plaintext credentials as the live config — write
+	// owner-only (CONST-042 / §12.1). writeSecretFile creates any missing parent
+	// tree (mode 0700).
+	return writeSecretFile(path, data)
 }
 
 // ResetToDefaults resets the configuration to defaults (write-locked).
@@ -1064,6 +1049,53 @@ func GetConfigPath() string {
 	}
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, ".config", "helixcode", "config.json")
+}
+
+// secretFileMode is the only permission any persisted config/secret file may
+// carry: owner read+write, no group/other access. CONST-042 / §12.1 — config
+// files persist plaintext credentials (Auth.JWTSecret, Redis.Password, provider
+// APIKeys, Cognee APIKey / RemoteAPI.APIKey), so a world-readable file is a
+// secret leak any local user can read.
+const (
+	secretFileMode os.FileMode = 0o600
+	privateDirMode os.FileMode = 0o700
+)
+
+// configDir returns the user-private directory that holds the config file
+// (e.g. ~/.config/helixcode). Derived from GetConfigPath so HELIX_CONFIG_PATH
+// overrides are honoured.
+func configDir() string {
+	return filepath.Dir(GetConfigPath())
+}
+
+// configBackupDir returns the user-PRIVATE directory under which config backups
+// are written. CONST-042: backups carry the same plaintext secrets as the live
+// config, so they MUST NOT land in the shared, world-traversable os.TempDir().
+func configBackupDir() string {
+	return filepath.Join(configDir(), "backups")
+}
+
+// writeSecretFile writes data to path with owner-only (0600) permissions,
+// creating any missing parent directories with owner-only-traversable (0700)
+// permissions. It is the single sanctioned write path for any config file that
+// can contain a credential (CONST-042 / §12.1). On platforms where a prior file
+// already exists with looser permissions, the mode is forcibly tightened.
+func writeSecretFile(path string, data []byte) error {
+	if dir := filepath.Dir(path); dir != "" {
+		if err := os.MkdirAll(dir, privateDirMode); err != nil {
+			return fmt.Errorf("failed to create directory %q: %w", dir, err)
+		}
+	}
+	if err := os.WriteFile(path, data, secretFileMode); err != nil {
+		return err
+	}
+	// os.WriteFile honours the umask on the initial create and does not change
+	// the mode of a pre-existing file; force the exact secret mode so a leftover
+	// world-readable file from before this fix is tightened on next write.
+	if err := os.Chmod(path, secretFileMode); err != nil {
+		return fmt.Errorf("failed to set secret file mode on %q: %w", path, err)
+	}
+	return nil
 }
 
 // IsConfigPresent checks if the default configuration file exists
@@ -1708,22 +1740,95 @@ func (m *ConfigurationMigrator) canMigrate(from, to string) bool {
 	return false
 }
 
-// createBackup creates a backup of the configuration
+// createBackup creates a backup of the configuration.
+//
+// CONST-042 / §12.1: a config backup carries the same plaintext credentials as
+// the live config (Auth.JWTSecret, Redis.Password, provider APIKeys, Cognee
+// APIKey / RemoteAPI.APIKey). The backup therefore MUST NOT land in the shared,
+// world-traversable os.TempDir() at a predictable name and world-readable mode
+// — that is an accumulating secret leak any local user can read. Instead it is
+// written into a user-PRIVATE directory (mode 0700) at owner-only file mode
+// (0600) with an unpredictable name, and old backups are pruned to bound the
+// on-disk secret footprint.
 func (m *ConfigurationMigrator) createBackup(config *Config, version string) error {
-	tempDir := os.TempDir()
+	backupDir := configBackupDir()
+	if err := os.MkdirAll(backupDir, privateDirMode); err != nil {
+		return fmt.Errorf("failed to create backup directory: %w", err)
+	}
+	// Force-tighten the directory mode in case it pre-existed world-traversable.
+	if err := os.Chmod(backupDir, privateDirMode); err != nil {
+		return fmt.Errorf("failed to secure backup directory: %w", err)
+	}
+
 	timestamp := time.Now().Format("20060102_150405")
-	backupPath := filepath.Join(tempDir, fmt.Sprintf("helix_config_backup_%s_%s.json", version, timestamp))
+	suffix, err := randomHexSuffix()
+	if err != nil {
+		return fmt.Errorf("failed to generate backup name: %w", err)
+	}
+	backupPath := filepath.Join(backupDir, fmt.Sprintf("helix_config_backup_%s_%s_%s.json", version, timestamp, suffix))
 
 	data, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal config for backup: %w", err)
 	}
 
-	if err := os.WriteFile(backupPath, data, 0644); err != nil {
+	if err := writeSecretFile(backupPath, data); err != nil {
 		return fmt.Errorf("failed to write backup file: %w", err)
 	}
 
+	// Retention: keep only the newest maxConfigBackups so secret-bearing backups
+	// do not accumulate unbounded on disk.
+	pruneOldBackups(backupDir, maxConfigBackups)
+
 	return nil
+}
+
+// maxConfigBackups bounds how many secret-bearing config backups are retained.
+const maxConfigBackups = 10
+
+// randomHexSuffix returns 8 random hex chars for an unpredictable backup name.
+func randomHexSuffix() (string, error) {
+	b := make([]byte, 4)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
+// pruneOldBackups removes the oldest helix config backups in dir, keeping at
+// most keep of them. Errors are non-fatal — a failure to prune must not block a
+// successful backup, but it is best-effort to bound the secret footprint.
+func pruneOldBackups(dir string, keep int) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return
+	}
+	type backup struct {
+		path string
+		mod  time.Time
+	}
+	var backups []backup
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		if !strings.HasPrefix(name, "helix_config_backup_") || !strings.HasSuffix(name, ".json") {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		backups = append(backups, backup{path: filepath.Join(dir, name), mod: info.ModTime()})
+	}
+	if len(backups) <= keep {
+		return
+	}
+	sort.Slice(backups, func(i, j int) bool { return backups[i].mod.After(backups[j].mod) })
+	for _, b := range backups[keep:] {
+		_ = os.Remove(b.path)
+	}
 }
 
 // ConfigurationTransformer transforms configuration
@@ -1898,20 +2003,16 @@ func (tm *ConfigurationTemplateManager) SaveTemplate(template *ConfigurationTemp
 	// Store in manager
 	tm.templates[template.ID] = template
 
-	// Ensure directory exists
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create template directory: %w", err)
-	}
-
 	// Serialize template to JSON
 	data, err := json.MarshalIndent(template, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal template: %w", err)
 	}
 
-	// Write to file
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	// A template embeds a full *Config, which can carry plaintext credentials —
+	// write owner-only (CONST-042 / §12.1). writeSecretFile creates the parent
+	// tree (mode 0700).
+	if err := writeSecretFile(path, data); err != nil {
 		return fmt.Errorf("failed to write template file: %w", err)
 	}
 

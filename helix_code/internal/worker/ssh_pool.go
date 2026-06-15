@@ -31,6 +31,17 @@ type SSHWorkerPool struct {
 	hostKeys       *HostKeyManager
 	isolation      *WorkerIsolationManager
 	consensus      *ConsensusManager
+
+	// Lifecycle plumbing. The pool starts two background goroutines at
+	// construction — the consensus run() loop (via consensus.Start) and the
+	// sandbox-cleanup ticker. Both are bound to ctx (a cancelable child of the
+	// caller-supplied/Background ctx); cancel() tears them both down and
+	// cleanupWG joins the cleanup goroutine so Close() leaks nothing. cancelOnce
+	// makes cancel idempotent so Close()/StopConsensus() are safe to repeat.
+	ctx        context.Context
+	cancel     context.CancelFunc
+	cancelOnce sync.Once
+	cleanupWG  sync.WaitGroup
 }
 
 // SSHWorker represents an SSH-accessible worker node
@@ -235,6 +246,13 @@ func NewSSHWorkerPoolWithConfig(autoInstall bool, cliDownloadURL string) *SSHWor
 		isolation:      NewWorkerIsolationManager(),
 	}
 
+	// Derive a single cancelable lifecycle context. BOTH background goroutines
+	// (consensus run() loop + sandbox cleanup ticker) are bound to it, so
+	// Close()/StopConsensus() can tear them down — previously consensus ran on a
+	// raw context.Background() that nothing could cancel and the cleanup loop had
+	// no stop path at all, leaking 2 goroutines per pool.
+	pool.ctx, pool.cancel = context.WithCancel(context.Background())
+
 	// Initialize consensus manager
 	nodeID := uuid.New().String()
 	pool.consensus = NewConsensusManager(ConsensusConfig{
@@ -248,9 +266,9 @@ func NewSSHWorkerPoolWithConfig(autoInstall bool, cliDownloadURL string) *SSHWor
 		},
 	})
 
-	// Start consensus protocol
-	ctx := context.Background()
-	if err := pool.consensus.Start(ctx); err != nil {
+	// Start consensus protocol on the cancelable lifecycle context so Stop()
+	// genuinely joins the consensus run() loop.
+	if err := pool.consensus.Start(pool.ctx); err != nil {
 		log.Printf("Warning: Failed to start consensus: %v", err)
 	}
 
@@ -259,22 +277,51 @@ func NewSSHWorkerPoolWithConfig(autoInstall bool, cliDownloadURL string) *SSHWor
 		log.Printf("Warning: Failed to load known hosts: %v", err)
 	}
 
-	// Start cleanup goroutine for expired sandboxes
+	// Start cleanup goroutine for expired sandboxes, tracked so Close() can join
+	// it.
+	pool.cleanupWG.Add(1)
 	go pool.startSandboxCleanup()
 
 	return pool
 }
 
-// startSandboxCleanup starts background cleanup of expired sandboxes
+// startSandboxCleanup runs background cleanup of expired sandboxes until the
+// pool's lifecycle context is cancelled (Close()/StopConsensus()). It exits
+// promptly on cancellation so the pool leaks no goroutine.
 func (p *SSHWorkerPool) startSandboxCleanup() {
+	defer p.cleanupWG.Done()
+
 	ticker := time.NewTicker(1 * time.Hour)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-		p.isolation.CleanupExpiredSandboxes(ctx, 24*time.Hour) // Cleanup after 24 hours
-		cancel()
+	for {
+		select {
+		case <-p.ctx.Done():
+			return
+		case <-ticker.C:
+			ctx, cancel := context.WithTimeout(p.ctx, 5*time.Minute)
+			p.isolation.CleanupExpiredSandboxes(ctx, 24*time.Hour) // Cleanup after 24 hours
+			cancel()
+		}
 	}
+}
+
+// Close stops every background goroutine the pool started at construction (the
+// consensus run() loop and the sandbox-cleanup ticker) and joins them, so a
+// caller that creates and discards pools leaks nothing. It is idempotent and
+// safe to call on a pool whose consensus was never started. Close subsumes
+// StopConsensus (it cancels the same lifecycle context) and additionally joins
+// the cleanup goroutine.
+func (p *SSHWorkerPool) Close() {
+	p.cancelOnce.Do(func() {
+		if p.cancel != nil {
+			p.cancel()
+		}
+	})
+	if p.consensus != nil {
+		p.consensus.Stop()
+	}
+	p.cleanupWG.Wait()
 }
 
 // AddWorker adds a new worker to the pool

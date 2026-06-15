@@ -110,9 +110,15 @@ func ExtractCriticalFacts(turns []HistoryTurn) CriticalFacts {
 	}
 
 	return CriticalFacts{
-		ActiveTask:    activeTask,
-		Decisions:     capFacts(dedupePreserveOrder(decisions)),
-		FilesTouched:  capFacts(sortedUnique(files)),
+		ActiveTask: activeTask,
+		Decisions:  capFacts(dedupePreserveOrder(decisions)),
+		// FilesTouched MUST honour the recency contract just like the other
+		// categories: dedupe preserving recency (insertion) order, cap to keep
+		// the most-recently-touched tail, and only THEN sort a COPY for stable
+		// display. Sorting BEFORE the cap (the historical bug) made the
+		// alpha-last 24 win instead of the most-recent 24, silently dropping
+		// the active-work file from the condensed summary.
+		FilesTouched:  sortedCopy(capFacts(dedupePreserveOrder(files))),
 		OpenQuestions: capFacts(dedupePreserveOrder(questions)),
 		Errors:        capFacts(dedupePreserveOrder(errs)),
 	}
