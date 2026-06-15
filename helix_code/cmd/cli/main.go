@@ -1570,6 +1570,38 @@ func (c *CLI) handleAddWorker(ctx context.Context, host, username, keyPath strin
 	return nil
 }
 
+// isKnownProviderPrefix reports whether seg (the part before the first ":" in a
+// "provider:model" string) names a recognized LLM provider type. It is sourced
+// from the canonical llm.ProviderType* constants so it cannot drift from the
+// provider registry (CONST-036/CONST-039). Comparison is case-insensitive.
+//
+// HXC-096: this gate is what distinguishes a real provider prefix
+// ("ollama:qwen2.5:3b" → strip "ollama") from an Ollama native "name:tag"
+// model id ("qwen2.5:3b" → keep intact, because "qwen2.5" is NOT a provider).
+func isKnownProviderPrefix(seg string) bool {
+	switch llm.ProviderType(strings.ToLower(seg)) {
+	case llm.ProviderTypeOllama,
+		llm.ProviderTypeLocal,
+		llm.ProviderTypeLlamaCpp,
+		llm.ProviderTypeOpenAI,
+		llm.ProviderTypeAnthropic,
+		llm.ProviderTypeGemini,
+		llm.ProviderTypeGroq,
+		llm.ProviderTypeMistral,
+		llm.ProviderTypeDeepSeek,
+		llm.ProviderTypeOpenRouter,
+		llm.ProviderTypeXAI,
+		llm.ProviderTypeQwen,
+		llm.ProviderTypeCohere,
+		llm.ProviderTypeAzure,
+		llm.ProviderTypeBedrock,
+		llm.ProviderTypeVertexAI:
+		return true
+	default:
+		return false
+	}
+}
+
 // handleGenerate performs LLM generation
 func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxTokens int, temperature float64, stream bool) error {
 	// ANTI-BLUFF: MUST use real LLM provider, not simulation
@@ -1577,11 +1609,24 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 		return fmt.Errorf("LLM provider not initialized - please check configuration")
 	}
 
-	// Parse model from string (format: provider:model or just model)
+	// Parse model from string (format: provider:model or just model).
+	//
+	// HXC-096 (CONST-035 / BLUFF-001): the prior code stripped everything
+	// before the FIRST ":" unconditionally. That is WRONG for Ollama, whose
+	// native model tags ARE "name:tag" (e.g. "qwen2.5:3b", "llama3.2:1b").
+	// The unconditional split mangled "qwen2.5:3b" into "3b", which Ollama's
+	// /api/chat rejects with a 404 ("model '3b' not found") — exactly the CLI
+	// 404 the web path never hit because internal/server passes req.Model
+	// through verbatim. The "provider:model" form is only meant to strip a
+	// LEADING provider name (e.g. "ollama:qwen2.5:3b", "anthropic:claude-...").
+	// So strip the prefix ONLY when the segment before the first ":" is a
+	// recognized provider type; otherwise keep the model string intact so a
+	// real Ollama "name:tag" reaches the provider unmodified.
 	modelName := model
-	if strings.Contains(model, ":") {
-		parts := strings.SplitN(model, ":", 2)
-		modelName = parts[1]
+	if idx := strings.Index(model, ":"); idx > 0 {
+		if isKnownProviderPrefix(model[:idx]) {
+			modelName = model[idx+1:]
+		}
 	}
 
 	// Round-41 readiness fix (CONST-035): the CLI's default model
