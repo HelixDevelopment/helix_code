@@ -569,3 +569,14 @@ Live /debate e2e (debate_e2e_test.go) shows CONCLUSION/Summary print literal 'de
 
 handleDebate/handleSpecify (cmd/cli) + TUI registered ONE AgentSpec but orchestrator MinAgentsPerDebate=2; users hit 'insufficient agents (have 1, need 2)'. Round-7 debate proof used a 2-agent test, masking the 1-agent production gap (§11.4.108).
 
+## HXC-081 — helix_specifier speckit topic i18n key unresolved plus format-verb mismatch
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** helix_specifier 188f9bc: BundleTranslator resolves phase-topic keys; GREEN prose 'Create a detailed specification ... Request: <req>', no raw key/no %!(EXTRA), 22 pkgs no-regression; /debate binary CONCLUSION now resolved prose
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Live /specify run shows 'Topic: helixspecifier_speckit_topic_specify%!(EXTRA string=...)' — the speckit phase prompt emits a raw i18n message-key with a Go Sprintf arg-count mismatch instead of resolved prose. Same class as HXC-079, in submodules/helix_specifier. Captured in specify_e2e_test.go output.
+

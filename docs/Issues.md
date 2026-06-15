@@ -586,13 +586,3 @@ Context-window usage percentage indicator scaffolded (commit 3c9d3495, task T1.5
 
 SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6); REMAINING: full precedence-conflict resolution + tests covering overlapping skill definitions still outstanding — keep open until precedence is fully resolved and tested.
 
-## HXC-081 — helix_specifier speckit topic i18n key unresolved plus format-verb mismatch
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Live /specify run shows 'Topic: helixspecifier_speckit_topic_specify%!(EXTRA string=...)' — the speckit phase prompt emits a raw i18n message-key with a Go Sprintf arg-count mismatch instead of resolved prose. Same class as HXC-079, in submodules/helix_specifier. Captured in specify_e2e_test.go output.
-
