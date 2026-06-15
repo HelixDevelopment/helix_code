@@ -17,11 +17,11 @@ import (
 // LevelReadOnly (so the ReadOnlyOnly agent loop accepts it), while one
 // registered at LevelEdit reports LevelEdit (blocked by that loop).
 func TestMcpTool_RequiresApproval_ReportsConfiguredLevel(t *testing.T) {
-	ro := &mcpTool{name: "fs:read_file", approvalLevel: approval.LevelReadOnly}
+	ro := &mcpTool{name: "fs__read_file", approvalLevel: approval.LevelReadOnly}
 	assert.Equal(t, approval.LevelReadOnly, ro.RequiresApproval(),
 		"read-only-configured mcpTool must report LevelReadOnly")
 
-	rw := &mcpTool{name: "fs:write_file", approvalLevel: approval.LevelEdit}
+	rw := &mcpTool{name: "fs__write_file", approvalLevel: approval.LevelEdit}
 	assert.Equal(t, approval.LevelEdit, rw.RequiresApproval(),
 		"unclassified mcpTool must keep the conservative LevelEdit default")
 }
@@ -90,7 +90,7 @@ func TestRegisterMCPManager_ReadOnlyServer_Live(t *testing.T) {
 	// Every fs tool — read AND write — must report LevelReadOnly because the
 	// server is readOnly:true.
 	for _, et := range live {
-		name := et.Server + ":" + et.Name
+		name := mcpToolRegisteredName(et.Server, et.Name)
 		tool, err := reg.Get(name)
 		require.NoErrorf(t, err, "tool %q should be registered", name)
 		assert.Equalf(t, approval.LevelReadOnly, tool.RequiresApproval(),
@@ -98,8 +98,8 @@ func TestRegisterMCPManager_ReadOnlyServer_Live(t *testing.T) {
 	}
 
 	// Spot-check a couple of well-known names exist (live wire evidence).
-	_, err = reg.Get("fs:read_text_file")
-	assert.NoError(t, err, "fs:read_text_file should be registered from the live server")
+	_, err = reg.Get("fs__read_text_file")
+	assert.NoError(t, err, "fs__read_text_file should be registered from the live server")
 }
 
 // TestRegisterMCPManager_DefaultServer_NameBasedReadOnly boots the same
@@ -140,12 +140,12 @@ func TestRegisterMCPManager_DefaultServer_NameBasedReadOnly(t *testing.T) {
 	require.NoError(t, err)
 	reg.RegisterMCPManager(m)
 
-	readTool, err := reg.Get("fs:read_text_file")
+	readTool, err := reg.Get("fs__read_text_file")
 	require.NoError(t, err)
 	assert.Equal(t, approval.LevelReadOnly, readTool.RequiresApproval(),
 		"read_text_file is a known read-only name → LevelReadOnly even without the server flag")
 
-	writeTool, err := reg.Get("fs:write_file")
+	writeTool, err := reg.Get("fs__write_file")
 	require.NoError(t, err)
 	assert.Equal(t, approval.LevelEdit, writeTool.RequiresApproval(),
 		"write_file is not a known read-only name and server is not flagged → LevelEdit")

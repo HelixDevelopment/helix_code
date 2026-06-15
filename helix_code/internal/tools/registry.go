@@ -894,7 +894,14 @@ func (r *ToolRegistry) RegisterMCPManager(m *mcp.Manager) {
 	}
 
 	for _, t := range m.Tools() {
-		name := t.Server + ":" + t.Name
+		// HXC-113: register under an OpenAI/DeepSeek-compatible function name
+		// (^[A-Za-z0-9_-]+$). The old "server:name" join contains a colon, which
+		// OpenAI-compatible providers reject ("invalid 'tools[].function.name'"),
+		// returning HTTP 400 and breaking LLM chat whenever any MCP tool is
+		// registered. mcpTool.Execute routes via t.server/t.toolName (the
+		// originals), so sanitising the registry/display name is safe — the
+		// reverse mapping is automatic.
+		name := mcpToolRegisteredName(t.Server, t.Name)
 		if _, err := r.Get(name); err == nil {
 			log.Printf("WARN tools: MCP tool %q replaces existing registration", name)
 		}
@@ -952,6 +959,27 @@ var readOnlyMCPToolNames = map[string]bool{
 // server-prefixed name).
 func isReadOnlyMCPToolName(name string) bool {
 	return readOnlyMCPToolNames[strings.ToLower(name)]
+}
+
+// mcpToolRegisteredName builds an OpenAI/DeepSeek-compatible function name
+// (matching ^[A-Za-z0-9_-]+$) for an MCP tool by joining server + tool with
+// "__" and replacing every other disallowed character with "_" (HXC-113).
+// OpenAI-compatible providers reject function names containing ':' (the old
+// "server:name" join) with HTTP 400, which broke LLM chat whenever an MCP tool
+// was registered. The mapping need not be reversed: mcpTool.Execute dispatches
+// via the captured original server/toolName, so only the registry/display name
+// is sanitised here.
+func mcpToolRegisteredName(server, tool string) string {
+	var b strings.Builder
+	for _, r := range server + "__" + tool {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '_', r == '-':
+			b.WriteRune(r)
+		default:
+			b.WriteRune('_')
+		}
+	}
+	return b.String()
 }
 
 // mcpTool is an internal Tool adapter that routes Execute to an mcp.Manager.
