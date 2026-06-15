@@ -890,6 +890,20 @@ func (cliApp *HarmonyCLIApp) cmdInteractive() error {
 func main() {
 	app := NewHarmonyCLIApp()
 
+	// Wire the real CONST-046 translator (embedded active.en.yaml bundle)
+	// onto the app BEFORE any user-facing output, replacing the
+	// NoopTranslator{} message-ID-echo default installed by NewHarmonyCLIApp.
+	// Without this, every command (help/status/version/...) leaks raw message
+	// keys (`harmony_os_cli_status_header`, ...) — a §11.4 / CONST-046
+	// PASS-bluff (systemic HXC-097). On bundle load failure the loud
+	// NoopTranslator{} echo is preserved (never a silent swallow). Mirrors
+	// applications/desktop/main_nogui.go.
+	if tr, err := i18n.NewTranslator(); err != nil {
+		log.Printf("⚠️  i18n: falling back to message-ID echo (bundle load failed): %v", err)
+	} else {
+		app.SetTranslator(tr)
+	}
+
 	if err := app.Initialize(); err != nil {
 		log.Fatalf("Failed to initialize: %v", err)
 	}

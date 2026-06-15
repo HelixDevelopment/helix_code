@@ -1636,6 +1636,18 @@ func main() {
 	// Create application
 	harmonyApp := NewHarmonyApp()
 
+	// Wire the real CONST-046 translator (embedded active.en.yaml bundle)
+	// onto the GUI app BEFORE any user-facing output, replacing the
+	// NoopTranslator{} message-ID-echo default installed by NewHarmonyApp.
+	// Without this, user-facing strings leak raw message keys — a §11.4 /
+	// CONST-046 PASS-bluff (systemic HXC-097). On bundle load failure the
+	// loud NoopTranslator{} echo is preserved (never a silent swallow).
+	if tr, err := i18n.NewTranslator(); err != nil {
+		log.Printf("⚠️  i18n: falling back to message-ID echo (bundle load failed): %v", err)
+	} else {
+		harmonyApp.SetTranslator(tr)
+	}
+
 	// Initialize
 	if err := harmonyApp.Initialize(); err != nil {
 		log.Fatalf("Failed to initialize Harmony OS application: %v", err)
