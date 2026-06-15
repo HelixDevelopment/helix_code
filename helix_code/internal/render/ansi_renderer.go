@@ -244,9 +244,26 @@ func (r *ansiRenderer) RenderFrame(frame Frame) error {
 	}
 	// Truncated: when the new frame is shorter than the previous, trailing
 	// old lines are NOT cleared from the terminal (acceptable v1 per task
-	// scope; documented). We still need to update cursorPos to reflect the
-	// new logical line count, but since cursor is below the lines, no
-	// movement is needed for this v1.
+	// scope; documented). No cursor movement is emitted for the stale
+	// trailing rows in this v1.
+	//
+	// HXC-RENDER-TRUNC-CURSOR fix: cursorPos MUST be decremented by the
+	// truncated count so it stays equal to the live line count. Before this
+	// fix cursorPos retained the OLD (larger) frame height; a subsequent
+	// Changed slot then computed `up = cursorPos - i` against the stale
+	// height and emitted a cursor-up sequence that overshot the frame's top
+	// edge, rewriting the changed line ABOVE the block and corrupting
+	// unrelated terminal content (and leaving the cursor misplaced after the
+	// matching cursor-down). cursorPos is the cursor's distance below the
+	// frame top after this RenderFrame; that distance == the live line count,
+	// so it MUST shrink when the frame shrinks. This preserves the
+	// `up >= 1` invariant the Changed loop relies on.
+	if diff.Truncated > 0 {
+		cursorPos -= diff.Truncated
+		if cursorPos < 0 {
+			cursorPos = 0
+		}
+	}
 	_ = prevLineCount // retained for clarity; debug builds may inspect.
 
 	r.frameCursorPos[frame.BlockID] = cursorPos
