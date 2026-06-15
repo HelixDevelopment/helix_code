@@ -41,6 +41,39 @@
       <pre id="output" aria-live="polite"></pre>
       <p id="meta" class="meta"></p>
     </section>
+
+    <h1 class="section-divider">Specify Phase</h1>
+    <p class="sub">
+      Sends a real request to <code>POST /api/v1/specify</code>. The server runs
+      the real HelixSpecifier Specify phase through a real LLM-backed debate and
+      returns the model's actual specification output — no simulation. On
+      failure the server's real error (e.g. a 502 deadline) is shown verbatim.
+    </p>
+
+    <form id="spec-form">
+      <label>
+        Provider (optional, e.g. <code>anthropic</code>, <code>ollama</code>)
+        <input id="spec-provider" type="text" placeholder="leave blank for local Ollama default" />
+      </label>
+      <label>
+        Model (optional)
+        <input id="spec-model" type="text" placeholder="e.g. llama3.2" />
+      </label>
+      <label>
+        Spec request
+        <textarea id="spec-request" rows="4" placeholder="Describe the feature/spec to specify…" required></textarea>
+      </label>
+      <div class="row">
+        <span></span>
+        <button id="spec-send" type="submit">Specify</button>
+      </div>
+    </form>
+
+    <section>
+      <h2>Specify result</h2>
+      <pre id="spec-output" aria-live="polite"></pre>
+      <p id="spec-meta" class="meta"></p>
+    </section>
   </main>
 
   <script src="/static/app.js"></script>

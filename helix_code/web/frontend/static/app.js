@@ -99,4 +99,66 @@
       sendBtn.disabled = false;
     }
   });
+
+  // --- Specify phase (POST /api/v1/specify) ---------------------------------
+  //
+  // Same pattern as generateOnce: POST a JSON body, then render the server's
+  // REAL fields on success or surface the server's REAL error string on
+  // failure. No client-side simulation — every byte rendered comes from the
+  // speckit engine's actual provider-backed response, and the 502 deadline /
+  // provider error is shown verbatim, never faked into a success.
+
+  var specForm = document.getElementById("spec-form");
+  var specOutput = document.getElementById("spec-output");
+  var specMeta = document.getElementById("spec-meta");
+  var specSendBtn = document.getElementById("spec-send");
+
+  function setSpecMeta(text, isError) {
+    specMeta.textContent = text || "";
+    specMeta.className = "meta" + (isError ? " error" : "");
+  }
+
+  function buildSpecBody() {
+    var body = { request: document.getElementById("spec-request").value };
+    var provider = document.getElementById("spec-provider").value.trim();
+    var model = document.getElementById("spec-model").value.trim();
+    if (provider) body.provider = provider;
+    if (model) body.model = model;
+    return body;
+  }
+
+  async function specifyOnce(body) {
+    var res = await fetch("/api/v1/specify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    var data = await res.json();
+    if (!res.ok || data.status === "error") {
+      throw new Error(data.error || ("HTTP " + res.status));
+    }
+    specOutput.textContent = data.output || "";
+    setSpecMeta(
+      "provider=" + (data.provider || "?") +
+      "  model=" + (data.model || "?") +
+      "  qualityScore=" + (data.qualityScore != null ? data.qualityScore : "?") +
+      "  debateID=" + (data.debateID || "?") +
+      "  success=" + (data.success === true)
+    );
+  }
+
+  specForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var body = buildSpecBody();
+    specSendBtn.disabled = true;
+    setSpecMeta("specifying…");
+    specOutput.textContent = "";
+    try {
+      await specifyOnce(body);
+    } catch (err) {
+      setSpecMeta((err && err.message) || String(err), true);
+    } finally {
+      specSendBtn.disabled = false;
+    }
+  });
 })();
