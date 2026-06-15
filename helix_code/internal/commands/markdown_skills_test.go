@@ -89,6 +89,65 @@ func TestSkillRegistry_FindMatching_FirstWins(t *testing.T) {
 	assert.Equal(t, "a", matched.Name())
 }
 
+// TestSkillRegistry_FindMatching_OverlappingPatternsDeterministic covers the
+// HXC-078 "overlapping skill definitions" precedence-conflict case: two
+// DIFFERENT-named skills with DIFFERENT-but-overlapping trigger patterns that
+// BOTH match one input. The documented contract (FindMatching iterates in
+// lexicographic name order, first-wins) MUST resolve the conflict
+// deterministically to the lexicographically-first skill name, regardless of
+// the order the skills were registered, and stable across repeated calls.
+func TestSkillRegistry_FindMatching_OverlappingPatternsDeterministic(t *testing.T) {
+	// "alpha" matches via "^deploy", "bravo" matches via "(?i)deploy" — both
+	// match "deploy now". They have different names AND different patterns.
+	mk := func(name, pattern string) *Skill {
+		s, err := parseSkillFile(name,
+			"---\ndescription: "+name+"\ntriggers:\n  - \""+pattern+"\"\n---\nbody "+name, "")
+		require.NoError(t, err)
+		return s
+	}
+
+	// Insertion-order independence: register bravo before alpha so a map-iteration
+	// or insertion-order implementation would be tempted to return bravo.
+	t.Run("insertion_order_independent", func(t *testing.T) {
+		reg := NewSkillRegistry()
+		reg.Add(mk("bravo", "(?i)deploy"))
+		reg.Add(mk("alpha", "^deploy"))
+		matched, _, ok := reg.FindMatching("deploy now")
+		require.True(t, ok)
+		assert.Equal(t, "alpha", matched.Name(),
+			"overlapping different-named matches must resolve to the lexicographically-first skill name")
+	})
+
+	// Determinism across repeated calls: lexicographically-first wins every time.
+	t.Run("stable_across_repeated_calls", func(t *testing.T) {
+		reg := NewSkillRegistry()
+		reg.Add(mk("zulu", "(?i)deploy"))
+		reg.Add(mk("alpha", "^deploy"))
+		reg.Add(mk("mike", "deploy"))
+		for i := 0; i < 50; i++ {
+			matched, _, ok := reg.FindMatching("deploy now")
+			require.True(t, ok)
+			require.Equal(t, "alpha", matched.Name(),
+				"FindMatching must be deterministic across repeated calls (iteration %d)", i)
+		}
+	})
+
+	// List() exposes the same deterministic lexicographic order that FindMatching
+	// relies on — proving the ordering is a contract, not an accident.
+	t.Run("list_is_lexicographically_ordered", func(t *testing.T) {
+		reg := NewSkillRegistry()
+		reg.Add(mk("zulu", "(?i)deploy"))
+		reg.Add(mk("alpha", "^deploy"))
+		reg.Add(mk("mike", "deploy"))
+		names := make([]string, 0, 3)
+		for _, s := range reg.List() {
+			names = append(names, s.Name())
+		}
+		assert.Equal(t, []string{"alpha", "mike", "zulu"}, names,
+			"List() must return skills in lexicographic name order")
+	})
+}
+
 func TestSkillRegistry_FindMatching_NamedCaptures(t *testing.T) {
 	reg := NewSkillRegistry()
 	s, _ := parseSkillFile("rc",
