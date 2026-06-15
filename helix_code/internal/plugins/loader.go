@@ -26,11 +26,17 @@ func (l *Loader) Load(ctx context.Context, manifestPath string) (Plugin, error) 
 	if err != nil {
 		return nil, err
 	}
+	// Guard the dependency-existence read with the loader lock: l.plugins is
+	// concurrently written under l.mu by other in-flight Load calls, so an
+	// unlocked read here is a data race (concurrent map read + write).
+	l.mu.RLock()
 	for _, dep := range manifest.Dependencies {
 		if _, ok := l.plugins[dep]; !ok {
+			l.mu.RUnlock()
 			return nil, fmt.Errorf("missing dependency: %s", dep)
 		}
 	}
+	l.mu.RUnlock()
 	plugin := &BasePlugin{
 		PluginName:    manifest.Name,
 		PluginVersion: manifest.Version,

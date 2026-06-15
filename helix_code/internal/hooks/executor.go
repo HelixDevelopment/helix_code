@@ -17,6 +17,13 @@ type Executor struct {
 	maxResults    int                // Maximum results to keep
 	onComplete    []ResultCallback   // Callbacks on completion
 	onError       []ResultCallback   // Callbacks on error
+	// cfgMu guards the callback slices (onComplete/onError) and the concurrency
+	// config (maxConcurrent/semaphore). Setters (OnComplete/OnError/
+	// SetMaxConcurrent) mutate this shared state while async dispatch goroutines
+	// read it (triggerCallbacks ranges the callback slices; executeAsync reads
+	// the semaphore) — without this mutex those are data races (proven by the
+	// -race detector in race_guard_test.go D1/D2).
+	cfgMu sync.RWMutex
 }
 
 // ResultCallback is called when a hook execution completes
@@ -157,9 +164,18 @@ func (e *Executor) executeAsync(ctx context.Context, hook *Hook, event *Event, r
 	go func() {
 		defer e.wg.Done()
 
+		// Snapshot the semaphore under cfgMu so a concurrent SetMaxConcurrent
+		// swapping e.semaphore cannot race this read. The token is acquired
+		// from and released to the SAME channel instance even if the executor's
+		// active semaphore is swapped mid-flight — so an in-flight goroutine
+		// never releases into a different channel than it acquired from.
+		e.cfgMu.RLock()
+		sem := e.semaphore
+		e.cfgMu.RUnlock()
+
 		// Acquire semaphore slot
-		e.semaphore <- struct{}{}
-		defer func() { <-e.semaphore }()
+		sem <- struct{}{}
+		defer func() { <-sem }()
 
 		result.Status = StatusRunning
 
@@ -287,31 +303,56 @@ func (e *Executor) GetStatistics() *ExecutorStatistics {
 
 // OnComplete registers a callback for completed executions
 func (e *Executor) OnComplete(callback ResultCallback) {
+	e.cfgMu.Lock()
+	defer e.cfgMu.Unlock()
 	e.onComplete = append(e.onComplete, callback)
 }
 
 // OnError registers a callback for failed executions
 func (e *Executor) OnError(callback ResultCallback) {
+	e.cfgMu.Lock()
+	defer e.cfgMu.Unlock()
 	e.onError = append(e.onError, callback)
 }
 
-// triggerCallbacks triggers registered callbacks
+// triggerCallbacks triggers registered callbacks.
+//
+// The callback slices are snapshotted under cfgMu (RLock) and the user
+// callbacks are invoked WITHOUT holding the lock — both to avoid the
+// OnComplete/OnError write-vs-iterate race and so an arbitrary callback cannot
+// deadlock by re-entering a setter while the executor holds its config lock.
 func (e *Executor) triggerCallbacks(result *ExecutionResult) {
+	e.cfgMu.RLock()
+	onComplete := e.onComplete
+	onError := e.onError
+	failed := result.Status == StatusFailed
+	e.cfgMu.RUnlock()
+
 	// Trigger completion callbacks
-	for _, callback := range e.onComplete {
+	for _, callback := range onComplete {
 		callback(result)
 	}
 
 	// Trigger error callbacks if failed
-	if result.Status == StatusFailed {
-		for _, callback := range e.onError {
+	if failed {
+		for _, callback := range onError {
 			callback(result)
 		}
 	}
 }
 
-// SetMaxConcurrent sets the maximum concurrent async executions
+// SetMaxConcurrent sets the maximum concurrent async executions.
+//
+// Mutates maxConcurrent and replaces the semaphore under cfgMu so concurrent
+// async dispatch goroutines (which snapshot e.semaphore under cfgMu.RLock in
+// executeAsync) never race this write. In-flight goroutines keep using the
+// semaphore instance they snapshotted at acquire time, so swapping the channel
+// here does not mis-route their token release; new dispatches pick up the new
+// bound. SetMaxConcurrent is therefore safe to call at any time, not only at
+// setup.
 func (e *Executor) SetMaxConcurrent(max int) {
+	e.cfgMu.Lock()
+	defer e.cfgMu.Unlock()
 	e.maxConcurrent = max
 	e.semaphore = make(chan struct{}, max)
 }

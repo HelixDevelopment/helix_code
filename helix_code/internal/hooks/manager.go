@@ -285,12 +285,24 @@ func (m *Manager) TriggerEvent(event *Event) []*ExecutionResult {
 	// Execute hooks
 	results := m.executor.ExecuteAll(event.Context, hooks, event)
 
-	// Trigger execute callbacks
-	for _, callback := range m.onExecute {
+	// Trigger execute callbacks (snapshot under m.mu so a concurrent OnExecute
+	// append cannot race this read).
+	for _, callback := range m.snapshotOnExecute() {
 		callback(event, results)
 	}
 
 	return results
+}
+
+// snapshotOnExecute returns the current onExecute callback slice taken under
+// m.mu.RLock. This is a brief, standalone RLock that does NOT wrap GetByType,
+// so it does not hit the non-reentrant-deadlock concern documented on the
+// Trigger* paths. The returned header is safe to range without the lock because
+// OnExecute appends copy-on-grow and the snapshot is length-bounded.
+func (m *Manager) snapshotOnExecute() []ExecuteCallback {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.onExecute
 }
 
 // TriggerAndWait triggers hooks and waits for all to complete
@@ -308,8 +320,9 @@ func (m *Manager) TriggerEventAndWait(event *Event) []*ExecutionResult {
 	// Execute hooks and wait
 	results := m.executor.ExecuteAndWait(event.Context, hooks, event)
 
-	// Trigger execute callbacks
-	for _, callback := range m.onExecute {
+	// Trigger execute callbacks (snapshot under m.mu so a concurrent OnExecute
+	// append cannot race this read).
+	for _, callback := range m.snapshotOnExecute() {
 		callback(event, results)
 	}
 
@@ -331,8 +344,9 @@ func (m *Manager) TriggerEventSync(event *Event) []*ExecutionResult {
 	// Execute hooks synchronously
 	results := m.executor.ExecuteSync(event.Context, hooks, event)
 
-	// Trigger execute callbacks
-	for _, callback := range m.onExecute {
+	// Trigger execute callbacks (snapshot under m.mu so a concurrent OnExecute
+	// append cannot race this read).
+	for _, callback := range m.snapshotOnExecute() {
 		callback(event, results)
 	}
 
@@ -374,18 +388,35 @@ func (m *Manager) GetStatistics() *ManagerStatistics {
 	return stats
 }
 
-// OnCreate registers a callback for hook creation
+// OnCreate registers a callback for hook creation.
+//
+// Guarded by m.mu (write lock): the onCreate slice is read under m.mu by
+// Register, so an unlocked append here is a data race (proven by the -race
+// detector in race_guard_test.go D3).
 func (m *Manager) OnCreate(callback HookCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onCreate = append(m.onCreate, callback)
 }
 
-// OnRemove registers a callback for hook removal
+// OnRemove registers a callback for hook removal.
+//
+// Guarded by m.mu (write lock): the onRemove slice is read under m.mu by
+// Unregister, so an unlocked append here would be a data race.
 func (m *Manager) OnRemove(callback HookCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onRemove = append(m.onRemove, callback)
 }
 
-// OnExecute registers a callback for hook execution
+// OnExecute registers a callback for hook execution.
+//
+// Guarded by m.mu (write lock): the onExecute slice is read by the Trigger*
+// paths (which snapshot it under m.mu.RLock), so an unlocked append here would
+// be a data race.
 func (m *Manager) OnExecute(callback ExecuteCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onExecute = append(m.onExecute, callback)
 }
 
