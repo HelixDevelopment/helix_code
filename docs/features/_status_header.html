@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>_status_header</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">_status_header</h1>
+</header>
+<h1 id="helixcode-feature-status">HelixCode Feature Status</h1>
+<table>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active (population in progress)</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>docs/features/Status_Summary.md</td>
+</tr>
+<tr>
+<td>Continuation</td>
+<td>docs/CONTINUATION.md</td>
+</tr>
+</tbody>
+</table>
+<p>Authoritative, in-depth inventory of <strong>every</strong> HelixCode
+feature across all services, infrastructure, and client applications —
+including capabilities ported from the <code>cli_agents/</code>
+reference catalogue — with per-feature status across every dimension the
+operator mandate (2026-06-15) requires. Kept in sync via the
+<code>docs_chain</code> engine (§11.4.106,
+<code>submodules/docs_chain</code>) and the Status-doc covenant
+(§11.4.45 / §11.4.53 / §11.4.56 / §11.4.57 / CONST-063 / CONST-064).</p>
+<blockquote>
+<p><strong>Anti-bluff (CONST-035 / §11.4.83 / §11.4.107):</strong> a
+feature is marked video-confirmed (<code>📹 yes</code>) ONLY when a real
+recorded scenario in <code>/Volumes/T7/Downloads/Recordings</code> shows
+it working end-to-end with a strong real LLM and that recording has been
+analyzed. No false “yes”. An un-recorded or un-analyzed feature is
+honestly <code>📹 no</code> / <code>📹 pending</code>, never bluffed
+green.</p>
+</blockquote>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#status-dimensions-legend">Status dimensions
+(legend)</a></li>
+<li><a href="#population-progress">Population progress</a></li>
+<li><a href="#feature-inventory">Feature inventory</a></li>
+<li><a href="#inventory-sources">Inventory sources</a></li>
+</ul>
+<h2 id="status-dimensions-legend">Status dimensions (legend)</h2>
+<p>Each feature row carries:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Column</th>
+<th>Meaning</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Area</strong></td>
+<td>service / infrastructure / application(client) / submodule</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Component</strong></td>
+<td>package / tool / app / submodule it lives in</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Feature</strong></td>
+<td>the discrete user-or-system capability</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Dev</strong></td>
+<td>implementation status</td>
+<td><code>done</code> / <code>partial</code> / <code>stub</code> /
+<code>absent</code></td>
+</tr>
+<tr>
+<td><strong>Wired</strong></td>
+<td>reachable from a shipped flow (not dead code)</td>
+<td><code>yes</code> / <code>no</code> / <code>partial</code></td>
+</tr>
+<tr>
+<td><strong>Real-use</strong></td>
+<td>genuinely usable by an end user</td>
+<td><code>yes</code> / <code>no</code> / <code>unknown</code></td>
+</tr>
+<tr>
+<td><strong>Tests</strong></td>
+<td>automated coverage</td>
+<td><code>unit</code> / <code>integ</code> / <code>e2e</code> /
+<code>none</code> (combinable)</td>
+</tr>
+<tr>
+<td><strong>V&amp;V</strong></td>
+<td>captured runtime evidence (§11.4.5/§11.4.69)</td>
+<td><code>yes(path)</code> / <code>no</code></td>
+</tr>
+<tr>
+<td><strong>📹 Video</strong></td>
+<td>recorded real scenario + analyzed (§11.4.83/§11.4.107)</td>
+<td><code>yes(path)</code> / <code>pending</code> / <code>no</code> /
+<code>n/a</code></td>
+</tr>
+<tr>
+<td><strong>Analysis</strong></td>
+<td>comprehensive recording analysis performed</td>
+<td><code>yes</code> / <code>no</code></td>
+</tr>
+<tr>
+<td><strong>Origin</strong></td>
+<td>native / <code>ported:&lt;cli_agent&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Overall</strong></td>
+<td>rollup</td>
+<td><code>confirmed</code> / <code>working-untaped</code> /
+<code>partial</code> / <code>gap</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="population-progress">Population progress</h2>
+<p>This document is populated by background inventory subagents fanning
+out across the codebase (§11.4.70 subagent-driven, §11.4.103
+parallel-streams). Coverage is reported honestly —
+<code>confirmed</code> rows require a real analyzed video; everything
+else is marked truthfully. Population is an ongoing program, NOT a
+one-shot claim.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Slice</th>
+<th>Scope</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>internal services + infra</td>
+<td><code>helix_code/internal/*</code> (72 pkgs)</td>
+<td>inventory dispatched</td>
+</tr>
+<tr>
+<td>cmd tools + client apps</td>
+<td><code>helix_code/cmd/*</code> (21) + <code>applications/*</code>
+(cli/tui/web/desktop/mobile)</td>
+<td>inventory dispatched</td>
+</tr>
+<tr>
+<td>owned submodules</td>
+<td><code>submodules/*</code> (70+)</td>
+<td>inventory dispatched</td>
+</tr>
+<tr>
+<td>ported cli_agents capabilities</td>
+<td><code>cli_agents/*</code> → HelixCode</td>
+<td>inventory dispatched</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
