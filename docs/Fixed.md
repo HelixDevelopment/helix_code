@@ -690,3 +690,14 @@ containers pkg/health/custom.go NewCustomCheckFunc duration=time.Since(start) re
 
 debate_orchestrator DefaultTimeout=30s x DefaultMaxRounds=3 (types.go:41-42) is tuned for fast qwen2.5:0.5b. A capable qwen2.5:3b (~16s/round) blows the 30s cap on the 3-round Specify pillar -> context deadline exceeded. /debate works (WithMaxRounds(1), rich quality 0.875 proven). Fix: raise per-debate timeout for the speckit Specify use case (adapter WithTimeout or orchestrator default). Tunable, not a code defect; surfaced honestly (no fabrication).
 
+## HXC-094 — F12 workspace checkpoints — file snapshot + restore/undo safety net
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** internal/checkpoint + cmd/cli /checkpoint; restore-bytes round-trip + survives-restart tests PASS, go build ./... 0
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+internal/checkpoint Manager (git-plumbing + file-copy backends) + /checkpoint create/list/restore CLI command: snapshot working-tree file contents and restore real bytes later (the cli_agents F12 oops-revert net). Existing checkpoints were task-DB rows, not file snapshots.
+
