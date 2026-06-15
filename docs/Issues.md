@@ -596,3 +596,13 @@ SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6);
 
 panoptic internal/enterprise/{audit,users}.json are version-tracked but overwritten by the enterprise test suite every run (timestamps/random IDs) -> perpetual dirty tree. CONST-053: test-generated data should be gitignored + a fixture template used. Pre-existing, low severity.
 
+## HXC-093 — helix_code module graph has phantom digital.vasic.* requires + private transitive blocking go list -m all / gomobile bind
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+gomobile bind fails because go list -m -json all errors: ~22 digital.vasic.{cache,database,eventbus,...,vectordb} module paths are required with NO replace + NO remote ('no such host'), and github.com/HelixDevelopment/helix_agent/Toolkit (private, separate from the replaced dev.helix.agent) needs interactive git creds. go build ./... works (imported subset only); full-graph tooling (gomobile, go list -m all) is blocked. Fix (repo-side, careful — editing go.mod risks the build): add replace directives for the phantom paths OR prune them, make Toolkit resolvable (replace/GOPRIVATE+SSH), persist x/mobile as a tool directive. Toolchain+NDK+Xcode all present; gobind codegen already works -> artifact achievable once graph resolves.
+
