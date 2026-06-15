@@ -2,6 +2,7 @@ package task
 
 import (
 	"errors"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -707,4 +708,161 @@ func TestNewTaskManager_TypedNilDB_NoPanic(t *testing.T) {
 		_, cerr := tm.CreateTask(TaskTypePlanning, map[string]interface{}{"x": 1}, PriorityNormal, CriticalityLow, nil)
 		require.Error(t, cerr, "CreateTask in DB-degraded mode must error cleanly, not panic")
 	})
+}
+
+// ---------------------------------------------------------------------------
+// §11.4.115 RED→GREEN regression guard for the CompleteTask/FailTask
+// worker-count-underflow defect.
+//
+// DEFECT (reproduced, medium severity): CompleteTask and the symmetric
+// FailTask unconditionally executed `worker.CurrentTasksCount--` whenever
+// `task.AssignedWorker != nil`, without checking the task's prior status and
+// without clearing AssignedWorker. A SECOND CompleteTask (duplicate event /
+// caller retry) decremented again → CurrentTasksCount went NEGATIVE (-1).
+// AssignTask gates new work on `CurrentTasksCount >= MaxConcurrentTasks`, so a
+// negative count silently inflated a worker's effective capacity.
+//
+// POLARITY SWITCH (§11.4.115): set RED_MODE=1 to author/verify the test
+// against the BROKEN artifact — it asserts the underflow is PRESENT (count
+// == -1 after a double CompleteTask), proving the test genuinely reproduces
+// the defect rather than agreeing with the fix. The default (RED_MODE unset
+// or "0") is the standing GREEN regression guard asserting the defect is
+// ABSENT (idempotent: count stays 0).
+func redMode() bool { return os.Getenv("RED_MODE") == "1" }
+
+// newAssignedTaskFixture wires a worker (capacity 5) and an assigned task
+// (status=assigned, count=1) into a TaskManager backed by a permissive mock
+// DB (every Exec succeeds, any number of times — so duplicate
+// Complete/Fail calls do not fail at the persistence layer and the count
+// behaviour is what is actually under test).
+func newAssignedTaskFixture(t *testing.T) (*TaskManager, *Task, *Worker) {
+	t.Helper()
+	mockDB := database.NewMockDatabase()
+	mockDB.MockExecSuccess(1) // permissive: matches all Exec calls
+	tm := NewTaskManager(mockDB, &redis.Client{})
+
+	workerID := uuid.New()
+	worker := &Worker{
+		ID:                 workerID,
+		Hostname:           "test-worker",
+		DisplayName:        "Test Worker",
+		Capabilities:       []string{"compilation", "build_tools"},
+		Status:             "active",
+		HealthStatus:       "healthy",
+		MaxConcurrentTasks: 5,
+		CurrentTasksCount:  1, // worker is mid-flight on the assigned task
+		CreatedAt:          time.Now(),
+		UpdatedAt:          time.Now(),
+	}
+
+	taskID := uuid.New()
+	task := &Task{
+		ID:             taskID,
+		Type:           TaskTypeBuilding,
+		Data:           map[string]interface{}{"k": "v"},
+		Status:         TaskStatusAssigned,
+		Priority:       PriorityNormal,
+		Criticality:    CriticalityNormal,
+		AssignedWorker: &workerID,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	}
+
+	tm.mu.Lock()
+	tm.workers[workerID] = worker
+	tm.tasks[taskID] = task
+	tm.mu.Unlock()
+	return tm, task, worker
+}
+
+func (tm *TaskManager) workerCount(id uuid.UUID) int {
+	tm.mu.RLock()
+	defer tm.mu.RUnlock()
+	return tm.workers[id].CurrentTasksCount
+}
+
+// TestCompleteTask_DoubleComplete_NoUnderflow reproduces (RED) / guards
+// against (GREEN) the worker-count underflow on duplicate CompleteTask.
+func TestCompleteTask_DoubleComplete_NoUnderflow(t *testing.T) {
+	tm, task, worker := newAssignedTaskFixture(t)
+
+	require.NoError(t, tm.CompleteTask(task.ID, map[string]interface{}{"out": "ok"}))
+	assert.Equal(t, 0, tm.workerCount(worker.ID),
+		"first CompleteTask must take count 1 -> 0")
+
+	// Duplicate event / caller retry.
+	require.NoError(t, tm.CompleteTask(task.ID, map[string]interface{}{"out": "ok"}))
+
+	if redMode() {
+		// On the BROKEN artifact the second decrement underflows to -1.
+		assert.Equal(t, -1, tm.workerCount(worker.ID),
+			"RED_MODE: defect must be PRESENT — duplicate CompleteTask underflows count to -1")
+	} else {
+		// On the FIXED artifact CompleteTask is idempotent: count stays 0.
+		assert.Equal(t, 0, tm.workerCount(worker.ID),
+			"duplicate CompleteTask must be a no-op — count must remain 0, never negative")
+	}
+}
+
+// TestFailTask_DoubleFail_NoUnderflow is the symmetric guard for FailTask.
+// MaxRetries is 0 so FailTask takes the permanent-failure (terminal) branch
+// rather than re-queuing.
+func TestFailTask_DoubleFail_NoUnderflow(t *testing.T) {
+	tm, task, worker := newAssignedTaskFixture(t)
+	tm.mu.Lock()
+	task.MaxRetries = 0 // force the terminal TaskStatusFailed branch
+	tm.mu.Unlock()
+
+	require.NoError(t, tm.FailTask(task.ID, "boom"))
+	assert.Equal(t, 0, tm.workerCount(worker.ID),
+		"first FailTask must take count 1 -> 0")
+
+	require.NoError(t, tm.FailTask(task.ID, "boom again"))
+
+	if redMode() {
+		assert.Equal(t, -1, tm.workerCount(worker.ID),
+			"RED_MODE: defect must be PRESENT — duplicate FailTask underflows count to -1")
+	} else {
+		assert.Equal(t, 0, tm.workerCount(worker.ID),
+			"duplicate FailTask must be a no-op — count must remain 0, never negative")
+	}
+}
+
+// TestCompleteTask_DoubleComplete_CapacityGatingIntact proves the
+// end-user-visible consequence: after a duplicate CompleteTask the worker's
+// capacity gating in AssignTask must still be honoured. With the underflow
+// (count=-1) the worker would silently accept MaxConcurrentTasks+1 tasks.
+// This guard is GREEN-only (it asserts correct post-fix behaviour); under the
+// underflow it FAILs because the over-capacity assignment is wrongly accepted.
+func TestCompleteTask_DoubleComplete_CapacityGatingIntact(t *testing.T) {
+	if redMode() {
+		t.Skip("SKIP-OK: capacity-gating guard asserts post-fix behaviour only; RED_MODE reproduces underflow via the count guards above")
+	}
+	tm, task, worker := newAssignedTaskFixture(t)
+	tm.mu.Lock()
+	worker.MaxConcurrentTasks = 1 // capacity exactly 1
+	tm.mu.Unlock()
+
+	require.NoError(t, tm.CompleteTask(task.ID, map[string]interface{}{"out": "ok"}))
+	require.NoError(t, tm.CompleteTask(task.ID, map[string]interface{}{"out": "ok"})) // duplicate
+
+	// count must be 0 now. Fill the single capacity slot...
+	a := uuid.New()
+	tm.mu.Lock()
+	tm.tasks[a] = &Task{ID: a, Type: TaskTypeBuilding, Status: TaskStatusPending,
+		Priority: PriorityNormal, Criticality: CriticalityNormal, CreatedAt: time.Now()}
+	tm.mu.Unlock()
+	require.NoError(t, tm.AssignTask(a, worker.ID), "first assignment fills the only slot")
+
+	// ...the worker is now AT capacity (count==1==Max). A second assignment
+	// MUST be refused. Under the underflow bug count would be -1 here, so this
+	// would wrongly succeed.
+	b := uuid.New()
+	tm.mu.Lock()
+	tm.tasks[b] = &Task{ID: b, Type: TaskTypeBuilding, Status: TaskStatusPending,
+		Priority: PriorityNormal, Criticality: CriticalityNormal, CreatedAt: time.Now()}
+	tm.mu.Unlock()
+	err := tm.AssignTask(b, worker.ID)
+	require.Error(t, err, "worker at capacity must refuse a second assignment")
+	assert.Contains(t, err.Error(), "at capacity")
 }

@@ -130,6 +130,18 @@ func (tm *TaskManager) CompleteTask(taskID uuid.UUID, result map[string]interfac
 		return fmt.Errorf("task not found: %s", taskID)
 	}
 
+	// Idempotency guard: a task already in a terminal state (completed /
+	// failed) has already released its worker slot. A duplicate event or
+	// caller retry MUST be a no-op — otherwise the second
+	// `worker.CurrentTasksCount--` underflows the count below zero, which
+	// AssignTask reads as spare capacity (CurrentTasksCount >=
+	// MaxConcurrentTasks no longer holds) and silently over-assigns the
+	// worker. See TestCompleteTask_DoubleComplete_NoUnderflow (§11.4.115).
+	if isTerminalStatus(task.Status) {
+		log.Printf("Task %s already terminal (%s); CompleteTask is a no-op", taskID, task.Status)
+		return nil
+	}
+
 	// Update task
 	task.Status = TaskStatusCompleted
 	task.ResultData = result
@@ -137,13 +149,16 @@ func (tm *TaskManager) CompleteTask(taskID uuid.UUID, result map[string]interfac
 	task.CompletedAt = &now
 	task.UpdatedAt = now
 
-	// Update worker if assigned
+	// Release the worker slot exactly once, then detach the worker so any
+	// duplicate call (even one that somehow bypassed the terminal-state
+	// guard) cannot decrement again. decrementWorkerTasks clamps at 0 as
+	// defense-in-depth.
 	if task.AssignedWorker != nil {
 		if worker, exists := tm.workers[*task.AssignedWorker]; exists {
-			worker.CurrentTasksCount--
-			worker.UpdatedAt = now
+			decrementWorkerTasks(worker, now)
 			tm.updateWorkerInDB(worker)
 		}
+		task.AssignedWorker = nil
 	}
 
 	// Update in database
@@ -163,13 +178,43 @@ func (tm *TaskManager) FailTask(taskID uuid.UUID, errorMessage string) error {
 		return fmt.Errorf("task not found: %s", taskID)
 	}
 
+	// Idempotency guard: a task already permanently failed (terminal) has
+	// already released its worker slot. A duplicate event or caller retry
+	// MUST be a no-op — otherwise the second `worker.CurrentTasksCount--`
+	// underflows the count below zero and AssignTask over-assigns the
+	// worker. See TestFailTask_DoubleFail_NoUnderflow (§11.4.115).
+	//
+	// Note: this guards only the TERMINAL completed/failed states. A task
+	// that was re-queued by a prior FailTask is back in TaskStatusPending
+	// (non-terminal) — calling FailTask on it again is a legitimate
+	// subsequent failure and proceeds through the retry/terminal logic
+	// below.
+	if isTerminalStatus(task.Status) {
+		log.Printf("Task %s already terminal (%s); FailTask is a no-op", taskID, task.Status)
+		return nil
+	}
+
+	now := time.Now()
+
+	// Release the worker slot exactly once for THIS active assignment,
+	// before we possibly detach the worker on the retry path. The slot is
+	// released whether we re-queue (the worker is no longer running it) or
+	// fail permanently. decrementWorkerTasks clamps at 0 as
+	// defense-in-depth.
+	if task.AssignedWorker != nil {
+		if worker, exists := tm.workers[*task.AssignedWorker]; exists {
+			decrementWorkerTasks(worker, now)
+			tm.updateWorkerInDB(worker)
+		}
+	}
+
 	// Check if we should retry
 	if task.RetryCount < task.MaxRetries {
 		task.RetryCount++
 		task.Status = TaskStatusPending
 		task.ErrorMessage = errorMessage
 		task.AssignedWorker = nil
-		task.UpdatedAt = time.Now()
+		task.UpdatedAt = now
 
 		// Add back to queue
 		tm.queue.AddTask(task)
@@ -177,23 +222,34 @@ func (tm *TaskManager) FailTask(taskID uuid.UUID, errorMessage string) error {
 	} else {
 		task.Status = TaskStatusFailed
 		task.ErrorMessage = errorMessage
-		task.UpdatedAt = time.Now()
+		task.AssignedWorker = nil
+		task.UpdatedAt = now
 		log.Printf("❌ Task %s failed permanently", taskID)
-	}
-
-	// Update worker if assigned
-	if task.AssignedWorker != nil {
-		if worker, exists := tm.workers[*task.AssignedWorker]; exists {
-			worker.CurrentTasksCount--
-			worker.UpdatedAt = time.Now()
-			tm.updateWorkerInDB(worker)
-		}
 	}
 
 	// Update in database
 	tm.updateTaskInDB(task)
 
 	return nil
+}
+
+// isTerminalStatus reports whether a task has reached a terminal state — one
+// where its worker slot has already been released and no further
+// status-transition or worker-count mutation should occur. CompleteTask and
+// FailTask use this to stay idempotent against duplicate events / retries.
+func isTerminalStatus(s TaskStatus) bool {
+	return s == TaskStatusCompleted || s == TaskStatusFailed
+}
+
+// decrementWorkerTasks releases one worker slot, clamping at zero so the
+// count can never go negative even on an unexpected double-release.
+// CurrentTasksCount feeds AssignTask's capacity gate, so a negative value
+// would silently inflate effective capacity (§11.4.115).
+func decrementWorkerTasks(worker *Worker, now time.Time) {
+	if worker.CurrentTasksCount > 0 {
+		worker.CurrentTasksCount--
+	}
+	worker.UpdatedAt = now
 }
 
 // CreateCheckpoint creates a checkpoint for a task

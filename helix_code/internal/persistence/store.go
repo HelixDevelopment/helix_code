@@ -116,7 +116,19 @@ func (s *Store) SetSerializer(serializer Serializer) {
 	s.serializer = serializer
 }
 
-// EnableAutoSave enables automatic saving at intervals
+// EnableAutoSave enables automatic saving at intervals.
+//
+// Channel-lifecycle correctness: each enable creates a FRESH stop channel
+// (s.stopAutoSave = make(chan struct{})) before starting the loop, and that
+// channel is captured and passed INTO autoSaveLoop. This makes the
+// enable→disable→re-enable cycle correct: a prior loop already exited on its own
+// (now-closed) channel, and the re-enabled loop selects on the NEW channel rather
+// than an already-closed one (which would have returned immediately, silently
+// killing auto-save). Double-enable (without an intervening disable) is a guarded
+// no-op so we never leak a second goroutine. All channel/flag mutation happens
+// under s.mu so it is race-free against DisableAutoSave and against the loop,
+// which now reads only its captured-by-value parameters (never s.stopAutoSave /
+// s.autoSaveInterval unguarded). §11.4.85.
 func (s *Store) EnableAutoSave(interval time.Duration) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -128,26 +140,39 @@ func (s *Store) EnableAutoSave(interval time.Duration) {
 	s.autoSaveEnabled = true
 	s.autoSaveInterval = interval
 
-	go s.autoSaveLoop()
+	// Fresh channel per enable — the previous one (if any) was closed by the
+	// matching DisableAutoSave and its loop has already exited.
+	stop := make(chan struct{})
+	s.stopAutoSave = stop
+
+	go s.autoSaveLoop(interval, stop)
 }
 
-// DisableAutoSave disables automatic saving
+// DisableAutoSave disables automatic saving. It closes the current stop channel
+// exactly once (guarded by the autoSaveEnabled flag + s.mu) so:
+//   - double-disable without an intervening enable is a safe no-op (the flag is
+//     already false), and
+//   - disable-after-re-enable closes the FRESH channel created by that re-enable,
+//     never the already-closed prior channel (which would panic
+//     "close of closed channel").
 func (s *Store) DisableAutoSave() {
 	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	if !s.autoSaveEnabled {
-		s.mu.Unlock()
 		return
 	}
 
 	s.autoSaveEnabled = false
-	s.mu.Unlock()
-
 	close(s.stopAutoSave)
 }
 
-// autoSaveLoop runs the auto-save loop
-func (s *Store) autoSaveLoop() {
-	ticker := time.NewTicker(s.autoSaveInterval)
+// autoSaveLoop runs the auto-save loop. The interval and stop channel are passed
+// BY VALUE (captured under s.mu by EnableAutoSave) so the loop never reads the
+// mutable s.autoSaveInterval / s.stopAutoSave fields without a lock — eliminating
+// the data race a concurrent EnableAutoSave/DisableAutoSave would otherwise cause.
+func (s *Store) autoSaveLoop(interval time.Duration, stop <-chan struct{}) {
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	for {
@@ -156,7 +181,7 @@ func (s *Store) autoSaveLoop() {
 			if err := s.SaveAll(); err != nil {
 				s.triggerError(err)
 			}
-		case <-s.stopAutoSave:
+		case <-stop:
 			return
 		}
 	}
