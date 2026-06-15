@@ -586,16 +586,6 @@ Context-window usage percentage indicator scaffolded (commit 3c9d3495, task T1.5
 
 SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6); REMAINING: full precedence-conflict resolution + tests covering overlapping skill definitions still outstanding — keep open until precedence is fully resolved and tested.
 
-## HXC-098 — out-of-box config fails 'version required' validation — blocks client status/system commands
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Default config/config.yaml + the operator's ~/.config/helixcode/config.json have no top-level Version -> config validation fails with 'version is required' (internal_config_validate_version_required), blocking desktop/aurora/harmony status/system/version (and CLI subsystems) for a fresh user. Found while recording client videos (had to use a throwaway minimal valid config). Fix: ship a valid default Version in config/config.yaml (+ docs), or default it in config.Load when absent.
-
 ## HXC-099 — Systemic i18n raw-key sweep redo (CONST-046) — corrected, regression-free, with default-translator contract decision
 
 **Status:** Queued

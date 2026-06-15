@@ -2818,5 +2818,27 @@ build): add replace directives for the phantom paths OR prune them, make
 Toolkit resolvable (replace/GOPRIVATE+SSH), persist x/mobile as a tool
 directive. Toolchain+NDK+Xcode all present; gobind codegen already works
 -&gt; artifact achievable once graph resolves.</p>
+<h2 id="hxc-098-out-of-box-config-fails-version-required-validation-blocks-client-statussystem-commands">HXC-098
+— out-of-box config fails ‘version required’ validation — blocks client
+status/system commands</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Reproduced via LoadHelixConfig path (RED:
+version-less config.json -&gt; Version=’’ + server.port=0 -&gt;
+validateConfig rejects). Fixed in internal/config/config.go
+loadConfigLocked: decode JSON ON TOP of getDefaultConfig() so all viper
+defaults merge. Guard hxc098_version_default_test.go: RED pre-fix (exit
+1), GREEN post-fix (Version=1.0.0,Port=8080). config.yaml ships explicit
+version. Full config pkg ok. <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Default config/config.yaml + the operator’s
+~/.config/helixcode/config.json have no top-level Version -&gt; config
+validation fails with ‘version is required’
+(internal_config_validate_version_required), blocking
+desktop/aurora/harmony status/system/version (and CLI subsystems) for a
+fresh user. Found while recording client videos (had to use a throwaway
+minimal valid config). Fix: ship a valid default Version in
+config/config.yaml (+ docs), or default it in config.Load when
+absent.</p>
 </body>
 </html>

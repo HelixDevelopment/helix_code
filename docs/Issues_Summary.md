@@ -49,9 +49,8 @@
 | HXC-035 | `POST /api/v1/auth/register` returns 400 `internal_auth_failed_create_user` on the live server (blocks all authenticated flows) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE (confirmed via direct psql INSERT → `ERROR: column "display_name" of relation "users" does not exist`): `createSchemaSQL`'s `CREATE TABLE users`… |
 | HXC-077 | T1.5 context-window percentage indicator (partial) | Feature | Queued |  | T1.5 context-window percentage indicator (partial) |
 | HXC-078 | T1.6 SKILL.md precedence resolution (partial) | Task | Queued |  | T1.6 SKILL.md precedence resolution (partial) |
-| HXC-098 | out-of-box config fails 'version required' validation — blocks client status/system commands | Bug | Queued |  | out-of-box config fails 'version required' validation — blocks client status/system commands |
 | HXC-099 | Systemic i18n raw-key sweep redo (CONST-046) — corrected, regression-free, with default-translator contract decision | Task | Queued |  | Systemic i18n raw-key sweep redo (CONST-046) — corrected, regression-free, with default-translator contract decision |
 
-**Counts**: 45 tracked item-sections in `docs/Issues.md` — **4 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
+**Counts**: 44 tracked item-sections in `docs/Issues.md` — **3 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
 *Last regenerated: 2026-06-15 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*

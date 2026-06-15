@@ -918,9 +918,18 @@ func (m *ConfigManager) loadConfigLocked() error {
 		return err
 	}
 
-	// Decode into a fresh struct and only swap m.config on success, so a failed
-	// reload leaves the previous good config intact (no nil/torn read).
-	cfg := &Config{}
+	// HXC-098: start from the fully-defaulted config and unmarshal the file ON
+	// TOP of it, so values the file supplies override the defaults while every
+	// field the file omits keeps its default. A plain json.Unmarshal into an
+	// empty struct merges NO defaults (unlike the viper-based Load()), so an
+	// out-of-box / hand-written config.json omitting top-level `version`,
+	// `server.port`, `application.name`, etc. would fail validateConfig
+	// ("version is required" / "server port must be between 1 and 65535"),
+	// blocking fresh users' status/system/version commands.
+	//
+	// Decode only swaps m.config on success, so a failed reload leaves the
+	// previous good config intact (no nil/torn read).
+	cfg := getDefaultConfig()
 	if err := json.Unmarshal(data, cfg); err != nil {
 		return err
 	}

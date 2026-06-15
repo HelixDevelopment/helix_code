@@ -2177,21 +2177,6 @@ T1.6 SKILL.md precedence resolution (partial)</h2>
 task T1.6); REMAINING: full precedence-conflict resolution + tests
 covering overlapping skill definitions still outstanding — keep open
 until precedence is fully resolved and tested.</p>
-<h2 id="hxc-098-out-of-box-config-fails-version-required-validation-blocks-client-statussystem-commands">HXC-098
-— out-of-box config fails ‘version required’ validation — blocks client
-status/system commands</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
-<strong>Assigned-To:</strong> Claude</p>
-<p>Default config/config.yaml + the operator’s
-~/.config/helixcode/config.json have no top-level Version -&gt; config
-validation fails with ‘version is required’
-(internal_config_validate_version_required), blocking
-desktop/aurora/harmony status/system/version (and CLI subsystems) for a
-fresh user. Found while recording client videos (had to use a throwaway
-minimal valid config). Fix: ship a valid default Version in
-config/config.yaml (+ docs), or default it in config.Load when
-absent.</p>
 <h2 id="hxc-099-systemic-i18n-raw-key-sweep-redo-const-046-corrected-regression-free-with-default-translator-contract-decision">HXC-099
 — Systemic i18n raw-key sweep redo (CONST-046) — corrected,
 regression-free, with default-translator contract decision</h2>

@@ -756,3 +756,14 @@ panoptic internal/enterprise/{audit,users}.json are version-tracked but overwrit
 
 gomobile bind fails because go list -m -json all errors: ~22 digital.vasic.{cache,database,eventbus,...,vectordb} module paths are required with NO replace + NO remote ('no such host'), and github.com/HelixDevelopment/helix_agent/Toolkit (private, separate from the replaced dev.helix.agent) needs interactive git creds. go build ./... works (imported subset only); full-graph tooling (gomobile, go list -m all) is blocked. Fix (repo-side, careful — editing go.mod risks the build): add replace directives for the phantom paths OR prune them, make Toolkit resolvable (replace/GOPRIVATE+SSH), persist x/mobile as a tool directive. Toolchain+NDK+Xcode all present; gobind codegen already works -> artifact achievable once graph resolves.
 
+## HXC-098 — out-of-box config fails 'version required' validation — blocks client status/system commands
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** Reproduced via LoadHelixConfig path (RED: version-less config.json -> Version='' + server.port=0 -> validateConfig rejects). Fixed in internal/config/config.go loadConfigLocked: decode JSON ON TOP of getDefaultConfig() so all viper defaults merge. Guard hxc098_version_default_test.go: RED pre-fix (exit 1), GREEN post-fix (Version=1.0.0,Port=8080). config.yaml ships explicit version. Full config pkg ok.
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Default config/config.yaml + the operator's ~/.config/helixcode/config.json have no top-level Version -> config validation fails with 'version is required' (internal_config_validate_version_required), blocking desktop/aurora/harmony status/system/version (and CLI subsystems) for a fresh user. Found while recording client videos (had to use a throwaway minimal valid config). Fix: ship a valid default Version in config/config.yaml (+ docs), or default it in config.Load when absent.
+
