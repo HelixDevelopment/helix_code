@@ -64,12 +64,12 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.43.0
 	go.opentelemetry.io/otel/trace v1.43.0
 	go.uber.org/zap v1.28.0
-	golang.org/x/crypto v0.52.0
-	golang.org/x/net v0.55.0
+	golang.org/x/crypto v0.53.0
+	golang.org/x/net v0.56.0
 	golang.org/x/oauth2 v0.36.0
-	golang.org/x/sync v0.20.0
-	golang.org/x/term v0.43.0
-	golang.org/x/text v0.37.0
+	golang.org/x/sync v0.21.0
+	golang.org/x/term v0.44.0
+	golang.org/x/text v0.38.0
 	golang.org/x/time v0.14.0
 	google.golang.org/grpc v1.80.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -193,8 +193,11 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.22.0 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
-	golang.org/x/image v0.32.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/image v0.42.0 // indirect
+	golang.org/x/mobile v0.0.0-20260611195102-4dd8f1dbf5d2 // indirect
+	golang.org/x/mod v0.37.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/tools v0.46.0 // indirect
 	gonum.org/v1/gonum v0.17.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260401024825-9d38bb4040a9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260401024825-9d38bb4040a9 // indirect
@@ -237,3 +240,64 @@ replace dev.helix.agent => ../submodules/helix_agent
 replace dev.helix.dag => ../submodules/dag_orchestrator
 
 replace dev.helix.pipeline => ../submodules/pipeline_runtime
+
+// HXC-093: phantom transitive deps surfaced by helix_agent's own replace block.
+// Go ignores replace directives of dependency modules, so helix_code (the main
+// module) must restate them. Targets mirror helix_agent/go.mod's replaces,
+// translated from helix_agent-relative (../X) to helix_code-relative
+// (../submodules/X). Every target dir's module line was verified to match.
+replace dev.helix.agent/pkg/api => ../submodules/helix_agent/pkg/api
+
+replace github.com/HelixDevelopment/helix_agent/Toolkit => ../submodules/helix_agent/Toolkit
+
+replace digital.vasic.agentic => ../submodules/agentic
+
+replace digital.vasic.auth => ../submodules/auth
+
+replace digital.vasic.background => ../submodules/background_tasks
+
+replace digital.vasic.benchmark => ../submodules/benchmark
+
+replace digital.vasic.cache => ../submodules/cache
+
+replace digital.vasic.database => ../submodules/database
+
+replace digital.vasic.eventbus => ../submodules/event_bus
+
+replace digital.vasic.formatters => ../submodules/formatters
+
+replace digital.vasic.llmops => ../submodules/llm_ops
+
+replace digital.vasic.llmprovider => ../submodules/llm_provider
+
+replace digital.vasic.llmsverifier => ../submodules/llms_verifier/llm-verifier
+
+replace digital.vasic.mcp => ../submodules/mcp_module
+
+replace digital.vasic.messaging => ../submodules/messaging
+
+replace digital.vasic.models => ../submodules/models
+
+replace digital.vasic.normalize => ../submodules/normalize
+
+replace digital.vasic.optimization => ../submodules/optimization
+
+replace digital.vasic.planning => ../submodules/planning
+
+replace digital.vasic.plugins => ../submodules/plugins
+
+replace digital.vasic.rag => ../submodules/rag
+
+replace digital.vasic.redteam => ../submodules/red_team
+
+replace digital.vasic.selfimprove => ../submodules/self_improve
+
+replace digital.vasic.storage => ../submodules/storage
+
+replace digital.vasic.streaming => ../submodules/streaming
+
+replace digital.vasic.toolschema => ../submodules/tool_schema
+
+replace digital.vasic.vectordb => ../submodules/vector_db
+
+tool golang.org/x/mobile/cmd/gobind
