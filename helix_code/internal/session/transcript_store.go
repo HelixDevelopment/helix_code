@@ -85,13 +85,20 @@ func (s *TranscriptStore) sessionDir(id string) string {
 // transcript file exists.
 func (s *TranscriptStore) Append(ctx context.Context, sessionID string, msg Message) error {
 	dir := s.sessionDir(sessionID)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	// Session directories and transcript/metadata files are owner-only (0700 /
+	// 0600): a transcript carries the full conversation — user prompts and tool
+	// output that can embed API keys, tokens, and other credentials — so it is
+	// sensitive-data per CONST-042 / §12.1 and CONST-053 §4. World-/group-
+	// readable modes would let any other local user read another user's
+	// session. (Fixed: previously 0755 dirs + 0644 files; reproduced by
+	// TestTranscriptStore_FileModes_NotWorldReadable.)
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("transcript_store: mkdir %s: %w", dir, err)
 	}
 
 	// Write the JSONL line.
 	path := filepath.Join(dir, "transcript.jsonl")
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("transcript_store: open %s: %w", path, err)
 	}
@@ -131,7 +138,7 @@ func (s *TranscriptStore) Append(ctx context.Context, sessionID string, msg Mess
 	if err != nil {
 		return fmt.Errorf("transcript_store: marshal metadata: %w", err)
 	}
-	if err := os.WriteFile(metaPath, encoded, 0644); err != nil {
+	if err := os.WriteFile(metaPath, encoded, 0600); err != nil {
 		return fmt.Errorf("transcript_store: write metadata %s: %w", metaPath, err)
 	}
 	return nil
@@ -177,7 +184,9 @@ func (s *TranscriptStore) ReadTranscript(ctx context.Context, sessionID string) 
 // <baseDir>/<meta.SessionID>/metadata.json, creating the directory if needed.
 func (s *TranscriptStore) UpdateSessionMetadata(ctx context.Context, meta SessionMetadata) error {
 	dir := s.sessionDir(meta.SessionID)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	// Owner-only (0700 dir / 0600 file): metadata is session state per
+	// CONST-042 / §12.1 / CONST-053 §4. See Append for the full rationale.
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("transcript_store: mkdir %s: %w", dir, err)
 	}
 	data, err := json.MarshalIndent(meta, "", "  ")
@@ -185,7 +194,7 @@ func (s *TranscriptStore) UpdateSessionMetadata(ctx context.Context, meta Sessio
 		return fmt.Errorf("transcript_store: marshal metadata: %w", err)
 	}
 	path := filepath.Join(dir, "metadata.json")
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	if err := os.WriteFile(path, data, 0600); err != nil {
 		return fmt.Errorf("transcript_store: write %s: %w", path, err)
 	}
 	return nil

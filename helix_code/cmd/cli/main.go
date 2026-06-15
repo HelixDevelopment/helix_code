@@ -928,9 +928,22 @@ func (c *CLI) buildSubsystems(ctx context.Context) error {
 	toolReg.Register(taskplanner.NewTaskStepTool(plannerExec))
 
 	// F27: aider-style voice input + repo-map.
-	voiceRec := voice.NewVoiceRecorder()
+	// Wire the operator-configured capture backend (HELIX_VOICE_CAPTURE_CMD)
+	// so NewVoiceRecorderWithCmd / VoiceConfig.CaptureCmd are actually
+	// exercised in production instead of being dead. When unset, fall back
+	// to the auto-detected arecord/sox/parec via NewVoiceRecorder(). The
+	// value is a command NAME (whitespace-split, first field LookPath-
+	// validated inside detectCaptureCmd — no shell injection).
+	voiceCaptureCmd := os.Getenv("HELIX_VOICE_CAPTURE_CMD")
+	var voiceRec *voice.VoiceRecorder
+	if voiceCaptureCmd != "" {
+		voiceRec = voice.NewVoiceRecorderWithCmd(voiceCaptureCmd)
+	} else {
+		voiceRec = voice.NewVoiceRecorder()
+	}
 	voiceTrans := voice.NewVoiceTranscriber(voice.VoiceConfig{
 		WhisperAPIKey: os.Getenv("OPENAI_API_KEY"),
+		CaptureCmd:    voiceCaptureCmd,
 	})
 	toolReg.Register(voice.NewVoiceStartTool(voiceRec))
 	toolReg.Register(voice.NewVoiceStopTool(voiceRec))

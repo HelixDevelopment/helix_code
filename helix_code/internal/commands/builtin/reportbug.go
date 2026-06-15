@@ -129,15 +129,56 @@ func collectSystemInfo() map[string]string {
 	}
 }
 
+// sanitizeSessionID returns a filesystem-safe rendition of a session id for
+// use as a path component, or "" if the id cannot be made safe.
+//
+// SECURITY (CONST-042-adjacent / path-traversal): sessionID flows from
+// CommandContext.SessionID, which for server/remote-originated sessions is
+// externally controlled. Interpolating it raw into
+// fmt.Sprintf("session_%s.log", sessionID) and then filepath.Join lets a value
+// like "/../../secret/x" or "x/../../etc/foo" collapse past the intended
+// "logs/" base and read arbitrary ".log" files anywhere on the host
+// (information disclosure). We forbid any id that contains a path separator
+// (os-specific or '/'), a NUL byte, or a ".." segment. A rejected id yields ""
+// so the caller skips the per-session log path entirely (it still falls back to
+// the fixed "logs/helixcode.log" and in-memory logging) — a missing session log
+// is far preferable to reading an attacker-chosen file.
+func sanitizeSessionID(sessionID string) string {
+	if sessionID == "" {
+		return ""
+	}
+	if strings.ContainsRune(sessionID, 0) {
+		return ""
+	}
+	if strings.ContainsRune(sessionID, '/') || strings.ContainsRune(sessionID, filepath.Separator) {
+		return ""
+	}
+	// Reject a bare ".." or any value Clean would resolve to an escaping
+	// segment. After the separator checks above, the only escaping form left is
+	// the literal "..".
+	if sessionID == ".." || sessionID == "." {
+		return ""
+	}
+	return sessionID
+}
+
 // collectRecentLogs collects recent log entries
 func collectRecentLogs(sessionID string, limit int) string {
-	// Try to read from standard log locations
-	logLocations := []string{
-		filepath.Join(os.TempDir(), "helixcode", "logs", fmt.Sprintf("session_%s.log", sessionID)),
-		filepath.Join(os.Getenv("HOME"), ".helixcode", "logs", fmt.Sprintf("session_%s.log", sessionID)),
-		filepath.Join("logs", fmt.Sprintf("session_%s.log", sessionID)),
-		filepath.Join("logs", "helixcode.log"),
+	safeID := sanitizeSessionID(sessionID)
+
+	// Try to read from standard log locations. The per-session paths are only
+	// included when the session id is filesystem-safe; otherwise we fall back to
+	// the fixed log path so a malicious id can never steer the read off-base.
+	var logLocations []string
+	if safeID != "" {
+		sessionFile := fmt.Sprintf("session_%s.log", safeID)
+		logLocations = append(logLocations,
+			filepath.Join(os.TempDir(), "helixcode", "logs", sessionFile),
+			filepath.Join(os.Getenv("HOME"), ".helixcode", "logs", sessionFile),
+			filepath.Join("logs", sessionFile),
+		)
 	}
+	logLocations = append(logLocations, filepath.Join("logs", "helixcode.log"))
 
 	var logContent strings.Builder
 	logContent.WriteString(trc("builtin_reportbug_logs_header", map[string]any{"Session": sessionID, "Limit": limit}) + "\n\n")

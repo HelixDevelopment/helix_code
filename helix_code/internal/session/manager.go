@@ -87,7 +87,6 @@ func (m *Manager) Create(projectID, name, description string, mode Mode) (*Sessi
 	}
 
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	// Create session
 	session := &Session{
@@ -107,6 +106,7 @@ func (m *Manager) Create(projectID, name, description string, mode Mode) (*Sessi
 	// Create dedicated focus chain for session
 	chain, err := m.focusManager.CreateChain(fmt.Sprintf("session-%s", session.ID), false)
 	if err != nil {
+		m.mu.Unlock()
 		return nil, fmt.Errorf("failed to create focus chain: %w", err)
 	}
 	session.FocusChainID = chain.ID
@@ -114,12 +114,16 @@ func (m *Manager) Create(projectID, name, description string, mode Mode) (*Sessi
 	// Store session
 	m.sessions[session.ID] = session
 
-	// Trigger callbacks
-	for _, callback := range m.onCreate {
+	// Snapshot callbacks under the lock, then invoke them OUTSIDE the lock
+	// (see snapshotCallbacks for the deadlock rationale).
+	onCreate := snapshotCallbacks(m.onCreate)
+	m.mu.Unlock()
+
+	for _, callback := range onCreate {
 		callback(session)
 	}
 
-	// Emit hook
+	// Emit hook outside m.mu: hook handlers may re-enter the session Manager.
 	m.emitHook(hooks.HookTypeCustom, "session_created", session)
 
 	return session, nil
@@ -128,18 +132,20 @@ func (m *Manager) Create(projectID, name, description string, mode Mode) (*Sessi
 // Start starts a session and makes it active
 func (m *Manager) Start(sessionID string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
+		m.mu.Unlock()
 		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if session.Status == StatusCompleted {
+		m.mu.Unlock()
 		return errors.New(tr(context.Background(), "internal_session_start_completed", nil))
 	}
 
 	if session.Status == StatusFailed {
+		m.mu.Unlock()
 		return errors.New(tr(context.Background(), "internal_session_start_failed", nil))
 	}
 
@@ -154,19 +160,28 @@ func (m *Manager) Start(sessionID string) error {
 		m.focusManager.SetActiveChain(session.FocusChainID)
 	}
 
+	// Snapshot callbacks under the lock, then invoke them OUTSIDE the lock.
+	onStart := snapshotCallbacks(m.onStart)
+	switched := oldActive != session
+	var onSwitch []SwitchCallback
+	if switched {
+		onSwitch = snapshotSwitchCallbacks(m.onSwitch)
+	}
+	m.mu.Unlock()
+
 	// Trigger callbacks
-	for _, callback := range m.onStart {
+	for _, callback := range onStart {
 		callback(session)
 	}
 
 	// Trigger switch callbacks
-	if oldActive != session {
-		for _, callback := range m.onSwitch {
+	if switched {
+		for _, callback := range onSwitch {
 			callback(oldActive, session)
 		}
 	}
 
-	// Emit hook
+	// Emit hook outside m.mu: hook handlers may re-enter the session Manager.
 	m.emitHook(hooks.HookTypeCustom, "session_started", session)
 
 	return nil
@@ -175,14 +190,15 @@ func (m *Manager) Start(sessionID string) error {
 // Pause pauses the active session
 func (m *Manager) Pause(sessionID string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
+		m.mu.Unlock()
 		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if session.Status != StatusActive {
+		m.mu.Unlock()
 		return fmt.Errorf("session is not active")
 	}
 
@@ -199,12 +215,16 @@ func (m *Manager) Pause(sessionID string) error {
 		m.activeSession = nil
 	}
 
+	// Snapshot callbacks under the lock, then invoke them OUTSIDE the lock.
+	onPause := snapshotCallbacks(m.onPause)
+	m.mu.Unlock()
+
 	// Trigger callbacks
-	for _, callback := range m.onPause {
+	for _, callback := range onPause {
 		callback(session)
 	}
 
-	// Emit hook
+	// Emit hook outside m.mu: hook handlers may re-enter the session Manager.
 	m.emitHook(hooks.HookTypeCustom, "session_paused", session)
 
 	return nil
@@ -213,14 +233,15 @@ func (m *Manager) Pause(sessionID string) error {
 // Resume resumes a paused session
 func (m *Manager) Resume(sessionID string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
+		m.mu.Unlock()
 		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if session.Status != StatusPaused {
+		m.mu.Unlock()
 		return fmt.Errorf("session is not paused")
 	}
 
@@ -235,19 +256,28 @@ func (m *Manager) Resume(sessionID string) error {
 		m.focusManager.SetActiveChain(session.FocusChainID)
 	}
 
+	// Snapshot callbacks under the lock, then invoke them OUTSIDE the lock.
+	onResume := snapshotCallbacks(m.onResume)
+	switched := oldActive != session
+	var onSwitch []SwitchCallback
+	if switched {
+		onSwitch = snapshotSwitchCallbacks(m.onSwitch)
+	}
+	m.mu.Unlock()
+
 	// Trigger callbacks
-	for _, callback := range m.onResume {
+	for _, callback := range onResume {
 		callback(session)
 	}
 
 	// Trigger switch callbacks
-	if oldActive != session {
-		for _, callback := range m.onSwitch {
+	if switched {
+		for _, callback := range onSwitch {
 			callback(oldActive, session)
 		}
 	}
 
-	// Emit hook
+	// Emit hook outside m.mu: hook handlers may re-enter the session Manager.
 	m.emitHook(hooks.HookTypeCustom, "session_resumed", session)
 
 	return nil
@@ -256,14 +286,15 @@ func (m *Manager) Resume(sessionID string) error {
 // Complete marks a session as completed
 func (m *Manager) Complete(sessionID string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
+		m.mu.Unlock()
 		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if session.Status == StatusCompleted {
+		m.mu.Unlock()
 		return fmt.Errorf("session already completed")
 	}
 
@@ -281,12 +312,16 @@ func (m *Manager) Complete(sessionID string) error {
 		m.activeSession = nil
 	}
 
+	// Snapshot callbacks under the lock, then invoke them OUTSIDE the lock.
+	onComplete := snapshotCallbacks(m.onComplete)
+	m.mu.Unlock()
+
 	// Trigger callbacks
-	for _, callback := range m.onComplete {
+	for _, callback := range onComplete {
 		callback(session)
 	}
 
-	// Emit hook
+	// Emit hook outside m.mu: hook handlers may re-enter the session Manager.
 	m.emitHook(hooks.HookTypeCustom, "session_completed", session)
 
 	return nil
@@ -295,10 +330,10 @@ func (m *Manager) Complete(sessionID string) error {
 // Fail marks a session as failed
 func (m *Manager) Fail(sessionID string, reason string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
+		m.mu.Unlock()
 		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
@@ -316,7 +351,9 @@ func (m *Manager) Fail(sessionID string, reason string) error {
 		m.activeSession = nil
 	}
 
-	// Emit hook
+	m.mu.Unlock()
+
+	// Emit hook outside m.mu: hook handlers may re-enter the session Manager.
 	m.emitHook(hooks.HookTypeCustom, "session_failed", session)
 
 	return nil
@@ -325,15 +362,16 @@ func (m *Manager) Fail(sessionID string, reason string) error {
 // Delete deletes a session
 func (m *Manager) Delete(sessionID string) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	session, exists := m.sessions[sessionID]
 	if !exists {
+		m.mu.Unlock()
 		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	// Don't delete active session
 	if session.Status == StatusActive {
+		m.mu.Unlock()
 		return fmt.Errorf("cannot delete active session")
 	}
 
@@ -345,12 +383,16 @@ func (m *Manager) Delete(sessionID string) error {
 	// Remove session
 	delete(m.sessions, sessionID)
 
+	// Snapshot callbacks under the lock, then invoke them OUTSIDE the lock.
+	onDelete := snapshotCallbacks(m.onDelete)
+	m.mu.Unlock()
+
 	// Trigger callbacks
-	for _, callback := range m.onDelete {
+	for _, callback := range onDelete {
 		callback(session)
 	}
 
-	// Emit hook
+	// Emit hook outside m.mu: hook handlers may re-enter the session Manager.
 	m.emitHook(hooks.HookTypeCustom, "session_deleted", session)
 
 	return nil
@@ -582,38 +624,93 @@ func (m *Manager) GetStatistics() *Statistics {
 	return stats
 }
 
-// OnCreate registers a callback for session creation
+// snapshotCallbacks returns an independent copy of a SessionCallback slice.
+//
+// Lifecycle methods (Create/Start/Pause/Resume/Complete/Delete) take this
+// copy while holding m.mu, release the lock, then range the copy with NO lock
+// held. Invoking callbacks under m.mu would deadlock any user callback that
+// re-enters the same *Manager (m.Get, m.GetAll, m.OnCreate, …) because
+// sync.RWMutex is not reentrant. The copy is independent of the live slice so
+// a concurrent On* append (which grows via copy-on-grow under the lock) cannot
+// race the lock-free range. Returns nil for an empty/nil input so the range is
+// a no-op.
+func snapshotCallbacks(cbs []SessionCallback) []SessionCallback {
+	if len(cbs) == 0 {
+		return nil
+	}
+	out := make([]SessionCallback, len(cbs))
+	copy(out, cbs)
+	return out
+}
+
+// snapshotSwitchCallbacks is snapshotCallbacks for the SwitchCallback slice
+// (onSwitch). Same deadlock + race rationale.
+func snapshotSwitchCallbacks(cbs []SwitchCallback) []SwitchCallback {
+	if len(cbs) == 0 {
+		return nil
+	}
+	out := make([]SwitchCallback, len(cbs))
+	copy(out, cbs)
+	return out
+}
+
+// OnCreate registers a callback for session creation.
+//
+// Callback-registration mutates the same slice the lifecycle methods snapshot
+// while holding m.mu (e.g. Create's onCreate snapshot). Registering without
+// the lock is a data race against a concurrent lifecycle call, so every On*
+// registrar takes the write lock. (Fixed: previously these appended without
+// m.mu, a race reproduced by TestManagerCallbackRegistration_Race.)
+//
+// The lifecycle methods snapshot the callback slice under the lock and invoke
+// the callbacks OUTSIDE the lock (see snapshotCallbacks) so a callback that
+// re-enters the Manager cannot deadlock
+// (TestManagerCallbackReentry_NoDeadlock).
 func (m *Manager) OnCreate(callback SessionCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onCreate = append(m.onCreate, callback)
 }
 
 // OnStart registers a callback for session start
 func (m *Manager) OnStart(callback SessionCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onStart = append(m.onStart, callback)
 }
 
 // OnPause registers a callback for session pause
 func (m *Manager) OnPause(callback SessionCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onPause = append(m.onPause, callback)
 }
 
 // OnResume registers a callback for session resume
 func (m *Manager) OnResume(callback SessionCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onResume = append(m.onResume, callback)
 }
 
 // OnComplete registers a callback for session completion
 func (m *Manager) OnComplete(callback SessionCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onComplete = append(m.onComplete, callback)
 }
 
 // OnDelete registers a callback for session deletion
 func (m *Manager) OnDelete(callback SessionCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onDelete = append(m.onDelete, callback)
 }
 
 // OnSwitch registers a callback for session switching
 func (m *Manager) OnSwitch(callback SwitchCallback) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onSwitch = append(m.onSwitch, callback)
 }
 
