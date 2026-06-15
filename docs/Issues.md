@@ -596,13 +596,3 @@ SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6);
 
 panoptic internal/enterprise/{audit,users}.json are version-tracked but overwritten by the enterprise test suite every run (timestamps/random IDs) -> perpetual dirty tree. CONST-053: test-generated data should be gitignored + a fixture template used. Pre-existing, low severity.
 
-## HXC-092 — debate_orchestrator 30s DefaultTimeout too short for capable models on multi-round /specify
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-debate_orchestrator DefaultTimeout=30s x DefaultMaxRounds=3 (types.go:41-42) is tuned for fast qwen2.5:0.5b. A capable qwen2.5:3b (~16s/round) blows the 30s cap on the 3-round Specify pillar -> context deadline exceeded. /debate works (WithMaxRounds(1), rich quality 0.875 proven). Fix: raise per-debate timeout for the speckit Specify use case (adapter WithTimeout or orchestrator default). Tunable, not a code defect; surfaced honestly (no fabrication).
-

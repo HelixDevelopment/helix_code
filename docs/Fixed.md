@@ -679,3 +679,14 @@ panoptic internal/platforms: web.go Fill/Click/Submit page.Element on unbounded 
 
 containers pkg/health/custom.go NewCustomCheckFunc duration=time.Since(start) returns 0 for a no-op check -> TestNewCustomCheckFunc_Success NotZero flake. Fixed: floor to time.Nanosecond when <=0 (no fabricated delay).
 
+## HXC-092 — debate_orchestrator 30s DefaultTimeout too short for capable models on multi-round /specify
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** debate_orchestrator 659559e: DefaultTimeout 30s->180s (justified ~96s worst-case + headroom) + WithTimeout option; build/vet 0, 15-pkg suite ok. Live capable-model /specify re-verify is follow-up.
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+debate_orchestrator DefaultTimeout=30s x DefaultMaxRounds=3 (types.go:41-42) is tuned for fast qwen2.5:0.5b. A capable qwen2.5:3b (~16s/round) blows the 30s cap on the 3-round Specify pillar -> context deadline exceeded. /debate works (WithMaxRounds(1), rich quality 0.875 proven). Fix: raise per-debate timeout for the speckit Specify use case (adapter WithTimeout or orchestrator default). Tunable, not a code defect; surfaced honestly (no fabrication).
+
