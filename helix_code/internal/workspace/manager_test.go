@@ -137,8 +137,11 @@ func TestWorkspaceManager_CleanupWorkspace(t *testing.T) {
 	err = mgr.CleanupWorkspace(ctx, ws.ID)
 	require.NoError(t, err)
 
-	assert.Equal(t, StatusStopped, ws.Status)
-
+	// Cleanup is verified through the manager (GetWorkspace), NOT by reading the
+	// CreateWorkspace return: that return is a point-in-time snapshot (taken at
+	// creation), so it intentionally does not reflect the later cleanup mutation
+	// — handing back the live stored pointer would be the data race the snapshot
+	// getters were fixed to remove.
 	_, err = mgr.GetWorkspace(ws.ID)
 	assert.ErrorIs(t, err, ErrWorkspaceNotFound)
 }
