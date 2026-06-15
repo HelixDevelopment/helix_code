@@ -61,6 +61,18 @@ func NewAdapter() *Adapter {
 }
 
 // initRuntime performs one-time container runtime auto-detection.
+//
+// §11.4.85 concurrency fix: the field writes below (a.rt, a.rtName,
+// a.rtDetected, a.compose) are read elsewhere under a.mu (RuntimeName,
+// RuntimeAvailable, ListContainers). sync.Once provides a happens-before
+// edge ONLY to callers that route through initRuntime — a getter that
+// reads a.rtName under a.mu.RLock() WITHOUT first calling initRuntime
+// shares no synchronisation with this Once writer, so the unguarded
+// write is a data race (caught by `go test -race`: adapter.go:72 write
+// vs adapter.go:96 read). The fix takes a.mu for the field mutation so
+// the write side and the mutex-guarded read side share the same lock.
+// AutoDetect / NewDefaultOrchestrator (slow, possibly blocking) stay
+// OUTSIDE the lock so the mutex is held only for the cheap assignment.
 func (a *Adapter) initRuntime(ctx context.Context) error {
 	a.initOnce.Do(func() {
 		rt, err := ctrRuntime.AutoDetect(ctx)
@@ -68,15 +80,17 @@ func (a *Adapter) initRuntime(ctx context.Context) error {
 			a.initErr = fmt.Errorf("no container runtime detected (docker/podman required): %w", err)
 			return
 		}
-		a.rt = rt
-		a.rtName = rt.Name()
-		a.rtDetected = true
 		orch, err := compose.NewDefaultOrchestrator(".", nil)
 		if err != nil {
 			a.initErr = fmt.Errorf("compose orchestrator init failed: %w", err)
 			return
 		}
+		a.mu.Lock()
+		a.rt = rt
+		a.rtName = rt.Name()
+		a.rtDetected = true
 		a.compose = orch
+		a.mu.Unlock()
 	})
 	return a.initErr
 }
