@@ -7,6 +7,7 @@ feat=$(cat $inv/*.md | grep -cE '^\| ' || true)
 wu=$(cat $inv/*.md | grep -oiE '\bworking-untaped\b' | wc -l | tr -d ' ')
 pa=$(cat $inv/*.md | grep -oiE '\bpartial\b' | wc -l | tr -d ' ')
 gp=$(cat $inv/*.md | grep -oiE '\bgap\b' | wc -l | tr -d ' ')
+cf=$(cat $inv/*.md | grep -cE '\| confirmed \|' || true)
 vids=$(ls /Volumes/T7/Downloads/Recordings/helixcode-*.mp4 2>/dev/null | wc -l | tr -d ' ')
 out() {
 cat <<EOF
@@ -32,7 +33,7 @@ video-confirmed rises only as real analyzed recordings land in
 | working-untaped (mentions) | ${wu} |
 | partial (mentions) | ${pa} |
 | gap (mentions) | ${gp} |
-| confirmed (real analyzed video) | 0 until videos land |
+| confirmed (real analyzed video) | ${cf} |
 | helixcode-*.mp4 recordings produced so far | ${vids} |
 
 See docs/features/Status.md for the full per-feature table.

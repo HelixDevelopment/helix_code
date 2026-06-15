@@ -17,10 +17,10 @@ video-confirmed rises only as real analyzed recordings land in
 | Metric | Value |
 |---|---|
 | Total inventory rows | 569 |
-| working-untaped (mentions) | 348 |
+| working-untaped (mentions) | 342 |
 | partial (mentions) | 331 |
-| gap (mentions) | 58 |
-| confirmed (real analyzed video) | 0 until videos land |
-| helixcode-*.mp4 recordings produced so far | 6 |
+| gap (mentions) | 56 |
+| confirmed (real analyzed video) | 8 |
+| helixcode-*.mp4 recordings produced so far | 12 |
 
 See docs/features/Status.md for the full per-feature table.

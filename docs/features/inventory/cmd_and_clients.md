@@ -16,10 +16,10 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | Area | Component | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | application(cli) | cmd/cli REPL | Plain-text prompt → real LLM (streaming via provider.GenerateStream) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/models` list models via providerManager.GetProviders (BLUFF-002 resolved) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | yes(helixcode-cli-generate-20260615.mp4; helixcode-cli-explain-go-20260615.mp4) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/models` list models via providerManager.GetProviders (BLUFF-002 resolved) | done | yes | yes | unit | no | yes(helixcode-cli-list-models-20260615.mp4) | yes | native | confirmed |
 | application(cli) | cmd/cli REPL | `/workers` list workers | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/health` health check | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/health` health check | done | yes | yes | unit | no | yes(helixcode-cli-health-20260615.mp4) | yes | native | confirmed |
 | application(cli) | cmd/cli REPL | `/diff [ref]` real git diff (os/exec) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli REPL | `/debate <prompt>` DebateOrchestrator over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli REPL | `/specify <request>` HelixSpecifier Specify phase over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
@@ -37,11 +37,11 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | application(cli) | cmd/cli `sessions` | list / show / delete sessions | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli `skills` | list / show / invoke / reload skills | done | yes | yes | unit | no | no | no | native | working-untaped |
 | service | cmd/server | HTTP/gRPC/WebSocket server boot (bin/helixcode) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-generate-20260615.mp4) | yes | native | confirmed |
 | application(web) | web/frontend | LLM streaming console (SSE, POST /api/v1/llm/stream) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | application(web) | web/frontend | Specify phase form (POST /api/v1/specify) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | application(web) | web/frontend | Response/metadata rendering (no client simulation) | done | yes | yes | e2e | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-generate-20260615.mp4) | yes | native | confirmed |
 | service | internal/server (HTTP API) | /api/v1/llm/stream real provider.GenerateStream (SSE) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/specify real speckit Specify phase | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/llm/providers, /llm/models list | done | yes | yes | none | no | no | no | native | partial |
@@ -66,7 +66,7 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | application(tui) | applications/terminal_ui | Status bar (DB/Redis/LLM status, context %), notifications, themes, i18n | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | QA engine panel (helixqa.Engine wired) | partial | yes | unknown | unit | no | no | no | native | partial |
 | application(desktop) | applications/desktop (Fyne) | LLM chat tab (real provider, verifier-driven models) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(desktop) | applications/desktop (Fyne) | Dashboard / Tasks / Workers / Projects / Sessions tabs (real managers) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(desktop) | applications/desktop (Fyne) | Dashboard / Tasks / Workers / Projects / Sessions tabs (real managers) | done | yes | yes | unit | no | yes(helixcode-desktop-dashboard-20260615.mp4) | yes | native | confirmed |
 | application(desktop) | applications/desktop (Fyne) | Settings tab (theme, server config, shortcuts; desktop.yaml) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(desktop) | applications/desktop (Fyne) | Agentic tools + skills/plugins wiring (graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(desktop) | applications/desktop (Fyne) | NoGUI build mode (-tags nogui CLI fallback) | done | yes | yes | unit | no | no | no | native | working-untaped |
@@ -75,9 +75,9 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | application(mobile) | applications/aurora_os (Go/Fyne) | NoGUI CLI mode (cobra) + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(mobile) | applications/harmony_os (Go/Fyne) | 10-tab GUI incl. distributed engine + multi-device scheduling | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
 | application(mobile) | applications/harmony_os (Go/Fyne) | NoGUI CLI + interactive shell + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(mobile) | applications/android (Kotlin) | Connect + task list (RecyclerView) over Go mobile-core bridge | partial | partial | no | none | no | no | no | native | gap |
+| application(mobile) | applications/android (Kotlin) | Connect + task list (RecyclerView) over Go mobile-core bridge | partial | partial | yes | none | no | yes(helixcode-android-connect-20260615.mp4; helixcode-android-connect-lifecycle-20260615.mp4; helixcode-android-tasklist-20260615.mp4) | yes | native | confirmed |
 | application(mobile) | applications/android (Kotlin) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
-| application(mobile) | applications/ios (Swift) | Connect + task list (UITableView) over Go mobile-core bridge | partial | partial | no | none | no | no | no | native | gap |
+| application(mobile) | applications/ios (Swift) | Connect + task list (UITableView) over Go mobile-core bridge | partial | partial | yes | none | no | yes(helixcode-ios-launch-20260615.mp4) | yes | native | confirmed |
 | application(mobile) | applications/ios (Swift) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
 | application(cli) | cmd/helix_config | Interactive provider/credential config wizard → YAML/.env | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/config_test | Config + provider-credential validator | done | yes | yes | unit | no | no | no | native | working-untaped |
