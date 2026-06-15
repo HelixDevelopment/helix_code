@@ -277,15 +277,21 @@ func (m *Manager) GetRecentChains(n int) []*Chain {
 	}
 
 	chains := make([]*Chain, 0, len(m.chains))
+	// Snapshot each chain's UpdatedAt under the chain lock so the sort key is
+	// stable and never races a concurrent mutation refreshing UpdatedAt.
+	updatedAt := make([]time.Time, 0, len(m.chains))
 	for _, chain := range m.chains {
 		chains = append(chains, chain)
+		updatedAt = append(updatedAt, chain.LastUpdated())
 	}
 
-	// Sort by UpdatedAt (descending)
+	// Sort by UpdatedAt (descending), keeping the snapshot key aligned with the
+	// chain it belongs to.
 	for i := 0; i < len(chains)-1; i++ {
 		for j := i + 1; j < len(chains); j++ {
-			if chains[j].UpdatedAt.After(chains[i].UpdatedAt) {
+			if updatedAt[j].After(updatedAt[i]) {
 				chains[i], chains[j] = chains[j], chains[i]
+				updatedAt[i], updatedAt[j] = updatedAt[j], updatedAt[i]
 			}
 		}
 	}

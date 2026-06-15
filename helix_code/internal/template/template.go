@@ -100,12 +100,13 @@ func (t *Template) Render(vars map[string]interface{}) (string, error) {
 	// Apply defaults for missing optional variables
 	mergedVars := t.applyDefaults(vars)
 
-	// Replace placeholders
-	result := t.Content
-	for key, value := range mergedVars {
-		placeholder := fmt.Sprintf("{{%s}}", key)
-		result = strings.ReplaceAll(result, placeholder, fmt.Sprint(value))
-	}
+	// Replace placeholders in a single pass so a variable VALUE that happens
+	// to contain a "{{other}}" sequence is emitted verbatim and never
+	// re-substituted (template injection) — and so the result does not depend
+	// on Go's randomised map-iteration order (the same inputs would otherwise
+	// non-deterministically either expand the injected placeholder or fail the
+	// unreplaced-placeholder check below).
+	result := substitutePlaceholders(t.Content, mergedVars)
 
 	// Check for unreplaced placeholders
 	if hasUnreplacedPlaceholders(result) {
@@ -295,14 +296,73 @@ func ParseTemplate(name string, content string, templateType Type) (*Template, e
 	return tpl, nil
 }
 
-// RenderSimple renders a template string with variables (no Template object needed)
+// RenderSimple renders a template string with variables (no Template object needed).
+// Substitution is single-pass (see substitutePlaceholders): a variable value that
+// contains a "{{other}}" sequence is emitted verbatim and never re-substituted, and
+// the output is independent of Go's randomised map-iteration order.
 func RenderSimple(content string, vars map[string]interface{}) string {
-	result := content
-	for key, value := range vars {
-		placeholder := fmt.Sprintf("{{%s}}", key)
-		result = strings.ReplaceAll(result, placeholder, fmt.Sprint(value))
+	return substitutePlaceholders(content, vars)
+}
+
+// substitutePlaceholders replaces every "{{name}}" placeholder in content with the
+// string form of vars[name], scanning content exactly once from left to right.
+//
+// Single-pass scanning is the load-bearing property: values already written into the
+// output are never re-examined, so (a) a value that itself contains "{{...}}" cannot
+// inject/expand an unrelated variable (template injection), and (b) the result is
+// deterministic regardless of map-iteration order. Placeholders whose name is not in
+// vars are left intact (so the caller's unreplaced-placeholder check can detect them).
+// A placeholder name uses the same grammar as ExtractVariables / hasUnreplacedPlaceholders:
+// [a-zA-Z_][a-zA-Z0-9_]*.
+func substitutePlaceholders(content string, vars map[string]interface{}) string {
+	var b strings.Builder
+	b.Grow(len(content))
+
+	for i := 0; i < len(content); {
+		// Look for the start of a placeholder.
+		if content[i] == '{' && i+1 < len(content) && content[i+1] == '{' {
+			if name, end, ok := parsePlaceholderName(content, i+2); ok {
+				if value, found := vars[name]; found {
+					b.WriteString(fmt.Sprint(value))
+					i = end
+					continue
+				}
+				// Unknown variable: emit the placeholder literally so the
+				// unreplaced-placeholder check downstream can flag it.
+				b.WriteString(content[i:end])
+				i = end
+				continue
+			}
+		}
+		b.WriteByte(content[i])
+		i++
 	}
-	return result
+
+	return b.String()
+}
+
+// parsePlaceholderName parses a placeholder name starting at start (the index just
+// after the opening "{{") and returns the name, the index just past the closing "}}",
+// and whether a syntactically valid placeholder was found. The grammar is
+// [a-zA-Z_][a-zA-Z0-9_]* followed by "}}".
+func parsePlaceholderName(content string, start int) (name string, end int, ok bool) {
+	j := start
+	for j < len(content) {
+		c := content[j]
+		isFirst := j == start
+		isAlpha := c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+		isDigit := c >= '0' && c <= '9'
+		if isAlpha || (!isFirst && isDigit) {
+			j++
+			continue
+		}
+		break
+	}
+	// Require at least one name char and a closing "}}".
+	if j == start || j+1 >= len(content) || content[j] != '}' || content[j+1] != '}' {
+		return "", 0, false
+	}
+	return content[start:j], j + 2, true
 }
 
 // VariableSet represents a set of variables for rendering

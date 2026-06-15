@@ -4,10 +4,23 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
+	"unsafe"
 )
 
-// Chain represents a sequence of focuses forming a conversation/work context
+// Chain represents a sequence of focuses forming a conversation/work context.
+//
+// A Chain is independently thread-safe: every method that reads or mutates the
+// mutable state (Focuses, CurrentIdx, Context, Metadata, UpdatedAt, …) does so
+// under mu. This matters because Manager hands live *Chain pointers back to
+// callers (GetChain / GetActiveChain / GetAllChains) while it concurrently
+// mutates the SAME chain through PushToActive / MergeChains / CleanExpiredFocuses.
+// The Manager's own RWMutex only guards its chains map + activeID — it does NOT
+// serialize access to a chain's internals once the pointer has escaped, so the
+// chain must guard itself. mu is a separate lock from the Manager's mutex; the
+// only nesting order ever used is manager-lock → chain-lock (a chain method
+// never calls back into the Manager), so no lock-order inversion is possible.
 type Chain struct {
 	ID          string                 // Unique identifier
 	Name        string                 // Chain name
@@ -19,6 +32,8 @@ type Chain struct {
 	CreatedAt   time.Time              // When chain was created
 	UpdatedAt   time.Time              // Last update time
 	Metadata    map[string]string      // Custom metadata
+
+	mu sync.RWMutex // guards all mutable fields above (see type doc)
 }
 
 // NewChain creates a new focus chain
@@ -50,8 +65,15 @@ func (c *Chain) Push(focus *Focus) error {
 		return fmt.Errorf("invalid focus: %w", err)
 	}
 
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.pushLocked(focus)
+}
+
+// pushLocked is the unlocked core of Push. Callers MUST hold c.mu (write).
+func (c *Chain) pushLocked(focus *Focus) error {
 	// Remove expired focuses before adding
-	c.removeExpired()
+	c.removeExpiredLocked()
 
 	// If max size is set and we're at capacity, remove oldest
 	if c.MaxSize > 0 && len(c.Focuses) >= c.MaxSize {
@@ -70,6 +92,9 @@ func (c *Chain) Push(focus *Focus) error {
 
 // Pop removes and returns the last focus
 func (c *Chain) Pop() (*Focus, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if len(c.Focuses) == 0 {
 		return nil, errors.New(tr(context.Background(), "internal_focus_chain_is_empty", nil))
 	}
@@ -88,6 +113,9 @@ func (c *Chain) Pop() (*Focus, error) {
 
 // Current returns the current focus
 func (c *Chain) Current() (*Focus, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if c.CurrentIdx < 0 || c.CurrentIdx >= len(c.Focuses) {
 		return nil, errors.New(tr(context.Background(), "internal_focus_chain_no_current_focus", nil))
 	}
@@ -96,6 +124,9 @@ func (c *Chain) Current() (*Focus, error) {
 
 // SetCurrent sets the current focus by index
 func (c *Chain) SetCurrent(index int) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if index < 0 || index >= len(c.Focuses) {
 		return fmt.Errorf("%s", tr(context.Background(), "internal_focus_chain_index_out_of_range", map[string]any{"Index": index}))
 	}
@@ -106,6 +137,9 @@ func (c *Chain) SetCurrent(index int) error {
 
 // Next moves to the next focus in the chain
 func (c *Chain) Next() (*Focus, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if c.CurrentIdx >= len(c.Focuses)-1 {
 		return nil, fmt.Errorf("already at last focus")
 	}
@@ -116,6 +150,9 @@ func (c *Chain) Next() (*Focus, error) {
 
 // Previous moves to the previous focus in the chain
 func (c *Chain) Previous() (*Focus, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if c.CurrentIdx <= 0 {
 		return nil, fmt.Errorf("already at first focus")
 	}
@@ -126,6 +163,9 @@ func (c *Chain) Previous() (*Focus, error) {
 
 // First returns the first focus
 func (c *Chain) First() (*Focus, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if len(c.Focuses) == 0 {
 		return nil, errors.New(tr(context.Background(), "internal_focus_chain_is_empty", nil))
 	}
@@ -134,6 +174,9 @@ func (c *Chain) First() (*Focus, error) {
 
 // Last returns the last focus
 func (c *Chain) Last() (*Focus, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if len(c.Focuses) == 0 {
 		return nil, errors.New(tr(context.Background(), "internal_focus_chain_is_empty", nil))
 	}
@@ -142,6 +185,9 @@ func (c *Chain) Last() (*Focus, error) {
 
 // Get returns the focus at the specified index
 func (c *Chain) Get(index int) (*Focus, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if index < 0 || index >= len(c.Focuses) {
 		return nil, fmt.Errorf("%s", tr(context.Background(), "internal_focus_chain_index_out_of_range", map[string]any{"Index": index}))
 	}
@@ -150,6 +196,9 @@ func (c *Chain) Get(index int) (*Focus, error) {
 
 // GetByID returns the focus with the specified ID
 func (c *Chain) GetByID(id string) (*Focus, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	for _, focus := range c.Focuses {
 		if focus.ID == id {
 			return focus, nil
@@ -160,6 +209,9 @@ func (c *Chain) GetByID(id string) (*Focus, error) {
 
 // Remove removes a focus by ID
 func (c *Chain) Remove(id string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	for i, focus := range c.Focuses {
 		if focus.ID == id {
 			c.Focuses = append(c.Focuses[:i], c.Focuses[i+1:]...)
@@ -178,6 +230,9 @@ func (c *Chain) Remove(id string) error {
 
 // Clear removes all focuses from the chain
 func (c *Chain) Clear() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	c.Focuses = make([]*Focus, 0)
 	c.CurrentIdx = -1
 	c.UpdatedAt = time.Now()
@@ -185,16 +240,35 @@ func (c *Chain) Clear() {
 
 // Size returns the number of focuses in the chain
 func (c *Chain) Size() int {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	return len(c.Focuses)
+}
+
+// LastUpdated returns the chain's UpdatedAt timestamp under the chain lock, so
+// readers (e.g. Manager.GetRecentChains) never race a concurrent mutation that
+// refreshes UpdatedAt.
+func (c *Chain) LastUpdated() time.Time {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	return c.UpdatedAt
 }
 
 // IsEmpty checks if the chain is empty
 func (c *Chain) IsEmpty() bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	return len(c.Focuses) == 0
 }
 
 // GetRecent returns the N most recent focuses
 func (c *Chain) GetRecent(n int) []*Focus {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if n <= 0 {
 		return []*Focus{}
 	}
@@ -214,6 +288,9 @@ func (c *Chain) GetRecent(n int) []*Focus {
 
 // GetByType returns all focuses of a specific type
 func (c *Chain) GetByType(focusType FocusType) []*Focus {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	result := make([]*Focus, 0)
 	for _, focus := range c.Focuses {
 		if focus.Type == focusType {
@@ -225,6 +302,9 @@ func (c *Chain) GetByType(focusType FocusType) []*Focus {
 
 // GetByTag returns all focuses with a specific tag
 func (c *Chain) GetByTag(tag string) []*Focus {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	result := make([]*Focus, 0)
 	for _, focus := range c.Focuses {
 		if focus.HasTag(tag) {
@@ -236,6 +316,9 @@ func (c *Chain) GetByTag(tag string) []*Focus {
 
 // GetByPriority returns all focuses with priority >= specified level
 func (c *Chain) GetByPriority(minPriority FocusPriority) []*Focus {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	result := make([]*Focus, 0)
 	for _, focus := range c.Focuses {
 		if focus.Priority >= minPriority {
@@ -247,30 +330,43 @@ func (c *Chain) GetByPriority(minPriority FocusPriority) []*Focus {
 
 // SetContext sets a shared context value
 func (c *Chain) SetContext(key string, value interface{}) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	c.Context[key] = value
 	c.UpdatedAt = time.Now()
 }
 
 // GetContext gets a shared context value
 func (c *Chain) GetContext(key string) (interface{}, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	value, ok := c.Context[key]
 	return value, ok
 }
 
 // SetMetadata sets a metadata value
 func (c *Chain) SetMetadata(key, value string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	c.Metadata[key] = value
 	c.UpdatedAt = time.Now()
 }
 
 // GetMetadata gets a metadata value
 func (c *Chain) GetMetadata(key string) (string, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	value, ok := c.Metadata[key]
 	return value, ok
 }
 
-// removeExpired removes expired focuses from the chain
-func (c *Chain) removeExpired() {
+// removeExpiredLocked removes expired focuses from the chain. Callers MUST hold
+// c.mu (write).
+func (c *Chain) removeExpiredLocked() {
 	newFocuses := make([]*Focus, 0, len(c.Focuses))
 	removedCount := 0
 
@@ -297,14 +393,20 @@ func (c *Chain) removeExpired() {
 
 // CleanExpired explicitly removes expired focuses
 func (c *Chain) CleanExpired() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	oldSize := len(c.Focuses)
-	c.removeExpired()
+	c.removeExpiredLocked()
 	c.UpdatedAt = time.Now()
 	return oldSize - len(c.Focuses)
 }
 
 // Clone creates a deep copy of the chain
 func (c *Chain) Clone() *Chain {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	clone := &Chain{
 		ID:          c.ID,
 		Name:        c.Name,
@@ -341,10 +443,25 @@ func (c *Chain) Merge(other *Chain) error {
 	if other == nil {
 		return fmt.Errorf("cannot merge nil chain")
 	}
+	if other == c {
+		return fmt.Errorf("cannot merge a chain into itself")
+	}
 
-	// Add all focuses from other chain
+	// Acquire both chain locks in a deterministic (address-ordered) order so two
+	// goroutines merging in opposite directions can never deadlock.
+	first, second := c, other
+	if uintptr(unsafe.Pointer(second)) < uintptr(unsafe.Pointer(first)) {
+		first, second = second, first
+	}
+	first.mu.Lock()
+	defer first.mu.Unlock()
+	second.mu.Lock()
+	defer second.mu.Unlock()
+
+	// Add all focuses from other chain via the unlocked core (we already hold
+	// c.mu) so Push's own Lock() does not self-deadlock.
 	for _, focus := range other.Focuses {
-		if err := c.Push(focus.Clone()); err != nil {
+		if err := c.pushLocked(focus.Clone()); err != nil {
 			return fmt.Errorf("failed to merge focus: %w", err)
 		}
 	}
@@ -365,6 +482,9 @@ func (c *Chain) Merge(other *Chain) error {
 
 // Split splits the chain at the specified index, returning a new chain with focuses from index onwards
 func (c *Chain) Split(index int) (*Chain, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if index < 0 || index >= len(c.Focuses) {
 		return nil, fmt.Errorf("index out of range: %d", index)
 	}
@@ -396,6 +516,9 @@ func (c *Chain) Split(index int) (*Chain, error) {
 
 // Reverse reverses the order of focuses in the chain
 func (c *Chain) Reverse() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	for i, j := 0, len(c.Focuses)-1; i < j; i, j = i+1, j-1 {
 		c.Focuses[i], c.Focuses[j] = c.Focuses[j], c.Focuses[i]
 	}
@@ -410,6 +533,9 @@ func (c *Chain) Reverse() {
 
 // String returns a string representation of the chain
 func (c *Chain) String() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	return fmt.Sprintf("Chain %s: %d focuses (current: %d)", c.Name, len(c.Focuses), c.CurrentIdx)
 }
 

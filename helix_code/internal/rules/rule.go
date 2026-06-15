@@ -105,19 +105,33 @@ func matchGlobPath(pattern, path string) bool {
 
 	regexPattern := regexp.QuoteMeta(pattern)
 
-	// Replace **/ with regex for zero or more directory levels
-	// Use a placeholder to avoid conflicts with single *
-	regexPattern = strings.ReplaceAll(regexPattern, `\*\*/`, `<<<DOUBLESTAR>>>`)
+	// Replace **/ with regex for zero or more directory levels.
+	// Use a placeholder to avoid conflicts with single *.
+	regexPattern = strings.ReplaceAll(regexPattern, `\*\*/`, `<<<DOUBLESTARSLASH>>>`)
+
+	// Any remaining ** (e.g. trailing "docs/**", or a "/**" suffix) is a
+	// double-star NOT followed by a slash; it must cross directory
+	// separators (match any depth). Placeholder it before the single-*
+	// substitution so the two `\*` it contains are not eaten by the
+	// non-slash rule below (which would collapse "docs/**" to "docs/[^/]*"
+	// and silently exclude every nested file — a fail-open coverage gap for
+	// security-scoped rules like "secrets/**").
+	regexPattern = strings.ReplaceAll(regexPattern, `\*\*`, `<<<DOUBLESTAR>>>`)
 
 	// Replace * with regex for any non-slash characters
 	regexPattern = strings.ReplaceAll(regexPattern, `\*`, `[^/]*`)
 
-	// Now replace the placeholder with the correct regex for **/
-	// (?:.*/)? matches an optional path with trailing slash (zero or more dirs)
-	regexPattern = strings.ReplaceAll(regexPattern, `<<<DOUBLESTAR>>>`, `(?:.*/)?`)
+	// Now replace the placeholders with the correct regex.
+	// **/  → (?:.*/)?  : an optional path with trailing slash (zero or more dirs)
+	regexPattern = strings.ReplaceAll(regexPattern, `<<<DOUBLESTARSLASH>>>`, `(?:.*/)?`)
+	// **   → .*        : any characters including slashes (any depth)
+	regexPattern = strings.ReplaceAll(regexPattern, `<<<DOUBLESTAR>>>`, `.*`)
 
-	// Replace ? with regex for single character
-	regexPattern = strings.ReplaceAll(regexPattern, `\?`, `.`)
+	// Replace ? with regex for a single NON-SEPARATOR character. Standard glob
+	// semantics (bash, filepath.Match, fnmatch) forbid `?` from crossing a `/`;
+	// mapping it to `.` (which matches `/` too) is a fail-open — a `?` in a
+	// security rule pattern could silently cross a directory boundary.
+	regexPattern = strings.ReplaceAll(regexPattern, `\?`, `[^/]`)
 
 	// Anchor the pattern
 	regexPattern = "^" + regexPattern + "$"
