@@ -28,7 +28,12 @@ func (c *ChatManager) CreateSession(title, model string) *ChatSession {
 		Model: model,
 	}
 	c.sessions[session.ID] = session
-	return session
+	// HXC-continua race fix: return a deep-copy snapshot, never the live
+	// stored pointer. Handing the caller the live *ChatSession lets it read
+	// session.Messages while a concurrent AddMessage appends under the write
+	// lock — a data race on the slice header (caught by `go test -race`),
+	// the GetSession-style getter race class fixed in internal/project.
+	return snapshotSession(session)
 }
 
 func (c *ChatManager) AddMessage(ctx context.Context, sessionID, role, content string) error {
@@ -53,7 +58,10 @@ func (c *ChatManager) GetSession(id string) (*ChatSession, error) {
 	if !ok {
 		return nil, ErrChatFailed
 	}
-	return s, nil
+	// HXC-continua race fix: snapshot under the read lock. Returning the
+	// live stored pointer escapes the lock — the caller reading
+	// snapshot.Messages races a concurrent AddMessage append.
+	return snapshotSession(s), nil
 }
 
 func (c *ChatManager) ListSessions() []*ChatSession {
@@ -61,9 +69,31 @@ func (c *ChatManager) ListSessions() []*ChatSession {
 	defer c.mu.RUnlock()
 	var result []*ChatSession
 	for _, s := range c.sessions {
-		result = append(result, s)
+		// HXC-continua race fix: snapshot each session, never the live pointer.
+		result = append(result, snapshotSession(s))
 	}
 	return result
+}
+
+// snapshotSession returns a deep copy of s — a new ChatSession with its own
+// Messages backing array — so a returned value never aliases the live stored
+// session's slice. ChatMessage holds only value fields (strings), so a
+// fresh slice with copied elements is a full deep copy. Callers MUST hold
+// c.mu (read or write) while invoking this.
+func snapshotSession(s *ChatSession) *ChatSession {
+	if s == nil {
+		return nil
+	}
+	cp := &ChatSession{
+		ID:    s.ID,
+		Title: s.Title,
+		Model: s.Model,
+	}
+	if len(s.Messages) > 0 {
+		cp.Messages = make([]ChatMessage, len(s.Messages))
+		copy(cp.Messages, s.Messages)
+	}
+	return cp
 }
 
 func (c *ChatManager) SetModel(sessionID, model string) error {

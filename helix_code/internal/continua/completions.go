@@ -22,11 +22,24 @@ func (e *CompletionEngine) Complete(ctx context.Context, filePath string, line, 
 	}
 
 	lines := strings.Split(string(src), "\n")
-	if line-1 < len(lines) {
+	// Guard against out-of-range line/column. line and col are 1-based and
+	// flow from tool input (continua_tools.go casts JSON numbers), so an LLM
+	// or user can supply 0 or negative values. Without these guards line<=0
+	// indexes lines[-1] (index out of range) and col<=0 slices [: -1]
+	// (slice bounds out of range) — both panic the request goroutine.
+	if line >= 1 && line-1 < len(lines) {
 		prefix := ""
-		if col-1 <= len(lines[line-1]) {
-			prefix = lines[line-1][:col-1]
+		lineText := lines[line-1]
+		// Clamp the column into [1, len(lineText)+1] so prefix is always a
+		// valid 0..len slice bound, regardless of caller-supplied col.
+		c := col
+		if c < 1 {
+			c = 1
 		}
+		if c-1 > len(lineText) {
+			c = len(lineText) + 1
+		}
+		prefix = lineText[:c-1]
 		suggestion := fmt.Sprintf("%s%s", strings.TrimSpace(prefix), tr(ctx, "internal_continua_completion_inferred_suffix", nil))
 		return &CompletionResult{Suggestion: suggestion, Line: line, Column: col}, nil
 	}
