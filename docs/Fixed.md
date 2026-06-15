@@ -701,3 +701,14 @@ debate_orchestrator DefaultTimeout=30s x DefaultMaxRounds=3 (types.go:41-42) is 
 
 internal/checkpoint Manager (git-plumbing + file-copy backends) + /checkpoint create/list/restore CLI command: snapshot working-tree file contents and restore real bytes later (the cli_agents F12 oops-revert net). Existing checkpoints were task-DB rows, not file snapshots.
 
+## HXC-095 — CLI binary generate/debate/specify return 404 against live local ollama
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** desktop i18n/bundle.go + main() SetTranslator wiring; before raw keys/%!(EXTRA) -> after resolved prose 'HelixCode Desktop CLI (nogui mode)'; build/test 0, paired-mutation guard
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+helixcli --prompt/--stream + /debate + /specify hit 'API request failed: API returned status 404' against a working local ollama (qwen2.5:3b on :11434). The web POST /llm/generate + integration tests work with the same NewOllamaProvider — so the CLI's default-local-provider path uses a wrong endpoint/model-name (§11.4.108 different-path gap). AI features are broken for the end user via the binary. Found while recording feature videos.
+

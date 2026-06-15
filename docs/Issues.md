@@ -606,16 +606,6 @@ panoptic internal/enterprise/{audit,users}.json are version-tracked but overwrit
 
 gomobile bind fails because go list -m -json all errors: ~22 digital.vasic.{cache,database,eventbus,...,vectordb} module paths are required with NO replace + NO remote ('no such host'), and github.com/HelixDevelopment/helix_agent/Toolkit (private, separate from the replaced dev.helix.agent) needs interactive git creds. go build ./... works (imported subset only); full-graph tooling (gomobile, go list -m all) is blocked. Fix (repo-side, careful — editing go.mod risks the build): add replace directives for the phantom paths OR prune them, make Toolkit resolvable (replace/GOPRIVATE+SSH), persist x/mobile as a tool directive. Toolchain+NDK+Xcode all present; gobind codegen already works -> artifact achievable once graph resolves.
 
-## HXC-095 — CLI binary generate/debate/specify return 404 against live local ollama
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** High
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-helixcli --prompt/--stream + /debate + /specify hit 'API request failed: API returned status 404' against a working local ollama (qwen2.5:3b on :11434). The web POST /llm/generate + integration tests work with the same NewOllamaProvider — so the CLI's default-local-provider path uses a wrong endpoint/model-name (§11.4.108 different-path gap). AI features are broken for the end user via the binary. Found while recording feature videos.
-
 ## HXC-096 — desktop nogui prints raw i18n keys + %!(EXTRA) format mismatch in status/help
 
 **Status:** Queued
@@ -625,4 +615,14 @@ helixcli --prompt/--stream + /debate + /specify hit 'API request failed: API ret
 **Assigned-To:** Claude
 
 applications/desktop/main_nogui.go status/help output prints raw message keys (desktop_cli_status_header, desktop_cli_help_body) + a Printf arg-count mismatch (%!(EXTRA int=0...)) in status. Same i18n-resolution class as HXC-079/081. CLI binary unaffected. Found while assessing desktop for video.
+
+## HXC-097 — SYSTEMIC: standalone binaries + internal/config + internal/database never wire i18n Translator -> raw keys at runtime
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Same unwired-translator bug as HXC-095 found across the fleet: aurora_os standalone nogui (aurora_os_cli_version_banner + %!(EXTRA) at runtime) — round-7's aurora/harmony 'i18n fix' added KEYS but never wired SetTranslator in main(), so keys still echo raw (§11.4.108 fixed-in-source-not-at-runtime). Also internal/config (internal_config_info_using_config_file) + internal/database (internal_database_ping_failed) echo raw keys in CLI output. Fix: wire a real Translator (embed-bundle pattern) at each binary's main()/package init; add runtime guards that assert resolved prose (not just key-presence).
 
