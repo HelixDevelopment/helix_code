@@ -141,11 +141,24 @@ func nodeDepthVisited(node *PlanNode, id string, depth int, visited map[string]b
 }
 
 func wouldCycle(node *PlanNode, ancestorID, descendantID string) bool {
+	// Walk the ParentID chain upward from ancestorID. A malformed tree
+	// (e.g. loaded from corrupt JSON) can contain a ParentID cycle that
+	// does NOT include descendantID — without a visited guard this loop
+	// never terminates (infinite-loop / hang reachable via MergeNode).
+	// The visited set bounds the walk to each node at most once, matching
+	// the cycle-safe traversal pattern used elsewhere in this package.
+	visited := make(map[string]bool)
 	current := findNode(node, ancestorID)
 	for current != nil && current.ParentID != "" {
 		if current.ParentID == descendantID {
 			return true
 		}
+		if visited[current.ID] {
+			// ParentID chain looped back on itself without reaching
+			// descendantID — no path from descendant to ancestor exists.
+			return false
+		}
+		visited[current.ID] = true
 		current = findNode(node, current.ParentID)
 	}
 	return false

@@ -147,6 +147,14 @@ func EnsureInfra(ctx context.Context, cfg *config.Config, opts *Options) (*Resul
 		res.AlreadyRunning = true
 		res.Reason = "endpoints already healthy"
 	} else {
+		// Host-safety (§11.4.133): never issue an irreversible `compose up` once
+		// the caller has already cancelled — that would boot containers the
+		// caller no longer wants and leave them orphaned (the call returns an
+		// error, so the caller never gets a Result to tear them down). Check
+		// BEFORE the boot, not only inside the post-up health wait.
+		if err := ctx.Err(); err != nil {
+			return nil, fmt.Errorf("infraboot: boot aborted before compose up: %w", err)
+		}
 		if !b.RuntimeAvailable(ctx) {
 			return nil, fmt.Errorf("infraboot: no container runtime available (docker/podman required to auto-boot infra; set HELIX_AUTOBOOT_INFRA=false to use external infra)")
 		}
