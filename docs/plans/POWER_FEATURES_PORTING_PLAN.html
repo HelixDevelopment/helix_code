@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>POWER_FEATURES_PORTING_PLAN</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">POWER_FEATURES_PORTING_PLAN</h1>
+</header>
+<h1 id="power-features-porting-plan-cli-agent-power-features-helixcode">POWER
+FEATURES PORTING PLAN — CLI-Agent Power Features → HelixCode</h1>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-14</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-14</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>DRAFT — research + plan only, NO code (operator decision pending).
+<strong>Rev 2: Phase-1 status reconciled against HEAD
+<code>e7266263</code> — T1.1/T1.2/T1.3 found already DONE;
+T1.4/T1.5/T1.6 PARTIAL; stale paths corrected
+(<code>internal/autonomy</code>→<code>internal/workflow/autonomy</code>,
+<code>internal/planner</code>→<code>internal/workflow/planmode</code>).</strong></td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>§11.4.70 subagent-driven, §11.4.74 catalogue-first, §11.4.6
+no-guessing, §11.4.50/§11.4.98 anti-bluff</td>
+</tr>
+<tr>
+<td>Method</td>
+<td>Read-only research of <code>cli_agents/&lt;agent&gt;/</code>
+READMEs+docs; cross-checked against <code>helix_code/internal/*</code> +
+<code>helix_code/applications/*</code></td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Map distinctive power features of every in-repo CLI agent for
+porting into HelixCode</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-executive-summary">Executive Summary</a></li>
+<li><a href="#2-method--evidence-discipline">Method &amp; Evidence
+Discipline</a></li>
+<li><a href="#3-what-helixcode-already-has-baseline">What HelixCode
+Already Has (baseline)</a></li>
+<li><a href="#4-agents-surveyed">Agents Surveyed</a></li>
+<li><a href="#5-master-feature-matrix">Master Feature Matrix</a></li>
+<li><a href="#6-top-10-highest-value-missing-features">Top-10
+Highest-Value Missing Features</a></li>
+<li><a href="#7-per-feature-acceptance-bar-anti-bluff">Per-Feature
+Acceptance Bar (anti-bluff)</a></li>
+<li><a href="#8-phases--tasks--sub-tasks">Phases → Tasks → Sub-Tasks</a>
+<ul>
+<li><a href="#phase-0--foundations--audit">Phase 0 — Foundations &amp;
+Audit</a></li>
+<li><a href="#phase-1--high-value--low-effort-already-partial">Phase 1 —
+High-Value / Low-Effort (already-partial)</a></li>
+<li><a href="#phase-2--session--context-power-tools">Phase 2 — Session
+&amp; Context Power Tools</a></li>
+<li><a href="#phase-3--autonomy--safety-surface">Phase 3 — Autonomy
+&amp; Safety Surface</a></li>
+<li><a href="#phase-4--multi-agent--parallel-orchestration">Phase 4 —
+Multi-Agent &amp; Parallel Orchestration</a></li>
+<li><a href="#phase-5--connectors-server--headless-surface">Phase 5 —
+Connectors, Server &amp; Headless Surface</a></li>
+<li><a href="#phase-6--spec-driven--quality-gate-workflow">Phase 6 —
+Spec-Driven &amp; Quality-Gate Workflow</a></li>
+<li><a href="#phase-7--long-tail--niche-features">Phase 7 — Long-Tail /
+Niche Features</a></li>
+</ul></li>
+<li><a href="#9-dependency-touch-map">Dependency Touch-Map</a></li>
+<li><a href="#10-honest-effort-caveats">Honest Effort Caveats</a></li>
+<li><a href="#11-sources-verified">Sources Verified</a></li>
+</ol>
+<hr />
+<h2 id="executive-summary">1. Executive Summary</h2>
+<ul>
+<li><strong>Agents enumerated under <code>cli_agents/</code>:</strong>
+51 directories. Of these, <strong>~38 are coding/agent tools</strong>
+worth mining; the remainder are MCP servers (<code>git-mcp</code>,
+<code>postgres-mcp</code>, <code>conduit</code>, <code>noi</code>,
+<code>snow-cli</code>, <code>x-cmd</code>, <code>cli-agent</code>,
+<code>aiagent</code>, <code>superset</code>, <code>ui-ux-pro-max</code>,
+<code>fauxpilot</code>, <code>deepseek-cli*</code>,
+<code>xela-cli</code>, <code>codex-skills</code>) or a skills/plugin
+marketplace (<code>bridle</code> = “Tons of Skills”) rather than full
+agents.</li>
+<li><strong>Distinctive power features mapped:</strong>
+<strong>~140</strong> across the 24 agents researched in depth (aider,
+cline, plandex, crush, codex, gemini-cli, qwen-code, copilot-cli,
+amazon-q, mistral-code, codename-goose, gptme, open-interpreter, forge,
+gpt-engineer, swe-agent, shai, nanocoder, claude-squad, claude-code,
+vtcode, warp, get-shit-done, spec-kit, junie, aichat, codai, taskweaver,
+octogen, zeroshot, multiagent-coding, agent-deck). After de-duplicating
+equivalent features across agents, they collapse into <strong>~62
+distinct capabilities</strong>.</li>
+<li><strong>HelixCode is already mature.</strong> It HAS: agentic tool
+loop (<code>internal/agent</code>), read-only tools + browser suite
+(<code>internal/tools</code>), MCP client+lifecycle
+(<code>internal/mcp</code>), plugins (<code>internal/plugins</code>),
+skills (via plugins + crush/vtcode-style <code>SKILL.md</code>
+precedent), LSP-equipped context, ensemble + verifier
+(<code>internal/verifier</code>), repomap
+(<code>internal/repomap</code>, tree-sitter), sessions +
+history-condense (<code>internal/session</code>), hooks
+(<code>internal/hooks</code>), sandbox + worktrees
+(<code>internal/worker</code>,
+<code>internal/session/manager_worktree</code>), memory + cognee
+(<code>internal/memory</code>), voice-to-code
+(<code>internal/voice</code>, the aider P2-F27 port), clarification
+(<code>internal/clarification</code>), task checkpoints
+(<code>internal/task/checkpoint.go</code>), roocode delegation
+(<code>internal/roocode</code>), kilocode callgraph/impact
+(<code>internal/kilocode</code>), planner/plantree
+(<code>internal/planner</code>, <code>internal/plantree</code>),
+approval/approvalwire, autocommit, git_status, multi-platform apps
+(desktop/terminal-ui/ios/android/aurora/harmony).</li>
+<li><strong>Net result:</strong> Most “power features” are
+<strong>HAVE</strong> or <strong>PARTIAL</strong> — the real porting
+work is in <strong>autonomy presets, cumulative-diff sandbox review,
+conversation branching, messaging connectors,
+daemon/server-shared-session mode, spec-driven workflow surface, and
+tangent/rewind UX</strong>. Few features are genuinely
+<strong>MISSING/large</strong>.</li>
+<li><strong>Phasing:</strong> 8 phases (0–7), ordered
+high-value-low-effort first, ending in niche features. Every feature
+ships with the operator’s full anti-bluff bar (§7).</li>
+</ul>
+<hr />
+<h2 id="method-evidence-discipline">2. Method &amp; Evidence
+Discipline</h2>
+<p>Per §11.4.6 (no-guessing) and §11.4.74 (catalogue-first), every
+feature row cites the source-agent file where the capability is
+textually evidenced. HelixCode status was cross-checked by reading
+<code>helix_code/internal/&lt;pkg&gt;/doc.go</code>, function
+signatures, and the existing port plan
+<code>docs/plans/HXC-031-codex-cline-port.md</code>. No source was
+modified. Where the in-repo doc only links out to a vendor website
+(codex <code>docs/*.md</code> stubs, mistral-code’s inherited gemini
+docs), that is noted so we do not over-claim a feature exists
+in-tree.</p>
+<p><strong>Status legend:</strong> HAVE (shipped in HelixCode) · PARTIAL
+(substrate exists, surface/UX gap) · MISSING. <strong>Effort
+legend:</strong> S (small, ≤~300-line unit) · M (medium, 1–3 units) · L
+(large, multi-component).</p>
+<hr />
+<h2 id="what-helixcode-already-has-baseline">3. What HelixCode Already
+Has (baseline)</h2>
+<p>Verified by reading the inner module
+(<code>helix_code/internal</code>,
+<code>helix_code/applications</code>):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th>HelixCode location</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-agent orchestration + agent types</td>
+<td><code>internal/agent</code></td>
+<td><code>agent/doc.go</code> (Coordinator, WorkflowExecutor,
+planning/coding/testing/debug/review agents)</td>
+</tr>
+<tr>
+<td>Repo-map (tree-sitter, ranked, incremental)</td>
+<td><code>internal/repomap</code></td>
+<td><code>repomap/file_ranker.go</code>, <code>cache.go</code>,
+<code>incremental_p2t06_test.go</code></td>
+</tr>
+<tr>
+<td>MCP client + lifecycle + chaos-tested</td>
+<td><code>internal/mcp</code></td>
+<td><code>mcp/lifecycle.go</code>, <code>config.go</code>,
+<code>mcp_chaos_test.go</code></td>
+</tr>
+<tr>
+<td>Plugins (loader, activation, registry, exec)</td>
+<td><code>internal/plugins</code></td>
+<td><code>plugins/loader.go</code>, <code>activation.go</code>,
+<code>registry.go</code></td>
+</tr>
+<tr>
+<td>Ensemble + verifier (LLMsVerifier single source)</td>
+<td><code>internal/verifier</code>, <code>internal/llm</code></td>
+<td><code>verifier/client.go</code>, <code>adapter.go</code>; ensemble
+commits in git log</td>
+</tr>
+<tr>
+<td>Sessions + history compaction/condense</td>
+<td><code>internal/session</code></td>
+<td><code>session/condense.go</code> (<code>CompactIfNeeded</code>,
+<code>ShouldCompact</code>), <code>manager_worktree.go</code></td>
+</tr>
+<tr>
+<td>Hooks (lifecycle blockers/executor)</td>
+<td><code>internal/hooks</code></td>
+<td><code>hooks/hook.go</code>, <code>blockers.go</code>,
+<code>executor.go</code></td>
+</tr>
+<tr>
+<td>Sandbox + worktree isolation</td>
+<td><code>internal/worker</code>, <code>internal/session</code></td>
+<td><code>worker/isolation_test.go</code>,
+<code>session/manager_worktree.go</code></td>
+</tr>
+<tr>
+<td>Memory + cognee + project memory</td>
+<td><code>internal/memory</code>,
+<code>internal/projectmemory</code></td>
+<td><code>memory/manager.go</code>, <code>cognee_integration.go</code>,
+<code>projectmemory/loader.go</code></td>
+</tr>
+<tr>
+<td>Voice-to-code (aider port P2-F27)</td>
+<td><code>internal/voice</code></td>
+<td><code>voice/doc.go</code> (Whisper API + whisper.cpp fallback)</td>
+</tr>
+<tr>
+<td>Clarification (LLM-generated questions)</td>
+<td><code>internal/clarification</code></td>
+<td><code>clarification/engine.go</code> (<code>DetectAmbiguity</code>,
+<code>Resolve</code>)</td>
+</tr>
+<tr>
+<td>Task checkpoints (DB-backed)</td>
+<td><code>internal/task</code></td>
+<td><code>task/checkpoint.go</code>
+(<code>CreateCheckpoint</code>/<code>GetLatestCheckpoint</code>/restore)</td>
+</tr>
+<tr>
+<td>Auto-commit + secret-filter + summariser</td>
+<td><code>internal/autocommit</code></td>
+<td><code>autocommit/committer.go</code>, <code>secret_filter.go</code>,
+<code>summariser.go</code></td>
+</tr>
+<tr>
+<td>Roo-code delegation, Kilo-code callgraph/impact</td>
+<td><code>internal/roocode</code>, <code>internal/kilocode</code></td>
+<td><code>roocode/delegator.go</code>,
+<code>kilocode/callgraph.go</code>, <code>impact.go</code></td>
+</tr>
+<tr>
+<td>Planner / plan-tree (compact, operations)</td>
+<td><code>internal/planner</code>, <code>internal/plantree</code></td>
+<td><code>planner/executor.go</code>,
+<code>plantree/operations.go</code></td>
+</tr>
+<tr>
+<td>Approval engine + yes/no prompter</td>
+<td><code>internal/approval</code>,
+<code>internal/approvalwire</code></td>
+<td><code>approval/manager.go</code>,
+<code>approvalwire/yesno_prompter.go</code></td>
+</tr>
+<tr>
+<td>Browser tools (chromedp, click/type/screenshot)</td>
+<td><code>internal/tools</code></td>
+<td><code>tools/browser_*_v2.go</code></td>
+</tr>
+<tr>
+<td>Quality gate + scorer</td>
+<td><code>internal/quality</code></td>
+<td><code>quality/gate.go</code>, <code>scorer.go</code></td>
+</tr>
+<tr>
+<td>Multi-platform apps + TUI</td>
+<td><code>applications/*</code></td>
+<td><code>applications/{desktop,terminal_ui,ios,android,aurora_os,harmony_os}</code></td>
+</tr>
+<tr>
+<td>Multimodal (in-flight per HXC-031)</td>
+<td><code>internal/llm/vision</code>, HXC-031 plan</td>
+<td><code>docs/plans/HXC-031-codex-cline-port.md</code></td>
+</tr>
+</tbody>
+</table>
+<p>This baseline means the plan is <strong>mostly closing UX/surface
+gaps over existing substrate</strong>, not building from zero.</p>
+<hr />
+<h2 id="agents-surveyed">4. Agents Surveyed</h2>
+<p><strong>Full coding agents mined (24):</strong> aider, cline,
+plandex, crush, codex, gemini-cli, qwen-code, copilot-cli, amazon-q,
+mistral-code, codename-goose, gptme, open-interpreter, forge,
+gpt-engineer, swe-agent, shai, nanocoder, claude-code, vtcode, aichat,
+codai, taskweaver, octogen.</p>
+<p><strong>Orchestration / multi-agent managers (6):</strong>
+claude-squad, agent-deck, zeroshot, multiagent-coding, warp,
+get-shit-done.</p>
+<p><strong>Workflow / spec toolkits (2):</strong> spec-kit, junie.</p>
+<p><strong>Not full agents (noted, low-priority mining):</strong>
+<code>bridle</code> (skills/plugin marketplace),
+<code>git-mcp</code>/<code>postgres-mcp</code>/<code>conduit</code>/<code>noi</code>/<code>snow-cli</code>/<code>x-cmd</code>/<code>cli-agent</code>/<code>aiagent</code>/<code>superset</code>/<code>ui-ux-pro-max</code>/<code>fauxpilot</code>/<code>deepseek-cli*</code>/<code>xela-cli</code>/<code>codex-skills</code>
+(MCP servers / dashboards / stubs).</p>
+<p><strong>Confirmed ABSENT from <code>cli_agents/</code>:</strong>
+<code>openhands</code> (operator example) is NOT present — do not plan
+against it.</p>
+<hr />
+<h2 id="master-feature-matrix">5. Master Feature Matrix</h2>
+<p><code>feature</code> × <code>representative source-agent(s)</code> ×
+<code>HelixCode status</code> × <code>effort</code> ×
+<code>priority</code> (1=highest). Evidence column cites the canonical
+source file.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Feature</th>
+<th>Source agent(s)</th>
+<th>Evidence (cli_agents/…)</th>
+<th>HelixCode status</th>
+<th>Effort</th>
+<th>Prio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F01</td>
+<td>Repo-map (tree-sitter project map)</td>
+<td>aider, plandex, codai</td>
+<td><code>aider/aider/website/docs/repomap.md</code>;
+<code>plandex/README.md</code>; <code>codai/README.md</code></td>
+<td>HAVE (<code>internal/repomap</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F02</td>
+<td>Git auto-commit w/ generated message</td>
+<td>aider, plandex, forge</td>
+<td><code>aider/README.md</code>;
+<code>plandex/docs/.../version-control.md</code>;
+<code>forge/README.md</code> (<code>:commit</code>)</td>
+<td>HAVE (<code>internal/autocommit</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F03</td>
+<td>Architect/editor dual-model mode</td>
+<td>aider</td>
+<td><code>aider/aider/website/docs/usage/modes.md</code></td>
+<td>PARTIAL (ensemble + roles exist; no explicit architect→editor
+handoff)</td>
+<td>M</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F04</td>
+<td>Chat modes (code/ask/architect/plan)</td>
+<td>aider, plandex, gemini-cli, forge</td>
+<td><code>aider/.../modes.md</code>; <code>plandex/.../repl.md</code>;
+<code>gemini-cli/docs/cli/plan-mode.md</code>; <code>forge</code>
+(sage/muse)</td>
+<td>PARTIAL (planner + read-only tools; no first-class mode switch)</td>
+<td>M</td>
+<td>1</td>
+</tr>
+<tr>
+<td>F05</td>
+<td>Voice-to-code</td>
+<td>aider</td>
+<td><code>aider/.../voice.md</code></td>
+<td>HAVE (<code>internal/voice</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F06</td>
+<td>Lint &amp; test on edit (auto-fix loop)</td>
+<td>aider, cline, swe-agent</td>
+<td><code>aider/.../lint-test.md</code>; <code>cline/README.md</code>;
+<code>swe-agent/docs/background/aci.md</code></td>
+<td>PARTIAL (quality gate exists; not wired as per-edit
+linter-block)</td>
+<td>M</td>
+<td>1</td>
+</tr>
+<tr>
+<td>F07</td>
+<td><code>/undo</code> + <code>/diff</code> (git-aware)</td>
+<td>aider, forge</td>
+<td><code>aider/.../commands.md</code></td>
+<td>HAVE (DONE 2026-06-14:
+<code>cmd/cli/main.go:2118-2133</code>,<code>:2326-2371</code>;
+<code>internal/autocommit/git.go:85,136,151</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F08</td>
+<td>Images &amp; web pages in chat
+(<code>/web</code>,<code>/paste</code>)</td>
+<td>aider, gpt-engineer</td>
+<td><code>aider/.../images-urls.md</code>;
+<code>gpt-engineer/README.md</code>
+(<code>--image_directory</code>)</td>
+<td>PARTIAL (HXC-031 multimodal in-flight; <code>/web</code> scrape via
+browser tools)</td>
+<td>M</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F09</td>
+<td>Watch-files / IDE-comment mode</td>
+<td>aider</td>
+<td><code>aider/.../watch.md</code></td>
+<td>MISSING</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F10</td>
+<td>Copy/paste-to-web-chat (<code>/copy-context</code>)</td>
+<td>aider</td>
+<td><code>aider/.../copypaste.md</code></td>
+<td>MISSING</td>
+<td>S</td>
+<td>5</td>
+</tr>
+<tr>
+<td>F11</td>
+<td>Plan/Act dual mode</td>
+<td>cline, gemini-cli</td>
+<td><code>cline/README.md</code>;
+<code>gemini-cli/docs/cli/plan-mode.md</code></td>
+<td>HAVE (DONE 2026-06-14:
+<code>internal/workflow/planmode/mode_controller.go:13-14</code>; wired
+<code>cmd/cli/main.go:773-779</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F12</td>
+<td>Checkpoints (workspace snapshot + restore/undo)</td>
+<td>cline, gemini-cli, amazon-q, nanocoder</td>
+<td><code>cline/README.md</code>;
+<code>gemini-cli/docs/checkpointing.md</code>;
+<code>amazon-q/docs/experiments.md</code>;
+<code>nanocoder/docs/features/index.md</code></td>
+<td>PARTIAL (task DB checkpoints; not workspace-file
+snapshot/restore)</td>
+<td>M</td>
+<td>1</td>
+</tr>
+<tr>
+<td>F13</td>
+<td>MCP marketplace + on-the-fly tool creation</td>
+<td>cline, codename-goose</td>
+<td><code>cline/README.md</code>; goose extension system</td>
+<td>PARTIAL (MCP client HAVE; no marketplace/auto-create)</td>
+<td>M</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F14</td>
+<td><code>.clinerules</code>/<code>GEMINI.md</code>/<code>AGENTS.md</code>
+context files</td>
+<td>cline, gemini-cli, codex, forge, shai, mistral-code</td>
+<td><code>cline/.clinerules/*</code>; <code>gemini-cli/GEMINI.md</code>;
+<code>codex/AGENTS.md</code>; <code>shai/README.md</code> (SHAI.md)</td>
+<td>HAVE (<code>internal/projectmemory</code>, rules)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F15</td>
+<td>Plugin SDK (programmatic tools + hooks)</td>
+<td>cline, gptme</td>
+<td><code>cline/README.md</code> (<code>@cline/sdk</code>);
+<code>gptme/README.md</code></td>
+<td>HAVE (<code>internal/plugins</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F16</td>
+<td>Multi-agent teams (coordinator → specialists)</td>
+<td>cline, codename-goose, multiagent-coding, zeroshot</td>
+<td><code>cline/README.md</code>; goose GooseTeam;
+<code>multiagent-coding/README.md</code></td>
+<td>PARTIAL (agent coordinator + roocode delegation; no persistent team
+state)</td>
+<td>L</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F17</td>
+<td>Scheduled/cron agents</td>
+<td>cline, nanocoder</td>
+<td><code>cline/README.md</code>; <code>nanocoder</code> daemon
+(croner)</td>
+<td>MISSING</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F18</td>
+<td>Messaging connectors (Slack/Telegram/Discord/…)</td>
+<td>cline</td>
+<td><code>cline/README.md</code></td>
+<td>MISSING (Herald submodule precedent exists org-wide)</td>
+<td>L</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F19</td>
+<td>Headless / non-interactive (JSON/stream-json out)</td>
+<td>cline, gemini-cli, qwen-code, codex, shai, vtcode, gpt-engineer</td>
+<td><code>cline/README.md</code>;
+<code>gemini-cli/docs/cli/headless.md</code>;
+<code>codex/docs/exec.md</code>; <code>shai/README.md</code>;
+<code>vtcode/README.md</code></td>
+<td>PARTIAL (<code>cmd/cli</code>; verify structured JSON/stream-json
+output)</td>
+<td>M</td>
+<td>1</td>
+</tr>
+<tr>
+<td>F20</td>
+<td>Background long-process monitoring</td>
+<td>cline, plandex</td>
+<td><code>cline/README.md</code>;
+<code>plandex/.../execution-and-debugging.md</code></td>
+<td>PARTIAL (<code>internal/workflow/background.go</code>)</td>
+<td>M</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F21</td>
+<td>Kanban / parallel task board</td>
+<td>cline, agent-deck</td>
+<td><code>cline/README.md</code>; <code>agent-deck/llms.txt</code></td>
+<td>MISSING</td>
+<td>L</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F22</td>
+<td>Cumulative diff-review sandbox (stage-before-apply)</td>
+<td>plandex, claude-squad, forge</td>
+<td><code>plandex/.../reviewing-changes.md</code>;
+<code>claude-squad/README.md</code>; <code>forge/README.md</code>
+(<code>--sandbox</code>)</td>
+<td>PARTIAL (worktree isolation; no cumulative-diff staging/apply-reject
+UX)</td>
+<td>L</td>
+<td>1</td>
+</tr>
+<tr>
+<td>F23</td>
+<td>Configurable autonomy levels (preset tiers)</td>
+<td>plandex, nanocoder, copilot-cli</td>
+<td><code>plandex/.../autonomy.md</code>; <code>nanocoder</code> modes;
+<code>copilot-cli</code> Autopilot</td>
+<td>HAVE (DONE 2026-06-14:
+<code>internal/workflow/autonomy/modes.go:12-31</code>, 5 named
+presets)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F24</td>
+<td>Automated command/build/test debugging</td>
+<td>plandex, shai, gptme</td>
+<td><code>plandex/.../execution-and-debugging.md</code>;
+<code>shai/README.md</code> (shell hook); <code>gptme</code></td>
+<td>PARTIAL (verifier + quality; no auto-debug loop on failing cmd)</td>
+<td>M</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F25</td>
+<td>Conversation branches / fork</td>
+<td>plandex, forge, claude-squad, agent-deck</td>
+<td><code>plandex/.../branches.md</code>; <code>forge/README.md</code>;
+<code>agent-deck/llms.txt</code></td>
+<td>MISSING (sessions exist; no branch/fork)</td>
+<td>M</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F26</td>
+<td>Big-context management (load files/dirs/urls; smart context)</td>
+<td>plandex, gemini-cli, nanocoder</td>
+<td><code>plandex/.../context-management.md</code>;
+<code>gemini-cli/README.md</code>; <code>nanocoder</code> File
+Explorer</td>
+<td>HAVE/PARTIAL (context pkg + repomap; <code>@</code>-mention &amp;
+explorer UX partial)</td>
+<td>M</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F27</td>
+<td>Model packs / mid-session model switch</td>
+<td>plandex, crush, copilot-cli, junie, qwen-code</td>
+<td><code>plandex</code> model packs; <code>crush/README.md</code>;
+<code>copilot-cli</code> <code>/model</code>; <code>qwen-code</code>
+<code>/model</code></td>
+<td>HAVE (LLM aliases, <code>internal/llm/aliases.go</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F28</td>
+<td>LSP-enhanced context</td>
+<td>crush, copilot-cli, nanocoder</td>
+<td><code>crush/README.md</code>; <code>copilot-cli/README.md</code>;
+<code>nanocoder</code> (<code>source/lsp/</code>)</td>
+<td>HAVE (LSP in context/tools)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F29</td>
+<td>Permission allowlist + <code>--yolo</code>/auto-approve</td>
+<td>crush, vtcode, open-interpreter, claude-squad, qwen-code</td>
+<td><code>crush/README.md</code>; <code>vtcode/README.md</code>;
+<code>open-interpreter/README.md</code> (<code>-y</code>)</td>
+<td>HAVE (<code>internal/approval</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F30</td>
+<td>Provider auto-update catalogue</td>
+<td>crush (Catwalk)</td>
+<td><code>crush/README.md</code></td>
+<td>HAVE (LLMsVerifier = single source, CONST-036)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F31</td>
+<td>Shared workspace across clients (server backend)</td>
+<td>crush, qwen-code (daemon), shai (serve)</td>
+<td><code>crush/README.md</code>; <code>qwen-code/README.md</code>;
+<code>shai/README.md</code></td>
+<td>MISSING (server pkg exists; no shared-session multi-client)</td>
+<td>L</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F32</td>
+<td>Self-config skill (“configure yourself”)</td>
+<td>crush</td>
+<td><code>crush/README.md</code> (crush-config skill)</td>
+<td>PARTIAL (config tool exists; not LLM-driven skill)</td>
+<td>S</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F33</td>
+<td>OS sandbox for tool exec (Seatbelt/Landlock/bwrap)</td>
+<td>codex, gemini-cli, octogen, taskweaver</td>
+<td><code>codex/AGENTS.md</code>; <code>codex/docs/sandbox.md</code>;
+<code>octogen/README.md</code>; <code>taskweaver</code> container</td>
+<td>PARTIAL (worker isolation + infraboot; OS-level seatbelt/landlock
+not confirmed)</td>
+<td>L</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F34</td>
+<td>Exec-policy / command-approval engine</td>
+<td>codex, amazon-q, vtcode</td>
+<td><code>codex/docs/execpolicy.md</code>;
+<code>amazon-q/docs/built-in-tools.md</code></td>
+<td>HAVE (<code>internal/approval</code> + selector)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F35</td>
+<td>ACP mode (Agent Client Protocol over stdio)</td>
+<td>gemini-cli, gptme, qwen-code</td>
+<td><code>gemini-cli/docs/cli/acp-mode.md</code>;
+<code>gptme/README.md</code>; <code>qwen-code</code> daemon (ACP)</td>
+<td>MISSING</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F36</td>
+<td><code>/rewind</code> (conversation + file-state rewind)</td>
+<td>gemini-cli</td>
+<td><code>gemini-cli/docs/cli/rewind.md</code></td>
+<td>PARTIAL (checkpoints; no rewind UX)</td>
+<td>M</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F37</td>
+<td>Model routing / auto-fallback on quota</td>
+<td>gemini-cli, crush</td>
+<td><code>gemini-cli/docs/cli/model-routing.md</code></td>
+<td>HAVE (<code>internal/llm/auto_llm_manager.go</code>,
+degraded-mode)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F38</td>
+<td>Model steering (mid-task course-correct)</td>
+<td>gemini-cli</td>
+<td><code>gemini-cli/docs/cli/model-steering.md</code></td>
+<td>MISSING</td>
+<td>M</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F39</td>
+<td>Git worktrees per session</td>
+<td>gemini-cli, claude-squad, forge, zeroshot, agent-deck</td>
+<td><code>gemini-cli/docs/cli/git-worktrees.md</code>;
+<code>claude-squad/README.md</code></td>
+<td>HAVE (<code>internal/session/manager_worktree.go</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F40</td>
+<td>Agent Skills (<code>SKILL.md</code> open standard)</td>
+<td>gemini-cli, crush, vtcode, forge, nanocoder, codex, qwen-code</td>
+<td><code>gemini-cli/docs/cli/skills.md</code>;
+<code>crush/README.md</code>; <code>vtcode/README.md</code>;
+<code>forge/README.md</code></td>
+<td>PARTIAL (2026-06-14: md-skills subsystem ships
+<code>internal/commands/markdown_skills.go</code>, 2-tier
+project&gt;user precedence <code>:253-254</code>; MISSING built-in tier
++ <code>SKILL.md</code> filename)</td>
+<td>S</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F41</td>
+<td><code>ask_user</code> / TODO / tracker tools</td>
+<td>gemini-cli, amazon-q, nanocoder</td>
+<td><code>gemini-cli/docs/tools/{ask-user,todos,tracker}.md</code>;
+<code>amazon-q/docs/experiments.md</code></td>
+<td>PARTIAL (2026-06-14: <code>ask_user</code> DONE
+<code>internal/tools/askuser/ask_user_tool.go</code>, wired
+<code>cmd/cli/main.go:707-714</code>; <code>/tasks</code> is a
+background-job list not a TODO tracker)</td>
+<td>S</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F42</td>
+<td>Knowledge base (persistent semantic index)</td>
+<td>amazon-q, aichat (RAG), gptme (RAG), forge (semantic search)</td>
+<td><code>amazon-q/docs/knowledge-management.md</code>;
+<code>aichat/README.md</code>; <code>forge/README.md</code>
+(<code>:sync</code>)</td>
+<td>HAVE (<code>internal/memory</code> cognee + RAG)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F43</td>
+<td>Tangent mode (side-topic checkpoint)</td>
+<td>amazon-q</td>
+<td><code>amazon-q/docs/tangent-mode.md</code></td>
+<td>MISSING</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F44</td>
+<td>Introspect tool (self-aware about own features)</td>
+<td>amazon-q</td>
+<td><code>amazon-q/docs/introspect-tool.md</code></td>
+<td>MISSING</td>
+<td>S</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F45</td>
+<td>Delegate (async background sub-sessions)</td>
+<td>amazon-q, gptme (subagent), nanocoder, vtcode</td>
+<td><code>amazon-q/docs/experiments.md</code>;
+<code>gptme/README.md</code>; <code>vtcode/README.md</code></td>
+<td>PARTIAL (roocode delegation + workflow background)</td>
+<td>M</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F46</td>
+<td>Recipes (reusable parametrized workflows)</td>
+<td>codename-goose, forge (skills)</td>
+<td>goose recipes; <code>forge/README.md</code></td>
+<td>PARTIAL (plugins/skills; no parametrized-recipe primitive)</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F47</td>
+<td>Lessons system (auto-injected contextual guidance)</td>
+<td>gptme</td>
+<td><code>gptme/README.md</code></td>
+<td>MISSING</td>
+<td>M</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F48</td>
+<td>Computer use (GUI/desktop control)</td>
+<td>gptme, open-interpreter, warp (Oz)</td>
+<td><code>gptme/README.md</code>;
+<code>open-interpreter/README.md</code></td>
+<td>PARTIAL (browser tools; no full desktop control)</td>
+<td>L</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F49</td>
+<td>Local code-exec REPL (NL → run code)</td>
+<td>open-interpreter, gptme, octogen, taskweaver</td>
+<td><code>open-interpreter/README.md</code>;
+<code>octogen/README.md</code></td>
+<td>HAVE (command exec tools; BLUFF-003 resolved)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F50</td>
+<td>Profiles (YAML behavior presets)</td>
+<td>open-interpreter, codename-goose, claude-squad</td>
+<td><code>open-interpreter/README.md</code>; goose profiles</td>
+<td>PARTIAL (config profiles; no named behavior-profile UX)</td>
+<td>S</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F51</td>
+<td>Whole-project generation from a prompt</td>
+<td>gpt-engineer</td>
+<td><code>gpt-engineer/README.md</code></td>
+<td>PARTIAL (agent loop can; no <code>gpte &lt;dir&gt;</code> one-shot
+scaffold mode)</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F52</td>
+<td>Benchmark harness (SWE-bench/TerminalBench)</td>
+<td>gpt-engineer, swe-agent, codename-goose, multiagent-coding</td>
+<td><code>gpt-engineer/README.md</code>;
+<code>swe-agent/README.md</code>; goose <code>goose-bench</code></td>
+<td>MISSING (helix_qa is QA, not agent-benchmark)</td>
+<td>L</td>
+<td>5</td>
+</tr>
+<tr>
+<td>F53</td>
+<td>Agent-Computer Interface tools (windowed editor/viewer, succinct
+search)</td>
+<td>swe-agent</td>
+<td><code>swe-agent/docs/background/aci.md</code></td>
+<td>PARTIAL (editor + repomap; windowed-viewer UX absent)</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F54</td>
+<td>Shell assistant (failed-command auto-fix hook)</td>
+<td>shai, aichat, plandex</td>
+<td><code>shai/README.md</code>; <code>aichat/README.md</code></td>
+<td>MISSING</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F55</td>
+<td>Chainable <code>--trace</code> (pipe conversation between runs)</td>
+<td>shai</td>
+<td><code>shai/README.md</code></td>
+<td>MISSING</td>
+<td>S</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F56</td>
+<td>HTTP server (OpenAI-compatible endpoints)</td>
+<td>shai, aichat, gptme, open-interpreter, octogen</td>
+<td><code>shai/README.md</code>; <code>aichat/README.md</code>;
+<code>gptme/README.md</code></td>
+<td>PARTIAL (<code>internal/server</code>; OpenAI-compat surface
+unconfirmed)</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F57</td>
+<td>Context compression <code>/compact</code> + <code>/usage</code></td>
+<td>nanocoder, qwen-code, forge</td>
+<td><code>nanocoder/docs/features/index.md</code>;
+<code>qwen-code/README.md</code></td>
+<td>HAVE (<code>internal/session/condense.go</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F58</td>
+<td>Session auto-save + <code>/resume</code></td>
+<td>nanocoder, codex, vtcode</td>
+<td><code>nanocoder/docs/features/index.md</code>;
+<code>vtcode/README.md</code></td>
+<td>HAVE (<code>internal/session</code>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F59</td>
+<td>Event triggers (file-watch + cron → skill)</td>
+<td>nanocoder</td>
+<td><code>nanocoder/CLAUDE.md</code> (daemon)</td>
+<td>MISSING</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F60</td>
+<td>VS Code / IDE extension bridge</td>
+<td>nanocoder, codex, qwen-code, junie</td>
+<td><code>nanocoder/docs/features/vscode-extension.md</code>;
+<code>codex/README.md</code></td>
+<td>MISSING (out of CLI scope; note for app team)</td>
+<td>L</td>
+<td>5</td>
+</tr>
+<tr>
+<td>F61</td>
+<td>Spec-driven workflow (specify→plan→tasks→implement)</td>
+<td>spec-kit, get-shit-done</td>
+<td><code>spec-kit/README.md</code>;
+<code>get-shit-done/docs/FEATURES.md</code></td>
+<td>PARTIAL (planner/plantree; no spec-command surface)</td>
+<td>L</td>
+<td>2</td>
+</tr>
+<tr>
+<td>F62</td>
+<td>QA / regression gates in workflow</td>
+<td>get-shit-done</td>
+<td><code>get-shit-done/docs/FEATURES.md</code></td>
+<td>HAVE (quality gate + verifier + helix_qa)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>F63</td>
+<td>Cross-AI peer review (multi-runtime review)</td>
+<td>get-shit-done, multiagent-coding</td>
+<td><code>get-shit-done/docs/FEATURES.md</code></td>
+<td>PARTIAL (ensemble + verifier; no cross-runtime reviewer)</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F64</td>
+<td>Token/usage tracking per request + context-%</td>
+<td>codai, amazon-q, nanocoder</td>
+<td><code>codai/README.md</code>;
+<code>amazon-q/docs/experiments.md</code></td>
+<td>HAVE/PARTIAL (telemetry pkg; in-prompt % indicator partial)</td>
+<td>S</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F65</td>
+<td>Stateful code-first execution (DataFrames persist)</td>
+<td>taskweaver, octogen</td>
+<td><code>taskweaver/README.md</code>;
+<code>octogen/README.md</code></td>
+<td>PARTIAL (substrate; not data-analytics-stateful)</td>
+<td>L</td>
+<td>5</td>
+</tr>
+<tr>
+<td>F66</td>
+<td>MCP socket pool (share MCP procs across sessions)</td>
+<td>agent-deck</td>
+<td><code>agent-deck/llms.txt</code></td>
+<td>MISSING</td>
+<td>M</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F67</td>
+<td>Global conversation search (fuzzy + regex)</td>
+<td>agent-deck</td>
+<td><code>agent-deck/llms.txt</code></td>
+<td>MISSING</td>
+<td>S</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F68</td>
+<td>Conversation export (<code>:dump</code> JSON/HTML)</td>
+<td>forge, aichat</td>
+<td><code>forge/README.md</code></td>
+<td>MISSING</td>
+<td>S</td>
+<td>4</td>
+</tr>
+<tr>
+<td>F69</td>
+<td>Restricted/secure shell mode (path/symlink guards)</td>
+<td>forge, vtcode</td>
+<td><code>forge/README.md</code>; <code>vtcode/README.md</code> (layered
+security)</td>
+<td>PARTIAL (approval + security pkg)</td>
+<td>M</td>
+<td>3</td>
+</tr>
+<tr>
+<td>F70</td>
+<td>ChatGPT/account-plan auth (non-API-key sign-in)</td>
+<td>codex, junie, copilot-cli</td>
+<td><code>codex/docs/authentication.md</code>;
+<code>copilot-cli/README.md</code></td>
+<td>OUT-OF-SCOPE (provider-specific; verifier owns auth)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="top-10-highest-value-missing-features">6. Top-10 Highest-Value
+Missing Features</h2>
+<p>Ranked by (user impact × low duplication-with-existing × evidence
+strength). “Missing” or “Partial-surface” only — excludes things
+HelixCode already HAS.</p>
+<ol type="1">
+<li><strong>F22 — Cumulative diff-review sandbox (stage-before-apply,
+apply/reject hotkeys)</strong> — plandex/forge/claude-squad. The single
+biggest trust/UX lever; HelixCode has worktrees but no cumulative-diff
+staging+review surface. <strong>L.</strong></li>
+<li><del><strong>F23 — Configurable autonomy levels (named preset tiers
+None→Full)</strong></del> — <strong>DONE 2026-06-14</strong>
+(<code>internal/workflow/autonomy/modes.go:12-31</code>, 5 named
+presets). No longer a missing feature; kept here only for ranking
+history.</li>
+<li><strong>F12 — Workspace checkpoints (file snapshot +
+restore/undo)</strong> — cline/gemini/amazon-q/nanocoder. HelixCode
+checkpoints are task-DB rows, not workspace-file snapshots; this is the
+“oops, revert everything” safety net. <strong>M.</strong> (Phase 2 — not
+re-verified this 2026-06-14 pass.)</li>
+<li><strong>F11/F04 — Plan/Act + first-class chat modes
+(code/ask/architect/plan)</strong> — cline/aider/gemini/forge.
+<strong>F11 Plan/Act is DONE 2026-06-14</strong>
+(<code>internal/workflow/planmode/mode_controller.go:13-14</code>, wired
+<code>cmd/cli/main.go:773-779</code>); F04’s broader code/ask/architect
+mode menu remains the open surface. <strong>M.</strong></li>
+<li><strong>F61 — Spec-driven workflow surface
+(specify→clarify→plan→tasks→implement + constitution)</strong> —
+spec-kit/get-shit-done. Aligns directly with HelixCode’s constitution
+discipline. <strong>L.</strong></li>
+<li><strong>F25 — Conversation branches / fork</strong> —
+plandex/forge/agent-deck. Explore multiple approaches/models from a
+shared point. <strong>M.</strong></li>
+<li><strong>F36/F43 — <code>/rewind</code> + Tangent mode</strong> —
+gemini-cli/amazon-q. Side-explore and time-travel without losing place.
+<strong>M.</strong></li>
+<li><strong>F19/F56 — Robust headless (JSON/stream-json) +
+OpenAI-compatible server</strong> — cline/gemini/shai/aichat. Unlocks
+CI/CD + programmatic embedding. <strong>M.</strong></li>
+<li><strong>F33 — OS-level tool-exec sandbox
+(Seatbelt/Landlock/bwrap)</strong> — codex/gemini. Hard isolation beyond
+worktrees; safety-critical for full-auto. <strong>L.</strong></li>
+<li><strong>F18 — Messaging connectors
+(Slack/Telegram/Discord/Linear)</strong> — cline. Org already has the
+Herald precedent to extend (§11.4.74 catalogue-first), making this
+lower-risk than greenfield. <strong>L.</strong></li>
+</ol>
+<p>Runners-up (just outside top-10): F35 ACP mode, F45 async delegate,
+F59 event triggers, F54 shell-assistant auto-fix.</p>
+<hr />
+<h2 id="per-feature-acceptance-bar-anti-bluff">7. Per-Feature Acceptance
+Bar (anti-bluff)</h2>
+<p>Per the operator’s bar and §11.4.27 / §11.4.69 / §11.4.83 / §11.4.98
+/ §11.4.107 / §11.4.135, <strong>every</strong> ported feature is DONE
+only when it ships ALL of:</p>
+<ol type="1">
+<li><strong>Real implementation</strong> — no simulation/placeholder
+(§Rule 2, BLUFF-001/002/003); touches real files/processes/LLM
+calls.</li>
+<li><strong>A triggering prompt</strong> — the exact natural-language
+prompt that exercises the feature end-to-end (§11.4.105
+intent-recognition compatible).</li>
+<li><strong>A recorded video/transcript demo</strong> under
+<code>docs/qa/&lt;run-id&gt;/</code> (§11.4.83) — full bidirectional
+thread + captured evidence.</li>
+<li><strong>Tests</strong> — unit + integration + (where applicable)
+stress + chaos (§11.4.85), each anti-bluff with a paired §1.1 mutation;
+integration/E2E hit real infra (§11.4.50(A)).</li>
+<li><strong>A Challenge</strong> in <code>challenges/</code> exercising
+the complete user workflow (§Rule 6/7).</li>
+<li><strong>A HelixQA bank entry</strong> executed in an autonomous
+session with captured wire evidence (§11.4.27 (B)).</li>
+<li><strong>A standing regression guard</strong> registered on close
+(§11.4.135) with RED-on-broken-artifact polarity switch
+(§11.4.115).</li>
+<li><strong>Docs in sync</strong> — feature manual/guide + tracker row
+with <code>Catalogue-Check:</code> field (§11.4.74).</li>
+</ol>
+<hr />
+<h2 id="phases-tasks-sub-tasks">8. Phases → Tasks → Sub-Tasks</h2>
+<p>Each task names concrete file targets (under
+<code>helix_code/internal/…</code> or <code>helix_code/cmd/cli/…</code>)
+and acceptance criteria. Tasks are sized for §11.4.70 subagent-driven,
+≤~300-line units. Every sub-task inherits the §7 acceptance bar.</p>
+<h3 id="phase-0-foundations-audit">Phase 0 — Foundations &amp;
+Audit</h3>
+<blockquote>
+<p>Goal: replace assumptions with FACTS before any port. No new
+features.</p>
+</blockquote>
+<ul>
+<li><strong>T0.1 — Capability-confirmation audit.</strong> Verify the
+PARTIAL rows by reading code, not guessing (§11.4.6).
+<ul>
+<li>ST0.1.1 — Confirm headless JSON/stream-json output state in
+<code>cmd/cli/main.go</code> + <code>internal/render</code>. Acceptance:
+documented yes/no with file:line.</li>
+<li>ST0.1.2 — Confirm <code>SKILL.md</code> precedence vs plugins in
+<code>internal/plugins</code> (F40). Acceptance: precedence table
+captured.</li>
+<li>ST0.1.3 — Confirm OS-sandbox depth in
+<code>internal/worker/isolation</code> + <code>internal/infraboot</code>
+(F33). Acceptance: “worktree-only” vs “seatbelt/landlock”
+determination.</li>
+<li>ST0.1.4 — Confirm OpenAI-compat surface in
+<code>internal/server</code> (F56). Acceptance: endpoint inventory.</li>
+</ul></li>
+<li><strong>T0.2 — Catalogue-check sweep (§11.4.74).</strong> For each
+planned feature, record
+<code>reuse|extend|no-match &lt;org/repo@sha&gt;</code> (e.g. F18 →
+extend Herald; F42 → reuse cognee). Acceptance: every Phase 1–6 feature
+has a <code>Catalogue-Check:</code> line.</li>
+<li><strong>T0.3 — Tracker rows.</strong> Open one Feature item per
+planned feature in the workable-items DB (§11.4.93) with
+<code>created_by</code>/<code>assigned_to</code> (§11.4.104).
+Acceptance: DB↔︎MD in sync (<code>workable-items validate</code>).</li>
+</ul>
+<h3 id="phase-1-high-value-low-effort-already-partial">Phase 1 —
+High-Value / Low-Effort (already-partial)</h3>
+<blockquote>
+<p>Wrap existing substrate into discoverable surfaces. Mostly S/M.</p>
+</blockquote>
+<blockquote>
+<p><strong>⚠ Reconciled 2026-06-14 against HEAD
+<code>e7266263</code></strong> (read-only grep/read of the real inner
+tree, file:line cited per §11.4.6). Phase-1 was STALE: most items the
+plan filed as “to do / partial” are already SHIPPED — several under
+different package paths than the plan named, and T1.1’s CLI wiring (plan
+said “pending”) is in fact live. Per-item ground-truth status table is
+below; corrected paths are inlined. Future-phase content (Phases 2–7)
+was NOT re-verified this pass.</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status (2026-06-14)</th>
+<th>Evidence (file:line)</th>
+<th>What was wrong in the original plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T1.1 <code>/undo</code>+<code>/diff</code></td>
+<td><strong>DONE</strong></td>
+<td>handlers <code>helix_code/cmd/cli/main.go:2118-2133</code>
+(dispatch) + <code>:2326-2371</code>
+(<code>handleDiff</code>/<code>handleUndo</code>); real git via
+<code>helix_code/internal/autocommit/git.go:85</code>
+<code>DiffUnstaged</code>, <code>:136</code>
+<code>RevertLastCommit</code>, <code>:151</code>
+<code>DiffSinceRef</code></td>
+<td>Plan said substrate-only “no <code>/undo</code>/<code>/diff</code>
+UX” and prior audit said “CLI wiring still pending” — both WRONG; both
+commands are fully wired and use real git output.</td>
+</tr>
+<tr>
+<td>T1.2 Autonomy presets</td>
+<td><strong>DONE</strong></td>
+<td><code>helix_code/internal/workflow/autonomy/modes.go:12-31</code> (5
+named modes None/Basic/BasicPlus/SemiAuto/FullAuto), <code>:137</code>
+<code>Level()</code> 1-5, capability table <code>:51-122</code></td>
+<td>Plan named the package <code>internal/autonomy</code>; it actually
+lives at <code>internal/workflow/autonomy/</code>.</td>
+</tr>
+<tr>
+<td>T1.3 Plan/Act modes</td>
+<td><strong>DONE</strong></td>
+<td><code>helix_code/internal/workflow/planmode/mode_controller.go:13-14</code>
+(<code>ModePlan</code>/<code>ModeAct</code>), transition table
+<code>:118-121</code>; wired
+<code>helix_code/cmd/cli/main.go:773-779</code>
+(<code>NewModeController</code>, <code>NewToolGate</code>, enter/exit
+plan-mode tools)</td>
+<td>Plan named <code>internal/planner</code> for the mode controller;
+the first-class Plan/Act controller is
+<code>internal/workflow/planmode/</code> and is already CLI-wired.</td>
+</tr>
+<tr>
+<td>T1.4 TODO/ask_user surface</td>
+<td><strong>PARTIAL</strong></td>
+<td><code>ask_user</code> DONE:
+<code>helix_code/internal/tools/askuser/ask_user_tool.go:47-61</code>,
+wired <code>helix_code/cmd/cli/main.go:707-714</code>.
+<code>/tasks</code> exists
+(<code>helix_code/internal/commands/tasks_command.go:29</code>, wired
+<code>main.go:769</code>) but wraps
+<code>workflow.BackgroundManager</code> (background-job list), NOT the
+plantree/clarification TODO-tracker this item describes.</td>
+<td>Plan implied the TODO surface bridges
+<code>internal/plantree</code>+<code>internal/clarification</code>; the
+shipped <code>/tasks</code> is a background-job tracker. The plantree
+slash command is <code>plantree</code>
+(<code>internal/commands/plan_tree_command.go:20</code>), not a TODO
+<code>/tasks</code>.</td>
+</tr>
+<tr>
+<td>T1.5 Token + context-%</td>
+<td><strong>PARTIAL</strong></td>
+<td>per-request token count DONE:
+<code>helix_code/cmd/cli/main.go:1727-1740</code>
+(<code>printGenerationStats</code>, real
+<code>resp.Usage.PromptTokens/CompletionTokens</code>, anti-bluff “don’t
+fabricate”). Context-% indicator <strong>ABSENT</strong> — no production
+hit for any context-window-percent render in
+<code>internal/render</code> or <code>cmd/cli</code>.</td>
+<td>Plan filed F64 as “HAVE/PARTIAL”; the token half is DONE, the
+context-% half is genuinely ABSENT (only the token counter ships).</td>
+</tr>
+<tr>
+<td>T1.6 Skill <code>SKILL.md</code> precedence</td>
+<td><strong>PARTIAL</strong></td>
+<td>markdown-skills subsystem ships:
+<code>helix_code/internal/commands/markdown_skills.go</code>
+(<code>SkillLoader</code> <code>:217</code>, precedence
+<code>:253-254</code> “user first, then project; project overrides
+user”), wired <code>helix_code/cmd/cli/main.go:991-1010</code>
+(<code>.helix/skills/</code> + user-config dir).</td>
+<td>NOT absent. Gaps vs the AC: (a) filename is any <code>*.md</code>
+(<code>markdown_skills.go:267</code>), not the <code>SKILL.md</code>
+open-standard filename; (b) precedence is <strong>2-tier</strong>
+(project&gt;user) — the <strong>built-in/bundled tier is
+MISSING</strong> (no <code>//go:embed</code>, no default skills). So
+“repo/user/built-in precedence” is only 2 of 3 tiers.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>T1.1 — <code>/undo</code> + <code>/diff</code> (F07,
+S).</strong> <strong>✅ DONE (2026-06-14).</strong> Shipped: handlers at
+<code>cmd/cli/main.go:2118-2133</code> + <code>:2326-2371</code>,
+bridged to real git in <code>internal/autocommit/git.go</code>
+(<code>DiffUnstaged</code>:85, <code>RevertLastCommit</code>:136,
+<code>DiffSinceRef</code>:151). <code>/undo</code> does
+<code>git revert --no-edit HEAD</code> (force-push-free per §11.4.113);
+<code>/diff</code> prints verbatim <code>git diff [&lt;ref&gt;]</code>.
+Remaining (if AC tightening desired): the dedicated reproduction
+Challenge reverting a real edit. (NOTE: the prior audit’s “CLI wiring
+still pending” is corrected to DONE.)</li>
+<li><strong>T1.2 — Autonomy presets (F23, M).</strong> <strong>✅ DONE
+(2026-06-14).</strong> Shipped at
+<code>internal/workflow/autonomy/</code> (NOT
+<code>internal/autonomy</code> — path corrected).
+<code>modes.go:12-31</code> defines the five named presets
+(None/Basic/BasicPlus/SemiAuto/FullAuto), <code>Level()</code>:137 maps
+them to levels 1-5, and <code>GetCapabilities</code>:51-122 drives
+per-tier behaviour. AC residual: confirm the paired §1.1 mutation (flip
+a tier → test FAILs) is registered.</li>
+<li><strong>T1.3 — First-class chat/Plan-Act modes (F04, F11,
+M).</strong> <strong>✅ DONE (2026-06-14).</strong> Shipped at
+<code>internal/workflow/planmode/</code> (NOT
+<code>internal/planner</code> — path corrected).
+<code>mode_controller.go:13-14</code>
+(<code>ModePlan</code>/<code>ModeAct</code>), legal transitions
+<code>:118-121</code>; CLI-wired at <code>cmd/cli/main.go:773-779</code>
+via <code>NewModeController</code> + <code>NewToolGate</code> +
+enter/exit-plan-mode tools (tool availability gated by mode). AC
+residual: the “no writes in ask/plan mode” Challenge.</li>
+<li><strong>T1.4 — TODO/tracker tool surface (F41, S).</strong>
+<strong>◑ PARTIAL (2026-06-14).</strong> <code>ask_user</code> DONE
+(<code>internal/tools/askuser/ask_user_tool.go:47-61</code>, wired
+<code>cmd/cli/main.go:707-714</code>). The plan’s TODO-tracker
+(plantree/clarification → <code>/tasks</code>) is NOT what shipped:
+<code>/tasks</code> (<code>internal/commands/tasks_command.go:29</code>,
+wired <code>main.go:769</code>) lists <strong>background jobs</strong>
+via <code>workflow.BackgroundManager</code>, not a step-by-step TODO
+tracker. Remaining: wire <code>internal/plantree</code> (slash command
+currently named <code>plantree</code>,
+<code>internal/commands/plan_tree_command.go:20</code>) +
+<code>internal/clarification</code> into a user-visible task-tracker
+surface.</li>
+<li><strong>T1.5 — Token/usage + context-% indicator (F64, S).</strong>
+<strong>◑ PARTIAL (2026-06-14).</strong> Per-request token count DONE:
+<code>cmd/cli/main.go:1727-1740</code>
+(<code>printGenerationStats</code>) prints real
+<code>resp.Usage.PromptTokens/CompletionTokens</code> from the provider
+<code>usage</code> object (anti-bluff: refuses to fabricate when
+unpopulated, §11.4.141-compliant). Remaining: the
+<strong>context-window-% indicator is ABSENT</strong> — no production
+code renders a context-usage percentage; this is the genuine outstanding
+work for T1.5.</li>
+<li><strong>T1.6 — Skill <code>SKILL.md</code> precedence (F40, S, gated
+on ST0.1.2).</strong> <strong>◑ PARTIAL (2026-06-14).</strong> A
+markdown-skills subsystem already ships
+(<code>internal/commands/markdown_skills.go</code> +
+<code>skills_command.go</code> + <code>skills_watcher.go</code>, wired
+<code>cmd/cli/main.go:991-1010</code>, dirs <code>.helix/skills/</code>
++ user-config-dir). It implements <strong>2-tier</strong> precedence
+(project overrides user, <code>markdown_skills.go:253-254</code>).
+Remaining vs the AC: (a) the <strong>built-in/bundled tier</strong> is
+missing (no <code>//go:embed</code> defaults) → “repo/user/built-in” is
+only 2 of 3 tiers; (b) the loader keys on any <code>*.md</code> filename
+(<code>:267</code>), not the <code>SKILL.md</code> open-standard
+filename. Document/implement the third tier + filename convention.</li>
+</ul>
+<h3 id="phase-2-session-context-power-tools">Phase 2 — Session &amp;
+Context Power Tools</h3>
+<ul>
+<li><strong>T2.1 — Workspace checkpoints (F12, M).</strong> Targets:
+extend <code>internal/session</code> + worktree to snapshot/restore
+working-tree files (not just task DB). AC: create→edit→restore
+round-trips real files; chaos test mid-write SIGKILL recovers
+cleanly.</li>
+<li><strong>T2.2 — Conversation branches/fork (F25, M).</strong>
+Targets: <code>internal/session</code> branch primitive +
+<code>cmd/cli</code> <code>/branch</code>. AC: fork from a point,
+diverge, compare; both branches persist.</li>
+<li><strong>T2.3 — <code>/rewind</code> (F36, M).</strong> Targets:
+compose T2.1 checkpoints + history rewind in
+<code>internal/session/condense.go</code>. AC: rewind reverts
+conversation + optionally files.</li>
+<li><strong>T2.4 — Tangent mode (F43, M).</strong> Targets:
+<code>internal/session</code> tangent stack. AC: enter tangent, explore,
+return to exact prior state; <code>tangent tail</code> keeps last
+Q+A.</li>
+<li><strong>T2.5 — Big-context <code>@</code>-mention + file explorer
+(F26, M).</strong> Targets: <code>internal/context</code> + repomap;
+<code>@file</code>/<code>@dir</code>/<code>@url</code> loaders + token
+estimates. AC: <code>@</code>-load injects real content with token
+budget shown.</li>
+<li><strong>T2.6 — Conversation export + global search (F68, F67, S
+each).</strong> Targets: <code>internal/session</code>
+<code>:dump</code> JSON/HTML; fuzzy+regex search across sessions. AC:
+exported HTML opens; search finds a known phrase.</li>
+</ul>
+<h3 id="phase-3-autonomy-safety-surface">Phase 3 — Autonomy &amp; Safety
+Surface</h3>
+<ul>
+<li><strong>T3.1 — OS-level exec sandbox (F33, L, gated on
+ST0.1.3).</strong> Targets:
+<code>internal/worker</code>/<code>internal/infraboot</code> — Seatbelt
+(macOS), Landlock/bwrap (Linux), per §11.4.81 cross-platform parity
+(per-OS branches + honest kernel-gap citation). AC: a write outside the
+sandbox is blocked on each OS branch; paired mutation strips a branch →
+gate FAILs.</li>
+<li><strong>T3.2 — Lint/test-on-edit auto-fix loop (F06, M).</strong>
+Targets: <code>internal/editor</code> + <code>internal/quality</code> —
+block edit on syntax/lint failure, auto-retry. AC: a deliberately broken
+edit is blocked then fixed; SWE-agent-style linter-block evidenced.</li>
+<li><strong>T3.3 — Automated command/build/test debugging (F24,
+M).</strong> Targets: <code>internal/verifier</code> + new debug loop on
+failing exec. AC: a failing build is auto-diagnosed + fixed with
+captured evidence.</li>
+<li><strong>T3.4 — Shell-assistant failed-command hook (F54,
+M).</strong> Targets: <code>cmd/cli</code> shell hook +
+<code>internal/approval</code>. AC: a failed shell command yields an
+LLM-proposed fix (opt-in).</li>
+<li><strong>T3.5 — Restricted/secure shell mode (F69, M).</strong>
+Targets: extend <code>internal/security</code>
+path/symlink/dangerous-command guards. AC: a path-escape command is
+blocked; audit log captured.</li>
+</ul>
+<h3 id="phase-4-multi-agent-parallel-orchestration">Phase 4 —
+Multi-Agent &amp; Parallel Orchestration</h3>
+<ul>
+<li><strong>T4.1 — Cumulative diff-review sandbox (F22, L).</strong>
+Targets: new <code>internal/changeset</code> staging layer over
+worktrees + <code>cmd/cli</code> review menu (apply/reject
+per-file/hunk). AC: changes accumulate unapplied; <code>diff --ui</code>
+apply/reject lands only accepted hunks; reject leaves tree clean.</li>
+<li><strong>T4.2 — Persistent multi-agent teams (F16, L).</strong>
+Targets: extend <code>internal/agent</code> coordinator +
+<code>internal/roocode</code> with named-team persistence. AC:
+coordinator delegates to specialists with isolated context; team state
+survives restart (§11.4.119 single-resource-owner for shared
+files).</li>
+<li><strong>T4.3 — Async delegate / background sub-sessions (F45,
+M).</strong> Targets: <code>internal/workflow/background.go</code> +
+<code>internal/roocode</code>. AC: background sub-session runs in
+parallel, summary injected into main context (§11.4.89 background
+execution).</li>
+<li><strong>T4.4 — Cross-AI peer review (F63, M).</strong> Targets:
+<code>internal/verifier</code> ensemble → multi-runtime reviewer. AC: a
+second model/runtime reviews a diff; findings captured.</li>
+<li><strong>T4.5 — Kanban/parallel task board + MCP socket pool (F21,
+F66, L).</strong> Targets: app/server task board;
+<code>internal/mcp</code> shared-process pool. AC: parallel cards each
+on own worktree; MCP procs shared with measured memory reduction.</li>
+</ul>
+<h3 id="phase-5-connectors-server-headless-surface">Phase 5 —
+Connectors, Server &amp; Headless Surface</h3>
+<ul>
+<li><strong>T5.1 — Robust headless output (F19, M, gated on
+ST0.1.1).</strong> Targets: <code>cmd/cli</code>
+<code>--output-format json|stream-json</code>. AC: NDJSON event stream;
+<code>git diff | helix --json</code> works in a pipe;
+<code>-count=3</code> deterministic (§11.4.98).</li>
+<li><strong>T5.2 — OpenAI-compatible server (F56, M, gated on
+ST0.1.4).</strong> Targets: <code>internal/server</code>
+chat-completions/responses/embeddings + SSE. AC: a real OpenAI client
+hits the endpoint and gets a completion.</li>
+<li><strong>T5.3 — Shared-session daemon (F31, L).</strong> Targets:
+<code>internal/server</code> multi-client shared session keyed by cwd
+(crush/qwen/shai pattern). AC: two clients mirror the same session live;
+loopback no-auth, remote token-gated.</li>
+<li><strong>T5.4 — ACP mode (F35, M).</strong> Targets:
+<code>cmd/cli --acp</code> JSON-RPC over stdio. AC: a JSON-RPC
+initialize/prompt round-trips (Zed/JetBrains-compatible shape).</li>
+<li><strong>T5.5 — Messaging connectors (F18, L, extend Herald per
+§11.4.74).</strong> Targets: connector adapters → session mapping with
+access control. AC: a real Slack/Telegram thread drives a session with
+@-attribution (§11.4.104) + intent recognition (§11.4.105).</li>
+<li><strong>T5.6 — Chainable <code>--trace</code> (F55, S).</strong> AC:
+<code>helix ... | helix &quot;now run it&quot;</code> pipes a real conversation
+trace.</li>
+</ul>
+<h3 id="phase-6-spec-driven-quality-gate-workflow">Phase 6 — Spec-Driven
+&amp; Quality-Gate Workflow</h3>
+<ul>
+<li><strong>T6.1 — Spec-driven command surface (F61, L).</strong>
+Targets: <code>cmd/cli</code> +
+<code>internal/planner</code>/<code>plantree</code> —
+<code>/specify</code>,<code>/clarify</code>,<code>/plan</code>,<code>/tasks</code>,<code>/implement</code>,<code>/analyze</code>
+with a project constitution file. AC: a spec produces a plan → tasks →
+real implementation; constitution governs phases. (Strong synergy with
+HelixCode’s existing constitution discipline.)</li>
+<li><strong>T6.2 — Recipes (parametrized reusable workflows) (F46,
+M).</strong> Targets: <code>internal/plugins</code>/skills —
+parametrized recipe primitive. AC: a recipe runs with substituted
+parameters end-to-end.</li>
+<li><strong>T6.3 — Event triggers (file-watch + cron → skill/recipe)
+(F59, F17, M).</strong> Targets: new <code>internal/triggers</code>
+daemon (file-watch + cron) firing skills. AC: a file change fires a
+subscribed skill; a cron schedule survives restart.</li>
+<li><strong>T6.4 — Whole-project generation one-shot (F51, M).</strong>
+Targets: <code>cmd/cli</code> scaffold mode reading a prompt file → full
+project. AC: <code>helix gen &lt;dir&gt;</code> from a prompt file
+produces a buildable project.</li>
+</ul>
+<h3 id="phase-7-long-tail-niche-features">Phase 7 — Long-Tail / Niche
+Features</h3>
+<ul>
+<li><strong>T7.1 — Watch-files / IDE-comment mode (F09, M).</strong> AC:
+an <code>AI!</code> comment in a file triggers an edit.</li>
+<li><strong>T7.2 — Lessons system (auto-injected guidance) (F47,
+M).</strong> AC: a keyword/tool match injects a lesson; opt-out
+works.</li>
+<li><strong>T7.3 — Introspect tool + self-config skill (F44, F32, S
+each).</strong> AC: “what can you do?” answered from bundled docs;
+“configure yourself” edits config.</li>
+<li><strong>T7.4 — Model steering mid-task (F38, M).</strong> AC: a
+steer message redirects without restarting the loop.</li>
+<li><strong>T7.5 — Profiles (YAML behavior presets) (F50, S).</strong>
+AC: <code>--profile</code> switches a named behavior set.</li>
+<li><strong>T7.6 — Copy-context to web chat (F10, S).</strong> AC:
+<code>/copy-context</code> yields paste-ready context.</li>
+<li><strong>T7.7 — Benchmark harness (F52, L) + ACI windowed editor
+(F53, M).</strong> AC: agent runs against a public benchmark task;
+windowed viewer shows ~100 lines/turn with in-file search.</li>
+<li><strong>T7.8 — Computer use / desktop control (F48, L).</strong> AC:
+a GUI action is driven + verified (compose §11.4.107 liveness).</li>
+<li><strong>T7.9 — Stateful code-first execution (DataFrames persist)
+(F65, L)</strong> + <strong>token-economy review</strong> — only if a
+data-analytics use case is greenlit.</li>
+</ul>
+<hr />
+<h2 id="dependency-touch-map">9. Dependency Touch-Map</h2>
+<p>Which org submodules / internal subsystems each feature cluster
+touches (per §11.4.51 equal-codebase, extend-don’t-reimplement):</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature cluster</th>
+<th>HelixAgent</th>
+<th>LLMsVerifier</th>
+<th>HelixMemory (cognee)</th>
+<th>HelixLLM</th>
+<th>HelixSpecifier</th>
+<th>Herald</th>
+<th>helix_qa</th>
+<th>challenges</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modes/Autonomy (F04,F11,F23)</td>
+<td>✓ agent loop</td>
+<td>✓ model status</td>
+<td>—</td>
+<td>✓ routing</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Checkpoints/Rewind/Tangent/Branches (F12,F25,F36,F43)</td>
+<td>✓ session</td>
+<td>—</td>
+<td>partial (history)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Diff-sandbox (F22)</td>
+<td>✓ worktree</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Multi-agent/Delegate (F16,F45,F63)</td>
+<td>✓ coordinator/roocode</td>
+<td>✓ ensemble</td>
+<td>✓ shared mem</td>
+<td>✓</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Server/Headless/ACP/Connectors (F19,F31,F35,F56,F18)</td>
+<td>✓</td>
+<td>✓</td>
+<td>—</td>
+<td>✓</td>
+<td>—</td>
+<td>✓ extend</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Spec-driven (F61) + Recipes/Triggers (F46,F59)</td>
+<td>✓ planner/plantree</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓ (spec engine)</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Sandbox/Lint-fix/Auto-debug (F33,F06,F24)</td>
+<td>✓ worker/editor</td>
+<td>✓ verifier</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Context/<code>@</code>-mention/RAG (F26,F42)</td>
+<td>✓ context</td>
+<td>—</td>
+<td>✓ cognee</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<p><code>HelixSpecifier</code> is the natural owner for F61’s spec
+engine (catalogue-check before greenfield). <code>Herald</code> is the
+catalogue-first base for F18 messaging connectors.</p>
+<hr />
+<h2 id="honest-effort-caveats">10. Honest Effort Caveats</h2>
+<ul>
+<li><strong>No over-claiming “missing”.</strong> Many marquee features
+(repo-map F01, auto-commit F02, voice F05, model routing F37, worktrees
+F39, RAG/knowledge F42, condense F57, sessions F58, approval F29/F34,
+LSP F28, provider catalogue F30) are <strong>already HAVE</strong> in
+HelixCode — porting work there is zero or surface-only.</li>
+<li><strong>PARTIAL ≠ trivial.</strong> F12/F22/F33/F61 have substrate
+but the user-facing surface + cross-platform + anti-bluff coverage are
+the real cost (each is M–L).</li>
+<li><strong>Vendor-doc stubs.</strong> codex <code>docs/*.md</code> and
+mistral-code’s inherited gemini docs link out to websites; their feature
+claims were taken from README/AGENTS/crate-names, not in-tree prose — do
+not assume the in-repo copy is the spec.</li>
+<li><strong>Out-of-scope rows.</strong> F60 (IDE extension), F70
+(account-plan auth), F52 (agent benchmark) are flagged but are app-team
+/ provider / research concerns, not core-CLI ports.</li>
+<li><strong><code>openhands</code> absent.</strong> The operator’s
+example list named openhands; it is NOT in <code>cli_agents/</code> —
+excluded.</li>
+<li>This is a <strong>planning document</strong> (§11.4.73
+spec-versioning applies once accepted). No code written. Effort
+estimates are S/M/L bands, not hour commitments.</li>
+</ul>
+<hr />
+<h2 id="sources-verified">11. Sources Verified</h2>
+<p>Researched 2026-06-14 by read-only subagents against the in-repo
+vendored copies under <code>cli_agents/</code>. Primary evidence files
+(non-exhaustive):</p>
+<ul>
+<li>aider: <code>aider/README.md</code>,
+<code>aider/aider/website/docs/{repomap,usage/modes,usage/commands,usage/voice,usage/watch,usage/lint-test,usage/copypaste,usage/images-urls}.md</code></li>
+<li>cline: <code>cline/README.md</code>,
+<code>cline/.clinerules/*</code></li>
+<li>plandex: <code>plandex/README.md</code>,
+<code>plandex/docs/docs/core-concepts/{plans,reviewing-changes,context-management,autonomy,execution-and-debugging,version-control,branches}.md</code>,
+<code>plandex/docs/docs/repl.md</code></li>
+<li>crush: <code>crush/README.md</code>,
+<code>crush/docs/hooks/</code></li>
+<li>codex: <code>codex/README.md</code>, <code>codex/AGENTS.md</code>,
+<code>codex/docs/{sandbox,exec,skills,slash_commands,config,agents_md,execpolicy,authentication}.md</code>,
+<code>codex/codex-rs/</code> crate layout</li>
+<li>gemini-cli: <code>gemini-cli/README.md</code>,
+<code>gemini-cli/docs/cli/{plan-mode,rewind,model-routing,model-steering,git-worktrees,acp-mode,skills,headless}.md</code>,
+<code>gemini-cli/docs/{checkpointing,hooks/index}.md</code>,
+<code>gemini-cli/docs/tools/*</code></li>
+<li>qwen-code: <code>qwen-code/README.md</code>,
+<code>qwen-code/.qwen/skills/</code></li>
+<li>copilot-cli: <code>copilot-cli/README.md</code></li>
+<li>amazon-q:
+<code>amazon-q/docs/{built-in-tools,agent-format,knowledge-management,tangent-mode,introspect-tool,hooks,experiments,todo-lists}.md</code></li>
+<li>mistral-code: <code>mistral-code/README.md</code>,
+<code>mistral-code/MISTRAL.md</code>, <code>mistral-code/docs/*</code>
+(mostly inherited)</li>
+<li>codename-goose: <code>codename-goose/README.md</code>,
+<code>ARCHITECTURE.md</code>, <code>crates/</code>,
+<code>documentation/blog/2025-02-21-gooseteam-mcp/index.md</code></li>
+<li>gptme: <code>gptme/README.md</code></li>
+<li>open-interpreter: <code>open-interpreter/README.md</code></li>
+<li>forge: <code>forge/README.md</code></li>
+<li>gpt-engineer: <code>gpt-engineer/README.md</code></li>
+<li>swe-agent: <code>swe-agent/README.md</code>,
+<code>swe-agent/docs/background/aci.md</code>,
+<code>swe-agent/tools/</code></li>
+<li>shai: <code>shai/README.md</code></li>
+<li>nanocoder: <code>nanocoder/README.md</code>,
+<code>nanocoder/CLAUDE.md</code>,
+<code>nanocoder/docs/features/*</code></li>
+<li>claude-squad: <code>claude-squad/README.md</code></li>
+<li>claude-code: <code>claude-code/README.md</code>,
+<code>claude-code/plugins/</code></li>
+<li>vtcode: <code>vtcode/README.md</code></li>
+<li>warp: <code>warp/README.md</code>, <code>.warp/</code> skills</li>
+<li>get-shit-done: <code>get-shit-done/docs/FEATURES.md</code>,
+<code>commands/gsd/</code>, <code>AGENTS.md</code></li>
+<li>spec-kit: <code>spec-kit/README.md</code></li>
+<li>junie: <code>junie/README.md</code></li>
+<li>aichat: <code>aichat/README.md</code></li>
+<li>codai: <code>codai/README.md</code></li>
+<li>taskweaver: <code>taskweaver/README.md</code></li>
+<li>octogen: <code>octogen/README.md</code></li>
+<li>zeroshot: <code>zeroshot/AGENTS.md</code></li>
+<li>multiagent-coding: <code>multiagent-coding/README.md</code></li>
+<li>agent-deck: <code>agent-deck/llms.txt</code></li>
+<li>bridle: <code>bridle/CLAUDE.md</code>,
+<code>bridle/AGENTS.md</code>,
+<code>.claude-plugin/marketplace.json</code> (marketplace, not an
+agent)</li>
+</ul>
+<p>HelixCode baseline verified against:
+<code>helix_code/internal/{agent,repomap,mcp,plugins,verifier,session,hooks,worker,memory,voice,clarification,task,autocommit,roocode,kilocode,planner,plantree,approval,approvalwire,quality,server,telemetry,context}</code>
+and <code>helix_code/applications/*</code>, plus
+<code>docs/plans/HXC-031-codex-cline-port.md</code>.</p>
+</body>
+</html>

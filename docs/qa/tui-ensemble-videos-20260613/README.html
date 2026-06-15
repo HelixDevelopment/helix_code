@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="qa-evidence-tui-model-interaction-video-recordings">QA Evidence
+— TUI model-interaction video recordings</h1>
+<p><strong>Run-id:</strong> tui-ensemble-videos-20260613
+<strong>Date:</strong> 2026-06-13 <strong>Feature:</strong>
+<code>helix-tui</code> end-to-end model interaction — agent-driven
+recording + OCR validation <strong>Operator request:</strong> record two
+TUI videos (Video 1 = strongest LLMsVerifier model; Video 2 = “Helix
+Agent ensemble”), run 3 prompts each, validate both for real replies +
+no errors/warnings; reuse HelixQA + Panoptic for recording/validation;
+everything dynamic, no hardcoding, no bluff. <strong>Anti-bluff
+basis:</strong> §11.4.5 / §11.4.107 (liveness/reply oracle) / §11.4.69 /
+§11.4.83 / §11.4.123. The agent (not the operator) drove the TUI and
+produced the recordings; replies and error-state are captured from real
+OCR of the recorded frames.</p>
+<h2 id="prompts-both-videos">Prompts (both videos)</h2>
+<ol type="1">
+<li>“Do you see my codebase?”</li>
+<li>“Do you need an AGENTS.md, and what is name of your agents file
+exactly?”</li>
+<li>“Check git status of all work done.”</li>
+</ol>
+<h2 id="video-1-strongest-single-model-groq-llama-3.3-70b-versatile-digit-7">Video
+1 — strongest single model (Groq <code>llama-3.3-70b-versatile</code>,
+digit 7)</h2>
+<ul>
+<li>File: <code>~/Downloads/video1-strongest-model.mp4</code> (also
+<code>/tmp/helix_recordings/</code>).</li>
+<li><strong>Validation: 5/5 PASS</strong>
+(<code>video1-strongest-model-validation.json</code>, 68 frames):
+<ul>
+<li><code>no_error_tokens</code> PASS — clean, no errors/warnings on
+screen.</li>
+<li><code>prompt_{1,2,3}_has_reply</code> PASS — real
+<code>llama-3.3-70b</code> prose replies rendered (e.g. honest “I don’t
+have a specific agents file… common names include AGENTS.md”, “git
+status…”), “Response received (tokens: 457)”.</li>
+<li><code>intended_model_selected</code> PASS — model “Groq”
+visible.</li>
+</ul></li>
+<li>The model honestly states it has no filesystem/git access (raw LLM
+via API, no tools) — an honest real reply, not a bluff.</li>
+</ul>
+<h2 id="video-2-helix-agent-ensemble-digit-9">Video 2 — “Helix Agent
+ensemble” (digit 9)</h2>
+<ul>
+<li>File: <code>~/Downloads/video2-helix-agent-ensemble.mp4</code> (also
+<code>/tmp/helix_recordings/</code>).</li>
+<li><strong>Validation: 5/5 PASS</strong>
+(<code>video2-ensemble-validation.json</code>, 95 frames):
+<code>no_error_tokens</code> PASS, <code>prompt_{1,2,3}_has_reply</code>
+PASS (real ensemble prose replies, e.g. “I don’t have the ability to see
+or access your codebase…”), <code>intended_model_selected</code> PASS
+(ensemble visible). Defect-token grep on the aggregated OCR
+(<code>member(s) failed</code> / <code>[Error:</code> /
+<code>first error</code>) → ABSENT.</li>
+<li>The ensemble fans each prompt to all env-key cloud providers
+(DeepSeek/Mistral/Groq/OpenRouter) and votes (confidence/quality). Zero
+hardcoded model names; member-model resolution preserves each provider’s
+live working-model-first catalogue order, is verifier-driven when real
+verified data exists (CONST-036/040), and persists a dead-model set so a
+decommissioned model (e.g. Groq <code>gemma-7b-it</code>) is recorded +
+never re-tried.</li>
+<li>ROOT-CAUSE of the earlier all-fail (§11.4.102, captured RED→GREEN):
+NOT rate-limits — the ensemble forwarded
+<code>request.Stream=true</code> into each member’s NON-streaming
+<code>Generate</code>, so providers returned SSE that was JSON-decoded →
+<code>invalid character &#39;d&#39; looking for beginning of value</code> →
+every member failed. Fix: <code>Stream=false</code> forced per member
+(votes on complete responses; <code>GenerateStream</code> emits the
+voted result as one chunk). A second contributor — an alphabetical sort
+destroying each provider’s working-model-first catalogue order — was
+also removed. Paired §1.1 regression guards: removing
+<code>Stream=false</code> reproduces the exact live
+<code>invalid character &#39;d&#39; … all member(s) failed</code> and FAILs the
+guard.</li>
+</ul>
+<h2 id="tooling-reused-extended-per-operator-ask">Tooling (reused +
+extended per operator ask)</h2>
+<ul>
+<li><strong>Panoptic</strong> <code>recvalidate</code>
+(<code>submodules/panoptic</code>): OCR video-validator; de-hardcoded so
+chrome patterns + reply markers are consumer-supplied
+(<code>--chrome-pattern</code>/<code>--reply-marker</code>), keeping
+Panoptic project-agnostic (CONST-051(B)); golden-good/golden-bad
+self-validation (§11.4.107(10)).</li>
+<li><strong>HelixQA</strong> <code>pkg/recordingqa</code> +
+<code>banks/tui-recording-validation.yaml</code>
+(<code>submodules/helix_qa</code>): recording-validation bank threading
+the new options through + a <code>TRV-ENSEMBLE-001</code> entry;
+paired-mutation tests.</li>
+</ul>
+<h2 id="sources-commands">Sources / commands</h2>
+<p>The exact <code>panoptic recvalidate</code> invocations (with chrome
+patterns + reply marker) and per-check JSON are in the two
+<code>*-validation.json</code> files in this directory.</p>
+</body>
+</html>
