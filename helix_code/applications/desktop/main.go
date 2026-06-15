@@ -1478,6 +1478,25 @@ func (da *DesktopApp) Close() error {
 func main() {
 	desktopApp := NewDesktopApp()
 
+	// Wire the real CONST-046 translator (embedded active.en.yaml bundle)
+	// onto the GUI app BEFORE any window/widget is built, replacing the
+	// NoopTranslator{} message-ID-echo default installed by NewDesktopApp.
+	// Without this, every dashboard/tab label leaks raw message keys
+	// (`desktop_dashboard_header`, `desktop_dashboard_activity_title`, ...)
+	// — a §11.4 / CONST-046 PASS-bluff visible on the rendered GUI (HXC-111).
+	// The `nogui` main() in main_nogui.go already did this; the GUI main()
+	// never did, so only the GUI surface regressed. We call NewTranslator
+	// with NO langs so it deterministically defaults to the shipped English
+	// bundle and never feeds a malformed host locale (e.g. "en-AT@..." whose
+	// "at" subtag Fyne rejects) into go-i18n's accept-language parser. On
+	// bundle-load failure the loud NoopTranslator{} echo is preserved (never
+	// a silent swallow). Mirrors main_nogui.go.
+	if tr, err := i18n.NewTranslator(); err != nil {
+		log.Printf("⚠️  i18n: falling back to message-ID echo (bundle load failed): %v", err)
+	} else {
+		desktopApp.SetTranslator(tr)
+	}
+
 	if err := desktopApp.Initialize(); err != nil {
 		log.Fatalf("Failed to initialize desktop app: %v", err)
 	}
