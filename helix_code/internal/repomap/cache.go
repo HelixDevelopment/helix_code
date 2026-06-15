@@ -353,6 +353,9 @@ func (rc *RepoCache) Cleanup() int {
 
 // GetStats returns cache statistics. Size is summed from the per-entry
 // SizeBytes measured at Set time (R1 B15 — no longer re-encodes every value).
+// For legacy entries with SizeBytes==0 the size is computed into a local for the
+// total only; GetStats holds an RLock and never mutates a shared entry, so
+// concurrent callers are race-free.
 func (rc *RepoCache) GetStats() CacheStats {
 	rc.mu.RLock()
 	defer rc.mu.RUnlock()
@@ -370,10 +373,14 @@ func (rc *RepoCache) GetStats() CacheStats {
 		}
 		size := entry.SizeBytes
 		if size == 0 {
-			// Entry loaded from a pre-SizeBytes disk file — measure once and
-			// memoize so the next GetStats is free.
+			// Entry loaded from a pre-SizeBytes disk file (legacy / Import path).
+			// Compute its size into a LOCAL for the total only — do NOT write
+			// entry.SizeBytes back here: GetStats holds rc.mu.RLock(), and two
+			// concurrent GetStats calls writing the same *cacheEntry under a read
+			// lock is a data race (DEFECT-2). GetStats is a read-only stats
+			// method; the authoritative back-fill happens under the write lock in
+			// Set/saveToDisk, not here.
 			size = estimateSize(entry.Value)
-			entry.SizeBytes = size
 		}
 		stats.TotalSize += size
 	}

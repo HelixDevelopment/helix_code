@@ -188,6 +188,13 @@ type ServerHealth struct {
 
 // NewProductionDeployer creates a new production deployer
 func NewProductionDeployer(config *DeploymentConfig) (*ProductionDeployer, error) {
+	// A nil config is a contract-anticipated input (checkPrerequisites handles
+	// it explicitly); reject it here with an error instead of dereferencing
+	// config.SecurityGateEnabled below and panicking.
+	if config == nil {
+		return nil, fmt.Errorf("deployment: nil config")
+	}
+
 	deployer := &ProductionDeployer{
 		config: config,
 		status: &DeploymentStatus{
@@ -858,6 +865,11 @@ func (pd *ProductionDeployer) validateTargetServers() error {
 }
 
 func (pd *ProductionDeployer) runSecurityScan(ctx context.Context) (*security.FeatureScanResult, error) {
+	// Capture the scan start BEFORE any work so ScanTime reflects the real
+	// elapsed duration (the previous time.Since(time.Now()) measured ~0 — only
+	// the cost of a single time.Now() call).
+	scanStart := time.Now()
+
 	log.Printf("   🔍 Running comprehensive security scan...")
 
 	// ANTI-BLUFF: Perform REAL security scan
@@ -913,7 +925,7 @@ func (pd *ProductionDeployer) runSecurityScan(ctx context.Context) (*security.Fe
 		SecurityScore:   securityScore,
 		Issues:          issues,
 		Recommendations: []string{"Review security issues before production deployment"},
-		ScanTime:        time.Since(time.Now()),
+		ScanTime:        time.Since(scanStart),
 		Timestamp:       time.Now(),
 	}, nil
 }

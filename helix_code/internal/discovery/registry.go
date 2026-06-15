@@ -84,6 +84,7 @@ type ServiceRegistry struct {
 	services  map[string]*ServiceInfo // key: service name
 	mu        sync.RWMutex
 	stopChan  chan struct{}
+	stopOnce  sync.Once
 	cleanupWg sync.WaitGroup
 }
 
@@ -112,9 +113,14 @@ func (r *ServiceRegistry) Start() {
 	}
 }
 
-// Stop stops the registry background tasks
+// Stop stops the registry background tasks. It is idempotent: the stop channel
+// is closed at most once via stopOnce, so a second (or concurrent) Stop call is
+// a clean no-op rather than a "close of closed channel" panic. cleanupWg.Wait is
+// kept OUTSIDE the Once so every caller blocks until the background workers exit.
 func (r *ServiceRegistry) Stop() {
-	close(r.stopChan)
+	r.stopOnce.Do(func() {
+		close(r.stopChan)
+	})
 	r.cleanupWg.Wait()
 }
 

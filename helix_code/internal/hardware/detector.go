@@ -5,6 +5,7 @@ import (
 	stdctx "context"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/exec"
 	"regexp"
@@ -98,9 +99,13 @@ func (d *Detector) parseMemorySize(sizeStr string) int {
 		return 0
 	}
 
-	// Use regex to extract number and unit
-	re := regexp.MustCompile(`(\d+(?:\.\d+)?)\s*(GB|MB|TB|G|M|T)?`)
-	matches := re.FindStringSubmatch(strings.ToUpper(sizeStr))
+	// Anchor the pattern to the ENTIRE (trimmed) string. An un-anchored pattern
+	// matched a digit substring anywhere, so a leading '-' ("-5GB") or
+	// scientific notation ("1e308TB") was silently dropped/truncated and a
+	// negative/malformed size became positive memory. Anchoring forces such
+	// inputs to fail the match → 0.
+	re := regexp.MustCompile(`^(\d+(?:\.\d+)?)\s*(GB|MB|TB|G|M|T)?$`)
+	matches := re.FindStringSubmatch(strings.TrimSpace(strings.ToUpper(sizeStr)))
 	if len(matches) < 2 {
 		log.Print(tr(stdctx.Background(), "internal_hardware_parse_memory_size_failed", map[string]any{"SizeStr": sizeStr}))
 		return 0
@@ -109,6 +114,13 @@ func (d *Detector) parseMemorySize(sizeStr string) int {
 	value, err := strconv.ParseFloat(matches[1], 64)
 	if err != nil {
 		log.Print(tr(stdctx.Background(), "internal_hardware_parse_memory_value_failed", map[string]any{"Value": matches[1], "Error": err}))
+		return 0
+	}
+
+	// Defence in depth: reject negative or non-finite values so a malformed
+	// size can never become positive memory.
+	if math.IsNaN(value) || math.IsInf(value, 0) || value < 0 {
+		log.Print(tr(stdctx.Background(), "internal_hardware_parse_memory_value_failed", map[string]any{"Value": matches[1], "Error": "negative or non-finite size"}))
 		return 0
 	}
 
@@ -143,7 +155,13 @@ func (d *Detector) CanRunModel(modelSize string) bool {
 		"70B": 5,
 	}
 
-	requestedOrder := sizeOrder[modelSize]
+	requestedOrder, ok := sizeOrder[modelSize]
+	if !ok {
+		// Unknown / typo'd / unsupported model size: a map miss yields order 0,
+		// which would otherwise be <= optimalOrder and wrongly reported as
+		// runnable. An unrecognised size is NOT runnable.
+		return false
+	}
 	optimalOrder := sizeOrder[optimalSize]
 
 	return requestedOrder <= optimalOrder

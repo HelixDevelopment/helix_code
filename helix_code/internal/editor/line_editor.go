@@ -1,9 +1,7 @@
 package editor
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 )
@@ -34,8 +32,8 @@ func (le *LineEditor) Apply(edit Edit) error {
 		return fmt.Errorf("no line edits provided")
 	}
 
-	// Read the file
-	lines, err := le.readFile(edit.FilePath)
+	// Read the file (preserving trailing-newline state, no per-line cap)
+	lines, endsWithNewline, err := le.readFile(edit.FilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
@@ -68,8 +66,8 @@ func (le *LineEditor) Apply(edit Edit) error {
 		}
 	}
 
-	// Write the modified content
-	if err := le.writeFile(edit.FilePath, lines); err != nil {
+	// Write the modified content (preserving original trailing-newline state)
+	if err := le.writeFile(edit.FilePath, lines, endsWithNewline); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 
@@ -189,43 +187,17 @@ func (le *LineEditor) GetLineRange(lines []string, start, end int) []string {
 	return result
 }
 
-// readFile reads a file and returns its lines
-func (le *LineEditor) readFile(filePath string) ([]string, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	return lines, nil
+// readFile reads a file and returns its lines plus whether it ended with a
+// trailing newline. Uses readLinesPreservingNewline so there is no 64KiB
+// per-line cap (DEFECT-A) and trailing-newline state is preserved (DEFECT-B).
+func (le *LineEditor) readFile(filePath string) ([]string, bool, error) {
+	return readLinesPreservingNewline(filePath)
 }
 
-// writeFile writes lines to a file
-func (le *LineEditor) writeFile(filePath string, lines []string) error {
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	writer := bufio.NewWriter(file)
-	for _, line := range lines {
-		if _, err := writer.WriteString(line + "\n"); err != nil {
-			return err
-		}
-	}
-
-	return writer.Flush()
+// writeFile writes lines to a file, preserving the original trailing-newline
+// state (DEFECT-B): a trailing newline is emitted only if endsWithNewline.
+func (le *LineEditor) writeFile(filePath string, lines []string, endsWithNewline bool) error {
+	return writeLinesPreservingNewline(filePath, lines, endsWithNewline)
 }
 
 // LineEditStats contains statistics about line edits
@@ -285,7 +257,7 @@ func (le *LineEditor) ValidateLineRange(lines []string, start, end int) error {
 // ApplySingleLineEdit applies a single line edit without sorting
 // Useful for interactive editing scenarios
 func (le *LineEditor) ApplySingleLineEdit(filePath string, lineEdit LineEdit) error {
-	lines, err := le.readFile(filePath)
+	lines, endsWithNewline, err := le.readFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
@@ -299,7 +271,7 @@ func (le *LineEditor) ApplySingleLineEdit(filePath string, lineEdit LineEdit) er
 		return fmt.Errorf("failed to apply edit: %w", err)
 	}
 
-	if err := le.writeFile(filePath, lines); err != nil {
+	if err := le.writeFile(filePath, lines, endsWithNewline); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 

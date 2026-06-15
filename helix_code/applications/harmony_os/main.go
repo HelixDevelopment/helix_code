@@ -171,6 +171,7 @@ type HarmonyApp struct {
 	// Update control
 	updateTicker *time.Ticker
 	stopUpdate   chan struct{}
+	stopOnce     sync.Once
 
 	// translator resolves CONST-046 user-facing message IDs for the
 	// GUI (round-438 §11.4 anti-bluff sweep, 2026-05-20). Defaults to
@@ -1600,11 +1601,15 @@ func (app *HarmonyApp) Run() {
 	app.mainWindow.ShowAndRun()
 }
 
-// Cleanup performs cleanup on application shutdown
+// Cleanup performs cleanup on application shutdown. It is idempotent: the
+// stopUpdate channel is closed at most once via stopOnce, so a second Cleanup
+// call is a clean no-op rather than a "close of closed channel" panic.
 func (app *HarmonyApp) Cleanup() {
 	// Stop background updates
 	if app.stopUpdate != nil {
-		close(app.stopUpdate)
+		app.stopOnce.Do(func() {
+			close(app.stopUpdate)
+		})
 	}
 
 	// Stop system monitoring

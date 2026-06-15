@@ -502,16 +502,21 @@ func TestModelSizeCompatibility(t *testing.T) {
 		size     string
 		expected bool
 	}{
-		{"1B", true},       // Smaller should always be compatible
-		{"3B", true},       // Should be compatible (equal to optimal)
-		{"7B", false},      // May not be compatible if optimal is 3B
-		{"13B", false},     // Likely not compatible if optimal is 3B
-		{"34B", false},     // Should not be compatible
-		{"70B", false},     // Should not be compatible
-		{"", true},         // Empty should default to true
-		{"invalid", false}, // Invalid should not be compatible
-		{"100B", false},    // Too large should not be compatible
-		{"0.5B", true},     // Smaller should be compatible
+		// Reconciled with DEFECT-2 fix (§11.4.120): CanRunModel now treats any
+		// model size NOT in the supported set {3B,7B,13B,34B,70B} as NOT
+		// runnable. Previously a map miss yielded order 0 and wrongly reported
+		// unknown sizes (1B, "", 0.5B, invalid, 100B) as runnable. Only
+		// recognised sizes at/below the optimal are compatible.
+		{"3B", true},       // Supported, equal to optimal → compatible
+		{"7B", false},      // Supported but above optimal 3B → not compatible
+		{"13B", false},     // Supported but above optimal 3B → not compatible
+		{"34B", false},     // Supported but above optimal → not compatible
+		{"70B", false},     // Supported but above optimal → not compatible
+		{"1B", false},      // Unsupported size → not runnable
+		{"", false},        // Empty/unrecognised → not runnable
+		{"invalid", false}, // Invalid → not compatible
+		{"100B", false},    // Unsupported (too large, not in set) → not runnable
+		{"0.5B", false},    // Unsupported size → not runnable
 	}
 
 	for _, tc := range testCases {

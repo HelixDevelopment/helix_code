@@ -1,7 +1,6 @@
 package editor
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"regexp"
@@ -142,8 +141,8 @@ func (sre *SearchReplaceEditor) ApplyToLines(edit Edit) error {
 		return fmt.Errorf("search/replace content must be []SearchReplace")
 	}
 
-	// Read the file lines
-	lines, err := sre.readFileLines(edit.FilePath)
+	// Read the file lines (preserving trailing-newline state, no per-line cap)
+	lines, endsWithNewline, err := sre.readFileLines(edit.FilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
@@ -160,8 +159,8 @@ func (sre *SearchReplaceEditor) ApplyToLines(edit Edit) error {
 		}
 	}
 
-	// Write the modified lines back
-	if err := sre.writeFileLines(edit.FilePath, lines); err != nil {
+	// Write the modified lines back (preserving original trailing-newline state)
+	if err := sre.writeFileLines(edit.FilePath, lines, endsWithNewline); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 
@@ -211,43 +210,21 @@ func (sre *SearchReplaceEditor) writeFile(filePath string, content string) error
 	return os.WriteFile(filePath, []byte(content), 0644)
 }
 
-// readFileLines reads file content as lines
-func (sre *SearchReplaceEditor) readFileLines(filePath string) ([]string, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	return lines, nil
+// readFileLines reads file content as lines plus whether the file ended with a
+// trailing newline. Uses readLinesPreservingNewline so there is no 64KiB
+// per-line cap (DEFECT-A) and trailing-newline state is preserved (DEFECT-B).
+//
+// NOTE: only the line-by-line ApplyToLines path uses this. The main Apply path
+// reads/writes whole content via os.ReadFile/os.WriteFile and is already
+// trailing-newline-safe — it is intentionally left unchanged.
+func (sre *SearchReplaceEditor) readFileLines(filePath string) ([]string, bool, error) {
+	return readLinesPreservingNewline(filePath)
 }
 
-// writeFileLines writes lines to file
-func (sre *SearchReplaceEditor) writeFileLines(filePath string, lines []string) error {
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	writer := bufio.NewWriter(file)
-	for _, line := range lines {
-		if _, err := writer.WriteString(line + "\n"); err != nil {
-			return err
-		}
-	}
-
-	return writer.Flush()
+// writeFileLines writes lines to file, preserving the original trailing-newline
+// state (DEFECT-B): a trailing newline is emitted only if endsWithNewline.
+func (sre *SearchReplaceEditor) writeFileLines(filePath string, lines []string, endsWithNewline bool) error {
+	return writeLinesPreservingNewline(filePath, lines, endsWithNewline)
 }
 
 // SearchReplaceStats contains statistics about search/replace operations

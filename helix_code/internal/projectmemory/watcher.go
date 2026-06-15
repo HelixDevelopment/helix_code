@@ -36,9 +36,22 @@ type MemoryWatcher struct {
 
 	// Synchronisation: closeOnce guards Close() so calling it twice is a
 	// no-op. done is closed when runEventLoop exits — Close blocks on it.
+	// startMu serialises the started check+set in Start so concurrent Start
+	// calls spawn AT MOST one event loop (no data race on `started`, no second
+	// goroutine). doneOnce guards close(done) so a stray double-close — e.g. a
+	// duplicate event loop on the pre-fix path, or Close racing the loop — can
+	// never panic with "close of closed channel" (defense-in-depth).
 	closeOnce sync.Once
+	doneOnce  sync.Once
+	startMu   sync.Mutex
 	done      chan struct{}
 	started   bool
+}
+
+// closeDone closes w.done exactly once. Safe to call from the event loop's
+// defer, from Start's fsnotify-failure path, and from Close.
+func (w *MemoryWatcher) closeDone() {
+	w.doneOnce.Do(func() { close(w.done) })
 }
 
 // NewMemoryWatcher constructs a watcher; safe to construct without an
@@ -68,6 +81,13 @@ func NewMemoryWatcher(r *MemoryRegistry, log *zap.Logger) *MemoryWatcher {
 // Calling Start twice is a no-op (the second call returns nil without
 // spawning a second goroutine).
 func (w *MemoryWatcher) Start(ctx context.Context) error {
+	// Serialise the started check+set: concurrent Start calls must spawn AT MOST
+	// one event loop. Without this lock both callers could read started==false,
+	// both set it true, and both spawn a runEventLoop sharing one w.done — the
+	// data race + the cancel→double-close-of-w.done panic (DEFECT-1).
+	w.startMu.Lock()
+	defer w.startMu.Unlock()
+
 	if w.started {
 		return nil
 	}
@@ -77,7 +97,7 @@ func (w *MemoryWatcher) Start(ctx context.Context) error {
 	if err != nil {
 		w.log.Warn("projectmemory: fsnotify new watcher failed; degrading to slash-only reload", zap.Error(err))
 		// Mark done as closed so Close() doesn't block.
-		close(w.done)
+		w.closeDone()
 		return nil
 	}
 	w.watcher = fsw
@@ -112,7 +132,7 @@ func (w *MemoryWatcher) Start(ctx context.Context) error {
 // rename event for the project path doesn't trick us into ignoring the
 // follow-up create/write of the same path.
 func (w *MemoryWatcher) runEventLoop(ctx context.Context, snap Memory) {
-	defer close(w.done)
+	defer w.closeDone()
 
 	targets := map[string]struct{}{}
 	if snap.ProjectPath != "" {
@@ -175,12 +195,10 @@ func (w *MemoryWatcher) Close() error {
 	w.closeOnce.Do(func() {
 		if w.watcher == nil {
 			// Either Start was never called or Start hit fsnotify.NewWatcher
-			// failure. done was closed in either case; no goroutine to drain.
-			select {
-			case <-w.done:
-			default:
-				close(w.done)
-			}
+			// failure. closeDone is idempotent: if Start already closed done
+			// (fsnotify-failure path) this is a no-op; if Start was never called
+			// it closes done so Close returns without blocking.
+			w.closeDone()
 			return
 		}
 		firstErr = w.watcher.Close()

@@ -230,6 +230,7 @@ type AuroraApp struct {
 	// Update ticker for real-time data
 	updateTicker *time.Ticker
 	stopUpdate   chan struct{}
+	stopOnce     sync.Once
 
 	// translator resolves user-facing strings per CONST-046
 	// (round-140 §11.4 migration). Defaults to NoopTranslator
@@ -1783,11 +1784,15 @@ func (auroraApp *AuroraApp) createSettingsTab() fyne.CanvasObject {
 	return container.NewScroll(settingsContent)
 }
 
-// Close cleans up resources
+// Close cleans up resources. It is idempotent: the stopUpdate channel is closed
+// at most once via stopOnce, so a second Close call is a clean no-op rather than
+// a "close of closed channel" panic.
 func (auroraApp *AuroraApp) Close() error {
 	// Stop background updates
 	if auroraApp.stopUpdate != nil {
-		close(auroraApp.stopUpdate)
+		auroraApp.stopOnce.Do(func() {
+			close(auroraApp.stopUpdate)
+		})
 	}
 
 	// Log shutdown

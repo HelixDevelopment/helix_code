@@ -385,9 +385,10 @@ func TestCodeEditorApplyEditIntegration(t *testing.T) {
 			expectError:    false,
 		},
 		{
+			// Newline-terminated input → newline-terminated output (preserved).
 			name:           "Line edit",
 			format:         EditFormatLines,
-			initialContent: "line1\nline2\nline3",
+			initialContent: "line1\nline2\nline3\n",
 			editContent: []LineEdit{
 				{StartLine: 2, EndLine: 2, NewContent: "modified"},
 			},

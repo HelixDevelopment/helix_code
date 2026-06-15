@@ -22,8 +22,9 @@ func TestDiffEditorApply(t *testing.T) {
 		expectError    bool
 	}{
 		{
+			// Newline-terminated input → newline-terminated output (preserved).
 			name:          "Simple addition",
-			originalLines: "line1\nline2\nline3",
+			originalLines: "line1\nline2\nline3\n",
 			diffContent: `--- test.txt
 +++ test.txt
 @@ -1,3 +1,4 @@
@@ -36,7 +37,7 @@ func TestDiffEditorApply(t *testing.T) {
 		},
 		{
 			name:          "Simple deletion",
-			originalLines: "line1\nline2\nline3",
+			originalLines: "line1\nline2\nline3\n",
 			diffContent: `--- test.txt
 +++ test.txt
 @@ -1,3 +1,2 @@
@@ -48,7 +49,7 @@ func TestDiffEditorApply(t *testing.T) {
 		},
 		{
 			name:          "Simple modification",
-			originalLines: "line1\nline2\nline3",
+			originalLines: "line1\nline2\nline3\n",
 			diffContent: `--- test.txt
 +++ test.txt
 @@ -1,3 +1,3 @@
@@ -61,7 +62,7 @@ func TestDiffEditorApply(t *testing.T) {
 		},
 		{
 			name:          "Multiple hunks",
-			originalLines: "line1\nline2\nline3\nline4\nline5",
+			originalLines: "line1\nline2\nline3\nline4\nline5\n",
 			diffContent: `--- test.txt
 +++ test.txt
 @@ -1,2 +1,2 @@

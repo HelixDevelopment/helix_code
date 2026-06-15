@@ -52,6 +52,7 @@ type ContextManager struct {
 	global   *GlobalContext
 	config   *config.ContextConfig
 	stopChan chan struct{}
+	stopOnce sync.Once
 	wg       sync.WaitGroup
 	mu       sync.RWMutex
 }
@@ -241,9 +242,14 @@ func (cm *ContextManager) Start(ctx context.Context) error {
 	return nil
 }
 
-// Stop stops the context manager
+// Stop stops the context manager. It is idempotent: the stop channel is closed
+// at most once via stopOnce, so a second (or concurrent) Stop call is a clean
+// no-op rather than a "close of closed channel" panic. wg.Wait is kept OUTSIDE
+// the Once so every caller blocks until the cleanup worker has fully exited.
 func (cm *ContextManager) Stop() {
-	close(cm.stopChan)
+	cm.stopOnce.Do(func() {
+		close(cm.stopChan)
+	})
 	cm.wg.Wait()
 }
 

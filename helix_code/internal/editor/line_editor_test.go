@@ -22,8 +22,9 @@ func TestLineEditorApply(t *testing.T) {
 		expectError    bool
 	}{
 		{
+			// Newline-terminated input → newline-terminated output (preserved).
 			name:    "Single line replacement",
-			initial: "line1\nline2\nline3",
+			initial: "line1\nline2\nline3\n",
 			edits: []LineEdit{
 				{StartLine: 2, EndLine: 2, NewContent: "modified"},
 			},
@@ -32,7 +33,7 @@ func TestLineEditorApply(t *testing.T) {
 		},
 		{
 			name:    "Multiple line replacement",
-			initial: "line1\nline2\nline3\nline4",
+			initial: "line1\nline2\nline3\nline4\n",
 			edits: []LineEdit{
 				{StartLine: 2, EndLine: 3, NewContent: "new\ncontent"},
 			},
@@ -41,7 +42,7 @@ func TestLineEditorApply(t *testing.T) {
 		},
 		{
 			name:    "Insert at beginning",
-			initial: "line1\nline2\nline3",
+			initial: "line1\nline2\nline3\n",
 			edits: []LineEdit{
 				{StartLine: 1, EndLine: 1, NewContent: "inserted\nline1"},
 			},
@@ -50,7 +51,7 @@ func TestLineEditorApply(t *testing.T) {
 		},
 		{
 			name:    "Append at end",
-			initial: "line1\nline2",
+			initial: "line1\nline2\n",
 			edits: []LineEdit{
 				{StartLine: 3, EndLine: 3, NewContent: "line3"},
 			},
@@ -59,7 +60,7 @@ func TestLineEditorApply(t *testing.T) {
 		},
 		{
 			name:    "Delete lines",
-			initial: "line1\nline2\nline3\nline4",
+			initial: "line1\nline2\nline3\nline4\n",
 			edits: []LineEdit{
 				{StartLine: 2, EndLine: 3, NewContent: ""},
 			},
@@ -68,7 +69,7 @@ func TestLineEditorApply(t *testing.T) {
 		},
 		{
 			name:    "Multiple non-overlapping edits",
-			initial: "line1\nline2\nline3\nline4\nline5",
+			initial: "line1\nline2\nline3\nline4\nline5\n",
 			edits: []LineEdit{
 				{StartLine: 1, EndLine: 1, NewContent: "modified1"},
 				{StartLine: 5, EndLine: 5, NewContent: "modified5"},
@@ -457,7 +458,7 @@ func TestLineEditorApplySingleLineEdit(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	testFile := filepath.Join(tmpDir, "test.txt")
-	initial := "line1\nline2\nline3"
+	initial := "line1\nline2\nline3\n"
 
 	if err := os.WriteFile(testFile, []byte(initial), 0644); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
@@ -521,7 +522,7 @@ func TestLineEditorApplySingleLineEdit(t *testing.T) {
 
 	t.Run("multiline edit", func(t *testing.T) {
 		testFile3 := filepath.Join(tmpDir, "test3.txt")
-		initial := "line1\nline2\nline3\nline4\nline5"
+		initial := "line1\nline2\nline3\nline4\nline5\n"
 		if err := os.WriteFile(testFile3, []byte(initial), 0644); err != nil {
 			t.Fatalf("Failed to create test file: %v", err)
 		}

@@ -162,7 +162,8 @@ func TestSearchReplaceEditorApplyToLines(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	testFile := filepath.Join(tmpDir, "test.txt")
-	initial := "line1 test\nline2 test\nline3 other"
+	// Newline-terminated input → newline-terminated output (preserved).
+	initial := "line1 test\nline2 test\nline3 other\n"
 
 	if err := os.WriteFile(testFile, []byte(initial), 0644); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)

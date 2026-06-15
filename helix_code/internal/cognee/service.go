@@ -41,6 +41,7 @@ type CogneeService struct {
 
 	// Background processing
 	stopChan          chan struct{}
+	stopOnce          sync.Once
 	bgTasks           sync.WaitGroup
 	healthCheckTicker *time.Ticker
 
@@ -179,18 +180,29 @@ func (s *CogneeService) Start(ctx context.Context) error {
 	return nil
 }
 
-// Stop stops the Cognee service
+// Stop stops the Cognee service. It is safe under concurrent invocation: the
+// transition out of ServiceStatusRunning is performed UNDER the status lock, so
+// a concurrent second Stop observes the non-running status and returns early
+// instead of both callers passing the guard and racing to close(s.stopChan).
+// stopOnce additionally guarantees the channel is closed at most once as
+// defense-in-depth (e.g. a Stop racing a Start that re-set Running).
 func (s *CogneeService) Stop(ctx context.Context) error {
 	s.mu.Lock()
 	if s.status != ServiceStatusRunning {
 		s.mu.Unlock()
 		return nil
 	}
+	// Flip out of Running while still holding the lock so any concurrent Stop
+	// fails the guard above and returns early — only the winner reaches the
+	// channel close below.
+	s.status = ServiceStatusStopped
 	s.mu.Unlock()
 
 	s.logger.Info("Stopping Cognee service...")
 
-	close(s.stopChan)
+	s.stopOnce.Do(func() {
+		close(s.stopChan)
+	})
 
 	done := make(chan struct{})
 	go func() {

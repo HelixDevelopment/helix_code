@@ -62,6 +62,7 @@ type ConsoleMonitor struct {
 	ctx          context.Context
 	cancel       context.CancelFunc
 	filterErrors bool
+	stopOnce     sync.Once
 }
 
 // ConsoleMonitorOptions configures console monitoring
@@ -116,7 +117,9 @@ func (cm *ConsoleMonitor) Start(browserCtx context.Context) {
 	})
 }
 
-// Stop stops monitoring console
+// Stop stops monitoring console. It is idempotent: both the messages and errors
+// channels are closed at most once via stopOnce, so a second (or concurrent)
+// Stop call is a clean no-op rather than a "close of closed channel" panic.
 func (cm *ConsoleMonitor) Stop() {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
@@ -126,9 +129,11 @@ func (cm *ConsoleMonitor) Stop() {
 		cm.cancel = nil
 	}
 
-	// Close channels
-	close(cm.messages)
-	close(cm.errors)
+	// Close channels exactly once.
+	cm.stopOnce.Do(func() {
+		close(cm.messages)
+		close(cm.errors)
+	})
 }
 
 // GetMessages returns the messages channel

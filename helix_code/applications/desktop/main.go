@@ -273,6 +273,7 @@ type DesktopApp struct {
 	// Update ticker for real-time data
 	updateTicker *time.Ticker
 	stopUpdate   chan struct{}
+	stopOnce     sync.Once
 
 	// translator resolves CONST-046 user-facing message IDs. Defaults
 	// to i18n.NoopTranslator{} (loud message-ID echo) when nil — set
@@ -1486,11 +1487,15 @@ func (da *DesktopApp) Run() {
 	da.mainWindow.ShowAndRun()
 }
 
-// Close cleans up resources
+// Close cleans up resources. It is idempotent: the stopUpdate channel is closed
+// at most once via stopOnce, so a second Close call is a clean no-op rather than
+// a "close of closed channel" panic.
 func (da *DesktopApp) Close() error {
 	// Stop background updates
 	if da.stopUpdate != nil {
-		close(da.stopUpdate)
+		da.stopOnce.Do(func() {
+			close(da.stopUpdate)
+		})
 	}
 
 	// Release the agentic capability sub-managers (MCP child processes, LSP
