@@ -889,3 +889,13 @@ Inventory found applications/android + applications/ios are single-screen scaffo
 
 Operator (2026-06-15): create a proper mechanism for starting mandatory iOS simulators through the containers submodule, extending it to support anything Apple-related. NOTE: iOS simulators run natively via xcrun simctl on macOS (cannot run inside Linux containers) — the containers submodule mechanism must orchestrate the host-native simctl lifecycle (boot/install/record) under its unified API. Investigate + extend containers (§11.4.76).
 
+## HXC-111 — Desktop GUI shows raw i18n keys (desktop_dashboard_header/_activity_title) — CONST-046 gap
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** Wired i18n.NewTranslator() in NewDesktopApp; dashboard now shows real text (verified via relaunch+AXRaise+screenshot: title 'HelixCode - Distributed AI Development Platform', 'Recent Activity', no raw keys). Desktop tests pass, build exit 0. Clean desktop video re-recorded.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+After fixing the launch crash, the desktop dashboard renders raw message-ID keys (desktop_dashboard_header, desktop_dashboard_activity_title) instead of localized text. Likely the desktop i18n bundle is missing those keys OR Fyne locale-parse error ('subtag at unknown') broke bundle loading. Real CONST-046 defect visible in helixcode-desktop-dashboard-20260615.mp4.
+

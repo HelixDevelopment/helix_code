@@ -3078,5 +3078,22 @@ xcrun simctl on macOS (cannot run inside Linux containers) — the
 containers submodule mechanism must orchestrate the host-native simctl
 lifecycle (boot/install/record) under its unified API. Investigate +
 extend containers (§11.4.76).</p>
+<h2 id="hxc-111-desktop-gui-shows-raw-i18n-keys-desktop_dashboard_header_activity_title-const-046-gap">HXC-111
+— Desktop GUI shows raw i18n keys
+(desktop_dashboard_header/_activity_title) — CONST-046 gap</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Wired i18n.NewTranslator() in
+NewDesktopApp; dashboard now shows real text (verified via
+relaunch+AXRaise+screenshot: title ‘HelixCode - Distributed AI
+Development Platform’, ‘Recent Activity’, no raw keys). Desktop tests
+pass, build exit 0. Clean desktop video re-recorded.
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>After fixing the launch crash, the desktop dashboard renders raw
+message-ID keys (desktop_dashboard_header,
+desktop_dashboard_activity_title) instead of localized text. Likely the
+desktop i18n bundle is missing those keys OR Fyne locale-parse error
+(‘subtag at unknown’) broke bundle loading. Real CONST-046 defect
+visible in helixcode-desktop-dashboard-20260615.mp4.</p>
 </body>
 </html>

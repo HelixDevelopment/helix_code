@@ -584,15 +584,6 @@ Round-1 inventory landed: ~388 features catalogued (233 internal, 67 cmd/clients
 
 Foundation verified: DeepSeek V3 (strongest) + Mistral Large + Groq Llama-3.3-70B ensemble real through helix stack. Recordable now: CLI/TUI/Web/Desktop(host display, operator-approved). Android Genymotion live via adb. Each recording must show real use-case scenarios, be analyzed, problems fixed/retested. Feeds the Status docs video-confirmed column. ONGOING multi-round.
 
-## HXC-111 — Desktop GUI shows raw i18n keys (desktop_dashboard_header/_activity_title) — CONST-046 gap
-
-**Status:** Queued
-**Type:** Bug
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-After fixing the launch crash, the desktop dashboard renders raw message-ID keys (desktop_dashboard_header, desktop_dashboard_activity_title) instead of localized text. Likely the desktop i18n bundle is missing those keys OR Fyne locale-parse error ('subtag at unknown') broke bundle loading. Real CONST-046 defect visible in helixcode-desktop-dashboard-20260615.mp4.
-
 ## HXC-112 — Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript synthetic clicks — need cliclick/real-event automation to record LLM-chat in-GUI
 
 **Status:** Queued
@@ -601,4 +592,13 @@ After fixing the launch crash, the desktop dashboard renders raw message-ID keys
 **Assigned-To:** Claude
 
 Fyne renders via OpenGL (no native accessibility); osascript 'click at' does not register on the canvas, so in-GUI feature interaction (LLM Chat, tab nav) cannot be driven for recording via AppleScript. helixcode-desktop-dashboard-20260615.mp4 honestly shows the working dashboard + live uptime but not feature interaction. Need cliclick (real CGEvent mouse) or a Fyne test-driver to record the desktop LLM-chat feature end-to-end.
+
+## HXC-113 — MCP tool names use 'server:name' (colon) — OpenAI-compatible providers (DeepSeek/etc.) reject function names, breaking LLM chat with MCP enabled
+
+**Status:** Queued
+**Type:** Bug
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+internal/tools/registry.go:897 RegisterMCPManager names MCP tools server+':'+name (e.g. fs:read_file). OpenAI/DeepSeek function-calling requires names matching ^[a-zA-Z0-9_-]+$, so a chat turn with MCP tools enabled returns HTTP 400. Found while recording the TUI (had to disable .helixcode/mcp.yml to record). Fix: sanitize MCP tool names (e.g. server__name or server-name) at registration + map back when dispatching.
 

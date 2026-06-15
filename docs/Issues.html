@@ -2185,18 +2185,6 @@ CLI/TUI/Web/Desktop(host display, operator-approved). Android Genymotion
 live via adb. Each recording must show real use-case scenarios, be
 analyzed, problems fixed/retested. Feeds the Status docs video-confirmed
 column. ONGOING multi-round.</p>
-<h2 id="hxc-111-desktop-gui-shows-raw-i18n-keys-desktop_dashboard_header_activity_title-const-046-gap">HXC-111
-— Desktop GUI shows raw i18n keys
-(desktop_dashboard_header/_activity_title) — CONST-046 gap</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
-Claude</p>
-<p>After fixing the launch crash, the desktop dashboard renders raw
-message-ID keys (desktop_dashboard_header,
-desktop_dashboard_activity_title) instead of localized text. Likely the
-desktop i18n bundle is missing those keys OR Fyne locale-parse error
-(‘subtag at unknown’) broke bundle loading. Real CONST-046 defect
-visible in helixcode-desktop-dashboard-20260615.mp4.</p>
 <h2 id="hxc-112-desktop-gui-feature-recording-fyne-opengl-canvas-ignores-osascript-synthetic-clicks-need-cliclickreal-event-automation-to-record-llm-chat-in-gui">HXC-112
 — Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript
 synthetic clicks — need cliclick/real-event automation to record
@@ -2211,5 +2199,25 @@ helixcode-desktop-dashboard-20260615.mp4 honestly shows the working
 dashboard + live uptime but not feature interaction. Need cliclick (real
 CGEvent mouse) or a Fyne test-driver to record the desktop LLM-chat
 feature end-to-end.</p>
+<h2 id="hxc-113-mcp-tool-names-use-servername-colon-openai-compatible-providers-deepseeketc.-reject-function-names-breaking-llm-chat-with-mcp-enabled">HXC-113
+— MCP tool names use ‘server:name’ (colon) — OpenAI-compatible providers
+(DeepSeek/etc.) reject function names, breaking LLM chat with MCP
+enabled</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>internal/tools/registry.go:897 RegisterMCPManager names MCP tools
+server+‘:’+name (e.g. fs:read_file). OpenAI/DeepSeek function-calling
+requires names matching <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>+$, so a chat turn with MCP tools
+enabled returns HTTP 400. Found while recording the TUI (had to disable
+.helixcode/mcp.yml to record). Fix: sanitize MCP tool names
+(e.g. server__name or server-name) at registration + map back when
+dispatching.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>a-zA-Z0-9_-<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 </body>
 </html>
