@@ -355,6 +355,13 @@ func parseHexColor(hex string) color.Color {
 
 // Color returns the color for the given theme color name
 func (ct *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+	// HXC: nil-guard — Fyne queries Color() during canvas creation; a
+	// CustomTheme built without NewCustomTheme (zero value) has a nil
+	// currentTheme and would nil-deref (desktop GUI launch SIGSEGV). Lazily
+	// initialise so every construction path is crash-safe.
+	if ct.currentTheme == nil {
+		ct.currentTheme = NewThemeManager().GetCurrentTheme()
+	}
 	switch name {
 	case theme.ColorNamePrimary:
 		return parseHexColor(ct.currentTheme.Primary)

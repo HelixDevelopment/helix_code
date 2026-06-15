@@ -269,7 +269,9 @@ type DesktopApp struct {
 // helix_code's *i18nadapter.Translator) before Run.
 func NewDesktopApp() *DesktopApp {
 	fyneApp := app.New()
-	fyneApp.Settings().SetTheme(&CustomTheme{})
+	// HXC: use the constructor — a zero-value &CustomTheme{} has a nil
+	// currentTheme and crashes Fyne's canvas color lookups (SIGSEGV on launch).
+	fyneApp.Settings().SetTheme(NewCustomTheme())
 
 	return &DesktopApp{
 		fyneApp:      fyneApp,
