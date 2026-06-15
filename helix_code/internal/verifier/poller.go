@@ -18,6 +18,7 @@ type Poller struct {
 	lastScores map[string]float64
 	mu         sync.RWMutex
 	pollCount  int
+	stopOnce   sync.Once
 }
 
 // NewPoller creates a poller. Minimum interval is 10s (enforced).
@@ -41,8 +42,16 @@ func (p *Poller) Start() {
 }
 
 // Stop signals the poller to stop and waits for the goroutine to exit.
+//
+// Stop is idempotent (sync.Once guards the channel close): it may be called
+// multiple times — e.g. via an idempotent server Shutdown that fans out to
+// BootstrapResult.Shutdown -> Poller.Stop more than once — without panicking on
+// a double close(stopCh). The wait is outside the Once so every caller still
+// blocks until the loop goroutine has exited.
 func (p *Poller) Stop() {
-	close(p.stopCh)
+	p.stopOnce.Do(func() {
+		close(p.stopCh)
+	})
 	p.wg.Wait()
 }
 

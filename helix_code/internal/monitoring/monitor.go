@@ -116,6 +116,13 @@ func (m *Monitor) StartPeriodicCollection(ctx context.Context, interval time.Dur
 
 // HealthCheck performs a health check
 func (m *Monitor) HealthCheck() error {
+	// Read m.collectors under the read lock: AddCollector mutates the slice
+	// under m.mutex.Lock(), so reading len(m.collectors) without holding the
+	// lock is a data race. RLock allows concurrent HealthCheck callers while
+	// still serializing against the writer.
+	m.mutex.RLock()
+	defer m.mutex.RUnlock()
+
 	// Basic health check - can be extended
 	if len(m.collectors) == 0 {
 		return fmt.Errorf("%s", tr(context.Background(), "internal_monitoring_no_collectors_registered", nil))

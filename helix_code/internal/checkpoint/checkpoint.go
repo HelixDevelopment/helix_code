@@ -33,6 +33,8 @@ package checkpoint
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -42,6 +44,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -137,9 +140,39 @@ func (m *Manager) git(ctx context.Context, args ...string) (string, error) {
 	return string(out), nil
 }
 
-// newID returns a sortable, unique checkpoint id (UTC timestamp to nanosecond).
+// idCounter is a process-wide monotonic counter that guarantees two newID()
+// calls in the same wall-clock nanosecond still produce distinct ids. The wall
+// clock alone is NOT a sufficient uniqueness source: on most hosts its
+// formatted resolution is coarse enough that a burst of Create calls lands many
+// in the same instant — historically that produced identical checkpoint ids,
+// and an id collision is data loss (same .helix/checkpoints/<id> dir, same
+// refs/helix/checkpoints/<id>, same meta.json — the second Create silently
+// clobbered the first, making the first snapshot irrecoverable and Restore
+// return the wrong snapshot's bytes).
+var idCounter uint64
+
+// newID returns a sortable, collision-free checkpoint id. The id is the UTC
+// timestamp to nanosecond (preserved as the leading, human-readable, sortable
+// prefix so List ordering and the existing "newest first" semantics are
+// unchanged) followed by a uniqueness suffix: a process-wide atomic counter AND
+// short crypto-random hex. The counter makes same-process same-instant calls
+// distinct; the random suffix makes ids distinct even across processes that may
+// share both the timestamp and a freshly-reset counter. The id stays
+// filesystem-safe and git-ref-safe (only [0-9A-Za-z.-]), so it remains valid as
+// both a .helix/checkpoints/<id> directory name and a
+// refs/helix/checkpoints/<id> ref. The leading timestamp keeps ids
+// lexicographically sortable by creation time.
 func newID() string {
-	return time.Now().UTC().Format("20060102T150405.000000000")
+	ts := time.Now().UTC().Format("20060102T150405.000000000")
+	n := atomic.AddUint64(&idCounter, 1)
+	var rnd [4]byte
+	if _, err := rand.Read(rnd[:]); err != nil {
+		// crypto/rand failure is extraordinarily rare; the atomic counter alone
+		// already guarantees in-process uniqueness, so fall back to it without
+		// the random suffix rather than failing checkpoint creation.
+		return fmt.Sprintf("%s-%010d", ts, n)
+	}
+	return fmt.Sprintf("%s-%010d-%s", ts, n, hex.EncodeToString(rnd[:]))
 }
 
 // Create snapshots the current working tree and returns the new checkpoint id.

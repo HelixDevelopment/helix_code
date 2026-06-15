@@ -26,6 +26,7 @@ type NotificationQueue struct {
 	engine   *NotificationEngine
 	workers  int
 	stopChan chan struct{}
+	stopOnce sync.Once
 	wg       sync.WaitGroup
 	stats    *QueueStats
 	maxSize  int
@@ -61,11 +62,17 @@ func (q *NotificationQueue) Start() {
 	log.Printf("Notification queue started with %d workers", q.workers)
 }
 
-// Stop stops the queue workers
+// Stop stops the queue workers. It is idempotent: the channel is closed exactly
+// once (via stopOnce) so a second call never panics on a closed channel. wg.Wait()
+// is OUTSIDE the Once so that EVERY caller — including a second CONCURRENT Stop()
+// — blocks until all workers have actually exited, rather than a concurrent
+// second caller getting a false "stopped" signal while workers still run.
 func (q *NotificationQueue) Stop() {
-	close(q.stopChan)
+	q.stopOnce.Do(func() {
+		close(q.stopChan)
+		log.Println("Notification queue stopped")
+	})
 	q.wg.Wait()
-	log.Println("Notification queue stopped")
 }
 
 // Enqueue adds a notification to the queue
@@ -133,11 +140,24 @@ func (q *NotificationQueue) Clear() {
 	q.queue = make([]*QueuedNotification, 0)
 }
 
-// GetStats returns queue statistics
-func (q *NotificationQueue) GetStats() *QueueStats {
+// GetStats returns a snapshot of the queue statistics.
+//
+// It returns a VALUE COPY of the counters taken while holding stats.mutex, never
+// the live shared *QueueStats. Handing out the live pointer (and releasing the
+// mutex on return) let callers read the int64 counters unlocked while worker
+// goroutines wrote them in Enqueue/Dequeue/processNext — a data race on the
+// documented public API. Copying the counters under the lock makes every read by
+// the caller race-free. The returned QueueStats carries its own zero-value mutex,
+// which is unused and must not be copied/shared further.
+func (q *NotificationQueue) GetStats() QueueStats {
 	q.stats.mutex.Lock()
 	defer q.stats.mutex.Unlock()
-	return q.stats
+	return QueueStats{
+		Enqueued:  q.stats.Enqueued,
+		Dequeued:  q.stats.Dequeued,
+		Failed:    q.stats.Failed,
+		Succeeded: q.stats.Succeeded,
+	}
 }
 
 // ResetStats resets queue statistics

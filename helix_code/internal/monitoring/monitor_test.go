@@ -550,3 +550,56 @@ func TestMonitor_CollectMetrics_NilMetrics(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 }
+
+// TestMonitor_Concurrency_HealthCheckAndAddCollector is a RED-on-broken /
+// GREEN-on-fixed regression guard (§11.4.115) for the data race between
+// HealthCheck() reading len(m.collectors) and AddCollector() appending to
+// m.collectors under m.mutex.Lock().
+//
+// Both HealthCheck and AddCollector are exported APIs callable concurrently by
+// independent callers (e.g. a health-probe goroutine while collectors are still
+// being registered at startup). Before the fix, HealthCheck read the collectors
+// slice header WITHOUT holding the mutex, racing the locked append in
+// AddCollector.
+//
+// The Go race detector is the oracle: on the broken code this test fails with a
+// DATA RACE report under `go test -race`; on the fixed code (HealthCheck takes
+// m.mutex.RLock()) it runs clean. No RED_MODE switch is needed — for a pure
+// data-race guard the -race detector supplies the polarity (race => FAIL,
+// clean => PASS) per the established pattern.
+func TestMonitor_Concurrency_HealthCheckAndAddCollector(t *testing.T) {
+	monitor := NewMonitor()
+
+	var wg sync.WaitGroup
+	const numAdders = 16
+	const numCheckers = 16
+	const iterations = 50
+
+	// Writers: concurrently append collectors under m.mutex.Lock().
+	wg.Add(numAdders)
+	for i := 0; i < numAdders; i++ {
+		go func(id int) {
+			defer wg.Done()
+			for j := 0; j < iterations; j++ {
+				monitor.AddCollector(NewMockCollector("collector", map[string]interface{}{
+					"metric": id,
+				}))
+			}
+		}(i)
+	}
+
+	// Readers: concurrently read len(m.collectors) via HealthCheck.
+	wg.Add(numCheckers)
+	for i := 0; i < numCheckers; i++ {
+		go func() {
+			defer wg.Done()
+			for j := 0; j < iterations; j++ {
+				_ = monitor.HealthCheck()
+			}
+		}()
+	}
+
+	wg.Wait()
+	// Reaching here clean under `-race` proves HealthCheck's read of
+	// m.collectors is properly synchronized against AddCollector's write.
+}

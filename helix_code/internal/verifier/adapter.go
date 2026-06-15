@@ -126,18 +126,28 @@ func (a *Adapter) GetModelScore(modelID string) (float64, bool) {
 
 	score, ok := a.modelScores[modelID]
 	if ok {
-		if score > 10 {
-			score = score / 10.0
-		}
-		return score, true
+		return normalizeScore(score), true
 	}
-	// Try cache
+	// Try cache. The cached value MUST be normalized identically to the map
+	// path: without this, the same modelID could resolve to 8.5 from the map
+	// and 85.0 from the cache (a 0-10 vs 0-100 scale inconsistency).
 	if a.cache != nil {
 		if cached, found := a.cache.GetModelScore(modelID); found {
-			return cached, true
+			return normalizeScore(cached), true
 		}
 	}
 	return 0, false
+}
+
+// normalizeScore coerces a raw verifier score onto the canonical 0-10 scale.
+// Values above 10 are assumed to be on a 0-100 scale and divided by 10. This is
+// the single chokepoint applied to every GetModelScore source (in-memory map
+// and cache fallback) so the score scale is consistent regardless of origin.
+func normalizeScore(score float64) float64 {
+	if score > 10 {
+		return score / 10.0
+	}
+	return score
 }
 
 // GetProviderScore returns the best score for any model of this provider.
@@ -147,10 +157,7 @@ func (a *Adapter) GetProviderScore(providerType string) (float64, bool) {
 
 	score, ok := a.providerScores[providerType]
 	if ok {
-		if score > 10 {
-			score = score / 10.0
-		}
-		return score, true
+		return normalizeScore(score), true
 	}
 	return 0, false
 }

@@ -45,21 +45,34 @@ func NewHealthMonitor(failureThreshold, recoveryThreshold int, halfOpenTimeout t
 	}
 }
 
-// AllowRequest returns true if requests should be allowed through.
+// AllowRequest returns true if a request should be allowed through.
+//
+// The CircuitOpen -> CircuitHalfOpen transition past halfOpenTimeout is made
+// EXCLUSIVE: a write lock guarantees that of N concurrent callers arriving
+// after the timeout, exactly ONE atomically flips the state to CircuitHalfOpen
+// and is allowed through as the single probe. Every subsequent caller observes
+// CircuitHalfOpen and is denied until the probe resolves (RecordSuccess closes
+// the circuit, RecordFailure re-opens it). This prevents a thundering herd from
+// hammering an upstream that is still recovering during an outage.
 func (h *HealthMonitor) AllowRequest() bool {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
+	h.mu.Lock()
+	defer h.mu.Unlock()
 
 	switch h.state {
 	case CircuitClosed:
 		return true
 	case CircuitOpen:
 		if time.Since(h.lastFailureTime) > h.halfOpenTimeout {
-			return true // allow one probe
+			// First caller past the timeout wins the probe slot and transitions
+			// the circuit; this is exclusive because we hold the write lock.
+			h.state = CircuitHalfOpen
+			h.successes = 0
+			return true // allow exactly ONE probe
 		}
 		return false
 	case CircuitHalfOpen:
-		return true
+		// A probe is already in flight; deny until it resolves.
+		return false
 	}
 	return true
 }
