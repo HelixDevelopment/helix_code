@@ -2159,6 +2159,56 @@ closed <code>Implemented (→ Fixed.md)</code>. To update
 Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
-hand-maintained).*</p>
+hand-maintained).* ## HXC-107 — Feature Status docs program
+(docs/features) — comprehensive per-feature inventory across all
+components/clients/submodules/ported-cli_agents, docs_chain-synced</p>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Round-1 inventory landed: ~388 features catalogued (233 internal, 67
+cmd/clients, 55 submodule, 33 ported) in docs/features/Status.md +
+Status_Summary.md with the full dimension schema
+(Dev/Wired/Real-use/Tests/V&amp;V/Video/Analysis/Origin/Overall). 0
+video-confirmed (honest). ONGOING: deeper inventory of flagged packages;
+docs_chain context wiring (§11.4.106); raise video-confirmed as
+recordings land.</p>
+<h2 id="hxc-108-video-qa-program-record-all-clients-x-all-features-with-strongest-models-ensemble---volumest7downloadsrecordings-analyze-fix">HXC-108
+— Video-QA program: record all clients x all features with strongest
+models + ensemble -&gt; /Volumes/T7/Downloads/Recordings, analyze +
+fix</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Foundation verified: DeepSeek V3 (strongest) + Mistral Large + Groq
+Llama-3.3-70B ensemble real through helix stack. Recordable now:
+CLI/TUI/Web/Desktop(host display, operator-approved). Android Genymotion
+live via adb. Each recording must show real use-case scenarios, be
+analyzed, problems fixed/retested. Feeds the Status docs video-confirmed
+column. ONGOING multi-round.</p>
+<h2 id="hxc-109-mobile-apps-are-scaffolds-android-has-no-build.gradleandroidmanifest-ios-has-no-xcode-project-not-buildable---not-recordable">HXC-109
+— Mobile apps are scaffolds — Android has no
+build.gradle/AndroidManifest, iOS has no Xcode project (not buildable
+-&gt; not recordable)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Inventory found applications/android + applications/ios are
+single-screen scaffolds with hardcoded localhost and NO build system.
+Must create Android Gradle build + manifest and an iOS Xcode project
+(gomobile or native) before the apps build/run on the Genymotion
+emulator / iOS simulators for recording.</p>
+<h2 id="hxc-110-extend-containers-submodule-to-launch-ios-simulators-operator-directed-apple-support-mechanism">HXC-110
+— Extend containers submodule to launch iOS simulators
+(operator-directed Apple-support mechanism)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Operator (2026-06-15): create a proper mechanism for starting
+mandatory iOS simulators through the containers submodule, extending it
+to support anything Apple-related. NOTE: iOS simulators run natively via
+xcrun simctl on macOS (cannot run inside Linux containers) — the
+containers submodule mechanism must orchestrate the host-native simctl
+lifecycle (boot/install/record) under its unified API. Investigate +
+extend containers (§11.4.76).</p>
 </body>
 </html>

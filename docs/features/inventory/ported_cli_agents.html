@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ported_cli_agents</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ported_cli_agents</h1>
+</header>
+<h2 id="ported-cli_agents-capabilities">Ported cli_agents
+capabilities</h2>
+<p>Evidence-backed inventory of capabilities <strong>actually ported
+into HelixCode</strong> from the <code>cli_agents/</code> reference
+catalogue (51 vendored reference agents). Per CONST-035 anti-bluff: this
+lists ONLY capabilities with landed code evidence (package
+<code>doc.go</code> origin headers, CONTINUATION.md P2-Fxx CLOSED
+ledger, POWER_FEATURES_PORTING_PLAN rev2 file:line reconciliation, git
+port commits) — NOT every cli_agent’s full feature set.
+Planned-but-not-landed items are marked
+<code>Dev=absent</code>/<code>partial</code> honestly. <strong>No
+feature is <code>📹 yes</code></strong> (no recordings analyzed for
+ported features). <strong>Overall is never
+<code>confirmed</code></strong> (a confirmed rollup requires an analyzed
+video).</p>
+<p>Evidence basis: (1) CONTINUATION.md ports ledger lists
+<code>P2-F21..P2-F30</code> as CLOSED with landing packages; (2) each
+landed package’s <code>doc.go</code> names its source agent (“aider
+voice input port P2-F27”, “Roo-code CLI agent port”, “Continue.dev IDE
+integration”, “Go port of upstream gptme’s profile mechanism”); (3)
+POWER_FEATURES_PORTING_PLAN.md rev2 reconciles Phase-1 against HEAD with
+file:line; (4) <code>HXC-031-codex-cline-port.md</code> is DRAFT (plan
+only, NO code) — codex multimodal + cline computer-use are PLANNED, not
+landed.</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Component (HelixCode pkg)</th>
+<th>Feature</th>
+<th>Dev</th>
+<th>Wired</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>V&amp;V</th>
+<th>📹 Video</th>
+<th>Analysis</th>
+<th>Origin</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>service</td>
+<td>internal/approval</td>
+<td>Approval/exec-policy modes (per-tool yes/no, autopilot tiers)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/autocommit</td>
+<td>Git auto-commit per change (generated msg, secret-filter,
+summariser)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:aider</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools/browser</td>
+<td>Browser tool suite (launch/click/type/scroll/screenshot via
+chromedp)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/projectmemory</td>
+<td>Project-memory context files (AGENTS.md/.clinerules-style
+loader+watcher)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/plantree</td>
+<td>Plan trees (branching persistent implementation plans,
+JSON-backed)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/session (condense.go)</td>
+<td>Context compaction / history condense
+(CompactIfNeeded/ShouldCompact)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workspace</td>
+<td>Container per-task workspace (Docker/Podman mount, TTL cleanup)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:openhands</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/voice</td>
+<td>Voice-to-code input (arecord/sox capture, Whisper API + whisper.cpp
+fallback)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:aider</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/repomap</td>
+<td>Repo-map (tree-sitter ranked incremental project map)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:aider</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/kilocode</td>
+<td>AST-aware refactoring (cross-file rename, impact/call-graph,
+extract/move/inline)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:kilo-code</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/roocode</td>
+<td>Roo-code full port (task delegation, template gen, diff review, conv
+memory)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:roo-code</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application</td>
+<td>internal/continua</td>
+<td>Continue.dev IDE integration (inline completions, editor, chat
+panel, diff, model selector)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:continue</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/agent/profiles</td>
+<td>Verifier work profile + RoleVerify posture (subagent
+review/validation)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gptme</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application</td>
+<td>cmd/cli (main.go:2118,2326) + autocommit/git.go</td>
+<td>/undo + /diff (git-aware, force-push-free revert)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:aider</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow/autonomy</td>
+<td>Configurable autonomy presets
+(None/Basic/BasicPlus/SemiAuto/FullAuto, 5 tiers)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow/planmode</td>
+<td>First-class Plan/Act mode controller (tool-gated by mode)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools/askuser</td>
+<td>ask_user interactive clarification tool</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands (markdown_skills.go)</td>
+<td>Markdown skills subsystem (project&gt;user 2-tier precedence)</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/checkpoint</td>
+<td>Workspace file-snapshot checkpoint + /checkpoint
+create/list/restore</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application</td>
+<td>cmd/cli (main.go:1727)</td>
+<td>Per-request token-usage counter (real provider Usage,
+anti-fabrication)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codai</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(no production code)</td>
+<td>Context-window-% indicator</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codai (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(no production code)</td>
+<td>TODO/step tracker surface (/tasks is background-job list, not TODO
+tracker)</td>
+<td>partial</td>
+<td>partial</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli (planned)</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>markdown_skills.go</td>
+<td>SKILL.md built-in/bundled tier + canonical SKILL.md filename</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm (HXC-031 plan)</td>
+<td>Codex multimodal image-content LLM request surface</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codex (planned/DRAFT)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools/browser (HXC-031 plan)</td>
+<td>Cline computer-use feedback loop (screenshot-per-action coord
+control)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline (planned/DRAFT)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F22)</td>
+<td>Cumulative diff-review sandbox (stage-before-apply, apply/reject
+hunks)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F25)</td>
+<td>Conversation branches / fork</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F36/F43)</td>
+<td>/rewind + Tangent mode</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli/amazon-q (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F18)</td>
+<td>Messaging connectors (Slack/Telegram/Discord)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F35)</td>
+<td>ACP mode (Agent Client Protocol over stdio)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F56)</td>
+<td>OpenAI-compatible server endpoints</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:shai/aichat (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F61)</td>
+<td>Spec-driven workflow surface (specify→plan→tasks→implement)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:spec-kit (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F33)</td>
+<td>OS-level exec sandbox (Seatbelt/Landlock/bwrap)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codex (planned)</td>
+<td>gap</td>
+</tr>
+</tbody>
+</table>
+<p>Count: 33 rows total — <strong>20 landed ports</strong>
+(<code>Dev=done</code>, working-untaped), <strong>3
+partial-landed</strong> (workspace, continua, markdown-skills),
+<strong>10 planned/not-landed</strong>
+(<code>Dev=absent</code>/<code>partial</code>, <code>gap</code>). Zero
+<code>📹 yes</code>; zero <code>confirmed</code>.</p>
+<p>Honest assessment: The <strong>Phase-2 port wave (P2-F21..F30)
+genuinely landed</strong> — 10 named source-agent ports
+(codex/aider/cline/plandex/openhands/kilo-code/roo-code/continue) ship
+as real packages with origin-attributed <code>doc.go</code> headers,
+unit tests, and CONTINUATION CLOSED records, plus the gptme
+verifier-profile port. The <strong>POWER_FEATURES Phase-1 wrap
+(autonomy/Plan-Act/undo-diff/ask_user/skills/ token-count/checkpoint) is
+largely landed</strong> per the rev2 file:line reconciliation. Beyond
+that, the porting is <strong>mostly PLANNED, not landed</strong>:
+POWER_FEATURES_PORTING_PLAN is explicitly “DRAFT — research + plan only,
+NO code”, its Phases 2–7 (diff-sandbox, branches, rewind, tangent,
+connectors, ACP, OpenAI server, spec-driven, OS sandbox) are
+unimplemented, and HXC-031 (codex multimodal + cline computer-use) is a
+DRAFT plan with no code. No ported feature has an analyzed recording, so
+none can be <code>confirmed</code>; all landed ports are honestly
+<code>working-untaped</code> pending video V&amp;V.</p>
+</body>
+</html>

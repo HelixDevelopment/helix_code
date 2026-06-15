@@ -1,0 +1,6610 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Status</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Status</h1>
+</header>
+<h1 id="helixcode-feature-status">HelixCode Feature Status</h1>
+<table>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active (population in progress)</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>docs/features/Status_Summary.md</td>
+</tr>
+<tr>
+<td>Continuation</td>
+<td>docs/CONTINUATION.md</td>
+</tr>
+</tbody>
+</table>
+<p>Authoritative, in-depth inventory of <strong>every</strong> HelixCode
+feature across all services, infrastructure, and client applications —
+including capabilities ported from the <code>cli_agents/</code>
+reference catalogue — with per-feature status across every dimension the
+operator mandate (2026-06-15) requires. Kept in sync via the
+<code>docs_chain</code> engine (§11.4.106,
+<code>submodules/docs_chain</code>) and the Status-doc covenant
+(§11.4.45 / §11.4.53 / §11.4.56 / §11.4.57 / CONST-063 / CONST-064).</p>
+<blockquote>
+<p><strong>Anti-bluff (CONST-035 / §11.4.83 / §11.4.107):</strong> a
+feature is marked video-confirmed (<code>📹 yes</code>) ONLY when a real
+recorded scenario in <code>/Volumes/T7/Downloads/Recordings</code> shows
+it working end-to-end with a strong real LLM and that recording has been
+analyzed. No false “yes”. An un-recorded or un-analyzed feature is
+honestly <code>📹 no</code> / <code>📹 pending</code>, never bluffed
+green.</p>
+</blockquote>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#status-dimensions-legend">Status dimensions
+(legend)</a></li>
+<li><a href="#population-progress">Population progress</a></li>
+<li><a href="#feature-inventory">Feature inventory</a></li>
+<li><a href="#inventory-sources">Inventory sources</a></li>
+</ul>
+<h2 id="status-dimensions-legend">Status dimensions (legend)</h2>
+<p>Each feature row carries:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Column</th>
+<th>Meaning</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Area</strong></td>
+<td>service / infrastructure / application(client) / submodule</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Component</strong></td>
+<td>package / tool / app / submodule it lives in</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Feature</strong></td>
+<td>the discrete user-or-system capability</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Dev</strong></td>
+<td>implementation status</td>
+<td><code>done</code> / <code>partial</code> / <code>stub</code> /
+<code>absent</code></td>
+</tr>
+<tr>
+<td><strong>Wired</strong></td>
+<td>reachable from a shipped flow (not dead code)</td>
+<td><code>yes</code> / <code>no</code> / <code>partial</code></td>
+</tr>
+<tr>
+<td><strong>Real-use</strong></td>
+<td>genuinely usable by an end user</td>
+<td><code>yes</code> / <code>no</code> / <code>unknown</code></td>
+</tr>
+<tr>
+<td><strong>Tests</strong></td>
+<td>automated coverage</td>
+<td><code>unit</code> / <code>integ</code> / <code>e2e</code> /
+<code>none</code> (combinable)</td>
+</tr>
+<tr>
+<td><strong>V&amp;V</strong></td>
+<td>captured runtime evidence (§11.4.5/§11.4.69)</td>
+<td><code>yes(path)</code> / <code>no</code></td>
+</tr>
+<tr>
+<td><strong>📹 Video</strong></td>
+<td>recorded real scenario + analyzed (§11.4.83/§11.4.107)</td>
+<td><code>yes(path)</code> / <code>pending</code> / <code>no</code> /
+<code>n/a</code></td>
+</tr>
+<tr>
+<td><strong>Analysis</strong></td>
+<td>comprehensive recording analysis performed</td>
+<td><code>yes</code> / <code>no</code></td>
+</tr>
+<tr>
+<td><strong>Origin</strong></td>
+<td>native / <code>ported:&lt;cli_agent&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Overall</strong></td>
+<td>rollup</td>
+<td><code>confirmed</code> / <code>working-untaped</code> /
+<code>partial</code> / <code>gap</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="population-progress">Population progress</h2>
+<p>This document is populated by background inventory subagents fanning
+out across the codebase (§11.4.70 subagent-driven, §11.4.103
+parallel-streams). Coverage is reported honestly —
+<code>confirmed</code> rows require a real analyzed video; everything
+else is marked truthfully. Population is an ongoing program, NOT a
+one-shot claim.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Slice</th>
+<th>Scope</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>internal services + infra</td>
+<td><code>helix_code/internal/*</code> (72 pkgs)</td>
+<td>inventory dispatched</td>
+</tr>
+<tr>
+<td>cmd tools + client apps</td>
+<td><code>helix_code/cmd/*</code> (21) + <code>applications/*</code>
+(cli/tui/web/desktop/mobile)</td>
+<td>inventory dispatched</td>
+</tr>
+<tr>
+<td>owned submodules</td>
+<td><code>submodules/*</code> (70+)</td>
+<td>inventory dispatched</td>
+</tr>
+<tr>
+<td>ported cli_agents capabilities</td>
+<td><code>cli_agents/*</code> → HelixCode</td>
+<td>inventory dispatched</td>
+</tr>
+</tbody>
+</table>
+<h2 id="feature-inventory">Feature inventory</h2>
+<p><em>Populated incrementally from
+<code>docs/features/inventory/*.md</code> (one file per slice).</em></p>
+<h2 id="internal-services-infrastructure">Internal services +
+infrastructure</h2>
+<p>Inventory of every feature under <code>helix_code/internal/*</code>
+(72 packages). Assessed from code evidence (impl reality, wiring,
+<code>_test.go</code> presence) per CONST-035 / §11.4.107 anti-bluff.
+<code>📹 Video</code> is <code>no</code> for every row (recordings are
+the conductor’s job once a real analyzed recording exists);
+<code>Overall</code> is never <code>confirmed</code> for the same
+reason. <code>Origin</code> is <code>native</code> (HelixCode’s own
+code).</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Component</th>
+<th>Feature</th>
+<th>Dev</th>
+<th>Wired</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>V&amp;V</th>
+<th>📹 Video</th>
+<th>Analysis</th>
+<th>Origin</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>service</td>
+<td>internal/adapters</td>
+<td>i18n message resolution</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/adapters</td>
+<td>translator injection seam</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/adapters</td>
+<td>speckit debate adapter</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/adapters</td>
+<td>container adapter</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/agent</td>
+<td>agent execution interface</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/agent</td>
+<td>agent capability management</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/agent</td>
+<td>agent health check</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/agent</td>
+<td>agent collaboration</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/agentbridge</td>
+<td>verifier bridge</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/approval</td>
+<td>approval request management</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/approval</td>
+<td>approval mode selector</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/approvalwire</td>
+<td>yes/no prompter</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/auth</td>
+<td>user authentication</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/auth</td>
+<td>session management</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/auth</td>
+<td>password hashing (bcrypt/argon2)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/auth</td>
+<td>JWT token generation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/autocommit</td>
+<td>git auto-commit</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/autocommit</td>
+<td>secret filter</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/cache</td>
+<td>multi-tier cache</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/cache</td>
+<td>redis tier</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/cache</td>
+<td>disk tier</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/checkpoint</td>
+<td>checkpoint manager</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/clarification</td>
+<td>clarification engine</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/clarification</td>
+<td>question generation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/clientcore</td>
+<td>agentic-tools provider</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/clientcore</td>
+<td>skills provider</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/cognee</td>
+<td>cognee client</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/cognee</td>
+<td>cognee manager</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/cognee</td>
+<td>cognee cache manager</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>aider command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>approval command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>browser command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>edit command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>git auto-commit command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>mcp command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>markdown commands</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>skills command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>subagents command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>tasks command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands</td>
+<td>worktree command</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/commands</td>
+<td>command executor</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/commands</td>
+<td>command registry</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/commands</td>
+<td>command parser</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/config</td>
+<td>viper-based config loader</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/config</td>
+<td>cognee configuration management</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/config</td>
+<td>verifier configuration</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/config</td>
+<td>platform-UI adapters config</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/context</td>
+<td>context builder</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/context</td>
+<td>token counter</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/context</td>
+<td>history condenser</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/continua</td>
+<td>completion engine</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/continua</td>
+<td>continue-edit tool</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/continua</td>
+<td>continue-complete tool</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/database</td>
+<td>database connection pool</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/database</td>
+<td>postgres integration</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/deployment</td>
+<td>production deployer</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/deployment</td>
+<td>deployment strategy</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/discovery</td>
+<td>service registry with TTL + health checks</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/discovery</td>
+<td>UDP multicast broadcast discovery</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/discovery</td>
+<td>dynamic port allocation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/discovery</td>
+<td>health monitoring (HTTP/gRPC/TCP)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/editor</td>
+<td>unified-diff code editing</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/editor</td>
+<td>whole-file replacement editing</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/editor</td>
+<td>search-and-replace editing</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/editor</td>
+<td>line-range editing</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/editor</td>
+<td>model-specific format selection</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/ensembleui</td>
+<td>ensemble UI rendering</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/event</td>
+<td>publish-subscribe event bus</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/event</td>
+<td>async + sync event handling</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/event</td>
+<td>task/workflow/worker event types</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/fix</td>
+<td>security issue auto-fix</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/focus</td>
+<td>hierarchical focus management</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/focus</td>
+<td>priority-based focus tracking</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/focus</td>
+<td>focus chain tracking</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/hardware</td>
+<td>CPU detection + profiling</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/hardware</td>
+<td>GPU detection (NVIDIA/AMD/Apple/Intel)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/hardware</td>
+<td>optimal LLM model-size inference</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/helixqa</td>
+<td>HelixQA test wrapper</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/hooks</td>
+<td>hook registration + triggering</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/hooks</td>
+<td>priority-based hook execution</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/hooks</td>
+<td>async/sync hook execution</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/i18nwiring</td>
+<td>i18n catalog wire-all (multi-lang)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/infraboot</td>
+<td>on-demand infra boot (EnsureInfra)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/kilocode</td>
+<td>call-graph build + query</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/kilocode</td>
+<td>symbol rename engine</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/kilocode</td>
+<td>change-impact analyzer</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/kilocode</td>
+<td>refactor (extract-method/inline-call)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/kilocode</td>
+<td>multi-edit tool</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>OpenAI provider (GPT models)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>Anthropic provider (Claude models)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>Google Gemini provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>Azure OpenAI provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>AWS Bedrock provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>Ollama local provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>llama.cpp local inference</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>Mistral provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>DeepSeek provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>Groq provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>streaming response handling</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>token counting + accounting</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>model discovery/listing</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>load balancing across providers</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>provider health monitoring</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>ensemble provider orchestration</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm</td>
+<td>embeddings generation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/logging</td>
+<td>structured logging with levels</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/logging</td>
+<td>named loggers</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/logo</td>
+<td>logo processing + assets</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/logo</td>
+<td>color extraction + icon generation</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/mcp</td>
+<td>Model Context Protocol server</td>
+<td>done</td>
+<td>yes</td>
+<td>partial</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/mcp</td>
+<td>JSON-RPC 2.0 tool invocation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/mcp</td>
+<td>WebSocket session management</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/mcp</td>
+<td>OAuth token management</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/memory</td>
+<td>Cognee LLM memory integration</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/memory</td>
+<td>memory state persistence</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/monitoring</td>
+<td>system metrics collection</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/monitoring</td>
+<td>health check monitoring</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/notification</td>
+<td>multi-channel notification engine</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/notification</td>
+<td>Slack integration</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/notification</td>
+<td>Discord integration</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/notification</td>
+<td>Telegram integration</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/notification</td>
+<td>Email/SMTP integration</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/notification</td>
+<td>Teams integration</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/notification</td>
+<td>rate limiting + retry</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/performance</td>
+<td>performance optimizer</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/performance</td>
+<td>CPU optimization</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/performance</td>
+<td>memory optimization</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/persistence</td>
+<td>file-based state store</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/persistence</td>
+<td>session serialization</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/persistence</td>
+<td>auto-save manager</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/planner</td>
+<td>task executor</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/planner</td>
+<td>OpenHands plan execution</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/plantree</td>
+<td>plan tree system</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/plantree</td>
+<td>plan node management</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/plantree</td>
+<td>plan branching + merging</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/plugins</td>
+<td>plugin base framework</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/plugins</td>
+<td>plugin activation</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/plugins</td>
+<td>plugin hooks registry</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/project</td>
+<td>project manager</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/project</td>
+<td>project metadata</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/project</td>
+<td>database-backed storage</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/projectmemory</td>
+<td>memory loader</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/projectmemory</td>
+<td>filesystem watcher</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/projectmemory</td>
+<td>memory registry</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/provider</td>
+<td>provider interface</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/provider</td>
+<td>multi-provider support</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/providers</td>
+<td>AI integration</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/providers</td>
+<td>fallback + load balancing</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/quality</td>
+<td>quality gate scoring</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/quality</td>
+<td>build verification</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/quality</td>
+<td>linting validation</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/redis</td>
+<td>redis client</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/redis</td>
+<td>key-value operations</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/redis</td>
+<td>pub/sub messaging</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/render</td>
+<td>ANSI renderer</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/render</td>
+<td>fancy-mode output</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/render</td>
+<td>frame buffer management</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/render</td>
+<td>streaming block renderer</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/repomap</td>
+<td>symbol extraction</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/repomap</td>
+<td>file ranking engine</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/repomap</td>
+<td>repo cache</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/repomap</td>
+<td>tree-sitter integration</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/roocode</td>
+<td>Roo-Code CLI port</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/roocode</td>
+<td>template-based code generation</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/rules</td>
+<td>rule hierarchy management</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/rules</td>
+<td>rule pattern matching (glob/regex/exact)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/rules</td>
+<td>rule category + tag querying</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/secrets</td>
+<td>secret loader from .env files</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/secrets</td>
+<td>secret validation + missing-var detection</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/security</td>
+<td>security manager (global + local)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/security</td>
+<td>feature scanning + zero-tolerance validation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>auth endpoints (register/login/logout/refresh)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>user profile endpoints (GET/PUT /me)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>worker mgmt endpoints (list/register/heartbeat)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>task CRUD endpoints</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>project CRUD endpoints</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>workflow execution endpoints</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>system stats + health-check endpoints</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>LLM provider + model list endpoints</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>memory system statistics endpoint</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server</td>
+<td>WebSocket real-time communication</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/session</td>
+<td>session lifecycle (create/start/complete/pause)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/session</td>
+<td>session modes (planning/building/testing/refactoring)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/session</td>
+<td>focus chain integration</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/session</td>
+<td>context + metadata tracking</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/session</td>
+<td>session querying + filtering</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/substrate</td>
+<td>substrate abstraction layer</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/task</td>
+<td>task creation + assignment</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/task</td>
+<td>task status lifecycle</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/task</td>
+<td>priority-based task queue</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/task</td>
+<td>checkpoint creation + recovery</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/task</td>
+<td>dependency + circular-dependency validation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/task</td>
+<td>dependent task tracking</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/task</td>
+<td>redis caching for tasks</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/telemetry</td>
+<td>agent instrumentation (prompt/response)</td>
+<td>done</td>
+<td>partial</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/telemetry</td>
+<td>LLM instrumentation (calls/latency/tokens)</td>
+<td>done</td>
+<td>partial</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/telemetry</td>
+<td>tool instrumentation (execution/errors)</td>
+<td>done</td>
+<td>partial</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/telemetry</td>
+<td>OpenTelemetry provider integration</td>
+<td>done</td>
+<td>partial</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/template</td>
+<td>template creation + registration</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/template</td>
+<td>variable substitution + validation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/template</td>
+<td>built-in template library</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/theme</td>
+<td>theme detection (OS/system prefs)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/theme</td>
+<td>theme loading + customization</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/theme</td>
+<td>built-in theme collection</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>file read/write operations</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>file editing with string replacement</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>file globbing (pattern matching)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>file content search (grep)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>shell command execution</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>background shell execution</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>web page fetching + parsing</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>web search integration</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>browser automation (launch/navigate/screenshot)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>codebase mapping + symbol definitions</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>multi-file transactional editing</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>user confirmation prompts</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools</td>
+<td>notebook read/edit operations</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/tools</td>
+<td>tool registry + execution</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/verifier</td>
+<td>LLMsVerifier HTTP client</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/verifier</td>
+<td>model metadata adapter</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/verifier</td>
+<td>two-tier cache (LRU + Redis)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/verifier</td>
+<td>health monitoring + circuit breaker</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/verifier</td>
+<td>background poller (real-time updates)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/verifier</td>
+<td>event publishing to HelixCode bus</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/version</td>
+<td>version string retrieval</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/version</td>
+<td>build metadata exposure</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/voice</td>
+<td>audio capture (arecord/sox)</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/voice</td>
+<td>Whisper API transcription</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/voice</td>
+<td>local whisper.cpp fallback</td>
+<td>partial</td>
+<td>no</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/worker</td>
+<td>worker registration + management</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/worker</td>
+<td>SSH-based remote execution</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/worker</td>
+<td>health monitoring + metrics</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/worker</td>
+<td>capability auto-detection</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/worker</td>
+<td>worker isolation + sandboxing</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/worker</td>
+<td>consensus protocol (leader election)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/worker</td>
+<td>host-key verification + SSH security</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow</td>
+<td>planning workflow execution</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow</td>
+<td>building workflow execution</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow</td>
+<td>testing workflow execution</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow</td>
+<td>refactoring workflow execution</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow</td>
+<td>DAG-based step orchestration</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow</td>
+<td>LLM provider integration for workflows</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/workspace</td>
+<td>container-based workspace management</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/workspace</td>
+<td>Docker/Podman container orchestration</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/workspace</td>
+<td>project directory mounting + isolation</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/workspace</td>
+<td>auto-cleanup TTL enforcement</td>
+<td>partial</td>
+<td>no</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/mocks</td>
+<td>unit-test mock fixtures (test-only, not a user feature)</td>
+<td>done</td>
+<td>yes</td>
+<td>n/a</td>
+<td>none</td>
+<td>no</td>
+<td>n/a</td>
+<td>no</td>
+<td>native</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/pprofutil</td>
+<td>pprof profiling helper (dev/test support)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td>internal/testutil</td>
+<td>shared test utilities (test-only, not a user feature)</td>
+<td>done</td>
+<td>yes</td>
+<td>n/a</td>
+<td>none</td>
+<td>no</td>
+<td>n/a</td>
+<td>no</td>
+<td>native</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<h3 id="coverage-notes">Coverage notes</h3>
+<ul>
+<li><strong>Partially assessed (need deeper inventory):</strong>
+<code>clientcore</code>, <code>agentbridge</code>,
+<code>checkpoint</code>, <code>ensembleui</code>,
+<code>substrate</code>, <code>workspace</code>, <code>voice</code>,
+<code>roocode</code>, <code>telemetry</code>, <code>verifier</code>
+(poller/event-bus wiring), <code>worker</code> (isolation/consensus),
+and <code>server</code> real-use (declared endpoints, no integration
+evidence inspected). Their core types compile and have unit tests, but
+wiring into a shipped flow and genuine end-user reachability could not
+be fully confirmed from static inspection alone — flagged
+<code>partial</code>/<code>unknown</code> honestly rather than
+green.</li>
+<li><code>mocks</code>, <code>pprofutil</code>, <code>testutil</code>
+are dev/test-support packages, not user features — listed for
+completeness, marked <code>n/a</code>.</li>
+<li>Every <code>Real-use=unknown</code> and every
+<code>working-untaped</code> row is a candidate for a recorded scenario;
+none is video-confirmed yet (📹 <code>no</code> throughout).</li>
+</ul>
+<p>233 features inventoried across 72 packages.</p>
+<h2 id="cli-tui-web-desktop-mobile-clients-cmd-tools">CLI / TUI / Web /
+Desktop / Mobile clients + cmd tools</h2>
+<p>Inventory slice for <code>helix_code/cmd/*</code> (cmd tools) and
+<code>helix_code/applications/*</code> + <code>helix_code/web/*</code>
+(client applications). Assessed from source evidence per the anti-bluff
+covenant (CONST-035 / §11.4.107). <strong>📹 Video is <code>no</code>
+for every row</strong> — device/display recordings are only just
+starting; the conductor owns video confirmation. <code>Overall</code> is
+therefore never <code>confirmed</code>; honest rollups are
+<code>working-untaped</code> / <code>partial</code> /
+<code>gap</code>.</p>
+<p>Recordability per client (for the conductor): <strong>CLI, TUI, Web =
+feasible now</strong> (terminal + headless HTTP). <strong>Desktop (Fyne)
+= host-display required</strong>. <strong>Mobile:</strong> Aurora OS /
+Harmony OS are Go/Fyne desktop-class binaries (recordable on a Linux
+display); <strong>Android / aurora_os HAP / harmony_os HAP need
+device/emulator</strong>; <strong>iOS needs a built app (no Xcode
+project present → not buildable yet)</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Component</th>
+<th>Feature</th>
+<th>Dev</th>
+<th>Wired</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>V&amp;V</th>
+<th>📹 Video</th>
+<th>Analysis</th>
+<th>Origin</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td>Plain-text prompt → real LLM (streaming via
+provider.GenerateStream)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/generate</code> real LLM generation (BLUFF-001 resolved)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/models</code> list models via providerManager.GetProviders
+(BLUFF-002 resolved)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/workers</code> list workers</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/health</code> health check</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/diff [ref]</code> real git diff (os/exec)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/debate &lt;prompt&gt;</code> DebateOrchestrator over real
+provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/specify &lt;request&gt;</code> HelixSpecifier Specify phase
+over real provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/checkpoint [create/list/restore]</code> workspace
+snapshots</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/undo</code> revert last action</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/clear</code> <code>/reset</code> clear conversation
+history</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/help</code> help; <code>/exit</code> <code>/quit</code>
+exit</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td>@-file mentions (real os.ReadFile context attach)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td>Context-window tracking + generation stats</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>commands</code></td>
+<td>list / show / run / reload markdown commands</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>hooks</code></td>
+<td>list / enable / disable / validate / test git hooks</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>lsp</code></td>
+<td>status / list-servers / restart / stop LSP servers</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>mcp</code></td>
+<td>add / remove / list / test / auth / logs MCP servers</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>permissions</code></td>
+<td>list / add / remove / check tool permissions</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>sessions</code></td>
+<td>list / show / delete sessions</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>skills</code></td>
+<td>list / show / invoke / reload skills</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>cmd/server</td>
+<td>HTTP/gRPC/WebSocket server boot (bin/helixcode)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(web)</td>
+<td>web/frontend</td>
+<td>LLM generate console (POST /api/v1/llm/generate)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(web)</td>
+<td>web/frontend</td>
+<td>LLM streaming console (SSE, POST /api/v1/llm/stream)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(web)</td>
+<td>web/frontend</td>
+<td>Specify phase form (POST /api/v1/specify)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(web)</td>
+<td>web/frontend</td>
+<td>Response/metadata rendering (no client simulation)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/llm/generate real provider.Generate</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/llm/stream real provider.GenerateStream (SSE)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/specify real speckit Specify phase</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/llm/providers, /llm/models list</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/auth register / login / logout / refresh (JWT)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/users me get/update/delete</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/workers CRUD + heartbeat + metrics</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/tasks CRUD +
+assign/start/complete/fail/retry/checkpoint</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/projects CRUD + sessions +
+planning/building/testing/refactoring workflows</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/sessions CRUD</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/system stats + status</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/memory systems + stats</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/qa session start/list/status/report/screenshot/cancel</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/screenshot engines + capture</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/ws MCP WebSocket bridge</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/health, /api/v1/health, /metrics, /api/v1/server/info</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/debug/pprof/* (opt-in profiling)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>LLM chat (real provider, verifier-driven model discovery)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>Dashboard / Tasks / Workers / Projects / Sessions panels (real
+managers)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>Sidebar nav + key bindings (d/t/w/p/s/l/q/c)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>Skill dispatcher + tool registry (git/fs/grep/LSP/MCP,
+graceful-nil)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>HelixMemory durable cross-session store (SQLite, default-on)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>Status bar (DB/Redis/LLM status, context %), notifications, themes,
+i18n</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>QA engine panel (helixqa.Engine wired)</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>LLM chat tab (real provider, verifier-driven models)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>Dashboard / Tasks / Workers / Projects / Sessions tabs (real
+managers)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>Settings tab (theme, server config, shortcuts; desktop.yaml)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>Agentic tools + skills/plugins wiring (graceful-nil)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>NoGUI build mode (-tags nogui CLI fallback)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>TUI-parity wiring (parity_wiring_test.go)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/aurora_os (Go/Fyne)</td>
+<td>Full multi-page GUI:
+dashboard/projects/sessions/tasks/LLM/workers/system</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/aurora_os (Go/Fyne)</td>
+<td>NoGUI CLI mode (cobra) + theme system</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/harmony_os (Go/Fyne)</td>
+<td>10-tab GUI incl. distributed engine + multi-device scheduling</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/harmony_os (Go/Fyne)</td>
+<td>NoGUI CLI + interactive shell + theme system</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/android (Kotlin)</td>
+<td>Connect + task list (RecyclerView) over Go mobile-core bridge</td>
+<td>partial</td>
+<td>partial</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/android (Kotlin)</td>
+<td>Models / settings / notifications / theme UI</td>
+<td>stub</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/ios (Swift)</td>
+<td>Connect + task list (UITableView) over Go mobile-core bridge</td>
+<td>partial</td>
+<td>partial</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/ios (Swift)</td>
+<td>Models / settings / notifications / theme UI</td>
+<td>stub</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/helix_config</td>
+<td>Interactive provider/credential config wizard → YAML/.env</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/config_test</td>
+<td>Config + provider-credential validator</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/i18n</td>
+<td>i18n bundle/translator tooling (library, no main)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/infrastructure</td>
+<td>Container / k8s / registry readiness checks</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/performance_optimization</td>
+<td>pprof profiling + bottleneck analysis + benchmarks</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/security_test</td>
+<td>Security test harness (PoC execution + verification)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/security_fix</td>
+<td>Finding ingestion + policy-driven fix + re-scan validation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/security_fix_standalone</td>
+<td>Batch parallel security fix + audit-trail reporting</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/security_scan</td>
+<td>AST/pattern code scan + leak detect + SARIF report</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+</tbody>
+</table>
+<h3 id="honesty-notes-anti-bluff">Honesty notes (anti-bluff)</h3>
+<ul>
+<li><strong><code>cmd/security_scan</code> has ZERO tests</strong> (only
+<code>main.go</code>) — marked <code>Tests=none</code>,
+<code>Overall=gap</code>. Untested scanner = bluff risk per
+CONST-048/CONST-050.</li>
+<li><strong>iOS / Android are scaffolds</strong>: real source (JSON
+parse, list bind, Go mobile-core bridge) but single-screen, hardcoded
+localhost test server, <strong>no Xcode project / no
+Gradle+manifest</strong> → not buildable, not recordable.
+<code>Real-use=no</code>, <code>Overall=gap</code>.</li>
+<li><strong>Aurora OS / Harmony OS are genuine Go/Fyne apps</strong>
+(buildable via <code>make aurora-os</code> /
+<code>make harmony-os</code>, comprehensive unit+integration tests) —
+but integration features need real PostgreSQL/Redis/LLM backends, and
+full HAP/multi-device exercise needs the actual OS environment.</li>
+<li><strong>Web LLM endpoints</strong> (<code>/llm/generate</code>,
+<code>/llm/stream</code>, <code>/specify</code>) have real Ollama-backed
+e2e tests
+(<code>tests/integration/{llm_generate,llm_stream,specify_server}_e2e_test.go</code>,
+build tag <code>integration</code>, honest SKIP-OK when Ollama
+unreachable) → <code>Tests=e2e</code>,
+<code>V&amp;V=yes(docs/qa/web-llm-e2e-20260615/)</code>. The 60+
+CRUD/auth/workflow endpoints are real but tested at the manager/service
+layer, not at the HTTP-transport layer →
+<code>Tests=integ</code>/<code>none</code> honestly.</li>
+<li><strong>No row is <code>confirmed</code></strong> — every
+<code>📹 Video=no</code>; rollups are <code>working-untaped</code> (real
++ tested, no video), <code>partial</code> (real but thin/unverified test
+coverage), or <code>gap</code> (scaffold or untested).</li>
+</ul>
+<p><strong>Feature count: 67 rows</strong> (CLI REPL 14, CLI subcommand
+groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7,
+desktop 6, mobile 8, other cmd tools 11 + security_scan 1).</p>
+<h2 id="owned-submodule-capabilities">Owned-submodule capabilities</h2>
+<p>Inventory of the discrete features each owned (own-org
+<code>vasic-digital</code> / <code>HelixDevelopment</code>) submodule
+under <code>submodules/*</code> provides to HelixCode. Assessed from
+each submodule’s <code>README.md</code>, exported package surface, and
+<code>*_test.go</code> presence (CONST-035 / §11.4.107 — evidence-based,
+no bluffs).</p>
+<blockquote>
+<p><strong>Wiring model (load-bearing).</strong> HelixCode’s inner Go
+module (<code>helix_code/go.mod</code>) <code>replace</code>s + imports
+only <strong>3</strong> submodules directly — <code>helix_agent</code>
+(<code>dev.helix.agent</code>), <code>dag_orchestrator</code>
+(<code>dev.helix.dag</code>), <code>pipeline_runtime</code>
+(<code>dev.helix.pipeline</code>). HelixCode source additionally imports
+a handful by module path (<code>containers</code>,
+<code>helixspecifier</code>, <code>helixqa</code>,
+<code>concurrency</code>, <code>helixmemory</code>, <code>debate</code>,
+<code>lazy</code>, <code>llmsverifier</code>, <code>memory</code>,
+<code>llmprovider</code>). A large set is wired
+<strong>transitively</strong> because <code>helix_agent/go.mod</code>
+requires ~35 own-org submodules — these are reachable through the agent
+dependency but NOT imported by HelixCode directly
+(<code>Wired=partial</code>). The remainder are present in the repo as
+equal-codebase submodules (CONST-051) but are NOT in HelixCode’s Go
+build graph at all (<code>Wired=no</code>). <code>📹 Video=no</code> for
+every row (conductor owns video confirmation; nothing here is
+<code>confirmed</code>). Origin=<code>native</code> throughout (all
+own-org).</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Component</th>
+<th>Feature</th>
+<th>Dev</th>
+<th>Wired</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>V&amp;V</th>
+<th>📹 Video</th>
+<th>Analysis</th>
+<th>Origin</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>submodule</td>
+<td>helix_agent</td>
+<td>Ensemble multi-LLM agent service (response fusion)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_agent</td>
+<td>ReAct/tool-calling agent runtime (consumed by HelixCode
+<code>internal/agent</code>)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_agent</td>
+<td>Skill registry + debate + verifier wiring (umbrella, 1583 test
+files)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>dag_orchestrator</td>
+<td>Agent-free DAG scheduler (topo dispatch, worker pool,
+retry/backoff)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>pipeline_runtime</td>
+<td>Staged streaming dataflow runtime (push operators + FBP
+backpressure)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_specifier</td>
+<td>Spec-driven dev fusion (SpecKit 7-phase + TDD + GSD milestones)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_specifier</td>
+<td>10 power features (parallel exec, constitution-as-code, debate
+phases)</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_memory</td>
+<td>Unified cognitive memory (Mem0+Cognee+Letta+Graphiti fusion)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_memory</td>
+<td>Parallel cross-backend search + 3-stage fusion/dedup/re-rank</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>debate_orchestrator</td>
+<td>Multi-agent debate orchestration (consensus + dissent,
+LessonBank)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>debate_orchestrator</td>
+<td>Aux packages (validation/audit/evaluation/reflexion/tools)</td>
+<td>stub</td>
+<td>partial</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>concurrency</td>
+<td>Worker pools, priority queues, rate limiters, circuit breakers,
+semaphores</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>lazy</td>
+<td>Type-safe lazy-init primitives (sync.Once generics)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>memory</td>
+<td>Mem0-style scoped memory + entity extraction + knowledge graph +
+leak detect</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llm_provider</td>
+<td>LLMProvider interface + circuit breaker + health monitor + retry +
+lazy</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llms_verifier</td>
+<td>LLM verification platform
+(existence/latency/streaming/vision/embeddings)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llms_verifier</td>
+<td>Single-source-of-truth model/provider metadata (CONST-036/037)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>containers</td>
+<td>Container lifecycle (boot/compose/health) for infra-on-demand
+(§11.4.76)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_qa</td>
+<td>Autonomous QA / Challenge orchestration (test-bank runner) [QA
+infra]</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>n/a</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>panoptic</td>
+<td>Recording-validator / observation harness [QA infra]</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>n/a</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>agentic</td>
+<td>Graph-based agentic workflow engine
+(branch/checkpoint/self-correct)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>auth</td>
+<td>JWT / API-key / OAuth2 / HTTP auth middleware / token store</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>cache</td>
+<td>Multi-backend cache (mem/Redis/PG) + distributed patterns +
+TTL/eviction</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>storage</td>
+<td>Object storage (S3/MinIO/local) + cloud credential mgmt</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>vector_db</td>
+<td>Unified vector store (Qdrant/Pinecone/Milvus/pgvector)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>embeddings</td>
+<td>Text embeddings across 7 providers
+(OpenAI/Cohere/Voyage/Jina/Google/Bedrock)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>event_bus</td>
+<td>Typed pub/sub bus + glob/prefix/metadata filtering + middleware</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>messaging</td>
+<td>Message-broker abstraction (in-mem/Kafka/RabbitMQ) +
+producer/consumer patterns</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>streaming</td>
+<td>SSE / WebSocket(rooms) / gRPC streaming / webhook(HMAC) /
+HTTP+breaker / Gin</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>rag</td>
+<td>RAG pipeline (3 chunkers, BM25+semantic+hybrid retrieve, MMR rerank,
+RRF fusion)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>tool_schema</td>
+<td>Tool schema/validation/exec + 14 built-in safe tool handlers</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>plugins</td>
+<td>Plugin lifecycle (dep-ordered) + .so/process loaders + sandbox +
+output parse</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>planning</td>
+<td>AI planning algorithms (HiPlan + MCTS + Tree-of-Thoughts)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>optimization</td>
+<td>Semantic cache + prompt compression + structured-output +
+SGLang/LlamaIndex/LangChain</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>self_improve</td>
+<td>RLAIF pipeline (reward models, feedback, policy/prompt
+optimization)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>benchmark</td>
+<td>LLM benchmarking (SWE-bench/HumanEval/MMLU/GSM8K) + leaderboard</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llm_ops</td>
+<td>LLMOps (continuous eval, A/B experiments, prompt versioning,
+alerting)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>mcp_module</td>
+<td>MCP server+client (JSON-RPC 2.0 stdio+HTTP/SSE) + adapter
+registry</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>models</td>
+<td>Shared AI/LLM data types (LLMRequest/Response, MCP/LSP/ACP,
+code-intelligence)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>formatters</td>
+<td>Pluggable code-formatter registry + engine + cache + native-binary
+shims</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>vision_engine</td>
+<td>CV + LLM-vision UI analysis + navigation-graph construction</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>doc_processor</td>
+<td>Doc-feature-map extraction + verification-coverage tracking
+(QA-oriented)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>security</td>
+<td>Security tooling module (round-300 deep-doc) — needs deeper
+inventory</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>red_team</td>
+<td>YAML-driven adversarial-prompt fixture harness (defensive guardrail
+regression)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llm_orchestrator</td>
+<td>Headless CLI-agent orchestration
+(OpenCode/Claude/Gemini/Junie/Qwen)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_llm</td>
+<td>Distributed LLM service (OpenAI/Anthropic APIs, llama.cpp, RAG,
+ReAct, HTTP/3)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>conversation</td>
+<td>Infinite-context (event-sourcing) + LLM compression + LRU cache</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>database</td>
+<td>Driver-agnostic DB (PG/SQLite) + pool + migrations + repo + query
+builder</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>document</td>
+<td>Document model (18-format detect, change tracking, JSON
+serialize)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>filesystem</td>
+<td>Multi-protocol FS client (SMB/FTP/NFS/WebDAV/Local)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>config</td>
+<td>Config mgmt (JSON files, env binding, validation, 8 storage-protocol
+types)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>i18n</td>
+<td>i18n library (bundles, loader, HTTP middleware)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>observability</td>
+<td>Distributed tracing + metrics + structured logging + health +
+analytics</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>middleware</td>
+<td>Reusable net/http middleware
+(requestid/logging/recovery/cors/chain)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>rate_limiter</td>
+<td>Rate limiting (in-mem + Redis) + HTTP middleware</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>recovery</td>
+<td>Named circuit breakers + periodic health checks + resilience
+facade</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>watcher</td>
+<td>Filesystem change monitoring (debounce, filters, handler
+chains)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>background_tasks</td>
+<td>Persistent task queue (PG) + worker pool + stuck-detect + DLQ +
+progress</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>skill_registry</td>
+<td>Skill mgmt (load YAML/JSON/MD, register, execute, validate,
+store)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>embeddings</td>
+<td>(see embeddings row — module also standalone)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>no</td>
+<td>—</td>
+<td>native</td>
+<td>—</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>auto_temp</td>
+<td>LLM temperature auto-tuning (multi-temp run + multi-judge
+scoring)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>hyper_tune</td>
+<td>LLM hyperparameter optimization (random/grid/Bayesian-lite)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>i_llm</td>
+<td>Structured-reasoning patterns
+(CoT/ToT/ReAct/few-shot/prompt-chain)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>veritas</td>
+<td>AI-truthfulness verification, fact-check, hallucination
+detection</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>leak_hub</td>
+<td>System-prompt-leak detection + searchable archive</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>claritas</td>
+<td>Defensive guardrail (leaked-prompt archive + extraction-attempt
+detector)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>gandalf_solutions</td>
+<td>Read-only Gandalf prompt-hacking solutions archive (research)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>ouroborous</td>
+<td>Self-referential AI-safety (recursive self-improve, runaway-loop
+detect)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>normalize</td>
+<td>Adversarial-input canonicalization
+(base64/leet/homoglyph/NFKC/ROT13…)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>plinius_common</td>
+<td>Plinius shared lib (config validators, error types, gRPC client,
+i18n, types)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>toon</td>
+<td>Token-Oriented Object Notation encode/decode</td>
+<td>stub</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+</tbody>
+</table>
+<p>55 features across 50 submodules.</p>
+<h3 id="coverage-depth-honesty">Coverage-depth honesty</h3>
+<ul>
+<li><strong>Shallow-inventoried (principal features only; deeper
+inventory warranted):</strong> <code>helix_agent</code> (1583 test files
+— only top umbrella capabilities captured; internal package-level
+features not enumerated), <code>helix_qa</code> (646 test files, QA
+infra — single capability row), <code>helix_specifier</code> (37 tests,
+10 power features collapsed to 2 rows), <code>security</code> (deep-doc
+module — only a single umbrella row; per-package security capabilities
+NOT enumerated, flagged as needs-deeper-inventory),
+<code>panoptic</code> (QA infra — single row).</li>
+<li><strong><code>Real-use</code> is <code>unknown</code></strong> for
+nearly every transitively-wired (<code>partial</code>) and standalone
+(<code>no</code>) submodule because reachability through
+<code>helix_agent</code>’s go.mod ≠ proof an end user exercises the
+capability via HelixCode; only the 3 directly-replaced modules +
+<code>concurrency</code>/<code>lazy</code> show <code>yes</code>.</li>
+<li><strong><code>Dev</code> reflects README claims + test
+presence</strong>, NOT runtime verification. <code>toon</code> is
+honestly <code>stub</code> (PENDING_IMPLEMENTATION per its own README);
+<code>debate_orchestrator</code> aux packages are <code>stub</code>
+(NotYetImplemented per ACK-STUB).</li>
+<li><strong><code>Tests</code> column</strong> marks <code>unit</code>
+baseline (all 70 own-org submodules have <code>*_test.go</code>);
+<code>integ</code>/<code>e2e</code> added only where README/dir evidence
+shows real infra/integration suites (cache, storage, vector_db,
+llms_verifier, helix_qa, helix_agent, containers, database,
+rate_limiter, helix_llm, observability-N/A).</li>
+<li>Infra/tooling submodules excluded from feature rows per task scope:
+<code>docs_chain</code>, <code>challenges</code> (and
+<code>containers</code>/<code>helix_qa</code>/<code>panoptic</code>
+included only as the capabilities HelixCode consumes, marked
+QA/infra).</li>
+</ul>
+<h2 id="ported-cli_agents-capabilities">Ported cli_agents
+capabilities</h2>
+<p>Evidence-backed inventory of capabilities <strong>actually ported
+into HelixCode</strong> from the <code>cli_agents/</code> reference
+catalogue (51 vendored reference agents). Per CONST-035 anti-bluff: this
+lists ONLY capabilities with landed code evidence (package
+<code>doc.go</code> origin headers, CONTINUATION.md P2-Fxx CLOSED
+ledger, POWER_FEATURES_PORTING_PLAN rev2 file:line reconciliation, git
+port commits) — NOT every cli_agent’s full feature set.
+Planned-but-not-landed items are marked
+<code>Dev=absent</code>/<code>partial</code> honestly. <strong>No
+feature is <code>📹 yes</code></strong> (no recordings analyzed for
+ported features). <strong>Overall is never
+<code>confirmed</code></strong> (a confirmed rollup requires an analyzed
+video).</p>
+<p>Evidence basis: (1) CONTINUATION.md ports ledger lists
+<code>P2-F21..P2-F30</code> as CLOSED with landing packages; (2) each
+landed package’s <code>doc.go</code> names its source agent (“aider
+voice input port P2-F27”, “Roo-code CLI agent port”, “Continue.dev IDE
+integration”, “Go port of upstream gptme’s profile mechanism”); (3)
+POWER_FEATURES_PORTING_PLAN.md rev2 reconciles Phase-1 against HEAD with
+file:line; (4) <code>HXC-031-codex-cline-port.md</code> is DRAFT (plan
+only, NO code) — codex multimodal + cline computer-use are PLANNED, not
+landed.</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Component (HelixCode pkg)</th>
+<th>Feature</th>
+<th>Dev</th>
+<th>Wired</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>V&amp;V</th>
+<th>📹 Video</th>
+<th>Analysis</th>
+<th>Origin</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>service</td>
+<td>internal/approval</td>
+<td>Approval/exec-policy modes (per-tool yes/no, autopilot tiers)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/autocommit</td>
+<td>Git auto-commit per change (generated msg, secret-filter,
+summariser)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:aider</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools/browser</td>
+<td>Browser tool suite (launch/click/type/scroll/screenshot via
+chromedp)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/projectmemory</td>
+<td>Project-memory context files (AGENTS.md/.clinerules-style
+loader+watcher)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/plantree</td>
+<td>Plan trees (branching persistent implementation plans,
+JSON-backed)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/session (condense.go)</td>
+<td>Context compaction / history condense
+(CompactIfNeeded/ShouldCompact)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workspace</td>
+<td>Container per-task workspace (Docker/Podman mount, TTL cleanup)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:openhands</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/voice</td>
+<td>Voice-to-code input (arecord/sox capture, Whisper API + whisper.cpp
+fallback)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:aider</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/repomap</td>
+<td>Repo-map (tree-sitter ranked incremental project map)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:aider</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/kilocode</td>
+<td>AST-aware refactoring (cross-file rename, impact/call-graph,
+extract/move/inline)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:kilo-code</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/roocode</td>
+<td>Roo-code full port (task delegation, template gen, diff review, conv
+memory)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:roo-code</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application</td>
+<td>internal/continua</td>
+<td>Continue.dev IDE integration (inline completions, editor, chat
+panel, diff, model selector)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:continue</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/agent/profiles</td>
+<td>Verifier work profile + RoleVerify posture (subagent
+review/validation)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gptme</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application</td>
+<td>cmd/cli (main.go:2118,2326) + autocommit/git.go</td>
+<td>/undo + /diff (git-aware, force-push-free revert)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:aider</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow/autonomy</td>
+<td>Configurable autonomy presets
+(None/Basic/BasicPlus/SemiAuto/FullAuto, 5 tiers)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/workflow/planmode</td>
+<td>First-class Plan/Act mode controller (tool-gated by mode)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools/askuser</td>
+<td>ask_user interactive clarification tool</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/commands (markdown_skills.go)</td>
+<td>Markdown skills subsystem (project&gt;user 2-tier precedence)</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/checkpoint</td>
+<td>Workspace file-snapshot checkpoint + /checkpoint
+create/list/restore</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application</td>
+<td>cmd/cli (main.go:1727)</td>
+<td>Per-request token-usage counter (real provider Usage,
+anti-fabrication)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codai</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(no production code)</td>
+<td>Context-window-% indicator</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codai (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(no production code)</td>
+<td>TODO/step tracker surface (/tasks is background-job list, not TODO
+tracker)</td>
+<td>partial</td>
+<td>partial</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli (planned)</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>markdown_skills.go</td>
+<td>SKILL.md built-in/bundled tier + canonical SKILL.md filename</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/llm (HXC-031 plan)</td>
+<td>Codex multimodal image-content LLM request surface</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codex (planned/DRAFT)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/tools/browser (HXC-031 plan)</td>
+<td>Cline computer-use feedback loop (screenshot-per-action coord
+control)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline (planned/DRAFT)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F22)</td>
+<td>Cumulative diff-review sandbox (stage-before-apply, apply/reject
+hunks)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F25)</td>
+<td>Conversation branches / fork</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:plandex (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F36/F43)</td>
+<td>/rewind + Tangent mode</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli/amazon-q (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F18)</td>
+<td>Messaging connectors (Slack/Telegram/Discord)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:cline (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F35)</td>
+<td>ACP mode (Agent Client Protocol over stdio)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:gemini-cli (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F56)</td>
+<td>OpenAI-compatible server endpoints</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:shai/aichat (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F61)</td>
+<td>Spec-driven workflow surface (specify→plan→tasks→implement)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:spec-kit (planned)</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>service</td>
+<td>(planned, POWER_FEATURES F33)</td>
+<td>OS-level exec sandbox (Seatbelt/Landlock/bwrap)</td>
+<td>absent</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>ported:codex (planned)</td>
+<td>gap</td>
+</tr>
+</tbody>
+</table>
+<p>Count: 33 rows total — <strong>20 landed ports</strong>
+(<code>Dev=done</code>, working-untaped), <strong>3
+partial-landed</strong> (workspace, continua, markdown-skills),
+<strong>10 planned/not-landed</strong>
+(<code>Dev=absent</code>/<code>partial</code>, <code>gap</code>). Zero
+<code>📹 yes</code>; zero <code>confirmed</code>.</p>
+<p>Honest assessment: The <strong>Phase-2 port wave (P2-F21..F30)
+genuinely landed</strong> — 10 named source-agent ports
+(codex/aider/cline/plandex/openhands/kilo-code/roo-code/continue) ship
+as real packages with origin-attributed <code>doc.go</code> headers,
+unit tests, and CONTINUATION CLOSED records, plus the gptme
+verifier-profile port. The <strong>POWER_FEATURES Phase-1 wrap
+(autonomy/Plan-Act/undo-diff/ask_user/skills/ token-count/checkpoint) is
+largely landed</strong> per the rev2 file:line reconciliation. Beyond
+that, the porting is <strong>mostly PLANNED, not landed</strong>:
+POWER_FEATURES_PORTING_PLAN is explicitly “DRAFT — research + plan only,
+NO code”, its Phases 2–7 (diff-sandbox, branches, rewind, tangent,
+connectors, ACP, OpenAI server, spec-driven, OS sandbox) are
+unimplemented, and HXC-031 (codex multimodal + cline computer-use) is a
+DRAFT plan with no code. No ported feature has an analyzed recording, so
+none can be <code>confirmed</code>; all landed ports are honestly
+<code>working-untaped</code> pending video V&amp;V.</p>
+<h2 id="inventory-sources">Inventory sources</h2>
+<ul>
+<li><code>docs/features/inventory/internal_services.md</code></li>
+<li><code>docs/features/inventory/cmd_and_clients.md</code></li>
+<li><code>docs/features/inventory/submodules.md</code></li>
+<li><code>docs/features/inventory/ported_cli_agents.md</code></li>
+</ul>
+</body>
+</html>

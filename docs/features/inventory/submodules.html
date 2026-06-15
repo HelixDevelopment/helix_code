@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>submodules</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">submodules</h1>
+</header>
+<h2 id="owned-submodule-capabilities">Owned-submodule capabilities</h2>
+<p>Inventory of the discrete features each owned (own-org
+<code>vasic-digital</code> / <code>HelixDevelopment</code>) submodule
+under <code>submodules/*</code> provides to HelixCode. Assessed from
+each submodule’s <code>README.md</code>, exported package surface, and
+<code>*_test.go</code> presence (CONST-035 / §11.4.107 — evidence-based,
+no bluffs).</p>
+<blockquote>
+<p><strong>Wiring model (load-bearing).</strong> HelixCode’s inner Go
+module (<code>helix_code/go.mod</code>) <code>replace</code>s + imports
+only <strong>3</strong> submodules directly — <code>helix_agent</code>
+(<code>dev.helix.agent</code>), <code>dag_orchestrator</code>
+(<code>dev.helix.dag</code>), <code>pipeline_runtime</code>
+(<code>dev.helix.pipeline</code>). HelixCode source additionally imports
+a handful by module path (<code>containers</code>,
+<code>helixspecifier</code>, <code>helixqa</code>,
+<code>concurrency</code>, <code>helixmemory</code>, <code>debate</code>,
+<code>lazy</code>, <code>llmsverifier</code>, <code>memory</code>,
+<code>llmprovider</code>). A large set is wired
+<strong>transitively</strong> because <code>helix_agent/go.mod</code>
+requires ~35 own-org submodules — these are reachable through the agent
+dependency but NOT imported by HelixCode directly
+(<code>Wired=partial</code>). The remainder are present in the repo as
+equal-codebase submodules (CONST-051) but are NOT in HelixCode’s Go
+build graph at all (<code>Wired=no</code>). <code>📹 Video=no</code> for
+every row (conductor owns video confirmation; nothing here is
+<code>confirmed</code>). Origin=<code>native</code> throughout (all
+own-org).</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Component</th>
+<th>Feature</th>
+<th>Dev</th>
+<th>Wired</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>V&amp;V</th>
+<th>📹 Video</th>
+<th>Analysis</th>
+<th>Origin</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>submodule</td>
+<td>helix_agent</td>
+<td>Ensemble multi-LLM agent service (response fusion)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_agent</td>
+<td>ReAct/tool-calling agent runtime (consumed by HelixCode
+<code>internal/agent</code>)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_agent</td>
+<td>Skill registry + debate + verifier wiring (umbrella, 1583 test
+files)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>dag_orchestrator</td>
+<td>Agent-free DAG scheduler (topo dispatch, worker pool,
+retry/backoff)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>pipeline_runtime</td>
+<td>Staged streaming dataflow runtime (push operators + FBP
+backpressure)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_specifier</td>
+<td>Spec-driven dev fusion (SpecKit 7-phase + TDD + GSD milestones)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_specifier</td>
+<td>10 power features (parallel exec, constitution-as-code, debate
+phases)</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_memory</td>
+<td>Unified cognitive memory (Mem0+Cognee+Letta+Graphiti fusion)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_memory</td>
+<td>Parallel cross-backend search + 3-stage fusion/dedup/re-rank</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>debate_orchestrator</td>
+<td>Multi-agent debate orchestration (consensus + dissent,
+LessonBank)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>debate_orchestrator</td>
+<td>Aux packages (validation/audit/evaluation/reflexion/tools)</td>
+<td>stub</td>
+<td>partial</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>concurrency</td>
+<td>Worker pools, priority queues, rate limiters, circuit breakers,
+semaphores</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>lazy</td>
+<td>Type-safe lazy-init primitives (sync.Once generics)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>memory</td>
+<td>Mem0-style scoped memory + entity extraction + knowledge graph +
+leak detect</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llm_provider</td>
+<td>LLMProvider interface + circuit breaker + health monitor + retry +
+lazy</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llms_verifier</td>
+<td>LLM verification platform
+(existence/latency/streaming/vision/embeddings)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llms_verifier</td>
+<td>Single-source-of-truth model/provider metadata (CONST-036/037)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>containers</td>
+<td>Container lifecycle (boot/compose/health) for infra-on-demand
+(§11.4.76)</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_qa</td>
+<td>Autonomous QA / Challenge orchestration (test-bank runner) [QA
+infra]</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>n/a</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>panoptic</td>
+<td>Recording-validator / observation harness [QA infra]</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>n/a</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>agentic</td>
+<td>Graph-based agentic workflow engine
+(branch/checkpoint/self-correct)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>auth</td>
+<td>JWT / API-key / OAuth2 / HTTP auth middleware / token store</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>cache</td>
+<td>Multi-backend cache (mem/Redis/PG) + distributed patterns +
+TTL/eviction</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>storage</td>
+<td>Object storage (S3/MinIO/local) + cloud credential mgmt</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>vector_db</td>
+<td>Unified vector store (Qdrant/Pinecone/Milvus/pgvector)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>embeddings</td>
+<td>Text embeddings across 7 providers
+(OpenAI/Cohere/Voyage/Jina/Google/Bedrock)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>event_bus</td>
+<td>Typed pub/sub bus + glob/prefix/metadata filtering + middleware</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>messaging</td>
+<td>Message-broker abstraction (in-mem/Kafka/RabbitMQ) +
+producer/consumer patterns</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>streaming</td>
+<td>SSE / WebSocket(rooms) / gRPC streaming / webhook(HMAC) /
+HTTP+breaker / Gin</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>rag</td>
+<td>RAG pipeline (3 chunkers, BM25+semantic+hybrid retrieve, MMR rerank,
+RRF fusion)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>tool_schema</td>
+<td>Tool schema/validation/exec + 14 built-in safe tool handlers</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>plugins</td>
+<td>Plugin lifecycle (dep-ordered) + .so/process loaders + sandbox +
+output parse</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>planning</td>
+<td>AI planning algorithms (HiPlan + MCTS + Tree-of-Thoughts)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>optimization</td>
+<td>Semantic cache + prompt compression + structured-output +
+SGLang/LlamaIndex/LangChain</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>self_improve</td>
+<td>RLAIF pipeline (reward models, feedback, policy/prompt
+optimization)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>benchmark</td>
+<td>LLM benchmarking (SWE-bench/HumanEval/MMLU/GSM8K) + leaderboard</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llm_ops</td>
+<td>LLMOps (continuous eval, A/B experiments, prompt versioning,
+alerting)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>mcp_module</td>
+<td>MCP server+client (JSON-RPC 2.0 stdio+HTTP/SSE) + adapter
+registry</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>models</td>
+<td>Shared AI/LLM data types (LLMRequest/Response, MCP/LSP/ACP,
+code-intelligence)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>formatters</td>
+<td>Pluggable code-formatter registry + engine + cache + native-binary
+shims</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>vision_engine</td>
+<td>CV + LLM-vision UI analysis + navigation-graph construction</td>
+<td>partial</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>doc_processor</td>
+<td>Doc-feature-map extraction + verification-coverage tracking
+(QA-oriented)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>security</td>
+<td>Security tooling module (round-300 deep-doc) — needs deeper
+inventory</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>red_team</td>
+<td>YAML-driven adversarial-prompt fixture harness (defensive guardrail
+regression)</td>
+<td>done</td>
+<td>partial</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>llm_orchestrator</td>
+<td>Headless CLI-agent orchestration
+(OpenCode/Claude/Gemini/Junie/Qwen)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>helix_llm</td>
+<td>Distributed LLM service (OpenAI/Anthropic APIs, llama.cpp, RAG,
+ReAct, HTTP/3)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit,integ,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>conversation</td>
+<td>Infinite-context (event-sourcing) + LLM compression + LRU cache</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>database</td>
+<td>Driver-agnostic DB (PG/SQLite) + pool + migrations + repo + query
+builder</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>document</td>
+<td>Document model (18-format detect, change tracking, JSON
+serialize)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>filesystem</td>
+<td>Multi-protocol FS client (SMB/FTP/NFS/WebDAV/Local)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>config</td>
+<td>Config mgmt (JSON files, env binding, validation, 8 storage-protocol
+types)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>i18n</td>
+<td>i18n library (bundles, loader, HTTP middleware)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>observability</td>
+<td>Distributed tracing + metrics + structured logging + health +
+analytics</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>middleware</td>
+<td>Reusable net/http middleware
+(requestid/logging/recovery/cors/chain)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>rate_limiter</td>
+<td>Rate limiting (in-mem + Redis) + HTTP middleware</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>recovery</td>
+<td>Named circuit breakers + periodic health checks + resilience
+facade</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>watcher</td>
+<td>Filesystem change monitoring (debounce, filters, handler
+chains)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>background_tasks</td>
+<td>Persistent task queue (PG) + worker pool + stuck-detect + DLQ +
+progress</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>skill_registry</td>
+<td>Skill mgmt (load YAML/JSON/MD, register, execute, validate,
+store)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>embeddings</td>
+<td>(see embeddings row — module also standalone)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>no</td>
+<td>—</td>
+<td>native</td>
+<td>—</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>auto_temp</td>
+<td>LLM temperature auto-tuning (multi-temp run + multi-judge
+scoring)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>hyper_tune</td>
+<td>LLM hyperparameter optimization (random/grid/Bayesian-lite)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>i_llm</td>
+<td>Structured-reasoning patterns
+(CoT/ToT/ReAct/few-shot/prompt-chain)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>veritas</td>
+<td>AI-truthfulness verification, fact-check, hallucination
+detection</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>leak_hub</td>
+<td>System-prompt-leak detection + searchable archive</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>claritas</td>
+<td>Defensive guardrail (leaked-prompt archive + extraction-attempt
+detector)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>gandalf_solutions</td>
+<td>Read-only Gandalf prompt-hacking solutions archive (research)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>ouroborous</td>
+<td>Self-referential AI-safety (recursive self-improve, runaway-loop
+detect)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>normalize</td>
+<td>Adversarial-input canonicalization
+(base64/leet/homoglyph/NFKC/ROT13…)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>plinius_common</td>
+<td>Plinius shared lib (config validators, error types, gRPC client,
+i18n, types)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>submodule</td>
+<td>toon</td>
+<td>Token-Oriented Object Notation encode/decode</td>
+<td>stub</td>
+<td>no</td>
+<td>no</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+</tbody>
+</table>
+<p>55 features across 50 submodules.</p>
+<h3 id="coverage-depth-honesty">Coverage-depth honesty</h3>
+<ul>
+<li><strong>Shallow-inventoried (principal features only; deeper
+inventory warranted):</strong> <code>helix_agent</code> (1583 test files
+— only top umbrella capabilities captured; internal package-level
+features not enumerated), <code>helix_qa</code> (646 test files, QA
+infra — single capability row), <code>helix_specifier</code> (37 tests,
+10 power features collapsed to 2 rows), <code>security</code> (deep-doc
+module — only a single umbrella row; per-package security capabilities
+NOT enumerated, flagged as needs-deeper-inventory),
+<code>panoptic</code> (QA infra — single row).</li>
+<li><strong><code>Real-use</code> is <code>unknown</code></strong> for
+nearly every transitively-wired (<code>partial</code>) and standalone
+(<code>no</code>) submodule because reachability through
+<code>helix_agent</code>’s go.mod ≠ proof an end user exercises the
+capability via HelixCode; only the 3 directly-replaced modules +
+<code>concurrency</code>/<code>lazy</code> show <code>yes</code>.</li>
+<li><strong><code>Dev</code> reflects README claims + test
+presence</strong>, NOT runtime verification. <code>toon</code> is
+honestly <code>stub</code> (PENDING_IMPLEMENTATION per its own README);
+<code>debate_orchestrator</code> aux packages are <code>stub</code>
+(NotYetImplemented per ACK-STUB).</li>
+<li><strong><code>Tests</code> column</strong> marks <code>unit</code>
+baseline (all 70 own-org submodules have <code>*_test.go</code>);
+<code>integ</code>/<code>e2e</code> added only where README/dir evidence
+shows real infra/integration suites (cache, storage, vector_db,
+llms_verifier, helix_qa, helix_agent, containers, database,
+rate_limiter, helix_llm, observability-N/A).</li>
+<li>Infra/tooling submodules excluded from feature rows per task scope:
+<code>docs_chain</code>, <code>challenges</code> (and
+<code>containers</code>/<code>helix_qa</code>/<code>panoptic</code>
+included only as the capabilities HelixCode consumes, marked
+QA/infra).</li>
+</ul>
+</body>
+</html>

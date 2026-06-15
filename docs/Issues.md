@@ -566,3 +566,39 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 ---
 
 *Last updated: 2026-05-29 — filed HXC-035 (POST /auth/register 400 internal_auth_failed_create_user — High, systematic-debugging in progress per §11.4.102); HXC-029 now 4/18 banks verified (full-qa-api + entity-management + admin-operations + security-validation, each 3×+mutation vs live server); filed HXC-034 (cascade constitution §11.4.102 into 68 owned submodules + gate — Task); constitution submodule §11.4.102 added+pushed (656b43a), meta pointer bumped; HXC-029 full-qa-api bank verified (§11.4.98); HXC-030 §11.4.99 sweep COMPLETE (38/38). Prior: filed HXC-033 (codegraph 0.9.7 index/sync crash + §11.4.79 own-org regression — Operator-blocked); HXC-032 FIXED+closed (LLMOrchestrator conflict markers; submodule d3956ad, helix_agent builds); reclassified HXC-031 (CONST-052 renames RESOLVED/none-remain, only Codex/Cline ports remain); HXC-029 §11.4.98 2 confirmed violations fixed; HXC-030 §11.4.99 Go 1.24→1.26.3 + PG 14→15 doc reconciliation. Prior: filed HXC-029 (§11.4.98 forward sweep), HXC-030 (§11.4.99 forward sweep), HXC-031 (deferred rename/port long-tail) per operator "do it all"; added scripts/generate_{issues,fixed}_summary.sh + G12 summary-freshness gate (§11.4.91/12). Previously: 2026-05-28 — constitution submodule pulled 7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB / stress+chaos / cross-platform / submodule-cascade / codegraph-own-org / obsolete+summary-tooling / docs-qa / test_bank-noncompile); HXC-021 + HXC-014a + HXC-015a FIXED→Fixed.md (commit f464adb0 — fake-skip Assert(true) bluffs + empty stress stub → honest SKIP); CONST-052/HXC-001 leaf-rename programme COMPLETE (Phases 1-4), Phase 5 org-grouping dirs kept as namespace carve-outs per operator decision 2026-05-28 → HXC-001 closeable. Prior: 2026-05-20 (round 463 — HXC-003 closed `Implemented (→ Fixed.md)` and migrated to `docs/Fixed.md`: the CONST-046 i18n migration campaign is concluded — the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals with paired-mutation anti-bluff tests; remaining ~55k audit hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`. Open set is now HXC-001 (CONST-052 renames — Task, In progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task)). Previous round 402 — HXC-011 closed `Fixed (→ Fixed.md)`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## HXC-107 — Feature Status docs program (docs/features) — comprehensive per-feature inventory across all components/clients/submodules/ported-cli_agents, docs_chain-synced
+
+**Status:** Queued
+**Type:** Task
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Round-1 inventory landed: ~388 features catalogued (233 internal, 67 cmd/clients, 55 submodule, 33 ported) in docs/features/Status.md + Status_Summary.md with the full dimension schema (Dev/Wired/Real-use/Tests/V&V/Video/Analysis/Origin/Overall). 0 video-confirmed (honest). ONGOING: deeper inventory of flagged packages; docs_chain context wiring (§11.4.106); raise video-confirmed as recordings land.
+
+## HXC-108 — Video-QA program: record all clients x all features with strongest models + ensemble -> /Volumes/T7/Downloads/Recordings, analyze + fix
+
+**Status:** Queued
+**Type:** Task
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Foundation verified: DeepSeek V3 (strongest) + Mistral Large + Groq Llama-3.3-70B ensemble real through helix stack. Recordable now: CLI/TUI/Web/Desktop(host display, operator-approved). Android Genymotion live via adb. Each recording must show real use-case scenarios, be analyzed, problems fixed/retested. Feeds the Status docs video-confirmed column. ONGOING multi-round.
+
+## HXC-109 — Mobile apps are scaffolds — Android has no build.gradle/AndroidManifest, iOS has no Xcode project (not buildable -> not recordable)
+
+**Status:** Queued
+**Type:** Bug
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Inventory found applications/android + applications/ios are single-screen scaffolds with hardcoded localhost and NO build system. Must create Android Gradle build + manifest and an iOS Xcode project (gomobile or native) before the apps build/run on the Genymotion emulator / iOS simulators for recording.
+
+## HXC-110 — Extend containers submodule to launch iOS simulators (operator-directed Apple-support mechanism)
+
+**Status:** Queued
+**Type:** Task
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Operator (2026-06-15): create a proper mechanism for starting mandatory iOS simulators through the containers submodule, extending it to support anything Apple-related. NOTE: iOS simulators run natively via xcrun simctl on macOS (cannot run inside Linux containers) — the containers submodule mechanism must orchestrate the host-native simctl lifecycle (boot/install/record) under its unified API. Investigate + extend containers (§11.4.76).
+

@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>cmd_and_clients</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">cmd_and_clients</h1>
+</header>
+<h2 id="cli-tui-web-desktop-mobile-clients-cmd-tools">CLI / TUI / Web /
+Desktop / Mobile clients + cmd tools</h2>
+<p>Inventory slice for <code>helix_code/cmd/*</code> (cmd tools) and
+<code>helix_code/applications/*</code> + <code>helix_code/web/*</code>
+(client applications). Assessed from source evidence per the anti-bluff
+covenant (CONST-035 / §11.4.107). <strong>📹 Video is <code>no</code>
+for every row</strong> — device/display recordings are only just
+starting; the conductor owns video confirmation. <code>Overall</code> is
+therefore never <code>confirmed</code>; honest rollups are
+<code>working-untaped</code> / <code>partial</code> /
+<code>gap</code>.</p>
+<p>Recordability per client (for the conductor): <strong>CLI, TUI, Web =
+feasible now</strong> (terminal + headless HTTP). <strong>Desktop (Fyne)
+= host-display required</strong>. <strong>Mobile:</strong> Aurora OS /
+Harmony OS are Go/Fyne desktop-class binaries (recordable on a Linux
+display); <strong>Android / aurora_os HAP / harmony_os HAP need
+device/emulator</strong>; <strong>iOS needs a built app (no Xcode
+project present → not buildable yet)</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Component</th>
+<th>Feature</th>
+<th>Dev</th>
+<th>Wired</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>V&amp;V</th>
+<th>📹 Video</th>
+<th>Analysis</th>
+<th>Origin</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td>Plain-text prompt → real LLM (streaming via
+provider.GenerateStream)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/generate</code> real LLM generation (BLUFF-001 resolved)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/models</code> list models via providerManager.GetProviders
+(BLUFF-002 resolved)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/workers</code> list workers</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/health</code> health check</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/diff [ref]</code> real git diff (os/exec)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/debate &lt;prompt&gt;</code> DebateOrchestrator over real
+provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/specify &lt;request&gt;</code> HelixSpecifier Specify phase
+over real provider</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/checkpoint [create/list/restore]</code> workspace
+snapshots</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/undo</code> revert last action</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/clear</code> <code>/reset</code> clear conversation
+history</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td><code>/help</code> help; <code>/exit</code> <code>/quit</code>
+exit</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td>@-file mentions (real os.ReadFile context attach)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli REPL</td>
+<td>Context-window tracking + generation stats</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>commands</code></td>
+<td>list / show / run / reload markdown commands</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>hooks</code></td>
+<td>list / enable / disable / validate / test git hooks</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>lsp</code></td>
+<td>status / list-servers / restart / stop LSP servers</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>mcp</code></td>
+<td>add / remove / list / test / auth / logs MCP servers</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>permissions</code></td>
+<td>list / add / remove / check tool permissions</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>sessions</code></td>
+<td>list / show / delete sessions</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli <code>skills</code></td>
+<td>list / show / invoke / reload skills</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>cmd/server</td>
+<td>HTTP/gRPC/WebSocket server boot (bin/helixcode)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(web)</td>
+<td>web/frontend</td>
+<td>LLM generate console (POST /api/v1/llm/generate)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(web)</td>
+<td>web/frontend</td>
+<td>LLM streaming console (SSE, POST /api/v1/llm/stream)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(web)</td>
+<td>web/frontend</td>
+<td>Specify phase form (POST /api/v1/specify)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(web)</td>
+<td>web/frontend</td>
+<td>Response/metadata rendering (no client simulation)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/llm/generate real provider.Generate</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/llm/stream real provider.GenerateStream (SSE)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/specify real speckit Specify phase</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(docs/qa/web-llm-e2e-20260615/)</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/llm/providers, /llm/models list</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/auth register / login / logout / refresh (JWT)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/users me get/update/delete</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/workers CRUD + heartbeat + metrics</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/tasks CRUD +
+assign/start/complete/fail/retry/checkpoint</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/projects CRUD + sessions +
+planning/building/testing/refactoring workflows</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/sessions CRUD</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/system stats + status</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/memory systems + stats</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/qa session start/list/status/report/screenshot/cancel</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/api/v1/screenshot engines + capture</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/ws MCP WebSocket bridge</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/health, /api/v1/health, /metrics, /api/v1/server/info</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>service</td>
+<td>internal/server (HTTP API)</td>
+<td>/debug/pprof/* (opt-in profiling)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>LLM chat (real provider, verifier-driven model discovery)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>Dashboard / Tasks / Workers / Projects / Sessions panels (real
+managers)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>Sidebar nav + key bindings (d/t/w/p/s/l/q/c)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>Skill dispatcher + tool registry (git/fs/grep/LSP/MCP,
+graceful-nil)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>HelixMemory durable cross-session store (SQLite, default-on)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>Status bar (DB/Redis/LLM status, context %), notifications, themes,
+i18n</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(tui)</td>
+<td>applications/terminal_ui</td>
+<td>QA engine panel (helixqa.Engine wired)</td>
+<td>partial</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>LLM chat tab (real provider, verifier-driven models)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>Dashboard / Tasks / Workers / Projects / Sessions tabs (real
+managers)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>Settings tab (theme, server config, shortcuts; desktop.yaml)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>Agentic tools + skills/plugins wiring (graceful-nil)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>NoGUI build mode (-tags nogui CLI fallback)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(desktop)</td>
+<td>applications/desktop (Fyne)</td>
+<td>TUI-parity wiring (parity_wiring_test.go)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/aurora_os (Go/Fyne)</td>
+<td>Full multi-page GUI:
+dashboard/projects/sessions/tasks/LLM/workers/system</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/aurora_os (Go/Fyne)</td>
+<td>NoGUI CLI mode (cobra) + theme system</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/harmony_os (Go/Fyne)</td>
+<td>10-tab GUI incl. distributed engine + multi-device scheduling</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/harmony_os (Go/Fyne)</td>
+<td>NoGUI CLI + interactive shell + theme system</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/android (Kotlin)</td>
+<td>Connect + task list (RecyclerView) over Go mobile-core bridge</td>
+<td>partial</td>
+<td>partial</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/android (Kotlin)</td>
+<td>Models / settings / notifications / theme UI</td>
+<td>stub</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/ios (Swift)</td>
+<td>Connect + task list (UITableView) over Go mobile-core bridge</td>
+<td>partial</td>
+<td>partial</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>application(mobile)</td>
+<td>applications/ios (Swift)</td>
+<td>Models / settings / notifications / theme UI</td>
+<td>stub</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/helix_config</td>
+<td>Interactive provider/credential config wizard → YAML/.env</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/config_test</td>
+<td>Config + provider-credential validator</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/i18n</td>
+<td>i18n bundle/translator tooling (library, no main)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/infrastructure</td>
+<td>Container / k8s / registry readiness checks</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/performance_optimization</td>
+<td>pprof profiling + bottleneck analysis + benchmarks</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/security_test</td>
+<td>Security test harness (PoC execution + verification)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/security_fix</td>
+<td>Finding ingestion + policy-driven fix + re-scan validation</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/security_fix_standalone</td>
+<td>Batch parallel security fix + audit-trail reporting</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/security_scan</td>
+<td>AST/pattern code scan + leak detect + SARIF report</td>
+<td>done</td>
+<td>yes</td>
+<td>unknown</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
+</tbody>
+</table>
+<h3 id="honesty-notes-anti-bluff">Honesty notes (anti-bluff)</h3>
+<ul>
+<li><strong><code>cmd/security_scan</code> has ZERO tests</strong> (only
+<code>main.go</code>) — marked <code>Tests=none</code>,
+<code>Overall=gap</code>. Untested scanner = bluff risk per
+CONST-048/CONST-050.</li>
+<li><strong>iOS / Android are scaffolds</strong>: real source (JSON
+parse, list bind, Go mobile-core bridge) but single-screen, hardcoded
+localhost test server, <strong>no Xcode project / no
+Gradle+manifest</strong> → not buildable, not recordable.
+<code>Real-use=no</code>, <code>Overall=gap</code>.</li>
+<li><strong>Aurora OS / Harmony OS are genuine Go/Fyne apps</strong>
+(buildable via <code>make aurora-os</code> /
+<code>make harmony-os</code>, comprehensive unit+integration tests) —
+but integration features need real PostgreSQL/Redis/LLM backends, and
+full HAP/multi-device exercise needs the actual OS environment.</li>
+<li><strong>Web LLM endpoints</strong> (<code>/llm/generate</code>,
+<code>/llm/stream</code>, <code>/specify</code>) have real Ollama-backed
+e2e tests
+(<code>tests/integration/{llm_generate,llm_stream,specify_server}_e2e_test.go</code>,
+build tag <code>integration</code>, honest SKIP-OK when Ollama
+unreachable) → <code>Tests=e2e</code>,
+<code>V&amp;V=yes(docs/qa/web-llm-e2e-20260615/)</code>. The 60+
+CRUD/auth/workflow endpoints are real but tested at the manager/service
+layer, not at the HTTP-transport layer →
+<code>Tests=integ</code>/<code>none</code> honestly.</li>
+<li><strong>No row is <code>confirmed</code></strong> — every
+<code>📹 Video=no</code>; rollups are <code>working-untaped</code> (real
++ tested, no video), <code>partial</code> (real but thin/unverified test
+coverage), or <code>gap</code> (scaffold or untested).</li>
+</ul>
+<p><strong>Feature count: 67 rows</strong> (CLI REPL 14, CLI subcommand
+groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7,
+desktop 6, mobile 8, other cmd tools 11 + security_scan 1).</p>
+</body>
+</html>
