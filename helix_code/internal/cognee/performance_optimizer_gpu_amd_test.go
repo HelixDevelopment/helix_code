@@ -102,6 +102,16 @@ func TestProbeAMDGPU_NoRocmSmi_ReturnsSentinel(t *testing.T) {
 }
 
 func TestProbeAMDGPU_ParsesRocmSmiJSON(t *testing.T) {
+	// HXC-064 (§11.4.50 determinism): this test exercises the PARSER, not the
+	// 2s production timeout. Under heavy parallel `go test ./...` load the fake
+	// rocm-smi subprocess can be signal-killed before completing within the
+	// production 2s window, returning the sentinel and flaking the parse assert.
+	// Raise the (now-var) timeout generously for this parser test; restore after
+	// (parity with TestProbeAMDGPU_HandlesAltKeyName).
+	origTO := rocmSmiQueryTimeout
+	rocmSmiQueryTimeout = 30 * time.Second
+	t.Cleanup(func() { rocmSmiQueryTimeout = origTO })
+
 	// echo (not printf) — printf would interpret '%)' as a format
 	// specifier and abort with "invalid format character".
 	dir := writeFakeRocmSmi(t, `echo '{"card0": {"GPU use (%)": "42"}}'`)
@@ -113,6 +123,13 @@ func TestProbeAMDGPU_ParsesRocmSmiJSON(t *testing.T) {
 }
 
 func TestProbeAMDGPU_HandlesMultiCard(t *testing.T) {
+	// HXC-064 (§11.4.50 determinism): parser test — raise the now-var timeout
+	// so the fake rocm-smi subprocess is not signal-killed under parallel load
+	// before the parse completes; restore after (parity with HandlesAltKeyName).
+	origTO := rocmSmiQueryTimeout
+	rocmSmiQueryTimeout = 30 * time.Second
+	t.Cleanup(func() { rocmSmiQueryTimeout = origTO })
+
 	dir := writeFakeRocmSmi(t, `echo '{"card0": {"GPU use (%)": "20"}, "card1": {"GPU use (%)": "60"}}'`)
 	scrubPathToOnlyAMD(t, dir)
 

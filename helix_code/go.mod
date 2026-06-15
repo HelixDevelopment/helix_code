@@ -43,6 +43,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.5.1
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/rivo/tview v0.42.0
+	github.com/sirupsen/logrus v1.9.4
 	github.com/smacker/go-tree-sitter v0.0.0-20240827094217-dd81d9e9be82
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.10
@@ -171,7 +172,6 @@ require (
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/encoding v0.3.4 // indirect
-	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
