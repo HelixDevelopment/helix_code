@@ -2944,5 +2944,22 @@ MUST fix templating + needs operator decision: missing i18n key echoes
 raw key (loud default) OR falls back to embedded English (polished,
 risks hiding missing translations). Work in git stash; green tree
 restored (build exit 0, 13/13 pass).</p>
+<h2 id="hxc-102-harmony_os-main_nogui.go-2-user-facing-strings-goodbye-error-v-bypass-i18n-const-046-low-severity">HXC-102
+— harmony_os main_nogui.go — 2 user-facing strings (‘Goodbye!’, ‘Error:
+%v’) bypass i18n (CONST-046, low severity)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Routed cmdInteractive Goodbye!/Error: %v
+through cliApp.tr with new bundle keys (error binds {{.Error}}, no
+<no value>). Guard hxc102_interactive_i18n_test.go (nogui): GREEN,
+RED-without-key (raw-key leak exit 1), restored GREEN. Full harmony_os
+pkg ok both tag variants; build exit 0; gofmt clean.
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Discovery sweep: applications/harmony_os/main_nogui.go uses its i18n
+bundle heavily (~95 refs) but lines 876 (‘Goodbye!’) + 882 (‘Error: %v’)
+are user-facing UI text printed via fmt without the translator
+(CONST-046 localization gap). Lines 784/789-793 are developer-facing
+diagnostics (arguably out of scope). Low severity; may be folded into
+the HXC-099 entry-path i18n work.</p>
 </body>
 </html>

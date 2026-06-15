@@ -819,3 +819,13 @@ Discovery sweep (§11.4.118) found the only failing package in a ~270-pkg sweep.
 
 First mechanical sweep (stash@{0}, agent a55802ad) wired a real embedded-English bundle translator as package default across 36 internal/ packages but INTRODUCED 13 regressions vs green HEAD d85f6962: (1) real Go-template bug — internal/project messages render '<no value>' (error-detail param dropped); (2) defeats intentional NoopTranslator-echoes-raw-key anti-bluff guards in 9 pkgs (tools,voice,plantree,repomap,context,hardware,persistence,mcp,template); (3) autocommit+project tests assert real message text now broken. Redo MUST fix templating + needs operator decision: missing i18n key echoes raw key (loud default) OR falls back to embedded English (polished, risks hiding missing translations). Work in git stash; green tree restored (build exit 0, 13/13 pass).
 
+## HXC-102 — harmony_os main_nogui.go — 2 user-facing strings ('Goodbye!', 'Error: %v') bypass i18n (CONST-046, low severity)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** Routed cmdInteractive Goodbye!/Error: %v through cliApp.tr with new bundle keys (error binds {{.Error}}, no <no value>). Guard hxc102_interactive_i18n_test.go (nogui): GREEN, RED-without-key (raw-key leak exit 1), restored GREEN. Full harmony_os pkg ok both tag variants; build exit 0; gofmt clean.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Discovery sweep: applications/harmony_os/main_nogui.go uses its i18n bundle heavily (~95 refs) but lines 876 ('Goodbye!') + 882 ('Error: %v') are user-facing UI text printed via fmt without the translator (CONST-046 localization gap). Lines 784/789-793 are developer-facing diagnostics (arguably out of scope). Low severity; may be folded into the HXC-099 entry-path i18n work.
+

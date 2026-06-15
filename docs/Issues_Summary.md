@@ -47,8 +47,7 @@
 | HXC-034 | Cascade constitution §11.4.102 into owned submodules + implement CM-COVENANT-114-102-PROPAGATION gate |  | Completed (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Completed (→ Fixed.md)) |
 | HXC-036 | Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID keys because boot-time translator wiring was never implemented |  | Fixed (→ Fixed.md) |  | the CONST-046 migration built 74 `SetTranslator` seams + bundles but never wired a real translator at boot (0 `.SetTranslator(` call sites module-wide). Fix:… |
 | HXC-035 | `POST /api/v1/auth/register` returns 400 `internal_auth_failed_create_user` on the live server (blocks all authenticated flows) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE (confirmed via direct psql INSERT → `ERROR: column "display_name" of relation "users" does not exist`): `createSchemaSQL`'s `CREATE TABLE users`… |
-| HXC-102 | harmony_os main_nogui.go — 2 user-facing strings ('Goodbye!', 'Error: %v') bypass i18n (CONST-046, low severity) | Bug | Queued |  | harmony_os main_nogui.go — 2 user-facing strings ('Goodbye!', 'Error: %v') bypass i18n (CONST-046, low severity) |
 
-**Counts**: 42 tracked item-sections in `docs/Issues.md` — **1 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
+**Counts**: 41 tracked item-sections in `docs/Issues.md` — **0 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
 *Last regenerated: 2026-06-15 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
