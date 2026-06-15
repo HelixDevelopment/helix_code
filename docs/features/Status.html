@@ -177,7 +177,7 @@
 <tbody>
 <tr>
 <td>Revision</td>
-<td>3</td>
+<td>4</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -1289,7 +1289,15 @@ testing+code_generation; device-scoped 1080x2424, 10.4s])</td>
 <td>yes</td>
 <td>none</td>
 <td>no</td>
-<td>yes(helixcode-ios-launch-20260615.mp4)</td>
+<td>yes(helixcode-ios-launch-20260615.mp4); themed re-record
+OPERATOR-BLOCKED §11.4.52 — themed HelixTheme.swift (lime/teal) + logo
+present &amp; Swift-compiles + real Go-core wiring, but
+<code>simctl io recordVideo</code> infeasible: CoreSimulatorService
+daemon denied write to /Volumes/T7 (NSCocoaError 513, FACT from
+CoreSimulator.log) for asset-catalog device-set creation. Unblock: grant
+CoreSimulatorService Full-Disk-Access to /Volumes/T7 OR relocate Xcode
+IB device-set to a local APFS volume (host TCC change, out of agent
+scope)</td>
 <td>yes</td>
 <td>native</td>
 <td>confirmed</td>
@@ -1487,9 +1495,23 @@ dark + logo + real connect + real server task list; device-scoped
 1080x2424, 10.4s). All window-scoped per §11.4.154 (terminal pane /
 browser viewport / app window / device frame — never whole-desktop),
 with §11.4.154 fresh-corpus rotation honored. <strong>iOS themed
-re-record is in progress</strong> (heavy-build slot serialized per
-§12.8); its row keeps prior state until the real simulator capture
-lands.</li>
+re-record is OPERATOR-BLOCKED</strong> (§11.4.52, honest SKIP not
+bluff): the themed <code>HelixTheme.swift</code> (lime/teal) + logo
+asset are present, Swift-compile cleanly, and the real Go-core wiring
+(<code>CoreNewMobileCore</code>/<code>createTask</code>) is genuine —
+but a window-scoped simulator video cannot be captured because
+<code>CoreSimulatorService</code> (the sandboxed daemon) is denied write
+access to the external <code>/Volumes/T7</code> volume for
+asset-catalog/IB device-set creation (FACT:
+<code>NSCocoaErrorDomain 513</code> in
+<code>~/Library/Logs/CoreSimulator/CoreSimulator.log</code>). Unblock
+(host TCC change, out of agent scope): grant CoreSimulatorService
+Full-Disk-Access to <code>/Volumes/T7</code>, OR relocate Xcode's
+IB-Support/DerivedData device-set to a local APFS path. No fabricated
+video was produced; the prior
+<code>helixcode-ios-launch-20260615.mp4</code> was NOT rotated (no
+replacement). 5 of 6 clients are real-LLM themed-recorded; the 6th
+awaits this host unblock.</li>
 </ul>
 <p><strong>Feature count: 67 rows</strong> (CLI REPL 14, CLI subcommand
 groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7,
