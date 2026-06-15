@@ -602,3 +602,36 @@ internal/performance/optimizer.go:540-760: applyCPU/Memory/Concurrency/Cache/Net
 
 internal/deployment/production_deployer.go: triggerRollback(1028) sleeps+logs success no real rollback; prepareEnvironment(810)+validateTargetServers(820) sleep+log success; executeBlueGreen/Canary/Rolling/Recreate(962) all just call executeProductionDeploy (no-op differentiation); executeMonitoring(758) ends with success notification contradicting its honest gap-log. §11.4 bluffs. Fix: real work or honest sentinels.
 
+## HXC-084 — challenge scripts use GNU-only grep -P backslash-K — breaks on macOS BSD grep
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** challenges 280c2d2 + helix_agent 8b622c7a: all grep -oP/-P/\K -> portable sed -nE/grep -oE/grep -F (incl. android_save/cognee/runtime_debate/mcps/helixmemory/output_formatting), each proven on sample input + edge cases, bash -n 0
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+29 owned challenge/CI shell scripts use grep -oP / grep -P / \K (GNU/PCRE-only). Stock macOS /usr/bin/grep rejects -P (invalid option) -> empty evidence capture -> corrupted PASS/FAIL gates (false FAIL or silently-masked). §11.4.81. Fix: portable sed -E/awk/perl. Highest: challenges android_save, helix_agent cognee/runtime_debate/mcps.
+
+## HXC-085 — 14 LLM providers HealthCheck hardcodes production URL ignoring injected baseURL
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** helix_agent 8b622c7a (13) + llm_provider 18108f4 (14): HealthCheck derives from injected baseURL (kimi pattern); existing tests were bluffs -> added real TestHealthCheck_HonorsInjectedBaseURL, RED-proven; both trees build 0, suites ok
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+openai/groq/cohere/fireworks/ai21/chutes/nvidia/publicai/replicate/together/cerebras/deepseek/mistral/claude HealthCheck hits a hardcoded *ModelsURL const/literal while Generate uses p.baseURL — config-injection / CONST-051(B), breaks httptest + proxy/Azure endpoints. Duplicated in helix_agent/internal/llm/providers + llm_provider/pkg/providers. Fix: mirror the existing kimi.go derive-from-baseURL fix.
+
+## HXC-086 — SSE broker client-ID UnixNano collision under concurrent connect
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** streaming 3e15904: SSE fallback client-ID atomic counter; RED 134/1000 lost -> GREEN 1000/1000 unique under -race
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+submodules/streaming/pkg/sse/sse.go:140 clientID=fmt.Sprintf('client-%d',UnixNano()) used as b.clients map key, generated per concurrent SSE connect — same-tick collision overwrites/loses a client. Fix: crypto/rand or atomic counter suffix.
+
