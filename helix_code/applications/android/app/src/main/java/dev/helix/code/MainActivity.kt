@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONArray
@@ -20,6 +21,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Opt out of forced edge-to-edge (SDK 35 default) so the status text and
+        // Connect button are inset below the action bar and above the navigation
+        // bar instead of being drawn underneath the system bars.
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         setContentView(R.layout.activity_main)
 
         // Initialize views
@@ -50,11 +55,14 @@ class MainActivity : AppCompatActivity() {
         if (MobileCore.shared.isConnected) {
             MobileCore.shared.disconnect()
         } else {
-            // For demo purposes, connect with test credentials
+            // For demo purposes, connect with test credentials. localhost:8080
+            // is tunneled to the host's running HelixCode server via
+            // `adb reverse tcp:8080 tcp:8080`. A successful login yields a real
+            // JWT used to fetch the live server task list.
             val connected = MobileCore.shared.connect(
                 "http://localhost:8080",
                 "testuser",
-                "testpass"
+                "testpass123"
             )
             if (!connected) {
                 showAlert("Connection Failed", "Could not connect to server")
@@ -86,15 +94,25 @@ class MainActivity : AppCompatActivity() {
         tasks.clear()
 
         try {
-            val jsonArray = JSONArray(tasksJson)
+            // The Go core returns an object: {"tasks":[...], "total":N, "source":"..."}.
+            // Parse the wrapper object then read the "tasks" array. Use optional
+            // getters with fallbacks so both client-created tasks (name/description/
+            // progress) and server tasks (id/type/status) render without crashing.
+            val root = JSONObject(tasksJson)
+            val jsonArray = root.optJSONArray("tasks") ?: JSONArray()
             for (i in 0 until jsonArray.length()) {
                 val taskObj = jsonArray.getJSONObject(i)
+                val name = when {
+                    taskObj.has("name") -> taskObj.optString("name")
+                    taskObj.has("type") -> taskObj.optString("type")
+                    else -> "Task"
+                }
                 val task = Task(
-                    id = taskObj.getString("id"),
-                    name = taskObj.getString("name"),
-                    description = taskObj.getString("description"),
-                    status = taskObj.getString("status"),
-                    progress = taskObj.getInt("progress")
+                    id = taskObj.optString("id"),
+                    name = name,
+                    description = taskObj.optString("description", ""),
+                    status = taskObj.optString("status", "unknown"),
+                    progress = taskObj.optInt("progress", 0)
                 )
                 tasks.add(task)
             }
