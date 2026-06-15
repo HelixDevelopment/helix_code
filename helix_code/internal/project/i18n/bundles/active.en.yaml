@@ -24,28 +24,28 @@ internal_project_path_does_not_exist:
   other: "project path does not exist: {{.Path}}"
 
 internal_project_detect_type_failed:
-  other: "failed to detect project type: {{.Err}}"
+  other: "failed to detect project type"
 
 internal_project_no_active_project:
   other: "no active project found"
 
 internal_project_create_failed:
-  other: "failed to create project in database: {{.Err}}"
+  other: "failed to create project in database"
 
 internal_project_get_failed:
-  other: "failed to get project from database: {{.Err}}"
+  other: "failed to get project from database"
 
 internal_project_list_query_failed:
-  other: "failed to query projects: {{.Err}}"
+  other: "failed to query projects"
 
 internal_project_list_scan_failed:
-  other: "failed to scan project row: {{.Err}}"
+  other: "failed to scan project row"
 
 internal_project_list_iter_failed:
-  other: "error iterating project rows: {{.Err}}"
+  other: "error iterating project rows"
 
 internal_project_update_failed:
-  other: "failed to update project: {{.Err}}"
+  other: "failed to update project"
 
 internal_project_update_metadata_failed:
-  other: "failed to update project metadata: {{.Err}}"
+  other: "failed to update project metadata"
