@@ -370,6 +370,16 @@ type Provider interface {
 	GetModels() []ModelInfo
 	GetCapabilities() []ModelCapability
 	Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error)
+	// GenerateStream streams the completion by sending each LLMResponse chunk on
+	// ch as it is produced. CHANNEL-OWNERSHIP CONTRACT: the provider is the SENDER
+	// and the SOLE closer of ch. The implementation MUST close ch exactly once, on
+	// EVERY return path (success, error, and ctx-cancel) — `defer close(ch)` at
+	// the top of the method is the canonical way to satisfy this. The CONSUMER
+	// (e.g. server.streamLLM) MUST NOT close ch: a double-close panics
+	// (`close of closed channel`) inside the producer goroutine, which gin's
+	// Recovery middleware cannot catch — it crashes the whole process. The
+	// guaranteed close is also what lets the consumer observe the channel-drain
+	// and emit its terminal frame without waiting for the context deadline.
 	GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error
 	IsAvailable(ctx context.Context) bool
 	GetHealth(ctx context.Context) (*ProviderHealth, error)

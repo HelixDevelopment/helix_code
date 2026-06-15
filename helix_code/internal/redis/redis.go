@@ -61,8 +61,16 @@ func (c *Client) Close() error {
 	return nil
 }
 
-// IsEnabled returns whether Redis is enabled
+// IsEnabled returns whether Redis is enabled.
+//
+// Nil-receiver-safe: a nil *Client (e.g. server.New(cfg, db, nil)) reports
+// disabled rather than panicking on the c.config dereference. Every other
+// method on Client already funnels through IsEnabled() before touching
+// c.client, so guarding here makes the whole type robust to a nil receiver.
 func (c *Client) IsEnabled() bool {
+	if c == nil {
+		return false
+	}
 	return c.config != nil && c.config.Enabled
 }
 

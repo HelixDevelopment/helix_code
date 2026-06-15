@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +13,15 @@ import (
 	"dev.helix.code/internal/llm"
 	"github.com/gin-gonic/gin"
 )
+
+// errUnknownProvider is returned by resolveLLMProvider when the request (or
+// HELIX_LLM_PROVIDER) explicitly names a provider that llm.Select cannot
+// resolve. It is distinct from a construction/availability failure: the user
+// supplied an invalid provider name, so the handler answers 400 (client error)
+// rather than silently falling back to the local Ollama default — that silent
+// fallback turned a provider typo into a misleading Ollama 404 (server
+// defect #4). The named provider is wrapped so the error body can echo it.
+var errUnknownProvider = errors.New("unknown provider")
 
 // llm_generate.go — real LLM generation surface over HTTP.
 //
@@ -79,6 +89,14 @@ func (r *llmGenerateRequest) buildLLMRequest(stream bool) (*llm.LLMRequest, stri
 	}, ""
 }
 
+// llmProviderResolver is the indirection the handlers call to obtain a provider
+// for a request. It defaults to the real resolveLLMProvider below. It is a
+// package-level var (not a hardcoded call) ONLY so unit tests can substitute a
+// real-but-deterministic provider to exercise the streaming goroutine's
+// channel-ownership behaviour without a live network/Ollama — production code
+// never reassigns it, so the default real path is always what ships.
+var llmProviderResolver = resolveLLMProvider
+
 // resolveLLMProvider constructs a real llm.Provider for this request.
 //
 // It reuses the exact construction path cmd/cli/main.go uses:
@@ -101,22 +119,43 @@ func resolveLLMProvider(providerName, model string) (llm.Provider, error) {
 		sel.Env = strings.TrimSpace(envLLMProvider())
 	}
 
+	// The name the caller actually supplied (request body field or env), used
+	// for honest error reporting on the unknown-provider path.
+	requested := strings.TrimSpace(sel.Flag)
+	if requested == "" {
+		requested = strings.TrimSpace(sel.Env)
+	}
+
 	ptype, selErr := llm.Select(sel)
-	if selErr == nil {
+	switch {
+	case selErr == nil:
+		// A provider was named and resolved to a known type — construct it.
 		entry := llm.ProviderConfigEntry{Type: ptype, Enabled: true}
 		if strings.TrimSpace(model) != "" {
 			entry.Models = []string{model}
 		}
 		provider, cErr := llm.NewCloudProvider(ptype, entry)
-		if cErr == nil && provider != nil {
-			return provider, nil
-		}
-		// Fall through to the local default on construction failure, exactly
-		// like the cmd/cli subagent path: surface nothing fake, degrade to a
-		// provider that can actually run locally.
 		if cErr != nil {
 			return nil, fmt.Errorf("failed to construct provider %q: %w", ptype, cErr)
 		}
+		if provider != nil {
+			return provider, nil
+		}
+		// Defensive: NewCloudProvider returned (nil, nil) — treat as a real
+		// construction failure rather than silently masking it as Ollama.
+		return nil, fmt.Errorf("provider %q constructed nil without an error", ptype)
+
+	case errors.Is(selErr, llm.ErrNoProviderConfigured):
+		// No provider named anywhere — fall through to the local Ollama default
+		// below (out-of-the-box behaviour for a zero-config server with Ollama).
+
+	default:
+		// A provider WAS explicitly named but llm.Select could not resolve it
+		// (unknown/unsupported provider string). Do NOT silently fall back to
+		// Ollama — that masks the user's typo as an unrelated Ollama 404
+		// (server defect #4). Surface a clear unknown-provider error so the
+		// handler can answer 400.
+		return nil, fmt.Errorf("%w: %q", errUnknownProvider, requested)
 	}
 
 	// Default: local Ollama on the standard port (mirrors NewCLI()).
@@ -153,9 +192,9 @@ func (s *Server) generateLLM(c *gin.Context) {
 		return
 	}
 
-	provider, err := resolveLLMProvider(req.Provider, req.Model)
+	provider, err := llmProviderResolver(req.Provider, req.Model)
 	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"status": "error", "error": err.Error()})
+		c.JSON(providerResolveStatus(err), gin.H{"status": "error", "error": err.Error()})
 		return
 	}
 	defer func() { _ = provider.Close() }()
@@ -209,9 +248,9 @@ func (s *Server) streamLLM(c *gin.Context) {
 		return
 	}
 
-	provider, err := resolveLLMProvider(req.Provider, req.Model)
+	provider, err := llmProviderResolver(req.Provider, req.Model)
 	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"status": "error", "error": err.Error()})
+		c.JSON(providerResolveStatus(err), gin.H{"status": "error", "error": err.Error()})
 		return
 	}
 	defer func() { _ = provider.Close() }()
@@ -223,17 +262,19 @@ func (s *Server) streamLLM(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
 	defer cancel()
 
+	// CHANNEL-OWNERSHIP CONTRACT (see llm.Provider.GenerateStream interface doc):
+	// the PROVIDER is the SENDER and the SOLE closer of chunkChan — it closes the
+	// channel on every return path (success, error, ctx-cancel). This consumer
+	// MUST NOT close chunkChan. Closing it here too would be a double-close, which
+	// panics ("close of closed channel") inside this producer goroutine; that
+	// panic is NOT recoverable by gin.Recovery and crashes the whole server
+	// process — a single client request could remotely kill the server
+	// (server defect #5; CONST-035 / Article XI §11.9). The provider's guaranteed
+	// close is what lets streamProviderToSSE observe the drain, emit the terminal
+	// `data: [DONE]` frame, and return without waiting for the 120s ctx deadline.
 	chunkChan := make(chan llm.LLMResponse, 100)
 	errCh := make(chan error, 1)
 	go func() {
-		// Close chunkChan once the provider stops producing so the consumer
-		// (streamProviderToSSE) observes the channel-drain, emits the terminal
-		// `data: [DONE]` frame, and returns. Without this close the consumer
-		// blocks on <-chunkChan after the final real chunk and the client never
-		// sees [DONE] until the 120s ctx deadline — a real hang the streaming
-		// e2e (tests/integration/llm_stream_e2e_test.go) exposes (CONST-035 /
-		// Article XI §11.9).
-		defer close(chunkChan)
 		errCh <- provider.GenerateStream(ctx, llmReq, chunkChan)
 	}()
 
@@ -287,6 +328,17 @@ func streamProviderToSSE(c *gin.Context, chunkChan <-chan llm.LLMResponse, errCh
 // the SSE framing (each `data:` line is a single logical field).
 func sseEscape(s string) string {
 	return strings.ReplaceAll(s, "\n", "\\n")
+}
+
+// providerResolveStatus maps a resolveLLMProvider error to the right HTTP
+// status. An explicitly-named-but-unknown provider is a client error (400 —
+// the caller typed an invalid provider name); any other resolution failure
+// (construction/credentials/endpoint) is a 503 the operator can act on.
+func providerResolveStatus(err error) int {
+	if errors.Is(err, errUnknownProvider) {
+		return http.StatusBadRequest
+	}
+	return http.StatusServiceUnavailable
 }
 
 // envLLMProvider reads HELIX_LLM_PROVIDER. Factored out so the resolution path

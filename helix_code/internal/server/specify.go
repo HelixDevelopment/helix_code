@@ -78,9 +78,9 @@ func (s *Server) specifyHandler(c *gin.Context) {
 
 	// Resolve a REAL provider via the shared resolveLLMProvider path. Closed by
 	// this handler once the phase completes.
-	provider, err := resolveLLMProvider(req.Provider, req.Model)
+	provider, err := llmProviderResolver(req.Provider, req.Model)
 	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
+		c.JSON(providerResolveStatus(err), gin.H{
 			"status": "error",
 			"error":  err.Error(),
 		})

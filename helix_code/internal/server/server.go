@@ -370,8 +370,12 @@ func (s *Server) healthCheck(c *gin.Context) {
 		}
 	}
 
-	// Check Redis connection if enabled
-	if s.redis.IsEnabled() {
+	// Check Redis connection if enabled.
+	// Guard s.redis != nil (mirrors the s.db != nil guard above): the server
+	// may be constructed with a nil *redis.Client (server.New(cfg, db, nil)),
+	// in which case /health must report healthy rather than nil-ptr panic.
+	// IsEnabled() is itself nil-receiver-safe; this guard is defense-in-depth.
+	if s.redis != nil && s.redis.IsEnabled() {
 		if _, err := s.redis.Get(c.Request.Context(), "health_check"); err != nil && err.Error() != "redis: nil" {
 			// Try to ping Redis
 			if s.redis.GetClient().Ping(c.Request.Context()).Err() != nil {

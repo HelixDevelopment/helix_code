@@ -233,9 +233,13 @@ func TestLlamaCPPProvider_GenerateStream(t *testing.T) {
 		ctx := context.Background()
 
 		go func() {
+			// Channel-ownership contract (Provider.GenerateStream): the provider
+			// is the SOLE closer of ch. The test must NOT close ch here — doing so
+			// would be a double-close panic now that LlamaCPPProvider correctly
+			// closes the channel itself (server defect #5 fix). The range loop
+			// below terminates on the provider's own close.
 			err := provider.GenerateStream(ctx, request, ch)
 			assert.NoError(t, err)
-			close(ch)
 		}()
 
 		var chunks []string

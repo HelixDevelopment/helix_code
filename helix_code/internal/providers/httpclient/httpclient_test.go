@@ -90,7 +90,13 @@ type connCountingServer struct {
 
 func newConnCountingServer() *connCountingServer {
 	ccs := &connCountingServer{seen: make(map[string]struct{})}
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// Use NewUnstartedServer + Start so Config.ConnState is installed BEFORE the
+	// accept loop begins. With httptest.NewServer the accept loop is already
+	// running when we mutate srv.Config.ConnState, and net/http reads that field
+	// from the serving goroutine concurrently with the test's write — a DATA
+	// RACE flagged 100% under `go test -race`. Setting it pre-Start removes the
+	// concurrent access while preserving the conn-reuse counting intent.
+	srv := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ccs.mu.Lock()
 		ccs.requests++
 		ccs.mu.Unlock()
@@ -103,6 +109,7 @@ func newConnCountingServer() *connCountingServer {
 			ccs.mu.Unlock()
 		}
 	}
+	srv.Start()
 	ccs.Server = srv
 	return ccs
 }

@@ -244,6 +244,12 @@ func (p *OpenAICompatibleProvider) Generate(ctx context.Context, request *LLMReq
 
 // GenerateStream generates a streaming response
 func (p *OpenAICompatibleProvider) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
+	// Channel-ownership contract (see Provider.GenerateStream interface doc):
+	// the provider (the SENDER) is the SOLE closer of ch, and MUST close it on
+	// every return path — success, error, and ctx-cancel. The consumer never
+	// closes ch; a double-close would panic in a spawned goroutine and crash the
+	// process (server defect #5). defer guarantees close on every return path.
+	defer close(ch)
 	if !p.isRunning {
 		return ErrProviderUnavailable
 	}

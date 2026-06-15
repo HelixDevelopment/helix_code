@@ -2151,8 +2151,26 @@ func (c *CLI) handleNotification(ctx context.Context, message, notifyType, prior
 	return nil
 }
 
+// exitCodeError carries a child process's real exit code up to main() so the
+// CLI process can surface that exact code as its own exit status.
+//
+// ANTI-BLUFF (BLUFF-003 FIX): a `--command` invocation is a transparent proxy
+// for the child process. If `helixcode --command 'exit 42'` exited 1 (because
+// main() blanket-mapped every Run() error to log.Fatalf → exit 1), the child's
+// real exit code would be silently lost — breaking shell scripts and CI gates
+// that branch on the exit status. The real code MUST propagate to the process.
+type exitCodeError struct {
+	code int
+	err  error
+}
+
+func (e *exitCodeError) Error() string { return e.err.Error() }
+func (e *exitCodeError) Unwrap() error { return e.err }
+func (e *exitCodeError) ExitCode() int { return e.code }
+
 // handleCommand executes a command locally via os/exec.
-// ANTI-BLUFF (BLUFF-003 FIX): This executes REAL commands, not simulations.
+// ANTI-BLUFF (BLUFF-003 FIX): This executes REAL commands, not simulations,
+// and surfaces the child process's REAL exit code as the CLI's exit code.
 func (c *CLI) handleCommand(ctx context.Context, command string) error {
 	fmt.Printf("\n=== Executing Command ===\n")
 	fmt.Printf("Command: %s\n\n", command)
@@ -2162,6 +2180,20 @@ func (c *CLI) handleCommand(ctx context.Context, command string) error {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
+		// If the child ran to completion with a non-zero status, surface that
+		// exact code (via *exec.ExitError → ProcessState.ExitCode()). For any
+		// other failure (sh not found, killed by signal, context cancelled),
+		// fall back to a generic non-zero exit so genuine errors stay non-zero.
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			code := exitErr.ProcessState.ExitCode()
+			if code <= 0 {
+				// Signalled/terminated abnormally — ExitCode() returns -1.
+				// Map to a generic non-zero so the proxy never reports success.
+				code = 1
+			}
+			return &exitCodeError{code: code, err: fmt.Errorf("command failed: %w", err)}
+		}
 		return fmt.Errorf("command failed: %w", err)
 	}
 
@@ -3065,6 +3097,13 @@ func main() {
 	cli := NewCLI()
 
 	if err := cli.Run(); err != nil {
+		// BLUFF-003: when a `--command` child exited with a real non-zero
+		// status, propagate that exact code instead of the blanket exit 1.
+		var ece *exitCodeError
+		if errors.As(err, &ece) {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(ece.ExitCode())
+		}
 		log.Fatalf("Error: %v", err)
 	}
 }
