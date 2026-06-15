@@ -2,6 +2,7 @@ package performance
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -423,11 +424,92 @@ func TestApplyOptimizations(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.NotNil(t, result)
-			assert.True(t, result.Success)
 			assert.NotZero(t, result.BeforeValue)
 			// GC metrics can be 0, so just check >= 0
 			assert.GreaterOrEqual(t, result.AfterValue, 0.0)
 			assert.False(t, result.Timestamp.IsZero())
+
+			// §11.4.120 reconciliation: this assertion previously read
+			// `assert.True(t, result.Success)` for EVERY method — codifying the
+			// §11.4 / CONST-035 bluff that 8 do-nothing methods "succeeded". Honest
+			// behavior: applyGCOptimization performs a real runtime.GOMAXPROCS call
+			// and reports Success:true; the other 8 perform no real tuning and MUST
+			// report Success:false with the ErrOptimizationNotWired sentinel.
+			if tt.optType == GCOpt {
+				assert.True(t, result.Success, "GC optimization does real GOMAXPROCS tuning")
+				assert.Empty(t, result.ErrorMessage)
+			} else {
+				assert.False(t, result.Success, "%s optimization is not wired — must not fabricate success", tt.optType)
+				assert.Equal(t, ErrOptimizationNotWired.Error(), result.ErrorMessage)
+			}
+		})
+	}
+}
+
+// TestUnwiredOptimizationsAreHonest is the §11.4.115 RED-polarity regression guard
+// for HXC-082. With RED_MODE=1 (set in the environment) it REPRODUCES the original
+// bluff on the pre-fix artifact: it asserts the 8 do-nothing apply* methods returned
+// Success:true with NO real work — proving the defect was genuinely present. With
+// RED_MODE unset/0 (the standing GREEN guard, the default) it asserts the honest
+// post-fix behavior: every unwired method returns Success:false + the
+// ErrOptimizationNotWired sentinel, and only the real GC method reports success.
+//
+//	RED reproduction on the pre-fix artifact:
+//	  RED_MODE=1 go test ./internal/performance/ -run TestUnwiredOptimizationsAreHonest
+func TestUnwiredOptimizationsAreHonest(t *testing.T) {
+	config := PerformanceConfig{
+		CPUOptimization:         true,
+		MemoryOptimization:      true,
+		GarbageCollection:       true,
+		ConcurrencyOptimization: true,
+		CacheOptimization:       true,
+		NetworkOptimization:     true,
+		DatabaseOptimization:    true,
+		WorkerOptimization:      true,
+		LLMOptimization:         true,
+	}
+	po, err := NewPerformanceOptimizer(config)
+	require.NoError(t, err)
+	ctx := context.Background()
+
+	// The 8 fabricating optimization types (GC excluded — it does real work).
+	unwired := []struct {
+		name    string
+		optType OptType
+		applyFn func(context.Context, *Optimization, float64) (*OptResult, error)
+	}{
+		{"CPU", CPUOpt, po.applyCPUOptimization},
+		{"Memory", MemoryOpt, po.applyMemoryOptimization},
+		{"Concurrency", ConcurrencyOpt, po.applyConcurrencyOptimization},
+		{"Cache", CacheOpt, po.applyCacheOptimization},
+		{"Network", NetworkOpt, po.applyNetworkOptimization},
+		{"Database", DatabaseOpt, po.applyDatabaseOptimization},
+		{"Worker", WorkerOpt, po.applyWorkerOptimization},
+		{"LLM", LLMOpt, po.applyLLMOptimization},
+	}
+
+	redMode := os.Getenv("RED_MODE") == "1"
+
+	for _, u := range unwired {
+		t.Run(u.name, func(t *testing.T) {
+			opt := Optimization{Name: "test-" + string(u.optType), Type: u.optType, Enabled: true}
+			result, err := u.applyFn(ctx, &opt, 100.0)
+			require.NoError(t, err)
+			require.NotNil(t, result)
+
+			if redMode {
+				// RED: reproduce the bluff on the pre-fix artifact — the unwired
+				// method fabricated Success:true. On the FIXED artifact this FAILs,
+				// which is the proof the fix landed.
+				assert.True(t, result.Success,
+					"RED_MODE: pre-fix artifact fabricated Success:true for unwired %s optimization", u.optType)
+			} else {
+				// GREEN guard (default): the unwired method is honest.
+				assert.False(t, result.Success,
+					"%s optimization performs no real tuning and MUST NOT report success", u.optType)
+				assert.Equal(t, ErrOptimizationNotWired.Error(), result.ErrorMessage,
+					"%s optimization must surface the not-wired sentinel", u.optType)
+			}
 		})
 	}
 }
@@ -449,7 +531,13 @@ func TestStartProductionOptimization(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		assert.Greater(t, result.TotalApplied, 0)
-		assert.Greater(t, result.Successful, 0)
+		// §11.4.120 reconciliation: this config enables only CPU + Memory, both of
+		// which are unwired (no real tuning). Honest behavior is zero successes and
+		// every applied optimization counted as failed — the previous
+		// `assert.Greater(t, result.Successful, 0)` codified the fabricated-success
+		// bluff. All applied items are unwired, so Successful==0 and Failed==Applied.
+		assert.Equal(t, 0, result.Successful, "only unwired optimizations enabled — none may report success")
+		assert.Equal(t, result.TotalApplied, result.Failed, "every unwired optimization must be counted as failed")
 		assert.NotNil(t, result.Baseline)
 		assert.NotNil(t, result.PostOptimization)
 		assert.NotNil(t, result.OverallImprovement)
@@ -499,9 +587,14 @@ func TestStartProductionOptimization(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		assert.Equal(t, 18, result.TotalApplied) // 9 types * 2 optimizations each
-		assert.Greater(t, result.Successful, 0)
+		// §11.4.120 reconciliation: of the 9 optimization types, only GC (2
+		// optimizations) performs real tuning (runtime.GOMAXPROCS) and reports
+		// success. The other 8 types (16 optimizations) are unwired and report
+		// failure. The previous loose `assert.Greater(t, result.Successful, 0)`
+		// passed against the fabricated-success bluff where all 18 "succeeded".
+		assert.Equal(t, 2, result.Successful, "only the 2 real GC optimizations may succeed")
+		assert.Equal(t, 16, result.Failed, "the 16 unwired optimizations must be counted as failed")
 		assert.NotNil(t, result.OverallImprovement)
-		assert.NotZero(t, result.OverallImprovement.OverallScore)
 	})
 }
 

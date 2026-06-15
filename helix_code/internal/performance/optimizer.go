@@ -3,6 +3,7 @@ package performance
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +12,17 @@ import (
 	"sync/atomic"
 	"time"
 )
+
+// ErrOptimizationNotWired is the honest sentinel returned (via OptResult.ErrorMessage)
+// by every apply*Optimization method that performs NO real system tuning yet. These
+// methods previously slept 200ms doing nothing and returned Success:true with a
+// fabricated MetricsChange — the canonical §11.4 / CONST-035 simulate-success bluff
+// (they LIED to the operator that tuning succeeded). Returning Success:false with this
+// sentinel is the honest, zero-risk anti-bluff behavior: no real CPU/memory/pool/GC
+// system tuning is attempted overnight (those can destabilize a host), and the operator
+// is told plainly that the optimization is not yet implemented. applyGCOptimization is
+// EXEMPT — it performs a real runtime.GOMAXPROCS call and honestly reports Success:true.
+var ErrOptimizationNotWired = errors.New("performance: optimization is not yet implemented (no real tuning performed)")
 
 // PerformanceOptimizer provides comprehensive production performance optimization
 type PerformanceOptimizer struct {
@@ -536,53 +548,41 @@ func (po *PerformanceOptimizer) applyOptimization(ctx context.Context, opt *Opti
 	}
 }
 
-// Implementation for each optimization type
-func (po *PerformanceOptimizer) applyCPUOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
-	log.Printf("      🔧 Applying CPU optimization: %s", opt.Name)
-
-	// Simulate CPU optimization
-	time.Sleep(200 * time.Millisecond)
-
-	// Get post-optimization metric
-	afterValue, err := po.getOptimizationMetric(opt.Type)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get post-optimization metric: %w", err)
-	}
-
-	improvement := calculateImprovement(beforeValue, afterValue)
-
+// notWiredResult builds the honest OptResult for an apply* method that performs no
+// real system tuning yet. It returns Success:false and embeds ErrOptimizationNotWired
+// in ErrorMessage so the caller (StartProductionOptimization) records the result and
+// counts it as failed, while telling the operator plainly the optimization is unwired.
+// The error is returned as nil (not a Go error) so the result is still stored by the
+// caller's success/failure accounting path rather than discarded on an early continue.
+func notWiredResult(beforeValue float64, kind string) *OptResult {
 	return &OptResult{
 		Timestamp:     time.Now(),
-		Success:       true,
-		Improvement:   improvement,
+		Success:       false,
+		Improvement:   0,
 		BeforeValue:   beforeValue,
-		AfterValue:    afterValue,
-		MetricsChange: "CPU utilization optimized",
-	}, nil
+		AfterValue:    beforeValue,
+		MetricsChange: kind + " optimization not wired (no real tuning performed)",
+		ErrorMessage:  ErrOptimizationNotWired.Error(),
+	}
+}
+
+// Implementation for each optimization type.
+//
+// NOTE (§11.4 / CONST-035 anti-bluff): the CPU/Memory/Concurrency/Cache/Network/
+// Database/Worker/LLM methods below performed NO real tuning — they slept 200ms and
+// returned Success:true with a fabricated MetricsChange, lying that the tuning
+// succeeded. They now return the honest not-wired sentinel result (Success:false).
+// Implementing real, side-effect-bearing tuning (goroutine pools, GC knobs, connection
+// pools) is deferred deliberately; an honest "not wired" is preferable to a fabricated
+// success. applyGCOptimization is the sole genuine method (real runtime.GOMAXPROCS).
+func (po *PerformanceOptimizer) applyCPUOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
+	log.Printf("      ⚠️  CPU optimization not wired (no real tuning): %s", opt.Name)
+	return notWiredResult(beforeValue, "CPU"), nil
 }
 
 func (po *PerformanceOptimizer) applyMemoryOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
-	log.Printf("      🔧 Applying Memory optimization: %s", opt.Name)
-
-	// Simulate memory optimization
-	time.Sleep(200 * time.Millisecond)
-
-	// Get post-optimization metric
-	afterValue, err := po.getOptimizationMetric(opt.Type)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get post-optimization metric: %w", err)
-	}
-
-	improvement := calculateImprovement(beforeValue, afterValue) * -1 // Memory improvement is negative
-
-	return &OptResult{
-		Timestamp:     time.Now(),
-		Success:       true,
-		Improvement:   improvement,
-		BeforeValue:   beforeValue,
-		AfterValue:    afterValue,
-		MetricsChange: "Memory usage optimized",
-	}, nil
+	log.Printf("      ⚠️  Memory optimization not wired (no real tuning): %s", opt.Name)
+	return notWiredResult(beforeValue, "Memory"), nil
 }
 
 func (po *PerformanceOptimizer) applyGCOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
@@ -613,147 +613,33 @@ func (po *PerformanceOptimizer) applyGCOptimization(ctx context.Context, opt *Op
 }
 
 func (po *PerformanceOptimizer) applyConcurrencyOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
-	log.Printf("      🔧 Applying Concurrency optimization: %s", opt.Name)
-
-	// Simulate concurrency optimization
-	time.Sleep(200 * time.Millisecond)
-
-	// Get post-optimization metric
-	afterValue, err := po.getOptimizationMetric(opt.Type)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get post-optimization metric: %w", err)
-	}
-
-	improvement := calculateImprovement(beforeValue, afterValue)
-
-	return &OptResult{
-		Timestamp:     time.Now(),
-		Success:       true,
-		Improvement:   improvement,
-		BeforeValue:   beforeValue,
-		AfterValue:    afterValue,
-		MetricsChange: "Concurrency optimized",
-	}, nil
+	log.Printf("      ⚠️  Concurrency optimization not wired (no real tuning): %s", opt.Name)
+	return notWiredResult(beforeValue, "Concurrency"), nil
 }
 
 func (po *PerformanceOptimizer) applyCacheOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
-	log.Printf("      🔧 Applying Cache optimization: %s", opt.Name)
-
-	// Simulate cache optimization
-	time.Sleep(200 * time.Millisecond)
-
-	// Get post-optimization metric
-	afterValue, err := po.getOptimizationMetric(opt.Type)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get post-optimization metric: %w", err)
-	}
-
-	improvement := calculateImprovement(beforeValue, afterValue)
-
-	return &OptResult{
-		Timestamp:     time.Now(),
-		Success:       true,
-		Improvement:   improvement,
-		BeforeValue:   beforeValue,
-		AfterValue:    afterValue,
-		MetricsChange: "Cache performance optimized",
-	}, nil
+	log.Printf("      ⚠️  Cache optimization not wired (no real tuning): %s", opt.Name)
+	return notWiredResult(beforeValue, "Cache"), nil
 }
 
 func (po *PerformanceOptimizer) applyNetworkOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
-	log.Printf("      🔧 Applying Network optimization: %s", opt.Name)
-
-	// Simulate network optimization
-	time.Sleep(200 * time.Millisecond)
-
-	// Get post-optimization metric
-	afterValue, err := po.getOptimizationMetric(opt.Type)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get post-optimization metric: %w", err)
-	}
-
-	improvement := calculateImprovement(beforeValue, afterValue) * -1 // Network improvement is negative
-
-	return &OptResult{
-		Timestamp:     time.Now(),
-		Success:       true,
-		Improvement:   improvement,
-		BeforeValue:   beforeValue,
-		AfterValue:    afterValue,
-		MetricsChange: "Network performance optimized",
-	}, nil
+	log.Printf("      ⚠️  Network optimization not wired (no real tuning): %s", opt.Name)
+	return notWiredResult(beforeValue, "Network"), nil
 }
 
 func (po *PerformanceOptimizer) applyDatabaseOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
-	log.Printf("      🔧 Applying Database optimization: %s", opt.Name)
-
-	// Simulate database optimization
-	time.Sleep(200 * time.Millisecond)
-
-	// Get post-optimization metric
-	afterValue, err := po.getOptimizationMetric(opt.Type)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get post-optimization metric: %w", err)
-	}
-
-	improvement := calculateImprovement(beforeValue, afterValue) * -1 // Database improvement is negative
-
-	return &OptResult{
-		Timestamp:     time.Now(),
-		Success:       true,
-		Improvement:   improvement,
-		BeforeValue:   beforeValue,
-		AfterValue:    afterValue,
-		MetricsChange: "Database performance optimized",
-	}, nil
+	log.Printf("      ⚠️  Database optimization not wired (no real tuning): %s", opt.Name)
+	return notWiredResult(beforeValue, "Database"), nil
 }
 
 func (po *PerformanceOptimizer) applyWorkerOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
-	log.Printf("      🔧 Applying Worker optimization: %s", opt.Name)
-
-	// Simulate worker optimization
-	time.Sleep(200 * time.Millisecond)
-
-	// Get post-optimization metric
-	afterValue, err := po.getOptimizationMetric(opt.Type)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get post-optimization metric: %w", err)
-	}
-
-	improvement := calculateImprovement(beforeValue, afterValue)
-
-	return &OptResult{
-		Timestamp:     time.Now(),
-		Success:       true,
-		Improvement:   improvement,
-		BeforeValue:   beforeValue,
-		AfterValue:    afterValue,
-		MetricsChange: "Worker performance optimized",
-	}, nil
+	log.Printf("      ⚠️  Worker optimization not wired (no real tuning): %s", opt.Name)
+	return notWiredResult(beforeValue, "Worker"), nil
 }
 
 func (po *PerformanceOptimizer) applyLLMOptimization(ctx context.Context, opt *Optimization, beforeValue float64) (*OptResult, error) {
-	log.Printf("      🔧 Applying LLM optimization: %s", opt.Name)
-
-	// Simulate LLM optimization
-	time.Sleep(200 * time.Millisecond)
-
-	// Get post-optimization metric
-	afterValue, err := po.getOptimizationMetric(opt.Type)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get post-optimization metric: %w", err)
-	}
-
-	improvement := calculateImprovement(beforeValue, afterValue) * -1 // LLM improvement is negative
-
-	return &OptResult{
-		Timestamp:     time.Now(),
-		Success:       true,
-		Improvement:   improvement,
-		BeforeValue:   beforeValue,
-		AfterValue:    afterValue,
-		MetricsChange: "LLM performance optimized",
-	}, nil
+	log.Printf("      ⚠️  LLM optimization not wired (no real tuning): %s", opt.Name)
+	return notWiredResult(beforeValue, "LLM"), nil
 }
 
 // Helper functions
