@@ -849,3 +849,23 @@ streamLLM goroutine (internal/server/llm_generate.go) called provider.GenerateSt
 
 The web POST /llm/generate + /llm/stream endpoints + minimal web frontend are httptest-handler-verified only; NO full runtime e2e (no live client->server->provider round-trip captured) per §11.4.108 layer-3/4. Deliver a real automated e2e (boot server, real HTTP/chromedp client hits the endpoints, REAL provider responds, capture the round-trip evidence). SKIP-OK per §11.4.3 when no real provider reachable (CONST-050(A) real-infra mandate) — never a fake PASS.
 
+## HXC-105 — Runtime e2e for server POST /api/v1/specify — boot server -> real spec output via live provider (speckit HTTP-endpoint gap)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** tests/integration/specify_server_e2e_test.go boots the real server + POSTs /api/v1/specify against live ollama qwen2.5:3b: HTTP 200 status:success provider:ollama qualityScore:0.9808, real 3-round 2-agent debate, provider_calls=6 total_tokens=806; output non-empty + NOT the 'awaiting provider wiring' stub. PASS 75.93s, vet clean, build exit 0. Evidence docs/qa/web-llm-e2e-20260615/.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+specify_e2e_test.go + debate_e2e_test.go exercise the speckit path provider-direct (pillar.ExecutePhase / responder.Generate); NO e2e boots the real HTTP server and POSTs to /api/v1/specify (server specifyHandler). Add one mirroring llm_generate_e2e_test.go: boot server.New, POST a real request, assert a genuine 200 + non-fabricated phase output from live ollama; honest 502/SKIP otherwise.
+
+## HXC-106 — helix_agent durable memory: process-lifetime in-memory fallback is NOT disk-durable — recall lost on restart (CONTINUATION honest gap)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** Investigated (§11.4.102): disk-durable DiskStore (sqlite, survives close+reopen) was ALREADY implemented + wired as preferred fallback (commits ac3ad237/a91faad6) via debateMemoryFallbackPath() (os.UserCacheDir, 'helixagent'-namespaced, CONST-051-decoupled). CONTINUATION 'in-memory only' gap was stale. Closed the test-coverage gap: new internal/services/debate_memory_fallback_test.go proves resolver returns writable durable path + persist->Close(restart)->reopen->RECALL. ./internal/memory + ./internal/services pass; submodule HEAD c5bdcfad pushed to upstreams.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+helix_agent memory persists by default with a local fallback, but the fallback is process-lifetime in-memory only: recall survives within a process but is LOST on restart unless a durable backend is configured. Investigate the fallback in the helix_agent submodule; make it disk-durable (e.g. local file/sqlite-backed store) so recall survives restart out-of-the-box, OR document precisely why not + the required backend. Submodule work: own commit + push discipline.
+

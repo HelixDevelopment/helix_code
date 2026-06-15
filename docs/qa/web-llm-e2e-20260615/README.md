@@ -18,6 +18,7 @@ paths, driven end-to-end against a **live Ollama** provider (`qwen2.5:3b` at
 - [Path 1 — POST /api/v1/llm/generate (HTTP)](#path-1--post-apiv1llmgenerate-http)
 - [Path 2 — POST /api/v1/llm/stream (SSE)](#path-2--post-apiv1llmstream-sse)
 - [Path 3 — browser → server → provider → browser](#path-3--browser--server--provider--browser)
+- [Path 4 — POST /api/v1/specify (speckit debate)](#path-4--post-apiv1specify-speckit-debate)
 - [Production hang found + fixed](#production-hang-found--fixed)
 - [Evidence files](#evidence-files)
 
@@ -59,6 +60,21 @@ server-served frontend, types a prompt into the real `textarea#prompt`, triggers
 - Rendered `#output` DOM text: `"4"` (the real model answer, read from the browser).
 - Rendered `#meta` DOM text: `provider=ollama  model=qwen2.5:3b  tokens=44  finish=stop`.
 - Screenshot captured during the run (chromedp `CaptureScreenshot`).
+
+## Path 4 — POST /api/v1/specify (speckit debate)
+
+`TestSpecifyServerE2E` (HXC-105) — real POST → server `specifyHandler` → a 2-agent
+speckit debate driven by the live provider. The speckit path was previously proven
+only provider-direct (`pillar.ExecutePhase`); this proves it through the booted
+HTTP server. **PASS** (75.9s).
+
+- `HTTP 200, status:success, provider:ollama, model:qwen2.5:3b, qualityScore:0.9808`.
+- Real 3-round, 2-agent debate transcript (FOR/AGAINST/SYNTHESIS → CONCLUSION);
+  metrics `provider_calls=6 total_tokens=806` prove 6 genuine `provider.Generate`
+  round-trips.
+- Anti-bluff: non-empty `output`, NOT the synthesized `"awaiting provider wiring"`
+  stub, `provider == "ollama"`. Honest 502/503 (no fabricated output) when the
+  provider is down.
 
 ## Production hang found + fixed
 
