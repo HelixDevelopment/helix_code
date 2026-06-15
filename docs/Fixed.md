@@ -712,3 +712,14 @@ internal/checkpoint Manager (git-plumbing + file-copy backends) + /checkpoint cr
 
 helixcli --prompt/--stream + /debate + /specify hit 'API request failed: API returned status 404' against a working local ollama (qwen2.5:3b on :11434). The web POST /llm/generate + integration tests work with the same NewOllamaProvider — so the CLI's default-local-provider path uses a wrong endpoint/model-name (§11.4.108 different-path gap). AI features are broken for the end user via the binary. Found while recording feature videos.
 
+## HXC-096 — desktop nogui prints raw i18n keys + %!(EXTRA) format mismatch in status/help
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** cmd/cli/main.go: known-provider-prefix guard on model parsing; live qwen2.5:3b -> real answer '4', zero 404; build/test 0
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+applications/desktop/main_nogui.go status/help output prints raw message keys (desktop_cli_status_header, desktop_cli_help_body) + a Printf arg-count mismatch (%!(EXTRA int=0...)) in status. Same i18n-resolution class as HXC-079/081. CLI binary unaffected. Found while assessing desktop for video.
+

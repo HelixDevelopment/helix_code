@@ -606,16 +606,6 @@ panoptic internal/enterprise/{audit,users}.json are version-tracked but overwrit
 
 gomobile bind fails because go list -m -json all errors: ~22 digital.vasic.{cache,database,eventbus,...,vectordb} module paths are required with NO replace + NO remote ('no such host'), and github.com/HelixDevelopment/helix_agent/Toolkit (private, separate from the replaced dev.helix.agent) needs interactive git creds. go build ./... works (imported subset only); full-graph tooling (gomobile, go list -m all) is blocked. Fix (repo-side, careful — editing go.mod risks the build): add replace directives for the phantom paths OR prune them, make Toolkit resolvable (replace/GOPRIVATE+SSH), persist x/mobile as a tool directive. Toolchain+NDK+Xcode all present; gobind codegen already works -> artifact achievable once graph resolves.
 
-## HXC-096 — desktop nogui prints raw i18n keys + %!(EXTRA) format mismatch in status/help
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-applications/desktop/main_nogui.go status/help output prints raw message keys (desktop_cli_status_header, desktop_cli_help_body) + a Printf arg-count mismatch (%!(EXTRA int=0...)) in status. Same i18n-resolution class as HXC-079/081. CLI binary unaffected. Found while assessing desktop for video.
-
 ## HXC-097 — SYSTEMIC: standalone binaries + internal/config + internal/database never wire i18n Translator -> raw keys at runtime
 
 **Status:** Queued
