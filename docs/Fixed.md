@@ -635,3 +635,36 @@ openai/groq/cohere/fireworks/ai21/chutes/nvidia/publicai/replicate/together/cere
 
 submodules/streaming/pkg/sse/sse.go:140 clientID=fmt.Sprintf('client-%d',UnixNano()) used as b.clients map key, generated per concurrent SSE connect — same-tick collision overwrites/loses a client. Fix: crypto/rand or atomic counter suffix.
 
+## HXC-087 — skill_registry randomString UnixNano same-tick produces identical chars and colliding IDs
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** skill_registry 5e5dc75: crypto/rand; tests pass -count=5
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+skill_registry/types.go:173 randomString used charset[UnixNano%len] in a tight loop -> all-identical chars + colliding execution IDs. Fixed with crypto/rand. Proven class.
+
+## HXC-088 — llm_orchestrator opencode cancel path hangs 30s — cmd.WaitDelay unset
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** llm_orchestrator c791f02: cmd.WaitDelay=2s; ContextCancel ok -count=3, pkg/agent ok
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+llm_orchestrator pkg/agent/opencode_agent.go runCapture set cmd.Cancel but WaitDelay==0 -> on ctx-cancel Wait() blocks on pipe drainage when a grandchild holds stdout (30s hang vs 5s test). Fixed cmd.WaitDelay=2s.
+
+## HXC-089 — panoptic web Element infinite-retry hang plus recorder zero-frames
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** panoptic fcc6322: bounded Element timeout + real initial Screenshot frame; platforms PASS x3, full suite green
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+panoptic internal/platforms: web.go Fill/Click/Submit page.Element on unbounded ctx -> missing selector retries forever (9m hang); screencast.go relied only on async CDP events -> 0 frames on immediate start/stop. Fixed: bounded page.Timeout + synchronous initial Screenshot frame.
+
