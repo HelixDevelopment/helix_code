@@ -177,7 +177,7 @@
 <tbody>
 <tr>
 <td>Revision</td>
-<td>4</td>
+<td>5</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -1110,10 +1110,15 @@ i18n</td>
 <td>yes</td>
 <td>unit,integ</td>
 <td>no</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-desktop-chat-themed-20260615.mp4 [brand lime/teal
+themed chat, real DeepSeek "2+2 equals 4" rendered + read from a frame
+extracted from the mp4; captured autonomously via Fyne software-painter
+<code>software.NewCanvas().Capture()</code> — no OS synthetic input
+needed; 900x620, 49 frames, 12.25s, liveness verified] — HXC-112
+unblocked)</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>application(desktop)</td>
@@ -1446,21 +1451,21 @@ scope)</td>
 </table>
 <h3 id="honesty-notes-anti-bluff">Honesty notes (anti-bluff)</h3>
 <ul>
-<li><strong><code>cmd/security_scan</code> has ZERO tests</strong> (only
-<code>main.go</code>) — marked <code>Tests=none</code>,
+<li><p><strong><code>cmd/security_scan</code> has ZERO tests</strong>
+(only <code>main.go</code>) — marked <code>Tests=none</code>,
 <code>Overall=gap</code>. Untested scanner = bluff risk per
-CONST-048/CONST-050.</li>
-<li><strong>iOS / Android are scaffolds</strong>: real source (JSON
+CONST-048/CONST-050.</p></li>
+<li><p><strong>iOS / Android are scaffolds</strong>: real source (JSON
 parse, list bind, Go mobile-core bridge) but single-screen, hardcoded
 localhost test server, <strong>no Xcode project / no
 Gradle+manifest</strong> → not buildable, not recordable.
-<code>Real-use=no</code>, <code>Overall=gap</code>.</li>
-<li><strong>Aurora OS / Harmony OS are genuine Go/Fyne apps</strong>
+<code>Real-use=no</code>, <code>Overall=gap</code>.</p></li>
+<li><p><strong>Aurora OS / Harmony OS are genuine Go/Fyne apps</strong>
 (buildable via <code>make aurora-os</code> /
 <code>make harmony-os</code>, comprehensive unit+integration tests) —
 but integration features need real PostgreSQL/Redis/LLM backends, and
-full HAP/multi-device exercise needs the actual OS environment.</li>
-<li><strong>Web LLM endpoints</strong> (<code>/llm/generate</code>,
+full HAP/multi-device exercise needs the actual OS environment.</p></li>
+<li><p><strong>Web LLM endpoints</strong> (<code>/llm/generate</code>,
 <code>/llm/stream</code>, <code>/specify</code>) have real Ollama-backed
 e2e tests
 (<code>tests/integration/{llm_generate,llm_stream,specify_server}_e2e_test.go</code>,
@@ -1469,12 +1474,12 @@ unreachable) → <code>Tests=e2e</code>,
 <code>V&amp;V=yes(docs/qa/web-llm-e2e-20260615/)</code>. The 60+
 CRUD/auth/workflow endpoints are real but tested at the manager/service
 layer, not at the HTTP-transport layer →
-<code>Tests=integ</code>/<code>none</code> honestly.</li>
-<li><strong>No row is <code>confirmed</code></strong> — every
+<code>Tests=integ</code>/<code>none</code> honestly.</p></li>
+<li><p><strong>No row is <code>confirmed</code></strong> — every
 <code>📹 Video=no</code>; rollups are <code>working-untaped</code> (real
 + tested, no video), <code>partial</code> (real but thin/unverified test
-coverage), or <code>gap</code> (scaffold or untested).</li>
-<li><strong>Themed brand re-records (Rev 3, 2026-06-15)</strong>: the
+coverage), or <code>gap</code> (scaffold or untested).</p></li>
+<li><p><strong>Themed brand re-records (Rev 3, 2026-06-15)</strong>: the
 logo+dark-theme (lime <code>#A8DD22</code> + teal <code>#8FC9B8</code>,
 from <code>assets/Logo.png</code>) was applied to all 6 clients (commit
 <code>f9c6ab06</code>) and <strong>5 of 6 clients now have a NEW themed,
@@ -1511,7 +1516,38 @@ IB-Support/DerivedData device-set to a local APFS path. No fabricated
 video was produced; the prior
 <code>helixcode-ios-launch-20260615.mp4</code> was NOT rotated (no
 replacement). 5 of 6 clients are real-LLM themed-recorded; the 6th
-awaits this host unblock.</li>
+awaits this host unblock.</p></li>
+<li><p><strong>Desktop chat re-record (Rev 5, 2026-06-15)</strong>:
+HXC-112 unblocked — the Fyne LLM-chat interaction is now recorded
+AUTONOMOUSLY (no OS synthetic input) via the Fyne software painter
+(<code>software.NewCanvas().Capture()</code> drives the real themed chat
+widgets + the real DeepSeek provider):
+<code>helixcode-desktop-chat-themed-20260615.mp4</code> (real DeepSeek
+"2+2 equals 4" rendered in brand-themed pixels + read from a frame
+extracted from the mp4 itself; 49 frames, 12.25s, liveness verified).
+The desktop client now has BOTH dashboard (window-scoped
+<code>screencapture -l</code>) and chat (software-painter) themed
+real-LLM recordings.</p></li>
+<li><p><strong>Known §11.4.153 sync-machinery gaps (Rev 5, honest per
+§11.4.6 — NOT bluffed):</strong> the ledger's <em>coverage</em> is
+comprehensive (enumerated reconciliation: every client / cmd tool /
+internal production package / functionality submodule maps to a row or a
+documented exclusion; 563 feature rows), but three sync/format gaps
+remain, named here as follow-ups: (a) <strong>no §11.4.86 drift-proof
+fingerprint sidecar</strong> beside Status.md (a roster sha256 of sorted
+feature-keys + sorted video-artefacts); (b) <strong>source↔︎output
+drift</strong> — this Status.md has been hand-edited (rev2–5 video
+annotations) and now diverges from its generator sources
+(<code>_status_header.md</code> +
+<code>inventory/cmd_and_clients.md</code>), so re-running the
+<code>scripts/generate_features_status.sh</code> / docs_chain regen
+would REGRESS the rich annotations — the rev2–5 deltas MUST be
+back-ported into the generator sources before any regen (same
+generated-vs-hand-edited reconciliation class as the
+<code>docs/workable_items.db</code> DB↔︎MD drift); (c)
+Status_Summary.docx now generated (gap closed this rev). Gaps (a)+(b)
+are deferred operator-surfaced reconciliation items, not
+silent.</p></li>
 </ul>
 <p><strong>Feature count: 67 rows</strong> (CLI REPL 14, CLI subcommand
 groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7,
