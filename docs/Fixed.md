@@ -829,3 +829,23 @@ First mechanical sweep (stash@{0}, agent a55802ad) wired a real embedded-English
 
 Discovery sweep: applications/harmony_os/main_nogui.go uses its i18n bundle heavily (~95 refs) but lines 876 ('Goodbye!') + 882 ('Error: %v') are user-facing UI text printed via fmt without the translator (CONST-046 localization gap). Lines 784/789-793 are developer-facing diagnostics (arguably out of scope). Low severity; may be folded into the HXC-099 entry-path i18n work.
 
+## HXC-104 — streamLLM /api/v1/llm/stream hangs forever — chunkChan never closed, [DONE] never emitted (production defect found by web e2e)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** Fixed via 'defer close(chunkChan)' in streamLLM goroutine. Regression guard tests/integration/llm_stream_e2e_test.go (TestLLMStreamE2E): post-fix streams 9 SSE frames + [DONE] in 1.1s, deterministic -count=3; server unit pkg ok; build exit 0. Evidence docs/qa/web-llm-e2e-20260615/.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+streamLLM goroutine (internal/server/llm_generate.go) called provider.GenerateStream(ctx,llmReq,chunkChan) but never closed chunkChan, so streamProviderToSSE never saw ok=false, never wrote the terminal data:[DONE] frame, and EVERY /stream request blocked until the 120s ctx deadline — a real user-facing hang that handler/httptest tests missed. Exposed by the new TestLLMStreamE2E runtime e2e. Fixed: defer close(chunkChan).
+
+## HXC-103 — Web-client runtime e2e proof — live browser/HTTP -> server -> LLM provider round-trip for /api/v1/llm/generate + /llm/stream (CONTINUATION honest gap)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** All 3 web LLM paths proven e2e against live ollama qwen2.5:3b: /generate (HTTP 200 content:4 provider:ollama), /stream (9 SSE frames + [DONE], streamed 1..5, >1 frame proves streaming), browser->server->provider (chromedp: #output DOM=4, #meta provider=ollama, screenshot). Exposed+fixed production hang HXC-104. Evidence + README docs/qa/web-llm-e2e-20260615/. SKIP-OK when provider down (§11.4.3).
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+The web POST /llm/generate + /llm/stream endpoints + minimal web frontend are httptest-handler-verified only; NO full runtime e2e (no live client->server->provider round-trip captured) per §11.4.108 layer-3/4. Deliver a real automated e2e (boot server, real HTTP/chromedp client hits the endpoints, REAL provider responds, capture the round-trip evidence). SKIP-OK per §11.4.3 when no real provider reachable (CONST-050(A) real-infra mandate) — never a fake PASS.
+

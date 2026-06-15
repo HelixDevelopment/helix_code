@@ -226,6 +226,14 @@ func (s *Server) streamLLM(c *gin.Context) {
 	chunkChan := make(chan llm.LLMResponse, 100)
 	errCh := make(chan error, 1)
 	go func() {
+		// Close chunkChan once the provider stops producing so the consumer
+		// (streamProviderToSSE) observes the channel-drain, emits the terminal
+		// `data: [DONE]` frame, and returns. Without this close the consumer
+		// blocks on <-chunkChan after the final real chunk and the client never
+		// sees [DONE] until the 120s ctx deadline — a real hang the streaming
+		// e2e (tests/integration/llm_stream_e2e_test.go) exposes (CONST-035 /
+		// Article XI §11.9).
+		defer close(chunkChan)
 		errCh <- provider.GenerateStream(ctx, llmReq, chunkChan)
 	}()
 
