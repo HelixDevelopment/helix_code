@@ -1602,6 +1602,23 @@ func isKnownProviderPrefix(seg string) bool {
 	}
 }
 
+// parseModelSpec splits a CLI model string into an optional provider prefix and
+// the model name to send to the provider. It is the pure, testable core of the
+// HXC-096 fix (see handleGenerate): the segment before the first ":" is stripped
+// ONLY when it names a recognized provider type (isKnownProviderPrefix), so an
+// Ollama native "name:tag" model id ("qwen2.5:3b", "llama3.2:1b") is kept intact
+// — the prior unconditional split-on-first-colon mangled "qwen2.5:3b" into "3b"
+// and Ollama's /api/chat returned a 404. When no recognized provider prefix is
+// present, provider is "" and modelName is the input unchanged.
+func parseModelSpec(model string) (provider, modelName string) {
+	if idx := strings.Index(model, ":"); idx > 0 {
+		if isKnownProviderPrefix(model[:idx]) {
+			return model[:idx], model[idx+1:]
+		}
+	}
+	return "", model
+}
+
 // handleGenerate performs LLM generation
 func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxTokens int, temperature float64, stream bool) error {
 	// ANTI-BLUFF: MUST use real LLM provider, not simulation
@@ -1622,12 +1639,7 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 	// So strip the prefix ONLY when the segment before the first ":" is a
 	// recognized provider type; otherwise keep the model string intact so a
 	// real Ollama "name:tag" reaches the provider unmodified.
-	modelName := model
-	if idx := strings.Index(model, ":"); idx > 0 {
-		if isKnownProviderPrefix(model[:idx]) {
-			modelName = model[idx+1:]
-		}
-	}
+	_, modelName := parseModelSpec(model)
 
 	// Round-41 readiness fix (CONST-035): the CLI's default model
 	// is "llama-3-8b" which is a generic-Ollama name that does NOT
