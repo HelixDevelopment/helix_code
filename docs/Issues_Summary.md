@@ -50,7 +50,8 @@
 | HXC-077 | T1.5 context-window percentage indicator (partial) | Feature | Queued |  | T1.5 context-window percentage indicator (partial) |
 | HXC-078 | T1.6 SKILL.md precedence resolution (partial) | Task | Queued |  | T1.6 SKILL.md precedence resolution (partial) |
 | HXC-099 | Systemic i18n raw-key sweep redo (CONST-046) — corrected, regression-free, with default-translator contract decision | Task | Queued |  | Systemic i18n raw-key sweep redo (CONST-046) — corrected, regression-free, with default-translator contract decision |
+| HXC-100 | Resync docs/CONTINUATION.md to current HEAD + de-bloat the 32k-token line-1 header (CONST-044/§12.10 + CONST-064 hygiene) | Task | Queued |  | Resync docs/CONTINUATION.md to current HEAD + de-bloat the 32k-token line-1 header (CONST-044/§12.10 + CONST-064 hygiene) |
 
-**Counts**: 44 tracked item-sections in `docs/Issues.md` — **3 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
+**Counts**: 45 tracked item-sections in `docs/Issues.md` — **4 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
 *Last regenerated: 2026-06-15 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*

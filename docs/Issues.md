@@ -595,3 +595,12 @@ SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6);
 
 First mechanical sweep (stash@{0}, agent a55802ad) wired a real embedded-English bundle translator as package default across 36 internal/ packages but INTRODUCED 13 regressions vs green HEAD d85f6962: (1) real Go-template bug — internal/project messages render '<no value>' (error-detail param dropped); (2) defeats intentional NoopTranslator-echoes-raw-key anti-bluff guards in 9 pkgs (tools,voice,plantree,repomap,context,hardware,persistence,mcp,template); (3) autocommit+project tests assert real message text now broken. Redo MUST fix templating + needs operator decision: missing i18n key echoes raw key (loud default) OR falls back to embedded English (polished, risks hiding missing translations). Work in git stash; green tree restored (build exit 0, 13/13 pass).
 
+## HXC-100 — Resync docs/CONTINUATION.md to current HEAD + de-bloat the 32k-token line-1 header (CONST-044/§12.10 + CONST-064 hygiene)
+
+**Status:** Queued
+**Type:** Task
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+CONTINUATION.md is stale (Last updated 2026-06-14, refs HEAD e3063af1; current is 80e62afa after HXC-098 fix + HXC-099 i18n-sweep finding). Per CONST-044/§12.10 out-of-sync CONTINUATION is a CRITICAL DEFECT. ALSO: line 1 ('Last updated' header) has accreted ~32k tokens into a SINGLE line across rounds — pathological; Read/Edit of lines 1-12 alone exceeds 25k tokens, making safe edits hard and risking corruption with blind sed. Overnight zero-risk policy => queued for careful daytime fix: (1) refactor the bloated header into a normal metadata table + a round-by-round table row, (2) add rounds for this session (B i18n sweep discarded+stashed -> HXC-099; HXC-098 config-default fix), (3) restore CONST-064 ToC parity, (4) regen .html/.pdf. Live resumption currently served by the up-to-date .remember/remember.md (§11.4.131).
+
