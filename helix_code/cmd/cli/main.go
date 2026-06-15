@@ -23,6 +23,7 @@ import (
 	"dev.helix.code/internal/approval"
 	"dev.helix.code/internal/approvalwire"
 	"dev.helix.code/internal/autocommit"
+	"dev.helix.code/internal/checkpoint"
 	"dev.helix.code/internal/commands"
 	"dev.helix.code/internal/commands/builtin"
 	"dev.helix.code/internal/config"
@@ -2224,6 +2225,15 @@ func (c *CLI) handleInteractive(ctx context.Context) error {
 			_ = c.handleSpecify(ctx, request)
 			continue
 		}
+		// /checkpoint [create [label] | list | restore <id>] — F12 workspace
+		// checkpoints: snapshot the working-tree file bytes now and restore
+		// them later. Prefix-matched (takes subcommand + args), mirroring the
+		// other multi-arg commands. Bare "/checkpoint" prints usage.
+		if lower == "/checkpoint" || strings.HasPrefix(lower, "/checkpoint ") {
+			args := strings.TrimSpace(strings.TrimPrefix(input, "/checkpoint"))
+			_ = c.handleCheckpoint(ctx, args)
+			continue
+		}
 		// Unknown slash command: surface clearly, don't send to LLM
 		if strings.HasPrefix(input, "/") {
 			fmt.Println(tr(ctx, "cli_repl_unknown_slash", map[string]any{"Input": input}))
@@ -2384,6 +2394,89 @@ func drainProviderStream(chunkChan chan llm.LLMResponse, errCh chan error, onChu
 				}
 			}
 		}
+	}
+}
+
+// handleCheckpoint implements the /checkpoint REPL command (F12 workspace
+// checkpoints). It snapshots/restores the REAL working-tree file bytes via the
+// internal/checkpoint Manager (git plumbing when in a repo, real file-copy
+// otherwise) rooted at the CLI's current working directory.
+//
+// Subcommands:
+//
+//	/checkpoint create [label]   snapshot the working tree now
+//	/checkpoint list             list checkpoints (newest first)
+//	/checkpoint restore <id>     restore the working tree to a snapshot
+//
+// Anti-bluff (§11.4 / CONST-035): every path drives the real Manager against
+// the real filesystem — there is no simulated/printed-only output. Restore
+// writes real bytes back to disk (covered by internal/checkpoint round-trip
+// tests).
+func (c *CLI) handleCheckpoint(ctx context.Context, args string) error {
+	_ = ctx
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("❌ /checkpoint: cannot determine working directory: %v\n", err)
+		return err
+	}
+	mgr, err := checkpoint.NewManager(cwd)
+	if err != nil {
+		fmt.Printf("❌ /checkpoint: %v\n", err)
+		return err
+	}
+
+	fields := strings.Fields(args)
+	sub := "list"
+	if len(fields) > 0 {
+		sub = strings.ToLower(fields[0])
+	}
+
+	switch sub {
+	case "create":
+		label := strings.TrimSpace(strings.TrimPrefix(args, fields[0]))
+		id, err := mgr.Create(label)
+		if err != nil {
+			fmt.Printf("❌ /checkpoint create failed: %v\n", err)
+			return err
+		}
+		fmt.Printf("✅ checkpoint created: %s (backend: %s)\n", id, mgr.Backend())
+		if label != "" {
+			fmt.Printf("   label: %s\n", label)
+		}
+		return nil
+
+	case "list":
+		cps := mgr.List()
+		if len(cps) == 0 {
+			fmt.Println("(no checkpoints)")
+			return nil
+		}
+		fmt.Printf("Checkpoints (%s backend, newest first):\n", mgr.Backend())
+		for _, cp := range cps {
+			label := cp.Label
+			if label == "" {
+				label = "(no label)"
+			}
+			fmt.Printf("  %s  %s  %s\n", cp.ID, cp.CreatedAt.Format("2006-01-02 15:04:05"), label)
+		}
+		return nil
+
+	case "restore":
+		if len(fields) < 2 {
+			fmt.Println("usage: /checkpoint restore <id>")
+			return nil
+		}
+		id := fields[1]
+		if err := mgr.Restore(id); err != nil {
+			fmt.Printf("❌ /checkpoint restore failed: %v\n", err)
+			return err
+		}
+		fmt.Printf("✅ working tree restored to checkpoint %s\n", id)
+		return nil
+
+	default:
+		fmt.Println("usage: /checkpoint create [label] | list | restore <id>")
+		return nil
 	}
 }
 
@@ -2675,6 +2768,7 @@ func (c *CLI) showHelp(ctx context.Context) {
 	fmt.Println("/undo            - Revert the last commit (git revert HEAD)")
 	fmt.Println("/debate <topic>  - Run a real LLM-backed debate on <topic>")
 	fmt.Println("/specify <req>   - Run the speckit Specify phase (real LLM-backed) for <req>")
+	fmt.Println("/checkpoint ...  - Snapshot/restore working-tree files (create [label] | list | restore <id>)")
 	fmt.Println(tr(ctx, "cli_help_cmd_help", nil))
 	fmt.Println(tr(ctx, "cli_help_cmd_exit", nil))
 	fmt.Println("")
