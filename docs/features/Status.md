@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Revision | 1 |
+| Revision | 3 |
 | Created | 2026-06-15 |
 | Last modified | 2026-06-15 |
 | Status | active (population in progress) |
@@ -85,7 +85,7 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | Area | Component | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | application(cli) | cmd/cli REPL | Plain-text prompt → real LLM (streaming via provider.GenerateStream) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | yes(helixcode-cli-generate-20260615.mp4; helixcode-cli-explain-go-20260615.mp4) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | yes(helixcode-cli-generate-20260615.mp4; helixcode-cli-explain-go-20260615.mp4; helixcode-cli-themed-20260615.mp4 [lime/teal brand banner + real DeepSeek "2+2 equals 4"]) | yes | native | confirmed |
 | application(cli) | cmd/cli REPL | `/models` list models via providerManager.GetProviders (BLUFF-002 resolved) | done | yes | yes | unit | no | yes(helixcode-cli-list-models-20260615.mp4) | yes | native | confirmed |
 | application(cli) | cmd/cli REPL | `/workers` list workers | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli REPL | `/health` health check | done | yes | yes | unit | no | yes(helixcode-cli-health-20260615.mp4) | yes | native | confirmed |
@@ -106,11 +106,11 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | application(cli) | cmd/cli `sessions` | list / show / delete sessions | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli `skills` | list / show / invoke / reload skills | done | yes | yes | unit | no | no | no | native | working-untaped |
 | service | cmd/server | HTTP/gRPC/WebSocket server boot (bin/helixcode) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-generate-20260615.mp4) | yes | native | confirmed |
+| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek generate, viewport-scoped 1280x800]) | yes | native | confirmed |
 | application(web) | web/frontend | LLM streaming console (SSE, POST /api/v1/llm/stream) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | application(web) | web/frontend | Specify phase form (POST /api/v1/specify) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | application(web) | web/frontend | Response/metadata rendering (no client simulation) | done | yes | yes | e2e | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-generate-20260615.mp4) | yes | native | confirmed |
+| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek generate, viewport-scoped]) | yes | native | confirmed |
 | service | internal/server (HTTP API) | /api/v1/llm/stream real provider.GenerateStream (SSE) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/specify real speckit Specify phase | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/llm/providers, /llm/models list | done | yes | yes | none | no | no | no | native | partial |
@@ -127,7 +127,7 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | service | internal/server (HTTP API) | /ws MCP WebSocket bridge | done | yes | yes | none | no | no | no | native | partial |
 | service | internal/server (HTTP API) | /health, /api/v1/health, /metrics, /api/v1/server/info | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /debug/pprof/* (opt-in profiling) | done | yes | yes | none | no | no | no | native | partial |
-| application(tui) | applications/terminal_ui | LLM chat (real provider, verifier-driven model discovery) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| application(tui) | applications/terminal_ui | LLM chat (real provider, verifier-driven model discovery) | done | yes | yes | unit,integ | no | yes(helixcode-tui-themed-20260615.mp4 [lime/teal brand tview.Styles + 🐚 HelixCode banner + real DeepSeek streamed answer "...is 4"; terminal-pane-scoped, 790x560, 29.8s]) | yes | native | confirmed |
 | application(tui) | applications/terminal_ui | Dashboard / Tasks / Workers / Projects / Sessions panels (real managers) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | Sidebar nav + key bindings (d/t/w/p/s/l/q/c) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | Skill dispatcher + tool registry (git/fs/grep/LSP/MCP, graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
@@ -135,7 +135,7 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | application(tui) | applications/terminal_ui | Status bar (DB/Redis/LLM status, context %), notifications, themes, i18n | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | QA engine panel (helixqa.Engine wired) | partial | yes | unknown | unit | no | no | no | native | partial |
 | application(desktop) | applications/desktop (Fyne) | LLM chat tab (real provider, verifier-driven models) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(desktop) | applications/desktop (Fyne) | Dashboard / Tasks / Workers / Projects / Sessions tabs (real managers) | done | yes | yes | unit | no | yes(helixcode-desktop-dashboard-20260615.mp4) | yes | native | confirmed |
+| application(desktop) | applications/desktop (Fyne) | Dashboard / Tasks / Workers / Projects / Sessions tabs (real managers) | done | yes | yes | unit | no | yes(helixcode-desktop-dashboard-20260615.mp4; helixcode-desktop-themed-20260615.mp4 [lime/teal brand theme + embedded logo, window-scoped via screencapture -l, 144 frames, liveness via advancing uptime; GUI-interaction-driving is operator-attended §11.4.52 — Fyne/OpenGL rejects synthetic input]) | yes | native | confirmed |
 | application(desktop) | applications/desktop (Fyne) | Settings tab (theme, server config, shortcuts; desktop.yaml) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(desktop) | applications/desktop (Fyne) | Agentic tools + skills/plugins wiring (graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(desktop) | applications/desktop (Fyne) | NoGUI build mode (-tags nogui CLI fallback) | done | yes | yes | unit | no | no | no | native | working-untaped |
@@ -144,7 +144,7 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | application(mobile) | applications/aurora_os (Go/Fyne) | NoGUI CLI mode (cobra) + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(mobile) | applications/harmony_os (Go/Fyne) | 10-tab GUI incl. distributed engine + multi-device scheduling | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
 | application(mobile) | applications/harmony_os (Go/Fyne) | NoGUI CLI + interactive shell + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(mobile) | applications/android (Kotlin) | Connect + task list (RecyclerView) over Go mobile-core bridge | partial | partial | yes | none | no | yes(helixcode-android-connect-20260615.mp4; helixcode-android-connect-lifecycle-20260615.mp4; helixcode-android-tasklist-20260615.mp4) | yes | native | confirmed |
+| application(mobile) | applications/android (Kotlin) | Connect + task list (RecyclerView) over Go mobile-core bridge | partial | partial | yes | none | no | yes(helixcode-android-connect-20260615.mp4; helixcode-android-connect-lifecycle-20260615.mp4; helixcode-android-tasklist-20260615.mp4; helixcode-android-themed-20260615.mp4 [lime/teal Material dark + helix logo + real connect "Connected/User:testuser" + real server tasks testing+code_generation; device-scoped 1080x2424, 10.4s]) | yes | native | confirmed |
 | application(mobile) | applications/android (Kotlin) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
 | application(mobile) | applications/ios (Swift) | Connect + task list (UITableView) over Go mobile-core bridge | partial | partial | yes | none | no | yes(helixcode-ios-launch-20260615.mp4) | yes | native | confirmed |
 | application(mobile) | applications/ios (Swift) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
@@ -165,6 +165,7 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 - **Aurora OS / Harmony OS are genuine Go/Fyne apps** (buildable via `make aurora-os` / `make harmony-os`, comprehensive unit+integration tests) — but integration features need real PostgreSQL/Redis/LLM backends, and full HAP/multi-device exercise needs the actual OS environment.
 - **Web LLM endpoints** (`/llm/generate`, `/llm/stream`, `/specify`) have real Ollama-backed e2e tests (`tests/integration/{llm_generate,llm_stream,specify_server}_e2e_test.go`, build tag `integration`, honest SKIP-OK when Ollama unreachable) → `Tests=e2e`, `V&V=yes(docs/qa/web-llm-e2e-20260615/)`. The 60+ CRUD/auth/workflow endpoints are real but tested at the manager/service layer, not at the HTTP-transport layer → `Tests=integ`/`none` honestly.
 - **No row is `confirmed`** — every `📹 Video=no`; rollups are `working-untaped` (real + tested, no video), `partial` (real but thin/unverified test coverage), or `gap` (scaffold or untested).
+- **Themed brand re-records (Rev 3, 2026-06-15)**: the logo+dark-theme (lime `#A8DD22` + teal `#8FC9B8`, from `assets/Logo.png`) was applied to all 6 clients (commit `f9c6ab06`) and **5 of 6 clients now have a NEW themed, real-LLM/real-data, window-scoped re-recording** referenced in their Analysis cells: `helixcode-cli-themed-20260615.mp4` (CLI: brand banner + real DeepSeek "2+2 equals 4"; 790x560, 4.9s), `helixcode-web-themed-20260615.mp4` (Web: dark theme + logo + real DeepSeek, viewport-scoped 1280x800, 5.2s), `helixcode-tui-themed-20260615.mp4` (TUI: brand tview.Styles + banner + real DeepSeek streamed answer; terminal-pane-scoped, 29.8s), `helixcode-desktop-themed-20260615.mp4` (Desktop: themed dashboard + embedded logo, window-scoped via `screencapture -l`, 144 frames, liveness via advancing uptime — GUI-interaction-driving is operator-attended §11.4.52 as Fyne/OpenGL rejects synthetic input), `helixcode-android-themed-20260615.mp4` (Android: Material dark + logo + real connect + real server task list; device-scoped 1080x2424, 10.4s). All window-scoped per §11.4.154 (terminal pane / browser viewport / app window / device frame — never whole-desktop), with §11.4.154 fresh-corpus rotation honored. **iOS themed re-record is in progress** (heavy-build slot serialized per §12.8); its row keeps prior state until the real simulator capture lands.
 
 **Feature count: 67 rows** (CLI REPL 14, CLI subcommand groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7, desktop 6, mobile 8, other cmd tools 11 + security_scan 1).
 
