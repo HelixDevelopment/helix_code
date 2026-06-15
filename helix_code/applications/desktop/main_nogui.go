@@ -282,6 +282,8 @@ func (cliApp *CLIApp) Run(args []string) error {
 		return cliApp.cmdWorkers(cmdArgs)
 	case "llm":
 		return cliApp.cmdLLM(cmdArgs)
+	case "specify":
+		return cliApp.cmdSpecify(cmdArgs)
 	case "interactive":
 		return cliApp.cmdInteractive()
 	default:
@@ -646,10 +648,34 @@ func (cliApp *CLIApp) cmdLLM(args []string) error {
 		fmt.Println(cliApp.t("desktop_cli_chat_requires_provider"))
 		fmt.Println(cliApp.t("desktop_cli_chat_configure_hint"))
 
+	case "specify":
+		return cliApp.cmdSpecify(args[1:])
+
 	default:
 		fmt.Printf(cliApp.t("desktop_cli_unknown_subcommand")+"\n", args[0])
 	}
 
+	return nil
+}
+
+// cmdSpecify drives the headless desktop client's REAL speckit Specify phase
+// (specify_nogui.go → (*CLIApp).Specify). It surfaces the real phase output or
+// the real error verbatim — never a fabricated success (§11.4 / CONST-035).
+// Wired both as `helix specify <request>` and `helix llm specify <request>`.
+func (cliApp *CLIApp) cmdSpecify(args []string) error {
+	request := strings.TrimSpace(strings.Join(args, " "))
+	if request == "" {
+		fmt.Println("usage: specify <request>")
+		return fmt.Errorf("specify: missing request")
+	}
+
+	out, err := cliApp.Specify(request)
+	if err != nil {
+		// Real error, surfaced verbatim (anti-bluff).
+		fmt.Printf("❌ specify failed: %v\n", err)
+		return err
+	}
+	fmt.Print(out)
 	return nil
 }
 
