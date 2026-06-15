@@ -1,0 +1,19 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        // gomobile-produced mobilecore.aar lives under app/libs
+        flatDir { dirs "app/libs" }
+    }
+}
+
+rootProject.name = "HelixCode"
+include ':app'

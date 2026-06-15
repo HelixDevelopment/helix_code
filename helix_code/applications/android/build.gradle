@@ -1,0 +1,8 @@
+// Root build file for the HelixCode Android client.
+// Real Gradle project (HXC-109) — assembles a debug APK that wires the
+// gomobile-produced mobilecore.aar (built from ../../shared/mobile_core) into a
+// native Android UI. No stubs: the Kotlin bridge calls the real Go core.
+plugins {
+    id 'com.android.application' version '8.7.3' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.25' apply false
+}

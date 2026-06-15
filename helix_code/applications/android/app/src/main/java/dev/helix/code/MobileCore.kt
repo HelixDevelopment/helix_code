@@ -1,20 +1,34 @@
 package dev.helix.code
 
 import org.json.JSONObject
+import dev.helix.code.core.core.Core
+import dev.helix.code.core.core.MobileCore as GoMobileCore
 
+/**
+ * Kotlin bridge over the gomobile-produced binding
+ * (dev.helix.code/shared/mobile_core, package `core`).
+ *
+ * The real Go core (mobilecore.aar) backs every call here — there is no
+ * simulation. `Core.newMobileCore()` is the gobind static factory; the
+ * returned [GoMobileCore] proxy dispatches over JNI into the Go runtime.
+ */
 object MobileCore {
     val shared = MobileCoreInstance()
 }
 
 class MobileCoreInstance {
-    private var core: HelixCoreMobileCore? = null
+    private var core: GoMobileCore? = null
 
     init {
-        core = HelixCoreNewMobileCore()
+        core = Core.newMobileCore()
     }
 
     fun initialize() {
-        core?.initialize()
+        try {
+            core?.initialize()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun connect(serverURL: String, username: String, password: String): Boolean {
@@ -36,7 +50,7 @@ class MobileCoreInstance {
     }
 
     val isConnected: Boolean
-        get() = core?.isConnected() ?: false
+        get() = core?.isConnected ?: false
 
     val currentUser: String
         get() = core?.currentUser ?: ""
@@ -52,6 +66,15 @@ class MobileCoreInstance {
 
     fun createTask(name: String, description: String): String {
         return core?.createTask(name, description) ?: "{\"error\": \"Core not initialized\"}"
+    }
+
+    fun generate(prompt: String): String {
+        return try {
+            core?.generate(prompt) ?: ""
+        } catch (e: Exception) {
+            e.printStackTrace()
+            "{\"error\": \"${e.message}\"}"
+        }
     }
 
     fun sendNotification(title: String, message: String, type: String): Boolean {

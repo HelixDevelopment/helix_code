@@ -1,0 +1,17 @@
+# Android / Gradle build artifacts (CONST-053)
+/build/
+/app/build/
+/.gradle/
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+.idea/
+*.iml
+captures/
+
+# gomobile-produced binding — regenerable via `make mobile-android`
+# (large binary AAR + JNI .so; CONST-053 build-derivative).
+/app/libs/mobilecore.aar
+/app/libs/mobilecore-sources.jar
