@@ -1803,6 +1803,18 @@ func (auroraApp *AuroraApp) Close() error {
 func main() {
 	auroraApp := NewAuroraApp()
 
+	// Wire the real CONST-046 translator (embedded active.en.yaml bundle) onto
+	// the app BEFORE any user-facing output, replacing the NoopTranslator{}
+	// message-ID-echo default installed by NewAuroraApp. Without this, every
+	// user-facing string leaks its raw message key — a §11.4 / CONST-046
+	// PASS-bluff. On bundle load failure the loud NoopTranslator{} echo is
+	// preserved (never a silent swallow). Mirrors main_nogui.go wireTranslator.
+	if tr, err := i18n.NewTranslator(); err != nil {
+		log.Printf("⚠️  i18n: falling back to message-ID echo (bundle load failed): %v", err)
+	} else {
+		auroraApp.SetTranslator(tr)
+	}
+
 	if err := auroraApp.Initialize(); err != nil {
 		log.Fatalf("Failed to initialize Aurora OS app: %v", err)
 	}

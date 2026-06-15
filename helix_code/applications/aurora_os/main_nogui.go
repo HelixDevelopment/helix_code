@@ -1028,12 +1028,30 @@ func (cliApp *CLIApp) cmdInteractive() error {
 	return nil
 }
 
+// wireTranslator injects the real CONST-046 translator (embedded
+// active.en.yaml bundle) onto the app BEFORE any user-facing output,
+// replacing the NoopTranslator{} message-ID-echo default installed by
+// NewCLIApp. Without this, every command (version/help/status/...) leaks raw
+// message keys (`aurora_os_cli_version_banner`, ...) and any Printf call site
+// passing args to an unresolved bare-key "format" emits Go's `%!(EXTRA ...)`
+// noise — a §11.4 / CONST-046 PASS-bluff. On bundle load failure the loud
+// NoopTranslator{} echo is preserved (never a silent swallow). Mirrors
+// applications/desktop/main_nogui.go main().
+func wireTranslator(app *CLIApp) {
+	if tr, err := i18n.NewTranslator(); err != nil {
+		log.Printf("⚠️  i18n: falling back to message-ID echo (bundle load failed): %v", err)
+	} else {
+		app.SetTranslator(tr)
+	}
+}
+
 func main() {
 	args := os.Args[1:]
 
 	// Handle help commands without requiring full initialization
 	if len(args) == 0 || args[0] == "help" || args[0] == "-h" || args[0] == "--help" {
 		app := NewCLIApp()
+		wireTranslator(app)
 		app.printHelp()
 		return
 	}
@@ -1041,6 +1059,7 @@ func main() {
 	// Handle version command without initialization
 	if args[0] == "version" || args[0] == "-v" || args[0] == "--version" {
 		app := NewCLIApp()
+		wireTranslator(app)
 		fmt.Println(app.t("aurora_os_cli_version_banner"))
 		fmt.Printf(app.t("aurora_os_cli_version_go")+"\n", runtime.Version())
 		fmt.Printf(app.t("aurora_os_cli_version_platform")+"\n", runtime.GOOS, runtime.GOARCH)
@@ -1048,6 +1067,7 @@ func main() {
 	}
 
 	app := NewCLIApp()
+	wireTranslator(app)
 
 	if err := app.Initialize(); err != nil {
 		log.Fatalf("Failed to initialize: %v", err)
