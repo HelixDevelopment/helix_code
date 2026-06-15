@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 type StepExecutor interface {
@@ -51,9 +52,33 @@ func (e *SequentialExecutor) ExecuteStep(ctx context.Context, step *TaskStep) er
 	}
 
 	for attempt := 0; attempt <= step.MaxRetries; attempt++ {
+		// Honour parent-context cancellation BEFORE doing any work for this
+		// attempt. A cancelled/expired parent ctx (user abort, server
+		// shutdown, request deadline) must abort the retry loop immediately
+		// instead of burning through MaxRetries with exponential sleeps.
+		if err := ctx.Err(); err != nil {
+			step.Status = StepFailed
+			step.Error = err.Error()
+			step.CompletedAt = time.Now().UTC()
+			return err
+		}
+
 		if attempt > 0 {
 			step.RetryCount = attempt
-			time.Sleep(time.Duration(1<<uint(attempt-1)) * time.Second)
+			// Context-aware backoff: a parent-context cancellation during the
+			// sleep must abort the retry immediately rather than block for the
+			// full exponential interval.
+			backoff := time.Duration(1<<uint(attempt-1)) * time.Second
+			timer := time.NewTimer(backoff)
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				step.Status = StepFailed
+				step.Error = ctx.Err().Error()
+				step.CompletedAt = time.Now().UTC()
+				return ctx.Err()
+			case <-timer.C:
+			}
 		}
 
 		stepCtx, cancel := context.WithTimeout(ctx, timeout)
@@ -130,7 +155,15 @@ func (e *SequentialExecutor) ExecutePlan(ctx context.Context, plan *TaskPlan) er
 func sanitizeOutput(output string, maxLen int) string {
 	output = strings.TrimSpace(output)
 	if len(output) > maxLen {
-		output = output[:maxLen]
+		// Truncate on a UTF-8 rune boundary, never mid-rune. A byte-index
+		// slice (output[:maxLen]) can split a multi-byte rune, producing
+		// invalid UTF-8 that json.Marshal silently rewrites to U+FFFD
+		// replacement characters — corrupting the output the user reads.
+		truncated := output[:maxLen]
+		for len(truncated) > 0 && !utf8.ValidString(truncated) {
+			truncated = truncated[:len(truncated)-1]
+		}
+		output = truncated
 	}
 	return output
 }

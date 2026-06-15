@@ -63,7 +63,16 @@ func (s *Scorer) computeOverall(r *ScoreResult) float64 {
 	}
 	score += r.TestPassRate * 30.0
 	score += r.LintScore * 0.2
-	if r.Security > 0 {
+	// Security is a COUNT of security findings (lower is better). A clean
+	// result (zero findings) MUST earn the security credit; a result that
+	// recorded findings MUST NOT. The previous `r.Security > 0` test was
+	// inverted: it awarded +10 ONLY when findings existed (rewarding worse
+	// code) and denied the credit to clean builds — making the documented
+	// 100-point ceiling structurally unreachable for both real scoring
+	// paths (Score / ScoreWithTools both set Security = 0, so the +10 was
+	// dead code and the clean-build ceiling capped at 90). See
+	// scorer_security_guard_test.go for the captured counterexample.
+	if r.Security == 0 {
 		score += 10.0
 	}
 	return score

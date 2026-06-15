@@ -97,26 +97,36 @@ func (m *Manager) CreateProject(ctx context.Context, name, description, path, pr
 	}
 
 	m.projects[id] = project
+	// Returns the live pointer by design: CreateProject hands the creating caller
+	// a usable handle to the just-created project (existing callers observe later
+	// state through it). The creating caller is the sole id-holder at this point,
+	// so there is no concurrent writer to race. The read methods (GetProject/
+	// ListProjects/GetActiveProject) and UpdateProject snapshot because they hand
+	// the pointer to arbitrary later callers while concurrent writers exist.
 	return project, nil
 }
 
-// GetProject retrieves a project by ID
+// GetProject retrieves a project by ID.
+//
+// HXC §11.4.85 race fix: returns a DEEP COPY snapshot, never the live
+// map-stored pointer. The manager mutates the stored *Project's fields
+// (Active / UpdatedAt / Name / …) under the write Lock in
+// SetActiveProject / UpdateProject / SetActiveProject etc.; handing the
+// live pointer back to a caller that reads those fields outside the lock
+// is a data race (caught by `go test -race`). The snapshot decouples the
+// caller's read from the manager's serialised writes. Callers consume the
+// result as read-only data (HTTP serialisation, UI display) and never rely
+// on pointer identity, so the copy is contract-preserving.
 func (m *Manager) GetProject(ctx context.Context, id string) (*Project, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	// Check cache first
-	if project, exists := m.projects[id]; exists {
-		return project, nil
-	}
-
-	// Check if project exists in memory
 	project, exists := m.projects[id]
 	if !exists {
 		return nil, fmt.Errorf("%w: %s", ErrProjectNotFound, id)
 	}
 
-	return project, nil
+	return copyProject(project), nil
 }
 
 // ListProjects returns all projects for a user (ownerID ignored for in-memory manager)
@@ -124,10 +134,12 @@ func (m *Manager) ListProjects(ctx context.Context, ownerID string) ([]*Project,
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	// Return all projects from memory
+	// Return DEEP-COPY snapshots from memory (see GetProject — handing live
+	// map-stored pointers to callers that read fields outside the lock while
+	// the manager mutates them under the write Lock is a data race).
 	var projects []*Project
 	for _, project := range m.projects {
-		projects = append(projects, project)
+		projects = append(projects, copyProject(project))
 	}
 
 	return projects, nil
@@ -170,7 +182,9 @@ func (m *Manager) SetActiveProject(ctx context.Context, id string) error {
 func (m *Manager) GetActiveProject(ctx context.Context) (*Project, error) {
 	m.mu.RLock()
 	if m.activeProject != nil {
-		ap := m.activeProject
+		// Snapshot under the read lock — never hand the live map-stored
+		// pointer back (its fields are mutated under the write Lock).
+		ap := copyProject(m.activeProject)
 		m.mu.RUnlock()
 		return ap, nil
 	}
@@ -183,18 +197,44 @@ func (m *Manager) GetActiveProject(ctx context.Context) (*Project, error) {
 	// Re-check under the write lock: another goroutine may have set the active
 	// project (or it may have been set since we dropped the read lock).
 	if m.activeProject != nil {
-		return m.activeProject, nil
+		return copyProject(m.activeProject), nil
 	}
 
 	// Try to find active project in memory
 	for _, project := range m.projects {
 		if project.Active {
 			m.activeProject = project
-			return project, nil
+			return copyProject(project), nil
 		}
 	}
 
 	return nil, errors.New(tr(ctx, "internal_project_no_active_project", nil))
+}
+
+// copyProject returns a deep-copy snapshot of p so callers never share
+// mutable state with the manager's internal store (HXC §11.4.85 race fix).
+// Metadata carries a slice (Dependencies) and a map (Environment) which are
+// deep-copied so a caller mutating either cannot corrupt the stored project,
+// and a concurrent writer to the stored project cannot race a caller's read.
+func copyProject(p *Project) *Project {
+	if p == nil {
+		return nil
+	}
+	cp := *p // shallow copy of value fields
+
+	if p.Metadata.Dependencies != nil {
+		deps := make([]string, len(p.Metadata.Dependencies))
+		copy(deps, p.Metadata.Dependencies)
+		cp.Metadata.Dependencies = deps
+	}
+	if p.Metadata.Environment != nil {
+		env := make(map[string]string, len(p.Metadata.Environment))
+		for k, v := range p.Metadata.Environment {
+			env[k] = v
+		}
+		cp.Metadata.Environment = env
+	}
+	return &cp
 }
 
 // CreateProjectWithUser creates a new project with user ID (for compatibility with DatabaseManager)
@@ -265,7 +305,10 @@ func (m *Manager) UpdateProject(ctx context.Context, projectID, name, descriptio
 	}
 	project.UpdatedAt = time.Now()
 
-	return project, nil
+	// Return a snapshot, never the live map-stored pointer: a concurrent
+	// SetActiveProject/UpdateProject would otherwise mutate the same struct the
+	// caller is reading (same data-race class fixed for the read methods).
+	return copyProject(project), nil
 }
 
 // UpdateProjectMetadata updates project metadata in memory
