@@ -873,13 +873,16 @@ func (cliApp *HarmonyCLIApp) cmdInteractive() error {
 		}
 
 		if input == "quit" || input == "exit" {
-			fmt.Println("Goodbye!")
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_interactive_goodbye", nil))
 			break
 		}
 
 		args := strings.Fields(input)
 		if err := cliApp.Run(args); err != nil {
-			fmt.Printf("Error: %v\n", err)
+			// HXC-102: route through the translator (CONST-046); bind the Error
+			// param so the {{.Error}} placeholder resolves (no '<no value>' per
+			// the HXC-099 lesson).
+			fmt.Println(cliApp.tr(context.Background(), "harmony_os_cli_interactive_error_fmt", map[string]any{"Error": err.Error()}))
 		}
 		fmt.Println()
 	}

@@ -269,6 +269,12 @@ harmony_os_cli_interactive_header:
 harmony_os_cli_interactive_hint:
   other: "Type 'help' for commands, 'quit' to exit"
 
+harmony_os_cli_interactive_goodbye:
+  other: "Goodbye!"
+
+harmony_os_cli_interactive_error_fmt:
+  other: "Error: {{.Error}}"
+
 # --- Round-438 GUI (main.go) strings ---
 
 harmony_os_gui_window_title:
