@@ -44,11 +44,20 @@ func resetTranslator(t *testing.T) {
 	SetTranslator(nil)
 }
 
-func TestTr_DefaultsToNoopTranslator(t *testing.T) {
+// TestTr_DefaultsToRealBundleTranslator — §11.4.120 reconcile (HXC-097,
+// 2026-06-15). Previously asserted the Noop key-echo default
+// (raw "internal_config_validate_version_required"). The package default
+// is now the real embedded-bundle translator installed at init(), so the
+// default-path resolves to the bundle PROSE. This is the regression guard
+// for HXC-097: if the default ever reverts to NoopTranslator{} (or the
+// embed fails to load), this test FAILs because it sees the raw key.
+func TestTr_DefaultsToRealBundleTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(context.Background(), "internal_config_validate_version_required", nil)
-	if got != "internal_config_validate_version_required" {
-		t.Fatalf("tr default = %q, want raw message ID (loud echo)", got)
+	if got != "version is required" {
+		t.Fatalf("tr default = %q, want resolved bundle prose %q "+
+			"(HXC-097: default must be the real embedded-bundle translator, not Noop)",
+			got, "version is required")
 	}
 }
 
@@ -78,15 +87,21 @@ func TestTr_TranslatorErrorReturnsMessageID(t *testing.T) {
 	}
 }
 
-func TestSetTranslator_NilResetsToNoop(t *testing.T) {
+// TestSetTranslator_NilRestoresDefault — §11.4.120 reconcile (HXC-097,
+// 2026-06-15). SetTranslator(nil) now restores the package DEFAULT (the
+// real embedded-bundle translator), not NoopTranslator{}. So after wiring
+// a sentinel and then nil-resetting, tr() resolves to bundle prose — never
+// reverting a correctly-loaded binary to raw-key echo.
+func TestSetTranslator_NilRestoresDefault(t *testing.T) {
 	resetTranslator(t)
 	SetTranslator(sentinelTranslator{})
-	SetTranslator(nil) // explicit reset
+	SetTranslator(nil) // restore default
 	defer resetTranslator(t)
 
 	got := tr(context.Background(), "internal_config_warn_no_config_file_using_defaults", nil)
-	if got != "internal_config_warn_no_config_file_using_defaults" {
-		t.Fatalf("tr after nil-reset = %q, want raw ID (Noop restored)", got)
+	want := "WARN: No config file found, using defaults and environment variables"
+	if got != want {
+		t.Fatalf("tr after nil-reset = %q, want resolved bundle prose %q (default restored)", got, want)
 	}
 }
 
@@ -190,11 +205,14 @@ func TestValidateConfig_AllMigratedLiterals_GoThroughTranslator(t *testing.T) {
 	}
 }
 
-// TestValidateConfig_RawTextEmittedByDefault asserts that with no
-// translator wired (NoopTranslator), validateConfig emits the bundle
-// message ID — confirming the migration didn't accidentally pass an
-// empty string or a different literal.
-func TestValidateConfig_RawTextEmittedByDefault(t *testing.T) {
+// TestValidateConfig_ResolvedProseByDefault — §11.4.120 reconcile
+// (HXC-097, 2026-06-15). Previously asserted the raw message ID (Noop
+// echo). With the real embedded-bundle translator as the package default,
+// validateConfig now surfaces the resolved bundle PROSE — the actual text
+// an end user sees. This is an HXC-097 regression guard at the
+// validateConfig call site: a revert to Noop would re-surface the raw key
+// and FAIL here.
+func TestValidateConfig_ResolvedProseByDefault(t *testing.T) {
 	resetTranslator(t)
 
 	cfg := minimallyValidConfig()
@@ -203,8 +221,13 @@ func TestValidateConfig_RawTextEmittedByDefault(t *testing.T) {
 	if err == nil {
 		t.Fatal("validateConfig(version=\"\") returned no error")
 	}
-	if !strings.Contains(err.Error(), "internal_config_validate_version_required") {
-		t.Fatalf("validateConfig error = %q, want raw message ID (Noop echo)", err.Error())
+	if !strings.Contains(err.Error(), "version is required") {
+		t.Fatalf("validateConfig error = %q, want resolved bundle prose %q (real-bundle default)",
+			err.Error(), "version is required")
+	}
+	if strings.Contains(err.Error(), "internal_config_validate_version_required") {
+		t.Fatalf("validateConfig error = %q still contains the raw message-ID key "+
+			"(HXC-097 regression: package fell back to NoopTranslator)", err.Error())
 	}
 }
 
@@ -268,12 +291,16 @@ func TestRenderConfigForm_Round444_TitleGoesThroughTranslator(t *testing.T) {
 	}
 }
 
-func TestRenderConfigForm_Round444_RawTitleByDefault(t *testing.T) {
+// TestRenderConfigForm_Round444_ResolvedTitleByDefault — §11.4.120
+// reconcile (HXC-097, 2026-06-15). Default path now resolves the form
+// title to bundle prose, not the raw key.
+func TestRenderConfigForm_Round444_ResolvedTitleByDefault(t *testing.T) {
 	resetTranslator(t)
 
 	got := renderFormTitle(t, NewWebPlatformAdapter().RenderConfigForm(""))
-	if got != "internal_config_ui_form_title" {
-		t.Fatalf("web RenderConfigForm Title = %q, want raw message ID (Noop echo)", got)
+	if got != "HelixCode Configuration" {
+		t.Fatalf("web RenderConfigForm Title = %q, want resolved bundle prose %q (real-bundle default)",
+			got, "HelixCode Configuration")
 	}
 }
 
@@ -325,15 +352,19 @@ func TestRenderConfigForm_Round444_WebSaveMessagesGoThroughTranslator(t *testing
 	}
 }
 
-func TestRenderConfigForm_Round444_WebSaveMessagesRawByDefault(t *testing.T) {
+// TestRenderConfigForm_Round444_WebSaveMessagesResolvedByDefault —
+// §11.4.120 reconcile (HXC-097, 2026-06-15). Default path now resolves
+// the web save-success banner to bundle prose, not the raw key.
+func TestRenderConfigForm_Round444_WebSaveMessagesResolvedByDefault(t *testing.T) {
 	resetTranslator(t)
 
 	form, ok := NewWebPlatformAdapter().RenderConfigForm("").(WebConfigForm)
 	if !ok {
 		t.Fatalf("web RenderConfigForm did not return WebConfigForm")
 	}
-	if form.SubmitAction.Success != "internal_config_ui_save_success" {
-		t.Fatalf("save Success = %q, want raw message ID (Noop echo)", form.SubmitAction.Success)
+	if form.SubmitAction.Success != "Configuration saved successfully!" {
+		t.Fatalf("save Success = %q, want resolved bundle prose %q (real-bundle default)",
+			form.SubmitAction.Success, "Configuration saved successfully!")
 	}
 }
 

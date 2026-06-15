@@ -227,10 +227,12 @@ func TestNew_InvalidHost(t *testing.T) {
 	db, err := New(config)
 	assert.Error(t, err)
 	assert.Nil(t, db)
-	// Post-CONST-046 the ping-failure error surfaces as the i18n message ID
-	// (NoopTranslator loud-echo when no translator is wired); the legacy
-	// English literal "failed to ping database" was migrated to this key.
-	assert.Contains(t, err.Error(), "internal_database_ping_failed")
+	// HXC-097 §11.4.120: the package default is now the real embedded-bundle
+	// translator, so the ping-failure surfaces as resolved prose — the actual
+	// text an end user sees — not the raw message-ID key.
+	assert.Contains(t, err.Error(), "failed to ping database")
+	assert.NotContains(t, err.Error(), "internal_database_ping_failed",
+		"HXC-097 regression: package fell back to NoopTranslator (raw key leaked to user)")
 }
 
 // TestNew_InvalidCredentials tests connection with wrong credentials

@@ -43,11 +43,18 @@ func resetTranslator(t *testing.T) {
 	SetTranslator(nil)
 }
 
-func TestTr_DefaultsToNoopTranslator(t *testing.T) {
+// TestTr_DefaultsToRealBundleTranslator — §11.4.120 reconcile (HXC-097,
+// 2026-06-15). The package default is now the real embedded-bundle
+// translator installed at init(), so the default path resolves to bundle
+// PROSE. HXC-097 regression guard: a revert to NoopTranslator{} (or an
+// embed-load failure) re-surfaces the raw key and FAILs this test.
+func TestTr_DefaultsToRealBundleTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(stdctx.Background(), "internal_database_pool_not_initialized", nil)
-	if got != "internal_database_pool_not_initialized" {
-		t.Fatalf("tr default = %q, want raw message ID (loud echo)", got)
+	if got != "database pool is not initialized" {
+		t.Fatalf("tr default = %q, want resolved bundle prose %q "+
+			"(HXC-097: default must be the real embedded-bundle translator, not Noop)",
+			got, "database pool is not initialized")
 	}
 }
 
@@ -77,15 +84,20 @@ func TestTr_TranslatorErrorReturnsMessageID(t *testing.T) {
 	}
 }
 
-func TestSetTranslator_NilResetsToNoop(t *testing.T) {
+// TestSetTranslator_NilRestoresDefault — §11.4.120 reconcile (HXC-097,
+// 2026-06-15). SetTranslator(nil) now restores the package DEFAULT (the
+// real embedded-bundle translator), not NoopTranslator{} — so after wiring
+// a sentinel and nil-resetting, tr() resolves to bundle prose.
+func TestSetTranslator_NilRestoresDefault(t *testing.T) {
 	resetTranslator(t)
 	SetTranslator(sentinelTranslator{})
-	SetTranslator(nil) // explicit reset
+	SetTranslator(nil) // restore default
 	defer resetTranslator(t)
 
 	got := tr(stdctx.Background(), "internal_database_pool_not_initialized", nil)
-	if got != "internal_database_pool_not_initialized" {
-		t.Fatalf("tr after nil-reset = %q, want raw ID (Noop restored)", got)
+	if got != "database pool is not initialized" {
+		t.Fatalf("tr after nil-reset = %q, want resolved bundle prose %q (default restored)",
+			got, "database pool is not initialized")
 	}
 }
 
@@ -138,11 +150,12 @@ func TestHealthCheck_NotInitialized_GoesThroughTranslator(t *testing.T) {
 	}
 }
 
-// TestRawText_EmittedByDefault asserts that with no translator wired
-// (NoopTranslator), the pre-init guard emits the bundle message ID —
-// confirming the migration didn't accidentally pass an empty string
-// or a different literal.
-func TestRawText_EmittedByDefault(t *testing.T) {
+// TestResolvedProse_EmittedByDefault — §11.4.120 reconcile (HXC-097,
+// 2026-06-15). With the real embedded-bundle translator as the package
+// default, the pre-init guard surfaces the resolved bundle PROSE — the
+// actual text an end user sees. HXC-097 regression guard at the GetDB
+// call site: a revert to Noop re-surfaces the raw key and FAILs here.
+func TestResolvedProse_EmittedByDefault(t *testing.T) {
 	resetTranslator(t)
 
 	db := &Database{Pool: nil}
@@ -150,7 +163,12 @@ func TestRawText_EmittedByDefault(t *testing.T) {
 	if err == nil {
 		t.Fatal("GetDB(nil pool) returned no error")
 	}
-	if !strings.Contains(err.Error(), "internal_database_pool_not_initialized") {
-		t.Fatalf("GetDB error = %q, want raw message ID (Noop echo)", err.Error())
+	if !strings.Contains(err.Error(), "database pool is not initialized") {
+		t.Fatalf("GetDB error = %q, want resolved bundle prose %q (real-bundle default)",
+			err.Error(), "database pool is not initialized")
+	}
+	if strings.Contains(err.Error(), "internal_database_pool_not_initialized") {
+		t.Fatalf("GetDB error = %q still contains the raw message-ID key "+
+			"(HXC-097 regression: package fell back to NoopTranslator)", err.Error())
 	}
 }

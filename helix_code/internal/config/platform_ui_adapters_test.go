@@ -73,7 +73,7 @@ func TestDesktopUIAdapter(t *testing.T) {
 	assert.Equal(t, "helix_config_form", desktopForm.ID)
 	// CONST-046 round-444: Title routed through the i18n translator;
 	// default NoopTranslator echoes the message ID (loud echo).
-	assert.Equal(t, "internal_config_ui_form_title", desktopForm.Title)
+	assert.Equal(t, "HelixCode Configuration", desktopForm.Title) // HXC-097 §11.4.120: real-bundle default resolves prose
 	assert.Equal(t, "native_window", desktopForm.Type)
 	assert.Equal(t, "tabs", desktopForm.Layout)
 	assert.True(t, desktopForm.Modal)
@@ -167,7 +167,7 @@ func TestWebUIAdapter(t *testing.T) {
 
 	assert.Equal(t, "helix_config_form", webForm.ID)
 	// CONST-046 round-444: i18n message ID under NoopTranslator.
-	assert.Equal(t, "internal_config_ui_form_title", webForm.Title)
+	assert.Equal(t, "HelixCode Configuration", webForm.Title) // HXC-097 §11.4.120: real-bundle default resolves prose
 	assert.Equal(t, "spa_component", webForm.Type)
 	assert.Equal(t, "responsive_tabs", webForm.Layout)
 	assert.True(t, webForm.Responsive)
@@ -252,7 +252,7 @@ func TestMobileUIAdapter(t *testing.T) {
 
 	assert.Equal(t, "helix_config_form", mobileForm.ID)
 	// CONST-046 round-444: i18n message ID under NoopTranslator.
-	assert.Equal(t, "internal_config_ui_form_title", mobileForm.Title)
+	assert.Equal(t, "HelixCode Configuration", mobileForm.Title) // HXC-097 §11.4.120: real-bundle default resolves prose
 	assert.Equal(t, "mobile_screens", mobileForm.Type)
 	assert.Equal(t, "carousel", mobileForm.Layout)
 	assert.True(t, mobileForm.Responsive)
@@ -339,7 +339,7 @@ func TestTUIAdapter(t *testing.T) {
 
 	assert.Equal(t, "helix_config_form", tuiForm.ID)
 	// CONST-046 round-444: i18n message ID under NoopTranslator.
-	assert.Equal(t, "internal_config_ui_form_title", tuiForm.Title)
+	assert.Equal(t, "HelixCode Configuration", tuiForm.Title) // HXC-097 §11.4.120: real-bundle default resolves prose
 	assert.Equal(t, "tui_screens", tuiForm.Type)
 	assert.Equal(t, "menu_driven", tuiForm.Layout)
 	assert.Equal(t, "single", tuiForm.BorderStyle)
@@ -369,8 +369,8 @@ func TestTUIAdapter(t *testing.T) {
 	}
 
 	require.NotNil(t, appSection)
-	// CONST-046 round-444: i18n message ID under NoopTranslator.
-	assert.Equal(t, "internal_config_ui_section_application", appSection.Title)
+	// HXC-097 §11.4.120: real-bundle default resolves prose (was raw key under NoopTranslator).
+	assert.Equal(t, "Application", appSection.Title)
 	assert.NotEmpty(t, appSection.Fields)
 
 	// Verify fields
@@ -387,8 +387,8 @@ func TestTUIAdapter(t *testing.T) {
 
 	require.NotNil(t, nameField)
 	assert.Equal(t, "text", nameField.Type)
-	// CONST-046 round-444: i18n message ID under NoopTranslator.
-	assert.Equal(t, "internal_config_ui_field_app_name_label", nameField.Label)
+	// HXC-097 §11.4.120: real-bundle default resolves prose (was raw key under NoopTranslator).
+	assert.Equal(t, "Application Name", nameField.Label)
 	assert.NotEmpty(t, nameField.HelpText)
 }
 

@@ -45,7 +45,10 @@ func TestNew_InvalidConfig(t *testing.T) {
 	db, err := New(config)
 	assert.Error(t, err)
 	assert.Nil(t, db)
-	assert.Contains(t, err.Error(), "internal_database_ping_failed")
+	// HXC-097 §11.4.120: real-bundle default resolves prose, not the raw key.
+	assert.Contains(t, err.Error(), "failed to ping database")
+	assert.NotContains(t, err.Error(), "internal_database_ping_failed",
+		"HXC-097 regression: package fell back to NoopTranslator (raw key leaked to user)")
 }
 
 func TestDatabase_Close(t *testing.T) {
@@ -61,7 +64,7 @@ func TestDatabase_GetDB(t *testing.T) {
 	sqlDB, err := db.GetDB()
 	assert.Error(t, err)
 	assert.Nil(t, sqlDB)
-	assert.Contains(t, err.Error(), "internal_database_pool_not_initialized")
+	assert.Contains(t, err.Error(), "database pool is not initialized") // HXC-097 §11.4.120: real-bundle default resolves prose, not the raw key
 }
 
 func TestDatabase_HealthCheck(t *testing.T) {
@@ -69,7 +72,7 @@ func TestDatabase_HealthCheck(t *testing.T) {
 	db := &Database{Pool: nil}
 	err := db.HealthCheck()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "internal_database_pool_not_initialized")
+	assert.Contains(t, err.Error(), "database pool is not initialized") // HXC-097 §11.4.120: real-bundle default resolves prose, not the raw key
 }
 
 // TestNew_ValidConfig tests that connection string is properly formatted
@@ -116,14 +119,14 @@ func TestDatabase_ErrorScenarios(t *testing.T) {
 		sqlDB, err := db.GetDB()
 		assert.Error(t, err)
 		assert.Nil(t, sqlDB)
-		assert.Contains(t, err.Error(), "internal_database_pool_not_initialized")
+		assert.Contains(t, err.Error(), "database pool is not initialized") // HXC-097 §11.4.120: real-bundle default resolves prose, not the raw key
 	})
 
 	t.Run("HealthCheck_NilPool", func(t *testing.T) {
 		db := &Database{Pool: nil}
 		err := db.HealthCheck()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "internal_database_pool_not_initialized")
+		assert.Contains(t, err.Error(), "database pool is not initialized") // HXC-097 §11.4.120: real-bundle default resolves prose, not the raw key
 	})
 
 	t.Run("Close_NilPool", func(t *testing.T) {
@@ -326,7 +329,7 @@ func TestDatabase_Concurrency(t *testing.T) {
 		go func() {
 			err := db.HealthCheck()
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "internal_database_pool_not_initialized")
+			assert.Contains(t, err.Error(), "database pool is not initialized") // HXC-097 §11.4.120: real-bundle default resolves prose, not the raw key
 			done <- true
 		}()
 	}
@@ -866,7 +869,7 @@ func TestDatabase_GetDB_EdgeCases(t *testing.T) {
 		sqlDB, err := db.GetDB()
 		assert.Error(t, err)
 		assert.Nil(t, sqlDB)
-		assert.Contains(t, err.Error(), "internal_database_pool_not_initialized")
+		assert.Contains(t, err.Error(), "database pool is not initialized") // HXC-097 §11.4.120: real-bundle default resolves prose, not the raw key
 	})
 }
 
@@ -875,7 +878,7 @@ func TestDatabase_HealthCheck_EdgeCases(t *testing.T) {
 		db := &Database{Pool: nil}
 		err := db.HealthCheck()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "internal_database_pool_not_initialized")
+		assert.Contains(t, err.Error(), "database pool is not initialized") // HXC-097 §11.4.120: real-bundle default resolves prose, not the raw key
 	})
 }
 
