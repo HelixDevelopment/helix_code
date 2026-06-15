@@ -869,3 +869,23 @@ specify_e2e_test.go + debate_e2e_test.go exercise the speckit path provider-dire
 
 helix_agent memory persists by default with a local fallback, but the fallback is process-lifetime in-memory only: recall survives within a process but is LOST on restart unless a durable backend is configured. Investigate the fallback in the helix_agent submodule; make it disk-durable (e.g. local file/sqlite-backed store) so recall survives restart out-of-the-box, OR document precisely why not + the required backend. Submodule work: own commit + push discipline.
 
+## HXC-109 — Mobile apps are scaffolds — Android has no build.gradle/AndroidManifest, iOS has no Xcode project (not buildable -> not recordable)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** Android: buildable Gradle project + 67MB APK runs on live Genymotion (3 videos: connect/lifecycle/tasklist, real server task list via authenticated HTTP); 2 runtime issues fixed (JWT client-mode, JSON parse). iOS: buildable Xcode project (gomobile xcframework + rewired binding) builds+runs on iPhone14 sim (helixcode-ios-launch video, Go core OK). Both committed (1ffc9b69/38caa48d). Mobile apps no longer scaffolds.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Inventory found applications/android + applications/ios are single-screen scaffolds with hardcoded localhost and NO build system. Must create Android Gradle build + manifest and an iOS Xcode project (gomobile or native) before the apps build/run on the Genymotion emulator / iOS simulators for recording.
+
+## HXC-110 — Extend containers submodule to launch iOS simulators (operator-directed Apple-support mechanism)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** submodules/containers/pkg/applesim: host xcrun-simctl orchestration (Boot/Install/Launch/Record/Shutdown, by stable UDID §11.4.111), 16 tests pass incl -race, real host round-trip; cmd/applesim CLI. Submodule a0fa823 pushed all upstreams, meta pointer bumped.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Operator (2026-06-15): create a proper mechanism for starting mandatory iOS simulators through the containers submodule, extending it to support anything Apple-related. NOTE: iOS simulators run natively via xcrun simctl on macOS (cannot run inside Linux containers) — the containers submodule mechanism must orchestrate the host-native simctl lifecycle (boot/install/record) under its unified API. Investigate + extend containers (§11.4.76).
+

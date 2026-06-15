@@ -2185,31 +2185,6 @@ CLI/TUI/Web/Desktop(host display, operator-approved). Android Genymotion
 live via adb. Each recording must show real use-case scenarios, be
 analyzed, problems fixed/retested. Feeds the Status docs video-confirmed
 column. ONGOING multi-round.</p>
-<h2 id="hxc-109-mobile-apps-are-scaffolds-android-has-no-build.gradleandroidmanifest-ios-has-no-xcode-project-not-buildable---not-recordable">HXC-109
-— Mobile apps are scaffolds — Android has no
-build.gradle/AndroidManifest, iOS has no Xcode project (not buildable
--&gt; not recordable)</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
-Claude</p>
-<p>Inventory found applications/android + applications/ios are
-single-screen scaffolds with hardcoded localhost and NO build system.
-Must create Android Gradle build + manifest and an iOS Xcode project
-(gomobile or native) before the apps build/run on the Genymotion
-emulator / iOS simulators for recording.</p>
-<h2 id="hxc-110-extend-containers-submodule-to-launch-ios-simulators-operator-directed-apple-support-mechanism">HXC-110
-— Extend containers submodule to launch iOS simulators
-(operator-directed Apple-support mechanism)</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
-Claude</p>
-<p>Operator (2026-06-15): create a proper mechanism for starting
-mandatory iOS simulators through the containers submodule, extending it
-to support anything Apple-related. NOTE: iOS simulators run natively via
-xcrun simctl on macOS (cannot run inside Linux containers) — the
-containers submodule mechanism must orchestrate the host-native simctl
-lifecycle (boot/install/record) under its unified API. Investigate +
-extend containers (§11.4.76).</p>
 <h2 id="hxc-111-desktop-gui-shows-raw-i18n-keys-desktop_dashboard_header_activity_title-const-046-gap">HXC-111
 — Desktop GUI shows raw i18n keys
 (desktop_dashboard_header/_activity_title) — CONST-046 gap</h2>

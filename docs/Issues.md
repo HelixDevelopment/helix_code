@@ -584,24 +584,6 @@ Round-1 inventory landed: ~388 features catalogued (233 internal, 67 cmd/clients
 
 Foundation verified: DeepSeek V3 (strongest) + Mistral Large + Groq Llama-3.3-70B ensemble real through helix stack. Recordable now: CLI/TUI/Web/Desktop(host display, operator-approved). Android Genymotion live via adb. Each recording must show real use-case scenarios, be analyzed, problems fixed/retested. Feeds the Status docs video-confirmed column. ONGOING multi-round.
 
-## HXC-109 — Mobile apps are scaffolds — Android has no build.gradle/AndroidManifest, iOS has no Xcode project (not buildable -> not recordable)
-
-**Status:** Queued
-**Type:** Bug
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Inventory found applications/android + applications/ios are single-screen scaffolds with hardcoded localhost and NO build system. Must create Android Gradle build + manifest and an iOS Xcode project (gomobile or native) before the apps build/run on the Genymotion emulator / iOS simulators for recording.
-
-## HXC-110 — Extend containers submodule to launch iOS simulators (operator-directed Apple-support mechanism)
-
-**Status:** Queued
-**Type:** Task
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Operator (2026-06-15): create a proper mechanism for starting mandatory iOS simulators through the containers submodule, extending it to support anything Apple-related. NOTE: iOS simulators run natively via xcrun simctl on macOS (cannot run inside Linux containers) — the containers submodule mechanism must orchestrate the host-native simctl lifecycle (boot/install/record) under its unified API. Investigate + extend containers (§11.4.76).
-
 ## HXC-111 — Desktop GUI shows raw i18n keys (desktop_dashboard_header/_activity_title) — CONST-046 gap
 
 **Status:** Queued
