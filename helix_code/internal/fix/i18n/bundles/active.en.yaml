@@ -50,3 +50,6 @@ internal_fix_csrf_manual_review_required:
 
 internal_fix_validation_scan_failed:
   other: "validation scan failed: {{.Err}}"
+
+internal_fix_unreadable_file:
+  other: "Could not read {{.File}} during security scan ({{.Err}}) - cannot certify clean, manual review required"

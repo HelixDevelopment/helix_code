@@ -5,7 +5,7 @@ import "errors"
 type SymbolKind int
 
 const (
-	KindFunction  SymbolKind = iota
+	KindFunction SymbolKind = iota
 	KindMethod
 	KindVariable
 	KindClass
@@ -31,12 +31,12 @@ type CallGraph struct {
 }
 
 type ImpactResult struct {
-	Symbol         SymbolRef   `json:"symbol"`
-	Callers        []SymbolRef `json:"callers"`
-	Callees        []SymbolRef `json:"callees"`
-	AffectedFiles  []string    `json:"affected_files"`
-	BlastRadius    int         `json:"blast_radius"`
-	RiskScore      float64     `json:"risk_score"`
+	Symbol        SymbolRef   `json:"symbol"`
+	Callers       []SymbolRef `json:"callers"`
+	Callees       []SymbolRef `json:"callees"`
+	AffectedFiles []string    `json:"affected_files"`
+	BlastRadius   int         `json:"blast_radius"`
+	RiskScore     float64     `json:"risk_score"`
 }
 
 type RenameResult struct {
@@ -47,10 +47,11 @@ type RenameResult struct {
 }
 
 var (
-	ErrSymbolNotFound    = errors.New("symbol not found in codebase")
-	ErrRenameConflict    = errors.New("rename would create a naming conflict")
-	ErrRefactorNotSafe   = errors.New("refactoring is not safe — impact analysis required")
-	ErrNoCallGraph       = errors.New("no call graph available — run impact analysis first")
+	ErrSymbolNotFound  = errors.New("symbol not found in codebase")
+	ErrRenameConflict  = errors.New("rename would create a naming conflict")
+	ErrRefactorNotSafe = errors.New("refactoring is not safe — impact analysis required")
+	ErrNoCallGraph     = errors.New("no call graph available — run impact analysis first")
+	ErrPathOutsideRoot = errors.New("path escapes the configured root directory")
 )
 
 const (

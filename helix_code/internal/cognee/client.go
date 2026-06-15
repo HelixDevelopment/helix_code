@@ -61,14 +61,36 @@ func (c *Client) IsConnected() bool {
 	return c.connected
 }
 
-// GetBaseURL returns the base URL of the Cognee API
+// GetBaseURL returns the base URL of the Cognee API. The read is guarded by
+// c.mu because SetBaseURL mutates baseURL under the same lock — an unguarded
+// read here races a concurrent SetBaseURL.
 func (c *Client) GetBaseURL() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.baseURL
+}
+
+// getBaseURL is the lock-guarded internal accessor every request builder MUST
+// use to read baseURL. baseURL is mutable (SetBaseURL writes it under c.mu), so
+// reading c.baseURL directly while a request is in flight is a data race.
+func (c *Client) getBaseURL() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.baseURL
+}
+
+// getAPIKey is the lock-guarded internal accessor for apiKey. apiKey is mutable
+// (SetAPIKey writes it under c.mu), so reading c.apiKey directly in setHeaders
+// while SetAPIKey runs concurrently is a data race.
+func (c *Client) getAPIKey() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.apiKey
 }
 
 // TestConnection tests the connection to Cognee
 func (c *Client) TestConnection(ctx context.Context) bool {
-	url := fmt.Sprintf("%s/health", c.baseURL)
+	url := fmt.Sprintf("%s/health", c.getBaseURL())
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -99,7 +121,7 @@ func (c *Client) TestConnection(ctx context.Context) bool {
 
 // AddMemory adds a memory entry to Cognee
 func (c *Client) AddMemory(ctx context.Context, req *AddMemoryRequest) (*AddMemoryResponse, error) {
-	url := fmt.Sprintf("%s/api/memory", c.baseURL)
+	url := fmt.Sprintf("%s/api/memory", c.getBaseURL())
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -134,7 +156,7 @@ func (c *Client) AddMemory(ctx context.Context, req *AddMemoryRequest) (*AddMemo
 
 // SearchMemory searches for memories in Cognee
 func (c *Client) SearchMemory(ctx context.Context, req *SearchMemoryRequest) (*SearchMemoryResponse, error) {
-	url := fmt.Sprintf("%s/api/search", c.baseURL)
+	url := fmt.Sprintf("%s/api/search", c.getBaseURL())
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -173,7 +195,7 @@ func (c *Client) SearchMemory(ctx context.Context, req *SearchMemoryRequest) (*S
 
 // Cognify processes data into knowledge graphs
 func (c *Client) Cognify(ctx context.Context, req *CognifyRequest) (*CognifyResponse, error) {
-	url := fmt.Sprintf("%s/api/cognify", c.baseURL)
+	url := fmt.Sprintf("%s/api/cognify", c.getBaseURL())
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -210,7 +232,7 @@ func (c *Client) Cognify(ctx context.Context, req *CognifyRequest) (*CognifyResp
 
 // SearchInsights performs insight-based search using graph reasoning
 func (c *Client) SearchInsights(ctx context.Context, req *InsightsRequest) (*InsightsResponse, error) {
-	url := fmt.Sprintf("%s/api/search", c.baseURL)
+	url := fmt.Sprintf("%s/api/search", c.getBaseURL())
 
 	insightsReq := map[string]interface{}{
 		"query":       req.Query,
@@ -256,7 +278,7 @@ func (c *Client) SearchInsights(ctx context.Context, req *InsightsRequest) (*Ins
 
 // SearchGraphCompletion performs LLM-powered graph completion search
 func (c *Client) SearchGraphCompletion(ctx context.Context, query string, datasets []string, limit int) (*SearchMemoryResponse, error) {
-	url := fmt.Sprintf("%s/api/search", c.baseURL)
+	url := fmt.Sprintf("%s/api/search", c.getBaseURL())
 
 	searchReq := map[string]interface{}{
 		"query":       query,
@@ -302,7 +324,7 @@ func (c *Client) SearchGraphCompletion(ctx context.Context, query string, datase
 
 // ProcessCodePipeline processes code through Cognee's code understanding pipeline
 func (c *Client) ProcessCodePipeline(ctx context.Context, req *CodePipelineRequest) (*CodePipelineResponse, error) {
-	url := fmt.Sprintf("%s/api/code-pipeline/index", c.baseURL)
+	url := fmt.Sprintf("%s/api/code-pipeline/index", c.getBaseURL())
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -337,7 +359,7 @@ func (c *Client) ProcessCodePipeline(ctx context.Context, req *CodePipelineReque
 
 // CreateDataset creates a new dataset
 func (c *Client) CreateDataset(ctx context.Context, req *CreateDatasetRequest) (*DatasetResponse, error) {
-	url := fmt.Sprintf("%s/api/datasets", c.baseURL)
+	url := fmt.Sprintf("%s/api/datasets", c.getBaseURL())
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -372,7 +394,7 @@ func (c *Client) CreateDataset(ctx context.Context, req *CreateDatasetRequest) (
 
 // ListDatasets retrieves all datasets
 func (c *Client) ListDatasets(ctx context.Context) (*DatasetsResponse, error) {
-	url := fmt.Sprintf("%s/api/datasets", c.baseURL)
+	url := fmt.Sprintf("%s/api/datasets", c.getBaseURL())
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -402,7 +424,7 @@ func (c *Client) ListDatasets(ctx context.Context) (*DatasetsResponse, error) {
 
 // GetDataset retrieves a specific dataset
 func (c *Client) GetDataset(ctx context.Context, name string) (*Dataset, error) {
-	url := fmt.Sprintf("%s/api/datasets/%s", c.baseURL, name)
+	url := fmt.Sprintf("%s/api/datasets/%s", c.getBaseURL(), name)
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -436,7 +458,7 @@ func (c *Client) GetDataset(ctx context.Context, name string) (*Dataset, error) 
 
 // DeleteDataset deletes a dataset
 func (c *Client) DeleteDataset(ctx context.Context, name string) error {
-	url := fmt.Sprintf("%s/api/datasets/%s", c.baseURL, name)
+	url := fmt.Sprintf("%s/api/datasets/%s", c.getBaseURL(), name)
 
 	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", url, nil)
 	if err != nil {
@@ -461,7 +483,7 @@ func (c *Client) DeleteDataset(ctx context.Context, name string) error {
 
 // VisualizeGraph retrieves graph visualization data
 func (c *Client) VisualizeGraph(ctx context.Context, req *GraphVisualizationRequest) (*GraphVisualizationResponse, error) {
-	url := fmt.Sprintf("%s/api/visualize", c.baseURL)
+	url := fmt.Sprintf("%s/api/visualize", c.getBaseURL())
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -496,7 +518,7 @@ func (c *Client) VisualizeGraph(ctx context.Context, req *GraphVisualizationRequ
 
 // DeleteData removes data from a dataset
 func (c *Client) DeleteData(ctx context.Context, req *DeleteDataRequest) (*DeleteDataResponse, error) {
-	url := fmt.Sprintf("%s/api/delete", c.baseURL)
+	url := fmt.Sprintf("%s/api/delete", c.getBaseURL())
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -531,7 +553,7 @@ func (c *Client) DeleteData(ctx context.Context, req *DeleteDataRequest) (*Delet
 
 // GetHealth retrieves health status
 func (c *Client) GetHealth(ctx context.Context) (*HealthStatus, error) {
-	url := fmt.Sprintf("%s/health", c.baseURL)
+	url := fmt.Sprintf("%s/health", c.getBaseURL())
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -583,7 +605,7 @@ func (c *Client) GetHealth(ctx context.Context) (*HealthStatus, error) {
 
 // GetStatistics retrieves Cognee statistics
 func (c *Client) GetStatistics(ctx context.Context) (*CogneeStatistics, error) {
-	url := fmt.Sprintf("%s/api/stats", c.baseURL)
+	url := fmt.Sprintf("%s/api/stats", c.getBaseURL())
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -615,7 +637,7 @@ func (c *Client) GetStatistics(ctx context.Context) (*CogneeStatistics, error) {
 
 // AddBatchMemory adds multiple memories in batch
 func (c *Client) AddBatchMemory(ctx context.Context, req *BatchMemoryRequest) (*BatchMemoryResponse, error) {
-	url := fmt.Sprintf("%s/api/memory/batch", c.baseURL)
+	url := fmt.Sprintf("%s/api/memory/batch", c.getBaseURL())
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -650,7 +672,7 @@ func (c *Client) AddBatchMemory(ctx context.Context, req *BatchMemoryRequest) (*
 
 // SubmitFeedback submits feedback on search results
 func (c *Client) SubmitFeedback(ctx context.Context, req *FeedbackRequest) (*FeedbackResponse, error) {
-	url := fmt.Sprintf("%s/api/feedback", c.baseURL)
+	url := fmt.Sprintf("%s/api/feedback", c.getBaseURL())
 
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -741,8 +763,8 @@ func (c *Client) startCogneeContainer(ctx context.Context) error {
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
-	if c.apiKey != "" {
-		req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	if key := c.getAPIKey(); key != "" {
+		req.Header.Set("Authorization", "Bearer "+key)
 	}
 }
 

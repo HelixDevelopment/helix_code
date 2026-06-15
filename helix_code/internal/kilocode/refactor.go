@@ -3,6 +3,7 @@ package kilocode
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -14,7 +15,54 @@ func NewRefactorer(rootDir string) *Refactorer {
 	return &Refactorer{rootDir: rootDir}
 }
 
+// resolveWithinRoot validates that sourceFile resolves to a location
+// inside the Refactorer's rootDir and returns the cleaned absolute path.
+// Any path that escapes the root (via "..", an absolute path pointing
+// elsewhere, or a symlink traversal) is rejected with ErrPathOutsideRoot.
+// Without this guard a caller-supplied "file" param could read/overwrite
+// arbitrary files on disk (path traversal). rootDir == "" means no root
+// is configured, which we treat as a hard rejection rather than an open
+// door (a refactorer with no scope must not write anywhere).
+func (r *Refactorer) resolveWithinRoot(sourceFile string) (string, error) {
+	if r.rootDir == "" {
+		return "", ErrPathOutsideRoot
+	}
+	rootAbs, err := filepath.Abs(r.rootDir)
+	if err != nil {
+		return "", fmt.Errorf("resolve root: %w", err)
+	}
+	// Resolve symlinks on the root so the prefix comparison is against
+	// the real directory (e.g. macOS /var -> /private/var).
+	if resolved, err := filepath.EvalSymlinks(rootAbs); err == nil {
+		rootAbs = resolved
+	}
+
+	target := sourceFile
+	if !filepath.IsAbs(target) {
+		target = filepath.Join(rootAbs, target)
+	}
+	target = filepath.Clean(target)
+	// If the target exists, resolve its symlinks too so a symlinked file
+	// inside the root that points outside is caught.
+	if resolved, err := filepath.EvalSymlinks(target); err == nil {
+		target = resolved
+	}
+
+	rel, err := filepath.Rel(rootAbs, target)
+	if err != nil {
+		return "", ErrPathOutsideRoot
+	}
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", ErrPathOutsideRoot
+	}
+	return target, nil
+}
+
 func (r *Refactorer) ExtractMethod(sourceFile, funcName string, startLine, endLine int) error {
+	sourceFile, err := r.resolveWithinRoot(sourceFile)
+	if err != nil {
+		return fmt.Errorf("source file: %w", err)
+	}
 	if _, err := os.Stat(sourceFile); err != nil {
 		return fmt.Errorf("source file: %w", err)
 	}
@@ -53,6 +101,10 @@ func (r *Refactorer) ExtractMethod(sourceFile, funcName string, startLine, endLi
 }
 
 func (r *Refactorer) InlineCall(sourceFile, funcName string) error {
+	sourceFile, err := r.resolveWithinRoot(sourceFile)
+	if err != nil {
+		return fmt.Errorf("source file: %w", err)
+	}
 	src, err := os.ReadFile(sourceFile)
 	if err != nil {
 		return fmt.Errorf("read file: %w", err)

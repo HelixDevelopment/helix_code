@@ -173,7 +173,14 @@ func fixHardcodedSecret(projectPath, issue string, logger *logging.Logger) bool 
 	for _, file := range files {
 		content, err := os.ReadFile(file)
 		if err != nil {
-			continue
+			// Anti-bluff (CONST-035 / Article XI §11.9): a file we could
+			// not read MUST NOT be silently treated as clean. Reporting the
+			// project "clean" when a target file was never inspected is a
+			// PASS-bluff — a real secret in an unreadable file would be
+			// missed. A security scanner that cannot read a target file
+			// cannot certify it; fail safe.
+			logger.Error("%s", tr(ctx, "internal_fix_unreadable_file", map[string]any{"File": file, "Err": err.Error()}))
+			return false
 		}
 
 		contentStr := string(content)
@@ -202,7 +209,10 @@ func fixSQLInjection(projectPath, issue string, logger *logging.Logger) bool {
 	for _, file := range files {
 		content, err := os.ReadFile(file)
 		if err != nil {
-			continue
+			// Anti-bluff (CONST-035 / Article XI §11.9): an unreadable target
+			// file MUST NOT be certified clean. Fail safe instead of skipping.
+			logger.Error("%s", tr(ctx, "internal_fix_unreadable_file", map[string]any{"File": file, "Err": err.Error()}))
+			return false
 		}
 
 		contentStr := string(content)
@@ -232,7 +242,10 @@ func fixPathTraversal(projectPath, issue string, logger *logging.Logger) bool {
 	for _, file := range files {
 		content, err := os.ReadFile(file)
 		if err != nil {
-			continue
+			// Anti-bluff (CONST-035 / Article XI §11.9): an unreadable target
+			// file MUST NOT be certified clean. Fail safe instead of skipping.
+			logger.Error("%s", tr(ctx, "internal_fix_unreadable_file", map[string]any{"File": file, "Err": err.Error()}))
+			return false
 		}
 
 		contentStr := string(content)
@@ -286,7 +299,10 @@ func fixWeakCrypto(projectPath, issue string, logger *logging.Logger) bool {
 	for _, file := range files {
 		content, err := os.ReadFile(file)
 		if err != nil {
-			continue
+			// Anti-bluff (CONST-035 / Article XI §11.9): an unreadable target
+			// file MUST NOT be certified clean. Fail safe instead of skipping.
+			logger.Error("%s", tr(ctx, "internal_fix_unreadable_file", map[string]any{"File": file, "Err": err.Error()}))
+			return false
 		}
 
 		contentStr := string(content)
