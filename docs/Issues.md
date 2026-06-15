@@ -602,3 +602,21 @@ Inventory found applications/android + applications/ios are single-screen scaffo
 
 Operator (2026-06-15): create a proper mechanism for starting mandatory iOS simulators through the containers submodule, extending it to support anything Apple-related. NOTE: iOS simulators run natively via xcrun simctl on macOS (cannot run inside Linux containers) — the containers submodule mechanism must orchestrate the host-native simctl lifecycle (boot/install/record) under its unified API. Investigate + extend containers (§11.4.76).
 
+## HXC-111 — Desktop GUI shows raw i18n keys (desktop_dashboard_header/_activity_title) — CONST-046 gap
+
+**Status:** Queued
+**Type:** Bug
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+After fixing the launch crash, the desktop dashboard renders raw message-ID keys (desktop_dashboard_header, desktop_dashboard_activity_title) instead of localized text. Likely the desktop i18n bundle is missing those keys OR Fyne locale-parse error ('subtag at unknown') broke bundle loading. Real CONST-046 defect visible in helixcode-desktop-dashboard-20260615.mp4.
+
+## HXC-112 — Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript synthetic clicks — need cliclick/real-event automation to record LLM-chat in-GUI
+
+**Status:** Queued
+**Type:** Task
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Fyne renders via OpenGL (no native accessibility); osascript 'click at' does not register on the canvas, so in-GUI feature interaction (LLM Chat, tab nav) cannot be driven for recording via AppleScript. helixcode-desktop-dashboard-20260615.mp4 honestly shows the working dashboard + live uptime but not feature interaction. Need cliclick (real CGEvent mouse) or a Fyne test-driver to record the desktop LLM-chat feature end-to-end.
+

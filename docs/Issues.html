@@ -2210,5 +2210,31 @@ xcrun simctl on macOS (cannot run inside Linux containers) — the
 containers submodule mechanism must orchestrate the host-native simctl
 lifecycle (boot/install/record) under its unified API. Investigate +
 extend containers (§11.4.76).</p>
+<h2 id="hxc-111-desktop-gui-shows-raw-i18n-keys-desktop_dashboard_header_activity_title-const-046-gap">HXC-111
+— Desktop GUI shows raw i18n keys
+(desktop_dashboard_header/_activity_title) — CONST-046 gap</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>After fixing the launch crash, the desktop dashboard renders raw
+message-ID keys (desktop_dashboard_header,
+desktop_dashboard_activity_title) instead of localized text. Likely the
+desktop i18n bundle is missing those keys OR Fyne locale-parse error
+(‘subtag at unknown’) broke bundle loading. Real CONST-046 defect
+visible in helixcode-desktop-dashboard-20260615.mp4.</p>
+<h2 id="hxc-112-desktop-gui-feature-recording-fyne-opengl-canvas-ignores-osascript-synthetic-clicks-need-cliclickreal-event-automation-to-record-llm-chat-in-gui">HXC-112
+— Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript
+synthetic clicks — need cliclick/real-event automation to record
+LLM-chat in-GUI</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Fyne renders via OpenGL (no native accessibility); osascript ‘click
+at’ does not register on the canvas, so in-GUI feature interaction (LLM
+Chat, tab nav) cannot be driven for recording via AppleScript.
+helixcode-desktop-dashboard-20260615.mp4 honestly shows the working
+dashboard + live uptime but not feature interaction. Need cliclick (real
+CGEvent mouse) or a Fyne test-driver to record the desktop LLM-chat
+feature end-to-end.</p>
 </body>
 </html>
