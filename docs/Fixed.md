@@ -767,3 +767,25 @@ gomobile bind fails because go list -m -json all errors: ~22 digital.vasic.{cach
 
 Default config/config.yaml + the operator's ~/.config/helixcode/config.json have no top-level Version -> config validation fails with 'version is required' (internal_config_validate_version_required), blocking desktop/aurora/harmony status/system/version (and CLI subsystems) for a fresh user. Found while recording client videos (had to use a throwaway minimal valid config). Fix: ship a valid default Version in config/config.yaml (+ docs), or default it in config.Load when absent.
 
+## HXC-077 — T1.5 context-window percentage indicator (partial)
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** TUI status bar now renders honest context-window USED-% (commit 6e03fe15). sessionUsedTokens accumulates real per-turn tokens; window from catalogue ContextSize->GetContextWindow; OMITS when unknown (CONST-035); label i18n-routed via new terminal_ui_chat_context_usage key (CONST-046). Guard context_usage_test.go: GREEN with key, RED without (raw-key echo exit 1), restored GREEN. Full terminal_ui pkg ok; build exit 0.
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Context-window usage percentage indicator scaffolded (commit 3c9d3495, task T1.5); REMAINING: live token-accounting wiring + UI verification across TUI/desktop still pending — keep open until the indicator reflects real per-session usage.
+
+## HXC-078 — T1.6 SKILL.md precedence resolution (partial)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** FindMatching/List already resolve overlapping matches deterministically by lexicographic name (sort.Strings, documented contract markdown_skills.go:194) — gap was missing coverage, not a bug. Added TestSkillRegistry_FindMatching_OverlappingPatternsDeterministic (insertion-order independence + 50-iter stability + lexicographic order), PASS; full internal/commands pkg ok; build exit 0. Commit 6e03fe15.
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+SKILL.md precedence ordering partially implemented (commit 51302bf8, task T1.6); REMAINING: full precedence-conflict resolution + tests covering overlapping skill definitions still outstanding — keep open until precedence is fully resolved and tested.
+
