@@ -345,40 +345,96 @@ func TestMemoryOptimization(t *testing.T) {
 	t.Log("✅ Memory optimization validated")
 }
 
-// TestResourceCleanup validates proper resource cleanup
+// TestResourceCleanup validates proper resource cleanup.
+//
+// This test asserts a DELTA, not an absolute process-wide threshold. The thing
+// under test is the create→operate→Cleanup() cycle: a correct cycle reclaims its
+// own allocations so the live heap does NOT grow without bound as the cycle
+// repeats. An absolute "HeapObjects < 10000" check is order-dependent and a false
+// signal — when this test runs after the high-load tests (TestHighLoadAuthentication
+// fires 32k+ requests over ~60s), the Go runtime / net.http idle-connection pools /
+// test harness leave ~49k objects of process-wide residue in the heap BEFORE this
+// test even starts (captured evidence: TestMemoryOptimization, running immediately
+// prior, reports ~49.5k objects; this test's own 10 cycles then move the count by
+// only ~5 objects). That residue is neither allocated nor owned by the cleanup-under-
+// test, so an absolute threshold measures the wrong thing. The sibling
+// TestMemoryOptimization already downgraded the identical absolute check to a warning
+// for the same reason ("modern Go may have more objects").
+//
+// We therefore establish a post-warm-up baseline, run the remaining cycles, GC, and
+// assert the live-heap delta stays within a generous per-cycle bound — a real,
+// falsifiable anti-leak assertion (a genuine leak in the create/cleanup cycle would
+// grow the heap roughly linearly with iterations and breach the bound) that is robust
+// to whatever residue earlier tests left behind.
 func TestResourceCleanup(t *testing.T) {
 	t.Log("🧹 Testing resource cleanup...")
-	
-	// Test multiple framework creations and cleanups
-	for i := 0; i < 10; i++ {
+
+	const totalCycles = 10
+	const warmupCycles = 1 // first cycle primes lazily-initialised, one-time allocations
+
+	runCycle := func() {
 		framework := NewPhase3Framework(t)
-		
+
 		// Perform some operations
 		resp, err := framework.GET(t, "/health")
 		if err == nil {
 			resp.Body.Close()
 		}
-		
+
 		// Cleanup
 		framework.Cleanup(t)
 	}
-	
-	// Force garbage collection and check for leaks
+
+	// Warm-up cycles: prime one-time/lazy allocations so they are not mistaken
+	// for a per-cycle leak in the measured window.
+	for i := 0; i < warmupCycles; i++ {
+		runCycle()
+	}
+
+	// Baseline AFTER warm-up + GC: this baselines out all process-wide residue
+	// from earlier tests in the same process, so the assertion is order-independent.
 	runtime.GC()
 	time.Sleep(100 * time.Millisecond)
-	
-	var m runtime.MemStats
-	runtime.ReadMemStats(&m)
-	
-	t.Logf("📊 Resource Cleanup Analysis:")
-	t.Logf("   Heap Objects: %d", m.HeapObjects)
-	t.Logf("   Heap Allocated: %d bytes", m.HeapAlloc)
-	t.Logf("   Heap In Use: %d bytes", m.HeapInuse)
-	t.Logf("   GC Runs: %d", m.NumGC)
-	
-	assert.Less(t, m.HeapObjects, uint64(10000), "Should not have excessive heap objects after cleanup")
-	assert.Less(t, m.HeapAlloc, uint64(50*1024*1024), "Heap allocation should be reasonable")
-	
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
+	// Measured cycles: the create→operate→cleanup loop under test.
+	measuredCycles := totalCycles - warmupCycles
+	for i := 0; i < measuredCycles; i++ {
+		runCycle()
+	}
+
+	// Force garbage collection and re-measure to detect retained (leaked) objects.
+	runtime.GC()
+	time.Sleep(100 * time.Millisecond)
+	var after runtime.MemStats
+	runtime.ReadMemStats(&after)
+
+	// Live-heap deltas across the measured cycles. Use signed arithmetic because a
+	// correctly-cleaning cycle frequently leaves the count flat or lower than baseline.
+	objectsDelta := int64(after.HeapObjects) - int64(before.HeapObjects)
+	allocDelta := int64(after.HeapAlloc) - int64(before.HeapAlloc)
+
+	t.Logf("📊 Resource Cleanup Analysis (delta over %d measured cycles):", measuredCycles)
+	t.Logf("   Heap Objects: %d → %d (delta %+d)", before.HeapObjects, after.HeapObjects, objectsDelta)
+	t.Logf("   Heap Allocated: %d → %d bytes (delta %+d)", before.HeapAlloc, after.HeapAlloc, allocDelta)
+	t.Logf("   Heap In Use: %d bytes", after.HeapInuse)
+	t.Logf("   GC Runs: %d", after.NumGC)
+
+	// A genuine per-cycle leak grows the live heap roughly linearly with iterations.
+	// These bounds are deliberately generous (well above measured no-leak noise of a
+	// few objects / a few KB) so the test is robust, yet a real leak — which would
+	// accumulate thousands of objects / many MB across the cycles — still trips them.
+	const maxObjectGrowthPerCycle = 2000
+	const maxAllocGrowthPerCycle = 1 * 1024 * 1024 // 1 MiB
+	maxObjectGrowth := int64(maxObjectGrowthPerCycle * measuredCycles)
+	maxAllocGrowth := int64(maxAllocGrowthPerCycle * measuredCycles)
+
+	assert.Less(t, objectsDelta, maxObjectGrowth,
+		"Live heap objects should not grow unbounded across create/cleanup cycles (leak indicator)")
+	assert.Less(t, allocDelta, maxAllocGrowth,
+		"Live heap allocation should not grow unbounded across create/cleanup cycles (leak indicator)")
+
 	t.Log("✅ Resource cleanup validated")
 }
 
