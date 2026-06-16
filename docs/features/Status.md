@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Revision | 5 |
+| Revision | 6 |
 | Created | 2026-06-15 |
-| Last modified | 2026-06-15 |
+| Last modified | 2026-06-16 |
 | Status | active (population in progress) |
 | Status summary | docs/features/Status_Summary.md |
 | Continuation | docs/CONTINUATION.md |
@@ -27,6 +27,18 @@ covenant (§11.4.45 / §11.4.53 / §11.4.56 / §11.4.57 / CONST-063 / CONST-064)
 - [Status dimensions (legend)](#status-dimensions-legend)
 - [Population progress](#population-progress)
 - [Feature inventory](#feature-inventory)
+- [CLI / TUI / Web / Desktop / Mobile clients + cmd tools](#cli-tui-web-desktop-mobile-clients-cmd-tools)
+  - [Honesty notes (anti-bluff)](#honesty-notes-anti-bluff)
+- [Deepened inventory (round 2)](#deepened-inventory-round-2)
+  - [Internal packages (round-1 partial/unknown → deepened)](#internal-packages-round-1-partialunknown-deepened)
+  - [Owned submodules (round-1 umbrella rows → deepened principal packages)](#owned-submodules-round-1-umbrella-rows-deepened-principal-packages)
+  - [Round-2 coverage notes](#round-2-coverage-notes)
+- [Internal services + infrastructure](#internal-services-infrastructure)
+  - [Coverage notes](#coverage-notes)
+  - [Regression-guard coverage (§11.4.118 / §11.4.135 round)](#regression-guard-coverage-11.4.118-11.4.135-round-this-session)
+- [Ported cli_agents capabilities](#ported-cli_agents-capabilities)
+- [Owned-submodule capabilities](#owned-submodule-capabilities)
+  - [Coverage-depth honesty](#coverage-depth-honesty)
 - [Inventory sources](#inventory-sources)
 
 ## Status dimensions (legend)
@@ -57,10 +69,22 @@ else is marked truthfully. Population is an ongoing program, NOT a one-shot clai
 
 | Slice | Scope | Status |
 |---|---|---|
-| internal services + infra | `helix_code/internal/*` (72 pkgs) | inventory dispatched |
-| cmd tools + client apps | `helix_code/cmd/*` (21) + `applications/*` (cli/tui/web/desktop/mobile) | inventory dispatched |
-| owned submodules | `submodules/*` (70+) | inventory dispatched |
-| ported cli_agents capabilities | `cli_agents/*` → HelixCode | inventory dispatched |
+| internal services + infra | `helix_code/internal/*` (73 pkgs) | complete — every package has ≥1 row (rev6) |
+| cmd tools + client apps | `helix_code/cmd/*` (11 dirs) + `applications/*` (cli/tui/web/desktop/mobile) | complete — all cmd tools + 6 clients rowed |
+| owned submodules | `submodules/*` (50 inventoried; principal capabilities) | complete (umbrella + deepened principal pkgs) |
+| ported cli_agents capabilities | `cli_agents/*` (51 vendored) → HelixCode landed ports | complete — landed ports + planned, honest |
+| §11.4.118/§11.4.135 regression-guard round | 36 internal pkgs, 43 guard/race files | complete — Tests-dimension upgrade tabled (rev6) |
+
+> **rev6 completeness gap-pass (2026-06-16):** cross-checked the live table against
+> `ls helix_code/internal/` (73 pkgs), `helix_code/cmd/*` (11 dirs),
+> `helix_code/applications/*` (8), `helix_code/internal/server` endpoint groups,
+> the `cli_agents/` catalogue (51), and `submodules/*`. Result: every internal
+> package, every cmd tool, every client app, every HTTP API group, and every
+> inventoried submodule now maps to ≥1 feature row OR a documented exclusion. The
+> single remaining internal-package gap (`internal/i18n_wiring`) was closed with a
+> row; the session's §11.4.118 guard/race coverage across 36 packages was tabled
+> as an honest Tests-dimension upgrade. No feature was fabricated — every added
+> row reflects code read this round.
 
 ## Feature inventory
 
@@ -169,7 +193,7 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 
 - **Desktop chat re-record (Rev 5, 2026-06-15)**: HXC-112 unblocked — the Fyne LLM-chat interaction is now recorded AUTONOMOUSLY (no OS synthetic input) via the Fyne software painter (`software.NewCanvas().Capture()` drives the real themed chat widgets + the real DeepSeek provider): `helixcode-desktop-chat-themed-20260615.mp4` (real DeepSeek "2+2 equals 4" rendered in brand-themed pixels + read from a frame extracted from the mp4 itself; 49 frames, 12.25s, liveness verified). The desktop client now has BOTH dashboard (window-scoped `screencapture -l`) and chat (software-painter) themed real-LLM recordings.
 
-- **Known §11.4.153 sync-machinery gaps (Rev 5, honest per §11.4.6 — NOT bluffed):** the ledger's *coverage* is comprehensive (enumerated reconciliation: every client / cmd tool / internal production package / functionality submodule maps to a row or a documented exclusion; 563 feature rows), but three sync/format gaps remain, named here as follow-ups: (a) **no §11.4.86 drift-proof fingerprint sidecar** beside Status.md (a roster sha256 of sorted feature-keys + sorted video-artefacts); (b) **source↔output drift** — this Status.md has been hand-edited (rev2–5 video annotations) and now diverges from its generator sources (`_status_header.md` + `inventory/cmd_and_clients.md`), so re-running the `scripts/generate_features_status.sh` / docs_chain regen would REGRESS the rich annotations — the rev2–5 deltas MUST be back-ported into the generator sources before any regen (same generated-vs-hand-edited reconciliation class as the `docs/workable_items.db` DB↔MD drift); (c) Status_Summary.docx now generated (gap closed this rev). Gaps (a)+(b) are deferred operator-surfaced reconciliation items, not silent.
+- **Known §11.4.153 sync-machinery gaps (Rev 5, honest per §11.4.6 — NOT bluffed):** the ledger's *coverage* is comprehensive (enumerated reconciliation: every client / cmd tool / internal production package / functionality submodule maps to a row or a documented exclusion; 564 feature rows as of rev6, + a 36-pkg §11.4.118 guard/race table), but three sync/format gaps remain, named here as follow-ups: (a) **no §11.4.86 drift-proof fingerprint sidecar** beside Status.md (a roster sha256 of sorted feature-keys + sorted video-artefacts); (b) **source↔output drift** — this Status.md has been hand-edited (rev2–5 video annotations) and now diverges from its generator sources (`_status_header.md` + `inventory/cmd_and_clients.md`), so re-running the `scripts/generate_features_status.sh` / docs_chain regen would REGRESS the rich annotations — the rev2–5 deltas MUST be back-ported into the generator sources before any regen (same generated-vs-hand-edited reconciliation class as the `docs/workable_items.db` DB↔MD drift); (c) Status_Summary.docx now generated (gap closed this rev). Gaps (a)+(b) are deferred operator-surfaced reconciliation items, not silent.
 
 **Feature count: 67 rows** (CLI REPL 14, CLI subcommand groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7, desktop 6, mobile 8, other cmd tools 11 + security_scan 1).
 
@@ -390,7 +414,7 @@ helix_qa 14, panoptic 10, distributed across the wiring model).
 
 ## Internal services + infrastructure
 
-Inventory of every feature under `helix_code/internal/*` (72 packages). Assessed
+Inventory of every feature under `helix_code/internal/*` (73 packages). Assessed
 from code evidence (impl reality, wiring, `_test.go` presence) per CONST-035 /
 §11.4.107 anti-bluff. `📹 Video` is `no` for every row (recordings are the
 conductor's job once a real analyzed recording exists); `Overall` is never
@@ -480,6 +504,7 @@ conductor's job once a real analyzed recording exists); `Overall` is never
 | service | internal/hooks | priority-based hook execution | done | yes | yes | unit | no | no | no | native | working-untaped |
 | service | internal/hooks | async/sync hook execution | done | yes | yes | unit | no | no | no | native | working-untaped |
 | infrastructure | internal/i18nwiring | i18n catalog wire-all (multi-lang) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| infrastructure | internal/i18n_wiring | i18n end-to-end wiring integration check (wiring_integration_test.go) | done | yes | yes | integ | no | no | no | native | working-untaped |
 | infrastructure | internal/infraboot | on-demand infra boot (EnsureInfra) | done | yes | unknown | unit,integ | no | no | no | native | working-untaped |
 | service | internal/kilocode | call-graph build + query | done | yes | unknown | unit | no | no | no | native | working-untaped |
 | service | internal/kilocode | symbol rename engine | done | yes | unknown | unit | no | no | no | native | working-untaped |
@@ -662,7 +687,65 @@ conductor's job once a real analyzed recording exists); `Overall` is never
 - Every `Real-use=unknown` and every `working-untaped` row is a candidate for a
   recorded scenario; none is video-confirmed yet (📹 `no` throughout).
 
-233 features inventoried across 72 packages.
+234 features inventoried across 73 packages (the `i18n_wiring` end-to-end
+integration package added this round closes the last internal-package gap —
+every package under `helix_code/internal/*` now has ≥1 feature row).
+
+### Regression-guard coverage (§11.4.118 / §11.4.135 round — this session)
+
+The 2026-06-16 discovery-pressure round (§11.4.118) landed STANDING regression
+guards (§11.4.135) and concurrency (`-race`) guards across the packages below.
+These are REAL `*_guard_test.go` / `*_race_test.go` sources that reproduce a
+historical defect (`RED_MODE=1`) and stand as the GREEN regression guard
+(`RED_MODE=0`) per §11.4.115, OR assert data-race-freedom under `go test -race`.
+They are honestly an UPGRADE to the `Tests` dimension of the corresponding rows
+above (baseline `unit` → now `unit` + standing-guard / race-validated). `📹 Video`
+stays `no` (these are non-visual logic/concurrency guards, not user-facing
+surfaces). Evidence: the named test files in each package; all pass under
+`go test -race` per the round's captured runs.
+
+| Component | Guard/race file(s) | Kind | Tests | Overall |
+|---|---|---|---|---|
+| internal/clarification | *_guard_test.go | standing regression guard (§11.4.135) | unit,guard | working-untaped |
+| internal/cognee | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/commands | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/config | *_guard_test.go (×2) | standing regression guard | unit,guard | working-untaped |
+| internal/continua | *_guard_test.go (×2) | standing regression guard | unit,guard | working-untaped |
+| internal/database | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/deployment | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/editor | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/fix | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/focus | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/helixqa | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
+| internal/hooks | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
+| internal/infraboot | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
+| internal/llm | llamacpp_provider_guard_test.go; load_balancer_race_test.go | guard + race | unit,integ,guard,race | working-untaped |
+| internal/logging | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/logo | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/memory | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
+| internal/persistence | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/planner | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/plantree | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/plugins | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/project | *_guard_test.go (×2) | standing regression guard | unit,guard | working-untaped |
+| internal/projectmemory | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/provider | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/providers | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
+| internal/quality | *_guard_test.go (×2) | standing regression guard | unit,guard | working-untaped |
+| internal/render | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/repomap | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/roocode | *_guard_test.go | standing regression guard | unit,guard | partial |
+| internal/rules | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/server | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
+| internal/session | manager_callback_race_test.go; transcript_store_guard_test.go | guard + race | unit,guard,race | working-untaped |
+| internal/substrate | dispatcher_shutdown_race_test.go; raceflag_race_test.go | race (concurrency) | unit,race | partial |
+| internal/task | getter_snapshot_race_test.go | race (concurrency) | unit,race | working-untaped |
+| internal/voice | *_guard_test.go | standing regression guard | unit,guard | partial |
+| internal/workspace | *_guard_test.go | standing regression guard | unit,guard | partial |
+
+Count: **36 packages** carry the new §11.4.118/§11.4.135 guard/race coverage
+(43 guard/race test files total). This is an honest Tests-dimension upgrade, not
+a new feature class; the user-facing surfaces are unchanged, so `📹 Video=no`.
 
 
 ## Ported cli_agents capabilities
