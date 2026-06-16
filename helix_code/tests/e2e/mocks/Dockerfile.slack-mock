@@ -20,6 +20,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -221,8 +222,6 @@ func truncate(s string, maxLen int) string {
 	}
 	return s[:maxLen] + "..."
 }
-
-import "strings"
 EOF
 
 # Build

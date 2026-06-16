@@ -90,13 +90,12 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    # NOTE: no nvidia GPU reservation. A hard `driver: nvidia / count: all`
+    # reservation makes podman fail with "unresolvable CDI devices
+    # nvidia.com/gpu=all" on hosts without an NVIDIA GPU + CDI (e.g. the
+    # nezha remote-distribution host), which aborts the whole compose up.
+    # Ollama runs CPU-only here; GPU acceleration is a host-specific
+    # optimization that must not be a hard dependency of the test stack.
     networks:
       - helixcode-full-test
 
@@ -253,6 +252,14 @@ services:
       - pulse-socket:/run/pulse
     networks:
       - helixcode-full-test
+    # Profile-gated OFF by default: the upstream thewierdnut/pulseaudio
+    # image is no longer publicly pullable ("requested access to the
+    # resource is denied" on docker.io/quay.io/altlinux), which aborts
+    # the whole compose up. The audio-mock is opt-in via
+    # `--profile audio`; its unavailability must not block the core
+    # database/cache/LLM stack.
+    profiles:
+      - audio
 
   # ============================================
   # KNOWLEDGE GRAPH / MEMORY SERVICES

@@ -7,9 +7,11 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"dev.helix.code/cmd/infrastructure/i18n"
+	containersadapter "dev.helix.code/internal/adapters/containers"
 	"digital.vasic.containers/pkg/boot"
 	"digital.vasic.containers/pkg/endpoint"
 	"digital.vasic.containers/pkg/logging"
@@ -82,6 +84,7 @@ type InfrastructureManager struct {
 	composeDir string
 	manager    *boot.BootManager
 	runtime    runtime.ContainerRuntime
+	runtimeErr error
 	logger     logging.Logger
 	ctx        context.Context
 	cancel     context.CancelFunc
@@ -98,18 +101,20 @@ func NewInfrastructureManager(mode InfraMode) (*InfrastructureManager, error) {
 
 	composeDir := filepath.Join(cwd, "..")
 
-	rt, err := runtime.AutoDetect(ctx)
-	if err != nil {
-		cancel()
-		return nil, fmt.Errorf("failed to detect container runtime: %w", err)
-	}
-
 	logger := logging.NewSlogAdapter(nil)
+
+	// Detect a LOCAL container runtime. In remote-distribution mode the
+	// local host only orchestrates over SSH (the heavy podman work runs
+	// on the remote host), so a missing local runtime is NOT fatal —
+	// it is recorded and Start() routes to the remote path. A nil
+	// im.runtime is only an error if a local boot is actually attempted.
+	rt, rtErr := runtime.AutoDetect(ctx)
 
 	return &InfrastructureManager{
 		mode:       mode,
 		composeDir: composeDir,
 		runtime:    rt,
+		runtimeErr: rtErr,
 		logger:     logger,
 		ctx:        ctx,
 		cancel:     cancel,
@@ -286,8 +291,49 @@ func (im *InfrastructureManager) fullEndpoints() map[string]endpoint.ServiceEndp
 	return full
 }
 
+// remoteEnvPath returns the absolute path to the containers submodule's
+// CONST-045 .env, resolved relative to the compose directory (the
+// meta-repo root when the binary runs from helix_code/).
+func (im *InfrastructureManager) remoteEnvPath() string {
+	return filepath.Join(im.composeDir, "submodules", "containers", ".env")
+}
+
+// fullTestComposeFile returns the absolute path to the full-test compose
+// file (lives inside the inner helix_code module dir).
+func (im *InfrastructureManager) fullTestComposeFile() string {
+	return filepath.Join(im.composeDir, "helix_code", "docker-compose.full-test.yml")
+}
+
+// fullTestProjectRoot returns the directory the full-test compose file's
+// relative build contexts resolve against.
+func (im *InfrastructureManager) fullTestProjectRoot() string {
+	return filepath.Join(im.composeDir, "helix_code")
+}
+
+// Start boots the infrastructure. When the containers submodule's .env
+// has CONTAINERS_REMOTE_ENABLED=true AND mode is "full", the whole
+// full-test System is distributed to the configured remote host(s) via
+// the containers submodule's remote orchestration (§11.4.76). Otherwise
+// it boots locally via BootManager (requires a local container runtime).
 func (im *InfrastructureManager) Start() error {
 	ctx := im.ctx
+
+	// §11.4.76 remote-distribution path: load the CONST-045 config and,
+	// if remote-enabled, route the full System to the remote host.
+	if im.mode == ModeFull {
+		adapter := containersadapter.NewAdapter()
+		enabled, err := adapter.LoadRemoteConfig(im.remoteEnvPath())
+		if err != nil {
+			im.logger.Warn("remote config load failed (%v); falling back to local boot", err)
+		} else if enabled {
+			return im.startRemote(ctx, adapter)
+		}
+	}
+
+	if im.runtime == nil {
+		return fmt.Errorf("no local container runtime detected (%v) and remote distribution not enabled", im.runtimeErr)
+	}
+
 	fmt.Print(banner)
 	fmt.Println(tr(ctx, "infra_start_starting", map[string]any{"Mode": string(im.mode)}))
 	fmt.Printf("%s\n\n", tr(ctx, "infra_start_runtime", map[string]any{"Runtime": im.runtime.Name()}))
@@ -336,6 +382,41 @@ func (im *InfrastructureManager) Start() error {
 	return nil
 }
 
+// startRemote distributes the full-test compose stack to the configured
+// remote host(s) via the containers submodule's RemoteComposeOrchestrator
+// (SCP compose file + build contexts, then `podman compose up -d --build`
+// remotely). §11.4.76 — reuse the submodule, never a hand-rolled
+// `podman compose up`.
+func (im *InfrastructureManager) startRemote(ctx context.Context, adapter *containersadapter.Adapter) error {
+	fmt.Print(banner)
+	hosts := adapter.RemoteHostNames()
+	fmt.Printf("Remote distribution ENABLED — target host(s): %s\n", strings.Join(hosts, ", "))
+	fmt.Println("Distributing full-test System via containers submodule (SCP + remote compose up)...")
+
+	composeFile := im.fullTestComposeFile()
+	projectRoot := im.fullTestProjectRoot()
+
+	// Default-profile build-context services live under these dirs:
+	//   tests/e2e/mocks       → mock-llm-server, mock-slack
+	//   tests/infrastructure  → ssh-server, ssh-worker-1/2/3
+	// The whole-repo context "." (helixcode-server) is profile-gated
+	// (profile "server") and therefore OFF by default, so the 27 GB repo
+	// root is never shipped (submodule CLAUDE.md gotcha #4).
+	buildContextDirs := []string{
+		"tests/e2e/mocks",
+		"tests/infrastructure",
+	}
+
+	workDir, err := adapter.RemoteComposeUp(ctx, composeFile, projectRoot, nil, buildContextDirs)
+	if err != nil {
+		return fmt.Errorf("remote compose up: %w", err)
+	}
+
+	fmt.Printf("\nRemote full-test System distributed. Remote work dir: %s\n", workDir)
+	fmt.Printf("Verify on host: ssh %s podman ps\n", strings.Join(hosts, " / "))
+	return nil
+}
+
 func (im *InfrastructureManager) Stop() error {
 	ctx := im.ctx
 	fmt.Printf("\n%s\n", tr(ctx, "infra_stop_stopping", nil))
@@ -356,7 +437,11 @@ func (im *InfrastructureManager) Status() error {
 	ctx := im.ctx
 	fmt.Printf("\n%s\n", tr(ctx, "infra_status_heading", nil))
 	fmt.Printf("   Mode: %s\n", im.mode)
-	fmt.Printf("   Runtime: %s\n", im.runtime.Name())
+	runtimeName := "<remote/none>"
+	if im.runtime != nil {
+		runtimeName = im.runtime.Name()
+	}
+	fmt.Printf("   Runtime: %s\n", runtimeName)
 
 	if im.manager == nil {
 		fmt.Println(tr(ctx, "infra_status_not_started", nil))
@@ -380,6 +465,14 @@ func (im *InfrastructureManager) Status() error {
 }
 
 func (im *InfrastructureManager) Wait() error {
+	// In remote-distribution mode the services run detached on the
+	// remote host(s); there is no local BootManager to keep alive, so
+	// the orchestrator returns immediately rather than blocking on a
+	// signal it would never use.
+	if im.manager == nil {
+		return nil
+	}
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 

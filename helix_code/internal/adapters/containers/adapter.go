@@ -33,6 +33,10 @@ type Adapter struct {
 	// Compose orchestrator
 	compose *compose.DefaultOrchestrator
 
+	// Remote distribution state (nil unless LoadRemoteConfig succeeds
+	// with CONTAINERS_REMOTE_ENABLED=true). Defined in adapter_remote.go.
+	remote *remoteState
+
 	// Concurrency control for container operations
 	sem *semaphore.Weighted
 }

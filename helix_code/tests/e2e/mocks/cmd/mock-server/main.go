@@ -189,9 +189,18 @@ func main() {
 		log.Println("Groq mock endpoints enabled")
 	}
 
-	// Mistral endpoints
+	// Mistral endpoints (OpenAI-compatible). Mistral's real path is
+	// /v1/chat/completions, which the OpenAI block above already
+	// registers — net/http.ServeMux panics on a duplicate pattern when
+	// both MockOpenAI and MockMistral are enabled. Register the OpenAI
+	// path for Mistral ONLY when the OpenAI block did not already claim
+	// it; always expose a distinct /mistral/v1/chat/completions alias so
+	// a Mistral-only base URL still resolves.
 	if config.MockMistral {
-		mux.HandleFunc("/v1/chat/completions", server.openAIChatHandler)
+		if !config.MockOpenAI {
+			mux.HandleFunc("/v1/chat/completions", server.openAIChatHandler)
+		}
+		mux.HandleFunc("/mistral/v1/chat/completions", server.openAIChatHandler)
 		log.Println("Mistral mock endpoints enabled")
 	}
 
