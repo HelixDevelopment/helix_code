@@ -2049,6 +2049,1076 @@ round 403 — HXC-008/HXC-007/HXC-009 closures. Round 400 — HXC-006
 closure (HelixCode Speed Programme — 6 phases / 31 tasks). Earlier
 closures (P0-P5 phases) tracked via
 <code>docs/improvements/PROGRESS.md</code> +
-<code>docs/improvements/*evidence*.md</code>.</em></p>
+<code>docs/improvements/*evidence*.md</code>.</em> ## HXC-037 —
+§11.4.103-141 + CONST-048..060 anchor-cascade backfill into 7 owned
+submodules (verify-governance-cascade.sh 30→0)</p>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/HXC-037/evidence.md <strong>Severity:</strong> High
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>verify-governance-cascade.sh reported 30 FAIL:
+debate_orchestrator/doc_processor/event_bus/helix_agent/llm_ops/llm_orchestrator/llm_provider
+each missing §11.9 + CONST-048..060 + §11.4.103-121 heading anchors in
+CONSTITUTION/CLAUDE/AGENTS.md. Authored deterministic additive
+scripts/backfill_anchor_cascade.sh (verbatim golden helix_qa cascade,
+idempotent, §11.4.122 no-removal); backfilled+committed+pushed all 7 to
+origin; verifier now 0 FAIL PASS.</p>
+<h2 id="hxc-040-claude.md-93.4-anti-bluff-smoke-command-false-alarm-527-i18ntest-hits-case-sensitivity-miss-of-bluff-001">HXC-040
+— CLAUDE.md §9/§3.4 anti-bluff smoke command false-alarm (527 i18n/test
+hits) + case-sensitivity miss of BLUFF-001</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-040/evidence.md
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>The documented anti-bluff grep one-liner prints BLUFF FOUND on a
+clean codebase (527 hits = 218 _test.go + 123 i18n message-keys + 306
+placeholder/template infra; 0 real production bluffs) AND was
+case-sensitive so it would miss the canonical ‘// For now, simulate
+generation’ (capital F). Refined to word-bounded case-insensitive
+markers with _test.go/i18n/comment-citation exclusions; clean on real
+tree; §1.1 mutation-proven (planted 3 bluffs caught then reverted
+byte-identical). Both §3.4 and §9 updated.</p>
+<h2 id="hxc-041-helixqa-standalone-http-bank-runner-subcommand-helixqa-http-drives-http-banks-vs-live-server-without-playwright-or-llm">HXC-041
+— helixqa standalone HTTP bank-runner subcommand (helixqa http) drives
+http: banks vs live server without Playwright or LLM</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+docs/qa/HXC-041/evidence.md <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>HelixQA could only run banks via Playwright (absent) or Ollama LLM
+(absent); the LLM-free HTTPExecutor that drives helixcode-auth.yaml’s 16
+http: cases against the live server was wired only internally. Built
+‘helixqa http -bank <yaml> -base-url <url>’ (cmd/helixqa/http.go +281,
+http_test.go +285, 2 mutation tests); build+tests green; live run vs
+booted helixcode = 15/16 PASS exit 1. helix_qa commit d6c084d6.</p>
+<h2 id="hxc-042-const-050b-challenge-coverage-gap-12-missing-challenge-scripts-in-debate_orchestrator-helix_agent-ddosstresschaosscalinguiux">HXC-042
+— CONST-050(B) challenge-coverage gap: 12 missing challenge scripts in
+debate_orchestrator + helix_agent (ddos/stress/chaos/scaling/ui/ux)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/HXC-042/evidence.md <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>verify-cascade-coverage.sh required 6 challenge scripts each in
+debate_orchestrator + helix_agent. Authored 12 REAL scripts (no stubs):
+concurrent flood w/ p50/p95, sustained-load degradation budget, /dev/tcp
+malformed+slowloris chaos, multi-replica sha256 body-identity, CLI
+panic/leak detection; honest SKIP-OK when no env target. bash -n 12/12
+PASS; real DDoS run 200/200 ok. Committed debate_orchestrator 19bd8e5b +
+helix_agent 6eee57e1.</p>
+<h2 id="hxc-043-auth-login-nil-db-panic-causes-http-500-server-advertises-graceful-no-db-operation-but-first-apiv1authlogin-dereferences-nil-s.db">HXC-043
+— auth Login nil-DB panic causes HTTP 500: server advertises graceful
+no-DB operation but first /api/v1/auth/login dereferences nil s.db</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-043/evidence.md
+<strong>Severity:</strong> High <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Found by HXC-041 live helixqa-http run (HXC-AUTH-003 expected 401 got
+500 empty body). With db=nil (server’s graceful no-DB path),
+helix_code/internal/auth/auth.go:156 (*AuthService).Login calls
+s.db.GetUserByUsername on nil s.db then nil-pointer panic then Gin
+Recovery then HTTP 500. Fix: guard nil s.db in Login and sibling
+db-touching auth paths, return clean 401/503. RED test exists:
+helixcode-auth.yaml HXC-AUTH-003 via helixqa http.</p>
+<h2 id="hxc-046-internalmemoryproviders-generatethreadid-non-unique-under-fast-back-to-back-calls-timestamp-only-same-nanosecond-collision">HXC-046
+— internal/memory/providers: generateThreadID() non-unique under fast
+back-to-back calls (timestamp-only, same-nanosecond collision)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-046/evidence.md
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Found by isolated-worktree full unit sweep (go test ./internal/… HEAD
+54ab4e95, hermetic test, no infra). See docs/qa/HXC-046/evidence.md for
+the exact failing test + file:line + message. Genuine product defect
+reproducible deterministically.</p>
+<h2 id="hxc-045-internalhooks-cancelled-hook-executionresult-leaves-duration-unset-should-always-be-populated">HXC-045
+— internal/hooks: cancelled hook ExecutionResult leaves duration unset
+(should always be populated)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-045/evidence.md
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Found by isolated-worktree full unit sweep (go test ./internal/… HEAD
+54ab4e95, hermetic test, no infra). See docs/qa/HXC-045/evidence.md for
+the exact failing test + file:line + message. Genuine product defect
+reproducible deterministically.</p>
+<h2 id="hxc-044-internalcognee-amd-gpu-rocm-smi-json-parser-returns--1-sentinel-instead-of-parsed-gpu-use-value">HXC-044
+— internal/cognee: AMD-GPU rocm-smi JSON parser returns -1 sentinel
+instead of parsed GPU-use value</h2>
+<p><strong>Status:</strong> Obsolete (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-044/evidence.md
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Found by isolated-worktree full unit sweep (go test ./internal/… HEAD
+54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md for
+the exact failing test + file:line + message. Genuine product defect
+reproducible deterministically.</p>
+<h2 id="hxc-047-internalredis-testnewclient_withdatabase-needs-live-redis-with-no-skip-ok-guard-11.4.98-i18n-error-no-longer-contains-literal-redis">HXC-047
+— internal/redis TestNewClient_WithDatabase needs-live-Redis with no
+SKIP-OK guard (§11.4.98) + i18n error no longer contains literal
+Redis</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/HXC-047/evidence.md <strong>Severity:</strong> Low
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Hermetic unit run found this test silently depends on a live Redis at
+127.0.0.1:6379 (no SKIP-OK §11.4.3/§11.4.98) AND asserts the error
+contains literal ‘Redis’ which the i18n-keyed error
+(internal_redis_failed_connect) no longer contains. Fix: SKIP-OK guard
+when no Redis + reconcile assertion. Evidence
+docs/qa/HXC-047/evidence.md (HEAD 54ab4e95).</p>
+<h2 id="hxc-048-helixcode-system.yaml-helixqa-bank-11-self-driving-http-cases-for-the-non-auth-server-surface-healthserver-infosystem-statusllm-providers-negatives">HXC-048
+— helixcode-system.yaml HelixQA bank: 11 self-driving http cases for the
+non-auth server surface (health/server-info/system-status/llm-providers
++ negatives)</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+docs/qa/HXC-048/evidence.md <strong>Severity:</strong> Low
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Authored + parse-validated a new LLM-free http: bank
+(banks/helixcode-system.yaml, 11 cases) covering /health,
+/api/v1/server/info, /api/v1/system/status(401), /api/v1/llm/providers +
+404/405 negatives, using only helixqa-http runner-consumed fields.
+helixqa list → 11 cases; dry run fired real requests. Confident body
+asserts from captured responses; status-only/_skip where unverified
+(§11.4.6). helix_qa f18a5d3b. Live-run vs booted server queued.</p>
+<h2 id="hxc-049-doc_processor-testautomation_upstreamsexist-reads-capital-upstreams-but-canonical-dir-is-lowercase-upstreams-const-052-case-drift-deterministic-fail">HXC-049
+— doc_processor TestAutomation_UpstreamsExist reads capital ‘Upstreams’
+but canonical dir is lowercase ‘upstreams’ (CONST-052 case drift,
+deterministic FAIL)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-049/evidence.md
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Owned-submodule health sweep found internal automation_test.go:140
+os.ReadDir(“Upstreams”) failing every run because the on-disk dir is
+lowercase ‘upstreams’ per CONST-052. Test-side fix
+‘“Upstreams”→“upstreams”’. GREEN: ok digital.vasic.docprocessor. Commit
+ecb384f.</p>
+<h2 id="hxc-050-event_bus-nats-env-gated-integration-skips-lack-skip-ok-markers-required-by-the-no-silent-skips-gate-11.4.98">HXC-050
+— event_bus NATS env-gated integration skips lack SKIP-OK markers
+required by the no-silent-skips gate (§11.4.98)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/HXC-050/evidence.md <strong>Severity:</strong> Low
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Owned-submodule health sweep found
+pkg/nats/integration_test.go:23,120 env-gated t.Skip (legitimately runs
+vs real NATS when NATS_URL is set) without literal SKIP-OK markers.
+Added ‘SKIP-OK: #HXC-050 …’ to both; build+skip clean. Commit
+1cae683.</p>
+<h2 id="hxc-052-background_tasks-go.mod-build-break-capitalised-replace-paths">HXC-052
+— background_tasks go.mod build break — capitalised replace paths</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-052/evidence.md
+<strong>Severity:</strong> Medium</p>
+<p>submodules/background_tasks/go.mod replace directives pointed at
+../Concurrency and ../Models which no longer exist after the CONST-052
+lowercase rename; go build ./… failed until corrected to ../concurrency
+and ../models.</p>
+<h2 id="hxc-053-conversation-go.mod-build-break-capitalised-replace-path-..messaging">HXC-053
+— conversation go.mod build break — capitalised replace path
+../Messaging</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-053/evidence.md
+<strong>Severity:</strong> Medium</p>
+<p>submodules/conversation/go.mod line 24 replace
+digital.vasic.messaging pointed at ../Messaging (capitalised) which
+broke go build ./… after the CONST-052 lowercase rename; corrected to
+../messaging.</p>
+<h2 id="hxc-038-docs_chain-g14-fixed.yaml-fixed_summary-transform-contract-mismatch-stale-state.json-baseline-false-conflict-on-issues-context">HXC-038
+— docs_chain G14: fixed.yaml fixed_summary transform-contract mismatch +
+stale state.json baseline false-CONFLICT on issues context</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-038/evidence.md
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>verify-all-constitution-rules.sh G14 (docs_chain verify –all) fails:
+(1) fixed.yaml fixed_summary node perpetually STALE because
+generate_fixed_summary.sh writes the file as a side-effect and prints a
+‘wrote …’ status line to stdout, while docs_chain captures stdout as
+content — content is correct+deterministic, the node I/O contract needs
+a stdout mode or a writes-file declaration; (2) issues context reports a
+§11.4.6 CONFLICT (both issues_md + items_db dirty vs stale state.json
+baseline) though MD⇄DB are verified byte-identical via db-to-md — needs
+a baseline refresh. governance context already in-sync this session.</p>
+<h2 id="hxc-051-helix_llm-helix_memory-go.mod-replace-directives-point-to-non-existent-....vasic-digital-sibling-layout-const-051c-dependency-layout">HXC-051
+— helix_llm + helix_memory go.mod replace directives point to
+non-existent ../../vasic-digital/* sibling layout (CONST-051(C)
+dependency-layout)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Task <strong>Evidence:</strong> docs/qa/HXC-051/evidence.md
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Owned-submodule health sweep (D-2): helix_llm
+(internal/knowledge/embedding_providers.go) + helix_memory
+(pkg/provider/adapter.go) fail to build standalone because their go.mod
+‘replace’ directives target ../../vasic-digital/<Module> sibling dirs
+not materialized in the HelixCode layout. CONST-051(C) requires deps
+resolvable from the project root (submodules/<name>). The other 8/24
+packages build+test ok; only the replace-dep-needing packages fail.
+Investigation: confirm whether HelixCode’s build actually compiles these
+(vs reference/standalone), then rewire replace paths to the root
+submodule layout OR document the standalone-build requirement. Not
+breaking helix_code’s own build. Found by D-2 health sweep.</p>
+<h2 id="hxc-054-leak_detector-parallel-test-flake-11.4.50-determinism">HXC-054
+— leak_detector parallel test flake — §11.4.50 determinism</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-054/evidence.md
+<strong>Severity:</strong> Low</p>
+<p>Discovery sweep: leak_detector test exhibits non-deterministic
+PASS/FAIL under parallel execution (timing-sensitive), violating
+§11.4.50 determinism; needs forensic root-cause before a deterministic
+fix. Open.</p>
+<h2 id="hxc-055-formatters-brittle-cat-version-probe-go_hello-fixtures-break-go-build">HXC-055
+— formatters brittle cat –version probe + go_hello fixtures break go
+build</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-055/evidence.md
+<strong>Severity:</strong> Low</p>
+<p>Discovery sweep: formatters test relies on brittle ‘cat –version’
+(§11.4.81 cross-platform), and committed go_hello fixture sources break
+a tree-wide go build; both need isolation/fixing. Open.</p>
+<h2 id="hxc-056-7-submodules-const-052-capitalised-replace-..pliniuscommon-dir-is-plinius_common">HXC-056
+— 7 submodules: CONST-052 capitalised replace =&gt; ../PliniusCommon
+(dir is plinius_common)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-056/evidence.md
+<strong>Severity:</strong> Medium</p>
+<p>auto_temp, claritas, gandalf_solutions, hyper_tune, leak_hub,
+ouroborous, veritas each have go.mod line replace
+digital.vasic.pliniuscommon =&gt; ../PliniusCommon; capitalised dir
+absent, lowercase sibling plinius_common exists; go build ./… fails on
+all 7.</p>
+<h2 id="hxc-057-recovery-go.mod-missing-requirereplace-for-digital.vasic.concurrency-pkgbreaker-import-unwired">HXC-057
+— recovery go.mod missing require+replace for digital.vasic.concurrency
+(pkg/breaker import unwired)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-057/evidence.md
+<strong>Severity:</strong> Medium</p>
+<p>recovery/pkg/breaker/breaker.go imports
+digital.vasic.concurrency/pkg/breaker but recovery/go.mod has no
+require/replace for the concurrency sibling; go build ./… fails: no
+required module provides package. Sibling submodules/concurrency
+provides pkg/breaker.</p>
+<h2 id="hxc-058-helix_agent-go-build-fails-on-vendored-third-party-cli_agentscontinue-test-fixture-quarantine">HXC-058
+— helix_agent go build fails on vendored third-party cli_agents/continue
+test fixture (quarantine)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-058/evidence.md
+<strong>Severity:</strong> Low</p>
+<p>helix_agent go build ./… fails ONLY in vendored third-party
+cli_agents/continue/ subtree (upstream continue project test fixture
+with bogus relative import); no owned dev.helix.agent package fails;
+needs build-exclusion/quarantine of the vendored fixture subtree, not an
+owned-code fix.</p>
+<h2 id="hxc-039-g7-11.4.83-docsqa-evidence-gap-8-past-featurefix-commits-lack-docsqa-directories">HXC-039
+— G7 §11.4.83 docs/qa evidence gap: 8 past feature/fix commits lack
+docs/qa/<run-id>/ directories</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/HXC-039/evidence.md <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix
+commits since baseline ed84f90e without a docs/qa/<run-id>/ evidence dir
+(81f3c482 deployment/perf, 83b2690a config var-expansion, d985e3ae
+worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963,
+3ce30285). Retro-adding to those commits needs history-rewrite which
+§11.4.113 forbids — operator decision on remediation (baseline reset vs
+documented exception). New work this session (HXC-037) ships its docs/qa
+evidence.</p>
+<h2 id="hxc-031-deferred-long-tail-const-052-renames-resolved-none-remain-codexcline-reference-agent-ports">HXC-031
+— Deferred long-tail: CONST-052 renames (RESOLVED — none remain) +
+Codex/Cline reference-agent ports</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/HXC-031/evidence.md</p>
+<p>Deferred long-tail: CONST-052 renames (RESOLVED — none remain) +
+Codex/Cline reference-agent ports</p>
+<h2 id="hxc-059-debate_orchestrator-sandbox-ctx-canceltimeout-fails-to-kill-child-process-tree-on-non-linux-11.4.81">HXC-059
+— debate_orchestrator sandbox: ctx-cancel/timeout fails to kill child
+process tree on non-Linux (§11.4.81)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-059/evidence.md
+<strong>Severity:</strong> Medium</p>
+<p>testing/sandbox_other.go (!linux) killProcessGroup is a no-op so
+Setpgid is never set; on macOS cmd.Cancel SIGKILLs only the direct child
+and the sleep-30 grandchild survives. TestSandboxExecute_CtxCancel +
+TestSandboxExecute_TimeoutEnforced FAIL deterministically (elapsed ~30s
+vs 100ms cap). Linux process-group kill has no functioning non-Linux
+equivalent (§11.4.81 parity gap).</p>
+<h2 id="hxc-060-debate_orchestrator-challengesrunnermain.go516-context-cancel-not-called-on-all-return-paths-vet-leak">HXC-060
+— debate_orchestrator challenges/runner/main.go:516 context cancel not
+called on all return paths (vet leak)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-060/evidence.md
+<strong>Severity:</strong> Low</p>
+<p>go vet: challenges/runner/main.go:516 the cancel function is not used
+on all paths (possible context leak); 571 return may be reached without
+using the cancel var defined on line 516. Owned-code vet finding.</p>
+<h2 id="hxc-061-helix_agent-legacy-unit-test-calls-memory.getrelevant-with-stale-2-arg-signature-wont-compile">HXC-061
+— helix_agent legacy unit-test calls memory.GetRelevant with stale 2-arg
+signature (won’t compile)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-061/evidence.md
+<strong>Severity:</strong> Medium</p>
+<p>tests/unit/debate_security_legacy/debate_security_test.go:335 calls
+memory.GetRelevant(string, number) but the current signature is
+(context.Context, string, int); go vet of the owned test tree fails to
+compile. Stale API call in test code.</p>
+<h2 id="hxc-062-helix_specifier-pkgmetrics-copies-sync.rwmutex-by-value-vet-lock-copy-concurrency-hazard">HXC-062
+— helix_specifier pkg/metrics copies sync.RWMutex by value (vet
+lock-copy, concurrency hazard)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-062/evidence.md
+<strong>Severity:</strong> Medium</p>
+<p>go vet: pkg/metrics/metrics.go:143 assignment copies lock value to
+cp; :163 return copies lock value — Metrics struct contains sync.RWMutex
+copied by value. Genuine owned-code concurrency hazard; build+tests pass
+but the copied mutex does not protect the original.</p>
+<h2 id="hxc-063-panoptic-startrecording-unreachable-recording-bootstrap-after-early-return-nil-recorder-never-starts">HXC-063
+— panoptic StartRecording: unreachable recording-bootstrap after early
+return nil — recorder never starts</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-063/evidence.md
+<strong>Severity:</strong> Medium</p>
+<p>internal/platforms/desktop.go:304 unconditional return nil makes
+lines 305+ dead (go vet: 305:2 unreachable code): os.MkdirAll video-dir
+creation + background recorder process startup never execute, so
+StartRecording returns success without recording. Latent correctness
+defect; investigate per §11.4.124 (likely restore by removing the early
+return, not delete the block).</p>
+<h2 id="hxc-064-cognee-amd-gpu-parser-tests-flake-under-parallel-load-rocm-smi-fake-subprocess-signal-killed-before-2s-timeout-11.4.50">HXC-064
+— cognee AMD-GPU parser tests flake under parallel load (rocm-smi fake
+subprocess signal-killed before 2s timeout, §11.4.50)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-064/evidence.md
+<strong>Severity:</strong> Low</p>
+<p>internal/cognee TestProbeAMDGPU_HandlesAltKeyName + _GpuUtilization
+call queryAMDGPUUsage() which execs a fake rocm-smi via a 2s const
+timeout; under heavy batch/parallel host load the echo subprocess is
+signal-killed before completing → product correctly returns sentinel -1
+but the parser tests assert 33/77 → non-deterministic FAIL. Product
+correct; test timeout load-fragile. Fix: make rocmSmiQueryTimeout an
+overridable var (prod default unchanged) + parser tests raise it.</p>
+<h2 id="hxc-065-cachepkgpostgres-finite-ttl-set-invisible-to-immediate-get-expires_at-clocktimezone-skew-vs-real-pg">HXC-065
+— cache/pkg/postgres: finite-TTL Set invisible to immediate Get
+(expires_at clock/timezone skew vs real PG)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-065/evidence.md
+<strong>Severity:</strong> Medium</p>
+<p>digital.vasic.cache pkg/postgres integration_test.go:195 — a value
+Set with a finite TTL (200ms) returns empty on an immediate Get even
+before expiry, deterministic across -count=3 vs real booted PG. Siblings
+TestSetGet/Exists/ZeroTTL pass, so isolated to the finite-TTL expires_at
+WHERE-clause: likely Go-process time.Now() vs PG server now()
+timezone/clock skew making the just-written row appear already-expired.
+Real cache-backend correctness defect.</p>
+<h2 id="hxc-066-inner-internaldatabase-integration-tests-hardcode-localhost5433helix_test-never-read-helix_database_-env">HXC-066
+— inner internal/database integration tests hardcode
+localhost:5433/helix_test, never read HELIX_DATABASE_* env</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-066/evidence.md
+<strong>Severity:</strong> Low</p>
+<p>helix_code/internal/database/database_integration_test.go hardcodes
+Config{Host:localhost,Port:5433,User:helix_test,DBName:helix_test}
+(lines 19-20,43-46,330-333) with zero env sourcing; port 5433 closed →
+internal_database_ping_failed against booted PG (15432). DB layer sound
+(persistence passes). Harness defect: should read
+DB_<em>/HELIX_DATABASE_</em> env.</p>
+<h2 id="hxc-067-inner-internalredis-stress-suite-reads-test_redis_hostport-default-6379-not-helix_redis_hostport">HXC-067
+— inner internal/redis stress suite reads TEST_REDIS_HOST/PORT (default
+:6379) not HELIX_REDIS_HOST/PORT</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/qa/HXC-067/evidence.md
+<strong>Severity:</strong> Low</p>
+<p>helix_code/internal/redis/redis_stress_test.go:38-39 reads
+TEST_REDIS_HOST/TEST_REDIS_PORT (default localhost:6379) instead of the
+standard HELIX_REDIS_HOST/HELIX_REDIS_PORT contract; causes false
+100%-error FAIL against booted Redis on 16379. Pointed at
+TEST_REDIS_PORT=16379 it’s GREEN. Env-var-contract inconsistency
+(harness).</p>
+<h2 id="hxc-068-speckit-debate-adapter-wireable-into-agentic-debate-flow">HXC-068
+— speckit debate adapter wireable into agentic debate flow</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+commit:95b7385c speckit debate adapter wireable
+<strong>Severity:</strong> High <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Wire the speckit debate adapter so the agentic debate flow can invoke
+it end-to-end; adapter is constructable and dispatchable from the
+orchestrator (commit 95b7385c).</p>
+<h2 id="hxc-069-helixmemory-default-on-durable-persistence-with-graceful-fallback">HXC-069
+— HelixMemory default-on durable persistence with graceful fallback</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+commit:ac3ad237 HelixMemory default-on persist+fallback
+<strong>Severity:</strong> High <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>HelixMemory persists cross-session memory by default and falls back
+gracefully when the backend store is unavailable, so recall works out of
+the box (commit ac3ad237).</p>
+<h2 id="hxc-070-helixmemory-persist-log-no-longer-misreports-success-on-failure">HXC-070
+— HelixMemory persist log no longer misreports success on failure</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> commit:a0239f52 honest HelixMemory
+persist log <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>The HelixMemory persistence log now reports the real outcome instead
+of an unconditional success line, removing a §11.4 honest-logging bluff
+(commit a0239f52).</p>
+<h2 id="hxc-071-web-llm-handler-httptest-coverage-for-generate-and-stream">HXC-071
+— Web LLM handler httptest coverage for generate and stream</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> commit:6f382b95
+web handler httptest coverage <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Add httptest-based handler tests exercising the web /llm/generate and
+/llm/stream endpoints with real request/response round-trips (commit
+6f382b95).</p>
+<h2 id="hxc-072-cli-undo-and-diff-slash-commands-over-autocommit-substrate">HXC-072
+— CLI /undo and /diff slash commands over autocommit substrate</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+commit:bd5228f8 CLI /undo + /diff commands <strong>Severity:</strong>
+High <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Implement CLI /undo and /diff commands that revert and show changes
+against the git autocommit substrate, giving users real edit history
+control (commit bd5228f8).</p>
+<h2 id="hxc-073-autocommit-git-substrate-backing-cli-edit-history">HXC-073 —
+Autocommit git substrate backing CLI edit history</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+commit:61d7167e autocommit git substrate <strong>Severity:</strong> High
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Add an autocommit git substrate that snapshots edits so /undo and
+/diff operate on real commits rather than in-memory state (commit
+61d7167e).</p>
+<h2 id="hxc-074-mobile-gomobile-generate-binding-for-on-device-llm-calls">HXC-074
+— Mobile gomobile Generate binding for on-device LLM calls</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+commit:28465071 mobile gomobile Generate binding
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Expose a gomobile-bound Generate entrypoint so the mobile
+applications can invoke the LLM provider through the shared client core
+(commit 28465071).</p>
+<h2 id="hxc-075-phase-1-cli-agent-fusion-plan-reconciliation-with-delivered-state">HXC-075
+— Phase-1 CLI-Agent Fusion plan reconciliation with delivered state</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> commit:e3063af1
+Phase-1 plan reconciliation <strong>Severity:</strong> Low
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Reconcile the Phase-1 implementation plan against actually-delivered
+state so the programme plan reflects reality, not aspiration (commit
+e3063af1).</p>
+<h2 id="hxc-076-web-llmgenerate-llmstream-endpoints-with-frontend-partial-e2e-pending">HXC-076
+— Web /llm/generate + /llm/stream endpoints with frontend (partial — e2e
+pending)</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong> eafdda36
+tests/integration/llm_generate_e2e_test.go: real GIN 200 content:4
+provider:ollama qwen2.5:0.5b, conductor-reproduced
+<strong>Severity:</strong> High <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Backend /llm/generate and /llm/stream endpoints plus frontend wiring
+landed (commit 32e7e5b8); REMAINING: full browser-driven end-to-end test
+proving real streamed output renders in the UI is not yet captured —
+keep open until e2e evidence lands.</p>
+<h2 id="hxc-079-debate_orchestrator-consensus-emits-unresolved-i18n-key">HXC-079
+— debate_orchestrator consensus emits unresolved i18n key</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> debate_orchestrator 4df3874: embed-bundle
+translator resolves consensus key; GREEN test ‘Debate on <topic>
+completed across N round(s).’, RED/GREEN polarity §11.4.115
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Live /debate e2e (debate_e2e_test.go) shows CONCLUSION/Summary print
+literal ‘debate.orchestrator.consensus_conclusion’ i18n message-key
+instead of resolved prose; per-agent LLM content is real, consensus
+synthesis layer in submodules/debate_orchestrator does not resolve the
+key. §11.4.118 discovery finding.</p>
+<h2 id="hxc-080-debate-and-specify-broken-at-runtime-single-agent-vs-2-min">HXC-080
+— /debate and /specify broken at runtime — single agent vs 2-min</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> cmd/cli+TUI register 2 agents;
+specify_e2e_test.go LIVE-PROVEN Success=true qualityScore=0.86 real
+output PASS 14.69s (conductor podman ollama) <strong>Severity:</strong>
+High <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>handleDebate/handleSpecify (cmd/cli) + TUI registered ONE AgentSpec
+but orchestrator MinAgentsPerDebate=2; users hit ‘insufficient agents
+(have 1, need 2)’. Round-7 debate proof used a 2-agent test, masking the
+1-agent production gap (§11.4.108).</p>
+<h2 id="hxc-081-helix_specifier-speckit-topic-i18n-key-unresolved-plus-format-verb-mismatch">HXC-081
+— helix_specifier speckit topic i18n key unresolved plus format-verb
+mismatch</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> helix_specifier 188f9bc: BundleTranslator
+resolves phase-topic keys; GREEN prose ‘Create a detailed specification
+… Request: <req>’, no raw key/no %!(EXTRA), 22 pkgs no-regression;
+/debate binary CONCLUSION now resolved prose <strong>Severity:</strong>
+Medium <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Live /specify run shows ‘Topic:
+helixspecifier_speckit_topic_specify%!(EXTRA string=…)’ — the speckit
+phase prompt emits a raw i18n message-key with a Go Sprintf arg-count
+mismatch instead of resolved prose. Same class as HXC-079, in
+submodules/helix_specifier. Captured in specify_e2e_test.go output.</p>
+<h2 id="hxc-082-performance-optimizer-fabricates-success-8-apply-methods-sleep-and-return-success-true">HXC-082
+— performance optimizer fabricates success — 8 apply methods sleep and
+return Success true</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> optimizer.go: 8 methods
+Success:false+ErrOptimizationNotWired (honest), GC kept real; §11.4.120
+reconcile + RED-polarity; build/test 0, go build ./… 0, smoke clean
+<strong>Severity:</strong> High <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>internal/performance/optimizer.go:540-760:
+applyCPU/Memory/Concurrency/Cache/Network/Database/Worker/LLM
+Optimization each time.Sleep(200ms) doing NO real work then return
+Success:true with fabricated MetricsChange. User-reachable via
+cmd/performance_optimization/main.go:89. Rule 2 / §11.4 bluff. Fix: real
+tuning OR honest ErrOptimizationNotWired sentinel.</p>
+<h2 id="hxc-083-production_deployer-fabricates-rollback-env-prep-server-validation-and-strategy-differentiation">HXC-083
+— production_deployer fabricates rollback env-prep server-validation and
+strategy differentiation</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> production_deployer.go: 5 bluff sites
+honest (rollback/env/validate/strategy/monitoring); RED/GREEN polarity;
+build/test 0, go build ./… 0, smoke clean <strong>Severity:</strong>
+Medium <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>internal/deployment/production_deployer.go: triggerRollback(1028)
+sleeps+logs success no real rollback;
+prepareEnvironment(810)+validateTargetServers(820) sleep+log success;
+executeBlueGreen/Canary/Rolling/Recreate(962) all just call
+executeProductionDeploy (no-op differentiation); executeMonitoring(758)
+ends with success notification contradicting its honest gap-log. §11.4
+bluffs. Fix: real work or honest sentinels.</p>
+<h2 id="hxc-084-challenge-scripts-use-gnu-only-grep--p-backslash-k-breaks-on-macos-bsd-grep">HXC-084
+— challenge scripts use GNU-only grep -P backslash-K — breaks on macOS
+BSD grep</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> challenges 280c2d2 + helix_agent
+8b622c7a: all grep -oP/-P/-&gt; portable sed -nE/grep -oE/grep -F
+(incl. android_save/cognee/runtime_debate/mcps/helixmemory/output_formatting),
+each proven on sample input + edge cases, bash -n 0
+<strong>Severity:</strong> High <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>29 owned challenge/CI shell scripts use grep -oP / grep -P /
+(GNU/PCRE-only). Stock macOS /usr/bin/grep rejects -P (invalid option)
+-&gt; empty evidence capture -&gt; corrupted PASS/FAIL gates (false FAIL
+or silently-masked). §11.4.81. Fix: portable sed -E/awk/perl. Highest:
+challenges android_save, helix_agent cognee/runtime_debate/mcps.</p>
+<h2 id="hxc-085-14-llm-providers-healthcheck-hardcodes-production-url-ignoring-injected-baseurl">HXC-085
+— 14 LLM providers HealthCheck hardcodes production URL ignoring
+injected baseURL</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> helix_agent 8b622c7a (13) + llm_provider
+18108f4 (14): HealthCheck derives from injected baseURL (kimi pattern);
+existing tests were bluffs -&gt; added real
+TestHealthCheck_HonorsInjectedBaseURL, RED-proven; both trees build 0,
+suites ok <strong>Severity:</strong> High <strong>Created-By:</strong>
+Claude <strong>Assigned-To:</strong> Claude</p>
+<p>openai/groq/cohere/fireworks/ai21/chutes/nvidia/publicai/replicate/together/cerebras/deepseek/mistral/claude
+HealthCheck hits a hardcoded *ModelsURL const/literal while Generate
+uses p.baseURL — config-injection / CONST-051(B), breaks httptest +
+proxy/Azure endpoints. Duplicated in helix_agent/internal/llm/providers
++ llm_provider/pkg/providers. Fix: mirror the existing kimi.go
+derive-from-baseURL fix.</p>
+<h2 id="hxc-086-sse-broker-client-id-unixnano-collision-under-concurrent-connect">HXC-086
+— SSE broker client-ID UnixNano collision under concurrent connect</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> streaming 3e15904: SSE fallback client-ID
+atomic counter; RED 134/1000 lost -&gt; GREEN 1000/1000 unique under
+-race <strong>Severity:</strong> Medium <strong>Created-By:</strong>
+Claude <strong>Assigned-To:</strong> Claude</p>
+<p>submodules/streaming/pkg/sse/sse.go:140
+clientID=fmt.Sprintf(‘client-%d’,UnixNano()) used as b.clients map key,
+generated per concurrent SSE connect — same-tick collision
+overwrites/loses a client. Fix: crypto/rand or atomic counter
+suffix.</p>
+<h2 id="hxc-087-skill_registry-randomstring-unixnano-same-tick-produces-identical-chars-and-colliding-ids">HXC-087
+— skill_registry randomString UnixNano same-tick produces identical
+chars and colliding IDs</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> skill_registry 5e5dc75: crypto/rand;
+tests pass -count=5 <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>skill_registry/types.go:173 randomString used charset[UnixNano%len]
+in a tight loop -&gt; all-identical chars + colliding execution IDs.
+Fixed with crypto/rand. Proven class.</p>
+<h2 id="hxc-088-llm_orchestrator-opencode-cancel-path-hangs-30s-cmd.waitdelay-unset">HXC-088
+— llm_orchestrator opencode cancel path hangs 30s — cmd.WaitDelay
+unset</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> llm_orchestrator c791f02:
+cmd.WaitDelay=2s; ContextCancel ok -count=3, pkg/agent ok
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>llm_orchestrator pkg/agent/opencode_agent.go runCapture set
+cmd.Cancel but WaitDelay==0 -&gt; on ctx-cancel Wait() blocks on pipe
+drainage when a grandchild holds stdout (30s hang vs 5s test). Fixed
+cmd.WaitDelay=2s.</p>
+<h2 id="hxc-089-panoptic-web-element-infinite-retry-hang-plus-recorder-zero-frames">HXC-089
+— panoptic web Element infinite-retry hang plus recorder
+zero-frames</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> panoptic fcc6322: bounded Element timeout
++ real initial Screenshot frame; platforms PASS x3, full suite green
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>panoptic internal/platforms: web.go Fill/Click/Submit page.Element on
+unbounded ctx -&gt; missing selector retries forever (9m hang);
+screencast.go relied only on async CDP events -&gt; 0 frames on
+immediate start/stop. Fixed: bounded page.Timeout + synchronous initial
+Screenshot frame.</p>
+<h2 id="hxc-091-containers-custom-health-check-duration-can-be-0-timer-resolution-flake">HXC-091
+— containers custom health-check duration can be 0 (timer-resolution
+flake)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> containers a36a435: duration floor 1ns;
+test 0/20 fail post-fix, pkg/health ok <strong>Severity:</strong> Low
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>containers pkg/health/custom.go NewCustomCheckFunc
+duration=time.Since(start) returns 0 for a no-op check -&gt;
+TestNewCustomCheckFunc_Success NotZero flake. Fixed: floor to
+time.Nanosecond when &lt;=0 (no fabricated delay).</p>
+<h2 id="hxc-092-debate_orchestrator-30s-defaulttimeout-too-short-for-capable-models-on-multi-round-specify">HXC-092
+— debate_orchestrator 30s DefaultTimeout too short for capable models on
+multi-round /specify</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> debate_orchestrator 659559e:
+DefaultTimeout 30s-&gt;180s (justified ~96s worst-case + headroom) +
+WithTimeout option; build/vet 0, 15-pkg suite ok. Live capable-model
+/specify re-verify is follow-up. <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>debate_orchestrator DefaultTimeout=30s x DefaultMaxRounds=3
+(types.go:41-42) is tuned for fast qwen2.5:0.5b. A capable qwen2.5:3b
+(~16s/round) blows the 30s cap on the 3-round Specify pillar -&gt;
+context deadline exceeded. /debate works (WithMaxRounds(1), rich quality
+0.875 proven). Fix: raise per-debate timeout for the speckit Specify use
+case (adapter WithTimeout or orchestrator default). Tunable, not a code
+defect; surfaced honestly (no fabrication).</p>
+<h2 id="hxc-094-f12-workspace-checkpoints-file-snapshot-restoreundo-safety-net">HXC-094
+— F12 workspace checkpoints — file snapshot + restore/undo safety
+net</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+internal/checkpoint + cmd/cli /checkpoint; restore-bytes round-trip +
+survives-restart tests PASS, go build ./… 0 <strong>Severity:</strong>
+Medium <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>internal/checkpoint Manager (git-plumbing + file-copy backends) +
+/checkpoint create/list/restore CLI command: snapshot working-tree file
+contents and restore real bytes later (the cli_agents F12 oops-revert
+net). Existing checkpoints were task-DB rows, not file snapshots.</p>
+<h2 id="hxc-095-cli-binary-generatedebatespecify-return-404-against-live-local-ollama">HXC-095
+— CLI binary generate/debate/specify return 404 against live local
+ollama</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> desktop i18n/bundle.go + main()
+SetTranslator wiring; before raw keys/%!(EXTRA) -&gt; after resolved
+prose ‘HelixCode Desktop CLI (nogui mode)’; build/test 0,
+paired-mutation guard <strong>Severity:</strong> High
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>helixcli –prompt/–stream + /debate + /specify hit ‘API request
+failed: API returned status 404’ against a working local ollama
+(qwen2.5:3b on :11434). The web POST /llm/generate + integration tests
+work with the same NewOllamaProvider — so the CLI’s
+default-local-provider path uses a wrong endpoint/model-name (§11.4.108
+different-path gap). AI features are broken for the end user via the
+binary. Found while recording feature videos.</p>
+<h2 id="hxc-096-desktop-nogui-prints-raw-i18n-keys-extra-format-mismatch-in-statushelp">HXC-096
+— desktop nogui prints raw i18n keys + %!(EXTRA) format mismatch in
+status/help</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> cmd/cli/main.go: known-provider-prefix
+guard on model parsing; live qwen2.5:3b -&gt; real answer ‘4’, zero 404;
+build/test 0 <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>applications/desktop/main_nogui.go status/help output prints raw
+message keys (desktop_cli_status_header, desktop_cli_help_body) + a
+Printf arg-count mismatch (%!(EXTRA int=0…)) in status. Same
+i18n-resolution class as HXC-079/081. CLI binary unaffected. Found while
+assessing desktop for video.</p>
+<h2 id="hxc-097-systemic-standalone-binaries-internalconfig-internaldatabase-never-wire-i18n-translator---raw-keys-at-runtime">HXC-097
+— SYSTEMIC: standalone binaries + internal/config + internal/database
+never wire i18n Translator -&gt; raw keys at runtime</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Systemic unwired-translator fixed across
+aurora_os (842551d3) + harmony_os (6dcf64aa) + internal/config +
+internal/database: real bundle translator wired (binaries: SetTranslator
+in main(); libs: init() default). Before/after raw-key-&gt;prose
+captured each; §11.4.115 guards. Broader follow-up: other CONST-046 pkgs
+may share the WireAll-only-on-CLI-path class (init()-default pattern is
+the fleet fix). <strong>Severity:</strong> High
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Same unwired-translator bug as HXC-095 found across the fleet:
+aurora_os standalone nogui (aurora_os_cli_version_banner + %!(EXTRA) at
+runtime) — round-7’s aurora/harmony ‘i18n fix’ added KEYS but never
+wired SetTranslator in main(), so keys still echo raw (§11.4.108
+fixed-in-source-not-at-runtime). Also internal/config
+(internal_config_info_using_config_file) + internal/database
+(internal_database_ping_failed) echo raw keys in CLI output. Fix: wire a
+real Translator (embed-bundle pattern) at each binary’s main()/package
+init; add runtime guards that assert resolved prose (not just
+key-presence).</p>
+<h2 id="hxc-090-panoptic-tracks-test-generated-audit.json-users.json-const-053-hygiene">HXC-090
+— panoptic tracks test-generated audit.json users.json (CONST-053
+hygiene)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> panoptic a77228e: enterprise TestMain
+runs from temp dir; tree stays clean post-test x2, tests PASS, no
+production change. Guard via §11.4.135 (HXC-096) committed separately.
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>panoptic internal/enterprise/{audit,users}.json are version-tracked
+but overwritten by the enterprise test suite every run
+(timestamps/random IDs) -&gt; perpetual dirty tree. CONST-053:
+test-generated data should be gitignored + a fixture template used.
+Pre-existing, low severity.</p>
+<h2 id="hxc-093-helix_code-module-graph-has-phantom-digital.vasic.-requires-private-transitive-blocking-go-list--m-all-gomobile-bind">HXC-093
+— helix_code module graph has phantom digital.vasic.* requires + private
+transitive blocking go list -m all / gomobile bind</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> helix_code/go.mod: 27 replace directives
+-&gt; local submodules; go list -m all no-such-host 26-&gt;0 (462
+modules); REAL .aar produced (classes.jar + jni/libgojni.so x4 ABIs); go
+build ./… green throughout <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>gomobile bind fails because go list -m -json all errors: ~22
+digital.vasic.{cache,database,eventbus,…,vectordb} module paths are
+required with NO replace + NO remote (‘no such host’), and
+github.com/HelixDevelopment/helix_agent/Toolkit (private, separate from
+the replaced dev.helix.agent) needs interactive git creds. go build ./…
+works (imported subset only); full-graph tooling (gomobile, go list -m
+all) is blocked. Fix (repo-side, careful — editing go.mod risks the
+build): add replace directives for the phantom paths OR prune them, make
+Toolkit resolvable (replace/GOPRIVATE+SSH), persist x/mobile as a tool
+directive. Toolchain+NDK+Xcode all present; gobind codegen already works
+-&gt; artifact achievable once graph resolves.</p>
+<h2 id="hxc-098-out-of-box-config-fails-version-required-validation-blocks-client-statussystem-commands">HXC-098
+— out-of-box config fails ‘version required’ validation — blocks client
+status/system commands</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Reproduced via LoadHelixConfig path (RED:
+version-less config.json -&gt; Version=’’ + server.port=0 -&gt;
+validateConfig rejects). Fixed in internal/config/config.go
+loadConfigLocked: decode JSON ON TOP of getDefaultConfig() so all viper
+defaults merge. Guard hxc098_version_default_test.go: RED pre-fix (exit
+1), GREEN post-fix (Version=1.0.0,Port=8080). config.yaml ships explicit
+version. Full config pkg ok. <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Default config/config.yaml + the operator’s
+~/.config/helixcode/config.json have no top-level Version -&gt; config
+validation fails with ‘version is required’
+(internal_config_validate_version_required), blocking
+desktop/aurora/harmony status/system/version (and CLI subsystems) for a
+fresh user. Found while recording client videos (had to use a throwaway
+minimal valid config). Fix: ship a valid default Version in
+config/config.yaml (+ docs), or default it in config.Load when
+absent.</p>
+<h2 id="hxc-077-t1.5-context-window-percentage-indicator-partial">HXC-077 —
+T1.5 context-window percentage indicator (partial)</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong> TUI status bar
+now renders honest context-window USED-% (commit 6e03fe15).
+sessionUsedTokens accumulates real per-turn tokens; window from
+catalogue ContextSize-&gt;GetContextWindow; OMITS when unknown
+(CONST-035); label i18n-routed via new terminal_ui_chat_context_usage
+key (CONST-046). Guard context_usage_test.go: GREEN with key, RED
+without (raw-key echo exit 1), restored GREEN. Full terminal_ui pkg ok;
+build exit 0. <strong>Severity:</strong> Medium
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Context-window usage percentage indicator scaffolded (commit
+3c9d3495, task T1.5); REMAINING: live token-accounting wiring + UI
+verification across TUI/desktop still pending — keep open until the
+indicator reflects real per-session usage.</p>
+<h2 id="hxc-078-t1.6-skill.md-precedence-resolution-partial">HXC-078 —
+T1.6 SKILL.md precedence resolution (partial)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> FindMatching/List
+already resolve overlapping matches deterministically by lexicographic
+name (sort.Strings, documented contract markdown_skills.go:194) — gap
+was missing coverage, not a bug. Added
+TestSkillRegistry_FindMatching_OverlappingPatternsDeterministic
+(insertion-order independence + 50-iter stability + lexicographic
+order), PASS; full internal/commands pkg ok; build exit 0. Commit
+6e03fe15. <strong>Severity:</strong> Medium <strong>Created-By:</strong>
+Claude <strong>Assigned-To:</strong> Claude</p>
+<p>SKILL.md precedence ordering partially implemented (commit 51302bf8,
+task T1.6); REMAINING: full precedence-conflict resolution + tests
+covering overlapping skill definitions still outstanding — keep open
+until precedence is fully resolved and tested.</p>
+<h2 id="hxc-100-resync-docscontinuation.md-to-current-head-de-bloat-the-32k-token-line-1-header-const-04412.10-const-064-hygiene">HXC-100
+— Resync docs/CONTINUATION.md to current HEAD + de-bloat the 32k-token
+line-1 header (CONST-044/§12.10 + CONST-064 hygiene)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> CONTINUATION.md
+resynced to HEAD 3aacfa9f + line-1 header de-bloated (max line
+54856-&gt;2931 chars). History preserved: 4 mega-prose lines replaced by
+CONST-064 metadata table + ToC + condensed close-out 143-169 table;
+close-outs 131-142 dedicated sections intact; this session’s 5 rows
+added. git diff +143/-8 (additive, no content loss); exports rendered=2
+failed=0 fresh. Gated independently by conductor.
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>CONTINUATION.md is stale (Last updated 2026-06-14, refs HEAD
+e3063af1; current is 80e62afa after HXC-098 fix + HXC-099 i18n-sweep
+finding). Per CONST-044/§12.10 out-of-sync CONTINUATION is a CRITICAL
+DEFECT. ALSO: line 1 (‘Last updated’ header) has accreted ~32k tokens
+into a SINGLE line across rounds — pathological; Read/Edit of lines 1-12
+alone exceeds 25k tokens, making safe edits hard and risking corruption
+with blind sed. Overnight zero-risk policy =&gt; queued for careful
+daytime fix: (1) refactor the bloated header into a normal metadata
+table + a round-by-round table row, (2) add rounds for this session (B
+i18n sweep discarded+stashed -&gt; HXC-099; HXC-098 config-default fix),
+(3) restore CONST-064 ToC parity, (4) regen .html/.pdf. Live resumption
+currently served by the up-to-date .remember/remember.md
+(§11.4.131).</p>
+<h2 id="hxc-101-securitysecurity_test.go-testtlsconfiguration-external-network-dependency-nil-deref-panic-crashes-the-whole-security-test-binary">HXC-101
+— security/security_test.go TestTLSConfiguration — external-network
+dependency + nil-deref panic crashes the whole security test binary</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Replaced live httpbin.org call with
+hermetic httptest.NewTLSServer + t.Fatalf on error path (no nil-deref
+fall-through). Verified: TestTLSConfiguration PASS 3/3 (-count=3)
+deterministic, no external net; full security pkg ok (0.223s); go build
+./… exit 0; gofmt clean. <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Discovery sweep (§11.4.118) found the only failing package in a
+~270-pkg sweep. TestTLSConfiguration called live https://httpbin.org/get
+(non-deterministic, §11.4.98) and on the error path did t.Errorf without
+return -&gt; defer resp.Body.Close() with resp==nil -&gt; SIGSEGV panic
+that crashed the entire security test binary (took every other test in
+the package down). Fixed: hermetic httptest.NewTLSServer + t.Fatalf on
+error path.</p>
+<h2 id="hxc-099-systemic-i18n-raw-key-sweep-redo-const-046-corrected-regression-free-with-default-translator-contract-decision">HXC-099
+— Systemic i18n raw-key sweep redo (CONST-046) — corrected,
+regression-free, with default-translator contract decision</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> Corrected redo
+per operator decision (preserve loud raw-key NoopTranslator default — NO
+default swap; 9 guards pass unchanged). GOAL A: WireAll() was only
+called from cmd/cli; added entry-path init() wiring to cmd/server + 4
+apps so internal-package strings resolve for real users. GOAL B: removed
+redundant {{.Err}} placeholder from 8 internal/project messages
+(nil-data -&gt; ‘<no value>’). RED→GREEN guards captured (non-tautology
+proven); 9 guards green -count=1; all touched pkgs pass; build exit 0;
+vet clean; no mutation residue. Commit a02a8aa8. (B’s rejected
+default-swap approach preserved in git stash@{0}.)
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>First mechanical sweep (stash@{0}, agent a55802ad) wired a real
+embedded-English bundle translator as package default across 36
+internal/ packages but INTRODUCED 13 regressions vs green HEAD d85f6962:
+(1) real Go-template bug — internal/project messages render ‘<no value>’
+(error-detail param dropped); (2) defeats intentional
+NoopTranslator-echoes-raw-key anti-bluff guards in 9 pkgs
+(tools,voice,plantree,repomap,context,hardware,persistence,mcp,template);
+(3) autocommit+project tests assert real message text now broken. Redo
+MUST fix templating + needs operator decision: missing i18n key echoes
+raw key (loud default) OR falls back to embedded English (polished,
+risks hiding missing translations). Work in git stash; green tree
+restored (build exit 0, 13/13 pass).</p>
+<h2 id="hxc-102-harmony_os-main_nogui.go-2-user-facing-strings-goodbye-error-v-bypass-i18n-const-046-low-severity">HXC-102
+— harmony_os main_nogui.go — 2 user-facing strings (‘Goodbye!’, ‘Error:
+%v’) bypass i18n (CONST-046, low severity)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Routed cmdInteractive Goodbye!/Error: %v
+through cliApp.tr with new bundle keys (error binds {{.Error}}, no
+<no value>). Guard hxc102_interactive_i18n_test.go (nogui): GREEN,
+RED-without-key (raw-key leak exit 1), restored GREEN. Full harmony_os
+pkg ok both tag variants; build exit 0; gofmt clean.
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Discovery sweep: applications/harmony_os/main_nogui.go uses its i18n
+bundle heavily (~95 refs) but lines 876 (‘Goodbye!’) + 882 (‘Error: %v’)
+are user-facing UI text printed via fmt without the translator
+(CONST-046 localization gap). Lines 784/789-793 are developer-facing
+diagnostics (arguably out of scope). Low severity; may be folded into
+the HXC-099 entry-path i18n work.</p>
+<h2 id="hxc-104-streamllm-apiv1llmstream-hangs-forever-chunkchan-never-closed-done-never-emitted-production-defect-found-by-web-e2e">HXC-104
+— streamLLM /api/v1/llm/stream hangs forever — chunkChan never closed,
+[DONE] never emitted (production defect found by web e2e)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Fixed via ‘defer close(chunkChan)’ in
+streamLLM goroutine. Regression guard
+tests/integration/llm_stream_e2e_test.go (TestLLMStreamE2E): post-fix
+streams 9 SSE frames + [DONE] in 1.1s, deterministic -count=3; server
+unit pkg ok; build exit 0. Evidence docs/qa/web-llm-e2e-20260615/.
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>streamLLM goroutine (internal/server/llm_generate.go) called
+provider.GenerateStream(ctx,llmReq,chunkChan) but never closed
+chunkChan, so streamProviderToSSE never saw ok=false, never wrote the
+terminal data:[DONE] frame, and EVERY /stream request blocked until the
+120s ctx deadline — a real user-facing hang that handler/httptest tests
+missed. Exposed by the new TestLLMStreamE2E runtime e2e. Fixed: defer
+close(chunkChan).</p>
+<h2 id="hxc-103-web-client-runtime-e2e-proof-live-browserhttp---server---llm-provider-round-trip-for-apiv1llmgenerate-llmstream-continuation-honest-gap">HXC-103
+— Web-client runtime e2e proof — live browser/HTTP -&gt; server -&gt;
+LLM provider round-trip for /api/v1/llm/generate + /llm/stream
+(CONTINUATION honest gap)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> All 3 web LLM
+paths proven e2e against live ollama qwen2.5:3b: /generate (HTTP 200
+content:4 provider:ollama), /stream (9 SSE frames + [DONE], streamed
+1..5, &gt;1 frame proves streaming), browser-&gt;server-&gt;provider
+(chromedp: #output DOM=4, #meta provider=ollama, screenshot).
+Exposed+fixed production hang HXC-104. Evidence + README
+docs/qa/web-llm-e2e-20260615/. SKIP-OK when provider down (§11.4.3).
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>The web POST /llm/generate + /llm/stream endpoints + minimal web
+frontend are httptest-handler-verified only; NO full runtime e2e (no
+live client-&gt;server-&gt;provider round-trip captured) per §11.4.108
+layer-3/4. Deliver a real automated e2e (boot server, real HTTP/chromedp
+client hits the endpoints, REAL provider responds, capture the
+round-trip evidence). SKIP-OK per §11.4.3 when no real provider
+reachable (CONST-050(A) real-infra mandate) — never a fake PASS.</p>
+<h2 id="hxc-105-runtime-e2e-for-server-post-apiv1specify-boot-server---real-spec-output-via-live-provider-speckit-http-endpoint-gap">HXC-105
+— Runtime e2e for server POST /api/v1/specify — boot server -&gt; real
+spec output via live provider (speckit HTTP-endpoint gap)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+tests/integration/specify_server_e2e_test.go boots the real server +
+POSTs /api/v1/specify against live ollama qwen2.5:3b: HTTP 200
+status:success provider:ollama qualityScore:0.9808, real 3-round 2-agent
+debate, provider_calls=6 total_tokens=806; output non-empty + NOT the
+‘awaiting provider wiring’ stub. PASS 75.93s, vet clean, build exit 0.
+Evidence docs/qa/web-llm-e2e-20260615/. <strong>Created-By:</strong>
+Claude <strong>Assigned-To:</strong> Claude</p>
+<p>specify_e2e_test.go + debate_e2e_test.go exercise the speckit path
+provider-direct (pillar.ExecutePhase / responder.Generate); NO e2e boots
+the real HTTP server and POSTs to /api/v1/specify (server
+specifyHandler). Add one mirroring llm_generate_e2e_test.go: boot
+server.New, POST a real request, assert a genuine 200 + non-fabricated
+phase output from live ollama; honest 502/SKIP otherwise.</p>
+<h2 id="hxc-106-helix_agent-durable-memory-process-lifetime-in-memory-fallback-is-not-disk-durable-recall-lost-on-restart-continuation-honest-gap">HXC-106
+— helix_agent durable memory: process-lifetime in-memory fallback is NOT
+disk-durable — recall lost on restart (CONTINUATION honest gap)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> Investigated
+(§11.4.102): disk-durable DiskStore (sqlite, survives close+reopen) was
+ALREADY implemented + wired as preferred fallback (commits
+ac3ad237/a91faad6) via debateMemoryFallbackPath() (os.UserCacheDir,
+‘helixagent’-namespaced, CONST-051-decoupled). CONTINUATION ‘in-memory
+only’ gap was stale. Closed the test-coverage gap: new
+internal/services/debate_memory_fallback_test.go proves resolver returns
+writable durable path +
+persist-&gt;Close(restart)-&gt;reopen-&gt;RECALL. ./internal/memory +
+./internal/services pass; submodule HEAD c5bdcfad pushed to upstreams.
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>helix_agent memory persists by default with a local fallback, but the
+fallback is process-lifetime in-memory only: recall survives within a
+process but is LOST on restart unless a durable backend is configured.
+Investigate the fallback in the helix_agent submodule; make it
+disk-durable (e.g. local file/sqlite-backed store) so recall survives
+restart out-of-the-box, OR document precisely why not + the required
+backend. Submodule work: own commit + push discipline.</p>
+<h2 id="hxc-109-mobile-apps-are-scaffolds-android-has-no-build.gradleandroidmanifest-ios-has-no-xcode-project-not-buildable---not-recordable">HXC-109
+— Mobile apps are scaffolds — Android has no
+build.gradle/AndroidManifest, iOS has no Xcode project (not buildable
+-&gt; not recordable)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Android: buildable Gradle project + 67MB
+APK runs on live Genymotion (3 videos: connect/lifecycle/tasklist, real
+server task list via authenticated HTTP); 2 runtime issues fixed (JWT
+client-mode, JSON parse). iOS: buildable Xcode project (gomobile
+xcframework + rewired binding) builds+runs on iPhone14 sim
+(helixcode-ios-launch video, Go core OK). Both committed
+(1ffc9b69/38caa48d). Mobile apps no longer scaffolds.
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Inventory found applications/android + applications/ios are
+single-screen scaffolds with hardcoded localhost and NO build system.
+Must create Android Gradle build + manifest and an iOS Xcode project
+(gomobile or native) before the apps build/run on the Genymotion
+emulator / iOS simulators for recording.</p>
+<h2 id="hxc-110-extend-containers-submodule-to-launch-ios-simulators-operator-directed-apple-support-mechanism">HXC-110
+— Extend containers submodule to launch iOS simulators
+(operator-directed Apple-support mechanism)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+submodules/containers/pkg/applesim: host xcrun-simctl orchestration
+(Boot/Install/Launch/Record/Shutdown, by stable UDID §11.4.111), 16
+tests pass incl -race, real host round-trip; cmd/applesim CLI. Submodule
+a0fa823 pushed all upstreams, meta pointer bumped.
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Operator (2026-06-15): create a proper mechanism for starting
+mandatory iOS simulators through the containers submodule, extending it
+to support anything Apple-related. NOTE: iOS simulators run natively via
+xcrun simctl on macOS (cannot run inside Linux containers) — the
+containers submodule mechanism must orchestrate the host-native simctl
+lifecycle (boot/install/record) under its unified API. Investigate +
+extend containers (§11.4.76).</p>
+<h2 id="hxc-111-desktop-gui-shows-raw-i18n-keys-desktop_dashboard_header_activity_title-const-046-gap">HXC-111
+— Desktop GUI shows raw i18n keys
+(desktop_dashboard_header/_activity_title) — CONST-046 gap</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> Wired i18n.NewTranslator() in
+NewDesktopApp; dashboard now shows real text (verified via
+relaunch+AXRaise+screenshot: title ‘HelixCode - Distributed AI
+Development Platform’, ‘Recent Activity’, no raw keys). Desktop tests
+pass, build exit 0. Clean desktop video re-recorded.
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>After fixing the launch crash, the desktop dashboard renders raw
+message-ID keys (desktop_dashboard_header,
+desktop_dashboard_activity_title) instead of localized text. Likely the
+desktop i18n bundle is missing those keys OR Fyne locale-parse error
+(‘subtag at unknown’) broke bundle loading. Real CONST-046 defect
+visible in helixcode-desktop-dashboard-20260615.mp4.</p>
+<h2 id="hxc-113-mcp-tool-names-use-servername-colon-openai-compatible-providers-deepseeketc.-reject-function-names-breaking-llm-chat-with-mcp-enabled">HXC-113
+— MCP tool names use ‘server:name’ (colon) — OpenAI-compatible providers
+(DeepSeek/etc.) reject function names, breaking LLM chat with MCP
+enabled</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> mcpToolRegisteredName sanitises MCP tool
+names to server__name (OpenAI-compatible <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>+);
+dispatch unaffected (Execute uses original server/toolName). 2
+mcp_readonly tests reconciled (§11.4.120); guard test + full
+internal/tools pkg pass; build exit 0. <strong>Created-By:</strong>
+Claude <strong>Assigned-To:</strong> Claude</p>
+<p>internal/tools/registry.go:897 RegisterMCPManager names MCP tools
+server+‘:’+name (e.g. fs:read_file). OpenAI/DeepSeek function-calling
+requires names matching <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>+$, so a chat turn with MCP tools
+enabled returns HTTP 400. Found while recording the TUI (had to disable
+.helixcode/mcp.yml to record). Fix: sanitize MCP tool names
+(e.g. server__name or server-name) at registration + map back when
+dispatching.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>A-Za-z0-9_-<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>a-zA-Z0-9_-<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 </body>
 </html>

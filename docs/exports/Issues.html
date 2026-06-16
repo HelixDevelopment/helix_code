@@ -1912,37 +1912,6 @@ criteria:</strong> Every operator-facing doc carries a
 check for the footer added; stale-beyond-grace docs triaged.
 <strong>Composes-with:</strong> §11.4.99, §11.4.92, HXC-028.</p>
 <hr />
-<h2 id="hxc-031-deferred-long-tail-const-052-renames-resolved-none-remain-codexcline-reference-agent-ports">HXC-031
-— Deferred long-tail: CONST-052 renames (RESOLVED — none remain) +
-Codex/Cline reference-agent ports</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Task
-<strong>Discovered:</strong> 2026-05-29 (carried forward from HXC-001
-deferral notes + Phase-3/5 backlog in docs/CONTINUATION.md)
-<strong>Discovered-By:</strong> AI <strong>Rename-component RESOLVED
-(2026-05-29 — investigation, no guessing per §11.4.6):</strong> the
-“deferred build-breaking renames” were stale CONTINUATION prose. On
-inspection there are NO owned-org renames genuinely left:
-<code>dependencies/HelixDevelopment/*</code> leaves are already
-lowercase snake_case (debate_orchestrator, doc_processor, helix_llm,
-helix_memory, helix_specifier, llm_orchestrator, llm_provider,
-llms_verifier, models, vision_engine);
-<code>dependencies/vasic-digital/*</code> has no PascalCase leaves; the
-only remaining PascalCase dirs (<code>HuggingFace_Hub</code>,
-<code>LLama_CPP</code>, <code>Ollama</code>) + the single remaining
-<code>Upstreams/</code> (<code>cli_agents/claude-code-source/</code>)
-are THIRD-PARTY (CONST-052-exempt vendor names); the parent org-grouping
-dirs <code>HelixDevelopment/</code> + <code>vasic-digital/</code> were
-intentionally kept as namespace carve-outs per HXC-001’s operator
-decision. <code>scripts/const052_verify_refs.sh</code> CHECK 1/2 PASS
-(217 gitlinks resolve, no conflict gitlinks). HXC-001 leaf-rename
-programme is genuinely complete; nothing to do here. <strong>Remaining
-scope:</strong> port “Codex Multimodal” + “Cline Computer Use” reference
-agents (docs/CONTINUATION.md Phase-3 backlog) — genuine feature work,
-not started. <strong>Closure criteria:</strong> each agent port covered
-by tests + Challenge with captured evidence; all pushed per §11.4.71.
-<strong>Composes-with:</strong> CONST-052, HXC-001, §11.4.81,
-§11.4.101.</p>
-<hr />
 <h2 id="hxc-032-llmorchestrator-submodule-committed-merge-conflict-markers-break-helix_agent-build-closed-fixed.md">HXC-032
 — LLMOrchestrator submodule: committed merge-conflict markers break
 <code>helix_agent</code> build — CLOSED (→ Fixed.md)</h2>
@@ -2190,6 +2159,45 @@ closed <code>Implemented (→ Fixed.md)</code>. To update
 Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
-hand-maintained).*</p>
+hand-maintained).* ## HXC-107 — Feature Status docs program
+(docs/features) — comprehensive per-feature inventory across all
+components/clients/submodules/ported-cli_agents, docs_chain-synced</p>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Round-1 inventory landed: ~388 features catalogued (233 internal, 67
+cmd/clients, 55 submodule, 33 ported) in docs/features/Status.md +
+Status_Summary.md with the full dimension schema
+(Dev/Wired/Real-use/Tests/V&amp;V/Video/Analysis/Origin/Overall). 0
+video-confirmed (honest). ONGOING: deeper inventory of flagged packages;
+docs_chain context wiring (§11.4.106); raise video-confirmed as
+recordings land.</p>
+<h2 id="hxc-108-video-qa-program-record-all-clients-x-all-features-with-strongest-models-ensemble---volumest7downloadsrecordings-analyze-fix">HXC-108
+— Video-QA program: record all clients x all features with strongest
+models + ensemble -&gt; /Volumes/T7/Downloads/Recordings, analyze +
+fix</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Foundation verified: DeepSeek V3 (strongest) + Mistral Large + Groq
+Llama-3.3-70B ensemble real through helix stack. Recordable now:
+CLI/TUI/Web/Desktop(host display, operator-approved). Android Genymotion
+live via adb. Each recording must show real use-case scenarios, be
+analyzed, problems fixed/retested. Feeds the Status docs video-confirmed
+column. ONGOING multi-round.</p>
+<h2 id="hxc-112-desktop-gui-feature-recording-fyne-opengl-canvas-ignores-osascript-synthetic-clicks-need-cliclickreal-event-automation-to-record-llm-chat-in-gui">HXC-112
+— Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript
+synthetic clicks — need cliclick/real-event automation to record
+LLM-chat in-GUI</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
+Claude</p>
+<p>Fyne renders via OpenGL (no native accessibility); osascript ‘click
+at’ does not register on the canvas, so in-GUI feature interaction (LLM
+Chat, tab nav) cannot be driven for recording via AppleScript.
+helixcode-desktop-dashboard-20260615.mp4 honestly shows the working
+dashboard + live uptime but not feature interaction. Need cliclick (real
+CGEvent mouse) or a Fyne test-driver to record the desktop LLM-chat
+feature end-to-end.</p>
 </body>
 </html>

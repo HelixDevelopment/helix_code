@@ -50,8 +50,7 @@
 | HXC-107 | Feature Status docs program (docs/features) — comprehensive per-feature inventory across all components/clients/submodules/ported-cli_agents, docs_chain-synced | Task | Queued |  | Feature Status docs program (docs/features) — comprehensive per-feature inventory across all components/clients/submodules/ported-cli_agents, docs_chain-synced |
 | HXC-108 | Video-QA program: record all clients x all features with strongest models + ensemble -> /Volumes/T7/Downloads/Recordings, analyze + fix | Task | Queued |  | Video-QA program: record all clients x all features with strongest models + ensemble -> /Volumes/T7/Downloads/Recordings, analyze + fix |
 | HXC-112 | Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript synthetic clicks — need cliclick/real-event automation to record LLM-chat in-GUI | Task | Queued |  | Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript synthetic clicks — need cliclick/real-event automation to record LLM-chat in-GUI |
-| HXC-113 | MCP tool names use 'server:name' (colon) — OpenAI-compatible providers (DeepSeek/etc.) reject function names, breaking LLM chat with MCP enabled | Bug | Queued |  | MCP tool names use 'server:name' (colon) — OpenAI-compatible providers (DeepSeek/etc.) reject function names, breaking LLM chat with MCP enabled |
 
-**Counts**: 45 tracked item-sections in `docs/Issues.md` — **4 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
+**Counts**: 44 tracked item-sections in `docs/Issues.md` — **3 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
-*Last regenerated: 2026-06-15 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
+*Last regenerated: 2026-06-16 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*

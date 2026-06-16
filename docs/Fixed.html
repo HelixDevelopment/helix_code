@@ -172,9 +172,6 @@
   </style>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">Fixed</h1>
-</header>
 <h1 id="helixcode-fixed-items-tracker">HelixCode — Fixed Items
 Tracker</h1>
 <blockquote>
@@ -3296,5 +3293,36 @@ desktop_dashboard_activity_title) instead of localized text. Likely the
 desktop i18n bundle is missing those keys OR Fyne locale-parse error
 (‘subtag at unknown’) broke bundle loading. Real CONST-046 defect
 visible in helixcode-desktop-dashboard-20260615.mp4.</p>
+<h2
+id="hxc-113-mcp-tool-names-use-servername-colon-openai-compatible-providers-deepseeketc.-reject-function-names-breaking-llm-chat-with-mcp-enabled">HXC-113
+— MCP tool names use ‘server:name’ (colon) — OpenAI-compatible providers
+(DeepSeek/etc.) reject function names, breaking LLM chat with MCP
+enabled</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> mcpToolRegisteredName sanitises MCP tool
+names to server__name (OpenAI-compatible <a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>+);
+dispatch unaffected (Execute uses original server/toolName). 2
+mcp_readonly tests reconciled (§11.4.120); guard test + full
+internal/tools pkg pass; build exit 0. <strong>Created-By:</strong>
+Claude <strong>Assigned-To:</strong> Claude</p>
+<p>internal/tools/registry.go:897 RegisterMCPManager names MCP tools
+server+‘:’+name (e.g. fs:read_file). OpenAI/DeepSeek function-calling
+requires names matching <a href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a>+$, so a chat turn with MCP tools
+enabled returns HTTP 400. Found while recording the TUI (had to disable
+.helixcode/mcp.yml to record). Fix: sanitize MCP tool names
+(e.g. server__name or server-name) at registration + map back when
+dispatching.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>A-Za-z0-9_-<a href="#fnref1" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>a-zA-Z0-9_-<a href="#fnref2" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 </body>
 </html>

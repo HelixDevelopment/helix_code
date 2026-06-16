@@ -593,12 +593,3 @@ Foundation verified: DeepSeek V3 (strongest) + Mistral Large + Groq Llama-3.3-70
 
 Fyne renders via OpenGL (no native accessibility); osascript 'click at' does not register on the canvas, so in-GUI feature interaction (LLM Chat, tab nav) cannot be driven for recording via AppleScript. helixcode-desktop-dashboard-20260615.mp4 honestly shows the working dashboard + live uptime but not feature interaction. Need cliclick (real CGEvent mouse) or a Fyne test-driver to record the desktop LLM-chat feature end-to-end.
 
-## HXC-113 — MCP tool names use 'server:name' (colon) — OpenAI-compatible providers (DeepSeek/etc.) reject function names, breaking LLM chat with MCP enabled
-
-**Status:** Queued
-**Type:** Bug
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-internal/tools/registry.go:897 RegisterMCPManager names MCP tools server+':'+name (e.g. fs:read_file). OpenAI/DeepSeek function-calling requires names matching ^[a-zA-Z0-9_-]+$, so a chat turn with MCP tools enabled returns HTTP 400. Found while recording the TUI (had to disable .helixcode/mcp.yml to record). Fix: sanitize MCP tool names (e.g. server__name or server-name) at registration + map back when dispatching.
-

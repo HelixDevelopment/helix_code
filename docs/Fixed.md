@@ -899,3 +899,13 @@ Operator (2026-06-15): create a proper mechanism for starting mandatory iOS simu
 
 After fixing the launch crash, the desktop dashboard renders raw message-ID keys (desktop_dashboard_header, desktop_dashboard_activity_title) instead of localized text. Likely the desktop i18n bundle is missing those keys OR Fyne locale-parse error ('subtag at unknown') broke bundle loading. Real CONST-046 defect visible in helixcode-desktop-dashboard-20260615.mp4.
 
+## HXC-113 — MCP tool names use 'server:name' (colon) — OpenAI-compatible providers (DeepSeek/etc.) reject function names, breaking LLM chat with MCP enabled
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** mcpToolRegisteredName sanitises MCP tool names to server__name (OpenAI-compatible ^[A-Za-z0-9_-]+); dispatch unaffected (Execute uses original server/toolName). 2 mcp_readonly tests reconciled (§11.4.120); guard test + full internal/tools pkg pass; build exit 0.
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+internal/tools/registry.go:897 RegisterMCPManager names MCP tools server+':'+name (e.g. fs:read_file). OpenAI/DeepSeek function-calling requires names matching ^[a-zA-Z0-9_-]+$, so a chat turn with MCP tools enabled returns HTTP 400. Found while recording the TUI (had to disable .helixcode/mcp.yml to record). Fix: sanitize MCP tool names (e.g. server__name or server-name) at registration + map back when dispatching.
+
