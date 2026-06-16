@@ -125,7 +125,7 @@ func minimallyValidConfig() *Config {
 		Application: ApplicationConfig{Name: "helix"},
 		Server:      ServerConfig{Port: 8080},
 		Database:    database.Config{Host: "localhost", DBName: "helix"},
-		Auth:        AuthConfig{JWTSecret: "real-secret-not-default"},
+		Auth:        AuthConfig{JWTSecret: "real-secret-not-default", BcryptCost: 12},
 		Workers:     WorkersConfig{HealthCheckInterval: 30, MaxConcurrentTasks: 10},
 		Tasks:       TasksConfig{MaxRetries: 3},
 		LLM:         LLMConfig{MaxTokens: 1000, Temperature: 0.7},

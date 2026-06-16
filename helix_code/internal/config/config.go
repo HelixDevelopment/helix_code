@@ -596,6 +596,22 @@ func validateConfig(cfg *Config) error {
 	if cfg.Auth.JWTSecret == "" || cfg.Auth.JWTSecret == "default-secret-change-in-production" {
 		return fmt.Errorf("%s", tr(context.Background(), "internal_config_validate_jwt_secret_must_be_set", nil))
 	}
+	// bcrypt cost must fall inside golang.org/x/crypto/bcrypt's documented
+	// inclusive range [MinCost=4 .. MaxCost=31]. A cost > 31 makes EVERY
+	// bcrypt.GenerateFromPassword call (internal/auth/auth.go) return
+	// InvalidCostError at runtime, so password hashing — and thus every user
+	// registration / password-set flow — fails for a config the loader had
+	// silently accepted. A cost < 4 is silently coerced to bcrypt.DefaultCost,
+	// quietly weakening the configured work factor; we reject it so the
+	// configured value is the value actually used (HXC-config / §11.4.110:
+	// catch the second-artifact contract mismatch at config-validation time,
+	// not at runtime). bcryptMinCost/bcryptMaxCost mirror the bcrypt package
+	// constants without importing it solely for two literals.
+	const bcryptMinCost, bcryptMaxCost = 4, 31
+	if cfg.Auth.BcryptCost < bcryptMinCost || cfg.Auth.BcryptCost > bcryptMaxCost {
+		return fmt.Errorf("auth.bcrypt_cost must be between %d and %d, got: %d",
+			bcryptMinCost, bcryptMaxCost, cfg.Auth.BcryptCost)
+	}
 
 	// Workers validation
 	if cfg.Workers.HealthCheckInterval < 1 {
@@ -1379,6 +1395,22 @@ func (v *ConfigurationValidator) Validate(config *Config) ValidationResult {
 			Severity: "error",
 			Code:     "invalid_jwt_secret",
 			Message:  "JWT secret must be at least 32 characters",
+		})
+	}
+
+	// Validate bcrypt cost — must be within bcrypt's documented inclusive range
+	// [4..31]. A cost > 31 makes every bcrypt.GenerateFromPassword call fail at
+	// runtime (InvalidCostError), and a cost < 4 is silently coerced to
+	// DefaultCost, weakening the configured work factor. See validateConfig for
+	// the full rationale.
+	if config.Auth.BcryptCost < 4 || config.Auth.BcryptCost > 31 {
+		result.Valid = false
+		result.Errors = append(result.Errors, ValidationError{
+			Property: "auth.bcrypt_cost",
+			Path:     "auth.bcrypt_cost",
+			Severity: "error",
+			Code:     "invalid_bcrypt_cost",
+			Message:  "bcrypt cost must be between 4 and 31",
 		})
 	}
 

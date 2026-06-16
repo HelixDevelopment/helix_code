@@ -293,30 +293,58 @@ func (s *Store) saveSessions() (int64, int, error) {
 		return 0, 0, err
 	}
 
-	// Export each session
+	// Export each session. A per-item failure (export / serialize / write) is a
+	// real persistence failure, NOT something to silently swallow: a save where
+	// items were dropped MUST surface an error and report only the items that were
+	// actually persisted. Reporting len(sessions) saved while a write failed is a
+	// §11.4 / Article XI §11.9 PASS-bluff — the user believes their data is durable
+	// when it is not (silent data loss on next restart). §11.4.135.
 	totalSize := int64(0)
+	saved := 0
+	var firstErr error
+	failed := 0
 	for _, sess := range sessions {
 		snapshot, err := s.sessionMgr.Export(sess.ID)
 		if err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			failed++
 			continue
 		}
 
 		// Serialize
 		data, err := s.serializer.Serialize(snapshot)
 		if err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			failed++
 			continue
 		}
 
 		// Write to file
 		filename := filepath.Join(sessionsPath, sess.ID+s.serializer.Extension())
 		if err := writeAtomic(filename, data); err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			failed++
 			continue
 		}
 
 		totalSize += int64(len(data))
+		saved++
 	}
 
-	return totalSize, len(sessions), nil
+	if failed > 0 {
+		return totalSize, saved, fmt.Errorf("%s: %w",
+			tr(stdctx.Background(), "internal_persistence_save_items_partial_failure",
+				map[string]any{"Failed": fmt.Sprintf("%d", failed), "Total": fmt.Sprintf("%d", len(sessions))}),
+			firstErr)
+	}
+
+	return totalSize, saved, nil
 }
 
 // saveConversations saves all conversations (internal, no lock)
@@ -332,30 +360,55 @@ func (s *Store) saveConversations() (int64, int, error) {
 		return 0, 0, err
 	}
 
-	// Export each conversation
+	// Export each conversation. Per-item failures are surfaced (not swallowed) and
+	// the reported count reflects only what was actually persisted — see
+	// saveSessions for the §11.4 / §11.9 PASS-bluff rationale.
 	totalSize := int64(0)
+	saved := 0
+	var firstErr error
+	failed := 0
 	for _, conv := range conversations {
 		snapshot, err := s.memoryMgr.Export(conv.ID)
 		if err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			failed++
 			continue
 		}
 
 		// Serialize
 		data, err := s.serializer.Serialize(snapshot)
 		if err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			failed++
 			continue
 		}
 
 		// Write to file
 		filename := filepath.Join(convsPath, conv.ID+s.serializer.Extension())
 		if err := writeAtomic(filename, data); err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			failed++
 			continue
 		}
 
 		totalSize += int64(len(data))
+		saved++
 	}
 
-	return totalSize, len(conversations), nil
+	if failed > 0 {
+		return totalSize, saved, fmt.Errorf("%s: %w",
+			tr(stdctx.Background(), "internal_persistence_save_items_partial_failure",
+				map[string]any{"Failed": fmt.Sprintf("%d", failed), "Total": fmt.Sprintf("%d", len(conversations))}),
+			firstErr)
+	}
+
+	return totalSize, saved, nil
 }
 
 // saveFocusChains saves all focus chains (internal, no lock)
@@ -371,30 +424,55 @@ func (s *Store) saveFocusChains() (int64, int, error) {
 		return 0, 0, err
 	}
 
-	// Export each chain
+	// Export each chain. Per-item failures are surfaced (not swallowed) and the
+	// reported count reflects only what was actually persisted — see saveSessions
+	// for the §11.4 / §11.9 PASS-bluff rationale.
 	totalSize := int64(0)
+	saved := 0
+	var firstErr error
+	failed := 0
 	for _, chain := range chains {
 		snapshot, err := s.focusMgr.ExportChain(chain.ID)
 		if err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			failed++
 			continue
 		}
 
 		// Serialize
 		data, err := s.serializer.Serialize(snapshot)
 		if err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			failed++
 			continue
 		}
 
 		// Write to file
 		filename := filepath.Join(focusPath, chain.ID+s.serializer.Extension())
 		if err := writeAtomic(filename, data); err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			failed++
 			continue
 		}
 
 		totalSize += int64(len(data))
+		saved++
 	}
 
-	return totalSize, len(chains), nil
+	if failed > 0 {
+		return totalSize, saved, fmt.Errorf("%s: %w",
+			tr(stdctx.Background(), "internal_persistence_save_items_partial_failure",
+				map[string]any{"Failed": fmt.Sprintf("%d", failed), "Total": fmt.Sprintf("%d", len(chains))}),
+			firstErr)
+	}
+
+	return totalSize, saved, nil
 }
 
 // LoadAll loads all application state

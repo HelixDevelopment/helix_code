@@ -607,17 +607,27 @@ func (m *Manager) UpdateConversationWithVersion(id string, updated *Conversation
 	updated.Version = current.Version + 1
 	updated.UpdatedAt = time.Now()
 
+	// HXC-MEM-UPDATE-ALIAS §11.4.85/§11.4.118: store a deep CLONE, never the
+	// caller's live `updated` pointer. Storing it directly would let the caller's
+	// retained reference alias the manager-owned struct — a subsequent
+	// manager-side mutation (AddMessage under the write lock) concurrent with a
+	// caller-side read of the same struct is a data race the Manager RWMutex
+	// cannot guard, because the mutex only protects the conversations map, not the
+	// contents of a pointer that escaped the critical section. Same class as the
+	// HXC-MEM-IMPORT-ALIAS store-path fix.
+	stored := updated.Clone()
+
 	// Update in memory
-	m.conversations[id] = updated
+	m.conversations[id] = stored
 
 	// Update active conversation if needed
 	if m.activeConv != nil && m.activeConv.ID == id {
-		m.activeConv = updated
+		m.activeConv = stored
 	}
 
 	return &ConflictResolution{
 		Resolved: true,
-		Current:  updated,
+		Current:  stored,
 	}, nil
 }
 
@@ -636,17 +646,25 @@ func (m *Manager) ResolveConflict(id string, incoming *Conversation, strategy st
 		// Overwrite with incoming version
 		incoming.Version = current.Version + 1
 		incoming.UpdatedAt = time.Now()
-		m.conversations[id] = incoming
+
+		// HXC-MEM-RESOLVE-ALIAS §11.4.85/§11.4.118: store a deep CLONE, never the
+		// caller's live `incoming` pointer. Storing it directly would let the
+		// caller's retained reference alias the manager-owned struct — a subsequent
+		// manager-side mutation (AddMessage under the write lock) concurrent with a
+		// caller-side read of the same struct is a data race the Manager RWMutex
+		// cannot guard. Same class as the HXC-MEM-IMPORT-ALIAS store-path fix.
+		stored := incoming.Clone()
+		m.conversations[id] = stored
 
 		if m.activeConv != nil && m.activeConv.ID == id {
-			m.activeConv = incoming
+			m.activeConv = stored
 		}
 
 		return &ConflictResolution{
 			Resolved:   true,
-			Current:    incoming,
+			Current:    stored,
 			Incoming:   incoming,
-			Resolution: incoming,
+			Resolution: stored,
 		}, nil
 
 	case "merge":

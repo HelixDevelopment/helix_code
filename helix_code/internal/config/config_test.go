@@ -71,7 +71,8 @@ func TestValidateConfig(t *testing.T) {
 					Port: 5432,
 				},
 				Auth: AuthConfig{
-					JWTSecret: "test-jwt-secret-32-chars-long-!!!",
+					JWTSecret:  "test-jwt-secret-32-chars-long-!!!",
+					BcryptCost: 12,
 				},
 				LLM: LLMConfig{
 					DefaultProvider: "local",
@@ -186,7 +187,7 @@ func TestConfigValidationEdgeCases(t *testing.T) {
 				Database: database.Config{
 					Port: 5432,
 				},
-				Auth: AuthConfig{JWTSecret: "test-jwt-secret-32-chars-long-!!!"},
+				Auth: AuthConfig{JWTSecret: "test-jwt-secret-32-chars-long-!!!", BcryptCost: 12},
 				LLM: LLMConfig{
 					DefaultProvider: "local",
 					MaxTokens:       1000,

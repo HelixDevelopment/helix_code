@@ -37,6 +37,9 @@ internal_persistence_save_conversations_failed:
 internal_persistence_save_focus_chains_failed:
   other: "failed to save focus chains: {{.Error}}"
 
+internal_persistence_save_items_partial_failure:
+  other: "failed to persist {{.Failed}} of {{.Total}} item(s)"
+
 internal_persistence_load_sessions_failed:
   other: "failed to load sessions: {{.Error}}"
 
