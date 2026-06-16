@@ -538,7 +538,16 @@ func (m *Manager) Import(snapshot *ConversationSnapshot) error {
 		return fmt.Errorf("conversation with ID '%s' already exists", snapshot.Conversation.ID)
 	}
 
-	m.conversations[snapshot.Conversation.ID] = snapshot.Conversation
+	// HXC-014 §11.4.85: store a deep CLONE, never the caller's live pointer.
+	// Storing snapshot.Conversation directly would let the caller's retained
+	// reference alias the manager-owned struct — a subsequent manager-side
+	// mutation (AddMessage under the write lock) concurrent with a caller-side
+	// read of the same struct is a data race the Manager RWMutex cannot guard,
+	// because the mutex only protects the conversations map, not the contents of
+	// a pointer that escaped the critical section. Cloning on the store path
+	// mirrors the read-path clone in GetConversation/GetAll and closes the
+	// aliasing hole.
+	m.conversations[snapshot.Conversation.ID] = snapshot.Conversation.Clone()
 
 	return nil
 }

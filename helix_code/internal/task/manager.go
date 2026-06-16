@@ -12,8 +12,8 @@ import (
 
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/redis"
-	goredis "github.com/redis/go-redis/v9"
 	"github.com/google/uuid"
+	goredis "github.com/redis/go-redis/v9"
 )
 
 // TaskType represents different types of tasks
@@ -387,29 +387,100 @@ func (tm *TaskManager) getCachedWorkerTasks(ctx context.Context, workerID uuid.U
 	return taskIDs, nil
 }
 
-// GetTaskWithCache retrieves a task with caching
+// GetTaskWithCache retrieves a task with caching.
+//
+// SNAPSHOT GUARANTEE (§11.4.6 data-race fix): the returned *Task is a COPY of
+// the in-memory task, never the live pointer stored in tm.tasks. The manager's
+// writers (AssignTask / CompleteTask / FailTask / SplitTask) mutate the stored
+// *Task in place under tm.mu.Lock(); handing a caller the live pointer let the
+// caller read those mutable fields (Status, UpdatedAt, Data, ...) with no shared
+// synchronisation, a data race the -race detector trips on. cloneTask produces
+// an independent snapshot so the caller never shares mutable memory with the
+// manager. See TestGetTaskWithCache_SnapshotRace (§11.4.115).
 func (tm *TaskManager) GetTaskWithCache(ctx context.Context, taskID uuid.UUID) (*Task, error) {
-	// Try cache first
+	// Try cache first. The cached value is freshly unmarshalled from Redis,
+	// so it is already an independent copy — safe to return directly.
 	if cachedTask, err := tm.getCachedTask(ctx, taskID); err == nil && cachedTask != nil {
 		return cachedTask, nil
 	}
 
 	tm.mu.RLock()
-	task, exists := tm.tasks[taskID]
+	stored, exists := tm.tasks[taskID]
+	var snapshot *Task
+	if exists {
+		// Copy while still holding the read lock so the snapshot is internally
+		// consistent and cannot race a concurrent writer mid-copy.
+		snapshot = cloneTask(stored)
+	}
 	tm.mu.RUnlock()
 
 	if !exists {
 		return nil, fmt.Errorf("%s", tr(ctx, "internal_task_not_found", map[string]any{"ID": taskID.String()}))
 	}
 
-	// Cache the result
-	if task != nil {
-		if cacheErr := tm.cacheTask(ctx, task); cacheErr != nil {
-			log.Printf("⚠️  Failed to cache task %s: %v", taskID, cacheErr)
-		}
+	// Cache the snapshot (cacheTask only marshals it, never retains the pointer).
+	if cacheErr := tm.cacheTask(ctx, snapshot); cacheErr != nil {
+		log.Printf("⚠️  Failed to cache task %s: %v", taskID, cacheErr)
 	}
 
-	return task, nil
+	return snapshot, nil
+}
+
+// cloneTask returns an independent deep-enough copy of a task. Scalar and
+// pointer-to-value fields are copied by value; the mutable reference-typed
+// fields (Data, ResultData, CheckpointData maps, Dependencies slice, and the
+// AssignedWorker / OriginalWorker / time pointers) are cloned so the returned
+// snapshot shares NO mutable memory with the source. Callers may freely read
+// the snapshot concurrently with the manager mutating the stored task.
+//
+// The caller MUST hold at least tm.mu.RLock() while invoking cloneTask on a
+// task stored in tm.tasks, so the source is not mutated mid-copy.
+func cloneTask(src *Task) *Task {
+	if src == nil {
+		return nil
+	}
+	dst := *src // shallow copy: scalars + the *uuid.UUID / *time.Time pointers
+
+	dst.AssignedWorker = cloneUUIDPtr(src.AssignedWorker)
+	dst.OriginalWorker = cloneUUIDPtr(src.OriginalWorker)
+	dst.StartedAt = cloneTimePtr(src.StartedAt)
+	dst.CompletedAt = cloneTimePtr(src.CompletedAt)
+
+	if src.Dependencies != nil {
+		dst.Dependencies = append([]uuid.UUID(nil), src.Dependencies...)
+	}
+	dst.Data = cloneStringAnyMap(src.Data)
+	dst.ResultData = cloneStringAnyMap(src.ResultData)
+	dst.CheckpointData = cloneStringAnyMap(src.CheckpointData)
+
+	return &dst
+}
+
+func cloneUUIDPtr(p *uuid.UUID) *uuid.UUID {
+	if p == nil {
+		return nil
+	}
+	v := *p
+	return &v
+}
+
+func cloneTimePtr(p *time.Time) *time.Time {
+	if p == nil {
+		return nil
+	}
+	v := *p
+	return &v
+}
+
+func cloneStringAnyMap(m map[string]interface{}) map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	out := make(map[string]interface{}, len(m))
+	for k, v := range m {
+		out[k] = v
+	}
+	return out
 }
 
 // UpdateTaskWithCache updates a task and invalidates cache

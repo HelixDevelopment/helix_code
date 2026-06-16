@@ -101,11 +101,19 @@ func (de *DiffEditor) parseDiff(diffContent string) ([]DiffHunk, error) {
 		// Parse hunk lines
 		if currentHunk != nil {
 			if len(line) == 0 {
-				// Empty line is treated as context
-				currentHunk.Lines = append(currentHunk.Lines, DiffLine{
-					Type:    ' ',
-					Content: "",
-				})
+				// A zero-length line carries no unified-diff prefix byte
+				// ('+', '-', or ' '), so it is NOT a hunk body line. In
+				// particular, strings.Split on a diff string ending in the
+				// conventional trailing newline produces a spurious empty
+				// final element; treating it as an empty context line
+				// appended a phantom row to the hunk that made applyHunks
+				// fail with "hunk context mismatch" on otherwise-valid
+				// diffs (DEFECT: trailing-newline diff silently rejected,
+				// edit dropped). A real empty context line in a unified
+				// diff is encoded as " " (a single space) and is handled
+				// by the ' ' prefix branch below, so skipping zero-length
+				// lines does not lose any legitimate content.
+				continue
 			} else if line[0] == '+' || line[0] == '-' || line[0] == ' ' {
 				currentHunk.Lines = append(currentHunk.Lines, DiffLine{
 					Type:    line[0],
