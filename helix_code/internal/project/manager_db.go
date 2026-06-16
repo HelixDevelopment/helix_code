@@ -130,9 +130,103 @@ func (m *DatabaseManager) GetProject(ctx context.Context, id string) (*Project, 
 	return project, nil
 }
 
-// CreateProject creates a new project with database persistence (for compatibility with Manager interface)
+// GetProjectForUser retrieves a project by ID scoped to its owner.
+//
+// IDOR fix (CONST-035 / Article XI §11.9): the bare GetProject above
+// returns ANY project by id with no owner check. getProject /
+// updateProject / deleteProject / getProjectSessions previously called
+// GetProject directly, so an authenticated user B could read / rename /
+// delete user A's project just by knowing its id, while listProjects
+// already scoped to the authenticated owner. This getter makes the four
+// by-id project handlers owner-aware, mirroring listProjects.
+//
+// Scoping is enforced IN THE QUERY (WHERE owner_id = $2) rather than by a
+// fetch-then-compare in Go. Two reasons:
+//   - No existence leak: a project owned by someone else and a truly
+//     non-existent project BOTH return pgx.ErrNoRows → ErrProjectNotFound
+//     → HTTP 404 with an identical body. A cross-user caller cannot
+//     distinguish "exists but not yours" from "does not exist".
+//   - No extra round-trip and no TOCTOU window between the owner check and
+//     the read.
+//
+// ownerID is the authenticated requester's user.ID (a UUID string from the
+// JWT-backed *auth.User). A malformed owner UUID surfaces as
+// ErrInvalidOwnerID (→ 400) — it can only happen if the context user is
+// corrupted, never from normal request flow.
+func (m *DatabaseManager) GetProjectForUser(ctx context.Context, id, ownerID string) (*Project, error) {
+	projectID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidProjectID, err)
+	}
+	ownerUUID, err := uuid.Parse(ownerID)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidOwnerID, err)
+	}
+
+	query := `
+		SELECT id, name, description, owner_id, workspace_path, config, status, created_at, updated_at
+		FROM projects
+		WHERE id = $1 AND owner_id = $2 AND status = 'active'
+	`
+
+	var (
+		dbID          uuid.UUID
+		name          string
+		description   string
+		dbOwnerID     uuid.UUID
+		workspacePath string
+		config        map[string]interface{}
+		status        string
+		createdAt     time.Time
+		updatedAt     time.Time
+	)
+
+	err = m.db.QueryRow(ctx, query, projectID, ownerUUID).Scan(
+		&dbID, &name, &description, &dbOwnerID, &workspacePath, &config, &status, &createdAt, &updatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Owned-by-someone-else OR genuinely missing — same 404, no leak.
+			return nil, fmt.Errorf("%w: %s", ErrProjectNotFound, id)
+		}
+		return nil, fmt.Errorf("%s: %w", tr(ctx, "internal_project_get_failed", nil), err)
+	}
+
+	projectType, _ := config["type"].(string)
+	metadataMap, _ := config["metadata"].(map[string]interface{})
+	metadata := m.convertToMetadata(metadataMap)
+
+	return &Project{
+		ID:          dbID.String(),
+		Name:        name,
+		Description: description,
+		Path:        workspacePath,
+		Type:        projectType,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
+		Metadata:    metadata,
+		Active:      false,
+	}, nil
+}
+
+// CreateProject satisfies the Manager interface's ownerless signature, but
+// the DB-backed manager CANNOT create a project without a real owner:
+// projects.owner_id is a NOT-NULL UUID FK to users(id).
+//
+// Migration note (CONST-035 / IDOR fix part (d)): the previous body fabricated
+// a literal "default-user" owner and forwarded it to CreateProjectWithUser,
+// where uuid.Parse("default-user") always failed (12 chars, not a UUID) and
+// returned ErrInvalidOwnerID BEFORE the INSERT ran. So no owner_id='default-user'
+// row could ever have been persisted — the UUID column type + the parse guard
+// make that value structurally unstorable (verified: the projects.owner_id
+// column is UUID, not text). There is therefore NO backfill to perform: there
+// are no fabricated-default rows to migrate. We replace the always-failing
+// fabricated default with an explicit, self-describing error so the
+// impossibility is permanent and obvious, and callers are pointed at
+// CreateProjectWithUser. The HTTP createProject handler already routes through
+// CreateProjectWithUser with the authenticated user.ID.
 func (m *DatabaseManager) CreateProject(ctx context.Context, name, description, path, projectType string) (*Project, error) {
-	return m.CreateProjectWithUser(ctx, name, description, path, projectType, "default-user")
+	return nil, ErrOwnerRequired
 }
 
 // detectProjectType sets build/test/lint defaults for the supplied

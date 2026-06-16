@@ -620,8 +620,16 @@ func TestGetProject_NotFound(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/api/v1/projects/nonexistent-id", nil)
 	router.ServeHTTP(w, req)
 
-	// Should return not found or internal error
-	assert.Contains(t, []int{http.StatusNotFound, http.StatusInternalServerError, http.StatusServiceUnavailable}, w.Code)
+	// IDOR-fix reconciliation (§11.4.120): getProject now scopes the lookup
+	// to the authenticated owner, so with no authMiddleware in front of the
+	// handler (this test mounts it bare) there is no *auth.User in context and
+	// requireUserID returns 401 BEFORE any DB lookup. That is the correct,
+	// more-secure behavior (the unauthenticated request is rejected, never
+	// served a fabricated/foreign project). The salient invariant — getProject
+	// never 200s a project for a request that isn't a legitimate owner — holds.
+	assert.Contains(t,
+		[]int{http.StatusUnauthorized, http.StatusNotFound, http.StatusInternalServerError, http.StatusServiceUnavailable},
+		w.Code)
 }
 
 func TestUpdateProject_InvalidRequest(t *testing.T) {

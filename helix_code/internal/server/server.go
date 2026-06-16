@@ -286,22 +286,38 @@ func (s *Server) setupRoutes() {
 		api.GET("/metrics", s.getMetrics)
 
 		// LLM routes
+		//
+		// The provider-metadata reads (GET /providers, /providers/:id,
+		// /models) stay public — they expose no paid surface and are used by
+		// unauthenticated discovery (e.g. the login screen's model picker).
+		//
+		// The generation surfaces (POST /generate, /stream) DO hit real, paid
+		// LLM providers (CONST-035 / BLUFF-001: both build a real llm.Provider
+		// per request and call Generate / GenerateStream). They were
+		// previously registered with NO auth middleware, so an unauthenticated
+		// caller could drive real paid-provider calls — a cost-abuse hole.
+		// They now require the SAME JWT auth as the project / task / session
+		// groups (VerifyJWTWithDB), via a dedicated authenticated subgroup.
 		llmRoutes := api.Group("/llm")
 		{
 			llmRoutes.GET("/providers", s.listLLMProviders)
 			llmRoutes.GET("/providers/:id", s.getLLMProvider)
 			llmRoutes.GET("/models", s.listLLMModels)
-			// Real generation surface (CONST-035 / BLUFF-001): both handlers
-			// construct a real llm.Provider per request and call its
-			// Generate / GenerateStream — no simulation. See llm_generate.go.
-			llmRoutes.POST("/generate", s.generateLLM)
-			llmRoutes.POST("/stream", s.streamLLM)
+		}
+		llmCost := api.Group("/llm")
+		llmCost.Use(s.authMiddleware())
+		{
+			llmCost.POST("/generate", s.generateLLM)
+			llmCost.POST("/stream", s.streamLLM)
 		}
 
 		// Real HelixSpecifier "Specify" phase surface (CONST-035): drives the
 		// real speckit engine via a real provider-backed debate responder — no
-		// simulation. See specify.go.
-		api.POST("/specify", s.specifyHandler)
+		// simulation. See specify.go. Like the generation surfaces above it
+		// consumes a real provider, so it MUST require authentication.
+		specify := api.Group("")
+		specify.Use(s.authMiddleware())
+		specify.POST("/specify", s.specifyHandler)
 
 		// Memory routes
 		memory := api.Group("/memory")

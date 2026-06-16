@@ -60,6 +60,61 @@ func respondInvalidID(c *gin.Context, err error, what string) bool {
 	return false
 }
 
+// requireUserID extracts the authenticated *auth.User stashed by
+// authMiddleware under context key "user" and returns its ID as a string.
+// On any failure it writes the appropriate error response (401 if the
+// middleware didn't run / the value is absent, 500 if the stored value is
+// the wrong type) and returns ok=false so the caller returns immediately.
+//
+// Centralises the user-from-context dance that getProject / updateProject /
+// deleteProject / getProjectSessions need for IDOR owner-scoping (and that
+// listProjects / createProject already do inline).
+func (s *Server) requireUserID(c *gin.Context) (string, bool) {
+	userValue, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "error",
+			"message": tr(reqCtx(c), "internal_server_authentication_required", nil),
+			"error":   "user not found in context - please authenticate first",
+		})
+		return "", false
+	}
+	user, ok := userValue.(*auth.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": tr(reqCtx(c), "internal_server_invalid_user_context", nil),
+		})
+		return "", false
+	}
+	return user.ID.String(), true
+}
+
+// enforceProjectOwner verifies the authenticated requester owns the project
+// :id and returns true only if they do. On mismatch (or genuinely-missing
+// project) it writes a 404 — owned-by-someone-else and not-found are
+// indistinguishable to the caller (GetProjectForUser scopes by owner in the
+// query), so project existence is never leaked. Malformed UUIDs surface as
+// 400 via respondInvalidID. This is the shared IDOR gate for the mutating /
+// sub-resource by-id project handlers (update / delete / sessions); getProject
+// uses GetProjectForUser directly as both gate and fetch.
+func (s *Server) enforceProjectOwner(c *gin.Context, projectID, userID string) bool {
+	if _, err := s.projectManager.GetProjectForUser(c.Request.Context(), projectID, userID); err != nil {
+		if respondInvalidID(c, err, "project") {
+			return false
+		}
+		// ErrProjectNotFound and any other lookup error both resolve to a
+		// 404 here — we never expose a 500 that would confirm existence.
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  "error",
+			"message": tr(reqCtx(c), "internal_server_project_not_found", nil),
+			"error":   err.Error(),
+		})
+		return false
+	}
+	return true
+}
+
 // Project Handlers
 
 func (s *Server) listProjects(c *gin.Context) {
@@ -375,8 +430,20 @@ func (s *Server) createProject(c *gin.Context) {
 func (s *Server) getProject(c *gin.Context) {
 	id := c.Param("id")
 
-	proj, err := s.projectManager.GetProject(c.Request.Context(), id)
+	// IDOR fix: scope the fetch to the authenticated owner. A project owned
+	// by someone else returns the SAME 404 as a missing one (no existence
+	// leak) — see project.DatabaseManager.GetProjectForUser.
+	userID, ok := s.requireUserID(c)
+	if !ok {
+		return
+	}
+
+	proj, err := s.projectManager.GetProjectForUser(c.Request.Context(), id, userID)
 	if err != nil {
+		// 400 for a malformed UUID; 404 for not-found / not-owned.
+		if respondInvalidID(c, err, "project") {
+			return
+		}
 		c.JSON(http.StatusNotFound, gin.H{
 			"status":  "error",
 			"message": tr(reqCtx(c), "internal_server_project_not_found", nil),
@@ -414,6 +481,17 @@ func (s *Server) updateProject(c *gin.Context) {
 			"message": tr(reqCtx(c), "internal_server_project_manager_unavailable", nil),
 			"error":   "database connection required for project management",
 		})
+		return
+	}
+
+	// IDOR fix: only the owner may mutate the project. Gate on ownership
+	// BEFORE the UPDATE (404 on mismatch — no existence leak). Without this a
+	// user could rename another user's project by id.
+	userID, ok := s.requireUserID(c)
+	if !ok {
+		return
+	}
+	if !s.enforceProjectOwner(c, id, userID) {
 		return
 	}
 
@@ -455,6 +533,16 @@ func (s *Server) deleteProject(c *gin.Context) {
 			"message": tr(reqCtx(c), "internal_server_project_manager_unavailable", nil),
 			"error":   "database connection required for project management",
 		})
+		return
+	}
+
+	// IDOR fix: only the owner may delete the project. Gate on ownership
+	// BEFORE the soft-delete (404 on mismatch — no existence leak).
+	userID, ok := s.requireUserID(c)
+	if !ok {
+		return
+	}
+	if !s.enforceProjectOwner(c, id, userID) {
 		return
 	}
 
@@ -2127,6 +2215,26 @@ func (s *Server) getProjectSessions(c *gin.Context) {
 			"status":  "error",
 			"message": tr(reqCtx(c), "internal_server_session_manager_unavailable", nil),
 		})
+		return
+	}
+
+	// IDOR fix: only the project's owner may list its sessions. Without this
+	// gate any authenticated user could enumerate another user's project
+	// sessions by id. Requires projectManager to verify ownership; if it's
+	// unavailable, fail closed (503) rather than serve unscoped data.
+	if s.projectManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "error",
+			"message": tr(reqCtx(c), "internal_server_project_manager_unavailable", nil),
+			"error":   "database connection required to authorize project access",
+		})
+		return
+	}
+	userID, ok := s.requireUserID(c)
+	if !ok {
+		return
+	}
+	if !s.enforceProjectOwner(c, projectID, userID) {
 		return
 	}
 

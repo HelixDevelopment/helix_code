@@ -26,6 +26,18 @@ var ErrInvalidProjectID = errors.New("invalid project ID")
 // if context-user is corrupted; surface as 400 to the caller).
 var ErrInvalidOwnerID = errors.New("invalid owner ID")
 
+// ErrOwnerRequired is returned by the DB-backed manager's ownerless
+// CreateProject compat shim. The projects.owner_id column is a NOT-NULL
+// UUID with a FK to users(id); there is NO valid "anonymous"/"default"
+// owner. The shim previously fabricated a literal "default-user" owner
+// (manager_db.go), which is not a UUID and always failed uuid.Parse →
+// ErrInvalidOwnerID before any INSERT, so no such row could ever persist.
+// We surface this explicit, self-describing error instead of the cryptic
+// "invalid UUID length: 12" so callers know to route through
+// CreateProjectWithUser with the authenticated owner (CONST-035: no
+// fabricated defaults).
+var ErrOwnerRequired = errors.New("project owner is required: use CreateProjectWithUser with the authenticated user's ID")
+
 // Project represents a development project
 type Project struct {
 	ID          string    `json:"id"`
