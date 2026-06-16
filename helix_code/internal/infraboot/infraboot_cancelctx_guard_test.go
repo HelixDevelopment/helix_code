@@ -98,7 +98,7 @@ func TestGuard_CancelledCtxNoBoot(t *testing.T) {
 // already elapsed must abort before any ComposeUp.
 func TestGuard_CancelDuringComposeUp(t *testing.T) {
 	if os.Getenv("RED_MODE") == "1" {
-		t.Skip("RED_MODE reproduction lives in TestGuard_CancelledCtxNoBoot")
+		t.Skip("SKIP-OK: RED_MODE reproduction lives in TestGuard_CancelledCtxNoBoot")
 	}
 	cfg := freshCfg()
 	b := &fakeBooter{runtimeAvail: true, runtimeName: "podman",

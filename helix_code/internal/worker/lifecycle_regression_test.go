@@ -103,7 +103,7 @@ func TestWorkerPool_Stop_Idempotent_NoDoubleClosePanic(t *testing.T) {
 // healthCheckLoop goroutine (wg.Wait) after the idempotency fix.
 func TestWorkerPool_StartStop_DrainsLoop(t *testing.T) {
 	if redMode() {
-		t.Skip("RED_MODE: drain-after-fix guard runs in GREEN mode (RED_MODE=0)")
+		t.Skip("SKIP-OK: RED_MODE: drain-after-fix guard runs in GREEN mode (RED_MODE=0)")
 	}
 	base := settleGoroutines(2 * time.Second)
 	wp := NewWorkerPool(newTestWorkersConfig())

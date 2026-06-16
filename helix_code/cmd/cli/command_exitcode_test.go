@@ -77,7 +77,7 @@ func asExitError(err error, target **exec.ExitError) bool {
 //	             propagate. This is what runs on every build.
 func TestCommandPropagatesRealExitCode(t *testing.T) {
 	if testing.Short() {
-		t.Skip("builds + runs a subprocess; skipped in -short mode")
+		t.Skip("SKIP-OK: builds + runs a subprocess; skipped in -short mode")
 	}
 	bin := buildCLIBinary(t)
 	redMode := os.Getenv("RED_MODE") == "1"

@@ -102,7 +102,7 @@ func TestGuard_Refactorer_ExtractMethod_RejectsOutsideRoot(t *testing.T) {
 		// (We do not invoke a pre-fix stand-in for ExtractMethod here — the
 		// InlineCall RED case above already proves the guard's reality; this
 		// case is the standing GREEN regression guard.)
-		t.Skip("RED_MODE handled by InlineCall reproduction; ExtractMethod retains GREEN guard")
+		t.Skip("SKIP-OK: RED_MODE handled by InlineCall reproduction; ExtractMethod retains GREEN guard")
 	}
 	if !errors.Is(err, ErrPathOutsideRoot) {
 		t.Fatalf("ExtractMethod(out-of-root) error = %v, want ErrPathOutsideRoot", err)
@@ -115,7 +115,7 @@ func TestGuard_Refactorer_ExtractMethod_RejectsOutsideRoot(t *testing.T) {
 
 func TestGuard_Refactorer_RejectsDotDotTraversal(t *testing.T) {
 	if redMode() {
-		t.Skip("RED_MODE handled by InlineCall reproduction")
+		t.Skip("SKIP-OK: RED_MODE handled by InlineCall reproduction")
 	}
 	rootDir := t.TempDir()
 	// plant a marker in the parent of rootDir, reached via "../"
@@ -143,7 +143,7 @@ func TestGuard_Refactorer_RejectsDotDotTraversal(t *testing.T) {
 // In-root operations must STILL work (the fix must not over-reject).
 func TestGuard_Refactorer_InRootStillWorks(t *testing.T) {
 	if redMode() {
-		t.Skip("RED_MODE handled by InlineCall reproduction")
+		t.Skip("SKIP-OK: RED_MODE handled by InlineCall reproduction")
 	}
 	rootDir := t.TempDir()
 	path := filepath.Join(rootDir, "main.go")

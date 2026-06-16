@@ -72,7 +72,7 @@ func TestNotificationQueue_Regression_DoubleStopNoPanic(t *testing.T) {
 // fix must not turn Stop() into a no-op that leaks goroutines.
 func TestNotificationQueue_Regression_StopStillStopsWorkers(t *testing.T) {
 	if redMode() {
-		t.Skip("GREEN-only guard; runs under RED_MODE=0")
+		t.Skip("SKIP-OK: GREEN-only guard; runs under RED_MODE=0")
 	}
 	engine := NewNotificationEngine()
 	queue := NewNotificationQueue(engine, 4, 10)
