@@ -4,12 +4,34 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"runtime"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"dev.helix.code/tests/stresschaos"
 )
+
+// concurrencyTimeout scales a deadlock-guard timeout so the test stays a genuine
+// deadlock detector without false-failing on CPU-starved runs. 12×80 = 960 real
+// filesystem ops take ~52s isolated when only GOMAXPROCS=2 CPUs are available
+// (e.g. the host-safe constrained validation run), yet finish in a few seconds
+// with ample cores. The timeout is the deadlock GUARD — a real deadlock never
+// completes within even the scaled bound, so the assertion is preserved. We pick
+// a generous floor (120s) and additionally widen it when GOMAXPROCS is scarce.
+func concurrencyTimeout(base time.Duration) time.Duration {
+	const floor = 120 * time.Second
+	scaled := base
+	if procs := runtime.GOMAXPROCS(0); procs > 0 && procs < 8 {
+		// Fewer cores ⇒ more wall-clock for the same op count. Scale inversely
+		// against an 8-core reference, capped so it never grows unbounded.
+		scaled = base * time.Duration(8) / time.Duration(procs)
+	}
+	if scaled < floor {
+		return floor
+	}
+	return scaled
+}
 
 // §11.4.85 stress coverage for the REAL tool registry + real filesystem/shell
 // tools.
@@ -184,7 +206,7 @@ func TestToolRegistry_Stress_ConcurrentExecute(t *testing.T) {
 
 	var done int64
 	stresschaos.RunConcurrent(t, "tool_registry_concurrent_execute",
-		stresschaos.ConcurrencyConfig{Parallelism: 12, IterationsPerGoroutine: 80, Timeout: 25 * time.Second},
+		stresschaos.ConcurrencyConfig{Parallelism: 12, IterationsPerGoroutine: 80, Timeout: concurrencyTimeout(25 * time.Second)},
 		func(g, it int) error {
 			path := filepath.Join(tmp, fmt.Sprintf("conc_%d_%d.txt", g, it))
 			content := fmt.Sprintf("g%d-it%d", g, it)

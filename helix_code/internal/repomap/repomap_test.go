@@ -967,8 +967,20 @@ func TestRankByModificationTime(t *testing.T) {
 	file2 := filepath.Join(tempDir, "new.go")
 
 	createTestFile(t, tempDir, "old.go", "package old")
-	time.Sleep(10 * time.Millisecond)
 	createTestFile(t, tempDir, "new.go", "package new")
+
+	// RankByModificationTime decays the score over DAYS (score = 1/(1 + ageHours/24)),
+	// so two files created milliseconds apart collapse to the same float score and the
+	// newer-ranks-higher ordering becomes unresolvable. Set mtimes with a MEANINGFUL,
+	// day-scale delta the production formula can actually resolve: old.go ~48h ago,
+	// new.go ~now. This exercises the real "newer file ranks higher" behaviour.
+	now := time.Now()
+	if err := os.Chtimes(file1, now.Add(-48*time.Hour), now.Add(-48*time.Hour)); err != nil {
+		t.Fatalf("Failed to set mtime on old.go: %v", err)
+	}
+	if err := os.Chtimes(file2, now, now); err != nil {
+		t.Fatalf("Failed to set mtime on new.go: %v", err)
+	}
 
 	ranker := NewFileRanker()
 	files := []string{file1, file2}
