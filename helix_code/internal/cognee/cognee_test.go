@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -1099,22 +1100,30 @@ func TestCogneeModels(t *testing.T) {
 // =====================================================
 
 // TestClientAddMemory tests the AddMemory method
+// §11.4.135 / §11.4.120 regression guard: the cognee 1.1.x versioned, multipart
+// /api/v1/add surface. These httptest handlers assert the NEW v1 mechanism
+// (versioned path + multipart "data" part + datasetName field). RED against the
+// pre-1.1 unversioned /api/memory JSON path that the deployed server 404s on,
+// GREEN against the v1 client — the guard that catches a regression back to the
+// old surface.
 func TestClientAddMemory(t *testing.T) {
 	t.Run("AddMemory_Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/memory", r.URL.Path)
+			assert.Equal(t, "/api/v1/add", r.URL.Path)
 			assert.Equal(t, "POST", r.Method)
-			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+			assert.Contains(t, r.Header.Get("Content-Type"), "multipart/form-data")
 
-			var req AddMemoryRequest
-			json.NewDecoder(r.Body).Decode(&req)
-			assert.Equal(t, "test content", req.Content)
+			// The content is the uploaded "data" file part.
+			f, _, ferr := r.FormFile("data")
+			require.NoError(t, ferr, "v1 /add must receive a 'data' file part")
+			content, _ := io.ReadAll(f)
+			assert.Equal(t, "test content", string(content))
+			assert.Equal(t, "test", r.FormValue("datasetName"))
 
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(AddMemoryResponse{
-				ID:       "mem-123",
-				VectorID: "vec-123",
-				Message:  "Memory added successfully",
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":      "mem-123",
+				"message": "Memory added successfully",
 			})
 		}))
 		defer server.Close()
@@ -1132,7 +1141,6 @@ func TestClientAddMemory(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		assert.Equal(t, "mem-123", resp.ID)
-		assert.Equal(t, "vec-123", resp.VectorID)
 	})
 
 	t.Run("AddMemory_ServerError", func(t *testing.T) {
@@ -1161,19 +1169,17 @@ func TestClientAddMemory(t *testing.T) {
 func TestClientSearchMemory(t *testing.T) {
 	t.Run("SearchMemory_Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/search", r.URL.Path)
+			assert.Equal(t, "/api/v1/search", r.URL.Path)
 			assert.Equal(t, "POST", r.Method)
 
-			var req SearchMemoryRequest
-			json.NewDecoder(r.Body).Decode(&req)
-			assert.Equal(t, "test query", req.Query)
+			var reqBody map[string]interface{}
+			json.NewDecoder(r.Body).Decode(&reqBody)
+			assert.Equal(t, "test query", reqBody["query"])
 
+			// v1 /search returns an array of SearchResult objects.
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(SearchMemoryResponse{
-				Results: []MemorySource{
-					{ID: "result-1", Content: "result content", Score: 0.95},
-				},
-				TotalCount: 1,
+			json.NewEncoder(w).Encode([]map[string]interface{}{
+				{"search_result": "result content", "dataset_id": "ds-1", "dataset_name": "test"},
 			})
 		}))
 		defer server.Close()
@@ -1193,16 +1199,13 @@ func TestClientSearchMemory(t *testing.T) {
 		assert.NotNil(t, resp)
 		assert.Equal(t, 1, resp.TotalCount)
 		assert.Len(t, resp.Results, 1)
-		assert.Equal(t, "result-1", resp.Results[0].ID)
+		assert.Equal(t, "result content", resp.Results[0].Content)
 	})
 
 	t.Run("SearchMemory_EmptyResults", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(SearchMemoryResponse{
-				Results:    []MemorySource{},
-				TotalCount: 0,
-			})
+			json.NewEncoder(w).Encode([]map[string]interface{}{})
 		}))
 		defer server.Close()
 
@@ -1245,16 +1248,17 @@ func TestClientSearchMemory(t *testing.T) {
 func TestClientCognify(t *testing.T) {
 	t.Run("Cognify_Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/cognify", r.URL.Path)
+			assert.Equal(t, "/api/v1/cognify", r.URL.Path)
 			assert.Equal(t, "POST", r.Method)
 
-			var req CognifyRequest
-			json.NewDecoder(r.Body).Decode(&req)
+			var reqBody map[string]interface{}
+			json.NewDecoder(r.Body).Decode(&reqBody)
+			assert.Contains(t, reqBody, "datasets")
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(CognifyResponse{
-				Status:  "processing",
-				Message: "Cognify started",
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"status":  "processing",
+				"message": "Cognify started",
 			})
 		}))
 		defer server.Close()
@@ -1296,18 +1300,16 @@ func TestClientCognify(t *testing.T) {
 func TestClientSearchInsights(t *testing.T) {
 	t.Run("SearchInsights_Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/search", r.URL.Path)
+			assert.Equal(t, "/api/v1/search", r.URL.Path)
 			assert.Equal(t, "POST", r.Method)
 
 			var reqBody map[string]interface{}
 			json.NewDecoder(r.Body).Decode(&reqBody)
-			assert.Equal(t, "INSIGHTS", reqBody["search_type"])
+			assert.Equal(t, "INSIGHTS", reqBody["searchType"])
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(InsightsResponse{
-				Insights: []Insight{
-					{ID: "ins-1", Content: "Test insight", Type: "summary", Confidence: 0.95},
-				},
+			json.NewEncoder(w).Encode([]map[string]interface{}{
+				{"search_result": "Test insight", "dataset_id": "ds-1", "dataset_name": "test"},
 			})
 		}))
 		defer server.Close()
@@ -1333,18 +1335,15 @@ func TestClientSearchInsights(t *testing.T) {
 func TestClientSearchGraphCompletion(t *testing.T) {
 	t.Run("SearchGraphCompletion_Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/search", r.URL.Path)
+			assert.Equal(t, "/api/v1/search", r.URL.Path)
 
 			var reqBody map[string]interface{}
 			json.NewDecoder(r.Body).Decode(&reqBody)
-			assert.Equal(t, "GRAPH_COMPLETION", reqBody["search_type"])
+			assert.Equal(t, "GRAPH_COMPLETION", reqBody["searchType"])
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(SearchMemoryResponse{
-				Results: []MemorySource{
-					{ID: "result-1", Content: "graph completion result"},
-				},
-				TotalCount: 1,
+			json.NewEncoder(w).Encode([]map[string]interface{}{
+				{"search_result": "graph completion result", "dataset_id": "ds-1", "dataset_name": "test"},
 			})
 		}))
 		defer server.Close()
@@ -1366,19 +1365,20 @@ func TestClientSearchGraphCompletion(t *testing.T) {
 func TestClientDatasetOperations(t *testing.T) {
 	t.Run("CreateDataset_Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/datasets", r.URL.Path)
+			assert.Equal(t, "/api/v1/datasets", r.URL.Path)
 			assert.Equal(t, "POST", r.Method)
 
-			var req CreateDatasetRequest
-			json.NewDecoder(r.Body).Decode(&req)
+			var reqBody map[string]interface{}
+			json.NewDecoder(r.Body).Decode(&reqBody)
+			name, _ := reqBody["name"].(string)
 
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(DatasetResponse{
-				Dataset: &Dataset{
-					ID:   "ds-123",
-					Name: req.Name,
-				},
-				Message: "Dataset created successfully",
+			// v1 returns a flat DatasetDTO.
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":        "1f264d9a-0000-5671-86ca-d9160f627969",
+				"name":      name,
+				"createdAt": "2026-06-16T12:00:00Z",
+				"ownerId":   "owner-1",
 			})
 		}))
 		defer server.Close()
@@ -1395,21 +1395,21 @@ func TestClientDatasetOperations(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.NotNil(t, resp.Dataset)
+		require.NotNil(t, resp.Dataset)
+		assert.Equal(t, "1f264d9a-0000-5671-86ca-d9160f627969", resp.Dataset.ID)
+		assert.Equal(t, "test-dataset", resp.Dataset.Name)
 	})
 
 	t.Run("ListDatasets_Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/datasets", r.URL.Path)
+			assert.Equal(t, "/api/v1/datasets", r.URL.Path)
 			assert.Equal(t, "GET", r.Method)
 
+			// v1 returns a flat array of DatasetDTO.
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(DatasetsResponse{
-				Datasets: []Dataset{
-					{ID: "ds-1", Name: "dataset-1"},
-					{ID: "ds-2", Name: "dataset-2"},
-				},
-				Total: 2,
+			json.NewEncoder(w).Encode([]map[string]interface{}{
+				{"id": "ds-1", "name": "dataset-1", "createdAt": "2026-06-16T12:00:00Z", "ownerId": "o"},
+				{"id": "ds-2", "name": "dataset-2", "createdAt": "2026-06-16T12:00:00Z", "ownerId": "o"},
 			})
 		}))
 		defer server.Close()
@@ -1428,14 +1428,13 @@ func TestClientDatasetOperations(t *testing.T) {
 	})
 
 	t.Run("GetDataset_Success", func(t *testing.T) {
+		// GetDataset resolves by-name via the v1 GET /api/v1/datasets list.
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/datasets/test-dataset", r.URL.Path)
+			assert.Equal(t, "/api/v1/datasets", r.URL.Path)
 			assert.Equal(t, "GET", r.Method)
-
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(Dataset{
-				ID:   "ds-123",
-				Name: "test-dataset",
+			json.NewEncoder(w).Encode([]map[string]interface{}{
+				{"id": "ds-123", "name": "test-dataset", "createdAt": "2026-06-16T12:00:00Z", "ownerId": "o"},
 			})
 		}))
 		defer server.Close()
@@ -1448,13 +1447,16 @@ func TestClientDatasetOperations(t *testing.T) {
 		dataset, err := client.GetDataset(ctx, "test-dataset")
 
 		assert.NoError(t, err)
-		assert.NotNil(t, dataset)
+		require.NotNil(t, dataset)
 		assert.Equal(t, "test-dataset", dataset.Name)
+		assert.Equal(t, "ds-123", dataset.ID)
 	})
 
 	t.Run("GetDataset_NotFound", func(t *testing.T) {
+		// Empty list -> by-name resolution finds nothing -> (nil, nil).
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode([]map[string]interface{}{})
 		}))
 		defer server.Close()
 
@@ -1470,11 +1472,19 @@ func TestClientDatasetOperations(t *testing.T) {
 	})
 
 	t.Run("DeleteDataset_Success", func(t *testing.T) {
+		// DeleteDataset resolves name->id via list, then DELETEs by UUID id.
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/datasets/test-dataset", r.URL.Path)
-			assert.Equal(t, "DELETE", r.Method)
-
-			w.WriteHeader(http.StatusNoContent)
+			switch {
+			case r.Method == "GET" && r.URL.Path == "/api/v1/datasets":
+				json.NewEncoder(w).Encode([]map[string]interface{}{
+					{"id": "ds-uuid-123", "name": "test-dataset", "createdAt": "2026-06-16T12:00:00Z", "ownerId": "o"},
+				})
+			case r.Method == "DELETE" && r.URL.Path == "/api/v1/datasets/ds-uuid-123":
+				w.WriteHeader(http.StatusNoContent)
+			default:
+				t.Errorf("unexpected request %s %s", r.Method, r.URL.Path)
+				w.WriteHeader(http.StatusNotFound)
+			}
 		}))
 		defer server.Close()
 
@@ -1492,15 +1502,18 @@ func TestClientDatasetOperations(t *testing.T) {
 // TestClientProcessCodePipeline tests the ProcessCodePipeline method
 func TestClientProcessCodePipeline(t *testing.T) {
 	t.Run("ProcessCodePipeline_Success", func(t *testing.T) {
+		// No v1 code-pipeline endpoint; code is added via the real /api/v1/add.
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/code-pipeline/index", r.URL.Path)
+			assert.Equal(t, "/api/v1/add", r.URL.Path)
 			assert.Equal(t, "POST", r.Method)
+			assert.Contains(t, r.Header.Get("Content-Type"), "multipart/form-data")
+			f, _, ferr := r.FormFile("data")
+			require.NoError(t, ferr)
+			content, _ := io.ReadAll(f)
+			assert.Equal(t, "func main() {}", string(content))
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(CodePipelineResponse{
-				Processed: true,
-				Message:   "Code processed successfully",
-			})
+			json.NewEncoder(w).Encode(map[string]interface{}{"id": "code-1"})
 		}))
 		defer server.Close()
 
@@ -1524,8 +1537,8 @@ func TestClientProcessCodePipeline(t *testing.T) {
 func TestClientVisualizeGraph(t *testing.T) {
 	t.Run("VisualizeGraph_Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/visualize", r.URL.Path)
-			assert.Equal(t, "POST", r.Method)
+			assert.Equal(t, "/api/v1/visualize", r.URL.Path)
+			assert.Equal(t, "GET", r.Method)
 
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(GraphVisualizationResponse{
@@ -1563,7 +1576,7 @@ func TestClientVisualizeGraph(t *testing.T) {
 func TestClientDeleteData(t *testing.T) {
 	t.Run("DeleteData_Success", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/delete", r.URL.Path)
+			assert.Equal(t, "/api/v1/delete", r.URL.Path)
 			assert.Equal(t, "DELETE", r.Method)
 
 			w.WriteHeader(http.StatusOK)
@@ -1640,54 +1653,34 @@ func TestClientGetHealth(t *testing.T) {
 	})
 }
 
-// TestClientGetStatistics tests the GetStatistics method
+// TestClientGetStatistics tests the GetStatistics method.
+// The pre-1.1 /api/stats endpoint has no v1 equivalent; GetStatistics returns
+// ErrUnsupportedEndpoint (CogneeService falls back to local counters).
 func TestClientGetStatistics(t *testing.T) {
-	t.Run("GetStatistics_Success", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/stats", r.URL.Path)
-			assert.Equal(t, "GET", r.Method)
-
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(CogneeStatistics{
-				TotalMemories:  100,
-				TotalDatasets:  5,
-				GraphNodeCount: 1000,
-			})
-		}))
-		defer server.Close()
-
+	t.Run("GetStatistics_Unsupported", func(t *testing.T) {
 		cfg := config.DefaultCogneeConfig()
 		client := NewClient(cfg)
-		client.SetBaseURL(server.URL)
+		client.SetBaseURL("http://127.0.0.1:0") // not contacted
 
 		ctx := context.Background()
 		stats, err := client.GetStatistics(ctx)
 
-		assert.NoError(t, err)
-		assert.NotNil(t, stats)
-		assert.Equal(t, int64(100), stats.TotalMemories)
-		assert.Equal(t, int64(5), stats.TotalDatasets)
+		require.ErrorIs(t, err, ErrUnsupportedEndpoint)
+		assert.Nil(t, stats)
 	})
 }
 
-// TestClientAddBatchMemory tests the AddBatchMemory method
+// TestClientAddBatchMemory tests the AddBatchMemory method.
+// No v1 batch endpoint; the batch is implemented as one real /api/v1/add per item.
 func TestClientAddBatchMemory(t *testing.T) {
 	t.Run("AddBatchMemory_Success", func(t *testing.T) {
+		var addCalls int
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/memory/batch", r.URL.Path)
+			assert.Equal(t, "/api/v1/add", r.URL.Path)
 			assert.Equal(t, "POST", r.Method)
-
-			var req BatchMemoryRequest
-			json.NewDecoder(r.Body).Decode(&req)
-			assert.Len(t, req.Memories, 2)
-
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(BatchMemoryResponse{
-				Processed: 2,
-				Failed:    0,
-				IDs:       []string{"mem-1", "mem-2"},
-				Message:   "Batch processed successfully",
-			})
+			addCalls++
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]interface{}{"id": fmt.Sprintf("mem-%d", addCalls)})
 		}))
 		defer server.Close()
 
@@ -1706,28 +1699,18 @@ func TestClientAddBatchMemory(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		assert.Equal(t, 2, resp.Processed)
-		assert.Equal(t, 0, resp.Failed)
+		assert.Equal(t, 2, addCalls, "batch must issue one real /api/v1/add per item")
 	})
 }
 
-// TestClientSubmitFeedback tests the SubmitFeedback method
+// TestClientSubmitFeedback tests the SubmitFeedback method.
+// The pre-1.1 /api/feedback endpoint has no v1 equivalent; SubmitFeedback
+// returns ErrUnsupportedEndpoint rather than POST a fabricated path.
 func TestClientSubmitFeedback(t *testing.T) {
-	t.Run("SubmitFeedback_Success", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "/api/feedback", r.URL.Path)
-			assert.Equal(t, "POST", r.Method)
-
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(FeedbackResponse{
-				ID:      "fb-123",
-				Message: "Feedback received successfully",
-			})
-		}))
-		defer server.Close()
-
+	t.Run("SubmitFeedback_Unsupported", func(t *testing.T) {
 		cfg := config.DefaultCogneeConfig()
 		client := NewClient(cfg)
-		client.SetBaseURL(server.URL)
+		client.SetBaseURL("http://127.0.0.1:0") // not contacted
 
 		ctx := context.Background()
 		resp, err := client.SubmitFeedback(ctx, &FeedbackRequest{
@@ -1737,9 +1720,8 @@ func TestClientSubmitFeedback(t *testing.T) {
 			Comment:  "Great result!",
 		})
 
-		assert.NoError(t, err)
-		assert.NotNil(t, resp)
-		assert.Equal(t, "fb-123", resp.ID)
+		require.ErrorIs(t, err, ErrUnsupportedEndpoint)
+		assert.Nil(t, resp)
 	})
 }
 
@@ -1776,15 +1758,18 @@ func TestClientTestConnection(t *testing.T) {
 	})
 }
 
-// TestClientAPIKeyHeader tests that API key is properly set in headers
+// TestClientAPIKeyHeader tests that the cognee 1.1.x ApiKeyAuth scheme is used:
+// a configured API key goes in the "X-Api-Key" header (NOT Authorization:
+// Bearer — that scheme is for login-obtained JWTs). With no key and no
+// username/password, requests are anonymous (no auth header).
 func TestClientAPIKeyHeader(t *testing.T) {
 	t.Run("WithAPIKey", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := r.Header.Get("Authorization")
-			assert.Equal(t, "Bearer test-api-key", authHeader)
+			assert.Equal(t, "test-api-key", r.Header.Get("X-Api-Key"))
+			assert.Empty(t, r.Header.Get("Authorization"))
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(DatasetsResponse{})
+			json.NewEncoder(w).Encode([]map[string]interface{}{})
 		}))
 		defer server.Close()
 
@@ -1800,11 +1785,11 @@ func TestClientAPIKeyHeader(t *testing.T) {
 
 	t.Run("WithoutAPIKey", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := r.Header.Get("Authorization")
-			assert.Empty(t, authHeader)
+			assert.Empty(t, r.Header.Get("Authorization"))
+			assert.Empty(t, r.Header.Get("X-Api-Key"))
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(DatasetsResponse{})
+			json.NewEncoder(w).Encode([]map[string]interface{}{})
 		}))
 		defer server.Close()
 
@@ -1818,6 +1803,50 @@ func TestClientAPIKeyHeader(t *testing.T) {
 	})
 }
 
+// TestClientBearerLogin is a §11.4.135 regression guard for the cognee 1.1.x
+// BearerAuth flow: with a username/password configured, the client logs in via
+// the form-urlencoded POST /api/v1/auth/login, caches the JWT, and attaches it
+// as "Authorization: Bearer <jwt>" on subsequent requests. The login endpoint
+// is hit exactly once (token cached).
+func TestClientBearerLogin(t *testing.T) {
+	var loginCalls int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/v1/auth/login":
+			loginCalls++
+			assert.Equal(t, "POST", r.Method)
+			assert.Equal(t, "application/x-www-form-urlencoded", r.Header.Get("Content-Type"))
+			require.NoError(t, r.ParseForm())
+			assert.Equal(t, "user@example.com", r.Form.Get("username"))
+			assert.Equal(t, "secret", r.Form.Get("password"))
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]interface{}{"access_token": "jwt-abc", "token_type": "bearer"})
+		case "/api/v1/datasets":
+			assert.Equal(t, "Bearer jwt-abc", r.Header.Get("Authorization"))
+			assert.Empty(t, r.Header.Get("X-Api-Key"))
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode([]map[string]interface{}{})
+		default:
+			t.Errorf("unexpected path %s", r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	cfg := config.DefaultCogneeConfig()
+	cfg.RemoteAPI.Username = "user@example.com"
+	cfg.RemoteAPI.Password = "secret"
+	client := NewClient(cfg)
+	client.SetBaseURL(server.URL)
+
+	ctx := context.Background()
+	_, err := client.ListDatasets(ctx)
+	require.NoError(t, err)
+	_, err = client.ListDatasets(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, 1, loginCalls, "JWT must be cached: login hit exactly once across two calls")
+}
+
 // TestClientConcurrency tests concurrent client operations
 func TestClientConcurrency(t *testing.T) {
 	t.Run("ConcurrentRequests", func(t *testing.T) {
@@ -1826,7 +1855,8 @@ func TestClientConcurrency(t *testing.T) {
 			atomic.AddInt64(&requestCount, 1)
 			time.Sleep(10 * time.Millisecond)
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(DatasetsResponse{})
+			// v1 GET /api/v1/datasets returns a flat array.
+			json.NewEncoder(w).Encode([]map[string]interface{}{})
 		}))
 		defer server.Close()
 

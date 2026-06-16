@@ -59,10 +59,23 @@ type CogneeConfig struct {
 	Monitoring *CogneeMonitoringConfig `json:"monitoring,omitempty" yaml:"monitoring,omitempty"`
 }
 
-// CogneeRemoteAPIConfig contains remote API configuration
+// CogneeRemoteAPIConfig contains remote API configuration.
+//
+// Cognee 1.1.x exposes a versioned, auth-required HTTP surface
+// (/api/v1/...). Two auth schemes are supported by the server:
+//   - BearerAuth: obtain a JWT via POST /api/v1/auth/login
+//     (application/x-www-form-urlencoded: username + password), then send it
+//     as "Authorization: Bearer <token>". Username/Password configure this.
+//   - ApiKeyAuth: a pre-issued API key sent as the "X-Api-Key" header. APIKey
+//     configures this.
+//
+// Credentials are NEVER hardcoded — they are read from config/env by the
+// caller (see cognee.NewClient, which falls back to COGNEE_* env vars).
 type CogneeRemoteAPIConfig struct {
 	ServiceEndpoint string        `json:"service_endpoint" yaml:"service_endpoint"`
 	APIKey          string        `json:"api_key" yaml:"api_key"`
+	Username        string        `json:"username,omitempty" yaml:"username,omitempty"`
+	Password        string        `json:"password,omitempty" yaml:"password,omitempty"`
 	Timeout         time.Duration `json:"timeout" yaml:"timeout"`
 }
 
