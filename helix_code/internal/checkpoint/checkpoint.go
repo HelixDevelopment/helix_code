@@ -266,6 +266,34 @@ func (m *Manager) List() []Checkpoint {
 	return cps
 }
 
+// RestoreReport describes the outcome of a Restore so callers can report an
+// honest success/partial message instead of an unconditional "restored".
+//
+// The git backend snapshots and restores ONLY git-tracked content (see
+// gitSnapshot). Working-tree files that were never git-added are therefore not
+// captured by a git-backed checkpoint and are NOT rewritten by a restore — they
+// are left exactly as they are on disk. UntrackedNotRestored lists those files
+// (relative to the working dir) so the CLI does not claim the whole working tree
+// was restored when untracked files were silently left untouched (§11.4 /
+// CONST-035 sink-side success-vs-reality anti-bluff).
+type RestoreReport struct {
+	// Backend is the backend that performed the restore ("git" or "files").
+	Backend string
+	// UntrackedNotRestored is the sorted set of working-tree files (relative
+	// paths) that exist now but were NOT part of the snapshot and so were NOT
+	// restored. Always empty for the files backend (it snapshots untracked
+	// content too). Non-empty for the git backend whenever untracked files are
+	// present, because the git snapshot never captured them.
+	UntrackedNotRestored []string
+}
+
+// FullyRestored reports whether every working-tree file the restore could affect
+// was actually covered by the snapshot. False means some untracked files were
+// left untouched and the caller MUST NOT print an unqualified success message.
+func (r RestoreReport) FullyRestored() bool {
+	return len(r.UntrackedNotRestored) == 0
+}
+
 // Restore writes the snapshot identified by id back over the working tree,
 // restoring the real bytes captured at Create time.
 //
@@ -275,16 +303,71 @@ func (m *Manager) List() []Checkpoint {
 // restore, not a destructive sync — this avoids silently destroying work the
 // user did after the snapshot. Files that were tracked at snapshot time and
 // later deleted ARE restored (their bytes come back).
+//
+// Restore is the thin error-only wrapper; callers that need to report which
+// files were genuinely restored (e.g. to avoid claiming untracked files were
+// restored when they were not) MUST use RestoreReported.
 func (m *Manager) Restore(id string) error {
+	_, err := m.RestoreReported(id)
+	return err
+}
+
+// RestoreReported performs the same restore as Restore but returns a
+// RestoreReport describing coverage. For the git backend it lists the untracked
+// working-tree files that the snapshot never captured and so were NOT restored,
+// enabling an honest CLI message instead of an unconditional success.
+func (m *Manager) RestoreReported(id string) (RestoreReport, error) {
 	ctx := context.Background()
 	cp, err := m.readMeta(id)
 	if err != nil {
-		return fmt.Errorf("%w: %s", ErrNotFound, id)
+		return RestoreReport{}, fmt.Errorf("%w: %s", ErrNotFound, id)
 	}
 	if m.isGit && cp.Backend == "git" {
-		return m.gitRestore(ctx, cp)
+		report := RestoreReport{Backend: "git"}
+		// Capture the untracked-file set BEFORE the restore: these files are not
+		// in the git snapshot tree, so checkout-index will not touch them. They
+		// are exactly the files a success message must NOT claim were restored.
+		report.UntrackedNotRestored = m.untrackedFiles(ctx)
+		if err := m.gitRestore(ctx, cp); err != nil {
+			return RestoreReport{Backend: "git"}, err
+		}
+		return report, nil
 	}
-	return m.fileRestore(id)
+	if err := m.fileRestore(id); err != nil {
+		return RestoreReport{Backend: "files"}, err
+	}
+	// Files backend snapshots untracked content too, so a successful restore
+	// covers the whole captured tree — nothing is silently left behind.
+	return RestoreReport{Backend: "files"}, nil
+}
+
+// untrackedFiles returns the working-tree files (relative paths, sorted) that
+// git does not track — the files a git-backed snapshot never captured. It uses
+// `git ls-files --others --exclude-standard` so .gitignore'd build/vendor output
+// is not falsely reported as "lost work". Returns nil on any git error (the
+// restore itself still proceeds; an empty report is safe-degrade, never a fake
+// claim of full restore — gitRestore would have failed loudly first).
+func (m *Manager) untrackedFiles(ctx context.Context) []string {
+	out, err := m.git(ctx, "ls-files", "--others", "--exclude-standard")
+	if err != nil {
+		return nil
+	}
+	var files []string
+	for _, line := range strings.Split(out, "\n") {
+		f := strings.TrimSpace(line)
+		if f == "" {
+			continue
+		}
+		// Exclude the checkpoint store itself (.helix/checkpoints/...): its
+		// meta.json sidecars are untracked but are not user work — listing them
+		// in the "not restored" warning would be noise that hides the real files.
+		if f == storeDir || strings.HasPrefix(f, storeDir+"/") || strings.HasPrefix(f, ".helix/") {
+			continue
+		}
+		files = append(files, f)
+	}
+	sort.Strings(files)
+	return files
 }
 
 // gitRestore writes the snapshot tree's bytes onto the working tree using

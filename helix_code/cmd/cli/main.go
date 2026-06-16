@@ -2616,11 +2616,24 @@ func (c *CLI) handleCheckpoint(ctx context.Context, args string) error {
 			return nil
 		}
 		id := fields[1]
-		if err := mgr.Restore(id); err != nil {
+		report, err := mgr.RestoreReported(id)
+		if err != nil {
 			fmt.Printf("❌ /checkpoint restore failed: %v\n", err)
 			return err
 		}
-		fmt.Printf("✅ working tree restored to checkpoint %s\n", id)
+		// Anti-bluff (§11.4 / CONST-035): the git backend snapshots ONLY
+		// git-tracked content, so untracked working-tree files are NOT restored.
+		// Report the truth instead of an unconditional success — never claim the
+		// whole working tree was restored when untracked files were left as-is.
+		if report.FullyRestored() {
+			fmt.Printf("✅ working tree restored to checkpoint %s\n", id)
+		} else {
+			fmt.Printf("⚠️  tracked files restored to checkpoint %s, but %d untracked file(s) were NOT restored (the %s checkpoint only snapshots git-tracked content):\n",
+				id, len(report.UntrackedNotRestored), report.Backend)
+			for _, f := range report.UntrackedNotRestored {
+				fmt.Printf("     - %s\n", f)
+			}
+		}
 		return nil
 
 	default:

@@ -263,5 +263,170 @@ func TestNewManagerRejectsNonDir(t *testing.T) {
 	}
 }
 
+// TestRestoreReportsUntrackedNotRestored_Git is the §11.4.115 RED→GREEN polarity
+// guard for the anti-bluff defect captured in
+// docs/qa/retro-cli-edit-safety-20260616/cli_checkpoint_restore_isolated.txt:
+// the git-backend /checkpoint restore printed an unconditional success even when
+// untracked working-tree files were NOT restored.
+//
+// It drives a REAL git checkpoint + restore on a temp dir (no mocks — §11.4 /
+// CONST-035): a TRACKED file is committed before the checkpoint, an UNTRACKED
+// file is created (never git-added). After a bad edit to BOTH and a restore:
+//   - the tracked file's bytes on disk come back (snapshot covered it),
+//   - the untracked file's bytes stay corrupted (snapshot never captured it),
+//   - the RestoreReport TRUTHFULLY lists the untracked file as NOT restored.
+//
+// Polarity switch RED_MODE (default "1" = reproduce the defect surface on the
+// real artifact: assert the untracked file is genuinely left corrupted AND that
+// the honest report flags it — the pre-fix unconditional-success path could not
+// distinguish this). RED_MODE=0 is the standing GREEN regression guard asserting
+// the report flags the untracked file so the CLI prints the honest warning.
+func TestRestoreReportsUntrackedNotRestored_Git(t *testing.T) {
+	gitAvailable(t)
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+
+	// Tracked file: committed before the checkpoint so the git snapshot captures
+	// it (this half of the behaviour genuinely works and must keep working).
+	tracked := filepath.Join(dir, "tracked.txt")
+	if err := os.WriteFile(tracked, []byte("TRACKED good v1\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command("git", args...)
+		cmd.Dir = dir
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v\n%s", args, err, out)
+		}
+	}
+	run("add", "tracked.txt")
+	run("commit", "-m", "add tracked")
+
+	// Untracked file: created in the working tree, NEVER git-added — exactly the
+	// case the captured evidence shows the success message lied about.
+	untracked := filepath.Join(dir, "work.txt")
+	untrackedGood := []byte("UNTRACKED good v1\n")
+	if err := os.WriteFile(untracked, untrackedGood, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	m, err := NewManager(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := m.Backend(); got != "git" {
+		t.Fatalf("expected git backend, got %q", got)
+	}
+
+	id, err := m.Create("good-state")
+	if err != nil {
+		t.Fatalf("create checkpoint: %v", err)
+	}
+
+	// Corrupt BOTH files (simulating the agent / external bad edit).
+	bad := []byte("CORRUPTED BAD EDIT xxxx\n")
+	if err := os.WriteFile(tracked, bad, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(untracked, bad, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := m.RestoreReported(id)
+	if err != nil {
+		t.Fatalf("restore: %v", err)
+	}
+
+	// Tracked file MUST be restored (this part works and must not regress).
+	gotTracked, err := os.ReadFile(tracked)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(gotTracked) != "TRACKED good v1\n" {
+		t.Fatalf("tracked file not restored: got %q want %q", gotTracked, "TRACKED good v1\n")
+	}
+
+	// Untracked file is NOT restored by the git backend (it was never in the
+	// snapshot tree). This is the underlying behaviour; the DEFECT was that the
+	// CLI claimed full restore anyway. The honest report MUST surface it.
+	gotUntracked, err := os.ReadFile(untracked)
+	if err != nil {
+		t.Fatal(err)
+	}
+	untrackedRestored := string(gotUntracked) == string(untrackedGood)
+
+	listed := false
+	for _, f := range report.UntrackedNotRestored {
+		if f == "work.txt" {
+			listed = true
+			break
+		}
+	}
+
+	redMode := os.Getenv("RED_MODE") != "0" // default "1": reproduce the defect
+
+	if redMode {
+		// RED: prove the defect surface exists on the real artifact — the
+		// untracked file is genuinely left corrupted (so an unconditional
+		// "working tree restored" message would be a lie). If the untracked file
+		// were somehow restored, there would be no defect to guard against.
+		if untrackedRestored {
+			t.Fatalf("RED expectation broken: untracked file WAS restored — the documented defect (untracked files not restored) does not reproduce; the guard is blind")
+		}
+		// And the fix's report must be able to tell the truth about it.
+		if !listed {
+			t.Fatalf("RED→FIX: report did not flag the un-restored untracked file work.txt; got %v — the pre-fix unconditional-success path cannot distinguish this", report.UntrackedNotRestored)
+		}
+		t.Logf("RED reproduced: untracked work.txt left corrupted by restore; honest report flags it (UntrackedNotRestored=%v) so the CLI no longer prints an unconditional success", report.UntrackedNotRestored)
+	} else {
+		// GREEN standing guard: the report MUST flag the un-restored untracked
+		// file so the CLI prints the honest warning, never a false success.
+		if !listed {
+			t.Fatalf("GREEN guard failed: RestoreReport.UntrackedNotRestored must include work.txt; got %v", report.UntrackedNotRestored)
+		}
+		if report.FullyRestored() {
+			t.Fatalf("GREEN guard failed: FullyRestored() must be false when untracked files were not restored")
+		}
+	}
+}
+
+// TestRestoreReportFullyRestored_FilesBackend confirms the files backend (which
+// snapshots untracked content too) reports a full restore so the CLI keeps
+// printing the unqualified success there — the honest-report fix must not
+// false-warn on the backend that genuinely covers everything.
+func TestRestoreReportFullyRestored_FilesBackend(t *testing.T) {
+	dir := t.TempDir() // not a git repo → files backend
+	f := filepath.Join(dir, "note.txt")
+	if err := os.WriteFile(f, []byte("v1\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	m, err := NewManager(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := m.Backend(); got != "files" {
+		t.Fatalf("expected files backend, got %q", got)
+	}
+	id, err := m.Create("fb")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(f, []byte("BAD\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	report, err := m.RestoreReported(id)
+	if err != nil {
+		t.Fatalf("restore: %v", err)
+	}
+	if !report.FullyRestored() {
+		t.Fatalf("files backend must report full restore; got UntrackedNotRestored=%v", report.UntrackedNotRestored)
+	}
+	got, _ := os.ReadFile(f)
+	if string(got) != "v1\n" {
+		t.Fatalf("files backend did not restore bytes: got %q", got)
+	}
+}
+
 // keep context import used even if future edits drop a usage.
 var _ = context.Background
