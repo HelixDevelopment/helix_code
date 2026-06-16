@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/agent/task"
+	"dev.helix.code/internal/hooks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -230,4 +231,142 @@ func TestDefect3_GetReadyStepsNoDeadlockUnderWriter(t *testing.T) {
 		}
 		t.Fatalf("deadlock: GetReadySteps did not complete within %s (regression of reentrant RLock)", watchdog)
 	}
+}
+
+// -----------------------------------------------------------------------------
+// DEFECT-4 — BaseAgent.Initialize unsynchronised state mutation (data race)
+//
+// Root cause: Initialize() mutated a.id / a.name / a.agentType / a.capabilities
+// WITHOUT holding a.mu, while getSystemPrompt / Capabilities / Health /
+// HealthMap / GetStatistics read those same fields UNDER a.mu. A re-configuring
+// Initialize() racing a live agent loop reading the system prompt was a genuine
+// DATA RACE: a torn read of the capabilities slice header (len/cap/ptr observed
+// mid-reallocation) or a torn name/agentType string read — undefined behaviour,
+// not merely a stale value.
+//
+// For a data race the -race tripwire IS the reproduction (§11.4.115): on the
+// pre-fix artifact `go test -race -run TestDefect4...` reports "DATA RACE" and
+// the run FAILs; on the fixed artifact (Initialize guarded by a.mu) the run is
+// clean. RED_MODE here governs only the descriptive assertion — the load-bearing
+// signal is the race detector. Run under -race for the real proof.
+// -----------------------------------------------------------------------------
+
+func TestDefect4_InitializeIsRaceFree(t *testing.T) {
+	a := NewBaseAgentFromConfig(&AgentConfig{ID: "d4", Name: "Defect4 Agent", Type: AgentTypeCoding})
+
+	const readers = 4
+	const writes = 4000
+
+	var wg sync.WaitGroup
+	stop := make(chan struct{})
+
+	for r := 0; r < readers; r++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case <-stop:
+					return
+				default:
+					// Concurrent readers exercising every locked accessor that
+					// touches the fields Initialize mutates. ID()/Name()/Type()
+					// read a.id/a.name/a.agentType respectively — the exact fields
+					// the writer below re-configures — so they MUST be exercised
+					// here for the race detector to certify their RLock guards
+					// against the Initialize() write side (review MUST-FIX 1).
+					_ = a.ID()
+					_ = a.Name()
+					_ = a.Type()
+					_ = a.Capabilities()
+					_ = a.getSystemPrompt()
+					_ = a.Health()
+					_ = a.GetStatistics()
+				}
+			}
+		}()
+	}
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < writes; i++ {
+			// Reconfigure ID/Name/Type/Capabilities — ALL four fields the
+			// accessors read — so the race detector exercises every accessor's
+			// lock against a live write. ID MUST be set or ID()'s guard would
+			// read a field nobody writes (no race possible, blind guard).
+			_ = a.Initialize(context.Background(), &AgentConfig{
+				ID:           "reconfigured-id",
+				Name:         "reconfigured",
+				Type:         AgentTypePlanning,
+				Capabilities: []Capability{CapabilityCodeGeneration, CapabilityDebugging},
+			})
+		}
+		close(stop)
+	}()
+
+	wg.Wait()
+
+	// Reaching here under -race with no DATA RACE report is the GREEN proof.
+	// (Under RED_MODE on the pre-fix artifact, -race aborts the binary before
+	// this point with a non-zero exit.)
+	if redMode() {
+		t.Log("RED_MODE: the load-bearing reproduction is the -race DATA RACE report on the pre-fix Initialize")
+	}
+	assert.NotEmpty(t, a.Capabilities(), "post-reconfigure capabilities must be observable")
+}
+
+// -----------------------------------------------------------------------------
+// DEFECT-5 — BaseAgent.SetHooksManager unsynchronised pointer mutation (race)
+//
+// Root cause: SetHooksManager() wrote a.hooksManager with NO lock, while
+// dispatchOnError() and RequestPlanApproval() READ a.hooksManager with NO lock.
+// dispatchOnError fires on every tool/LLM error inside the live agent loop
+// (executeTaskWithLLM, Execute), so a host wiring a hooks manager while the
+// agent is processing was a real DATA RACE on a pointer field.
+//
+// As with DEFECT-4 the -race detector is the reproduction (§11.4.115): pre-fix
+// → "DATA RACE" + FAIL; fixed (both writer and readers snapshot under a.mu) →
+// clean. Run under -race for the real proof.
+// -----------------------------------------------------------------------------
+
+func TestDefect5_HooksManagerAccessIsRaceFree(t *testing.T) {
+	a := NewBaseAgentFromConfig(&AgentConfig{ID: "d5", Name: "Defect5 Agent", Type: AgentTypeCoding})
+
+	const writes = 4000
+
+	var wg sync.WaitGroup
+	stop := make(chan struct{})
+
+	// Reader: the live error-dispatch path.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+				a.dispatchOnError(context.Background(), context.Canceled, "probe")
+				_ = a.RequestPlanApproval(context.Background(), "plan")
+			}
+		}
+	}()
+
+	// Writer: a host re-wiring the hooks manager concurrently.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < writes; i++ {
+			a.SetHooksManager(hooks.NewManager())
+		}
+		close(stop)
+	}()
+
+	wg.Wait()
+
+	if redMode() {
+		t.Log("RED_MODE: the load-bearing reproduction is the -race DATA RACE report on the pre-fix SetHooksManager/dispatchOnError")
+	}
+	// Reaching here under -race with no DATA RACE report is the GREEN proof.
 }

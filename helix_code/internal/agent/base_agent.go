@@ -169,18 +169,34 @@ func NewBaseAgent(id, name string, agentType AgentType, config *config.AgentConf
 	}
 }
 
-// ID returns the agent ID
+// ID returns the agent ID.
+//
+// a.id is mutated by Initialize() under a.mu, so this read is taken under
+// a.mu.RLock() — a lock-free return would be a DATA RACE against a concurrent
+// re-configuration.
 func (a *BaseAgent) ID() string {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
 	return a.id
 }
 
-// Name returns the agent name
+// Name returns the agent name.
+//
+// a.name is mutated by Initialize() under a.mu; the RLock makes this read
+// race-free against a concurrent re-configuration.
 func (a *BaseAgent) Name() string {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
 	return a.name
 }
 
-// Type returns the agent type
+// Type returns the agent type.
+//
+// a.agentType is mutated by Initialize() under a.mu; the RLock makes this read
+// race-free against a concurrent re-configuration.
 func (a *BaseAgent) Type() AgentType {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
 	return a.agentType
 }
 
@@ -363,7 +379,7 @@ func (a *BaseAgent) basicPlanning(ctx context.Context, t *Task) (interface{}, er
 		"plan":         "No-LLM fallback plan: requirements echoed verbatim. Configure an LLM provider for real decomposition.",
 		"requirements": requirements,
 		"task_id":      t.ID,
-		"agent_id":     a.id,
+		"agent_id":     a.ID(),
 		"subtasks":     []map[string]interface{}{},
 		"total_tasks":  0,
 		"mode":         "no_llm_fallback",
@@ -720,6 +736,13 @@ Format response as JSON:
 // — so mid-session edits via /memory edit + fsnotify-driven reload are
 // observed immediately. Spec §3.5 (F24).
 func (a *BaseAgent) getSystemPrompt() string {
+	// Read agentType/name/capabilities AND the memory registry under a single
+	// RLock. These identity fields are mutated by Initialize() (under a.mu), so
+	// the prior lock-free fmt.Sprintf read of a.agentType/a.name/a.capabilities
+	// was a real DATA RACE against a concurrent re-configure. The RLock makes
+	// every field read here consistent with the Initialize() write side.
+	a.mu.RLock()
+	reg := a.memoryRegistry
 	base := fmt.Sprintf(`You are a %s agent named %s. Your capabilities include: %v.
 
 You are part of a multi-agent system for software development. Your responses should be:
@@ -730,10 +753,8 @@ You are part of a multi-agent system for software development. Your responses sh
 Tool output handling: when a tool produces output exceeding 50,000 characters, the runtime persists the raw content to disk. The tool result you receive will contain a "persistedOutputPath" pointing to a file under .helix/tool-results/. To read the full content, invoke the Read tool with that path. Treat the path as a regular workspace file.
 
 Always respond with valid JSON only, no additional text.`, a.agentType, a.name, a.capabilities)
-
-	a.mu.RLock()
-	reg := a.memoryRegistry
 	a.mu.RUnlock()
+
 	if reg == nil {
 		return base
 	}
@@ -763,7 +784,7 @@ func (a *BaseAgent) processLLMResponse(ctx context.Context, t *Task, response *l
 	// Add metadata
 	result["task_id"] = t.ID
 	result["task_type"] = string(t.Type)
-	result["agent_id"] = a.id
+	result["agent_id"] = a.ID()
 	result["tokens_used"] = response.Usage.TotalTokens
 
 	// For code generation/edit tasks, optionally apply changes using tools
@@ -967,6 +988,8 @@ func (a *BaseAgent) GetTelemetryInstrumentation() *telemetry.AgentInstrumentatio
 // manager disables hook firing.
 // Per Feature 5 (hook-based extensibility), P1-F05-T08.
 func (a *BaseAgent) SetHooksManager(m *hooks.Manager) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	a.hooksManager = m
 }
 
@@ -977,14 +1000,24 @@ func (a *BaseAgent) SetHooksManager(m *hooks.Manager) {
 // to report it, not retry.
 // Per Feature 5 (hook-based extensibility), P1-F05-T08.
 func (a *BaseAgent) dispatchOnError(ctx context.Context, err error, errorType string) {
-	if a.hooksManager == nil || err == nil {
+	if err == nil {
+		return
+	}
+	// Snapshot the manager pointer under the lock: SetHooksManager writes the
+	// field concurrently, so a lock-free read here is a real DATA RACE on a
+	// pointer field. Fire the event AFTER releasing the lock so a hook
+	// subscriber can never deadlock against the agent lock.
+	a.mu.RLock()
+	mgr := a.hooksManager
+	a.mu.RUnlock()
+	if mgr == nil {
 		return
 	}
 	event := hooks.NewEventWithContext(ctx, hooks.HookTypeOnError)
 	event.Source = "agent"
 	event.SetData("error_message", err.Error())
 	event.SetData("error_type", errorType)
-	_ = a.hooksManager.TriggerEventAndWait(event)
+	_ = mgr.TriggerEventAndWait(event)
 }
 
 // RequestPlanApproval fires HookTypeOnPlanApproval synchronously. A
@@ -993,13 +1026,17 @@ func (a *BaseAgent) dispatchOnError(ctx context.Context, err error, errorType st
 // message loop — F08 (Plan Mode) wires it into the actual approval gate.
 // Per Feature 5 (hook-based extensibility), P1-F05-T08.
 func (a *BaseAgent) RequestPlanApproval(ctx context.Context, plan string) error {
-	if a.hooksManager == nil {
+	// Snapshot under the lock — SetHooksManager mutates this field concurrently.
+	a.mu.RLock()
+	mgr := a.hooksManager
+	a.mu.RUnlock()
+	if mgr == nil {
 		return nil
 	}
 	event := hooks.NewEventWithContext(ctx, hooks.HookTypeOnPlanApproval)
 	event.Source = "agent"
 	event.SetData("plan_text", plan)
-	results := a.hooksManager.TriggerEventAndWait(event)
+	results := mgr.TriggerEventAndWait(event)
 	if blockers := hooks.Blockers(results); len(blockers) > 0 {
 		return fmt.Errorf("plan approval blocked: %v", blockers[0])
 	}
@@ -1167,7 +1204,10 @@ func (a *BaseAgent) Collaborate(ctx context.Context, agents []Agent, t *task.Tas
 func (a *BaseAgent) shouldCollaborateWith(other Agent, t *task.Task) (bool, string) {
 	otherType := other.Type()
 
-	switch a.agentType {
+	// a.Type() takes a.mu.RLock(); a.agentType is mutated by Initialize() under
+	// a.mu, so the bare switch on a.agentType was a DATA RACE. This method does
+	// not itself hold a.mu, so the locked accessor is safe (no self-deadlock).
+	switch a.Type() {
 	case AgentTypeCoding:
 		// Coding agents benefit from review and testing
 		if otherType == AgentTypeReview {
@@ -1279,9 +1319,19 @@ func (a *BaseAgent) createCollaborationTask(originalTask *task.Task, collaborati
 	}
 }
 
-// Initialize implements the Agent interface Initialize method
+// Initialize implements the Agent interface Initialize method.
+//
+// The id/name/agentType/capabilities writes are guarded by a.mu because those
+// same fields are read under a.mu by getSystemPrompt, Health, HealthMap,
+// GetStatistics and Capabilities. Without the lock a concurrent Initialize
+// (e.g. a re-configuration) racing a live agent loop reading the system prompt
+// is a real DATA RACE: a torn read of the capabilities slice header or the
+// name/agentType strings. The lock is taken NON-reentrantly here (SetStatus is
+// invoked AFTER this critical section releases a.mu, never inside it) so a
+// queued reader cannot deadlock.
 func (a *BaseAgent) Initialize(ctx context.Context, cfg *AgentConfig) error {
 	if cfg != nil {
+		a.mu.Lock()
 		// Update agent configuration
 		if cfg.ID != "" {
 			a.id = cfg.ID
@@ -1296,6 +1346,7 @@ func (a *BaseAgent) Initialize(ctx context.Context, cfg *AgentConfig) error {
 			a.capabilities = make([]Capability, len(cfg.Capabilities))
 			copy(a.capabilities, cfg.Capabilities)
 		}
+		a.mu.Unlock()
 	}
 
 	a.SetStatus(StatusIdle)
@@ -1348,15 +1399,20 @@ func (a *BaseAgent) processTasks(ctx context.Context) {
 func (a *BaseAgent) processTask(ctx context.Context, task *Task) {
 	result, err := a.SubmitTask(ctx, task)
 
+	// Read a.id once via the locked accessor — Initialize() mutates a.id under
+	// a.mu, so the prior bare log reads raced it. processTask holds no lock, so
+	// the accessor is safe (no self-deadlock).
+	agentID := a.ID()
+
 	select {
 	case a.resultChan <- result:
 	default:
 		// Channel is full, log error
-		log.Printf("Agent %s: result channel full, dropping result for task %s", a.id, task.ID)
+		log.Printf("Agent %s: result channel full, dropping result for task %s", agentID, task.ID)
 	}
 
 	if err != nil {
-		log.Printf("Agent %s: error processing task %s: %v", a.id, task.ID, err)
+		log.Printf("Agent %s: error processing task %s: %v", agentID, task.ID, err)
 	}
 }
 
