@@ -57,23 +57,37 @@ func (s *Server) getQASessionStatus(c *gin.Context) {
 		return
 	}
 
-	// SSE stream for live progress updates
+	// SSE stream for live progress updates.
+	//
+	// DEADLOCK FIX (§11.4.102 / §11.4.118): do NOT hold state.Mu.RLock()
+	// across json.Marshal(state). *SessionState implements MarshalJSON
+	// (internal/helixqa/wrapper.go), which itself acquires state.Mu.RLock().
+	// Holding the lock here too is a RECURSIVE read-lock: Go's sync.RWMutex
+	// is documented as NOT safe for recursive read-locking — if the
+	// orchestrator goroutine (StartSession's background runner, which calls
+	// state.Mu.Lock() on every phase transition) issues a write-Lock between
+	// this handler's outer RLock and MarshalJSON's inner RLock, the inner
+	// RLock blocks behind the pending writer while the writer blocks behind
+	// the outer RLock held by this same goroutine — a permanent self-deadlock
+	// that hangs the request forever (DoS: a running QA session + a status
+	// poll wedges the handler goroutine). MarshalJSON is the single, correct
+	// synchronization point; this handler must hand it the bare pointer and
+	// let it lock once.
 	if c.GetHeader("Accept") == "text/event-stream" {
 		c.Header("Content-Type", "text/event-stream")
 		c.Header("Cache-Control", "no-cache")
 		c.Header("Connection", "keep-alive")
-		// Stream at most 1 update for testing compatibility
-		state.Mu.RLock()
+		// Stream at most 1 update for testing compatibility. json.Marshal
+		// invokes (*SessionState).MarshalJSON, which RLocks state.Mu itself.
 		data, err := json.Marshal(state)
-		state.Mu.RUnlock()
 		if err == nil {
 			fmt.Fprintf(c.Writer, "data: %s\n\n", data)
 		}
 		return
 	}
 
-	state.Mu.RLock()
-	defer state.Mu.RUnlock()
+	// c.JSON likewise routes through (*SessionState).MarshalJSON, which
+	// RLocks state.Mu. No handler-side lock — see the deadlock note above.
 	c.JSON(http.StatusOK, state)
 }
 
