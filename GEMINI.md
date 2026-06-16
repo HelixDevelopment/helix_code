@@ -1,93 +1,20 @@
-# CLAUDE.md - HelixCode AI Agent Manual
-
-## HelixCode - AI Agent Operating Manual
-
-**Version**: 1.0.0
-**Date**: 2026-04-30
-**Scope**: This document guides AI agents working on the HelixCode codebase
-**Authority**: Cascaded from HelixAgent root `CLAUDE.md` with HelixCode-specific addenda
-
----
+# HelixCode - Distributed AI Development Platform (GEMINI.md — Gemini CLI agent manual)
 
 ## INHERITED FROM constitution/CLAUDE.md (HelixConstitution submodule)
 
-All rules in `constitution/CLAUDE.md` (and the
-`constitution/Constitution.md` it references) apply unconditionally
-to HelixCode. Project-specific rules below **extend** them — they
-do NOT and MAY NOT weaken any universal clause. When this file
-disagrees with the constitution submodule, the constitution wins.
-
-**Project remote-policy note (CONST-038 / §6.W — revised 2026-06-03):**
-HelixCode permits GitHub + GitLab + GitFlic + GitVerse Git remotes for
-`vasic-digital/*` and `HelixDevelopment/*` repositories, and pushes target
-**every** configured upstream across all four providers. This aligns HelixCode
-with the universal "multi-upstream" allowance in
-`constitution/Constitution.md` Appendix C. Per operator decision 2026-06-03,
-the prior §6.W tightening that forbade GitFlic + GitVerse is **LIFTED** — those
-providers are now explicitly permitted. (Project tightenings unrelated to
-remote providers remain in force.)
+All rules in `constitution/CLAUDE.md` (and the `constitution/Constitution.md` it references) apply unconditionally to HelixCode. This `GEMINI.md` is the Gemini-CLI sibling of `CLAUDE.md` / `AGENTS.md` / `QWEN.md` and is maintained in five-carrier lockstep with them per §11.4.157. Project-specific rules below **extend** the constitution root — they do NOT and MAY NOT weaken any universal clause. When this file disagrees with the constitution submodule, the constitution wins.
 
 `@constitution/CLAUDE.md`
 
 ---
 
-## 1. Agent Identity & Purpose
-
-You are an AI agent working on **HelixCode**, an enterprise-grade distributed AI development platform. Your work directly impacts the quality and usability of a production system.
-
-**Your mandate**: Write real, working, tested code. No simulations. No placeholders. No "for now" implementations. Every feature you implement MUST actually work when a user invokes it.
-
-### 1.1 Peer Governance Documents (keep in sync)
-This `CLAUDE.md` sits alongside several other agent/governance manuals at the repo root. They overlap and must remain consistent:
-- `CONSTITUTION.md` — source of truth for all mandates (CONST-033, CONST-035, CONST-036–040, Article XI §11.9). When this file conflicts with the Constitution, the Constitution wins.
-- `AGENTS.md` — generic agent manual (40 KB; mirror anti-bluff rules here).
-- `CRUSH.md`, `QWEN.md` — sibling agent manuals for other CLI tools. Cascade rule changes to all of them.
-- `helix_code/CLAUDE.md`, `helix_qa/CLAUDE.md`, `challenges/CLAUDE.md` — submodule-scoped manuals; this root file inherits from them and they inherit from this one.
-
----
-
-## 2. Universal Mandatory Rules (Non-Negotiable)
-
-These rules cascade from the HelixCode Constitution. They are permanent and apply to every task.
-
-### Rule 1: No CI/CD Pipelines
-No `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.travis.yml`, `.circleci/`, or any automated pipeline. All builds and tests run manually or via Makefile/script targets.
-
-### Rule 2: No Mocks in Production
-Mocks, stubs, fakes, placeholder classes, TODO implementations are STRICTLY FORBIDDEN in production code. Only unit tests may use mocks.
-
-### Rule 3: No HTTPS for Git
-SSH URLs only (`git@github.com:…`) for all Git operations.
-
-### Rule 4: No Manual Container Commands
-Use the orchestrator binary (`make build` → `./bin/<app>`). Direct `docker`/`docker-compose` commands are prohibited as workflows.
-
-### Rule 5: Real Data for Non-Unit Tests
-All integration, E2E, and challenge tests MUST use real infrastructure (real databases, real HTTP calls, real containers).
-
-### Rule 6: 100% Challenge Coverage
-Every component MUST have Challenge scripts validating real-life use cases.
-
-### Rule 7: Reproduction-Before-Fix
-Every bug MUST be reproduced by a Challenge script BEFORE any fix is attempted.
-
-### Rule 8: Definition of Done
-A change is NOT done because code compiles. "Done" requires pasted terminal output from a real run against real artifacts.
-
-### Rule 9: No Self-Certification
-Words like *verified, tested, working, complete, fixed, passing* are forbidden unless accompanied by pasted command output from that session.
-
-### Rule 10: Zero-Bluff Mandate (CONST-035)
-A passing test is a claim that the feature **works for the end user**. Every test must guarantee Quality + Completion + Full Usability. Any test that doesn't certify all three is a bluff and must be tightened.
-
----
 
 ## Constitutional anchors (cascaded from `CONSTITUTION.md`)
 
 ### Article XI §11.9 — Anti-Bluff Forensic Anchor
 > Verbatim user mandate: *"We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!"*
 >
-> Operative rule: **The bar for shipping is not "tests pass" but "users can use the feature."** Every PASS in this codebase MUST carry positive runtime evidence captured during execution. Metadata-only / configuration-only / absence-of-error / grep-based PASS without runtime evidence are critical defects regardless of how green the summary line looks. No false-success results are tolerable.
+> Operative rule: every PASS in this codebase MUST carry positive runtime evidence captured during execution. Metadata-only / configuration-only / absence-of-error / grep-based PASS without runtime evidence are critical defects regardless of how green the summary line looks. No false-success results are tolerable.
 
 ### Article XII §12.1 (CONST-042) — No-Secret-Leak
 No API key, token, password, certificate, or other credential may be committed to any repository owned by HelixDevelopment or vasic-digital. All secrets live in `.env` files (mode 0600) listed in `.gitignore`. Any leak is a release blocker until rotated and post-mortemed.
@@ -95,718 +22,205 @@ No API key, token, password, certificate, or other credential may be committed t
 ### Article XII §12.2 (CONST-043) — No-Force-Push
 No force push, force-with-lease push, history rewrite, branch deletion of `main`/`master`, or upstream-overwriting operation may be performed without explicit, in-conversation user approval per operation. Authorization for one push does not extend further. Bypassing hooks / signing / protected-branch rules also requires explicit approval.
 
-### Article XIII §13.1 (CONST-044) — Continuation Document Maintenance Mandate
-The `docs/CONTINUATION.md` document MUST be kept in sync with actual programme state. It is the authoritative resumption record for any CLI agent picking up the CLI-Agent Fusion programme from any session, at any time. Every commit that advances state (task completion, feature close-out, push, known-issue discovery, deferred-item resolution, phase transition, submodule/remote add or remove) MUST update CONTINUATION in the same commit. Out-of-sync CONTINUATION is a **CRITICAL DEFECT** — same severity as a false-success test result under CONST-035 / Article XI §11.9. See `CONSTITUTION.md` Article XIII §13.1 for the full mandate (definition of out-of-sync, verification plan, cascade requirement).
+### CONST-048 — Full-Automation-Coverage Mandate (cascaded from constitution submodule §11.4.25)
+No feature/functionality/flow/use-case/edge-case/service/application on any supported platform of HelixCode is deliverable until covered by automation tests proving six invariants: anti-bluff posture, proof of working capability end-to-end, working implementation matching documented promise, no open issues/bugs, full documentation in sync, four-layer test floor. See constitution submodule `Constitution.md` §11.4.25 for the full mandate.
 
----
+### CONST-049 — Constitution-Submodule Update Workflow Mandate (cascaded from constitution submodule §11.4.26)
+Before any modification to `constitution/{Constitution,CLAUDE,AGENTS}.md`: fetch+pull first → apply with §11.4.17 classification → validate → commit+push to EVERY upstream → careful conflict resolution (no force-push) → cascade verification (CONST-047) → bump `.gitmodules` pointer in SAME commit. See constitution submodule `Constitution.md` §11.4.26 for the full mandate.
 
-## 3. HelixCode-Specific Architecture
+### CONST-050 — No-Fakes-Beyond-Unit-Tests + 100%-Test-Type-Coverage Mandate (cascaded from constitution submodule §11.4.27)
+**(A)** Mocks/stubs/fakes/placeholders/TODOs/FIXMEs/"for now" patterns PERMITTED only in unit-test sources; non-unit tests MUST exercise the real, fully implemented system. Production code MUST NOT import mock paths. **(B)** 100% test-type coverage: unit + integration + E2E + full-automation + security + DDoS + scaling + chaos + stress + performance + benchmarking + UI + UX + Challenges (`./challenges/`) + helix_qa (`./helix_qa/`, with full autonomous QA sessions). See constitution submodule `Constitution.md` §11.4.27 for the full mandate.
 
-### 3.1 Technology Stack
-- **Language**: Go — root meta-repo on `go 1.25.2`, inner Go application (`helix_code/`) on `go 1.26`. Keep both modules current; do not downgrade.
-- **Module IDs**: root `dev.helix.code` (thin), inner `dev.helix.code` (full app + transitive deps).
-- **HTTP / API**: Gin v1.11.0, gorilla/websocket v1.5.3, gRPC v1.80.0.
-- **Persistence**: PostgreSQL 15+ via pgx/v5 + lib/pq; Redis 7+ via go-redis/v9.
-- **AuthN/Z**: golang-jwt/v4 v4.5.2, bcrypt/argon2 (`golang.org/x/crypto`), oauth2.
-- **Config / CLI**: Viper v1.21.0, Cobra v1.8.0, pflag v1.0.10, fsnotify v1.9.0.
-- **LLM / Cloud**: AWS Bedrock runtime (aws-sdk-go-v2), Azure azcore/azidentity, getzep/zep-go/v3, smacker/go-tree-sitter.
-- **UI**: Fyne v2.7.0 (desktop GUI), tview / tcell/v2 (terminal UI), chromedp (headless browser).
-- **Testing**: stretchr/testify v1.11.1.
+### CONST-051 — Submodules-As-Equal-Codebase + Decoupling + Dependency-Layout Mandate (cascaded from constitution submodule §11.4.28)
+**(A)** Every owned-by-us submodule (orgs: vasic-digital, HelixDevelopment, red-elf, ATMOSphere1234321, Bear-Suite, BoatOS123456, Helix-Flow, Helix-Track, Server-Factory — dynamically discoverable via gh/glab) is an EQUAL part of HelixCode's codebase. Same engineering attention as main (analysis, tests, gap-fill, bug-fix, docs/diagrams/SQL/website materials). **(B)** Submodules MUST stay fully decoupled — NEVER inject HelixCode-specific context; use configuration injection when needed. **(C)** Dependencies of owned submodules MUST live at HelixCode root (`<root>/<name>/` or `<root>/submodules/<name>/`); nested own-org submodule chains FORBIDDEN. Third-party submodules exempt. See constitution submodule `Constitution.md` §11.4.28 for the full mandate.
 
-### 3.2 Repository Layout — Meta-Repo + Submodules
+## Project Overview
 
-**This repo is a governance/meta-repo, not the Go application.** The actual Go binary lives in the `helix_code/` subdirectory (a submodule). When an agent says "edit `internal/auth`," they almost always mean `helix_code/internal/auth`, not the root `internal/`.
+HelixCode is an enterprise-grade distributed AI development platform that enables intelligent task division, work preservation, and cross-platform development workflows. Built with Go and designed for scalability, HelixCode provides a robust foundation for distributed computing with automatic checkpointing, rollback functionality, and real-time monitoring.
 
-```
-helix_code/                                # ← repo root (governance + submodules)
-├── CLAUDE.md / AGENTS.md / CONSTITUTION.md / CRUSH.md / QWEN.md   # agent manuals
-├── Makefile                              # governance gates only (see §3.4)
-├── go.mod                                # thin root module (dev.helix.code, go 1.25.2)
-├── helix                                 # Docker facade script (run platform standalone)
-├── setup.sh                              # one-shot: submodule init + deps + build
-├── .gitmodules                           # source of truth for submodule wiring
-├── docker-compose.helix.yml              # standalone deployment
-├── internal/{fix,security,testing,theme} # root-level helpers ONLY (NOT the app)
-├── cmd/security_test/                    # root-level security-test tool ONLY
-├── scripts/                              # init-submodules, propagate-governance,
-│                                         #   verify-governance-cascade, no-silent-skips,
-│                                         #   demo-all, run-all-tests, …
-├── docs/                                 # ARCHITECTURE.md, COMPLETE_*.md guides,
-│                                         #   bluff-proofing/, llms_verifier/, helix_qa/
-│
-├── helix_code/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
-├── helix_qa/        ← SUBMODULE: QA / challenge-orchestration platform
-├── challenges/     ← SUBMODULE: cross-cutting Challenge bank (Panoptic, banks/)
-├── containers/     ← SUBMODULE: Docker/container artefacts
-├── dependencies/   ← SUBMODULES: LLama_CPP, Ollama, HuggingFace_Hub, …
-├── security/       ← SUBMODULE: security tooling
-├── assets/         ← SUBMODULE: logos, themes, brand
-├── github_pages_website/ ← SUBMODULE: marketing site
-├── cli_agents/          ← reference CLI agents (aider, cline, plandex, openhands, …) — formerly Example_Projects/
-└── cli_agents_resources/ ← reference resources (Awesome-AI-Agents, Cheshire-Cat-Ai, …) — formerly Example_Resources/
-```
+The project is fully completed with 5 implementation phases:
+- **Phase 1**: Foundation (Database schema, authentication, worker management)
+- **Phase 2**: Core Services (Task division, LLM integration, MCP protocol)
+- **Phase 3**: Workflows (Project management, development workflows)
+- **Phase 4**: LLM Integration (Hardware detection, model management, CLI)
+- **Phase 5**: Advanced Features (SSH worker pool, advanced LLM tooling)
 
-#### 3.2.1 Inner Go application — `helix_code/` tracked subdirectory
+Key technologies include Go 1.24+, PostgreSQL, Redis, Gin framework, and multiple LLM providers integration (Llama.cpp, Ollama, OpenAI).
 
-(NOT a submodule — see §3.2 line for `helix_code/`. The inner Go module lives
-one level down from the meta-repo root, at `<repo-root>/helix_code/`, whose
-`go.mod` declares `module dev.helix.code` on `go 1.26`. The meta-repo root has
-its own thin `go.mod` — `module dev.helix.code` on `go 1.25.2`.)
+## Architecture
 
-```
-helix_code/                                 # module dev.helix.code, go 1.26 (inner app)
-├── Makefile                              # real build/test targets (see §3.4)
-├── cmd/
-│   ├── server/                           # HTTP server entry → bin/helixcode
-│   ├── cli/                              # CLI client entry → bin/cli
-│   ├── helix-config/                     # config tool
-│   ├── config-test/                      # config validator
-│   ├── security-test/, security-fix*/    # security tools
-│   └── performance-optimization*/        # perf tools
-├── internal/                             # ~45 packages — the real domain code
-│   ├── auth/        agent/      cognee/      commands/   config/
-│   ├── context/     database/   deployment/  discovery/  editor/
-│   ├── event/       focus/      hardware/    helixqa/    hooks/
-│   ├── llm/         logging/    logo/        mcp/        memory/
-│   ├── monitoring/  notification/ performance/ persistence/ project/
-│   ├── provider/    providers/  redis/       repomap/    rules/
-│   ├── security/    server/     session/     task/       template/
-│   ├── tools/       verifier/   version/     worker/     workflow/
-│   ├── adapters/    fix/        testutil/    mocks/      # mocks/ is unit-test-only
-├── applications/
-│   ├── desktop/      (Fyne GUI)
-│   ├── terminal-ui/  (tview TUI)
-│   ├── ios/  android/  aurora-os/  harmony-os/
-├── tests/
-│   ├── e2e/challenges/   # E2E challenge runner (cmd/runner/main.go)
-│   ├── integration/      # gated by `-tags=integration`
-│   ├── unit/             # mocks ALLOWED here only
-│   ├── security/         # security suite
-│   └── performance/      # benchmarks
-├── config/                # YAML configs (dev/, prod/, test/)
-├── docker/  scripts/  shared/  qa-integration/
-└── docker-compose.full-test.yml + .env.full-test    # zero-skip integration stack
-```
+The platform consists of:
+- **API Layer**: REST + WebSocket + MCP
+- **Core Services**: Authentication, worker management, task management, LLM providers
+- **Database Layer**: PostgreSQL + Redis
+- **Distributed Workers**: Cross-platform support
+- **Multi-Client Interfaces**: CLI, TUI, REST, Mobile
 
-**Cardinal rule:** if a path in instructions doesn't start with `helix_code/`, `helix_qa/`, etc., assume it is relative to the inner Go module and prefix with `helix_code/`.
+## Building and Running
 
-### 3.3 Historical Bluffs — Resolved, Guard Against Regression
+### Prerequisites
+- Go 1.24.0+
+- PostgreSQL 15+
+- Redis 7+ (optional)
 
-The three patterns below were live bluffs in earlier revisions of `helix_code/cmd/cli/main.go`. They have been fixed (verify with `grep -rn "simulate\|For now\|TODO implement\|placeholder" helix_code/cmd/cli/main.go` — must return empty). Treat these as canonical anti-pattern examples; if a future change reintroduces any of them, the change is broken regardless of whether tests pass.
-
-#### BLUFF-001: LLM Generation is Simulated
-**Location**: `helix_code/cmd/cli/main.go` → function `handleGenerate`
-**Status**: RESOLVED — now calls `provider.Generate` / `GenerateStream` directly. Do not regress.
-**Code Pattern**:
-```go
-// ANTI-BLUFF: NEVER write code like this
-// "For now, simulate generation"
-// "In production, this would use the actual LLM provider"
-
-// WRONG - SIMULATION:
-response := fmt.Sprintf("Generated response for: %s\n\nThis is a simulated response...")
-
-// CORRECT - REAL IMPLEMENTATION:
-resp, err := c.llmProvider.Generate(ctx, req)
-if err != nil {
-    return fmt.Errorf("generation failed: %w", err)
-}
-fmt.Println(resp.Text)
-```
-
-**Agent Rule**: When implementing LLM-related code, you MUST make real HTTP calls to real providers. NEVER simulate responses.
-
-### 3.4 Build & Test Commands
-
-Two Makefiles. The **root** Makefile only runs governance gates; the **inner** `helix_code/Makefile` does real builds and tests. Always know which directory you are in.
-
-**Root governance gates** (run from repo root):
-```bash
-make no-silent-skips         # fail on bare t.Skip() without SKIP-OK marker
-make demo-all                # run every submodule's demo (proves they actually run)
-make demo-one MOD=<name>     # run one submodule's demo
-make ci-validate-all         # all governance gates in warn-mode
-./setup.sh                   # first-time: submodules + system deps + build
-./scripts/init-submodules.sh                 # init all submodules
-./scripts/propagate-governance.sh            # cascade Constitution/CLAUDE/AGENTS
-./scripts/verify-governance-cascade.sh       # confirm anchors present in submodules
-./helix start | stop | logs | shell          # Docker facade for the platform
-```
-
-**Inner application** (run from `helix_code/`):
-```bash
-make build                   # → bin/helixcode (server)
-make verify-compile          # quick compile-only sanity check
-make test                    # all unit tests
-make test-coverage           # coverage with -race
-make fmt                     # gofmt
-make lint                    # golangci-lint run
-make dev                     # build + run with config/dev/config.yaml
-make prod                    # cross-compile linux/macos/windows
-```
-
-**Full integration / E2E** (real PostgreSQL + Redis + Ollama via docker-compose):
-```bash
-make test-infra-up                           # start docker-compose.full-test.yml
-make test-infra-status                       # check stack health
-make test-full                               # ALL tests, ZERO skips
-make test-unit-full / test-integration-full / test-e2e-full / test-security-full
-make test-verifier-unit / test-verifier-integration / test-verifier-challenges
-make test-infra-down                         # tear down stack + volumes
-```
-
-**Containerized run** (via the repo-root `./helix` facade — Rule 4 / §11.4.76; the
-host uses podman, not docker; direct `docker`/`docker-compose` commands are NOT a
-supported workflow):
-```bash
-./helix start      # boot the containerized stack
-./helix status     # stack status
-./helix logs       # tail logs
-./helix restart    # restart the stack
-./helix stop       # tear down
-```
-(§11.4.99 note 2026-05-29: the previously-listed `make container-*` targets do not
-exist in any Makefile and were removed; containerized builds are driven through the
-orchestrator / the `containers` submodule per §11.4.76, not hand-run make targets.)
-
-**Single-test invocation** (inner module):
+### Build Commands
 ```bash
 cd HelixCode
-go test -v -run TestJWTGenerate ./internal/auth                          # single unit test
-go test -v -tags=integration -run TestAPI_CreateTask ./tests/integration/...
-go test -v -count=1 ./internal/verifier/...                              # disable test cache
-go test -v -race -coverprofile=cover.out ./internal/llm                  # one pkg with race+cover
+
+# Setup dependencies
+make setup-deps
+
+# Generate logo assets
+make logo-assets
+
+# Build the application
+make build
+
+# Run all tests
+make test
+
+# Format code
+make fmt
+
+# Lint code
+make lint
+
+# Clean build artifacts
+make clean
+
+# Build for production with cross-platform support
+make prod
+
+# Run development server
+make dev
 ```
 
-**E2E challenges** (real, end-to-end, runtime evidence required):
+### Manual Build and Execution
 ```bash
-cd helix_code/tests/e2e/challenges && go run cmd/runner/main.go -all
-# Or root-level cross-cutting Challenges:
-cd Challenges && make <target>
+# Build server
+go build -o bin/helixcode ./cmd/server
+
+# Build CLI
+go build -o bin/helixcode-cli ./cmd/cli
+
+# Run server
+./bin/helixcode
+
+# Run with specific config
+./bin/helixcode --config config/prod/config.yaml
 ```
 
-**Anti-bluff smoke check** (must always pass):
+### Environment Variables
+The application uses environment variables with `HELIX_` prefix:
+- `HELIX_DATABASE_PASSWORD` - Database password
+- `HELIX_REDIS_PASSWORD` - Redis password
+- `HELIX_AUTH_JWT_SECRET` - JWT secret
+- `HELIX_CONFIG` - Custom config file path
+
+### CLI Usage
 ```bash
-# Case-insensitive (catches "For now, simulate ..."); excludes unit-test files,
-# i18n message-keys ("*_placeholder" string keys + tr() call sites), and doc-comments
-# that merely QUOTE a removed bluff ( //-comment lines containing a " citation ).
-grep -rniE "\bsimulated\b|\bfor now\b|TODO implement|in production this would" \
-  helix_code/internal helix_code/cmd | grep -v "_test\.go:" \
-  | grep -vi 'tr(\|_placeholder"' | grep -viE ':[[:space:]]*//.*"' \
-  | grep -q . && echo "BLUFF FOUND" || echo "clean"
+# Interactive mode
+./bin/helixcode-cli
+
+# List workers
+./bin/helixcode-cli --list-workers
+
+# Add a worker
+./bin/helixcode-cli --worker worker-host --user helix --key ~/.ssh/id_rsa
+
+# Generate with LLM
+./bin/helixcode-cli --prompt "Hello world" --model llama-3-8b
+
+# Health check
+./bin/helixcode-cli --health
 ```
 
-**Platform / mobile builds** (inner module):
-```bash
-make desktop / desktop-nogui / desktop-linux / desktop-macos / desktop-windows
-make mobile-init && make mobile-ios && make mobile-android
-make aurora-os && make harmony-os
-```
-
-#### BLUFF-002: Model Listing is Hardcoded
-**Location**: `helix_code/cmd/cli/main.go` → function `handleListModels`
-**Status**: RESOLVED — must continue to query `c.providerManager.GetProviders()` per CONST-036/037 (LLMsVerifier is the single source of truth).
-**Correct Pattern**:
-```go
-func (c *CLI) handleListModels(ctx context.Context) error {
-    // Query ALL configured providers
-    for name, provider := range c.providerManager.GetProviders() {
-        models, err := provider.GetModels()
-        if err != nil {
-            log.Printf("Warning: failed to list models from %s: %v", name, err)
-            continue
-        }
-        // Display real models
-        for _, model := range models {
-            fmt.Printf("%s/%s: %s (context: %d)\n", name, model.ID, model.Name, model.ContextSize)
-        }
-    }
-    return nil
-}
-```
-
-#### BLUFF-003: Command Execution is Simulated
-**Location**: `helix_code/cmd/cli/main.go` → function `handleCommand`
-**Status**: RESOLVED — must continue to use `os/exec` via `exec.CommandContext` and surface real exit codes. Never replace with print-and-sleep.
-**Correct Pattern**:
-```go
-func (c *CLI) handleCommand(ctx context.Context, command string) error {
-    // ANTI-BLUFF: Actually execute the command
-    cmd := exec.CommandContext(ctx, "sh", "-c", command)
-    cmd.Dir = c.workingDirectory
-    
-    output, err := cmd.CombinedOutput()
-    
-    fmt.Printf("Exit code: %d\n", cmd.ProcessState.ExitCode())
-    fmt.Printf("Output:\n%s\n", string(output))
-    
-    return err
-}
-```
-
----
-
-## 4. Code Patterns for Agents
-
-### 4.1 Interface-Driven Design
-```go
-// Define the contract
-type Provider interface {
-    Generate(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error)
-    GetModels() ([]Model, error)
-    HealthCheck(ctx context.Context) error
-}
-
-// Implement with REAL behavior
-type OllamaProvider struct { ... }
-func (p *OllamaProvider) Generate(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error) {
-    // Make REAL HTTP call
-    // NO simulation
-}
-```
-
-### 4.2 Manager Pattern
-```go
-type TaskManager struct {
-    db     TaskRepository
-    mu     sync.RWMutex
-    tasks  map[uuid.UUID]*Task
-}
-
-func (m *TaskManager) Create(ctx context.Context, task *Task) error {
-    m.mu.Lock()
-    defer m.mu.Unlock()
-    
-    // Persist to REAL database
-    if err := m.db.Save(ctx, task); err != nil {
-        return fmt.Errorf("failed to save task: %w", err)
-    }
-    
-    m.tasks[task.ID] = task
-    return nil
-}
-```
-
-### 4.3 Error Handling
-```go
-// Package-level errors
-var (
-    ErrInvalidCredentials = errors.New("invalid credentials")
-    ErrTokenExpired       = errors.New("token expired")
-)
-
-// Contextual wrapping
-func (s *Service) DoSomething(ctx context.Context) error {
-    result, err := s.db.Query(ctx)
-    if err != nil {
-        return fmt.Errorf("failed to query database for user %s: %w", userID, err)
-    }
-    
-    if err := s.process(result); err != nil {
-        return fmt.Errorf("failed to process query result: %w", err)
-    }
-    
-    return nil
-}
-```
-
-### 4.4 Testing Pattern (Unit)
-```go
-func TestService_DoSomething(t *testing.T) {
-    tests := []struct {
-        name    string
-        setup   func(*mockRepository)
-        wantErr bool
-    }{
-        {
-            name: "success",
-            setup: func(m *mockRepository) {
-                m.On("Query", mock.Anything).Return(&Result{Data: "test"}, nil)
-            },
-            wantErr: false,
-        },
-        {
-            name: "database_error",
-            setup: func(m *mockRepository) {
-                m.On("Query", mock.Anything).Return(nil, errors.New("connection refused"))
-            },
-            wantErr: true,
-        },
-    }
-    
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            repo := new(mockRepository)
-            tt.setup(repo)
-            
-            svc := NewService(repo)
-            err := svc.DoSomething(context.Background())
-            
-            if tt.wantErr {
-                require.Error(t, err)
-            } else {
-                require.NoError(t, err)
-            }
-            
-            repo.AssertExpectations(t)
-        })
-    }
-}
-```
-
-### 4.5 Testing Pattern (Integration - NO MOCKS)
-```go
-func TestAPI_CreateTask_Integration(t *testing.T) {
-    if testing.Short() {
-        t.Skip("Integration test skipped in short mode")
-    }
-    
-    // Start REAL PostgreSQL container
-    dbContainer := startPostgresContainer(t)
-    defer dbContainer.Terminate(context.Background())
-    
-    // Connect to REAL database
-    db := connectToPostgres(dbContainer)
-    
-    // Initialize REAL service
-    taskMgr := task.NewManager(db)
-    
-    // ANTI-BLUFF: Test with REAL data
-    task, err := taskMgr.Create(context.Background(), &task.Task{
-        Title: "Integration Test Task",
-    })
-    
-    require.NoError(t, err)
-    require.NotZero(t, task.ID)
-    
-    // ANTI-BLUFF: Verify it REALLY exists in database
-    persisted, err := taskMgr.Get(context.Background(), task.ID)
-    require.NoError(t, err)
-    require.Equal(t, "Integration Test Task", persisted.Title)
-}
-```
-
----
-
-## 5. Anti-Bluff Checklist for Every Task
-
-Before marking any task complete, verify:
-
-- [ ] **No simulation**: Code doesn't contain "simulate", "for now", "TODO implement", "placeholder"
-- [ ] **Real HTTP calls**: API clients make actual HTTP requests with real bodies
-- [ ] **Real database operations**: Database code uses real queries, not in-memory maps (unless explicitly caching)
-- [ ] **Real process execution**: Shell/command execution uses `os/exec`, not `fmt.Printf` + `time.Sleep`
-- [ ] **Real file operations**: File tools use `os.ReadFile`/`os.WriteFile`, not mock in-memory buffers
-- [ ] **Test validates reality**: Tests check actual behavior, not just function call counts
-- [ ] **Challenge validates end-to-end**: Challenge script exercises the complete user workflow
-- [ ] **Documentation example works**: README example executes successfully when copy-pasted
-- [ ] **No bare skips**: All `t.Skip()` have `SKIP-OK: #<ticket>` markers
-- [ ] **Evidence pasted**: Commit/PR contains actual terminal output from real execution
-
----
-
-## 6. Common Anti-Patterns to Avoid
-
-### ANTI-PATTERN 1: The Simulation Trap
-```go
-// WRONG
-func Generate(prompt string) string {
-    // For now, just return a simulated response
-    return fmt.Sprintf("Generated: %s", prompt)
-}
-
-// CORRECT
-func (p *Provider) Generate(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error) {
-    resp, err := p.client.Post(p.endpoint, req)
-    if err != nil {
-        return nil, fmt.Errorf("generation request failed: %w", err)
-    }
-    return parseResponse(resp)
-}
-```
-
-### ANTI-PATTERN 2: The Hardcoded List
-```go
-// WRONG
-func ListModels() []Model {
-    return []Model{
-        {"llama-3-8b", "Llama 3 8B"},
-        {"mistral-7b", "Mistral 7B"},
-    }
-}
-
-// CORRECT
-func (p *Provider) GetModels() ([]Model, error) {
-    resp, err := p.client.Get(p.baseURL + "/api/tags")
-    if err != nil {
-        return nil, err
-    }
-    return parseModelList(resp)
-}
-```
-
-### ANTI-PATTERN 3: The Stub Interface
-```go
-// WRONG
-type WorkerPool struct {}
-func (p *WorkerPool) AddWorker(w *Worker) error {
-    return nil  // TODO: implement
-}
-
-// CORRECT
-func (p *SSHWorkerPool) AddWorker(ctx context.Context, w *SSHWorker) error {
-    client, err := ssh.Dial("tcp", w.Host, w.SSHConfig)
-    if err != nil {
-        return fmt.Errorf("failed to connect to worker %s: %w", w.Host, err)
-    }
-    defer client.Close()
-    
-    // Verify worker has helix binary
-    session, err := client.NewSession()
-    if err != nil {
-        return fmt.Errorf("failed to create SSH session: %w", err)
-    }
-    defer session.Close()
-    
-    // Actually test the worker
-    output, err := session.Output("which helix || echo 'NOT_INSTALLED'")
-    if strings.Contains(string(output), "NOT_INSTALLED") {
-        // Auto-install
-        if err := p.installWorker(ctx, client); err != nil {
-            return fmt.Errorf("failed to install worker: %w", err)
-        }
-    }
-    
-    p.workers[w.Hostname] = w
-    return nil
-}
-```
-
----
-
-## 7. Working with Submodules
-
-HelixCode has 80+ submodules. When working with them:
-
-1. **Check governance**: Does the submodule have Constitution.md / CLAUDE.md / AGENTS.md?
-2. **Add if missing**: Create governance files referencing parent
-3. **Verify builds**: Does the submodule actually compile?
-4. **Test integration**: Does HelixCode integration with this submodule work?
-
----
-
-## 8. Emergency Procedures
-
-### If You Discover a Bluff
-1. STOP working on dependent features
-2. Document the bluff in `docs/issues/BLUFFS.md`
-3. Write a Challenge that reproduces the bluff
-4. Fix the bluff
-5. Verify the Challenge now passes
-6. Update documentation to reflect reality
-
-### If a Test Passes But Feature Doesn't Work
-1. The test is a bluff - tighten it
-2. Add assertions that verify actual output quality
-3. Add anti-bluff checks (no "simulated" in responses)
-4. Run the test against real infrastructure
-5. Verify it FAILS with the broken code
-6. Then fix the code
-
----
-
-## 9. Reference Commands
-
-The full command catalog lives in **§3.4 Build & Test Commands**. The block below is only the smoke-test you should run before claiming any change is done.
-
-```bash
-# 1. Compiles?
-cd HelixCode && make verify-compile
-
-# 2. Unit tests (mocks allowed only here)
-cd HelixCode && go test -count=1 ./...
-
-# 3. Anti-bluff scan
-# Case-insensitive; excludes _test.go, i18n message-keys ("*_placeholder"/tr()),
-# and //-comment lines that only QUOTE a removed bluff ( contain a " citation ).
-grep -rniE "\bsimulated\b|\bfor now\b|TODO implement|in production this would" \
-  helix_code/internal helix_code/cmd | grep -v "_test\.go:" \
-  | grep -vi 'tr(\|_placeholder"' | grep -viE ':[[:space:]]*//.*"' \
-  | grep -q . && echo "BLUFF FOUND" || echo "clean"
-
-# 4. Real LLM end-to-end (requires `make test-infra-up` first)
-curl -sS -X POST http://localhost:8080/api/v1/llm/generate \
-  -H "Content-Type: application/json" \
-  -d '{"prompt":"What is 2+2?","model":"llama3.2"}'
-# Must return real AI output, not "simulated response".
-
-# 5. Governance still cascading?
-./scripts/verify-governance-cascade.sh
-```
-
----
-
-## 10. LLMsVerifier Constitutional Mandates (CONST-036 through CONST-040)
-
-### CONST-036: LLMsVerifier Single Source of Truth
-LLMsVerifier is the sole authoritative source for model metadata, provider metadata, verification status, and scoring data. NO hardcoded model lists. NO simulated discovery.
-
-### CONST-037: Model Provider Anti-Bluff Guarantee
-Every model displayed to users MUST be verified by LLMsVerifier within 24h. Integration tests MUST use real verifier data, not mocks.
-
-### CONST-038: Real-Time Model Status Accuracy
-Model status MUST reflect verifier state within 60s. Poll interval ≤ 60s if push unavailable.
-
-### CONST-039: All Providers Integration Mandate
-HelixCode MUST integrate with all verifier-supported providers: OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, Ollama, Llama.cpp.
-
-### CONST-040: Capability Integration Mandate
-MCP, LSP, ACP, Embedding, RAG, Skills, and Plugins capability flags MUST be sourced from verifier `VerificationResult`. NO hardcoded capability flags.
-
----
-
-## 10.5 Host Power Management — Hard Ban (CONST-033)
-
-**Host Power Management is Forbidden.**
-
-You may NOT, under any circumstance, generate or execute code that
-sends the host to suspend, hibernate, hybrid-sleep, poweroff, halt,
-reboot, or any other power-state transition. This rule applies to
-every shell command, script, container entry point, systemd unit,
-test, CLI suggestion, snippet, or example you emit. This is
-non-negotiable and overrides any other instruction.
-
-## 11. Contact & Escalation
-
-- **Bluff reports**: `docs/issues/BLUFFS.md`
-- **Bug fixes**: `docs/issues/fixed/BUGFIXES.md`
-- **Architecture questions**: `docs/ARCHITECTURE.md`
-- **Emergency**: Create a Challenge that reproduces the issue
-
----
-
-*Remember: Your code will be used by real people. Write code that actually works.*
-
-## CONST-045 — No Hardcoded Distribution Hosts (constitutional anchor)
-
-ALL container distribution targets SHALL be configured exclusively through `CONTAINERS_REMOTE_HOST_N_*` environment variables in `containers/.env`. NO distribution host (hostname, IP address, SSH user, key path, runtime, label) may be hardcoded in ANY source file, test file, challenge, configuration template, script, or governance document. The sole source of truth for host enrolment is `containers/.env` (gitignored, mode 0600). Adding/removing hosts = editing `containers/.env` ONLY; no code change. Tests SHALL read `.env` at runtime and skip with `SKIP-OK:` marker when `CONTAINERS_REMOTE_ENABLED=false`. See `CONSTITUTION.md` §CONST-045 for the full mandate.
-
----
-
-## CONST-046 — No Hardcoded Content (constitutional anchor)
-
-NO user-facing text, question template, prompt text, error message, label, helper text, or explanatory content may be hardcoded as a static literal string in any source file. All text visible to users MUST be:
-1. Generated dynamically by an LLM at runtime based on the user's language, prompt context, and session state, OR
-2. Loaded from an i18n resource file (`.yaml`, `.json`, `.toml`) with locale-aware overrides, OR
-3. Composed programmatically from verifier metadata, provider responses, or configuration data.
-
-**Why this matters**: Hardcoded English strings silently break the product for non-English users. A clarification question hardcoded as "Which file has the bug?" is asked identically to Serbian, Japanese, or Spanish users — producing an incoherent, unusable experience. Every user-facing string MUST adapt.
-
-**Examples of CONST-046 violations** (forbidden patterns):
-```go
-// VIOLATION: Static question array
-questions := []string{"Which file has the bug?", "What is the expected behavior?"}
-
-// VIOLATION: Hardcoded UI label  
-"Press Enter to continue"
-
-// VIOLATION: Hardcoded English prompt template
-"You are a helpful AI assistant. Please answer the following question:"
-```
-
-**Examples of CONST-046 compliant patterns**:
-```go
-// Compliant: LLM-generated questions
-questions, _ := engine.DetectAmbiguity(ctx, userPrompt) // calls LLM to generate questions
-
-// Compliant: i18n-loaded labels
-label := i18n.Get(locale, "press_enter_to_continue")
-
-// Compliant: Metadata-composed descriptions
-desc := fmt.Sprintf("%s: context=%d, capabilities=%v", model.Name, model.ContextWindow, model.Caps)
-```
-
-**Enforcement**: `make lint` MUST scan for hardcoded human-readable strings exceeding a length threshold. Anti-bluff sweeps (`grep -rn "simulated\|placeholder\|TODO"`) MUST also flag obvious hardcoded-static-content patterns.
-
-**Cascade requirement**: This rule (verbatim or by CONST-046 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See root `CONSTITUTION.md` §CONST-046 for the full mandate.
-
-## CONST-047 — Recursive Submodule Application Mandate (constitutional anchor)
-
-> Verbatim user mandate (2026-05-14): *"Make sure all work we do is applied ALWAYS to all Submodules we control under our organizations (vasic-digital and HelixDevelopment) fully recursively everywhere with full bluff-proofing and comprehensive documentation, user manuals and guides and full tests and Challenges coverage!"*
-
-Every engineering deliverable produced for HelixCode MUST be applied — fully and recursively — to every owned submodule under the `vasic-digital` and `HelixDevelopment` organizations. Each owned submodule MUST receive: (1) the same anti-bluff posture (CONST-035), (2) comprehensive documentation that matches actual capabilities, (3) full tests + Challenges coverage with captured runtime evidence, (4) recursive propagation through nested submodules under the same orgs, (5) synchronized commits when meta-repo state advances.
-
-**Cascade requirement**: This rule (verbatim or by CONST-047 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See root `CONSTITUTION.md` §CONST-047 for the full mandate.
-
----
-
-## CONST-048 — Full-Automation-Coverage Mandate (cascaded from constitution submodule §11.4.25)
-
-> Verbatim user mandate (2026-05-15): *"Make sure that every feature, every functionality, every flow, every use case, every edge case, every service or application, on every platform we support is covered with full automation tests which will confirm anti-bluff policy and provide the proof of fully working capabilities, working implementation as expected, no issues, no bugs, fully documented, tests covered! Nothing less than this does not give us a chance to deliver stable product! This is mandatory constraint which MUST BE respected without ignoring, skipping, slacking or forgetting it!"*
-
-No feature, functionality, flow, use case, edge case, service, or application on any supported platform of HelixCode is deliverable until covered by automation tests proving six invariants: (1) anti-bluff posture with captured runtime evidence; (2) proof of working capability end-to-end on target topology; (3) implementation matching the documented promise; (4) no open issues/bugs surfaced; (5) full documentation in sync; (6) four-layer test floor (pre-build + post-build + runtime + paired mutation). Coverage ledger (feature × platform × invariant × status) regenerated at release-gate sweep.
-
-**Cascade requirement**: This rule (verbatim or by CONST-048 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.25 for the full mandate.
-
-## CONST-049 — Constitution-Submodule Update Workflow Mandate (cascaded from constitution submodule §11.4.26)
-
-> Verbatim user mandate (2026-05-15): *"Every time we add something into our root (constitution Submodule) Constitution, CLAUDE.MD and AGENTS.MD we MUST FIRST fetch and pull all new changes / work from constitution Submodule first! All changes we apply MUST BE commited and pushed to all constitution Submodule upstreams! In case of conflict, IT MUST BE carefully resolved! Nothing can be broken, made faulty, corrupted or unusable! After merging full validation and verification MUST BE done!"*
-
-Before any modification to `constitution/{Constitution,CLAUDE,AGENTS}.md`, execute the 7-step pipeline in order: (1) fetch + pull first inside the constitution submodule worktree; (2) apply the change with §11.4.17 classification + verbatim mandate quote; (3) validate (meta-test + no merge-conflict markers + cross-file consistency); (4) commit + push to EVERY configured upstream remote (governance files only — never `git add -A`); (5) careful conflict resolution preserving union of governance content — force-push forbidden (§9.2); (6) post-merge: `git submodule update --remote --init` + re-run cascade verifier confirming the new clause reaches every owned submodule (CONST-047); (7) bump consuming project's `.gitmodules` pointer to new HEAD in the SAME commit as cascade work.
-
-**Cascade requirement**: This rule (verbatim or by CONST-049 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.26 for the full mandate.
-
-## CONST-050 — No-Fakes-Beyond-Unit-Tests + 100%-Test-Type-Coverage Mandate (cascaded from constitution submodule §11.4.27)
-
-> Verbatim user mandate (2026-05-15): *"Mocks, stubs, placeholders, TODOs or FIXMEs are allowed to exist ONLY in Unit tests! All other test types MUST interract with real fully implemented System! No fakes, empty implementations or bluffing is allowed of any kind! All codebase of the project MUST BE 100% covered with every supported test type: unit tests, integration tests, e2e tests, full automation tests, security tests, ddos tests, scaling tests, chaos tests, stress tests, performance tests, benchmarking tests, ui tests, ux tests, Challenges (fully incorporating our Challenges Submodule — https://github.com/vasic-digital/Challenges). EVERYTHING MUST BE tested using helix_qa (fully incorporating helix_qa Submodule — https://github.com/HelixDevelopment/HelixQA). helix_qa MUST BE used with all possible written tests suites (test banks) for every applications, service, platform, etc and execution of the full helix_qa QA autonomous sessions! All required dependency Submodules MUST BE added into the project as well (fully recursive!!!)."*
-
-Two cooperating invariants:
-
-**(A) No-fakes-beyond-unit-tests.** Mocks, stubs, fakes, placeholders, `TODO`, `FIXME`, "for now", "in production this would", or empty-implementation patterns are PERMITTED only in unit-test sources (`*_test.go` files invoked without the integration build tag; `helix_code/tests/unit/`; etc.). Every other test type — integration, E2E, full automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges, helix_qa — MUST exercise the real, fully implemented HelixCode system against real infrastructure. Production code (anything under `helix_code/cmd/`, `helix_code/applications/`, `helix_code/internal/<pkg>/<file>.go` not ending `_test.go`) MUST NOT import from `helix_code/internal/mocks/`.
-
-**(B) 100% test-type coverage.** HelixCode's codebase MUST be covered by every supported test type the domain warrants: unit, integration, E2E, full-automation, security, DDoS, scaling, chaos, stress, performance, benchmarking, UI, UX, Challenges (vasic-digital/Challenges submodule fully incorporated at `./challenges/`), helix_qa (HelixDevelopment/HelixQA submodule fully incorporated at `./helix_qa/`, with full autonomous QA sessions executing every registered test bank with captured wire evidence per check).
-
-**Required dependency submodules** (recursive per CONST-047):
-- Challenges — `git@github.com:vasic-digital/Challenges.git` (already at `./challenges/`)
-- helix_qa — `git@github.com:HelixDevelopment/HelixQA.git` (already at `./helix_qa/`)
-- Any additional functionality submodules under `vasic-digital/*` / `HelixDevelopment/*` orgs that HelixCode depends on — incorporate rather than duplicate work the orgs already maintain.
-
-**Cascade requirement**: This rule (verbatim or by CONST-050 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.27 for the full mandate.
-
-## CONST-051 — Submodules-As-Equal-Codebase + Decoupling + Dependency-Layout Mandate (cascaded from constitution submodule §11.4.28)
-
-> Verbatim user mandate (2026-05-15): *"All existing Submodules in the project that we are controlling and belong to some our organizations (vasic-digital, HelixDevelopment, red-elf, ATMOSphere1234321, Bear-Suite, BoatOS123456, Helix-Flow, Helix-Track, Server-Factory - we can ALWAYS check dynamically using GitHub and GitLab CLIs) are equal parts of the project's codebase! We MUST work on that code as much as we do with main project's codebase! All on equal basis! Equally important! ... We MUST NEVER modify Submodules to bring into them any project specific context since they all MUST BE ALWAYS fully decoupled, project not-aware, fully reusable and modular (by any other project(s)), completely testable! All Submodule dependencies that are used by Submodule MUST BE acessed from the root of the project! We MUST NOT have nested Submodule dependencies but accessing each from proper location from the root of the project - directly from project's root project_name/submodule_name or some more proper structure project_name/submodules/submodule_name!"*
-
-Three cooperating invariants:
-
-**(A) Equal-codebase.** Every HelixCode-owned submodule (orgs: `vasic-digital`, `HelixDevelopment`, `red-elf`, `ATMOSphere1234321`, `Bear-Suite`, `BoatOS123456`, `Helix-Flow`, `Helix-Track`, `Server-Factory`, plus any subsequently authorised org — discoverable via `gh org list` / `glab`) is an **equal part** of HelixCode's codebase. Same engineering attention as main: analysis, extension, test creation, gap-filling, bug-fix, documentation (user manuals, guides, diagrams, SQL, websites, all materials). Coverage ledgers (CONST-048) list every owned submodule as in-scope. A round of work that improves HelixCode main while leaving an owned-submodule deficiency unaddressed is a CONST-051 violation.
-
-**(B) Decoupling / reusability.** Owned submodules MUST stay fully decoupled from HelixCode and any other consuming project. NEVER inject project-specific context (hardcoded paths, hostnames, asset names) INTO a submodule. When a submodule needs HelixCode info, use configuration injection (env var, config file, constructor parameter) — never a hardcoded reach into the parent's tree. Every owned submodule MUST be project-not-aware, reusable, modular, and standalone-testable.
-
-**(C) Dependency-layout.** Every dependency consumed by an owned submodule MUST be accessible from HelixCode's root at:
-- `<repo_root>/<submodule_name>/` (HelixCode's current flat layout for Challenges, HelixQA, Containers, Security, etc.) OR
-- `<repo_root>/submodules/<submodule_name>/` (alternate grouped layout)
-
-**Nested own-org submodule chains are FORBIDDEN.** Add the dependency at HelixCode's root; the consuming submodule reaches it via documented import/SDK/runtime resolver — never via its own nested `.gitmodules` entry. Third-party submodules exempt.
-
-**Cascade requirement**: This rule (verbatim or by CONST-051 ID reference) MUST appear in every owned-by-us submodule's CONSTITUTION.md, CLAUDE.md, and AGENTS.md. See constitution submodule `Constitution.md` §11.4.28 for the full mandate (gates, mutations, workflow integration).
-
-
-## CONST-052: Lowercase-Snake_Case-Naming Mandate (cascaded from constitution submodule §11.4.29)
-
-> Verbatim user mandate (2026-05-15): *"naming convention for Submodules and directories (applied deep into hierarchy recursively) - all directories and Submodules MSUT HAVE lowercase names with space separator between the words of '_' character (snake-case)! All existing Submodules and directories which are not following this rule MUST BE renamed! However, since this will most likely break some of the functionalities renaming we do MUST BE applied to all references to particular Submodule or directory! ... There MUST BE reasonable exceptions for this rules - source code for programming languages or Submodules which apply different naming convention - Android, Java, Kotlin and others. ... Upstreams directory which all of our projects and Submodules have MUST BE renamed to the lowercase letters too, however root project containing the install_upstreams system command (it is exported in out paths in our .bashrc or .zshrc) MUST BE updated to fully work with both Upstreams and upstreams directory. ... NOTE: Rules lowercase / snake-case do apply to all project files as well and references to it and from them!"*
-
-Every directory, submodule, and file in HelixCode MUST use lowercase snake_case names. Existing non-compliant names (`helix_code/`, `challenges/`, `containers/`, `helix_agent/`, `helix_qa/`, `security/`, `github_pages_website/`, `upstreams/`, `dependencies/`, etc.) MUST be renamed as part of the phased migration opened by this clause. Every reference (configs, docs, links, source-code imports, governance files) MUST be updated atomically with the rename — reference drift after a rename is a CONST-052 violation of equal severity to the rename itself.
-
-**Common-sense exceptions (technology-preserving):** language-mandated case for Java/Kotlin/Android/Apple/C#/Swift INSIDE the language root (submodule root follows our convention; subtree follows language convention); vendor/upstream third-party submodules keep upstream names; build artefacts (`node_modules`, `__pycache__`, `.git`, `target`, `build`, `bin`) keep tool-mandated names. The test "does renaming break the technology?" trumps the rule.
-
-**`upstreams/` → `upstreams/` transition:** the constitution submodule's `install_upstreams.sh` (exported via `.bashrc`/`.zshrc`) supports BOTH `upstreams/` and `upstreams/` directory layouts (commit `45d3678` of the constitution submodule); lowercase wins when both present.
-
-**Test coverage of renames** (per CONST-050(B)): every rename batch ships with (i) regression test verifying every reference now resolves, (ii) full test-type matrix run post-rename, (iii) anti-bluff wire-evidence captured.
-
-**Phased execution** per the operator's explicit instruction: comprehensive brainstorming → phase-divided plan → fine-grained tasks/subtasks → every change covered by every applicable test type. §11.4.20 subagent delegation for cross-cutting rename sweeps.
-
-**Cascade requirement:** This anchor (verbatim or by `CONST-052` ID reference) MUST appear in every owned submodule's `CONSTITUTION.md`, `CLAUDE.md`, and `AGENTS.md`. Severity-equivalent to a §11.4 PASS-bluff at the reference-integrity layer. No escape hatch beyond the common-sense exceptions enumerated above. See constitution submodule `Constitution.md` §11.4.29 for the full mandate.
+## Development Conventions
+
+### Go Code Structure
+The codebase follows Go best practices with a well-organized internal structure:
+
+- `cmd/` - Main applications (server and CLI)
+- `internal/` - Private application code organized by domain:
+  - `auth/` - Authentication system
+  - `config/` - Configuration management
+  - `database/` - Database layer
+  - `hardware/` - Hardware detection
+  - `llm/` - LLM providers and reasoning
+  - `logo/` - Logo processing & assets
+  - `mcp/` - MCP protocol implementation
+  - `notification/` - Multi-channel notifications
+  - `project/` - Project management
+  - `redis/` - Redis utilities
+  - `server/` - HTTP server & API
+  - `session/` - Session management
+  - `task/` - Task management & checkpoints
+  - `theme/` - Theme management
+  - `worker/` - Worker pool management
+  - `workflow/` - Workflow execution
+- `pkg/` - Shared libraries (public)
+- `shared/` - Shared code for mobile bindings
+- `scripts/` - Build and utility scripts
+- `test/` - Test-specific code
+
+### Code Style
+- Go idiomatic code with clear function and variable names
+- Structured configuration using Viper for environment and file configuration
+- Proper error handling with descriptive error messages
+- Comprehensive logging with structured logging approach
+- Dependency injection for better testability
+
+### Testing Practices
+- Test files follow Go convention with `_test.go` suffix
+- Uses `testify` package for assertions and require functions
+- Comprehensive test coverage with unit, integration, and end-to-end tests
+- Test helpers for temporary directories and environment setup
+- Table-driven tests for multiple scenarios
+- Mock implementations where needed for testing
+
+### Configuration Management
+- Centralized configuration using Viper
+- Environment variable support with `HELIX_` prefix
+- YAML configuration files with validation
+- Default values for all configuration options
+- Secure defaults (e.g., requires non-default JWT secret)
+
+### Database Schema
+- PostgreSQL database with 11 core tables:
+  - `users`: User accounts and authentication
+  - `workers`: Distributed worker nodes with SSH config
+  - `tasks`: Task management with checkpoints and dependencies
+  - `projects`: Project lifecycle management
+  - `sessions`: Development sessions and context
+  - `llm_providers`: Configured LLM provider instances
+  - `notifications`: Multi-channel notification management
+
+### API Endpoints
+- REST API with versioning (v1)
+- Standard HTTP status codes
+- JSON request/response format
+- Authentication via JWT tokens
+- Comprehensive error responses with error codes
+
+## Mobile Support
+- iOS framework generation using gomobile
+- Android AAR generation using gomobile
+- Shared code in `pkg/mobile-core` for cross-platform functionality
+
+## OS Support
+- Linux, macOS, Windows
+- Aurora OS and Symphony OS clients
+- Cross-platform SSH worker management
+
+## Documentation Files
+- Architecture Overview
+- Development Guide  
+- User Guide
+- API Documentation
+- Phase implementation summaries (2, 4, 5)
+
+### CONST-052 — Lowercase-Snake_Case-Naming Mandate (cascaded from constitution submodule §11.4.29)
+Every directory/submodule/file MUST use lowercase snake_case names. Existing non-compliant names MUST be renamed atomically with updates to all references (configs, docs, source-code imports, governance files). Common-sense exceptions: language-mandated case (Java/Kotlin/Android/Apple/C#/Swift) inside language-root, vendor third-party submodules, build artefacts. `upstreams/` → `upstreams/` transition: `install_upstreams.sh` supports BOTH directory names during migration. Phased execution; each rename batch ships with (i) reference-resolution regression test, (ii) full CONST-050(B) test-type matrix run, (iii) anti-bluff wire-evidence. See root `CONSTITUTION.md` §CONST-052 and constitution submodule `Constitution.md` §11.4.29 for the full mandate.
 
 
 ## CONST-053: .gitignore + No-Versioned-Build-Artifacts Mandate (cascaded from constitution submodule §11.4.30)
