@@ -133,7 +133,13 @@ func (e *Executor) Autocomplete(partial string) []string {
 	names := e.registry.ListNames()
 
 	for _, name := range names {
-		if partial == "" || len(partial) < len(name) && name[:len(partial)] == partial {
+		// A command name is a valid completion of itself: when the user has
+		// fully typed a registered name, the autocomplete MUST still offer it.
+		// The prefix check is therefore `len(partial) <= len(name)` — using
+		// `<` silently drops the exact-full-match case (e.g. typing "/test"
+		// with a registered "test" returned nothing, implying the command did
+		// not exist). Empty partial matches everything.
+		if partial == "" || (len(partial) <= len(name) && name[:len(partial)] == partial) {
 			matches = append(matches, "/"+name)
 		}
 	}
