@@ -402,3 +402,27 @@ Sources: [25] + vendored `cli_agents/crush/`
 `cline/src/core/assistant-message/diff.ts`, `cline/src/core/task/tools/handlers/ApplyPatchHandler.ts`,
 `plandex/plandex/app/cli/` + `app/server/` (Go client/server),
 `crush/` (`go.mod` go 1.26.2; `internal/{agent,llm,diff,diffdetect,filetracker,lsp}`).
+
+---
+
+## Sources verified 2026-06-16: <urls>
+
+Per §11.4.99, the load-bearing external-service performance claim in this
+competitive analysis — that provider-side prompt caching is the dominant
+LLM-latency lever the competitor agents exploit — was re-cross-referenced
+against the LATEST official documentation on 2026-06-16:
+
+- **Anthropic prompt caching** (cache-read = 0.1× base input ≈ 90% cheaper;
+  cache-write 1.25× / 2.0×; default 5-min TTL) — CONFIRMED current. Source:
+  `https://platform.claude.com/docs/en/build-with-claude/prompt-caching`.
+
+Scope note (honest, §11.4.6): this is an internal competitive-research /
+architecture-analysis document, not an operator setup guide — its 27 inline
+source URLs (competitor repos, blog posts, framework docs) were cited at
+original-research time 2026-05-20 per §11.4.8 and document third-party agents'
+*internal* design, which is observational evidence rather than instructions an
+operator follows. Competitor agents evolve quickly; the architecture
+observations are a 2026-05-20 snapshot and SHOULD be treated as potentially
+stale beyond the §11.4.99 6-month window (re-survey before relying on any
+specific competitor internal claim). The one re-checked external-service fact
+(prompt caching) showed no contradiction with current official docs.

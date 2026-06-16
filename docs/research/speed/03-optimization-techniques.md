@@ -442,3 +442,26 @@ Tiers: **S** = do first (high impact, low effort), **A** = high value, **B** = s
 Every wave must be guarded by the existing test/Challenge floor (CONST-048 four-layer coverage)
 so "ultra-fast" never trades away a working feature — speedups land with captured before/after
 runtime evidence per CONST-035 / Article XI §11.9.
+
+---
+
+## Sources verified 2026-06-16: <urls>
+
+This research deliverable's load-bearing external-service claim — provider-side
+prompt caching as the single highest-impact LLM-latency/cost lever (Executive
+Summary) — was re-cross-referenced against the LATEST official documentation per
+§11.4.99 on 2026-06-16:
+
+- **Anthropic prompt caching** (the doc's headline lever): cache-read tokens cost
+  **0.1× base input** (≈90% cheaper on repeated input), cache-write **1.25×**
+  (5-min TTL) / **2.0×** (1-hour TTL), default TTL **5 minutes** — CONFIRMED
+  matching the official docs. Source: `https://platform.claude.com/docs/en/build-with-claude/prompt-caching`
+  (corroborated for 2026 pricing across multiple secondary sources via web search).
+
+The 73 inline source URLs throughout this document (Go pprof/PGO, tree-sitter,
+aider repomap, OpenAI/Gemini caching, etc.) were cited at original-research time
+per §11.4.8. This footer re-verifies the document's single most consequential
+external-service instruction (prompt caching) against current official docs; the
+remaining inline citations are research references, not operator setup
+instructions, and were not individually re-fetched this round. No contradiction
+with current official documentation was found for the re-checked claim.

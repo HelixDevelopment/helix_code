@@ -472,3 +472,42 @@ CG14, gated by the cascade verifier in CG16.
 - Crush MCP: `https://github.com/charmbracelet/crush`,
   `https://brightdata.com/blog/ai/crush-cli-with-web-mcp`
 - OpenCode config: `https://opencode.ai/docs/config`
+
+---
+
+## ⚠️ §11.4.99 STALENESS FLAG — CodeGraph upstream has materially changed since this plan was written (verify-recheck 2026-06-16)
+
+This CG1 research deliverable was written **2026-05-20 against CodeGraph
+`0.7.11`**. A §11.4.99 latest-source re-verification on **2026-06-16** found
+the upstream tool has **materially changed**. Treat the §1–§4 install/version
+specifics below as **STALE** until the implementation phases (CG2…) re-pin
+against the values confirmed here. The §4 *per-agent MCP config shapes*
+(OpenCode/Qwen) remain accurate (re-confirmed below); the **CodeGraph package
+itself** is what drifted:
+
+| Fact | This plan (2026-05-20, v0.7.11) | Current official (2026-06-16) | Action for CG2/CG3 |
+|---|---|---|---|
+| Latest npm version | `0.7.11` | **`1.0.1`** (released 2026-06-13) | Re-pin `codegraph.version` to `1.0.1` (re-run all CG-CHALLENGE-* on bump per §8.4) |
+| Node `engines` | `>=18 <25` | **`>=20 <25`**, and the package now **bundles its own runtime** (self-contained) | Host has Node `v22.19.0` ✔ still in range; bundled-runtime means the §3.1 Node precheck is now belt-and-suspenders, not load-bearing |
+| Headline claim | "92% fewer tool calls · 71% faster · 100% local" | **"~16% cheaper · ~58% fewer tool calls · 100% local"** | §1's quoted headline is outdated marketing copy — do not cite the old numbers to the operator |
+| Install model | `npm install --prefix` / interactive `npx` | Official one-liner installers now exist: `curl -fsSL .../install.sh \| sh` (macOS/Linux) + `install.ps1` (Windows); `npm i -g @colbymchenry/codegraph` still works | §3.2's pinned `npm install --prefix` approach is still valid and remains preferred for reproducibility, but it is no longer the *only* sanctioned path |
+| Agent auto-wiring | upstream installer knows Claude/Cursor/Codex/OpenCode only | `codegraph install` now auto-detects **Claude Code, Cursor, Codex, opencode, Hermes Agent, Gemini CLI, Antigravity, Kiro** | **Kimi CLI, Crush, and Qwen Code (3 of this plan's 5 targets) are STILL NOT in upstream auto-detect** → this plan's §4 manual per-agent wiring for those three remains REQUIRED, not superseded |
+
+**Why this matters (§11.4.99):** an operator following §1–§3 verbatim would
+`npm install` the wrong pinned version (`0.7.11`) and quote stale performance
+numbers. None of the drift is a *safety/ban* hazard (unlike the Telegram-VoIP
+case), but it is a correctness staleness that CG2/CG3 MUST resolve before this
+plan is treated as authoritative. The §4 config-shape instructions were
+re-confirmed correct and are NOT stale.
+
+## Sources verified 2026-06-16: <urls>
+
+CodeGraph package + install/CLI/agent-wiring facts (re-verified — see staleness flag above):
+- CodeGraph npm registry (latest `1.0.1`, `engines` node `>=20 <25`, bundled runtime, `bin: codegraph`): `https://registry.npmjs.org/@colbymchenry/codegraph`
+- CodeGraph repo README (one-liner installers, `codegraph install` agent auto-detect list, `init`/`index`/`sync`/`serve --mcp` CLI, "~16% cheaper · ~58% fewer tool calls" headline, v1.0.1 2026-06-13): `https://github.com/colbymchenry/codegraph`
+
+Per-agent MCP config shapes (re-confirmed CURRENT — no change needed):
+- OpenCode local MCP server shape (`mcp.<name>` wrapper, `type:"local"`, `command` array, `enabled` flag — matches §4.2): `https://opencode.ai/docs/mcp-servers`, `https://opencode.ai/docs/config`
+- Qwen Code MCP shape (top-level `mcpServers`, `command`+`args`+`timeout`, `qwen mcp add`/manage CLI — matches §4.5): `https://qwenlm.github.io/qwen-code-docs/en/developers/tools/mcp-server/`
+
+Not re-fetched this round (cited at original-research time 2026-05-20, §9 above; re-verify before CG7/CG8 implementation): Kimi CLI MCP docs, Crush MCP docs.
