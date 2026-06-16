@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>HelixCode Feature Status</title>
+  <title>Status</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -172,15 +172,12 @@
   </style>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">HelixCode Feature Status</h1>
-</header>
 <h1 id="helixcode-feature-status">HelixCode Feature Status</h1>
 <table>
 <tbody>
 <tr>
 <td>Revision</td>
-<td>6</td>
+<td>7</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -232,6 +229,9 @@ Web / Desktop / Mobile clients + cmd tools</a>
 <ul>
 <li><a href="#honesty-notes-anti-bluff">Honesty notes
 (anti-bluff)</a></li>
+<li><a
+href="#video-confirmation-sweep-2026-06-16-11.4.15311.4.158">Video-confirmation
+sweep 2026-06-16 (§11.4.153/§11.4.158)</a></li>
 </ul></li>
 <li><a href="#deepened-inventory-round-2">Deepened inventory (round
 2)</a>
@@ -419,12 +419,13 @@ Desktop / Mobile clients + cmd tools</h2>
 <p>Inventory slice for <code>helix_code/cmd/*</code> (cmd tools) and
 <code>helix_code/applications/*</code> + <code>helix_code/web/*</code>
 (client applications). Assessed from source evidence per the anti-bluff
-covenant (CONST-035 / §11.4.107). <strong>📹 Video is <code>no</code>
-for every row</strong> — device/display recordings are only just
-starting; the conductor owns video confirmation. <code>Overall</code> is
-therefore never <code>confirmed</code>; honest rollups are
-<code>working-untaped</code> / <code>partial</code> /
-<code>gap</code>.</p>
+covenant (CONST-035 / §11.4.107). Many CLI/TUI/Web/API rows are now
+<code>📹 yes</code> from real analyzed recordings (see the <a
+href="#video-confirmation-sweep-2026-06-16-11.4.15311.4.158">Video-confirmation
+sweep 2026-06-16</a>); rows without a real analyzed recording stay
+honestly <code>📹 no</code>/<code>pending</code>. <code>Overall</code>
+is <code>confirmed</code> only where a real analyzed recording
+exists.</p>
 <p>Recordability per client (for the conductor): <strong>CLI, TUI, Web =
 feasible now</strong> (terminal + headless HTTP). <strong>Desktop (Fyne)
 = host-display required</strong>. <strong>Mobile:</strong> Aurora OS /
@@ -474,10 +475,13 @@ provider.GenerateStream)</td>
 <td>yes</td>
 <td>unit</td>
 <td>no</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-cli-stream-20260616.cast/.gif/.mp4 [real DeepSeek
+<code>-stream</code> streamed token-by-token; §11.4.108 stale-binary
+break fixed this session — fresh bin/cli; §11.4.135 guard
+internal/llm/deepseek_stream_guard_test.go])</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>application(cli)</td>
@@ -488,7 +492,8 @@ provider.GenerateStream)</td>
 <td>yes</td>
 <td>unit,e2e</td>
 <td>no</td>
-<td>yes(helixcode-cli-generate-20260615.mp4;
+<td>yes(helixcode-cli-generate-20260616.cast/.gif/.mp4;
+helixcode-cli-generate-20260615.mp4;
 helixcode-cli-explain-go-20260615.mp4; helixcode-cli-themed-20260615.mp4
 [lime/teal brand banner + real DeepSeek “2+2 equals 4”])</td>
 <td>yes</td>
@@ -505,7 +510,9 @@ helixcode-cli-explain-go-20260615.mp4; helixcode-cli-themed-20260615.mp4
 <td>yes</td>
 <td>unit</td>
 <td>no</td>
-<td>yes(helixcode-cli-list-models-20260615.mp4)</td>
+<td>yes(helixcode-cli-list-models-20260616.cast/.gif/.mp4 [real provider
+catalog deepseek-v4-flash/-pro];
+helixcode-cli-list-models-20260615.mp4)</td>
 <td>yes</td>
 <td>native</td>
 <td>confirmed</td>
@@ -513,16 +520,17 @@ helixcode-cli-explain-go-20260615.mp4; helixcode-cli-themed-20260615.mp4
 <tr>
 <td>application(cli)</td>
 <td>cmd/cli REPL</td>
-<td><code>/workers</code> list workers</td>
+<td><code>/workers</code> list workers (<code>-list-workers</code>)</td>
 <td>done</td>
 <td>yes</td>
 <td>yes</td>
 <td>unit</td>
 <td>no</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-cli-list-workers-20260616.cast/.gif/.mp4 [real worker
+stats, 0 workers — honest])</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>application(cli)</td>
@@ -533,7 +541,8 @@ helixcode-cli-explain-go-20260615.mp4; helixcode-cli-themed-20260615.mp4
 <td>yes</td>
 <td>unit</td>
 <td>no</td>
-<td>yes(helixcode-cli-health-20260615.mp4)</td>
+<td>yes(helixcode-cli-health-20260616.cast/.gif/.mp4 [real health
+states]; helixcode-cli-health-20260615.mp4)</td>
 <td>yes</td>
 <td>native</td>
 <td>confirmed</td>
@@ -541,16 +550,19 @@ helixcode-cli-explain-go-20260615.mp4; helixcode-cli-themed-20260615.mp4
 <tr>
 <td>application(cli)</td>
 <td>cmd/cli REPL</td>
-<td><code>/diff [ref]</code> real git diff (os/exec)</td>
+<td><code>/diff [ref]</code> / <code>-command</code> real shell exec
+(os/exec, BLUFF-003 resolved)</td>
 <td>done</td>
 <td>yes</td>
 <td>yes</td>
 <td>unit</td>
 <td>no</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-cli-command-20260616.cast/.gif/.mp4 [real os/exec
+<code>echo &amp;&amp; uname -s &amp;&amp; date</code>, exit code
+0])</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>application(cli)</td>
@@ -768,6 +780,54 @@ exit</td>
 <td>working-untaped</td>
 </tr>
 <tr>
+<td>application(cli)</td>
+<td>cmd/cli flags</td>
+<td><code>-notify</code> notification dispatch
+(<code>-notify-type</code>/<code>-notify-priority</code>)</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>yes(helixcode-cli-notify-20260616.cast/.gif/.mp4 [real dispatch
+runs; no enabled sink = honest caveat])</td>
+<td>yes</td>
+<td>native</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli flags</td>
+<td><code>-model</code> selection + <code>-max-tokens</code> cap
+enforcement</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>yes(helixcode-cli-model-maxtokens-20260616.cast/.gif/.mp4
+[deepseek-v4-pro, cap enforced: out=200 finish:length])</td>
+<td>yes</td>
+<td>native</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>application(cli)</td>
+<td>cmd/cli flags</td>
+<td><code>-approval</code> (F21) + <code>-permission-mode</code>
+presets</td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit</td>
+<td>no</td>
+<td>yes(helixcode-cli-approval-mode-20260616.cast/.gif/.mp4 [full-auto +
+bypassPermissions, real DeepSeek answer])</td>
+<td>yes</td>
+<td>native</td>
+<td>confirmed</td>
+</tr>
+<tr>
 <td>service</td>
 <td>cmd/server</td>
 <td>HTTP/gRPC/WebSocket server boot (bin/helixcode)</td>
@@ -790,9 +850,12 @@ exit</td>
 <td>yes</td>
 <td>e2e</td>
 <td>yes(docs/qa/web-llm-e2e-20260615/)</td>
-<td>yes(helixcode-web-generate-20260615.mp4;
-helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek
-generate, viewport-scoped 1280x800])</td>
+<td>yes(helixcode-web-llm-console-deepseek-20260616.mp4 +
+helixcode-web-01-console-dashboard/02-form-filled-deepseek/03-deepseek-response-20260616.png
+[real DeepSeek response, tokens=203];
+helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4
+[dark theme + logo + real DeepSeek generate, viewport-scoped
+1280x800])</td>
 <td>yes</td>
 <td>native</td>
 <td>confirmed</td>
@@ -806,10 +869,11 @@ generate, viewport-scoped 1280x800])</td>
 <td>yes</td>
 <td>e2e</td>
 <td>yes(docs/qa/web-llm-e2e-20260615/)</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-web-04-deepseek-stream-20260616.png [real SSE stream
+“Python,JavaScript,Rust”])</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>application(web)</td>
@@ -848,9 +912,10 @@ generate, viewport-scoped 1280x800])</td>
 <td>yes</td>
 <td>e2e</td>
 <td>yes(docs/qa/web-llm-e2e-20260615/)</td>
-<td>yes(helixcode-web-generate-20260615.mp4;
-helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek
-generate, viewport-scoped])</td>
+<td>yes(helixcode-api-generate-20260616.cast/.gif/.mp4 [real DeepSeek,
+tokens=203]; helixcode-web-llm-console-deepseek-20260616.mp4;
+helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4
+[dark theme + logo + real DeepSeek generate, viewport-scoped])</td>
 <td>yes</td>
 <td>native</td>
 <td>confirmed</td>
@@ -864,10 +929,11 @@ generate, viewport-scoped])</td>
 <td>yes</td>
 <td>e2e</td>
 <td>yes(docs/qa/web-llm-e2e-20260615/)</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-web-04-deepseek-stream-20260616.png [real SSE stream
+“Python,JavaScript,Rust”])</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>service</td>
@@ -892,10 +958,11 @@ generate, viewport-scoped])</td>
 <td>yes</td>
 <td>none</td>
 <td>no</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-api-models-20260616.cast/.gif/.mp4 [real 7-model
+catalog])</td>
+<td>yes</td>
 <td>native</td>
-<td>partial</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>service</td>
@@ -906,10 +973,11 @@ generate, viewport-scoped])</td>
 <td>yes</td>
 <td>integ</td>
 <td>no</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-api-auth-20260616.cast/.gif/.mp4 [register 201,
+login→JWT, bad-pw rejected])</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>service</td>
@@ -949,10 +1017,11 @@ assign/start/complete/fail/retry/checkpoint</td>
 <td>yes</td>
 <td>integ</td>
 <td>no</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-api-tasks-crud-20260616.cast/.gif/.mp4 [401 enforced
+unauth, real UUID persisted])</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>service</td>
@@ -1062,10 +1131,11 @@ planning/building/testing/refactoring workflows</td>
 <td>yes</td>
 <td>integ</td>
 <td>no</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-api-health-20260616.cast/.gif/.mp4 [real health
+JSON])</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>service</td>
@@ -1090,8 +1160,10 @@ planning/building/testing/refactoring workflows</td>
 <td>yes</td>
 <td>unit,integ</td>
 <td>no</td>
-<td>yes(helixcode-tui-themed-20260615.mp4 [lime/teal brand tview.Styles
-+ 🐚 HelixCode banner + real DeepSeek streamed answer “…is 4”;
+<td>yes(helixcode-tui-llm-deepseek-20260616.cast/.gif/.mp4 [real
+DeepSeek “The capital of Japan is Tokyo.”];
+helixcode-tui-themed-20260615.mp4 [lime/teal brand tview.Styles + 🐚
+HelixCode banner + real DeepSeek streamed answer “…is 4”;
 terminal-pane-scoped, 790x560, 29.8s])</td>
 <td>yes</td>
 <td>native</td>
@@ -1115,16 +1187,17 @@ managers)</td>
 <tr>
 <td>application(tui)</td>
 <td>applications/terminal_ui</td>
-<td>Sidebar nav + key bindings (d/t/w/p/s/l/q/c)</td>
+<td>Sidebar nav + key bindings (d/t/w/p/s/l/q/c) + theme tour</td>
 <td>done</td>
 <td>yes</td>
 <td>yes</td>
 <td>unit</td>
 <td>no</td>
-<td>no</td>
-<td>no</td>
+<td>yes(helixcode-tui-navigation-20260616.cast/.gif/.mp4 [real
+navigation + theme tour across panels])</td>
+<td>yes</td>
 <td>native</td>
-<td>working-untaped</td>
+<td>confirmed</td>
 </tr>
 <tr>
 <td>application(tui)</td>
@@ -1633,9 +1706,75 @@ Status_Summary.docx now generated (gap closed this rev). Gaps (a)+(b)
 are deferred operator-surfaced reconciliation items, not
 silent.</p></li>
 </ul>
-<p><strong>Feature count: 67 rows</strong> (CLI REPL 14, CLI subcommand
-groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7,
-desktop 6, mobile 8, other cmd tools 11 + security_scan 1).</p>
+<h3
+id="video-confirmation-sweep-2026-06-16-11.4.15311.4.158">Video-confirmation
+sweep 2026-06-16 (§11.4.153/§11.4.158)</h3>
+<p>Comprehensive real-DeepSeek (real LLM, no bluff) video/recording
+confirmation sweep against fresh binaries built this session
+(<code>bin/cli</code> 11:16, <code>bin/tui</code> 11:24, fresh server).
+Every recording cited below lives in
+<code>/Volumes/T7/Downloads/Recordings</code> with the
+<code>helixcode-</code> prefix, is a genuine real-LLM run, and has been
+analyzed (the recorded screen READ, not just produced). No false-green:
+features NOT recorded this session stay honestly
+<code>📹 pending</code>/<code>no</code>.</p>
+<p><strong>Surfaces confirmed this sweep:</strong></p>
+<ul>
+<li><strong>CLI — 9 features</strong> (fresh <code>bin/cli</code>):
+<code>-stream</code> (helixcode-cli-stream-20260616),
+<code>/generate</code> (helixcode-cli-generate-20260616),
+<code>-list-models</code> (helixcode-cli-list-models-20260616 — real
+deepseek-v4-flash/-pro catalog), <code>-command</code> os/exec exit 0
+(helixcode-cli-command-20260616), <code>-health</code>
+(helixcode-cli-health-20260616), <code>-list-workers</code>
+(helixcode-cli-list-workers-20260616 — 0 workers, honest),
+<code>-notify</code> (helixcode-cli-notify-20260616 — dispatch runs, no
+enabled sink = honest caveat),
+<code>-model</code>/<code>-max-tokens</code> cap
+(helixcode-cli-model-maxtokens-20260616 — deepseek-v4-pro, out=200
+finish:length), <code>-approval</code>/<code>-permission-mode</code>
+(helixcode-cli-approval-mode-20260616).</li>
+<li><strong>API — 5 features</strong> (server :8080): health
+(helixcode-api-health-20260616), models — 7-model catalog
+(helixcode-api-models-20260616), generate — real DeepSeek tokens=203
+(helixcode-api-generate-20260616), auth — register 201 / login→JWT /
+bad-pw rejected (helixcode-api-auth-20260616), tasks-crud — 401 enforced
++ real UUID persisted (helixcode-api-tasks-crud-20260616).</li>
+<li><strong>TUI — 2 features</strong> (fresh <code>bin/tui</code>):
+llm-chat DeepSeek (helixcode-tui-llm-deepseek-20260616 — “The capital of
+Japan is Tokyo.”), navigation/theme tour
+(helixcode-tui-navigation-20260616).</li>
+<li><strong>Web — 2 features incl. SSE streaming</strong> (fresh
+server): llm-console non-stream
+(helixcode-web-llm-console-deepseek-20260616.mp4 +
+helixcode-web-01/02/03-*-20260616.png — real response tokens=203), SSE
+streaming (helixcode-web-04-deepseek-stream-20260616.png — real stream
+“Python,JavaScript,Rust”).</li>
+</ul>
+<p><strong>Anti-bluff payoff — the <code>-stream</code> §11.4.108
+stale-binary finding (reading the recorded screen matters):</strong> the
+CLI <code>-stream</code> recording attempt initially produced
+<code>invalid character 'd'</code> — a §11.4.108 STALE-BINARY break (the
+on-disk <code>bin/cli</code> predated a DeepSeek streaming-decode fix,
+so the runtime artifact did NOT match source). Because the sweep READS
+the recorded screen (not just produces a file), the break was caught
+instead of bluffed green. Fix: rebuilt <code>bin/cli</code> → streaming
+now emits real “Hello!”/token-by-token output; a §11.4.135 permanent
+regression guard was added
+(<code>internal/llm/deepseek_stream_guard_test.go</code>). This is the
+exact anti-bluff value of §11.4.153/§11.4.107 — a produced-but-unread
+recording would have shipped a dead feature green.</p>
+<p><strong>Honest SKIP (operator-attended, §11.4.52 — NOT
+faked):</strong> GUI desktop / mobile native-window video capture is
+host <strong>Screen-Recording TCC-blocked</strong> on this host, so
+native-window desktop/mobile GUI recordings are operator-attended
+(tracked, never faked green). Desktop/Android rows retain their prior
+software-painter / device-frame confirmations (rev2–5); iOS themed
+re-record remains OPERATOR-BLOCKED per the iOS row above.</p>
+<p><strong>Feature count: 70 rows</strong> (CLI REPL 14, CLI subcommand
+groups 7, CLI flag rows 3 [notify, model/max-tokens, approval], server
+boot 1, web frontend 4, HTTP API groups 18, TUI 7, desktop 6, mobile 8,
+other cmd tools 11 + security_scan 1).</p>
 <h2 id="deepened-inventory-round-2">Deepened inventory (round 2)</h2>
 <p>Round-2 deepening of packages flagged shallow/partial/unknown in
 round 1 (<code>internal_services.md</code> coverage notes + the

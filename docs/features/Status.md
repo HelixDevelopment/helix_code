@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Revision | 6 |
+| Revision | 7 |
 | Created | 2026-06-15 |
 | Last modified | 2026-06-16 |
 | Status | active (population in progress) |
@@ -29,6 +29,7 @@ covenant (§11.4.45 / §11.4.53 / §11.4.56 / §11.4.57 / CONST-063 / CONST-064)
 - [Feature inventory](#feature-inventory)
 - [CLI / TUI / Web / Desktop / Mobile clients + cmd tools](#cli-tui-web-desktop-mobile-clients-cmd-tools)
   - [Honesty notes (anti-bluff)](#honesty-notes-anti-bluff)
+  - [Video-confirmation sweep 2026-06-16 (§11.4.153/§11.4.158)](#video-confirmation-sweep-2026-06-16-11.4.15311.4.158)
 - [Deepened inventory (round 2)](#deepened-inventory-round-2)
   - [Internal packages (round-1 partial/unknown → deepened)](#internal-packages-round-1-partialunknown-deepened)
   - [Owned submodules (round-1 umbrella rows → deepened principal packages)](#owned-submodules-round-1-umbrella-rows-deepened-principal-packages)
@@ -95,10 +96,11 @@ _Aggregated from docs/features/inventory/*.md by scripts/generate_features_statu
 
 Inventory slice for `helix_code/cmd/*` (cmd tools) and `helix_code/applications/*` +
 `helix_code/web/*` (client applications). Assessed from source evidence per the
-anti-bluff covenant (CONST-035 / §11.4.107). **📹 Video is `no` for every row** —
-device/display recordings are only just starting; the conductor owns video
-confirmation. `Overall` is therefore never `confirmed`; honest rollups are
-`working-untaped` / `partial` / `gap`.
+anti-bluff covenant (CONST-035 / §11.4.107). Many CLI/TUI/Web/API rows are now
+`📹 yes` from real analyzed recordings (see the [Video-confirmation sweep
+2026-06-16](#video-confirmation-sweep-2026-06-16-11.4.15311.4.158)); rows without a
+real analyzed recording stay honestly `📹 no`/`pending`. `Overall` is `confirmed`
+only where a real analyzed recording exists.
 
 Recordability per client (for the conductor): **CLI, TUI, Web = feasible now**
 (terminal + headless HTTP). **Desktop (Fyne) = host-display required**. **Mobile:**
@@ -108,12 +110,12 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 
 | Area | Component | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| application(cli) | cmd/cli REPL | Plain-text prompt → real LLM (streaming via provider.GenerateStream) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | yes(helixcode-cli-generate-20260615.mp4; helixcode-cli-explain-go-20260615.mp4; helixcode-cli-themed-20260615.mp4 [lime/teal brand banner + real DeepSeek "2+2 equals 4"]) | yes | native | confirmed |
-| application(cli) | cmd/cli REPL | `/models` list models via providerManager.GetProviders (BLUFF-002 resolved) | done | yes | yes | unit | no | yes(helixcode-cli-list-models-20260615.mp4) | yes | native | confirmed |
-| application(cli) | cmd/cli REPL | `/workers` list workers | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli REPL | `/health` health check | done | yes | yes | unit | no | yes(helixcode-cli-health-20260615.mp4) | yes | native | confirmed |
-| application(cli) | cmd/cli REPL | `/diff [ref]` real git diff (os/exec) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | Plain-text prompt → real LLM (streaming via provider.GenerateStream) | done | yes | yes | unit | no | yes(helixcode-cli-stream-20260616.cast/.gif/.mp4 [real DeepSeek `-stream` streamed token-by-token; §11.4.108 stale-binary break fixed this session — fresh bin/cli; §11.4.135 guard internal/llm/deepseek_stream_guard_test.go]) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | yes(helixcode-cli-generate-20260616.cast/.gif/.mp4; helixcode-cli-generate-20260615.mp4; helixcode-cli-explain-go-20260615.mp4; helixcode-cli-themed-20260615.mp4 [lime/teal brand banner + real DeepSeek "2+2 equals 4"]) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/models` list models via providerManager.GetProviders (BLUFF-002 resolved) | done | yes | yes | unit | no | yes(helixcode-cli-list-models-20260616.cast/.gif/.mp4 [real provider catalog deepseek-v4-flash/-pro]; helixcode-cli-list-models-20260615.mp4) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/workers` list workers (`-list-workers`) | done | yes | yes | unit | no | yes(helixcode-cli-list-workers-20260616.cast/.gif/.mp4 [real worker stats, 0 workers — honest]) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/health` health check | done | yes | yes | unit | no | yes(helixcode-cli-health-20260616.cast/.gif/.mp4 [real health states]; helixcode-cli-health-20260615.mp4) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/diff [ref]` / `-command` real shell exec (os/exec, BLUFF-003 resolved) | done | yes | yes | unit | no | yes(helixcode-cli-command-20260616.cast/.gif/.mp4 [real os/exec `echo && uname -s && date`, exit code 0]) | yes | native | confirmed |
 | application(cli) | cmd/cli REPL | `/debate <prompt>` DebateOrchestrator over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli REPL | `/specify <request>` HelixSpecifier Specify phase over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli REPL | `/checkpoint [create/list/restore]` workspace snapshots | done | yes | yes | unit | no | no | no | native | working-untaped |
@@ -129,19 +131,22 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | application(cli) | cmd/cli `permissions` | list / add / remove / check tool permissions | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli `sessions` | list / show / delete sessions | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli `skills` | list / show / invoke / reload skills | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli flags | `-notify` notification dispatch (`-notify-type`/`-notify-priority`) | done | yes | yes | unit | no | yes(helixcode-cli-notify-20260616.cast/.gif/.mp4 [real dispatch runs; no enabled sink = honest caveat]) | yes | native | confirmed |
+| application(cli) | cmd/cli flags | `-model` selection + `-max-tokens` cap enforcement | done | yes | yes | unit | no | yes(helixcode-cli-model-maxtokens-20260616.cast/.gif/.mp4 [deepseek-v4-pro, cap enforced: out=200 finish:length]) | yes | native | confirmed |
+| application(cli) | cmd/cli flags | `-approval` (F21) + `-permission-mode` presets | done | yes | yes | unit | no | yes(helixcode-cli-approval-mode-20260616.cast/.gif/.mp4 [full-auto + bypassPermissions, real DeepSeek answer]) | yes | native | confirmed |
 | service | cmd/server | HTTP/gRPC/WebSocket server boot (bin/helixcode) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek generate, viewport-scoped 1280x800]) | yes | native | confirmed |
-| application(web) | web/frontend | LLM streaming console (SSE, POST /api/v1/llm/stream) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-llm-console-deepseek-20260616.mp4 + helixcode-web-01-console-dashboard/02-form-filled-deepseek/03-deepseek-response-20260616.png [real DeepSeek response, tokens=203]; helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek generate, viewport-scoped 1280x800]) | yes | native | confirmed |
+| application(web) | web/frontend | LLM streaming console (SSE, POST /api/v1/llm/stream) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-04-deepseek-stream-20260616.png [real SSE stream "Python,JavaScript,Rust"]) | yes | native | confirmed |
 | application(web) | web/frontend | Specify phase form (POST /api/v1/specify) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | application(web) | web/frontend | Response/metadata rendering (no client simulation) | done | yes | yes | e2e | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek generate, viewport-scoped]) | yes | native | confirmed |
-| service | internal/server (HTTP API) | /api/v1/llm/stream real provider.GenerateStream (SSE) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-api-generate-20260616.cast/.gif/.mp4 [real DeepSeek, tokens=203]; helixcode-web-llm-console-deepseek-20260616.mp4; helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek generate, viewport-scoped]) | yes | native | confirmed |
+| service | internal/server (HTTP API) | /api/v1/llm/stream real provider.GenerateStream (SSE) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-04-deepseek-stream-20260616.png [real SSE stream "Python,JavaScript,Rust"]) | yes | native | confirmed |
 | service | internal/server (HTTP API) | /api/v1/specify real speckit Specify phase | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/llm/providers, /llm/models list | done | yes | yes | none | no | no | no | native | partial |
-| service | internal/server (HTTP API) | /api/v1/auth register / login / logout / refresh (JWT) | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/llm/providers, /llm/models list | done | yes | yes | none | no | yes(helixcode-api-models-20260616.cast/.gif/.mp4 [real 7-model catalog]) | yes | native | confirmed |
+| service | internal/server (HTTP API) | /api/v1/auth register / login / logout / refresh (JWT) | done | yes | yes | integ | no | yes(helixcode-api-auth-20260616.cast/.gif/.mp4 [register 201, login→JWT, bad-pw rejected]) | yes | native | confirmed |
 | service | internal/server (HTTP API) | /api/v1/users me get/update/delete | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/workers CRUD + heartbeat + metrics | done | yes | yes | integ | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/tasks CRUD + assign/start/complete/fail/retry/checkpoint | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /api/v1/tasks CRUD + assign/start/complete/fail/retry/checkpoint | done | yes | yes | integ | no | yes(helixcode-api-tasks-crud-20260616.cast/.gif/.mp4 [401 enforced unauth, real UUID persisted]) | yes | native | confirmed |
 | service | internal/server (HTTP API) | /api/v1/projects CRUD + sessions + planning/building/testing/refactoring workflows | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/sessions CRUD | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/system stats + status | done | yes | yes | none | no | no | no | native | partial |
@@ -149,11 +154,11 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | service | internal/server (HTTP API) | /api/v1/qa session start/list/status/report/screenshot/cancel | done | yes | unknown | none | no | no | no | native | partial |
 | service | internal/server (HTTP API) | /api/v1/screenshot engines + capture | done | yes | unknown | none | no | no | no | native | partial |
 | service | internal/server (HTTP API) | /ws MCP WebSocket bridge | done | yes | yes | none | no | no | no | native | partial |
-| service | internal/server (HTTP API) | /health, /api/v1/health, /metrics, /api/v1/server/info | done | yes | yes | integ | no | no | no | native | working-untaped |
+| service | internal/server (HTTP API) | /health, /api/v1/health, /metrics, /api/v1/server/info | done | yes | yes | integ | no | yes(helixcode-api-health-20260616.cast/.gif/.mp4 [real health JSON]) | yes | native | confirmed |
 | service | internal/server (HTTP API) | /debug/pprof/* (opt-in profiling) | done | yes | yes | none | no | no | no | native | partial |
-| application(tui) | applications/terminal_ui | LLM chat (real provider, verifier-driven model discovery) | done | yes | yes | unit,integ | no | yes(helixcode-tui-themed-20260615.mp4 [lime/teal brand tview.Styles + 🐚 HelixCode banner + real DeepSeek streamed answer "...is 4"; terminal-pane-scoped, 790x560, 29.8s]) | yes | native | confirmed |
+| application(tui) | applications/terminal_ui | LLM chat (real provider, verifier-driven model discovery) | done | yes | yes | unit,integ | no | yes(helixcode-tui-llm-deepseek-20260616.cast/.gif/.mp4 [real DeepSeek "The capital of Japan is Tokyo."]; helixcode-tui-themed-20260615.mp4 [lime/teal brand tview.Styles + 🐚 HelixCode banner + real DeepSeek streamed answer "...is 4"; terminal-pane-scoped, 790x560, 29.8s]) | yes | native | confirmed |
 | application(tui) | applications/terminal_ui | Dashboard / Tasks / Workers / Projects / Sessions panels (real managers) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(tui) | applications/terminal_ui | Sidebar nav + key bindings (d/t/w/p/s/l/q/c) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(tui) | applications/terminal_ui | Sidebar nav + key bindings (d/t/w/p/s/l/q/c) + theme tour | done | yes | yes | unit | no | yes(helixcode-tui-navigation-20260616.cast/.gif/.mp4 [real navigation + theme tour across panels]) | yes | native | confirmed |
 | application(tui) | applications/terminal_ui | Skill dispatcher + tool registry (git/fs/grep/LSP/MCP, graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | HelixMemory durable cross-session store (SQLite, default-on) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | Status bar (DB/Redis/LLM status, context %), notifications, themes, i18n | done | yes | yes | unit | no | no | no | native | working-untaped |
@@ -195,7 +200,58 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 
 - **Known §11.4.153 sync-machinery gaps (Rev 5, honest per §11.4.6 — NOT bluffed):** the ledger's *coverage* is comprehensive (enumerated reconciliation: every client / cmd tool / internal production package / functionality submodule maps to a row or a documented exclusion; 564 feature rows as of rev6, + a 36-pkg §11.4.118 guard/race table), but three sync/format gaps remain, named here as follow-ups: (a) **no §11.4.86 drift-proof fingerprint sidecar** beside Status.md (a roster sha256 of sorted feature-keys + sorted video-artefacts); (b) **source↔output drift** — this Status.md has been hand-edited (rev2–5 video annotations) and now diverges from its generator sources (`_status_header.md` + `inventory/cmd_and_clients.md`), so re-running the `scripts/generate_features_status.sh` / docs_chain regen would REGRESS the rich annotations — the rev2–5 deltas MUST be back-ported into the generator sources before any regen (same generated-vs-hand-edited reconciliation class as the `docs/workable_items.db` DB↔MD drift); (c) Status_Summary.docx now generated (gap closed this rev). Gaps (a)+(b) are deferred operator-surfaced reconciliation items, not silent.
 
-**Feature count: 67 rows** (CLI REPL 14, CLI subcommand groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7, desktop 6, mobile 8, other cmd tools 11 + security_scan 1).
+### Video-confirmation sweep 2026-06-16 (§11.4.153/§11.4.158)
+
+Comprehensive real-DeepSeek (real LLM, no bluff) video/recording confirmation
+sweep against fresh binaries built this session (`bin/cli` 11:16, `bin/tui` 11:24,
+fresh server). Every recording cited below lives in `/Volumes/T7/Downloads/Recordings`
+with the `helixcode-` prefix, is a genuine real-LLM run, and has been analyzed
+(the recorded screen READ, not just produced). No false-green: features NOT
+recorded this session stay honestly `📹 pending`/`no`.
+
+**Surfaces confirmed this sweep:**
+
+- **CLI — 9 features** (fresh `bin/cli`): `-stream` (helixcode-cli-stream-20260616),
+  `/generate` (helixcode-cli-generate-20260616), `-list-models` (helixcode-cli-list-models-20260616 — real deepseek-v4-flash/-pro catalog),
+  `-command` os/exec exit 0 (helixcode-cli-command-20260616), `-health` (helixcode-cli-health-20260616),
+  `-list-workers` (helixcode-cli-list-workers-20260616 — 0 workers, honest),
+  `-notify` (helixcode-cli-notify-20260616 — dispatch runs, no enabled sink = honest caveat),
+  `-model`/`-max-tokens` cap (helixcode-cli-model-maxtokens-20260616 — deepseek-v4-pro, out=200 finish:length),
+  `-approval`/`-permission-mode` (helixcode-cli-approval-mode-20260616).
+- **API — 5 features** (server :8080): health (helixcode-api-health-20260616),
+  models — 7-model catalog (helixcode-api-models-20260616), generate — real
+  DeepSeek tokens=203 (helixcode-api-generate-20260616), auth — register 201 /
+  login→JWT / bad-pw rejected (helixcode-api-auth-20260616), tasks-crud — 401
+  enforced + real UUID persisted (helixcode-api-tasks-crud-20260616).
+- **TUI — 2 features** (fresh `bin/tui`): llm-chat DeepSeek
+  (helixcode-tui-llm-deepseek-20260616 — "The capital of Japan is Tokyo."),
+  navigation/theme tour (helixcode-tui-navigation-20260616).
+- **Web — 2 features incl. SSE streaming** (fresh server): llm-console non-stream
+  (helixcode-web-llm-console-deepseek-20260616.mp4 + helixcode-web-01/02/03-*-20260616.png —
+  real response tokens=203), SSE streaming (helixcode-web-04-deepseek-stream-20260616.png —
+  real stream "Python,JavaScript,Rust").
+
+**Anti-bluff payoff — the `-stream` §11.4.108 stale-binary finding (reading the
+recorded screen matters):** the CLI `-stream` recording attempt initially produced
+`invalid character 'd'` — a §11.4.108 STALE-BINARY break (the on-disk `bin/cli`
+predated a DeepSeek streaming-decode fix, so the runtime artifact did NOT match
+source). Because the sweep READS the recorded screen (not just produces a file),
+the break was caught instead of bluffed green. Fix: rebuilt `bin/cli` → streaming
+now emits real "Hello!"/token-by-token output; a §11.4.135 permanent regression
+guard was added (`internal/llm/deepseek_stream_guard_test.go`). This is the exact
+anti-bluff value of §11.4.153/§11.4.107 — a produced-but-unread recording would
+have shipped a dead feature green.
+
+**Honest SKIP (operator-attended, §11.4.52 — NOT faked):** GUI desktop / mobile
+native-window video capture is host **Screen-Recording TCC-blocked** on this host,
+so native-window desktop/mobile GUI recordings are operator-attended (tracked,
+never faked green). Desktop/Android rows retain their prior software-painter /
+device-frame confirmations (rev2–5); iOS themed re-record remains OPERATOR-BLOCKED
+per the iOS row above.
+
+**Feature count: 70 rows** (CLI REPL 14, CLI subcommand groups 7, CLI flag rows 3
+[notify, model/max-tokens, approval], server boot 1, web frontend 4, HTTP API
+groups 18, TUI 7, desktop 6, mobile 8, other cmd tools 11 + security_scan 1).
 
 
 ## Deepened inventory (round 2)

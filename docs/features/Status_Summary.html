@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>HelixCode Feature Status — Summary</title>
+  <title>Status_Summary</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -172,16 +172,13 @@
   </style>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">HelixCode Feature Status — Summary</h1>
-</header>
 <h1 id="helixcode-feature-status-summary">HelixCode Feature Status —
 Summary</h1>
 <table>
 <tbody>
 <tr>
 <td>Revision</td>
-<td>3</td>
+<td>4</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -193,7 +190,7 @@ Summary</h1>
 </tr>
 <tr>
 <td>Status</td>
-<td>active (rev6 completeness gap-pass)</td>
+<td>active (rev7 — 2026-06-16 video-confirmation sweep)</td>
 </tr>
 <tr>
 <td>Status detail</td>
@@ -206,8 +203,9 @@ Anti-bluff (CONST-035 / §11.4.83 / §11.4.107): the video-confirmed count
 rises ONLY as real analyzed recordings land in
 <code>/Volumes/T7/Downloads/Recordings</code>; an un-recorded feature is
 honestly <code>📹 pending</code>/<code>no</code>, never bluffed green.
-Counts below are computed over the <strong>564 twelve-column feature
-rows</strong> in the live table (Area-prefixed rows).</p>
+Counts below are computed over the <strong>567 twelve-column feature
+rows</strong> in the live table (Area-prefixed rows; +3 new CLI flag
+rows added by the 2026-06-16 sweep).</p>
 <h2 id="rollup-by-overall">Rollup — by Overall</h2>
 <table>
 <colgroup>
@@ -225,12 +223,12 @@ rows</strong> in the live table (Area-prefixed rows).</p>
 <tbody>
 <tr>
 <td>working-untaped</td>
-<td>333</td>
+<td>324</td>
 <td>real + tested, no analyzed video yet</td>
 </tr>
 <tr>
 <td>partial</td>
-<td>169</td>
+<td>168</td>
 <td>real but thin/unverified coverage OR partial wiring</td>
 </tr>
 <tr>
@@ -240,8 +238,9 @@ rows</strong> in the live table (Area-prefixed rows).</p>
 </tr>
 <tr>
 <td>confirmed</td>
-<td>10</td>
-<td>real analyzed recording exists (📹 yes)</td>
+<td>23</td>
+<td>real analyzed recording exists (📹 yes) — +13 from the 2026-06-16
+sweep</td>
 </tr>
 <tr>
 <td>n/a (test-support)</td>
@@ -250,7 +249,7 @@ rows</strong> in the live table (Area-prefixed rows).</p>
 </tr>
 <tr>
 <td><strong>Total feature rows</strong></td>
-<td><strong>564</strong></td>
+<td><strong>567</strong></td>
 <td></td>
 </tr>
 </tbody>
@@ -329,6 +328,10 @@ session</td>
 <h2 id="rollup-by-video-confirmation-anti-bluff">Rollup — by Video
 confirmation (anti-bluff)</h2>
 <table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
 <thead>
 <tr>
 <th>📹 Video</th>
@@ -338,20 +341,37 @@ confirmation (anti-bluff)</h2>
 <tbody>
 <tr>
 <td>confirmed (📹 yes, real analyzed recording)</td>
-<td>10 rows</td>
+<td>23 rows</td>
 </tr>
 <tr>
 <td>pending / no (not yet recorded or non-visual)</td>
-<td>554 rows</td>
+<td>544 rows</td>
 </tr>
 <tr>
-<td><code>helixcode-*.mp4</code> real recordings produced so far</td>
-<td>12</td>
+<td><code>helixcode-*</code> real recordings produced so far</td>
+<td>30+ (incl. 2026-06-16 CLI/API/TUI/Web sweep)</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Video-confirmed surfaces (real analyzed recordings):</strong>
-CLI (<code>/generate</code>, <code>/models</code>, <code>/health</code>,
+<p><strong>Video-confirmation sweep 2026-06-16
+(§11.4.153/§11.4.158)</strong> — real DeepSeek, fresh binaries, all
+analyzed: <strong>CLI 9 features</strong> (stream, generate,
+list-models, command/os-exec, health, list-workers, notify,
+model+max-tokens, approval/permission), <strong>API 5</strong> (health,
+models [7-model catalog], generate [tokens=203], auth
+[register/login-JWT/bad-pw], tasks-crud [401+UUID]), <strong>TUI
+2</strong> (llm-chat DeepSeek “capital of Japan is Tokyo”,
+navigation/theme tour), <strong>Web 2 incl. SSE streaming</strong>
+(llm-console non-stream tokens=203, SSE “Python,JavaScript,Rust”). The
+<code>-stream</code> recording caught a §11.4.108 STALE-BINARY break
+(<code>invalid character 'd'</code>) → rebuilt <code>bin/cli</code> →
+fixed + §11.4.135 guard added — the anti-bluff payoff of reading the
+recorded screen, not just producing a file. <strong>GUI desktop/mobile
+native-window video this sweep = host Screen-Recording TCC-blocked →
+operator-attended §11.4.52 SKIP</strong> (tracked, never faked
+green).</p>
+<p><strong>Prior video-confirmed surfaces (rev2–5):</strong> CLI
+(<code>/generate</code>, <code>/models</code>, <code>/health</code>,
 themed brand banner), Web (LLM generate + themed), TUI (themed real-LLM
 stream), Desktop (Fyne dashboard + chat, autonomous software-painter
 capture), Android (connect + task list + themed). <strong>iOS themed

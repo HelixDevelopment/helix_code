@@ -2,28 +2,29 @@
 
 | | |
 |---|---|
-| Revision | 3 |
+| Revision | 4 |
 | Created | 2026-06-15 |
 | Last modified | 2026-06-16 |
-| Status | active (rev6 completeness gap-pass) |
+| Status | active (rev7 — 2026-06-16 video-confirmation sweep) |
 | Status detail | docs/features/Status.md |
 
 Authoritative rollup of `docs/features/Status.md`. Anti-bluff (CONST-035 /
 §11.4.83 / §11.4.107): the video-confirmed count rises ONLY as real analyzed
 recordings land in `/Volumes/T7/Downloads/Recordings`; an un-recorded feature is
 honestly `📹 pending`/`no`, never bluffed green. Counts below are computed over
-the **564 twelve-column feature rows** in the live table (Area-prefixed rows).
+the **567 twelve-column feature rows** in the live table (Area-prefixed rows; +3
+new CLI flag rows added by the 2026-06-16 sweep).
 
 ## Rollup — by Overall
 
 | Overall rollup | Count | Meaning |
 |---|---|---|
-| working-untaped | 333 | real + tested, no analyzed video yet |
-| partial | 169 | real but thin/unverified coverage OR partial wiring |
+| working-untaped | 324 | real + tested, no analyzed video yet |
+| partial | 168 | real but thin/unverified coverage OR partial wiring |
 | gap | 49 | scaffold / untested / planned-not-landed |
-| confirmed | 10 | real analyzed recording exists (📹 yes) |
+| confirmed | 23 | real analyzed recording exists (📹 yes) — +13 from the 2026-06-16 sweep |
 | n/a (test-support) | 3 | mocks/testutil/pprofutil — not user features |
-| **Total feature rows** | **564** | |
+| **Total feature rows** | **567** | |
 
 ## Rollup — by Development status
 
@@ -48,11 +49,24 @@ the **564 twelve-column feature rows** in the live table (Area-prefixed rows).
 
 | 📹 Video | Count |
 |---|---|
-| confirmed (📹 yes, real analyzed recording) | 10 rows |
-| pending / no (not yet recorded or non-visual) | 554 rows |
-| `helixcode-*.mp4` real recordings produced so far | 12 |
+| confirmed (📹 yes, real analyzed recording) | 23 rows |
+| pending / no (not yet recorded or non-visual) | 544 rows |
+| `helixcode-*` real recordings produced so far | 30+ (incl. 2026-06-16 CLI/API/TUI/Web sweep) |
 
-**Video-confirmed surfaces (real analyzed recordings):** CLI (`/generate`,
+**Video-confirmation sweep 2026-06-16 (§11.4.153/§11.4.158)** — real DeepSeek,
+fresh binaries, all analyzed: **CLI 9 features** (stream, generate, list-models,
+command/os-exec, health, list-workers, notify, model+max-tokens, approval/permission),
+**API 5** (health, models [7-model catalog], generate [tokens=203], auth
+[register/login-JWT/bad-pw], tasks-crud [401+UUID]), **TUI 2** (llm-chat DeepSeek
+"capital of Japan is Tokyo", navigation/theme tour), **Web 2 incl. SSE streaming**
+(llm-console non-stream tokens=203, SSE "Python,JavaScript,Rust"). The `-stream`
+recording caught a §11.4.108 STALE-BINARY break (`invalid character 'd'`) →
+rebuilt `bin/cli` → fixed + §11.4.135 guard added — the anti-bluff payoff of
+reading the recorded screen, not just producing a file. **GUI desktop/mobile
+native-window video this sweep = host Screen-Recording TCC-blocked →
+operator-attended §11.4.52 SKIP** (tracked, never faked green).
+
+**Prior video-confirmed surfaces (rev2–5):** CLI (`/generate`,
 `/models`, `/health`, themed brand banner), Web (LLM generate + themed), TUI
 (themed real-LLM stream), Desktop (Fyne dashboard + chat, autonomous
 software-painter capture), Android (connect + task list + themed). **iOS themed
