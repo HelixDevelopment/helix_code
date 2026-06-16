@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/nfnt/resize"
@@ -72,12 +73,36 @@ func (lp *LogoProcessor) ExtractColors() error {
 		}
 	}
 
-	// Find the most common colors
-	var dominantColors []color.Color
+	// Find the most common colors.
+	//
+	// HXC §11.4.118 / §11.4.6: collect the dominant colors into a slice and
+	// sort them DETERMINISTICALLY. Iterating `colorCounts` (a Go map) directly
+	// yields randomized order on every run, so Primary/Secondary/Accent were
+	// previously assigned non-deterministically — the same logo produced a
+	// different brand palette each invocation, which then propagated into the
+	// generated icons, CSS theme, and Go theme constants. Sort by descending
+	// pixel count (most-dominant first), with the hex value as a stable
+	// tiebreaker so equal-count colors still resolve to one fixed order.
+	type colorCount struct {
+		c     color.Color
+		count int
+	}
+	var ranked []colorCount
 	for c, count := range colorCounts {
 		if count > 50 { // Threshold for dominant colors
-			dominantColors = append(dominantColors, c)
+			ranked = append(ranked, colorCount{c: c, count: count})
 		}
+	}
+	sort.Slice(ranked, func(i, j int) bool {
+		if ranked[i].count != ranked[j].count {
+			return ranked[i].count > ranked[j].count
+		}
+		return colorToHex(ranked[i].c) < colorToHex(ranked[j].c)
+	})
+
+	dominantColors := make([]color.Color, 0, len(ranked))
+	for _, rc := range ranked {
+		dominantColors = append(dominantColors, rc.c)
 	}
 
 	// Update color scheme based on extracted colors
