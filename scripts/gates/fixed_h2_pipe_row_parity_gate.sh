@@ -24,12 +24,18 @@
 # Therefore:
 #   - Invariant (B) — the Obsolete→Summary parity HXC-044 exercised — is a HARD
 #     FAIL (this is the exact bug this guard was written to lock down).
-#   - Invariant (A) — the broader H2↔pipe-row parity — is reported as a
-#     WARNING with the full enumerated backlog (captured evidence per §11.4.118)
-#     and does NOT fail the gate, so a clean GREEN is achievable for the
-#     HXC-044-scoped fix while the backlog stays visible + tracked. Set
-#     FIXED_PARITY_STRICT=1 to promote (A) to a hard FAIL once the backlog is
-#     fully repaired in a dedicated work item.
+#   - Invariant (A) — the broader H2↔pipe-row parity — was a WARNING-only
+#     enumerated backlog (~74 H2 sections lacking pipe rows) while the
+#     hand-maintained table lagged the H2 sections. As of the 2026-06-16
+#     DB-as-SSoT archaeology backfill, all 74 pipe rows were reconstructed
+#     from REAL git history (closure date = author-date of the commit that
+#     first added each `## <ID>` heading to docs/Fixed.md; commit = that SHA,
+#     §11.4.6 no-guessing) and the DB now carries them as `representation=
+#     'table'` rows with closure_date/round/commit_ref. The backlog is
+#     CLEARED, so FIXED_PARITY_STRICT now DEFAULTS TO 1 — invariant (A) is a
+#     HARD FAIL going forward (a future H2 section without a pipe row breaks
+#     the gate). Export FIXED_PARITY_STRICT=0 only to temporarily demote (A)
+#     back to a warning during a known mid-backfill window.
 #
 # Purpose / Usage / Inputs / Outputs / Side-effects / Dependencies / Cross-refs:
 #   Purpose:      §11.4.135 regression guard (drift that hid HXC-044).
@@ -85,7 +91,7 @@ SUMMARY="${SUMMARY_OVERRIDE:-$SUMMARY}"
 [[ -f "$SUMMARY" ]] || { echo "$GATE: FAIL — $SUMMARY missing" >&2; exit 1; }
 
 FAILURES=0
-STRICT="${FIXED_PARITY_STRICT:-0}"
+STRICT="${FIXED_PARITY_STRICT:-1}"
 A_BACKLOG=0
 
 # (A) Every H2 closure heading (## HXC-NNN / ## ATM-NNN) has a pipe-table row.
