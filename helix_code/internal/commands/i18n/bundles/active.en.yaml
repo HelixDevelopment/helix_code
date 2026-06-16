@@ -1045,6 +1045,9 @@ internal_commands_permissions_rule_added:
 internal_commands_permissions_rule_removed:
   other: "session-only rule removed: {{.Pattern}}\n(use `helixcode permissions remove` to persist)\n"
 
+internal_commands_permissions_rule_not_found:
+  other: "no session-only rule matched: {{.Pattern}}\n(it may be a file rule — use `helixcode permissions remove` to persist removals)\n"
+
 internal_commands_permissions_invalid_action:
   other: "invalid action {{.Action}} (allow|ask|deny)"
 
