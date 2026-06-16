@@ -6,9 +6,9 @@
 
 | Type | Count | Closure vocabulary (CONST-057) |
 |---|---|---|
-| Bug | 78 | `Fixed (→ Fixed.md)` |
+| Bug | 79 | `Fixed (→ Fixed.md)` |
 | Feature | 79 | `Implemented (→ Fixed.md)` |
-| Task | 31 | `Completed (→ Fixed.md)` |
+| Task | 30 | `Completed (→ Fixed.md)` |
 | Obsolete | 1 | `Obsolete (→ Fixed.md)` (§11.4.90 — terminal Status, orthogonal to Type) |
 
 **Total closed items**: 188 (counted directly from the `docs/Fixed.md` closure table).

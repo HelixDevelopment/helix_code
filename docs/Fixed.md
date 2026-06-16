@@ -189,7 +189,7 @@
 | 2026-06-09 | HXC-056: 7 submodules: CONST-052 capitalised replace => ../PliniusCommon (dir is plinius_common) | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | 11104a05 | docs/qa/HXC-056/evidence.md |
 | 2026-06-09 | HXC-055: formatters brittle cat --version probe + go_hello fixtures break go build | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | 94b46bfe | docs/qa/HXC-055/evidence.md |
 | 2026-06-09 | HXC-054: leak_detector parallel test flake — §11.4.50 determinism | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | 94b46bfe | docs/qa/HXC-054/evidence.md |
-| 2026-06-09 | HXC-051: helix_llm + helix_memory go.mod replace directives point to non-existent ../../vasic-digital/* sibling layout (CONST-051(C) dependency-layout) | Task | Fixed (→ Fixed.md) | 2026-06-09 session | 94b46bfe | docs/qa/HXC-051/evidence.md |
+| 2026-06-09 | HXC-051: helix_llm + helix_memory go.mod replace directives point to non-existent ../../vasic-digital/* sibling layout (CONST-051(C) dependency-layout) | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | 94b46bfe | docs/qa/HXC-051/evidence.md |
 | 2026-06-09 | HXC-038: docs_chain G14: fixed.yaml fixed_summary transform-contract mismatch + stale state.json baseline false-CONFLICT on issues context | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | ac4ce917 | docs/qa/HXC-038/evidence.md |
 | 2026-06-09 | HXC-053: conversation go.mod build break — capitalised replace path ../Messaging | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | ac4ce917 | docs/qa/HXC-053/evidence.md |
 | 2026-06-09 | HXC-052: background_tasks go.mod build break — capitalised replace paths | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | ac4ce917 | docs/qa/HXC-052/evidence.md |
@@ -371,7 +371,7 @@ verify-all-constitution-rules.sh G14 (docs_chain verify --all) fails: (1) fixed.
 ## HXC-051 — helix_llm + helix_memory go.mod replace directives point to non-existent ../../vasic-digital/* sibling layout (CONST-051(C) dependency-layout)
 
 **Status:** Fixed (→ Fixed.md)
-**Type:** Task
+**Type:** Bug
 **Evidence:** docs/qa/HXC-051/evidence.md
 **Severity:** Low
 **Created-By:** Claude

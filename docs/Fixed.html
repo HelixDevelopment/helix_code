@@ -9,6 +9,152 @@
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
@@ -24,10 +170,12 @@
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
-  <link rel="stylesheet" href=" _progress-style.css" />
 </head>
 <body>
-<h1 id="helixcode--fixed-items-tracker">HelixCode — Fixed Items
+<header id="title-block-header">
+<h1 class="title">Fixed</h1>
+</header>
+<h1 id="helixcode-fixed-items-tracker">HelixCode — Fixed Items
 Tracker</h1>
 <blockquote>
 <p>Per Constitution §11.4.19 (Fixed-document column-alignment) +
@@ -40,9 +188,9 @@ from <code>docs/Issues.md</code> ONLY after positive captured-evidence
 per §11.4.5.</p>
 <p><strong>Round 189 prefix convention:</strong> Closures originally
 tracked as <code>ISSUE-NNN</code> are now annotated with their new scope
-prefix and the legacy ID preserved in parentheses (e.g.
-<code>HXL-001 (ex-ISSUE-003)</code>) for git-history traceability. See
-<code>docs/Issues.md</code> "Prefix convention" for the full mapping
+prefix and the legacy ID preserved in parentheses
+(e.g. <code>HXL-001 (ex-ISSUE-003)</code>) for git-history traceability.
+See <code>docs/Issues.md</code> “Prefix convention” for the full mapping
 table.</p>
 <p><strong>Authoritative round-by-round narrative</strong>:
 <code>docs/CONTINUATION.md</code> (CONST-044). Each row below points to
@@ -51,7 +199,16 @@ are not retroactively captured (would be impractical) — they live in
 commit history + the <code>docs/improvements/</code> evidence chain
 (P0-P5 phases).</p>
 </blockquote>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
 <thead>
 <tr>
 <th>Closure</th>
@@ -64,7 +221,7 @@ commit history + the <code>docs/improvements/</code> evidence chain
 </tr>
 </thead>
 <tbody>
-<tr class="cell-status-obsolete">
+<tr>
 <td>2026-06-09</td>
 <td>HXC-044: internal/cognee — AMD-GPU rocm-smi JSON parser returns -1
 sentinel instead of parsed GPU-use value</td>
@@ -103,16 +260,16 @@ full-qa-api/entity-management/admin-operations/security-validation + 3
 CLI:
 cli-agents-comprehensive/aichat-bash-tools/cli-agents-test-helixagent),
 each 3× deterministic + flip-mutation-proof, driving the real bin/cli
-via os/exec, grep -c manual-review-required=0, honest <em>skip for
-absent tools (no fabricated PASS). 31/31 integration files
-runtime-verified self-driving (0 manual deps; the 3 FAILs were a real
-i18n product defect → HXC-036, fixed). The 20 browser/Android/capture
-banks are OUT of scope per §11.4.79/§11.4.51 (HelixQA is shared — they
-target Catalogizer/Yole/HelixQA-engine; HelixCode has no web UI
-(API-only) + no Android app; the 2 connected devices are ATMOSphere
-hardware). e2e suites static-clean (only config-bootstrap skips =
-permitted §11.4.98(B) exception). Evidence
-docs/qa/HXC-029/{compliance-ledger,integration-classification,playwright-android,*/run</em>*+mutation-proof}.
+via os/exec, grep -c manual-review-required=0, honest _skip for absent
+tools (no fabricated PASS). 31/31 integration files runtime-verified
+self-driving (0 manual deps; the 3 FAILs were a real i18n product defect
+→ HXC-036, fixed). The 20 browser/Android/capture banks are OUT of scope
+per §11.4.79/§11.4.51 (HelixQA is shared — they target
+Catalogizer/Yole/HelixQA-engine; HelixCode has no web UI (API-only) + no
+Android app; the 2 connected devices are ATMOSphere hardware). e2e
+suites static-clean (only config-bootstrap skips = permitted §11.4.98(B)
+exception). Evidence
+docs/qa/HXC-029/{compliance-ledger,integration-classification,playwright-android,<em>/run_</em>+mutation-proof}.
 Closed <code>Completed (→ Fixed.md)</code> per CONST-057 (Type
 Task).</td>
 </tr>
@@ -134,16 +291,16 @@ systematic-debugging, module-wide grep): the CONST-046 migration created
 defaults + <code>active.en.yaml</code> bundles but the documented
 boot-time wiring was NEVER written — 0 <code>.SetTranslator(</code> call
 sites module-wide, <code>i18nadapter</code> never constructed, bundles
-not <code>go:embed</code>'d → every package ran on NoopTranslator →
+not <code>go:embed</code>’d → every package ran on NoopTranslator →
 users saw raw keys (<code>askuser_prompt_invalid_choice_hint</code>
-instead of "Enter choice [1-3]:"); unit tests passed because they assert
+instead of “Enter choice [1-3]:”); unit tests passed because they assert
 the Noop echo. FIX (operator chose Option A — boot-time wiring, 4
 phases): per-package <code>bundle.go</code> embeds
 <code>active.en.yaml</code> →
 <code>i18n.NewBundle</code>/<code>Localizer</code> →
 <code>i18nadapter.New</code>; central
 <code>internal/i18nwiring.WireAll()</code> wires 63 internal packages
-(incl. the shared <code>internal/workflow/i18n</code> serving
+(incl. the shared <code>internal/workflow/i18n</code> serving
 autonomy+planmode), called at boot (cmd/cli buildSubsystems) + in
 integration <code>TestMain</code>; the 9 <code>package main</code>
 binaries self-wire via <code>cmd/&lt;m&gt;/i18n_boot_wire.go</code>
@@ -151,9 +308,9 @@ init() (Go forbids importing main). VERIFIED: the 3 originally-failing
 integration tests PASS with resolved interpolated text;
 <code>WireAll()</code> returns nil at <strong>74/74</strong>;
 resolved-text captured for
-askuser/approval/auth/llm/config/cli/autonomy/planmode (e.g. "Full Auto
-(Fully Autonomous)", "Score: 87.5/100", "Inspect or run user-defined
-Markdown slash commands"); paired-mutation proven (without WireAll → raw
+askuser/approval/auth/llm/config/cli/autonomy/planmode (e.g. “Full Auto
+(Fully Autonomous)”, “Score: 87.5/100”, “Inspect or run user-defined
+Markdown slash commands”); paired-mutation proven (without WireAll → raw
 keys → FAIL, proving the wiring is load-bearing). Evidence
 docs/qa/HXC-036/phase{1,2,3,4}/. Commits
 f3b864f4+31c57a2a+1ea79fd2+d570b05e. §11.4.84 explicit staging
@@ -189,8 +346,8 @@ data-driven into <code>COVENANT114_ANCHORS</code> (auto-derives
 across root + all owned submodules (was 6 §11.4.102 FAILs before the
 helix_qa/panoptic gaps were caught + closed); §1.1 paired-mutation
 proven (strip §11.4.102 from root CLAUDE.md → gate emits
-<code>CM-COVENANT-114-102-PROPAGATION</code> FAIL; restore → PASS, "all
-27 covenant-114 anchors present"). Each owned submodule committed +
+<code>CM-COVENANT-114-102-PROPAGATION</code> FAIL; restore → PASS, “all
+27 covenant-114 anchors present”). Each owned submodule committed +
 pushed to its org remotes (github :443 + gitlab where present).
 §11.4.84: explicit per-repo 3-govfile staging, no
 <code>git add -A</code>, residue scans clean. Closed
@@ -210,7 +367,7 @@ docs/qa/HXC-035/)</td>
 fix). ROOT CAUSE (confirmed by direct psql INSERT →
 <code>ERROR: column "display_name" of relation "users" does not exist</code>,
 the swallowed error behind the i18n-generic 400):
-<code>createSchemaSQL</code>'s <code>CREATE TABLE users</code> omitted
+<code>createSchemaSQL</code>’s <code>CREATE TABLE users</code> omitted
 <code>display_name</code>; the compensating
 <code>ALTER TABLE … ADD display_name</code> migration in
 <code>InitializeSchema()</code> lives ONLY inside the
@@ -220,7 +377,7 @@ INSERT fails. FIX: 1 line — added <code>display_name VARCHAR(255)</code>
 to <code>createSchemaSQL</code>. VERIFIED: rebuilt + restarted server →
 register <code>HTTP 201</code> with real user (display_name set) where
 it was 400; login → valid session token (full auth flow). Unblocks
-HXC-029's authenticated-positive bank paths. Closed
+HXC-029’s authenticated-positive bank paths. Closed
 <code>Fixed (→ Fixed.md)</code> per CONST-057 (Type Bug).</td>
 </tr>
 <tr>
@@ -250,7 +407,7 @@ re-pinned (LLMsVerifier is runtime source-of-truth), pointing operators
 to <code>helixcode llm models list</code>. New
 <code>scripts/gates/sources_verified_gate.sh</code> wired as <strong>G13
 ENFORCING</strong> (CM-SOURCES-VERIFIED) — a future operator doc without
-a footer FAILs the sweep; paired §1.1 check (--enforce exits 1 while
+a footer FAILs the sweep; paired §1.1 check (–enforce exits 1 while
 &lt;100%, exit 0 at 100%). Out of §11.4.99 scope (evidence/internal):
 qa_evidence (93)/helix_qa/architecture/coverage/materials. 90-day
 staleness re-verification is steady-state (gate
@@ -265,7 +422,7 @@ index + full index/sync appeared to crash (§11.4.79 regression)</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>2026-05-29 session</td>
 <td>docs/codegraph/Status.md 2026-05-29 entries + Issues/tracker</td>
-<td>ROOT CAUSE (operator's data-compat hypothesis, CONFIRMED): codegraph
+<td>ROOT CAUSE (operator’s data-compat hypothesis, CONFIRMED): codegraph
 0.9.7 requires explicit <code>codegraph init</code> before
 <code>index</code>; the pre-0.9.7 DB was incompatible. Fix: full wipe of
 gitignored DB
@@ -273,7 +430,7 @@ gitignored DB
 stale WAL) + <code>codegraph init</code> (tracked
 <code>.codegraph/config.json</code> preserved — own-org includes +
 §11.4.10 credential excludes intact) + <code>codegraph index .</code>.
-<strong>Result: Files 75,663 / Nodes 1,272,492</strong> (≈ HXC-017's
+<strong>Result: Files 75,663 / Nodes 1,272,492</strong> (≈ HXC-017’s
 76,044/1.26M baseline; edges finalize async). <strong>§11.4.79
 anti-bluff probe PASS (<code>codegraph query</code>):</strong>
 <code>NewBundleTranslator</code>→<code>submodules/llm_orchestrator/pkg/i18n/bundle.go:34</code>
@@ -281,9 +438,9 @@ anti-bluff probe PASS (<code>codegraph query</code>):</strong>
 <code>EventBus</code> resolves; third-party
 <code>llama_model_load</code>@<code>LLama_CPP</code> empty (excluded).
 <strong>Two earlier mis-diagnoses corrected per §11.4.6:</strong> (1)
-"index crashes/killed" = faulty <code>pgrep</code> pattern (real
+“index crashes/killed” = faulty <code>pgrep</code> pattern (real
 <code>ps</code> showed the <code>node…codegraph.js index</code> process
-alive+healthy, just slow on 76k files); (2) "own-org unreachable" =
+alive+healthy, just slow on 76k files); (2) “own-org unreachable” =
 wrong CLI verb (<code>search</code>→<code>query</code> in 0.9.7) + stale
 MCP-server DB queried before re-index. Bonus: Status.md de-bloated 3.66
 MB→8 KB (ANSI-spinner garbage from <code>codegraph_sync.sh</code>).
@@ -338,7 +495,7 @@ CONST-057 (Type Bug).</td>
 <code>dependencies/vasic-digital/**</code> (~55) +
 <code>dependencies/HelixDevelopment/**</code> (~10) now INCLUDED;
 credential excludes
-(<strong>/.env,</strong>/<em>.key,**/</em>.pem,<strong>/secrets/</strong>)
+(<strong>/.env,</strong>/*.key,**/*.pem,<strong>/secrets/</strong>)
 added; valid JSON. (2) §11.4.78 gap fixed: root <code>.gitignore</code>
 blanket-ignored <code>**/.codegraph/</code> so config.json was never
 tracked → now config.json + .codegraph/.gitignore tracked, db/caches
@@ -372,11 +529,11 @@ the test banks replaced with real assertions or honest skips — batch 1
 core/additional_tests.go (41: 31 real-assert + 1 real-fail + 9
 honest-skip), batch 2
 distributed(12)+integration(11)+platform(5)+core/tests.go(4)+performance(1)=33.
-Pattern: mislabelled "X succeeded" branches firing on non-2xx →
+Pattern: mislabelled “X succeeded” branches firing on non-2xx →
 <code>AssertEqual</code> the expected 2xx; 401/403/429 auth/rate
 branches → assert that exact status; feature-404 branches → honest
-<code>v.Skip(reason)</code>; the 4 legitimate "Running on
-&lt;arch/platform&gt;" positive-platform asserts left untouched.
+<code>v.Skip(reason)</code>; the 4 legitimate “Running on
+<arch/platform>” positive-platform asserts left untouched.
 <strong>Verification: <code>go build ./...</code> exit 0 +
 <code>go vet ./...</code> clean (independently re-verified by
 conductor); full-tree grep for literal-true bluffs = 0; anti-bluff
@@ -407,7 +564,7 @@ subpackage; un-masked pre-existing core/ defects (duplicate
 fixed. <strong><code>go build ./...</code> exit 0 (whole test_bank
 module) + <code>go vet ./...</code> clean — independently re-verified by
 conductor.</strong> HXC-021 runtime-verified through the now-compiling
-banks: platform SKIP=3 honest (macOS/Windows/ARM "not running on…"),
+banks: platform SKIP=3 honest (macOS/Windows/ARM “not running on…”),
 integration SKIP=2 honest (Ollama unreachable / OPENAI_API_KEY unset), 0
 fake PASS, 0 green-empty; <code>grep 'Assert(true.*skip'</code> = 0. A
 larger residual sweep (~57 literal-true endpoint/auth bluffs) filed
@@ -434,7 +591,7 @@ skipping the §11.4.95 <em>heading</em> in batch-1-6 submodules — caught
 by tightening the gate to the H2 marker <code>## §11.4.NN —</code>
 (d2165bf7) which then exposed 201 missing-heading files; fix-up A/B/C
 (79478ed5/903b9225/a9a1a6a1) restored them. A second defect: the
-cascade's <code>reset --hard origin/main</code> regressed 4
+cascade’s <code>reset --hard origin/main</code> regressed 4
 HelixDevelopment submodules
 (doc_processor/llm_orchestrator/llm_provider/vision_engine) off their
 canonical <code>master</code> lineage (which carried
@@ -443,7 +600,7 @@ master with the complete set (b4b790ea). Gate submodule-scope enabled
 (9031368d: <code>check_covenant114_anchors</code> inside the
 owned-submodule loop). <strong>Final
 <code>verify-governance-cascade.sh</code> → 0 failures</strong> (204
-submodule PASS lines carry "+ §11.4 covenant-114"); paired §1.1 mutation
+submodule PASS lines carry “+ §11.4 covenant-114”); paired §1.1 mutation
 captured (strip <code>## §11.4.95 —</code> from cache/CLAUDE.md →
 Result: 1 failures → git-checkout restore → 0 failures). Closed
 <code>Completed (→ Fixed.md)</code> per CONST-057 (Type Task).</td>
@@ -505,7 +662,7 @@ honest-SKIP mechanism
 Passed, never inflating green); all 11 fake-skips →
 <code>v.Skip(runtime.GOOS/GOARCH...)</code>; the legitimate
 <code>Assert(true,"Running on...")</code> positive assertions left
-untouched. HXC-014a: <code>TestProviderStress</code>'s 3 empty
+untouched. HXC-014a: <code>TestProviderStress</code>‘s 3 empty
 sub-functions (<code>t.Logf</code>+comment) → route through
 <code>stressProvider(t)</code> (real available+healthy provider OR
 honest <code>t.Skip</code> SKIP-OK:#HXC-014 — never green-empty).
@@ -513,7 +670,7 @@ Verified: orchestrator <code>go build ./...</code> exit 0;
 <code>go vet -tags=integration ./tests/integration/...</code> exit 0;
 <code>grep 'Assert(true,".*skip'</code> in both banks = 0; §11.4.84
 mutation-residue scan clean. Pre-existing test_bank platform/integration
-non-compilation (blocks runtime-verifying those two banks' honest-skips)
+non-compilation (blocks runtime-verifying those two banks’ honest-skips)
 filed as <strong>HXC-022</strong>. Closed
 <code>Fixed (→ Fixed.md)</code> per CONST-057 (Type Bug).</td>
 </tr>
@@ -533,9 +690,9 @@ leak-audit: <strong>CLEAN</strong> — <code>git grep</code> +
 <code>SILICONFLOW_API_KEY</code>) confirmed none has ever been committed
 to a tracked file or git history. The originally-blocking backends
 remain blocked: <code>KIMI_API_KEY</code> shares the <strong>same
-exhausted account-level monthly billing-cycle quota</strong> as Kimi's
+exhausted account-level monthly billing-cycle quota</strong> as Kimi’s
 bundled OAuth (<code>exceeded_current_quota_error</code> on
-<code>api.kimi.com/coding/v1</code>); Qwen's bundled OAuth free tier is
+<code>api.kimi.com/coding/v1</code>); Qwen’s bundled OAuth free tier is
 still discontinued; <code>OPENROUTER_API_KEY</code> had insufficient
 credit (~$0.0007, ~4 tokens). Resolution: both agents driven against the
 <strong>SiliconFlow</strong> OpenAI-compatible router, which has credit
@@ -609,7 +766,7 @@ templates (strings addressed to a model, not a human), (B) wrapped-error
 developer-facing tech strings, identifier tokens, struct-tag keys,
 format-spec tokens, and test fixtures — classified file-by-file in
 <code>docs/audits/2026-05-20-internal-const046-classification.md</code>
-(Revision 2). CONST-046's invariant is satisfied: no user-facing text is
+(Revision 2). CONST-046’s invariant is satisfied: no user-facing text is
 hardcoded as a static literal; every such string is LLM-generated,
 i18n-loaded, or metadata-composed. Closed
 <code>Implemented (→ Fixed.md)</code> per CONST-057 (Type Feature).</td>
@@ -663,7 +820,7 @@ and 67 owned-submodule
 Meta <code>.gitmodules</code> constitution pointer confirmed at
 <code>34a82b3</code> (<code>git ls-tree HEAD constitution</code> →
 <code>160000 commit 34a82b3859...</code>). Spot-check:
-<code>grep -c "11.4.70|11.4.74"</code> returns 6 for
+<code>grep -c "11.4.70\|11.4.74"</code> returns 6 for
 <code>helix_qa/CLAUDE.md</code>,
 <code>submodules/llm_provider/CLAUDE.md</code>,
 <code>challenges/CLAUDE.md</code> — all carry §11.4.70-74. CONST-049
@@ -683,30 +840,30 @@ LLMProvider, challenges, containers, DocProcessor all reconciled via
 merge-first (CONST-061 / §11.4.71) — real 2-parent merge commits
 preserving the union of both org-mirror lineages, no force-push, no
 history rewrite. Spot-check: <code>VisionEngine</code> carries
-convergence merge <code>3485f5f</code> ("converge VisionEngine mirror
+convergence merge <code>3485f5f</code> (“converge VisionEngine mirror
 divergence — merge rebased-away f534b22 into 0512fa4
-(CONST-061/§11.4.71)") and pushed FF-clean to all 4 upstreams
+(CONST-061/§11.4.71)”) and pushed FF-clean to all 4 upstreams
 (<code>3485f5f..b3a13d8</code> to helix-gitlab + vasic-digital-github +
 vasic-digital-gitlab during the HXC-008 push); <code>helix_qa</code>
 HEAD was at parity across github+gitlab <code>origin</code> before this
-round's push. All owned submodules converged + pushed to all upstreams;
+round’s push. All owned submodules converged + pushed to all upstreams;
 meta pointers bumped (<code>68309b8e</code>).</td>
 </tr>
 <tr>
 <td>2026-05-20</td>
-<td>HXC-011: helix_qa runner emits hollow sub-microsecond "PASSED" rows
-for desktop-platform bank cases instead of executing the case's
+<td>HXC-011: helix_qa runner emits hollow sub-microsecond “PASSED” rows
+for desktop-platform bank cases instead of executing the case’s
 <code>action:</code></td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>402</td>
 <td>helix_qa <code>6b46df0</code> + meta pointer bump</td>
 <td>Reproduce-before-fix (Rule 7 / §11.4.43 TDD-fix). Root cause: the
-orchestrator <code>run</code> path's
+orchestrator <code>run</code> path’s
 <code>definitionChallenge.Execute</code> unconditionally returned
-<code>Status=Skipped</code> and never shelled out to a bank case's
+<code>Status=Skipped</code> and never shelled out to a bank case’s
 <code>action:</code> — and the generic <code>challenges/pkg/bank</code>
-loader drops each case's <code>steps</code> array, so executable action
+loader drops each case’s <code>steps</code> array, so executable action
 data never reached the orchestrator. RED (fix reverted):
 <code>TestHXC011_RED_DesktopShellExecutes</code> FAILed — a desktop bank
 case whose <code>shell:</code> action writes a sentinel file ran through
@@ -1498,7 +1655,7 @@ content in tree</td>
 <td>Implemented (→ Fixed.md)</td>
 <td>157</td>
 <td>(TBD - in tree)</td>
-<td>"chain not found" sites × 4 (same ID); agent stalled on push but
+<td>“chain not found” sites × 4 (same ID); agent stalled on push but
 i18n/ present in tree</td>
 </tr>
 <tr>
@@ -1522,7 +1679,7 @@ i18n/ present in tree</td>
 </tr>
 <tr>
 <td>2026-05-19</td>
-<td>release-gate-test.sh --skip-env-failures filter</td>
+<td>release-gate-test.sh –skip-env-failures filter</td>
 <td>Feature</td>
 <td>Implemented (→ Fixed.md)</td>
 <td>89</td>
@@ -1592,33 +1749,33 @@ URLs probed = OK pre-fix, 100/100 = OK post-fix</td>
 </tr>
 </tbody>
 </table>
-<p>| 2026-05-19 | HXA-003 (ex-ISSUE-011): venice
+<div class="line-block">2026-05-19 | HXA-003 (ex-ISSUE-011): venice
 <code>TestGetCapabilities</code> CONST-037 model-list drift | Bug |
 Fixed (→ Fixed.md) | 190 | helix_agent (round-190) + meta pointer-bump |
 Replaced hardcoded <code>venice-uncensored</code> +
 <code>llama-3.3-70b</code> literals with structural assertion (NotEmpty
 + <code>venice-uncensored*</code> family substring scan); SKIP-OK
 CONST-035 marker on full-family rotation; mutation-verified revert→FAIL
-/ restore→PASS |</p>
-<p>| 2026-05-19 | HXC-004: recovery-batch 4-package under-verification
-(llm + logo + notification test-assertion drift + performance
-translator.go build break) | Bug | Fixed (→ Fixed.md) | 200 | (this
-commit) | Round-200 §11.4: 3 packages had test-assertion drift after
-round 161/163/167 i18n migration (tests still expected pre-i18n English
-literals; production now emits NoopTranslator-echoed message-IDs e.g.
-<code>internal_llm_wizard_anthropic_apikey_required</code>,
+/ restore→PASS |</div>
+<div class="line-block">2026-05-19 | HXC-004: recovery-batch 4-package
+under-verification (llm + logo + notification test-assertion drift +
+performance translator.go build break) | Bug | Fixed (→ Fixed.md) | 200
+| (this commit) | Round-200 §11.4: 3 packages had test-assertion drift
+after round 161/163/167 i18n migration (tests still expected pre-i18n
+English literals; production now emits NoopTranslator-echoed message-IDs
+e.g. <code>internal_llm_wizard_anthropic_apikey_required</code>,
 <code>internal_logo_open_source_failed</code>,
 <code>internal_notification_title_task_completed</code>). Updated 11
 test assertions (1 llm + 4 logo + 6 notification + 2 notification
 additional). 4th package (performance) build-break already fixed inline
 by parent agent. All 4 packages PASS (llm 51.8s, logo 0.07s,
 notification 0.89s, performance 8.4s). Mutation-verified per CONST-035:
-3 mutations (one per package), revert→FAIL, restore→PASS. | | 2026-05-19
-| PAN-001: panoptic <code>appendJSONString</code> truncates multi-byte
-UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code> corrupts
-non-ASCII) | Bug | Fixed (→ Fixed.md) | 302 | panoptic 24aa627 + meta
-pointer-bump | Replaced <code>buf = append(buf, byte(r))</code> with
-<code>buf = utf8.AppendRune(buf, r)</code> in
+3 mutations (one per package), revert→FAIL, restore→PASS. |<br />
+2026-05-19 | PAN-001: panoptic <code>appendJSONString</code> truncates
+multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
+corrupts non-ASCII) | Bug | Fixed (→ Fixed.md) | 302 | panoptic 24aa627
++ meta pointer-bump | Replaced <code>buf = append(buf, byte(r))</code>
+with <code>buf = utf8.AppendRune(buf, r)</code> in
 <code>panoptic/internal/executor/executor.go:120</code> + added
 <code>unicode/utf8</code> import. Evidence: <code>go build ./...</code>
 clean; <code>go test -race -count=1 ./internal/executor/...</code> → ok
@@ -1628,7 +1785,8 @@ clean; <code>go test -race -count=1 ./internal/executor/...</code> → ok
 <code>PASS [executor-marshal:utf8-detector:fixed]</code> +
 <code>KNOWN-ISSUE-RESOLVED: executor.appendJSONString now UTF-8 clean</code>).
 Probe <code>AppName="ü"</code> (UTF-8 <code>0xC3 0xBC</code>) preserved
-end-to-end through MarshalJSON. | | 2026-05-20 | HXC-005:
+end-to-end through MarshalJSON. |<br />
+2026-05-20 | HXC-005:
 <code>cmd/performance_optimization_standalone/main.go</code> is a
 CONST-035 simulation bluff | Bug | Fixed (→ Fixed.md) | 318 | (this
 commit) | Decision: DELETE (obsolete). The standalone binary fabricated
@@ -1656,13 +1814,13 @@ genuine <code>runtime.HeapAlloc</code>, not RNG). Evidence:
 <code>go test -count=1 -run TestHXC005 ./cmd/performance_optimization/</code>
 → both PASS (literal:
 <code>optimizer baseline MemoryUsage=33812624 bytes, runtime.HeapAlloc=33802008 bytes — both real measurements</code>).
-|</p>
-<p>| 2026-05-20 | HXV-001: LLMsVerifier 18 pre-existing
-<code>tests/</code> failures (CLI-integration + verification/scoring) |
-Bug | Fixed (→ Fixed.md) | 323 | LLMsVerifier <code>59f542ba</code>
-(github+gitlab) + meta pointer-bump | Round-323 §11.4 / CONST-035. 18
-failures classified: <strong>(A) test-build drift</strong> — 9 CLI tests
-(<code>tests/automation_test.go</code>) ran
+|</div>
+<div class="line-block">2026-05-20 | HXV-001: LLMsVerifier 18
+pre-existing <code>tests/</code> failures (CLI-integration +
+verification/scoring) | Bug | Fixed (→ Fixed.md) | 323 | LLMsVerifier
+<code>59f542ba</code> (github+gitlab) + meta pointer-bump | Round-323
+§11.4 / CONST-035. 18 failures classified: <strong>(A) test-build
+drift</strong> — 9 CLI tests (<code>tests/automation_test.go</code>) ran
 <code>go run ../cmd/main.go</code> which compiles ONLY
 <code>main.go</code>; i18n rounds 194/308/309/312/316/319 correctly
 placed <code>tr()</code>/<code>trData()</code> in
@@ -1691,11 +1849,12 @@ FAIL; after = <code>ok digital.vasic.llmsverifier/tests</code> (17.9s),
 <code>ok .../tests/integration</code> (3.1s),
 <code>ok .../tests/unit</code> (0.003s); <code>go build ./...</code>
 clean. No production code changed — round-17 production fix was already
-correct; only test re-keying. | | 2026-05-20 | HXQ-001 (ex-ISSUE-008):
-helix_qa intermittent <code>TestPerformance</code> flake
-(host-load-sensitive) | Bug | Fixed (→ Fixed.md) | 325 | helix_qa
-<code>649e2dd</code> (github+gitlab) + meta pointer-bump | Round-325
-§11.4 / CONST-035. The three <code>pkg/vision/</code> perf tests
+correct; only test re-keying. |<br />
+2026-05-20 | HXQ-001 (ex-ISSUE-008): helix_qa intermittent
+<code>TestPerformance</code> flake (host-load-sensitive) | Bug | Fixed
+(→ Fixed.md) | 325 | helix_qa <code>649e2dd</code> (github+gitlab) +
+meta pointer-bump | Round-325 §11.4 / CONST-035. The three
+<code>pkg/vision/</code> perf tests
 (<code>TestPerformance_DHash64_Under5msPer1080pFrame</code>,
 <code>TestPerformance_PHash_Under25msPer1080pFrame</code>,
 <code>TestPerformance_SSIM_Under5msPer480pFrame</code>) assert hard
@@ -1703,7 +1862,7 @@ per-frame timing ceilings (5 ms / 25 ms / 5 ms) that flake under
 concurrent container/build CPU contention. <strong>Decision: resolution
 path (b)</strong> — env-var gating — chosen over path (a) (loosen
 tolerance). Rationale: loosening the timing tolerance would weaken the
-test's anti-bluff value (a genuine perf regression could then pass);
+test’s anti-bluff value (a genuine perf regression could then pass);
 path (b) preserves the strict assertions while making the flake
 deterministic. The three tests now gate on
 <code>os.Getenv("HOST_LOAD_DEDICATED")</code> —
@@ -1718,11 +1877,12 @@ clean;
 <code>SKIP-OK: #HXQ-001</code> marker;
 <code>HOST_LOAD_DEDICATED=1 go test …</code> → all 3
 <code>--- PASS</code> strict (DHash64 average 741ns, PHash average
-88.969µs — well under the 5 ms / 25 ms ceilings). | | 2026-05-20 |
-VEN-002 (ex-ISSUE-002): VisionEngine <code>vasic-digital-github</code>
-fork lineage divergent at SHA 93c830a | Bug | Fixed (→ Fixed.md) | 340 |
-VisionEngine merge <code>70c9e0c</code> (4 remotes) + meta pointer-bump
-| Round-340 §11.4.41 / CONST-061 merge-first.
+88.969µs — well under the 5 ms / 25 ms ceilings). |<br />
+2026-05-20 | VEN-002 (ex-ISSUE-002): VisionEngine
+<code>vasic-digital-github</code> fork lineage divergent at SHA 93c830a
+| Bug | Fixed (→ Fixed.md) | 340 | VisionEngine merge
+<code>70c9e0c</code> (4 remotes) + meta pointer-bump | Round-340
+§11.4.41 / CONST-061 merge-first.
 <code>vasic-digital-github/master</code> HEAD
 <code>93c830a</code>→<code>256cce1</code> carried 15 commits absent from
 HelixDevelopment local <code>master</code> (<code>6e3888e</code>); local
@@ -1743,19 +1903,19 @@ testify-v1.11.1 transitive graph, <code>go mod tidy</code> reconciled
 clean; (3) <code>pkg/analyzer/stub.go</code> — took vd anti-bluff
 sentinel bodies: HEAD body had RE-INTRODUCED the fabricated
 <code>ScreenAnalysis{Title:"Unknown Screen"}</code>+<code>err=nil</code>
-PASS-bluff that the file's own unconflicted doc comments declare removed
+PASS-bluff that the file’s own unconflicted doc comments declare removed
 round-27 — per CONST-035/Article XI §11.9 the bluff must not survive;
 removed bluff-only
 <code>i18n_defaults.go</code>+<code>i18n_callsites_test.go</code> (sole
 consumer was the removed path; <code>pkg/i18n</code> package untouched);
 (4) <code>pkg/remote/{remote,ssh,remote_test}.go</code> — took HEAD:
 <code>EnsureReady</code> SSH-probe is a strict functional superset of
-vd's config-only <code>EnsureReady</code>, HEAD defines
+vd’s config-only <code>EnsureReady</code>, HEAD defines
 <code>ErrBackendNotReachable</code>+<code>SSHConfig.BackendProbePort</code>
 the merged body needs, HEAD <code>SSHConfig</code> is a field-superset
 so vd RPC code compiles unchanged; (5)
 <code>pkg/remote/deployer_test.go</code> — modify/delete conflict, kept
-vd's 1026-line real anti-bluff RPC test suite per CONST-061 union-merge
+vd’s 1026-line real anti-bluff RPC test suite per CONST-061 union-merge
 (<code>deployer.go</code>+<code>distributed.go</code> auto-merged as
 pure vd additions); (6)
 <code>CONSTITUTION.md</code>/<code>CLAUDE.md</code>/<code>AGENTS.md</code>
@@ -1769,16 +1929,17 @@ clean; <code>go test -count=1 ./...</code> → 7 packages PASS
 (<code>analyzer config graph i18n llmvision opencv remote</code>); all 4
 remotes fast-forwarded (<code>6e3888e..70c9e0c</code>
 helix-github/gitlab + vasic-digital-gitlab,
-<code>256cce1..70c9e0c</code> vasic-digital-github — NO force on any). |
-| 2026-05-20 | HXA-002 (ex-ISSUE-010): helix_agent debate/llmprovider
+<code>256cce1..70c9e0c</code> vasic-digital-github — NO force on any).
+|<br />
+2026-05-20 | HXA-002 (ex-ISSUE-010): helix_agent debate/llmprovider
 sibling-submodule API drift | Bug | Fixed (→ Fixed.md) | 342 |
 helix_agent (round-342 HXA-002) + meta pointer-bump | Round-342 §11.4 /
-CONST-035. <strong>Investigation finding (operator's explicit ask —
+CONST-035. <strong>Investigation finding (operator’s explicit ask —
 moved vs deleted): GENUINELY DELETED, not moved.</strong>
 <code>git log</code> on <code>digital.vasic.debate</code>
 (<code>submodules/debate_orchestrator</code>) shows the orchestrator was
-rebuilt from scratch (commit <code>196d0ea</code> "initial
-DebateOrchestrator reconstruction (Phase 1)");
+rebuilt from scratch (commit <code>196d0ea</code> “initial
+DebateOrchestrator reconstruction (Phase 1)”);
 <code>git log --follow orchestrator/api.go</code> = single entry — the
 slim <code>CreateDebate</code>/<code>GetStatistics</code> API is the
 first and only version. Tree-wide <code>grep</code> of
@@ -1789,7 +1950,7 @@ or HelixSpecifier/HelixMemory. The richer
 learning/knowledge/recommendations tier was a pre-reconstruction
 artifact that no longer exists anywhere — not relocated. <strong>Part 1
 (mechanical import swap):</strong>
-<code>digital.vasic.llmprovider</code>'s <code>LLMProvider</code>
+<code>digital.vasic.llmprovider</code>‘s <code>LLMProvider</code>
 interface now uses its own in-module
 <code>digital.vasic.llmprovider/pkg/models</code>; swapped
 <code>digital.vasic.models</code> →
@@ -1809,7 +1970,7 @@ surface — also fixed <code>provider_bridge_test.go</code>
 converted all <code>RegisterProvider</code> scores from the old 0-10
 scale to the reconstructed <code>[0,1]</code> scale (orchestrator now
 rejects score&gt;1). Lost coverage documented honestly in the rewritten
-files' header comments: request-conversion / knowledge-repository /
+files’ header comments: request-conversion / knowledge-repository /
 recommendations / status-by-id assertions dropped (those API surfaces no
 longer exist). <strong>Bonus rename-drift fix:</strong>
 <code>helix_agent/go.mod</code>
@@ -1829,20 +1990,22 @@ VisionEngine <code>remote</code> API drift, entirely unrelated to
 HXA-002 — <code>helix_qa</code> committed code at <code>7fa674a</code>).
 The standalone verification caught and fixed one wrong assertion in the
 original test (<code>DefaultTimeout</code> is <code>30s</code>, not
-<code>5m</code>). gofmt clean on all 8 changed files. | | 2026-05-20 |
-VEN-002 (ex-ISSUE-002): VisionEngine <code>vasic-digital-github</code>
-fork lineage divergent at SHA 93c830a | Bug | Fixed (→ Fixed.md) | 340 |
-VisionEngine merge <code>70c9e0c</code> (4 remotes) + meta pointer-bump
-| Round-340 §11.4.41 / CONST-061 merge-first. (See round-340 row above —
-duplicate header retained intentionally for migration-discipline
-alignment.) | | 2026-05-20 | HXQ-002: helix_qa
-<code>pkg/autonomous</code> ↔︎ VisionEngine <code>remote</code> API drift
-blocks helix_agent <code>tests/integration</code> compile | Bug | Fixed
-(→ Fixed.md) | 344 | helix_qa <code>9ef3d95</code> (github+gitlab) +
-meta pointer-bump | Round-344 §11.4 / CONST-035. Drift resolved by
-consuming the round-340 VEN-002 merged superset <code>remote</code> API
-— drift was MECHANICAL (three changed signatures, no removed type, no
-renamed symbol). <strong>Per-symbol classification:</strong> <strong>(1)
+<code>5m</code>). gofmt clean on all 8 changed files. |<br />
+2026-05-20 | VEN-002 (ex-ISSUE-002): VisionEngine
+<code>vasic-digital-github</code> fork lineage divergent at SHA 93c830a
+| Bug | Fixed (→ Fixed.md) | 340 | VisionEngine merge
+<code>70c9e0c</code> (4 remotes) + meta pointer-bump | Round-340
+§11.4.41 / CONST-061 merge-first. (See round-340 row above — duplicate
+header retained intentionally for migration-discipline alignment.)
+|<br />
+2026-05-20 | HXQ-002: helix_qa <code>pkg/autonomous</code> ↔︎
+VisionEngine <code>remote</code> API drift blocks helix_agent
+<code>tests/integration</code> compile | Bug | Fixed (→ Fixed.md) | 344
+| helix_qa <code>9ef3d95</code> (github+gitlab) + meta pointer-bump |
+Round-344 §11.4 / CONST-035. Drift resolved by consuming the round-340
+VEN-002 merged superset <code>remote</code> API — drift was MECHANICAL
+(three changed signatures, no removed type, no renamed symbol).
+<strong>Per-symbol classification:</strong> <strong>(1)
 <code>ProbeHosts</code></strong> —
 <code>(ctx, hosts []string, user string) []HardwareInfo</code> →
 <code>(ctx, hosts []SSHConfig) ([]HardwareInfo, error)</code>. Fix:
@@ -1862,7 +2025,7 @@ error handled with single-host fallback. <strong>(3)
 <code>(infos []HardwareInfo, models []ModelSpec) (*DistributionConfig, error)</code>.
 Fix: the GGUF model path and server port are no longer call arguments —
 they are set on the returned <code>*DistributionConfig</code> after the
-planner's best-fit bin-pack; error handled with single-host fallback.
+planner’s best-fit bin-pack; error handled with single-host fallback.
 Added five config-injected pipeline fields
 (<code>VisionSSHKeyPath</code>, <code>VisionSSHKnownHostsPath</code>,
 <code>VisionSSHPort</code>, <code>VisionRPCMinGPUMemMB</code>,
@@ -1874,14 +2037,15 @@ Evidence:
 0; <code>go test -count=1 ./pkg/autonomous/...</code> →
 <code>ok digital.vasic.helixqa/pkg/autonomous 14.270s</code> (PASS);
 <code>cd helix_agent &amp;&amp; go build ./tests/integration/...</code>
-exit 0 — the original HXQ-002 symptom is resolved. |</p>
-<p>| 2026-05-20 | HXV-002: LLMsVerifier <code>verification/</code>
-package 10 pre-existing test failures | Bug | Fixed (→ Fixed.md) | 348 |
-LLMsVerifier (round-348 HXV-002) + meta pointer-bump | Round-348 §11.4 /
-CONST-035. All 10 failures classified <strong>(A) test-assertion
-drift</strong> — every failing test asserted pre-honesty fabricated
-behaviour that round-17 commit <code>a6328629</code> correctly removed;
-<strong>no production code changed</strong>. <strong>8 in
+exit 0 — the original HXQ-002 symptom is resolved. |</div>
+<div class="line-block">2026-05-20 | HXV-002: LLMsVerifier
+<code>verification/</code> package 10 pre-existing test failures | Bug |
+Fixed (→ Fixed.md) | 348 | LLMsVerifier (round-348 HXV-002) + meta
+pointer-bump | Round-348 §11.4 / CONST-035. All 10 failures classified
+<strong>(A) test-assertion drift</strong> — every failing test asserted
+pre-honesty fabricated behaviour that round-17 commit
+<code>a6328629</code> correctly removed; <strong>no production code
+changed</strong>. <strong>8 in
 <code>verification_test.go</code></strong> —
 <code>TestVerifier_Verify_Success</code> / <code>_ResultScores</code> /
 <code>_LatencyMetrics</code> / <code>_CodeLanguageSupport</code> /
@@ -1906,7 +2070,7 @@ callers distinguish API failure from negative verification — re-keyed to
 carries <code>Verified=false</code>+<code>Error</code>.
 <code>VerifyModelCodeVisibility_ServerError</code> asserted
 <code>Status=="verified"</code>+score≥0.7 on a server returning HTTP 500
-for every sample (the "relaxed verification" bluff); zero successful
+for every sample (the “relaxed verification” bluff); zero successful
 responses → production correctly returns <code>Status=="failed"</code> —
 re-keyed to assert <code>failed</code> + non-empty
 <code>ErrorMessage</code>. Evidence: before
@@ -1916,21 +2080,21 @@ failures; <code>go build ./...</code> clean. Mirrors HXV-001 round-323
 classification approach — production code (round-17
 <code>ErrVerificationNotWired</code>, <code>code_verification.go</code>
 error-propagation + zero-response→<code>failed</code>) was already
-honest; only stale test assertions needed re-keying. |</p>
-<p>| 2026-05-20 | HXV-003: LLMsVerifier
+honest; only stale test assertions needed re-keying. |</div>
+<div class="line-block">2026-05-20 | HXV-003: LLMsVerifier
 <code>ProviderAdapterForBenchmark.Complete</code> is a CONST-050(A)
 production mock-bluff | Bug | Fixed (→ Fixed.md) | 396 | LLMsVerifier
 (round-396 HXV-003) + meta pointer-bump | Round-396 §11.4 / CONST-050(A)
 / CONST-035 / BLUFF-001. <strong>Decision: WIRE, not delete.</strong>
 Investigation confirmed <code>ProviderAdapterForBenchmark</code> IS live
-code — <code>BenchmarkSystem.Initialize</code> wires it as the runner's
+code — <code>BenchmarkSystem.Initialize</code> wires it as the runner’s
 <code>LLMProvider</code> (two call sites in
 <code>benchmark_test.go</code>), so honest deletion was not applicable.
 The bug: <code>Complete(ctx, prompt, systemPrompt)</code> body was
 <code>// Mock implementation - actual would call real provider</code> +
 <code>return "Response", 50, nil</code> — fabricated a hardcoded
 completion for an LLM call it never made (canonical BLUFF-001).
-<strong>Fix:</strong> the adapter's <code>provider</code> field was an
+<strong>Fix:</strong> the adapter’s <code>provider</code> field was an
 untyped <code>interface{}</code> it never used; retyped it to the real
 <code>benchmark.LLMProvider</code> interface (<code>Complete</code> +
 <code>GetName</code>, the same contract
@@ -1939,7 +2103,7 @@ untyped <code>interface{}</code> it never used; retyped it to the real
 value to <code>LLMProvider</code> and stores it; <code>Complete</code>
 dispatches directly to
 <code>a.provider.Complete(ctx, prompt, systemPrompt)</code>, returning
-the underlying provider's genuine response text + real token count +
+the underlying provider’s genuine response text + real token count +
 real error verbatim. When no real provider is wired,
 <code>Complete</code> returns the new honest sentinel
 <code>ErrProviderAdapterNotWired</code> — it NEVER fabricates a result
@@ -1965,19 +2129,20 @@ the server (hit-counter == 1) and returns the real server payload
 <code>TestProviderAdapterForBenchmark*</code> tests all
 <code>--- PASS</code>; anti-bluff smoke
 <code>grep -rn "Mock implementation\|simulated\|for now" internal/benchmark/*.go</code>
-(prod only) = clean. |</p>
-<p>| 2026-05-20 | HXC-006: HelixCode Speed Programme — 3-5× faster than
-competitor AI CLI agents (6-phase / 31-task) | Feature | Implemented (→
-Fixed.md) | 400 | P5-T04 (this commit) + 30 prior task commits |
-Round-400 / CONST-048 / CONST-035. Operator mandate 2026-05-20: make
-HelixCode + owned-submodule code 3-5× faster than competitor AI CLI
-agents without breaking any feature or weakening anti-bluff posture.
-<strong>All 6 phases / 31 tasks landed</strong> — P0-T01..04 (baseline
-harness: pprof + benchmarks + competitor wall-clock + scenario runner),
-P1-T01..07 (LLM &amp; startup wins), P2-T01..07 (context-build speed),
-P3-T01..05 (interactive &amp; agent-loop levers), P4-T01..04
-(profile-gated tuning), P5-T01..04 (dev-experience + submodule cascade +
-this close-out). <strong>CONST-048 coverage ledger</strong> committed at
+(prod only) = clean. |</div>
+<div class="line-block">2026-05-20 | HXC-006: HelixCode Speed Programme
+— 3-5× faster than competitor AI CLI agents (6-phase / 31-task) |
+Feature | Implemented (→ Fixed.md) | 400 | P5-T04 (this commit) + 30
+prior task commits | Round-400 / CONST-048 / CONST-035. Operator mandate
+2026-05-20: make HelixCode + owned-submodule code 3-5× faster than
+competitor AI CLI agents without breaking any feature or weakening
+anti-bluff posture. <strong>All 6 phases / 31 tasks landed</strong> —
+P0-T01..04 (baseline harness: pprof + benchmarks + competitor wall-clock
++ scenario runner), P1-T01..07 (LLM &amp; startup wins), P2-T01..07
+(context-build speed), P3-T01..05 (interactive &amp; agent-loop levers),
+P4-T01..04 (profile-gated tuning), P5-T01..04 (dev-experience +
+submodule cascade + this close-out). <strong>CONST-048 coverage
+ledger</strong> committed at
 <code>docs/research/speed/05-coverage-ledger.md</code>: <strong>29 PASS
 + 2 honestly-bounded PARTIAL + 0 DEFERRED</strong>. PARTIALs reported
 truthfully — P5-T01 (<code>98315a14</code>) build/test parallelism
@@ -2010,7 +2175,397 @@ pre-existing defects surfaced during the programme filed honestly as
 <strong>HXC-012</strong> (<code>internal/llm/load_balancer.go</code>
 stat-collector data race under <code>-race</code>). No speed task
 introduced a regression, a new bluff pattern, or new hardcoded content.
-|</p>
+|<br />
+2026-06-16 | HXC-113: MCP tool names use ‘server:name’ (colon) —
+OpenAI-compatible providers (DeepSeek/etc.) reject function names,
+breaking LLM chat with MCP enabled | Bug | Fixed (→ Fixed.md) |
+2026-06-16 session | c4c88f91 | mcpToolRegisteredName sanitises MCP tool
+names to server__name (OpenAI-compatible <a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>+);
+dispatch unaffected (Execute uses original server/toolName). 2
+mcp_readonly tests reconciled (§11.4.120); guard test + full
+internal/tools pkg pass; build exit 0. |<br />
+2026-06-15 | HXC-111: Desktop GUI shows raw i18n keys
+(desktop_dashboard_header/_activity_title) — CONST-046 gap | Bug | Fixed
+(→ Fixed.md) | 2026-06-15 session | 883c7d0f | Wired
+i18n.NewTranslator() in NewDesktopApp; dashboard now shows real text
+(verified via relaunch+AXRaise+screenshot: title ‘HelixCode -
+Distributed AI Development Platform’, ‘Recent Activity’, no raw keys).
+Desktop tests pass, build exit 0. Clean desktop video re-recorded.
+|<br />
+2026-06-15 | HXC-110: Extend containers submodule to launch iOS
+simulators (operator-directed Apple-support mechanism) | Task |
+Completed (→ Fixed.md) | 2026-06-15 session | 5a86067a |
+submodules/containers/pkg/applesim: host xcrun-simctl orchestration
+(Boot/Install/Launch/Record/Shutdown, by stable UDID §11.4.111), 16
+tests pass incl -race, real host round-trip; cmd/applesim CLI. Submodule
+a0fa823 pushed all upstreams, meta pointer bumped. |<br />
+2026-06-15 | HXC-109: Mobile apps are scaffolds — Android has no
+build.gradle/AndroidManifest, iOS has no Xcode project (not buildable
+-&gt; not recordable) | Bug | Fixed (→ Fixed.md) | 2026-06-15 session |
+5a86067a | Android: buildable Gradle project + 67MB APK runs on live
+Genymotion (3 videos: connect/lifecycle/tasklist, real server task list
+via authenticated HTTP); 2 runtime issues fixed (JWT client-mode, JSON
+parse). iOS: buildable Xcode project (gomobile xcframework + rewired
+binding) builds+runs on iPhone14 sim (helixcode-ios-launch video, Go
+core OK). Both committed (1ffc9b69/38caa48d). Mobile apps no longer
+scaffolds. |<br />
+2026-06-15 | HXC-106: helix_agent durable memory: process-lifetime
+in-memory fallback is NOT disk-durable — recall lost on restart
+(CONTINUATION honest gap) | Task | Completed (→ Fixed.md) | 2026-06-15
+session | c88e4aee | Investigated (§11.4.102): disk-durable DiskStore
+(sqlite, survives close+reopen) was ALREADY implemented + wired as
+preferred fallback (commits ac3ad237/a91faad6) via
+debateMemoryFallbackPath() (os.UserCacheDir, ‘helixagent’-namespaced,
+CONST-051-decoupled). CONTINUATION ‘in-memory only’ gap was stale.
+Closed the test-coverage gap: new
+internal/services/debate_memory_fallback_test.go proves resolver returns
+writable durable path +
+persist-&gt;Close(restart)-&gt;reopen-&gt;RECALL. ./internal/memory +
+./internal/services pass; submodule HEAD c5bdcfad pushed to upstreams.
+|<br />
+2026-06-15 | HXC-105: Runtime e2e for server POST /api/v1/specify — boot
+server -&gt; real spec output via live provider (speckit HTTP-endpoint
+gap) | Task | Completed (→ Fixed.md) | 2026-06-15 session | c88e4aee |
+tests/integration/specify_server_e2e_test.go boots the real server +
+POSTs /api/v1/specify against live ollama qwen2.5:3b: HTTP 200
+status:success provider:ollama qualityScore:0.9808, real 3-round 2-agent
+debate, provider_calls=6 total_tokens=806; output non-empty + NOT the
+‘awaiting provider wiring’ stub. PASS 75.93s, vet clean, build exit 0.
+Evidence docs/qa/web-llm-e2e-20260615/. |<br />
+2026-06-15 | HXC-103: Web-client runtime e2e proof — live browser/HTTP
+-&gt; server -&gt; LLM provider round-trip for /api/v1/llm/generate +
+/llm/stream (CONTINUATION honest gap) | Task | Completed (→ Fixed.md) |
+2026-06-15 session | 3b7e692f | All 3 web LLM paths proven e2e against
+live ollama qwen2.5:3b: /generate (HTTP 200 content:4 provider:ollama),
+/stream (9 SSE frames + [DONE], streamed 1..5, &gt;1 frame proves
+streaming), browser-&gt;server-&gt;provider (chromedp: #output DOM=4,
+#meta provider=ollama, screenshot). Exposed+fixed production hang
+HXC-104. Evidence + README docs/qa/web-llm-e2e-20260615/. SKIP-OK when
+provider down (§11.4.3). |<br />
+2026-06-15 | HXC-104: streamLLM /api/v1/llm/stream hangs forever —
+chunkChan never closed, [DONE] never emitted (production defect found by
+web e2e) | Bug | Fixed (→ Fixed.md) | 2026-06-15 session | 3b7e692f |
+Fixed via ‘defer close(chunkChan)’ in streamLLM goroutine. Regression
+guard tests/integration/llm_stream_e2e_test.go (TestLLMStreamE2E):
+post-fix streams 9 SSE frames + [DONE] in 1.1s, deterministic -count=3;
+server unit pkg ok; build exit 0. Evidence
+docs/qa/web-llm-e2e-20260615/. |<br />
+2026-06-15 | HXC-102: harmony_os main_nogui.go — 2 user-facing strings
+(‘Goodbye!’, ‘Error: %v’) bypass i18n (CONST-046, low severity) | Bug |
+Fixed (→ Fixed.md) | 2026-06-15 session | 127b8ccd | Routed
+cmdInteractive Goodbye!/Error: %v through cliApp.tr with new bundle keys
+(error binds {{.Error}}, no <no value>). Guard
+hxc102_interactive_i18n_test.go (nogui): GREEN, RED-without-key (raw-key
+leak exit 1), restored GREEN. Full harmony_os pkg ok both tag variants;
+build exit 0; gofmt clean. |<br />
+2026-06-15 | HXC-099: Systemic i18n raw-key sweep redo (CONST-046) —
+corrected, regression-free, with default-translator contract decision |
+Task | Completed (→ Fixed.md) | 2026-06-15 session | e4bdd0d0 |
+Corrected redo per operator decision (preserve loud raw-key
+NoopTranslator default — NO default swap; 9 guards pass unchanged). GOAL
+A: WireAll() was only called from cmd/cli; added entry-path init()
+wiring to cmd/server + 4 apps so internal-package strings resolve for
+real users. GOAL B: removed redundant {{.Err}} placeholder from 8
+internal/project messages (nil-data -&gt; ‘<no value>’). RED→GREEN
+guards captured (non-tautology proven); 9 guards green -count=1; all
+touched pkgs pass; build exit 0; vet clean; no mutation residue. Commit
+a02a8aa8. (B’s rejected default-swap approach preserved in git
+stash@{0}.) |<br />
+2026-06-15 | HXC-101: security/security_test.go TestTLSConfiguration —
+external-network dependency + nil-deref panic crashes the whole security
+test binary | Bug | Fixed (→ Fixed.md) | 2026-06-15 session | 61a33986 |
+Replaced live httpbin.org call with hermetic httptest.NewTLSServer +
+t.Fatalf on error path (no nil-deref fall-through). Verified:
+TestTLSConfiguration PASS 3/3 (-count=3) deterministic, no external net;
+full security pkg ok (0.223s); go build ./… exit 0; gofmt clean. |<br />
+2026-06-15 | HXC-100: Resync docs/CONTINUATION.md to current HEAD +
+de-bloat the 32k-token line-1 header (CONST-044/§12.10 + CONST-064
+hygiene) | Task | Completed (→ Fixed.md) | 2026-06-15 session | afbafeea
+| CONTINUATION.md resynced to HEAD 3aacfa9f + line-1 header de-bloated
+(max line 54856-&gt;2931 chars). History preserved: 4 mega-prose lines
+replaced by CONST-064 metadata table + ToC + condensed close-out 143-169
+table; close-outs 131-142 dedicated sections intact; this session’s 5
+rows added. git diff +143/-8 (additive, no content loss); exports
+rendered=2 failed=0 fresh. Gated independently by conductor. |<br />
+2026-06-15 | HXC-078: T1.6 SKILL.md precedence resolution (partial) |
+Task | Completed (→ Fixed.md) | 2026-06-15 session | 3aacfa9f |
+FindMatching/List already resolve overlapping matches deterministically
+by lexicographic name (sort.Strings, documented contract
+markdown_skills.go:194) — gap was missing coverage, not a bug. Added
+TestSkillRegistry_FindMatching_OverlappingPatternsDeterministic
+(insertion-order independence + 50-iter stability + lexicographic
+order), PASS; full internal/commands pkg ok; build exit 0. Commit
+6e03fe15. |<br />
+2026-06-15 | HXC-077: T1.5 context-window percentage indicator (partial)
+| Feature | Implemented (→ Fixed.md) | 2026-06-15 session | 3aacfa9f |
+TUI status bar now renders honest context-window USED-% (commit
+6e03fe15). sessionUsedTokens accumulates real per-turn tokens; window
+from catalogue ContextSize-&gt;GetContextWindow; OMITS when unknown
+(CONST-035); label i18n-routed via new terminal_ui_chat_context_usage
+key (CONST-046). Guard context_usage_test.go: GREEN with key, RED
+without (raw-key echo exit 1), restored GREEN. Full terminal_ui pkg ok;
+build exit 0. |<br />
+2026-06-15 | HXC-098: out-of-box config fails ‘version required’
+validation — blocks client status/system commands | Bug | Fixed (→
+Fixed.md) | 2026-06-15 session | 80e62afa | Reproduced via
+LoadHelixConfig path (RED: version-less config.json -&gt; Version=’’ +
+server.port=0 -&gt; validateConfig rejects). Fixed in
+internal/config/config.go loadConfigLocked: decode JSON ON TOP of
+getDefaultConfig() so all viper defaults merge. Guard
+hxc098_version_default_test.go: RED pre-fix (exit 1), GREEN post-fix
+(Version=1.0.0,Port=8080). config.yaml ships explicit version. Full
+config pkg ok. |<br />
+2026-06-15 | HXC-093: helix_code module graph has phantom
+digital.vasic.* requires + private transitive blocking go list -m all /
+gomobile bind | Bug | Fixed (→ Fixed.md) | 2026-06-15 session | 5690dc58
+| helix_code/go.mod: 27 replace directives -&gt; local submodules; go
+list -m all no-such-host 26-&gt;0 (462 modules); REAL .aar produced
+(classes.jar + jni/libgojni.so x4 ABIs); go build ./… green throughout
+|<br />
+2026-06-15 | HXC-090: panoptic tracks test-generated audit.json
+users.json (CONST-053 hygiene) | Bug | Fixed (→ Fixed.md) | 2026-06-15
+session | 36c9ee42 | panoptic a77228e: enterprise TestMain runs from
+temp dir; tree stays clean post-test x2, tests PASS, no production
+change. Guard via §11.4.135 (HXC-096) committed separately. |<br />
+2026-06-15 | HXC-097: SYSTEMIC: standalone binaries + internal/config +
+internal/database never wire i18n Translator -&gt; raw keys at runtime |
+Bug | Fixed (→ Fixed.md) | 2026-06-15 session | cdf4fa81 | Systemic
+unwired-translator fixed across aurora_os (842551d3) + harmony_os
+(6dcf64aa) + internal/config + internal/database: real bundle translator
+wired (binaries: SetTranslator in main(); libs: init() default).
+Before/after raw-key-&gt;prose captured each; §11.4.115 guards. Broader
+follow-up: other CONST-046 pkgs may share the WireAll-only-on-CLI-path
+class (init()-default pattern is the fleet fix). |<br />
+2026-06-15 | HXC-096: desktop nogui prints raw i18n keys + %!(EXTRA)
+format mismatch in status/help | Bug | Fixed (→ Fixed.md) | 2026-06-15
+session | a843cc0f | cmd/cli/main.go: known-provider-prefix guard on
+model parsing; live qwen2.5:3b -&gt; real answer ‘4’, zero 404;
+build/test 0 |<br />
+2026-06-15 | HXC-095: CLI binary generate/debate/specify return 404
+against live local ollama | Bug | Fixed (→ Fixed.md) | 2026-06-15
+session | 89d0cd3c | desktop i18n/bundle.go + main() SetTranslator
+wiring; before raw keys/%!(EXTRA) -&gt; after resolved prose ‘HelixCode
+Desktop CLI (nogui mode)’; build/test 0, paired-mutation guard |<br />
+2026-06-15 | HXC-094: F12 workspace checkpoints — file snapshot +
+restore/undo safety net | Feature | Implemented (→ Fixed.md) |
+2026-06-15 session | 3811508b | internal/checkpoint + cmd/cli
+/checkpoint; restore-bytes round-trip + survives-restart tests PASS, go
+build ./… 0 |<br />
+2026-06-15 | HXC-092: debate_orchestrator 30s DefaultTimeout too short
+for capable models on multi-round /specify | Bug | Fixed (→ Fixed.md) |
+2026-06-15 session | f8763c8a | debate_orchestrator 659559e:
+DefaultTimeout 30s-&gt;180s (justified ~96s worst-case + headroom) +
+WithTimeout option; build/vet 0, 15-pkg suite ok. Live capable-model
+/specify re-verify is follow-up. |<br />
+2026-06-15 | HXC-091: containers custom health-check duration can be 0
+(timer-resolution flake) | Bug | Fixed (→ Fixed.md) | 2026-06-15 session
+| e95cd735 | containers a36a435: duration floor 1ns; test 0/20 fail
+post-fix, pkg/health ok |<br />
+2026-06-15 | HXC-089: panoptic web Element infinite-retry hang plus
+recorder zero-frames | Bug | Fixed (→ Fixed.md) | 2026-06-15 session |
+2b8f46df | panoptic fcc6322: bounded Element timeout + real initial
+Screenshot frame; platforms PASS x3, full suite green |<br />
+2026-06-15 | HXC-088: llm_orchestrator opencode cancel path hangs 30s —
+cmd.WaitDelay unset | Bug | Fixed (→ Fixed.md) | 2026-06-15 session |
+2b8f46df | llm_orchestrator c791f02: cmd.WaitDelay=2s; ContextCancel ok
+-count=3, pkg/agent ok |<br />
+2026-06-15 | HXC-087: skill_registry randomString UnixNano same-tick
+produces identical chars and colliding IDs | Bug | Fixed (→ Fixed.md) |
+2026-06-15 session | 2b8f46df | skill_registry 5e5dc75: crypto/rand;
+tests pass -count=5 |<br />
+2026-06-15 | HXC-086: SSE broker client-ID UnixNano collision under
+concurrent connect | Bug | Fixed (→ Fixed.md) | 2026-06-15 session |
+e4aa9a26 | streaming 3e15904: SSE fallback client-ID atomic counter; RED
+134/1000 lost -&gt; GREEN 1000/1000 unique under -race |<br />
+2026-06-15 | HXC-085: 14 LLM providers HealthCheck hardcodes production
+URL ignoring injected baseURL | Bug | Fixed (→ Fixed.md) | 2026-06-15
+session | e4aa9a26 | helix_agent 8b622c7a (13) + llm_provider 18108f4
+(14): HealthCheck derives from injected baseURL (kimi pattern); existing
+tests were bluffs -&gt; added real
+TestHealthCheck_HonorsInjectedBaseURL, RED-proven; both trees build 0,
+suites ok |<br />
+2026-06-15 | HXC-084: challenge scripts use GNU-only grep -P backslash-K
+— breaks on macOS BSD grep | Bug | Fixed (→ Fixed.md) | 2026-06-15
+session | e4aa9a26 | challenges 280c2d2 + helix_agent 8b622c7a: all grep
+-oP/-P/-&gt; portable sed -nE/grep -oE/grep -F
+(incl. android_save/cognee/runtime_debate/mcps/helixmemory/output_formatting),
+each proven on sample input + edge cases, bash -n 0 |<br />
+2026-06-15 | HXC-083: production_deployer fabricates rollback env-prep
+server-validation and strategy differentiation | Bug | Fixed (→
+Fixed.md) | 2026-06-15 session | fde6bc0f | production_deployer.go: 5
+bluff sites honest (rollback/env/validate/strategy/monitoring);
+RED/GREEN polarity; build/test 0, go build ./… 0, smoke clean |<br />
+2026-06-15 | HXC-082: performance optimizer fabricates success — 8 apply
+methods sleep and return Success true | Bug | Fixed (→ Fixed.md) |
+2026-06-15 session | fde6bc0f | optimizer.go: 8 methods
+Success:false+ErrOptimizationNotWired (honest), GC kept real; §11.4.120
+reconcile + RED-polarity; build/test 0, go build ./… 0, smoke clean
+|<br />
+2026-06-15 | HXC-081: helix_specifier speckit topic i18n key unresolved
+plus format-verb mismatch | Bug | Fixed (→ Fixed.md) | 2026-06-15
+session | ce097488 | helix_specifier 188f9bc: BundleTranslator resolves
+phase-topic keys; GREEN prose ‘Create a detailed specification …
+Request: <req>’, no raw key/no %!(EXTRA), 22 pkgs no-regression; /debate
+binary CONCLUSION now resolved prose |<br />
+2026-06-15 | HXC-080: /debate and /specify broken at runtime — single
+agent vs 2-min | Bug | Fixed (→ Fixed.md) | 2026-06-15 session |
+63b035fc | cmd/cli+TUI register 2 agents; specify_e2e_test.go
+LIVE-PROVEN Success=true qualityScore=0.86 real output PASS 14.69s
+(conductor podman ollama) |<br />
+2026-06-15 | HXC-079: debate_orchestrator consensus emits unresolved
+i18n key | Bug | Fixed (→ Fixed.md) | 2026-06-15 session | 09b72280 |
+debate_orchestrator 4df3874: embed-bundle translator resolves consensus
+key; GREEN test ‘Debate on <topic> completed across N round(s).’,
+RED/GREEN polarity §11.4.115 |<br />
+2026-06-14 | HXC-076: Web /llm/generate + /llm/stream endpoints with
+frontend (partial — e2e pending) | Feature | Implemented (→ Fixed.md) |
+2026-06-14 session | c850d9d6 | eafdda36
+tests/integration/llm_generate_e2e_test.go: real GIN 200 content:4
+provider:ollama qwen2.5:0.5b, conductor-reproduced |<br />
+2026-06-14 | HXC-075: Phase-1 CLI-Agent Fusion plan reconciliation with
+delivered state | Task | Completed (→ Fixed.md) | 2026-06-14 session |
+7fc09724 | commit:e3063af1 Phase-1 plan reconciliation |<br />
+2026-06-14 | HXC-074: Mobile gomobile Generate binding for on-device LLM
+calls | Feature | Implemented (→ Fixed.md) | 2026-06-14 session |
+7fc09724 | commit:28465071 mobile gomobile Generate binding |<br />
+2026-06-14 | HXC-073: Autocommit git substrate backing CLI edit history
+| Feature | Implemented (→ Fixed.md) | 2026-06-14 session | 7fc09724 |
+commit:61d7167e autocommit git substrate |<br />
+2026-06-14 | HXC-072: CLI /undo and /diff slash commands over autocommit
+substrate | Feature | Implemented (→ Fixed.md) | 2026-06-14 session |
+7fc09724 | commit:bd5228f8 CLI /undo + /diff commands |<br />
+2026-06-14 | HXC-071: Web LLM handler httptest coverage for generate and
+stream | Task | Completed (→ Fixed.md) | 2026-06-14 session | 7fc09724 |
+commit:6f382b95 web handler httptest coverage |<br />
+2026-06-14 | HXC-070: HelixMemory persist log no longer misreports
+success on failure | Bug | Fixed (→ Fixed.md) | 2026-06-14 session |
+7fc09724 | commit:a0239f52 honest HelixMemory persist log |<br />
+2026-06-14 | HXC-069: HelixMemory default-on durable persistence with
+graceful fallback | Feature | Implemented (→ Fixed.md) | 2026-06-14
+session | 7fc09724 | commit:ac3ad237 HelixMemory default-on
+persist+fallback |<br />
+2026-06-14 | HXC-068: speckit debate adapter wireable into agentic
+debate flow | Feature | Implemented (→ Fixed.md) | 2026-06-14 session |
+7fc09724 | commit:95b7385c speckit debate adapter wireable |<br />
+2026-06-09 | HXC-067: inner internal/redis stress suite reads
+TEST_REDIS_HOST/PORT (default :6379) not HELIX_REDIS_HOST/PORT | Bug |
+Fixed (→ Fixed.md) | 2026-06-09 session | 5f98eae9 |
+docs/qa/HXC-067/evidence.md |<br />
+2026-06-09 | HXC-066: inner internal/database integration tests hardcode
+localhost:5433/helix_test, never read HELIX_DATABASE_* env | Bug | Fixed
+(→ Fixed.md) | 2026-06-09 session | 5f98eae9 |
+docs/qa/HXC-066/evidence.md |<br />
+2026-06-09 | HXC-065: cache/pkg/postgres: finite-TTL Set invisible to
+immediate Get (expires_at clock/timezone skew vs real PG) | Bug | Fixed
+(→ Fixed.md) | 2026-06-09 session | 5f98eae9 |
+docs/qa/HXC-065/evidence.md |<br />
+2026-06-09 | HXC-064: cognee AMD-GPU parser tests flake under parallel
+load (rocm-smi fake subprocess signal-killed before 2s timeout,
+§11.4.50) | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | 43521764 |
+docs/qa/HXC-064/evidence.md |<br />
+2026-06-09 | HXC-063: panoptic StartRecording: unreachable
+recording-bootstrap after early return nil — recorder never starts | Bug
+| Fixed (→ Fixed.md) | 2026-06-09 session | 6c7fead9 |
+docs/qa/HXC-063/evidence.md |<br />
+2026-06-09 | HXC-062: helix_specifier pkg/metrics copies sync.RWMutex by
+value (vet lock-copy, concurrency hazard) | Bug | Fixed (→ Fixed.md) |
+2026-06-09 session | 6c7fead9 | docs/qa/HXC-062/evidence.md |<br />
+2026-06-09 | HXC-061: helix_agent legacy unit-test calls
+memory.GetRelevant with stale 2-arg signature (won’t compile) | Bug |
+Fixed (→ Fixed.md) | 2026-06-09 session | 6c7fead9 |
+docs/qa/HXC-061/evidence.md |<br />
+2026-06-09 | HXC-060: debate_orchestrator challenges/runner/main.go:516
+context cancel not called on all return paths (vet leak) | Bug | Fixed
+(→ Fixed.md) | 2026-06-09 session | 6c7fead9 |
+docs/qa/HXC-060/evidence.md |<br />
+2026-06-09 | HXC-059: debate_orchestrator sandbox: ctx-cancel/timeout
+fails to kill child process tree on non-Linux (§11.4.81) | Bug | Fixed
+(→ Fixed.md) | 2026-06-09 session | 6c7fead9 |
+docs/qa/HXC-059/evidence.md |<br />
+2026-06-09 | HXC-031: Deferred long-tail: CONST-052 renames (RESOLVED —
+none remain) + Codex/Cline reference-agent ports | Task | Completed (→
+Fixed.md) | 2026-06-09 session | fe4539f2 | docs/qa/HXC-031/evidence.md
+|<br />
+2026-06-09 | HXC-039: G7 §11.4.83 docs/qa evidence gap: 8 past
+feature/fix commits lack docs/qa/<run-id>/ directories | Task |
+Completed (→ Fixed.md) | 2026-06-09 session | 45362598 |
+docs/qa/HXC-039/evidence.md |<br />
+2026-06-09 | HXC-058: helix_agent go build fails on vendored third-party
+cli_agents/continue test fixture (quarantine) | Bug | Fixed (→ Fixed.md)
+| 2026-06-09 session | f4c5d7d6 | docs/qa/HXC-058/evidence.md |<br />
+2026-06-09 | HXC-057: recovery go.mod missing require+replace for
+digital.vasic.concurrency (pkg/breaker import unwired) | Bug | Fixed (→
+Fixed.md) | 2026-06-09 session | 11104a05 | docs/qa/HXC-057/evidence.md
+|<br />
+2026-06-09 | HXC-056: 7 submodules: CONST-052 capitalised replace =&gt;
+../PliniusCommon (dir is plinius_common) | Bug | Fixed (→ Fixed.md) |
+2026-06-09 session | 11104a05 | docs/qa/HXC-056/evidence.md |<br />
+2026-06-09 | HXC-055: formatters brittle cat –version probe + go_hello
+fixtures break go build | Bug | Fixed (→ Fixed.md) | 2026-06-09 session
+| 94b46bfe | docs/qa/HXC-055/evidence.md |<br />
+2026-06-09 | HXC-054: leak_detector parallel test flake — §11.4.50
+determinism | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | 94b46bfe |
+docs/qa/HXC-054/evidence.md |<br />
+2026-06-09 | HXC-051: helix_llm + helix_memory go.mod replace directives
+point to non-existent ../../vasic-digital/* sibling layout (CONST-051(C)
+dependency-layout) | Bug | Fixed (→ Fixed.md) | 2026-06-09 session |
+94b46bfe | docs/qa/HXC-051/evidence.md |<br />
+2026-06-09 | HXC-038: docs_chain G14: fixed.yaml fixed_summary
+transform-contract mismatch + stale state.json baseline false-CONFLICT
+on issues context | Bug | Fixed (→ Fixed.md) | 2026-06-09 session |
+ac4ce917 | docs/qa/HXC-038/evidence.md |<br />
+2026-06-09 | HXC-053: conversation go.mod build break — capitalised
+replace path ../Messaging | Bug | Fixed (→ Fixed.md) | 2026-06-09
+session | ac4ce917 | docs/qa/HXC-053/evidence.md |<br />
+2026-06-09 | HXC-052: background_tasks go.mod build break — capitalised
+replace paths | Bug | Fixed (→ Fixed.md) | 2026-06-09 session | ac4ce917
+| docs/qa/HXC-052/evidence.md |<br />
+2026-06-09 | HXC-050: event_bus NATS env-gated integration skips lack
+SKIP-OK markers required by the no-silent-skips gate (§11.4.98) | Task |
+Completed (→ Fixed.md) | 2026-06-09 session | f0b0329d |
+docs/qa/HXC-050/evidence.md |<br />
+2026-06-09 | HXC-049: doc_processor TestAutomation_UpstreamsExist reads
+capital ‘Upstreams’ but canonical dir is lowercase ‘upstreams’
+(CONST-052 case drift, deterministic FAIL) | Bug | Fixed (→ Fixed.md) |
+2026-06-09 session | f0b0329d | docs/qa/HXC-049/evidence.md |<br />
+2026-06-09 | HXC-048: helixcode-system.yaml HelixQA bank: 11
+self-driving http cases for the non-auth server surface
+(health/server-info/system-status/llm-providers + negatives) | Feature |
+Implemented (→ Fixed.md) | 2026-06-09 session | 3e6d0830 |
+docs/qa/HXC-048/evidence.md |<br />
+2026-06-09 | HXC-047: internal/redis TestNewClient_WithDatabase
+needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer
+contains literal Redis | Task | Completed (→ Fixed.md) | 2026-06-09
+session | 644019e5 | docs/qa/HXC-047/evidence.md |<br />
+2026-06-09 | HXC-045: internal/hooks: cancelled hook ExecutionResult
+leaves duration unset (should always be populated) | Bug | Fixed (→
+Fixed.md) | 2026-06-09 session | f1bf436f | docs/qa/HXC-045/evidence.md
+|<br />
+2026-06-09 | HXC-046: internal/memory/providers: generateThreadID()
+non-unique under fast back-to-back calls (timestamp-only,
+same-nanosecond collision) | Bug | Fixed (→ Fixed.md) | 2026-06-09
+session | 44a4d43f | docs/qa/HXC-046/evidence.md |<br />
+2026-06-09 | HXC-043: auth Login nil-DB panic causes HTTP 500: server
+advertises graceful no-DB operation but first /api/v1/auth/login
+dereferences nil s.db | Bug | Fixed (→ Fixed.md) | 2026-06-09 session |
+d6a37173 | docs/qa/HXC-043/evidence.md |<br />
+2026-06-09 | HXC-042: CONST-050(B) challenge-coverage gap: 12 missing
+challenge scripts in debate_orchestrator + helix_agent
+(ddos/stress/chaos/scaling/ui/ux) | Task | Completed (→ Fixed.md) |
+2026-06-09 session | 54ab4e95 | docs/qa/HXC-042/evidence.md |<br />
+2026-06-09 | HXC-041: helixqa standalone HTTP bank-runner subcommand
+(helixqa http) drives http: banks vs live server without Playwright or
+LLM | Feature | Implemented (→ Fixed.md) | 2026-06-09 session | 7bc10191
+| docs/qa/HXC-041/evidence.md |<br />
+2026-06-09 | HXC-040: CLAUDE.md §9/§3.4 anti-bluff smoke command
+false-alarm (527 i18n/test hits) + case-sensitivity miss of BLUFF-001 |
+Bug | Fixed (→ Fixed.md) | 2026-06-09 session | 7bc10191 |
+docs/qa/HXC-040/evidence.md |<br />
+2026-06-09 | HXC-037: §11.4.103-141 + CONST-048..060 anchor-cascade
+backfill into 7 owned submodules (verify-governance-cascade.sh 30→0) |
+Task | Completed (→ Fixed.md) | 2026-06-09 session | 7bc10191 |
+docs/qa/HXC-037/evidence.md |</div>
 <p><em>Last regenerated: 2026-05-20 (round 463 — HXC-003 closure:
 CONST-046 i18n migration campaign concluded — the genuine user-facing
 (C) string-literal surface is exhausted across all 7 scope areas
@@ -2027,11 +2582,9 @@ round 403 — HXC-008/HXC-007/HXC-009 closures. Round 400 — HXC-006
 closure (HelixCode Speed Programme — 6 phases / 31 tasks). Earlier
 closures (P0-P5 phases) tracked via
 <code>docs/improvements/PROGRESS.md</code> +
-<code>docs/improvements/*evidence*.md</code>.</em></p>
-<h2
-id="hxc-037--114103-141--const-048060-anchor-cascade-backfill-into-7-owned-submodules-verify-governance-cascadesh-300">HXC-037
-— §11.4.103-141 + CONST-048..060 anchor-cascade backfill into 7 owned
-submodules (verify-governance-cascade.sh 30→0)</h2>
+<code>docs/improvements/*evidence*.md</code>.</em> ## HXC-037 —
+§11.4.103-141 + CONST-048..060 anchor-cascade backfill into 7 owned
+submodules (verify-governance-cascade.sh 30→0)</p>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
 docs/qa/HXC-037/evidence.md <strong>Severity:</strong> High
@@ -2045,7 +2598,7 @@ scripts/backfill_anchor_cascade.sh (verbatim golden helix_qa cascade,
 idempotent, §11.4.122 no-removal); backfilled+committed+pushed all 7 to
 origin; verifier now 0 FAIL PASS.</p>
 <h2
-id="hxc-040--claudemd-934-anti-bluff-smoke-command-false-alarm-527-i18ntest-hits--case-sensitivity-miss-of-bluff-001">HXC-040
+id="hxc-040-claude.md-93.4-anti-bluff-smoke-command-false-alarm-527-i18ntest-hits-case-sensitivity-miss-of-bluff-001">HXC-040
 — CLAUDE.md §9/§3.4 anti-bluff smoke command false-alarm (527 i18n/test
 hits) + case-sensitivity miss of BLUFF-001</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2055,13 +2608,13 @@ Bug <strong>Evidence:</strong> docs/qa/HXC-040/evidence.md
 <p>The documented anti-bluff grep one-liner prints BLUFF FOUND on a
 clean codebase (527 hits = 218 _test.go + 123 i18n message-keys + 306
 placeholder/template infra; 0 real production bluffs) AND was
-case-sensitive so it would miss the canonical '// For now, simulate
-generation' (capital F). Refined to word-bounded case-insensitive
+case-sensitive so it would miss the canonical ‘// For now, simulate
+generation’ (capital F). Refined to word-bounded case-insensitive
 markers with _test.go/i18n/comment-citation exclusions; clean on real
 tree; §1.1 mutation-proven (planted 3 bluffs caught then reverted
 byte-identical). Both §3.4 and §9 updated.</p>
 <h2
-id="hxc-041--helixqa-standalone-http-bank-runner-subcommand-helixqa-http-drives-http-banks-vs-live-server-without-playwright-or-llm">HXC-041
+id="hxc-041-helixqa-standalone-http-bank-runner-subcommand-helixqa-http-drives-http-banks-vs-live-server-without-playwright-or-llm">HXC-041
 — helixqa standalone HTTP bank-runner subcommand (helixqa http) drives
 http: banks vs live server without Playwright or LLM</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
@@ -2070,13 +2623,13 @@ docs/qa/HXC-041/evidence.md <strong>Severity:</strong> Medium
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
 <p>HelixQA could only run banks via Playwright (absent) or Ollama LLM
-(absent); the LLM-free HTTPExecutor that drives helixcode-auth.yaml's 16
+(absent); the LLM-free HTTPExecutor that drives helixcode-auth.yaml’s 16
 http: cases against the live server was wired only internally. Built
-'helixqa http -bank <yaml> -base-url <url>' (cmd/helixqa/http.go +281,
+‘helixqa http -bank <yaml> -base-url <url>’ (cmd/helixqa/http.go +281,
 http_test.go +285, 2 mutation tests); build+tests green; live run vs
 booted helixcode = 15/16 PASS exit 1. helix_qa commit d6c084d6.</p>
 <h2
-id="hxc-042--const-050b-challenge-coverage-gap-12-missing-challenge-scripts-in-debate_orchestrator--helix_agent-ddosstresschaosscalinguiux">HXC-042
+id="hxc-042-const-050b-challenge-coverage-gap-12-missing-challenge-scripts-in-debate_orchestrator-helix_agent-ddosstresschaosscalinguiux">HXC-042
 — CONST-050(B) challenge-coverage gap: 12 missing challenge scripts in
 debate_orchestrator + helix_agent (ddos/stress/chaos/scaling/ui/ux)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -2092,7 +2645,7 @@ panic/leak detection; honest SKIP-OK when no env target. bash -n 12/12
 PASS; real DDoS run 200/200 ok. Committed debate_orchestrator 19bd8e5b +
 helix_agent 6eee57e1.</p>
 <h2
-id="hxc-043--auth-login-nil-db-panic-causes-http-500-server-advertises-graceful-no-db-operation-but-first-apiv1authlogin-dereferences-nil-sdb">HXC-043
+id="hxc-043-auth-login-nil-db-panic-causes-http-500-server-advertises-graceful-no-db-operation-but-first-apiv1authlogin-dereferences-nil-s.db">HXC-043
 — auth Login nil-DB panic causes HTTP 500: server advertises graceful
 no-DB operation but first /api/v1/auth/login dereferences nil s.db</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2100,38 +2653,38 @@ Bug <strong>Evidence:</strong> docs/qa/HXC-043/evidence.md
 <strong>Severity:</strong> High <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
 <p>Found by HXC-041 live helixqa-http run (HXC-AUTH-003 expected 401 got
-500 empty body). With db=nil (server's graceful no-DB path),
+500 empty body). With db=nil (server’s graceful no-DB path),
 helix_code/internal/auth/auth.go:156 (*AuthService).Login calls
 s.db.GetUserByUsername on nil s.db then nil-pointer panic then Gin
 Recovery then HTTP 500. Fix: guard nil s.db in Login and sibling
 db-touching auth paths, return clean 401/503. RED test exists:
 helixcode-auth.yaml HXC-AUTH-003 via helixqa http.</p>
 <h2
-id="hxc-046--internalmemoryproviders-generatethreadid-non-unique-under-fast-back-to-back-calls-timestamp-only-same-nanosecond-collision">HXC-046
+id="hxc-046-internalmemoryproviders-generatethreadid-non-unique-under-fast-back-to-back-calls-timestamp-only-same-nanosecond-collision">HXC-046
 — internal/memory/providers: generateThreadID() non-unique under fast
 back-to-back calls (timestamp-only, same-nanosecond collision)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-046/evidence.md
 <strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
-<p>Found by isolated-worktree full unit sweep (go test ./internal/...
-HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-046/evidence.md
-for the exact failing test + file:line + message. Genuine product defect
+<p>Found by isolated-worktree full unit sweep (go test ./internal/… HEAD
+54ab4e95, hermetic test, no infra). See docs/qa/HXC-046/evidence.md for
+the exact failing test + file:line + message. Genuine product defect
 reproducible deterministically.</p>
 <h2
-id="hxc-045--internalhooks-cancelled-hook-executionresult-leaves-duration-unset-should-always-be-populated">HXC-045
+id="hxc-045-internalhooks-cancelled-hook-executionresult-leaves-duration-unset-should-always-be-populated">HXC-045
 — internal/hooks: cancelled hook ExecutionResult leaves duration unset
 (should always be populated)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-045/evidence.md
 <strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
-<p>Found by isolated-worktree full unit sweep (go test ./internal/...
-HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-045/evidence.md
-for the exact failing test + file:line + message. Genuine product defect
+<p>Found by isolated-worktree full unit sweep (go test ./internal/… HEAD
+54ab4e95, hermetic test, no infra). See docs/qa/HXC-045/evidence.md for
+the exact failing test + file:line + message. Genuine product defect
 reproducible deterministically.</p>
 <h2
-id="hxc-044--internalcognee-amd-gpu-rocm-smi-json-parser-returns--1-sentinel-instead-of-parsed-gpu-use-value">HXC-044
+id="hxc-044-internalcognee-amd-gpu-rocm-smi-json-parser-returns--1-sentinel-instead-of-parsed-gpu-use-value">HXC-044
 — internal/cognee: AMD-GPU rocm-smi JSON parser returns -1 sentinel
 instead of parsed GPU-use value</h2>
 <p><strong>Status:</strong> Obsolete (→ Fixed.md) <strong>Type:</strong>
@@ -2140,12 +2693,12 @@ Bug <strong>Evidence:</strong> docs/qa/HXC-044/evidence.md
 <strong>Assigned-To:</strong> Claude <strong>Obsolete-Details:</strong>
 Since: 2026-06-09; Reason: not-reproducible; Superseding-item: none;
 Triple-check evidence: docs/qa/HXC-044/evidence.md</p>
-<p>Found by isolated-worktree full unit sweep (go test ./internal/...
-HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md
-for the exact failing test + file:line + message. Genuine product defect
+<p>Found by isolated-worktree full unit sweep (go test ./internal/… HEAD
+54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md for
+the exact failing test + file:line + message. Genuine product defect
 reproducible deterministically.</p>
 <h2
-id="hxc-047--internalredis-testnewclient_withdatabase-needs-live-redis-with-no-skip-ok-guard-11498--i18n-error-no-longer-contains-literal-redis">HXC-047
+id="hxc-047-internalredis-testnewclient_withdatabase-needs-live-redis-with-no-skip-ok-guard-11.4.98-i18n-error-no-longer-contains-literal-redis">HXC-047
 — internal/redis TestNewClient_WithDatabase needs-live-Redis with no
 SKIP-OK guard (§11.4.98) + i18n error no longer contains literal
 Redis</h2>
@@ -2156,12 +2709,12 @@ docs/qa/HXC-047/evidence.md <strong>Severity:</strong> Low
 Claude</p>
 <p>Hermetic unit run found this test silently depends on a live Redis at
 127.0.0.1:6379 (no SKIP-OK §11.4.3/§11.4.98) AND asserts the error
-contains literal 'Redis' which the i18n-keyed error
+contains literal ‘Redis’ which the i18n-keyed error
 (internal_redis_failed_connect) no longer contains. Fix: SKIP-OK guard
 when no Redis + reconcile assertion. Evidence
 docs/qa/HXC-047/evidence.md (HEAD 54ab4e95).</p>
 <h2
-id="hxc-048--helixcode-systemyaml-helixqa-bank-11-self-driving-http-cases-for-the-non-auth-server-surface-healthserver-infosystem-statusllm-providers--negatives">HXC-048
+id="hxc-048-helixcode-system.yaml-helixqa-bank-11-self-driving-http-cases-for-the-non-auth-server-surface-healthserver-infosystem-statusllm-providers-negatives">HXC-048
 — helixcode-system.yaml HelixQA bank: 11 self-driving http cases for the
 non-auth server surface (health/server-info/system-status/llm-providers
 + negatives)</h2>
@@ -2178,21 +2731,21 @@ helixqa list → 11 cases; dry run fired real requests. Confident body
 asserts from captured responses; status-only/_skip where unverified
 (§11.4.6). helix_qa f18a5d3b. Live-run vs booted server queued.</p>
 <h2
-id="hxc-049--doc_processor-testautomation_upstreamsexist-reads-capital-upstreams-but-canonical-dir-is-lowercase-upstreams-const-052-case-drift-deterministic-fail">HXC-049
-— doc_processor TestAutomation_UpstreamsExist reads capital 'Upstreams'
-but canonical dir is lowercase 'upstreams' (CONST-052 case drift,
+id="hxc-049-doc_processor-testautomation_upstreamsexist-reads-capital-upstreams-but-canonical-dir-is-lowercase-upstreams-const-052-case-drift-deterministic-fail">HXC-049
+— doc_processor TestAutomation_UpstreamsExist reads capital ‘Upstreams’
+but canonical dir is lowercase ‘upstreams’ (CONST-052 case drift,
 deterministic FAIL)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-049/evidence.md
 <strong>Severity:</strong> Low <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
 <p>Owned-submodule health sweep found internal automation_test.go:140
-os.ReadDir("Upstreams") failing every run because the on-disk dir is
-lowercase 'upstreams' per CONST-052. Test-side fix
-'"Upstreams"→"upstreams"'. GREEN: ok digital.vasic.docprocessor. Commit
+os.ReadDir(“Upstreams”) failing every run because the on-disk dir is
+lowercase ‘upstreams’ per CONST-052. Test-side fix
+‘“Upstreams”→“upstreams”’. GREEN: ok digital.vasic.docprocessor. Commit
 ecb384f.</p>
 <h2
-id="hxc-050--event_bus-nats-env-gated-integration-skips-lack-skip-ok-markers-required-by-the-no-silent-skips-gate-11498">HXC-050
+id="hxc-050-event_bus-nats-env-gated-integration-skips-lack-skip-ok-markers-required-by-the-no-silent-skips-gate-11.4.98">HXC-050
 — event_bus NATS env-gated integration skips lack SKIP-OK markers
 required by the no-silent-skips gate (§11.4.98)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -2203,20 +2756,20 @@ Claude</p>
 <p>Owned-submodule health sweep found
 pkg/nats/integration_test.go:23,120 env-gated t.Skip (legitimately runs
 vs real NATS when NATS_URL is set) without literal SKIP-OK markers.
-Added 'SKIP-OK: #HXC-050 ...' to both; build+skip clean. Commit
+Added ‘SKIP-OK: #HXC-050 …’ to both; build+skip clean. Commit
 1cae683.</p>
 <h2
-id="hxc-052--background_tasks-gomod-build-break--capitalised-replace-paths">HXC-052
+id="hxc-052-background_tasks-go.mod-build-break-capitalised-replace-paths">HXC-052
 — background_tasks go.mod build break — capitalised replace paths</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-052/evidence.md
 <strong>Severity:</strong> Medium</p>
 <p>submodules/background_tasks/go.mod replace directives pointed at
 ../Concurrency and ../Models which no longer exist after the CONST-052
-lowercase rename; go build ./... failed until corrected to
-../concurrency and ../models.</p>
+lowercase rename; go build ./… failed until corrected to ../concurrency
+and ../models.</p>
 <h2
-id="hxc-053--conversation-gomod-build-break--capitalised-replace-path-messaging">HXC-053
+id="hxc-053-conversation-go.mod-build-break-capitalised-replace-path-..messaging">HXC-053
 — conversation go.mod build break — capitalised replace path
 ../Messaging</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2224,47 +2777,47 @@ Bug <strong>Evidence:</strong> docs/qa/HXC-053/evidence.md
 <strong>Severity:</strong> Medium</p>
 <p>submodules/conversation/go.mod line 24 replace
 digital.vasic.messaging pointed at ../Messaging (capitalised) which
-broke go build ./... after the CONST-052 lowercase rename; corrected to
+broke go build ./… after the CONST-052 lowercase rename; corrected to
 ../messaging.</p>
 <h2
-id="hxc-038--docs_chain-g14-fixedyaml-fixed_summary-transform-contract-mismatch--stale-statejson-baseline-false-conflict-on-issues-context">HXC-038
+id="hxc-038-docs_chain-g14-fixed.yaml-fixed_summary-transform-contract-mismatch-stale-state.json-baseline-false-conflict-on-issues-context">HXC-038
 — docs_chain G14: fixed.yaml fixed_summary transform-contract mismatch +
 stale state.json baseline false-CONFLICT on issues context</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-038/evidence.md
 <strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
-<p>verify-all-constitution-rules.sh G14 (docs_chain verify --all) fails:
+<p>verify-all-constitution-rules.sh G14 (docs_chain verify –all) fails:
 (1) fixed.yaml fixed_summary node perpetually STALE because
 generate_fixed_summary.sh writes the file as a side-effect and prints a
-'wrote ...' status line to stdout, while docs_chain captures stdout as
+‘wrote …’ status line to stdout, while docs_chain captures stdout as
 content — content is correct+deterministic, the node I/O contract needs
 a stdout mode or a writes-file declaration; (2) issues context reports a
 §11.4.6 CONFLICT (both issues_md + items_db dirty vs stale state.json
 baseline) though MD⇄DB are verified byte-identical via db-to-md — needs
 a baseline refresh. governance context already in-sync this session.</p>
 <h2
-id="hxc-051--helix_llm--helix_memory-gomod-replace-directives-point-to-non-existent-vasic-digital-sibling-layout-const-051c-dependency-layout">HXC-051
+id="hxc-051-helix_llm-helix_memory-go.mod-replace-directives-point-to-non-existent-....vasic-digital-sibling-layout-const-051c-dependency-layout">HXC-051
 — helix_llm + helix_memory go.mod replace directives point to
 non-existent ../../vasic-digital/* sibling layout (CONST-051(C)
 dependency-layout)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
-Task <strong>Evidence:</strong> docs/qa/HXC-051/evidence.md
+Bug <strong>Evidence:</strong> docs/qa/HXC-051/evidence.md
 <strong>Severity:</strong> Low <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
 <p>Owned-submodule health sweep (D-2): helix_llm
 (internal/knowledge/embedding_providers.go) + helix_memory
 (pkg/provider/adapter.go) fail to build standalone because their go.mod
-'replace' directives target ../../vasic-digital/<Module> sibling dirs
+‘replace’ directives target ../../vasic-digital/<Module> sibling dirs
 not materialized in the HelixCode layout. CONST-051(C) requires deps
 resolvable from the project root (submodules/<name>). The other 8/24
 packages build+test ok; only the replace-dep-needing packages fail.
-Investigation: confirm whether HelixCode's build actually compiles these
+Investigation: confirm whether HelixCode’s build actually compiles these
 (vs reference/standalone), then rewire replace paths to the root
 submodule layout OR document the standalone-build requirement. Not
-breaking helix_code's own build. Found by D-2 health sweep.</p>
+breaking helix_code’s own build. Found by D-2 health sweep.</p>
 <h2
-id="hxc-054--leak_detector-parallel-test-flake--11450-determinism">HXC-054
+id="hxc-054-leak_detector-parallel-test-flake-11.4.50-determinism">HXC-054
 — leak_detector parallel test flake — §11.4.50 determinism</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-054/evidence.md
@@ -2274,17 +2827,17 @@ PASS/FAIL under parallel execution (timing-sensitive), violating
 §11.4.50 determinism; needs forensic root-cause before a deterministic
 fix. Open.</p>
 <h2
-id="hxc-055--formatters-brittle-cat---version-probe--go_hello-fixtures-break-go-build">HXC-055
-— formatters brittle cat --version probe + go_hello fixtures break go
+id="hxc-055-formatters-brittle-cat-version-probe-go_hello-fixtures-break-go-build">HXC-055
+— formatters brittle cat –version probe + go_hello fixtures break go
 build</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-055/evidence.md
 <strong>Severity:</strong> Low</p>
-<p>Discovery sweep: formatters test relies on brittle 'cat --version'
+<p>Discovery sweep: formatters test relies on brittle ‘cat –version’
 (§11.4.81 cross-platform), and committed go_hello fixture sources break
 a tree-wide go build; both need isolation/fixing. Open.</p>
 <h2
-id="hxc-056--7-submodules-const-052-capitalised-replace--pliniuscommon-dir-is-plinius_common">HXC-056
+id="hxc-056-7-submodules-const-052-capitalised-replace-..pliniuscommon-dir-is-plinius_common">HXC-056
 — 7 submodules: CONST-052 capitalised replace =&gt; ../PliniusCommon
 (dir is plinius_common)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2293,10 +2846,10 @@ Bug <strong>Evidence:</strong> docs/qa/HXC-056/evidence.md
 <p>auto_temp, claritas, gandalf_solutions, hyper_tune, leak_hub,
 ouroborous, veritas each have go.mod line replace
 digital.vasic.pliniuscommon =&gt; ../PliniusCommon; capitalised dir
-absent, lowercase sibling plinius_common exists; go build ./... fails on
+absent, lowercase sibling plinius_common exists; go build ./… fails on
 all 7.</p>
 <h2
-id="hxc-057--recovery-gomod-missing-requirereplace-for-digitalvasicconcurrency-pkgbreaker-import-unwired">HXC-057
+id="hxc-057-recovery-go.mod-missing-requirereplace-for-digital.vasic.concurrency-pkgbreaker-import-unwired">HXC-057
 — recovery go.mod missing require+replace for digital.vasic.concurrency
 (pkg/breaker import unwired)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2304,23 +2857,23 @@ Bug <strong>Evidence:</strong> docs/qa/HXC-057/evidence.md
 <strong>Severity:</strong> Medium</p>
 <p>recovery/pkg/breaker/breaker.go imports
 digital.vasic.concurrency/pkg/breaker but recovery/go.mod has no
-require/replace for the concurrency sibling; go build ./... fails: no
+require/replace for the concurrency sibling; go build ./… fails: no
 required module provides package. Sibling submodules/concurrency
 provides pkg/breaker.</p>
 <h2
-id="hxc-058--helix_agent-go-build-fails-on-vendored-third-party-cli_agentscontinue-test-fixture-quarantine">HXC-058
+id="hxc-058-helix_agent-go-build-fails-on-vendored-third-party-cli_agentscontinue-test-fixture-quarantine">HXC-058
 — helix_agent go build fails on vendored third-party cli_agents/continue
 test fixture (quarantine)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-058/evidence.md
 <strong>Severity:</strong> Low</p>
-<p>helix_agent go build ./... fails ONLY in vendored third-party
+<p>helix_agent go build ./… fails ONLY in vendored third-party
 cli_agents/continue/ subtree (upstream continue project test fixture
 with bogus relative import); no owned dev.helix.agent package fails;
 needs build-exclusion/quarantine of the vendored fixture subtree, not an
 owned-code fix.</p>
 <h2
-id="hxc-039--g7-11483-docsqa-evidence-gap-8-past-featurefix-commits-lack-docsqa-directories">HXC-039
+id="hxc-039-g7-11.4.83-docsqa-evidence-gap-8-past-featurefix-commits-lack-docsqa-directories">HXC-039
 — G7 §11.4.83 docs/qa evidence gap: 8 past feature/fix commits lack
 docs/qa/<run-id>/ directories</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -2337,7 +2890,7 @@ worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963,
 documented exception). New work this session (HXC-037) ships its docs/qa
 evidence.</p>
 <h2
-id="hxc-031--deferred-long-tail-const-052-renames-resolved--none-remain--codexcline-reference-agent-ports">HXC-031
+id="hxc-031-deferred-long-tail-const-052-renames-resolved-none-remain-codexcline-reference-agent-ports">HXC-031
 — Deferred long-tail: CONST-052 renames (RESOLVED — none remain) +
 Codex/Cline reference-agent ports</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -2346,7 +2899,7 @@ docs/qa/HXC-031/evidence.md</p>
 <p>Deferred long-tail: CONST-052 renames (RESOLVED — none remain) +
 Codex/Cline reference-agent ports</p>
 <h2
-id="hxc-059--debate_orchestrator-sandbox-ctx-canceltimeout-fails-to-kill-child-process-tree-on-non-linux-11481">HXC-059
+id="hxc-059-debate_orchestrator-sandbox-ctx-canceltimeout-fails-to-kill-child-process-tree-on-non-linux-11.4.81">HXC-059
 — debate_orchestrator sandbox: ctx-cancel/timeout fails to kill child
 process tree on non-Linux (§11.4.81)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2359,7 +2912,7 @@ TestSandboxExecute_TimeoutEnforced FAIL deterministically (elapsed ~30s
 vs 100ms cap). Linux process-group kill has no functioning non-Linux
 equivalent (§11.4.81 parity gap).</p>
 <h2
-id="hxc-060--debate_orchestrator-challengesrunnermaingo516-context-cancel-not-called-on-all-return-paths-vet-leak">HXC-060
+id="hxc-060-debate_orchestrator-challengesrunnermain.go516-context-cancel-not-called-on-all-return-paths-vet-leak">HXC-060
 — debate_orchestrator challenges/runner/main.go:516 context cancel not
 called on all return paths (vet leak)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2369,9 +2922,9 @@ Bug <strong>Evidence:</strong> docs/qa/HXC-060/evidence.md
 on all paths (possible context leak); 571 return may be reached without
 using the cancel var defined on line 516. Owned-code vet finding.</p>
 <h2
-id="hxc-061--helix_agent-legacy-unit-test-calls-memorygetrelevant-with-stale-2-arg-signature-wont-compile">HXC-061
+id="hxc-061-helix_agent-legacy-unit-test-calls-memory.getrelevant-with-stale-2-arg-signature-wont-compile">HXC-061
 — helix_agent legacy unit-test calls memory.GetRelevant with stale 2-arg
-signature (won't compile)</h2>
+signature (won’t compile)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-061/evidence.md
 <strong>Severity:</strong> Medium</p>
@@ -2380,7 +2933,7 @@ memory.GetRelevant(string, number) but the current signature is
 (context.Context, string, int); go vet of the owned test tree fails to
 compile. Stale API call in test code.</p>
 <h2
-id="hxc-062--helix_specifier-pkgmetrics-copies-syncrwmutex-by-value-vet-lock-copy-concurrency-hazard">HXC-062
+id="hxc-062-helix_specifier-pkgmetrics-copies-sync.rwmutex-by-value-vet-lock-copy-concurrency-hazard">HXC-062
 — helix_specifier pkg/metrics copies sync.RWMutex by value (vet
 lock-copy, concurrency hazard)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2391,7 +2944,7 @@ cp; :163 return copies lock value — Metrics struct contains sync.RWMutex
 copied by value. Genuine owned-code concurrency hazard; build+tests pass
 but the copied mutex does not protect the original.</p>
 <h2
-id="hxc-063--panoptic-startrecording-unreachable-recording-bootstrap-after-early-return-nil--recorder-never-starts">HXC-063
+id="hxc-063-panoptic-startrecording-unreachable-recording-bootstrap-after-early-return-nil-recorder-never-starts">HXC-063
 — panoptic StartRecording: unreachable recording-bootstrap after early
 return nil — recorder never starts</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2404,7 +2957,7 @@ StartRecording returns success without recording. Latent correctness
 defect; investigate per §11.4.124 (likely restore by removing the early
 return, not delete the block).</p>
 <h2
-id="hxc-064--cognee-amd-gpu-parser-tests-flake-under-parallel-load-rocm-smi-fake-subprocess-signal-killed-before-2s-timeout-11450">HXC-064
+id="hxc-064-cognee-amd-gpu-parser-tests-flake-under-parallel-load-rocm-smi-fake-subprocess-signal-killed-before-2s-timeout-11.4.50">HXC-064
 — cognee AMD-GPU parser tests flake under parallel load (rocm-smi fake
 subprocess signal-killed before 2s timeout, §11.4.50)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2418,7 +2971,7 @@ but the parser tests assert 33/77 → non-deterministic FAIL. Product
 correct; test timeout load-fragile. Fix: make rocmSmiQueryTimeout an
 overridable var (prod default unchanged) + parser tests raise it.</p>
 <h2
-id="hxc-065--cachepkgpostgres-finite-ttl-set-invisible-to-immediate-get-expires_at-clocktimezone-skew-vs-real-pg">HXC-065
+id="hxc-065-cachepkgpostgres-finite-ttl-set-invisible-to-immediate-get-expires_at-clocktimezone-skew-vs-real-pg">HXC-065
 — cache/pkg/postgres: finite-TTL Set invisible to immediate Get
 (expires_at clock/timezone skew vs real PG)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2432,7 +2985,7 @@ WHERE-clause: likely Go-process time.Now() vs PG server now()
 timezone/clock skew making the just-written row appear already-expired.
 Real cache-backend correctness defect.</p>
 <h2
-id="hxc-066--inner-internaldatabase-integration-tests-hardcode-localhost5433helix_test-never-read-helix_database_-env">HXC-066
+id="hxc-066-inner-internaldatabase-integration-tests-hardcode-localhost5433helix_test-never-read-helix_database_-env">HXC-066
 — inner internal/database integration tests hardcode
 localhost:5433/helix_test, never read HELIX_DATABASE_* env</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2445,7 +2998,7 @@ internal_database_ping_failed against booted PG (15432). DB layer sound
 (persistence passes). Harness defect: should read
 DB_<em>/HELIX_DATABASE_</em> env.</p>
 <h2
-id="hxc-067--inner-internalredis-stress-suite-reads-test_redis_hostport-default-6379-not-helix_redis_hostport">HXC-067
+id="hxc-067-inner-internalredis-stress-suite-reads-test_redis_hostport-default-6379-not-helix_redis_hostport">HXC-067
 — inner internal/redis stress suite reads TEST_REDIS_HOST/PORT (default
 :6379) not HELIX_REDIS_HOST/PORT</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2455,10 +3008,10 @@ Bug <strong>Evidence:</strong> docs/qa/HXC-067/evidence.md
 TEST_REDIS_HOST/TEST_REDIS_PORT (default localhost:6379) instead of the
 standard HELIX_REDIS_HOST/HELIX_REDIS_PORT contract; causes false
 100%-error FAIL against booted Redis on 16379. Pointed at
-TEST_REDIS_PORT=16379 it's GREEN. Env-var-contract inconsistency
+TEST_REDIS_PORT=16379 it’s GREEN. Env-var-contract inconsistency
 (harness).</p>
 <h2
-id="hxc-068--speckit-debate-adapter-wireable-into-agentic-debate-flow">HXC-068
+id="hxc-068-speckit-debate-adapter-wireable-into-agentic-debate-flow">HXC-068
 — speckit debate adapter wireable into agentic debate flow</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
 <strong>Type:</strong> Feature <strong>Evidence:</strong>
@@ -2469,7 +3022,7 @@ commit:95b7385c speckit debate adapter wireable
 it end-to-end; adapter is constructable and dispatchable from the
 orchestrator (commit 95b7385c).</p>
 <h2
-id="hxc-069--helixmemory-default-on-durable-persistence-with-graceful-fallback">HXC-069
+id="hxc-069-helixmemory-default-on-durable-persistence-with-graceful-fallback">HXC-069
 — HelixMemory default-on durable persistence with graceful fallback</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
 <strong>Type:</strong> Feature <strong>Evidence:</strong>
@@ -2480,7 +3033,7 @@ commit:ac3ad237 HelixMemory default-on persist+fallback
 gracefully when the backend store is unavailable, so recall works out of
 the box (commit ac3ad237).</p>
 <h2
-id="hxc-070--helixmemory-persist-log-no-longer-misreports-success-on-failure">HXC-070
+id="hxc-070-helixmemory-persist-log-no-longer-misreports-success-on-failure">HXC-070
 — HelixMemory persist log no longer misreports success on failure</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> commit:a0239f52 honest HelixMemory
@@ -2491,7 +3044,7 @@ Claude</p>
 of an unconditional success line, removing a §11.4 honest-logging bluff
 (commit a0239f52).</p>
 <h2
-id="hxc-071--web-llm-handler-httptest-coverage-for-generate-and-stream">HXC-071
+id="hxc-071-web-llm-handler-httptest-coverage-for-generate-and-stream">HXC-071
 — Web LLM handler httptest coverage for generate and stream</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong> commit:6f382b95
@@ -2502,7 +3055,7 @@ Claude</p>
 /llm/stream endpoints with real request/response round-trips (commit
 6f382b95).</p>
 <h2
-id="hxc-072--cli-undo-and-diff-slash-commands-over-autocommit-substrate">HXC-072
+id="hxc-072-cli-undo-and-diff-slash-commands-over-autocommit-substrate">HXC-072
 — CLI /undo and /diff slash commands over autocommit substrate</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
 <strong>Type:</strong> Feature <strong>Evidence:</strong>
@@ -2513,8 +3066,8 @@ Claude</p>
 against the git autocommit substrate, giving users real edit history
 control (commit bd5228f8).</p>
 <h2
-id="hxc-073--autocommit-git-substrate-backing-cli-edit-history">HXC-073
-— Autocommit git substrate backing CLI edit history</h2>
+id="hxc-073-autocommit-git-substrate-backing-cli-edit-history">HXC-073 —
+Autocommit git substrate backing CLI edit history</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
 <strong>Type:</strong> Feature <strong>Evidence:</strong>
 commit:61d7167e autocommit git substrate <strong>Severity:</strong> High
@@ -2524,7 +3077,7 @@ Claude</p>
 /diff operate on real commits rather than in-memory state (commit
 61d7167e).</p>
 <h2
-id="hxc-074--mobile-gomobile-generate-binding-for-on-device-llm-calls">HXC-074
+id="hxc-074-mobile-gomobile-generate-binding-for-on-device-llm-calls">HXC-074
 — Mobile gomobile Generate binding for on-device LLM calls</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
 <strong>Type:</strong> Feature <strong>Evidence:</strong>
@@ -2535,7 +3088,7 @@ commit:28465071 mobile gomobile Generate binding
 applications can invoke the LLM provider through the shared client core
 (commit 28465071).</p>
 <h2
-id="hxc-075--phase-1-cli-agent-fusion-plan-reconciliation-with-delivered-state">HXC-075
+id="hxc-075-phase-1-cli-agent-fusion-plan-reconciliation-with-delivered-state">HXC-075
 — Phase-1 CLI-Agent Fusion plan reconciliation with delivered state</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong> commit:e3063af1
@@ -2546,7 +3099,7 @@ Claude</p>
 state so the programme plan reflects reality, not aspiration (commit
 e3063af1).</p>
 <h2
-id="hxc-076--web-llmgenerate--llmstream-endpoints-with-frontend-partial--e2e-pending">HXC-076
+id="hxc-076-web-llmgenerate-llmstream-endpoints-with-frontend-partial-e2e-pending">HXC-076
 — Web /llm/generate + /llm/stream endpoints with frontend (partial — e2e
 pending)</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
@@ -2560,21 +3113,21 @@ landed (commit 32e7e5b8); REMAINING: full browser-driven end-to-end test
 proving real streamed output renders in the UI is not yet captured —
 keep open until e2e evidence lands.</p>
 <h2
-id="hxc-079--debate_orchestrator-consensus-emits-unresolved-i18n-key">HXC-079
+id="hxc-079-debate_orchestrator-consensus-emits-unresolved-i18n-key">HXC-079
 — debate_orchestrator consensus emits unresolved i18n key</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> debate_orchestrator 4df3874: embed-bundle
-translator resolves consensus key; GREEN test 'Debate on <topic>
-completed across N round(s).', RED/GREEN polarity §11.4.115
+translator resolves consensus key; GREEN test ‘Debate on <topic>
+completed across N round(s).’, RED/GREEN polarity §11.4.115
 <strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
 <p>Live /debate e2e (debate_e2e_test.go) shows CONCLUSION/Summary print
-literal 'debate.orchestrator.consensus_conclusion' i18n message-key
+literal ‘debate.orchestrator.consensus_conclusion’ i18n message-key
 instead of resolved prose; per-agent LLM content is real, consensus
 synthesis layer in submodules/debate_orchestrator does not resolve the
 key. §11.4.118 discovery finding.</p>
 <h2
-id="hxc-080--debate-and-specify-broken-at-runtime--single-agent-vs-2-min">HXC-080
+id="hxc-080-debate-and-specify-broken-at-runtime-single-agent-vs-2-min">HXC-080
 — /debate and /specify broken at runtime — single agent vs 2-min</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> cmd/cli+TUI register 2 agents;
@@ -2583,33 +3136,33 @@ output PASS 14.69s (conductor podman ollama) <strong>Severity:</strong>
 High <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
 <p>handleDebate/handleSpecify (cmd/cli) + TUI registered ONE AgentSpec
-but orchestrator MinAgentsPerDebate=2; users hit 'insufficient agents
-(have 1, need 2)'. Round-7 debate proof used a 2-agent test, masking the
+but orchestrator MinAgentsPerDebate=2; users hit ‘insufficient agents
+(have 1, need 2)’. Round-7 debate proof used a 2-agent test, masking the
 1-agent production gap (§11.4.108).</p>
 <h2
-id="hxc-081--helix_specifier-speckit-topic-i18n-key-unresolved-plus-format-verb-mismatch">HXC-081
+id="hxc-081-helix_specifier-speckit-topic-i18n-key-unresolved-plus-format-verb-mismatch">HXC-081
 — helix_specifier speckit topic i18n key unresolved plus format-verb
 mismatch</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> helix_specifier 188f9bc: BundleTranslator
-resolves phase-topic keys; GREEN prose 'Create a detailed specification
-... Request: <req>', no raw key/no %!(EXTRA), 22 pkgs no-regression;
+resolves phase-topic keys; GREEN prose ‘Create a detailed specification
+… Request: <req>’, no raw key/no %!(EXTRA), 22 pkgs no-regression;
 /debate binary CONCLUSION now resolved prose <strong>Severity:</strong>
 Medium <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
-<p>Live /specify run shows 'Topic:
-helixspecifier_speckit_topic_specify%!(EXTRA string=...)' — the speckit
+<p>Live /specify run shows ‘Topic:
+helixspecifier_speckit_topic_specify%!(EXTRA string=…)’ — the speckit
 phase prompt emits a raw i18n message-key with a Go Sprintf arg-count
 mismatch instead of resolved prose. Same class as HXC-079, in
 submodules/helix_specifier. Captured in specify_e2e_test.go output.</p>
 <h2
-id="hxc-082--performance-optimizer-fabricates-success--8-apply-methods-sleep-and-return-success-true">HXC-082
+id="hxc-082-performance-optimizer-fabricates-success-8-apply-methods-sleep-and-return-success-true">HXC-082
 — performance optimizer fabricates success — 8 apply methods sleep and
 return Success true</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> optimizer.go: 8 methods
 Success:false+ErrOptimizationNotWired (honest), GC kept real; §11.4.120
-reconcile + RED-polarity; build/test 0, go build ./... 0, smoke clean
+reconcile + RED-polarity; build/test 0, go build ./… 0, smoke clean
 <strong>Severity:</strong> High <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
 <p>internal/performance/optimizer.go:540-760:
@@ -2619,13 +3172,13 @@ Success:true with fabricated MetricsChange. User-reachable via
 cmd/performance_optimization/main.go:89. Rule 2 / §11.4 bluff. Fix: real
 tuning OR honest ErrOptimizationNotWired sentinel.</p>
 <h2
-id="hxc-083--production_deployer-fabricates-rollback-env-prep-server-validation-and-strategy-differentiation">HXC-083
+id="hxc-083-production_deployer-fabricates-rollback-env-prep-server-validation-and-strategy-differentiation">HXC-083
 — production_deployer fabricates rollback env-prep server-validation and
 strategy differentiation</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> production_deployer.go: 5 bluff sites
 honest (rollback/env/validate/strategy/monitoring); RED/GREEN polarity;
-build/test 0, go build ./... 0, smoke clean <strong>Severity:</strong>
+build/test 0, go build ./… 0, smoke clean <strong>Severity:</strong>
 Medium <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
 <p>internal/deployment/production_deployer.go: triggerRollback(1028)
@@ -2636,24 +3189,23 @@ executeProductionDeploy (no-op differentiation); executeMonitoring(758)
 ends with success notification contradicting its honest gap-log. §11.4
 bluffs. Fix: real work or honest sentinels.</p>
 <h2
-id="hxc-084--challenge-scripts-use-gnu-only-grep--p-backslash-k--breaks-on-macos-bsd-grep">HXC-084
+id="hxc-084-challenge-scripts-use-gnu-only-grep--p-backslash-k-breaks-on-macos-bsd-grep">HXC-084
 — challenge scripts use GNU-only grep -P backslash-K — breaks on macOS
 BSD grep</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> challenges 280c2d2 + helix_agent
-8b622c7a: all grep -oP/-P/\K -&gt; portable sed -nE/grep -oE/grep -F
-(incl.
-android_save/cognee/runtime_debate/mcps/helixmemory/output_formatting),
+8b622c7a: all grep -oP/-P/-&gt; portable sed -nE/grep -oE/grep -F
+(incl. android_save/cognee/runtime_debate/mcps/helixmemory/output_formatting),
 each proven on sample input + edge cases, bash -n 0
 <strong>Severity:</strong> High <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
-<p>29 owned challenge/CI shell scripts use grep -oP / grep -P / \K
+<p>29 owned challenge/CI shell scripts use grep -oP / grep -P /
 (GNU/PCRE-only). Stock macOS /usr/bin/grep rejects -P (invalid option)
 -&gt; empty evidence capture -&gt; corrupted PASS/FAIL gates (false FAIL
 or silently-masked). §11.4.81. Fix: portable sed -E/awk/perl. Highest:
 challenges android_save, helix_agent cognee/runtime_debate/mcps.</p>
 <h2
-id="hxc-085--14-llm-providers-healthcheck-hardcodes-production-url-ignoring-injected-baseurl">HXC-085
+id="hxc-085-14-llm-providers-healthcheck-hardcodes-production-url-ignoring-injected-baseurl">HXC-085
 — 14 LLM providers HealthCheck hardcodes production URL ignoring
 injected baseURL</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2670,7 +3222,7 @@ proxy/Azure endpoints. Duplicated in helix_agent/internal/llm/providers
 + llm_provider/pkg/providers. Fix: mirror the existing kimi.go
 derive-from-baseURL fix.</p>
 <h2
-id="hxc-086--sse-broker-client-id-unixnano-collision-under-concurrent-connect">HXC-086
+id="hxc-086-sse-broker-client-id-unixnano-collision-under-concurrent-connect">HXC-086
 — SSE broker client-ID UnixNano collision under concurrent connect</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> streaming 3e15904: SSE fallback client-ID
@@ -2678,12 +3230,12 @@ atomic counter; RED 134/1000 lost -&gt; GREEN 1000/1000 unique under
 -race <strong>Severity:</strong> Medium <strong>Created-By:</strong>
 Claude <strong>Assigned-To:</strong> Claude</p>
 <p>submodules/streaming/pkg/sse/sse.go:140
-clientID=fmt.Sprintf('client-%d',UnixNano()) used as b.clients map key,
+clientID=fmt.Sprintf(‘client-%d’,UnixNano()) used as b.clients map key,
 generated per concurrent SSE connect — same-tick collision
 overwrites/loses a client. Fix: crypto/rand or atomic counter
 suffix.</p>
 <h2
-id="hxc-087--skill_registry-randomstring-unixnano-same-tick-produces-identical-chars-and-colliding-ids">HXC-087
+id="hxc-087-skill_registry-randomstring-unixnano-same-tick-produces-identical-chars-and-colliding-ids">HXC-087
 — skill_registry randomString UnixNano same-tick produces identical
 chars and colliding IDs</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2695,7 +3247,7 @@ Claude</p>
 in a tight loop -&gt; all-identical chars + colliding execution IDs.
 Fixed with crypto/rand. Proven class.</p>
 <h2
-id="hxc-088--llm_orchestrator-opencode-cancel-path-hangs-30s--cmdwaitdelay-unset">HXC-088
+id="hxc-088-llm_orchestrator-opencode-cancel-path-hangs-30s-cmd.waitdelay-unset">HXC-088
 — llm_orchestrator opencode cancel path hangs 30s — cmd.WaitDelay
 unset</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2708,7 +3260,7 @@ cmd.Cancel but WaitDelay==0 -&gt; on ctx-cancel Wait() blocks on pipe
 drainage when a grandchild holds stdout (30s hang vs 5s test). Fixed
 cmd.WaitDelay=2s.</p>
 <h2
-id="hxc-089--panoptic-web-element-infinite-retry-hang-plus-recorder-zero-frames">HXC-089
+id="hxc-089-panoptic-web-element-infinite-retry-hang-plus-recorder-zero-frames">HXC-089
 — panoptic web Element infinite-retry hang plus recorder
 zero-frames</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2722,7 +3274,7 @@ screencast.go relied only on async CDP events -&gt; 0 frames on
 immediate start/stop. Fixed: bounded page.Timeout + synchronous initial
 Screenshot frame.</p>
 <h2
-id="hxc-091--containers-custom-health-check-duration-can-be-0-timer-resolution-flake">HXC-091
+id="hxc-091-containers-custom-health-check-duration-can-be-0-timer-resolution-flake">HXC-091
 — containers custom health-check duration can be 0 (timer-resolution
 flake)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2735,7 +3287,7 @@ duration=time.Since(start) returns 0 for a no-op check -&gt;
 TestNewCustomCheckFunc_Success NotZero flake. Fixed: floor to
 time.Nanosecond when &lt;=0 (no fabricated delay).</p>
 <h2
-id="hxc-092--debate_orchestrator-30s-defaulttimeout-too-short-for-capable-models-on-multi-round-specify">HXC-092
+id="hxc-092-debate_orchestrator-30s-defaulttimeout-too-short-for-capable-models-on-multi-round-specify">HXC-092
 — debate_orchestrator 30s DefaultTimeout too short for capable models on
 multi-round /specify</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2753,13 +3305,13 @@ context deadline exceeded. /debate works (WithMaxRounds(1), rich quality
 case (adapter WithTimeout or orchestrator default). Tunable, not a code
 defect; surfaced honestly (no fabrication).</p>
 <h2
-id="hxc-094--f12-workspace-checkpoints--file-snapshot--restoreundo-safety-net">HXC-094
+id="hxc-094-f12-workspace-checkpoints-file-snapshot-restoreundo-safety-net">HXC-094
 — F12 workspace checkpoints — file snapshot + restore/undo safety
 net</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
 <strong>Type:</strong> Feature <strong>Evidence:</strong>
 internal/checkpoint + cmd/cli /checkpoint; restore-bytes round-trip +
-survives-restart tests PASS, go build ./... 0 <strong>Severity:</strong>
+survives-restart tests PASS, go build ./… 0 <strong>Severity:</strong>
 Medium <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
 <p>internal/checkpoint Manager (git-plumbing + file-copy backends) +
@@ -2767,40 +3319,40 @@ Claude</p>
 contents and restore real bytes later (the cli_agents F12 oops-revert
 net). Existing checkpoints were task-DB rows, not file snapshots.</p>
 <h2
-id="hxc-095--cli-binary-generatedebatespecify-return-404-against-live-local-ollama">HXC-095
+id="hxc-095-cli-binary-generatedebatespecify-return-404-against-live-local-ollama">HXC-095
 — CLI binary generate/debate/specify return 404 against live local
 ollama</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> desktop i18n/bundle.go + main()
 SetTranslator wiring; before raw keys/%!(EXTRA) -&gt; after resolved
-prose 'HelixCode Desktop CLI (nogui mode)'; build/test 0,
+prose ‘HelixCode Desktop CLI (nogui mode)’; build/test 0,
 paired-mutation guard <strong>Severity:</strong> High
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
-<p>helixcli --prompt/--stream + /debate + /specify hit 'API request
-failed: API returned status 404' against a working local ollama
+<p>helixcli –prompt/–stream + /debate + /specify hit ‘API request
+failed: API returned status 404’ against a working local ollama
 (qwen2.5:3b on :11434). The web POST /llm/generate + integration tests
-work with the same NewOllamaProvider — so the CLI's
+work with the same NewOllamaProvider — so the CLI’s
 default-local-provider path uses a wrong endpoint/model-name (§11.4.108
 different-path gap). AI features are broken for the end user via the
 binary. Found while recording feature videos.</p>
 <h2
-id="hxc-096--desktop-nogui-prints-raw-i18n-keys--extra-format-mismatch-in-statushelp">HXC-096
+id="hxc-096-desktop-nogui-prints-raw-i18n-keys-extra-format-mismatch-in-statushelp">HXC-096
 — desktop nogui prints raw i18n keys + %!(EXTRA) format mismatch in
 status/help</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> cmd/cli/main.go: known-provider-prefix
-guard on model parsing; live qwen2.5:3b -&gt; real answer '4', zero 404;
+guard on model parsing; live qwen2.5:3b -&gt; real answer ‘4’, zero 404;
 build/test 0 <strong>Severity:</strong> Medium
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
 <p>applications/desktop/main_nogui.go status/help output prints raw
 message keys (desktop_cli_status_header, desktop_cli_help_body) + a
-Printf arg-count mismatch (%!(EXTRA int=0...)) in status. Same
+Printf arg-count mismatch (%!(EXTRA int=0…)) in status. Same
 i18n-resolution class as HXC-079/081. CLI binary unaffected. Found while
 assessing desktop for video.</p>
 <h2
-id="hxc-097--systemic-standalone-binaries--internalconfig--internaldatabase-never-wire-i18n-translator---raw-keys-at-runtime">HXC-097
+id="hxc-097-systemic-standalone-binaries-internalconfig-internaldatabase-never-wire-i18n-translator---raw-keys-at-runtime">HXC-097
 — SYSTEMIC: standalone binaries + internal/config + internal/database
 never wire i18n Translator -&gt; raw keys at runtime</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2815,16 +3367,16 @@ the fleet fix). <strong>Severity:</strong> High
 Claude</p>
 <p>Same unwired-translator bug as HXC-095 found across the fleet:
 aurora_os standalone nogui (aurora_os_cli_version_banner + %!(EXTRA) at
-runtime) — round-7's aurora/harmony 'i18n fix' added KEYS but never
+runtime) — round-7’s aurora/harmony ‘i18n fix’ added KEYS but never
 wired SetTranslator in main(), so keys still echo raw (§11.4.108
 fixed-in-source-not-at-runtime). Also internal/config
 (internal_config_info_using_config_file) + internal/database
 (internal_database_ping_failed) echo raw keys in CLI output. Fix: wire a
-real Translator (embed-bundle pattern) at each binary's main()/package
+real Translator (embed-bundle pattern) at each binary’s main()/package
 init; add runtime guards that assert resolved prose (not just
 key-presence).</p>
 <h2
-id="hxc-090--panoptic-tracks-test-generated-auditjson-usersjson-const-053-hygiene">HXC-090
+id="hxc-090-panoptic-tracks-test-generated-audit.json-users.json-const-053-hygiene">HXC-090
 — panoptic tracks test-generated audit.json users.json (CONST-053
 hygiene)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2839,34 +3391,34 @@ but overwritten by the enterprise test suite every run
 test-generated data should be gitignored + a fixture template used.
 Pre-existing, low severity.</p>
 <h2
-id="hxc-093--helix_code-module-graph-has-phantom-digitalvasic-requires--private-transitive-blocking-go-list--m-all--gomobile-bind">HXC-093
+id="hxc-093-helix_code-module-graph-has-phantom-digital.vasic.-requires-private-transitive-blocking-go-list--m-all-gomobile-bind">HXC-093
 — helix_code module graph has phantom digital.vasic.* requires + private
 transitive blocking go list -m all / gomobile bind</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> helix_code/go.mod: 27 replace directives
 -&gt; local submodules; go list -m all no-such-host 26-&gt;0 (462
 modules); REAL .aar produced (classes.jar + jni/libgojni.so x4 ABIs); go
-build ./... green throughout <strong>Severity:</strong> Medium
+build ./… green throughout <strong>Severity:</strong> Medium
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
 <p>gomobile bind fails because go list -m -json all errors: ~22
-digital.vasic.{cache,database,eventbus,...,vectordb} module paths are
-required with NO replace + NO remote ('no such host'), and
+digital.vasic.{cache,database,eventbus,…,vectordb} module paths are
+required with NO replace + NO remote (‘no such host’), and
 github.com/HelixDevelopment/helix_agent/Toolkit (private, separate from
-the replaced dev.helix.agent) needs interactive git creds. go build
-./... works (imported subset only); full-graph tooling (gomobile, go
-list -m all) is blocked. Fix (repo-side, careful — editing go.mod risks
-the build): add replace directives for the phantom paths OR prune them,
-make Toolkit resolvable (replace/GOPRIVATE+SSH), persist x/mobile as a
-tool directive. Toolchain+NDK+Xcode all present; gobind codegen already
-works -&gt; artifact achievable once graph resolves.</p>
+the replaced dev.helix.agent) needs interactive git creds. go build ./…
+works (imported subset only); full-graph tooling (gomobile, go list -m
+all) is blocked. Fix (repo-side, careful — editing go.mod risks the
+build): add replace directives for the phantom paths OR prune them, make
+Toolkit resolvable (replace/GOPRIVATE+SSH), persist x/mobile as a tool
+directive. Toolchain+NDK+Xcode all present; gobind codegen already works
+-&gt; artifact achievable once graph resolves.</p>
 <h2
-id="hxc-098--out-of-box-config-fails-version-required-validation--blocks-client-statussystem-commands">HXC-098
-— out-of-box config fails 'version required' validation — blocks client
+id="hxc-098-out-of-box-config-fails-version-required-validation-blocks-client-statussystem-commands">HXC-098
+— out-of-box config fails ‘version required’ validation — blocks client
 status/system commands</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> Reproduced via LoadHelixConfig path (RED:
-version-less config.json -&gt; Version='' + server.port=0 -&gt;
+version-less config.json -&gt; Version=’’ + server.port=0 -&gt;
 validateConfig rejects). Fixed in internal/config/config.go
 loadConfigLocked: decode JSON ON TOP of getDefaultConfig() so all viper
 defaults merge. Guard hxc098_version_default_test.go: RED pre-fix (exit
@@ -2874,9 +3426,9 @@ defaults merge. Guard hxc098_version_default_test.go: RED pre-fix (exit
 version. Full config pkg ok. <strong>Severity:</strong> Medium
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
-<p>Default config/config.yaml + the operator's
+<p>Default config/config.yaml + the operator’s
 ~/.config/helixcode/config.json have no top-level Version -&gt; config
-validation fails with 'version is required'
+validation fails with ‘version is required’
 (internal_config_validate_version_required), blocking
 desktop/aurora/harmony status/system/version (and CLI subsystems) for a
 fresh user. Found while recording client videos (had to use a throwaway
@@ -2884,7 +3436,7 @@ minimal valid config). Fix: ship a valid default Version in
 config/config.yaml (+ docs), or default it in config.Load when
 absent.</p>
 <h2
-id="hxc-077--t15-context-window-percentage-indicator-partial">HXC-077 —
+id="hxc-077-t1.5-context-window-percentage-indicator-partial">HXC-077 —
 T1.5 context-window percentage indicator (partial)</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
 <strong>Type:</strong> Feature <strong>Evidence:</strong> TUI status bar
@@ -2901,7 +3453,7 @@ Claude</p>
 3c9d3495, task T1.5); REMAINING: live token-accounting wiring + UI
 verification across TUI/desktop still pending — keep open until the
 indicator reflects real per-session usage.</p>
-<h2 id="hxc-078--t16-skillmd-precedence-resolution-partial">HXC-078 —
+<h2 id="hxc-078-t1.6-skill.md-precedence-resolution-partial">HXC-078 —
 T1.6 SKILL.md precedence resolution (partial)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong> FindMatching/List
@@ -2918,7 +3470,7 @@ task T1.6); REMAINING: full precedence-conflict resolution + tests
 covering overlapping skill definitions still outstanding — keep open
 until precedence is fully resolved and tested.</p>
 <h2
-id="hxc-100--resync-docscontinuationmd-to-current-head--de-bloat-the-32k-token-line-1-header-const-0441210--const-064-hygiene">HXC-100
+id="hxc-100-resync-docscontinuation.md-to-current-head-de-bloat-the-32k-token-line-1-header-const-04412.10-const-064-hygiene">HXC-100
 — Resync docs/CONTINUATION.md to current HEAD + de-bloat the 32k-token
 line-1 header (CONST-044/§12.10 + CONST-064 hygiene)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -2926,7 +3478,7 @@ line-1 header (CONST-044/§12.10 + CONST-064 hygiene)</h2>
 resynced to HEAD 3aacfa9f + line-1 header de-bloated (max line
 54856-&gt;2931 chars). History preserved: 4 mega-prose lines replaced by
 CONST-064 metadata table + ToC + condensed close-out 143-169 table;
-close-outs 131-142 dedicated sections intact; this session's 5 rows
+close-outs 131-142 dedicated sections intact; this session’s 5 rows
 added. git diff +143/-8 (additive, no content loss); exports rendered=2
 failed=0 fresh. Gated independently by conductor.
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
@@ -2934,7 +3486,7 @@ Claude</p>
 <p>CONTINUATION.md is stale (Last updated 2026-06-14, refs HEAD
 e3063af1; current is 80e62afa after HXC-098 fix + HXC-099 i18n-sweep
 finding). Per CONST-044/§12.10 out-of-sync CONTINUATION is a CRITICAL
-DEFECT. ALSO: line 1 ('Last updated' header) has accreted ~32k tokens
+DEFECT. ALSO: line 1 (‘Last updated’ header) has accreted ~32k tokens
 into a SINGLE line across rounds — pathological; Read/Edit of lines 1-12
 alone exceeds 25k tokens, making safe edits hard and risking corruption
 with blind sed. Overnight zero-risk policy =&gt; queued for careful
@@ -2945,7 +3497,7 @@ i18n sweep discarded+stashed -&gt; HXC-099; HXC-098 config-default fix),
 currently served by the up-to-date .remember/remember.md
 (§11.4.131).</p>
 <h2
-id="hxc-101--securitysecurity_testgo-testtlsconfiguration--external-network-dependency--nil-deref-panic-crashes-the-whole-security-test-binary">HXC-101
+id="hxc-101-securitysecurity_test.go-testtlsconfiguration-external-network-dependency-nil-deref-panic-crashes-the-whole-security-test-binary">HXC-101
 — security/security_test.go TestTLSConfiguration — external-network
 dependency + nil-deref panic crashes the whole security test binary</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2953,18 +3505,17 @@ Bug <strong>Evidence:</strong> Replaced live httpbin.org call with
 hermetic httptest.NewTLSServer + t.Fatalf on error path (no nil-deref
 fall-through). Verified: TestTLSConfiguration PASS 3/3 (-count=3)
 deterministic, no external net; full security pkg ok (0.223s); go build
-./... exit 0; gofmt clean. <strong>Created-By:</strong> Claude
+./… exit 0; gofmt clean. <strong>Created-By:</strong> Claude
 <strong>Assigned-To:</strong> Claude</p>
 <p>Discovery sweep (§11.4.118) found the only failing package in a
-~270-pkg sweep. TestTLSConfiguration called live <a
-href="https://httpbin.org/get">https://httpbin.org/get</a>
+~270-pkg sweep. TestTLSConfiguration called live https://httpbin.org/get
 (non-deterministic, §11.4.98) and on the error path did t.Errorf without
 return -&gt; defer resp.Body.Close() with resp==nil -&gt; SIGSEGV panic
 that crashed the entire security test binary (took every other test in
 the package down). Fixed: hermetic httptest.NewTLSServer + t.Fatalf on
 error path.</p>
 <h2
-id="hxc-099--systemic-i18n-raw-key-sweep-redo-const-046--corrected-regression-free-with-default-translator-contract-decision">HXC-099
+id="hxc-099-systemic-i18n-raw-key-sweep-redo-const-046-corrected-regression-free-with-default-translator-contract-decision">HXC-099
 — Systemic i18n raw-key sweep redo (CONST-046) — corrected,
 regression-free, with default-translator contract decision</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -2974,16 +3525,16 @@ default swap; 9 guards pass unchanged). GOAL A: WireAll() was only
 called from cmd/cli; added entry-path init() wiring to cmd/server + 4
 apps so internal-package strings resolve for real users. GOAL B: removed
 redundant {{.Err}} placeholder from 8 internal/project messages
-(nil-data -&gt; '<no value>'). RED→GREEN guards captured (non-tautology
+(nil-data -&gt; ‘<no value>’). RED→GREEN guards captured (non-tautology
 proven); 9 guards green -count=1; all touched pkgs pass; build exit 0;
-vet clean; no mutation residue. Commit a02a8aa8. (B's rejected
+vet clean; no mutation residue. Commit a02a8aa8. (B’s rejected
 default-swap approach preserved in git stash@{0}.)
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
 <p>First mechanical sweep (stash@{0}, agent a55802ad) wired a real
 embedded-English bundle translator as package default across 36
 internal/ packages but INTRODUCED 13 regressions vs green HEAD d85f6962:
-(1) real Go-template bug — internal/project messages render '<no value>'
+(1) real Go-template bug — internal/project messages render ‘<no value>’
 (error-detail param dropped); (2) defeats intentional
 NoopTranslator-echoes-raw-key anti-bluff guards in 9 pkgs
 (tools,voice,plantree,repomap,context,hardware,persistence,mcp,template);
@@ -2993,9 +3544,9 @@ raw key (loud default) OR falls back to embedded English (polished,
 risks hiding missing translations). Work in git stash; green tree
 restored (build exit 0, 13/13 pass).</p>
 <h2
-id="hxc-102--harmony_os-main_noguigo--2-user-facing-strings-goodbye-error-v-bypass-i18n-const-046-low-severity">HXC-102
-— harmony_os main_nogui.go — 2 user-facing strings ('Goodbye!', 'Error:
-%v') bypass i18n (CONST-046, low severity)</h2>
+id="hxc-102-harmony_os-main_nogui.go-2-user-facing-strings-goodbye-error-v-bypass-i18n-const-046-low-severity">HXC-102
+— harmony_os main_nogui.go — 2 user-facing strings (‘Goodbye!’, ‘Error:
+%v’) bypass i18n (CONST-046, low severity)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> Routed cmdInteractive Goodbye!/Error: %v
 through cliApp.tr with new bundle keys (error binds {{.Error}}, no
@@ -3005,17 +3556,17 @@ pkg ok both tag variants; build exit 0; gofmt clean.
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
 <p>Discovery sweep: applications/harmony_os/main_nogui.go uses its i18n
-bundle heavily (~95 refs) but lines 876 ('Goodbye!') + 882 ('Error: %v')
+bundle heavily (~95 refs) but lines 876 (‘Goodbye!’) + 882 (‘Error: %v’)
 are user-facing UI text printed via fmt without the translator
 (CONST-046 localization gap). Lines 784/789-793 are developer-facing
 diagnostics (arguably out of scope). Low severity; may be folded into
 the HXC-099 entry-path i18n work.</p>
 <h2
-id="hxc-104--streamllm-apiv1llmstream-hangs-forever--chunkchan-never-closed-done-never-emitted-production-defect-found-by-web-e2e">HXC-104
+id="hxc-104-streamllm-apiv1llmstream-hangs-forever-chunkchan-never-closed-done-never-emitted-production-defect-found-by-web-e2e">HXC-104
 — streamLLM /api/v1/llm/stream hangs forever — chunkChan never closed,
 [DONE] never emitted (production defect found by web e2e)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
-Bug <strong>Evidence:</strong> Fixed via 'defer close(chunkChan)' in
+Bug <strong>Evidence:</strong> Fixed via ‘defer close(chunkChan)’ in
 streamLLM goroutine. Regression guard
 tests/integration/llm_stream_e2e_test.go (TestLLMStreamE2E): post-fix
 streams 9 SSE frames + [DONE] in 1.1s, deterministic -count=3; server
@@ -3030,7 +3581,7 @@ terminal data:[DONE] frame, and EVERY /stream request blocked until the
 missed. Exposed by the new TestLLMStreamE2E runtime e2e. Fixed: defer
 close(chunkChan).</p>
 <h2
-id="hxc-103--web-client-runtime-e2e-proof--live-browserhttp---server---llm-provider-round-trip-for-apiv1llmgenerate--llmstream-continuation-honest-gap">HXC-103
+id="hxc-103-web-client-runtime-e2e-proof-live-browserhttp---server---llm-provider-round-trip-for-apiv1llmgenerate-llmstream-continuation-honest-gap">HXC-103
 — Web-client runtime e2e proof — live browser/HTTP -&gt; server -&gt;
 LLM provider round-trip for /api/v1/llm/generate + /llm/stream
 (CONTINUATION honest gap)</h2>
@@ -3052,7 +3603,7 @@ client hits the endpoints, REAL provider responds, capture the
 round-trip evidence). SKIP-OK per §11.4.3 when no real provider
 reachable (CONST-050(A) real-infra mandate) — never a fake PASS.</p>
 <h2
-id="hxc-105--runtime-e2e-for-server-post-apiv1specify--boot-server---real-spec-output-via-live-provider-speckit-http-endpoint-gap">HXC-105
+id="hxc-105-runtime-e2e-for-server-post-apiv1specify-boot-server---real-spec-output-via-live-provider-speckit-http-endpoint-gap">HXC-105
 — Runtime e2e for server POST /api/v1/specify — boot server -&gt; real
 spec output via live provider (speckit HTTP-endpoint gap)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -3061,7 +3612,7 @@ tests/integration/specify_server_e2e_test.go boots the real server +
 POSTs /api/v1/specify against live ollama qwen2.5:3b: HTTP 200
 status:success provider:ollama qualityScore:0.9808, real 3-round 2-agent
 debate, provider_calls=6 total_tokens=806; output non-empty + NOT the
-'awaiting provider wiring' stub. PASS 75.93s, vet clean, build exit 0.
+‘awaiting provider wiring’ stub. PASS 75.93s, vet clean, build exit 0.
 Evidence docs/qa/web-llm-e2e-20260615/. <strong>Created-By:</strong>
 Claude <strong>Assigned-To:</strong> Claude</p>
 <p>specify_e2e_test.go + debate_e2e_test.go exercise the speckit path
@@ -3071,7 +3622,7 @@ specifyHandler). Add one mirroring llm_generate_e2e_test.go: boot
 server.New, POST a real request, assert a genuine 200 + non-fabricated
 phase output from live ollama; honest 502/SKIP otherwise.</p>
 <h2
-id="hxc-106--helix_agent-durable-memory-process-lifetime-in-memory-fallback-is-not-disk-durable--recall-lost-on-restart-continuation-honest-gap">HXC-106
+id="hxc-106-helix_agent-durable-memory-process-lifetime-in-memory-fallback-is-not-disk-durable-recall-lost-on-restart-continuation-honest-gap">HXC-106
 — helix_agent durable memory: process-lifetime in-memory fallback is NOT
 disk-durable — recall lost on restart (CONTINUATION honest gap)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -3079,8 +3630,8 @@ disk-durable — recall lost on restart (CONTINUATION honest gap)</h2>
 (§11.4.102): disk-durable DiskStore (sqlite, survives close+reopen) was
 ALREADY implemented + wired as preferred fallback (commits
 ac3ad237/a91faad6) via debateMemoryFallbackPath() (os.UserCacheDir,
-'helixagent'-namespaced, CONST-051-decoupled). CONTINUATION 'in-memory
-only' gap was stale. Closed the test-coverage gap: new
+‘helixagent’-namespaced, CONST-051-decoupled). CONTINUATION ‘in-memory
+only’ gap was stale. Closed the test-coverage gap: new
 internal/services/debate_memory_fallback_test.go proves resolver returns
 writable durable path +
 persist-&gt;Close(restart)-&gt;reopen-&gt;RECALL. ./internal/memory +
@@ -3091,11 +3642,11 @@ Claude</p>
 fallback is process-lifetime in-memory only: recall survives within a
 process but is LOST on restart unless a durable backend is configured.
 Investigate the fallback in the helix_agent submodule; make it
-disk-durable (e.g. local file/sqlite-backed store) so recall survives
+disk-durable (e.g. local file/sqlite-backed store) so recall survives
 restart out-of-the-box, OR document precisely why not + the required
 backend. Submodule work: own commit + push discipline.</p>
 <h2
-id="hxc-109--mobile-apps-are-scaffolds--android-has-no-buildgradleandroidmanifest-ios-has-no-xcode-project-not-buildable---not-recordable">HXC-109
+id="hxc-109-mobile-apps-are-scaffolds-android-has-no-build.gradleandroidmanifest-ios-has-no-xcode-project-not-buildable---not-recordable">HXC-109
 — Mobile apps are scaffolds — Android has no
 build.gradle/AndroidManifest, iOS has no Xcode project (not buildable
 -&gt; not recordable)</h2>
@@ -3115,7 +3666,7 @@ Must create Android Gradle build + manifest and an iOS Xcode project
 (gomobile or native) before the apps build/run on the Genymotion
 emulator / iOS simulators for recording.</p>
 <h2
-id="hxc-110--extend-containers-submodule-to-launch-ios-simulators-operator-directed-apple-support-mechanism">HXC-110
+id="hxc-110-extend-containers-submodule-to-launch-ios-simulators-operator-directed-apple-support-mechanism">HXC-110
 — Extend containers submodule to launch iOS simulators
 (operator-directed Apple-support mechanism)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -3134,14 +3685,14 @@ containers submodule mechanism must orchestrate the host-native simctl
 lifecycle (boot/install/record) under its unified API. Investigate +
 extend containers (§11.4.76).</p>
 <h2
-id="hxc-111--desktop-gui-shows-raw-i18n-keys-desktop_dashboard_header_activity_title--const-046-gap">HXC-111
+id="hxc-111-desktop-gui-shows-raw-i18n-keys-desktop_dashboard_header_activity_title-const-046-gap">HXC-111
 — Desktop GUI shows raw i18n keys
 (desktop_dashboard_header/_activity_title) — CONST-046 gap</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> Wired i18n.NewTranslator() in
 NewDesktopApp; dashboard now shows real text (verified via
-relaunch+AXRaise+screenshot: title 'HelixCode - Distributed AI
-Development Platform', 'Recent Activity', no raw keys). Desktop tests
+relaunch+AXRaise+screenshot: title ‘HelixCode - Distributed AI
+Development Platform’, ‘Recent Activity’, no raw keys). Desktop tests
 pass, build exit 0. Clean desktop video re-recorded.
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
@@ -3149,26 +3700,40 @@ Claude</p>
 message-ID keys (desktop_dashboard_header,
 desktop_dashboard_activity_title) instead of localized text. Likely the
 desktop i18n bundle is missing those keys OR Fyne locale-parse error
-('subtag at unknown') broke bundle loading. Real CONST-046 defect
+(‘subtag at unknown’) broke bundle loading. Real CONST-046 defect
 visible in helixcode-desktop-dashboard-20260615.mp4.</p>
 <h2
-id="hxc-113--mcp-tool-names-use-servername-colon--openai-compatible-providers-deepseeketc-reject-function-names-breaking-llm-chat-with-mcp-enabled">HXC-113
-— MCP tool names use 'server:name' (colon) — OpenAI-compatible providers
+id="hxc-113-mcp-tool-names-use-servername-colon-openai-compatible-providers-deepseeketc.-reject-function-names-breaking-llm-chat-with-mcp-enabled">HXC-113
+— MCP tool names use ‘server:name’ (colon) — OpenAI-compatible providers
 (DeepSeek/etc.) reject function names, breaking LLM chat with MCP
 enabled</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> mcpToolRegisteredName sanitises MCP tool
-names to server__name (OpenAI-compatible ^[A-Za-z0-9_-]+); dispatch
-unaffected (Execute uses original server/toolName). 2 mcp_readonly tests
-reconciled (§11.4.120); guard test + full internal/tools pkg pass; build
-exit 0. <strong>Created-By:</strong> Claude
-<strong>Assigned-To:</strong> Claude</p>
+names to server__name (OpenAI-compatible <a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>+);
+dispatch unaffected (Execute uses original server/toolName). 2
+mcp_readonly tests reconciled (§11.4.120); guard test + full
+internal/tools pkg pass; build exit 0. <strong>Created-By:</strong>
+Claude <strong>Assigned-To:</strong> Claude</p>
 <p>internal/tools/registry.go:897 RegisterMCPManager names MCP tools
-server+':'+name (e.g. fs:read_file). OpenAI/DeepSeek function-calling
-requires names matching ^[a-zA-Z0-9_-]+$, so a chat turn with MCP tools
+server+‘:’+name (e.g. fs:read_file). OpenAI/DeepSeek function-calling
+requires names matching <a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a>+$, so a chat turn with MCP tools
 enabled returns HTTP 400. Found while recording the TUI (had to disable
-.helixcode/mcp.yml to record). Fix: sanitize MCP tool names (e.g.
-server__name or server-name) at registration + map back when
+.helixcode/mcp.yml to record). Fix: sanitize MCP tool names
+(e.g. server__name or server-name) at registration + map back when
 dispatching.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>A-Za-z0-9_-<a href="#fnref1" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A-Za-z0-9_-<a href="#fnref2" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>a-zA-Z0-9_-<a href="#fnref3" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 </body>
 </html>
