@@ -216,6 +216,7 @@ Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95
 **Severity:** Medium
 **Created-By:** Claude
 **Assigned-To:** Claude
+**Obsolete-Details:** Since: 2026-06-09; Reason: not-reproducible; Superseding-item: none; Triple-check evidence: docs/qa/HXC-044/evidence.md
 
 Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
 
