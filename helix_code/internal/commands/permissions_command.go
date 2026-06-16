@@ -39,6 +39,20 @@ func NewPermissionsCommand() *PermissionsCommand {
 	return &PermissionsCommand{store: sessionrules.New()}
 }
 
+// NewPermissionsCommandWithStore constructs the /permissions slash command sharing
+// the caller's session-rule store, so that rules added via `/permissions add|remove`
+// are honoured by the SAME store the live permissions.Engine consults at decision
+// time (engine wired via permissions.WithSessionDecider(store.Decide)). This is the
+// writer half of the live-gating seam — without it the command and the engine hold
+// two unconnected stores and a session rule never reaches the live gate. A nil store
+// falls back to a private one (degrades to store-only, never panics).
+func NewPermissionsCommandWithStore(store *sessionrules.Store) *PermissionsCommand {
+	if store == nil {
+		store = sessionrules.New()
+	}
+	return &PermissionsCommand{store: store}
+}
+
 // SessionRules returns the session-scoped rules currently held for the given
 // session key. Exposed so a host wiring the live confirmation engine can consult
 // session-added rules; nil-safe when the store was not initialised.

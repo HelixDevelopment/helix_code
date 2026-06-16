@@ -50,6 +50,7 @@ import (
 	"dev.helix.code/internal/tools/browser"
 	"dev.helix.code/internal/tools/confirmation"
 	"dev.helix.code/internal/tools/permissions"
+	"dev.helix.code/internal/tools/permissions/sessionrules"
 	"dev.helix.code/internal/tools/persistence"
 	"dev.helix.code/internal/tools/sandbox"
 	"dev.helix.code/internal/tools/smartedit"
@@ -228,6 +229,12 @@ type CLI struct {
 	verifierAdapter    *verifier.Adapter
 	permissionMode     string
 	permissionsEngine  *permissions.Engine
+	// sessionRuleStore is the single, shared, session-scoped permission-rule
+	// store. It is the SAME instance consulted by the live permissions.Engine
+	// at decision time AND mutated by the `/permissions add|remove` slash
+	// command, so a rule added in-session takes effect on the live gate
+	// immediately (no restart). See initPermissions + the slash-command wiring.
+	sessionRuleStore   *sessionrules.Store
 	persistenceManager *persistence.Manager
 	worktreeManager    *worktree.Manager
 	sessionMgr         *session.Manager
@@ -398,7 +405,17 @@ func (c *CLI) initPermissions(ctx context.Context, pe *confirmation.PolicyEngine
 		ProjectPath: filepath.Join(cwd, ".helixcode", "permissions.yaml"),
 		Mode:        c.permissionMode,
 	}
-	eng, err := permissions.NewEngine(ctx, loader, pe)
+	// Construct the single shared session-rule store and wire it into the live
+	// engine as the session-rule overlay (consulted FIRST at decision time). The
+	// SAME store instance is handed to the `/permissions add|remove` slash
+	// command (see the command-registry wiring), so a rule added in-session
+	// gates live tool execution immediately. sessionrules.Store.Decide is
+	// fail-closed on a corrupt session rule set.
+	if c.sessionRuleStore == nil {
+		c.sessionRuleStore = sessionrules.New()
+	}
+	eng, err := permissions.NewEngine(ctx, loader, pe,
+		permissions.WithSessionDecider(c.sessionRuleStore.Decide))
 	if err != nil {
 		return fmt.Errorf("initialising permissions engine: %w", err)
 	}
@@ -767,6 +784,19 @@ func (c *CLI) buildSubsystems(ctx context.Context) error {
 		log.Printf("mcp: register slash command failed: %v", regErr)
 	}
 	c.commandRegistry = cmdRegistry
+
+	// Share the live session-rule store with the /permissions command so rules
+	// added via `/permissions add|remove` reach the SAME store the permissions
+	// Engine consults at decision time (initPermissions, run earlier, wired the
+	// engine via WithSessionDecider(c.sessionRuleStore.Decide)). Without this the
+	// command and the engine hold two unconnected stores and a session rule never
+	// gates live execution. Replaces the builtin-registered default (own store).
+	if c.sessionRuleStore != nil {
+		cmdRegistry.Unregister("permissions")
+		if regErr := cmdRegistry.Register(commands.NewPermissionsCommandWithStore(c.sessionRuleStore)); regErr != nil {
+			log.Printf("permissions: register store-shared slash command failed: %v", regErr)
+		}
+	}
 
 	// F07: background task manager.
 	bgMgr := workflow.NewBackgroundManager(zap.NewNop(), workflow.ManagerConfig{})
