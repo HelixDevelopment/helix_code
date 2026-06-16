@@ -195,6 +195,7 @@ reports/performance/
 /aurora-os
 /aurora_os
 /bin/helixcode
+/helixcode-infra
 /config-test
 /config_test
 /desktop

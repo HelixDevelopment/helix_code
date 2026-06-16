@@ -84,8 +84,12 @@ services:
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_KEEP_ALIVE=24h
+    # Healthcheck: the ollama image ships NO curl/wget (only the `ollama`
+    # CLI under /bin/ollama). `curl` always-failed → false (unhealthy).
+    # `ollama list` talks to the local server over OLLAMA_HOST and exits 0
+    # only when the API is serving (verified on nezha: exit 0, lists models).
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD", "ollama", "list"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -306,8 +310,14 @@ services:
       - CLUSTER_HOSTNAME=node1
     volumes:
       - weaviate-full-data:/var/lib/weaviate
+    # Healthcheck: the weaviate image ships NO curl, but DOES ship
+    # /usr/bin/wget. `curl` always-failed → false (unhealthy). wget against
+    # the real readiness endpoint /v1/.well-known/ready (verified 200 on
+    # nezha) exits 0 only when the node is ready. -q drops output; -O- to
+    # stdout (no /tmp writes); --spider would not follow on all builds so
+    # we GET and discard.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/.well-known/ready"]
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8080/v1/.well-known/ready"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -325,8 +335,16 @@ services:
       - ANONYMIZED_TELEMETRY=FALSE
     volumes:
       - chromadb-full-data:/chroma/chroma
+    # Healthcheck: the chromadb image ships NO curl/wget/python3, and its
+    # /bin/sh is dash (no /dev/tcp). The v1 heartbeat path the old `curl`
+    # probe hit now returns HTTP 410 Gone — the API moved to v2 (verified on
+    # nezha: /api/v1/heartbeat → 410, /api/v2/heartbeat → {"nanosecond
+    # heartbeat":...}). /bin/bash IS present and supports /dev/tcp, so we open
+    # a raw socket, GET the v2 heartbeat, and assert "200 OK" in the response
+    # (verified: returns "HTTP/1.0 200 OK"). A connect-only check would pass
+    # even on a 410, so we grep the status line for genuine readiness.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/8000 && printf 'GET /api/v2/heartbeat HTTP/1.0\\r\\n\\r\\n' >&3 && head -c 100 <&3 | grep -q '200 OK'"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -341,8 +359,13 @@ services:
       - "6334:6334"
     volumes:
       - qdrant-full-data:/qdrant/storage
+    # Healthcheck: the qdrant image ships NO curl/wget. `curl` always-failed
+    # → false (unhealthy). /usr/bin/bash IS present and supports /dev/tcp.
+    # We GET the real readiness endpoint /readyz (verified 200 on nezha;
+    # /healthz also 200 but /readyz is the stricter "ready to serve" signal)
+    # over a raw socket and assert "200 OK" in the status line.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/6333 && printf 'GET /readyz HTTP/1.0\\r\\n\\r\\n' >&3 && head -c 100 <&3 | grep -q '200 OK'"]
       interval: 10s
       timeout: 5s
       retries: 10
