@@ -1,0 +1,13 @@
+### COMMAND (real-user: system health check)
+$ helix_code/bin/cli -health
+
+### REAL OUTPUT (captured 2026-06-16T18:18:45Z)
+INFO: Using config file: /Users/milosvasic/.config/helixcode/config.json
+2026/06/16 21:18:45 Starting Raft consensus for node aa676e20-afac-4b27-b1bf-2a23df60d01e
+2026/06/16 21:18:45 Loaded 21 known hosts from /Users/milosvasic/.ssh/known_hosts
+Flags parsed: listWorkers=false, nonInteractive=false
+
+=== System Health Check ===
+⚠️ Worker Pool: No healthy workers
+⚠️ Notification System: No enabled channels
+✅ System is operational

@@ -1,0 +1,39 @@
+### COMMAND (real-user: streaming LLM generation, -stream flag)
+$ helix_code/bin/cli -non-interactive -provider deepseek -stream -prompt "Count from 1 to 5, one number per line." -max-tokens 60
+
+### REAL OUTPUT (captured 2026-06-16T18:24:02Z)
+INFO: Using config file: /Users/milosvasic/.config/helixcode/config.json
+2026/06/16 21:24:03 Starting Raft consensus for node b7085858-a997-4248-93fd-6027c894d751
+2026/06/16 21:24:03 Loaded 21 known hosts from /Users/milosvasic/.ssh/known_hosts
+Flags parsed: listWorkers=false, nonInteractive=true
+2026/06/16 21:24:03 ✅ DeepSeek provider initialized with 3 models
+F12 provider: using "deepseek"
+2026/06/16 21:24:03 telemetry: initialised (exporter=noop)
+2026/06/16 21:24:03 ✅ DeepSeek catalog refreshed with 2 models (live /models)
+
+=== Generating with deepseek-v4-flash ===
+Prompt: Count from 1 to 5, one number per line.
+
+2026/06/16 21:24:03 theme: name=dark depth=off
+2026/06/16 21:24:03 Node b7085858-a997-4248-93fd-6027c894d751 starting election for term 1 (peers=0)
+2026/06/16 21:24:03 Node b7085858-a997-4248-93fd-6027c894d751 became leader for term 1
+2026/06/16 21:24:03 Consensus: Node b7085858-a997-4248-93fd-6027c894d751 elected as leader
+2026/06/16 21:24:03 Consensus: Node b7085858-a997-4248-93fd-6027c894d751 state changed to 2
+2026/06/16 21:24:03 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:03 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:03 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:03 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:03 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:04 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:04 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:04 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:04 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:04 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:24:04 Leader b7085858-a997-4248-93fd-6027c894d751 sending heartbeat for term 1 (single-node cluster, no transport needed)
+1
+2
+3
+4
+5
+
+✅ Generation completed

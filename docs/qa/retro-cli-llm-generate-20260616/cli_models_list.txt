@@ -1,0 +1,26 @@
+### COMMAND (real-user: list models — CONST-036 LLMsVerifier source-of-truth, anti-BLUFF-002)
+$ helix_code/bin/cli -list-models -provider deepseek
+
+### REAL OUTPUT (captured 2026-06-16T18:18:37Z)
+INFO: Using config file: /Users/milosvasic/.config/helixcode/config.json
+2026/06/16 21:18:37 Starting Raft consensus for node 7fc3594c-87d3-4a41-a4ff-a2360ef4c63d
+2026/06/16 21:18:37 Loaded 21 known hosts from /Users/milosvasic/.ssh/known_hosts
+Flags parsed: listWorkers=false, nonInteractive=false
+2026/06/16 21:18:37 ✅ DeepSeek provider initialized with 3 models
+F12 provider: using "deepseek"
+2026/06/16 21:18:37 telemetry: initialised (exporter=noop)
+
+=== Available Models ===
+2026/06/16 21:18:38 ✅ DeepSeek catalog refreshed with 2 models (live /models)
+ID: deepseek-v4-flash
+  Name: deepseek-v4-flash
+  Provider: deepseek
+  Context Size: 128000
+  Status: available
+
+ID: deepseek-v4-pro
+  Name: deepseek-v4-pro
+  Provider: deepseek
+  Context Size: 128000
+  Status: available
+

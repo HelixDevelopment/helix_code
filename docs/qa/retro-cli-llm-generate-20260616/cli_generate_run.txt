@@ -1,0 +1,40 @@
+### COMMAND (real end-user CLI invocation)
+$ . ~/api_keys.sh; export HELIX_LLM_PROVIDER=deepseek
+$ helix_code/bin/cli -non-interactive -provider deepseek -prompt "What is 2+2? Reply with just the number." -max-tokens 30
+
+### REAL OUTPUT (captured 2026-06-16T18:18:26Z)
+INFO: Using config file: /Users/milosvasic/.config/helixcode/config.json
+2026/06/16 21:18:26 Starting Raft consensus for node c83da294-67b7-4a6e-8c11-6c6415589fe6
+2026/06/16 21:18:26 Loaded 21 known hosts from /Users/milosvasic/.ssh/known_hosts
+Flags parsed: listWorkers=false, nonInteractive=true
+2026/06/16 21:18:26 ✅ DeepSeek provider initialized with 3 models
+F12 provider: using "deepseek"
+2026/06/16 21:18:26 telemetry: initialised (exporter=noop)
+2026/06/16 21:18:27 ✅ DeepSeek catalog refreshed with 2 models (live /models)
+
+=== Generating with deepseek-v4-flash ===
+Prompt: What is 2+2? Reply with just the number.
+
+2026/06/16 21:18:27 theme: name=dark depth=off
+2026/06/16 21:18:27 Node c83da294-67b7-4a6e-8c11-6c6415589fe6 starting election for term 1 (peers=0)
+2026/06/16 21:18:27 Node c83da294-67b7-4a6e-8c11-6c6415589fe6 became leader for term 1
+2026/06/16 21:18:27 Consensus: Node c83da294-67b7-4a6e-8c11-6c6415589fe6 elected as leader
+2026/06/16 21:18:27 Consensus: Node c83da294-67b7-4a6e-8c11-6c6415589fe6 state changed to 2
+2026/06/16 21:18:27 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:27 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:27 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:27 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:27 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:27 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:27 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:27 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:27 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:28 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:28 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:28 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:18:28 Leader c83da294-67b7-4a6e-8c11-6c6415589fe6 sending heartbeat for term 1 (single-node cluster, no transport needed)
+4
+
+📊 tokens: in=17 out=30 total=47   context: 47/128000 (0%)   time: 1.298s   tps: 23.1   finish: length
+
+✅ Generation completed

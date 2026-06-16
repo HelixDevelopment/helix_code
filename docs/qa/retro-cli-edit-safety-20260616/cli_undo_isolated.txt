@@ -1,0 +1,50 @@
+### COMMAND (real-user CLI REPL: /undo — git revert HEAD; run in ISOLATED temp repo /tmp/helix_retro_undo.7SO8F0 so the real source tree is never touched, per scope)
+$ cd <isolated-temp-git-repo>; helix_code/bin/cli -provider deepseek   (typed: /undo)
+
+### STATE BEFORE /undo
+1759712 second commit: add line two (target of /undo)
+83f5830 initial commit: sample.txt with one line
+--- sample.txt before ---
+line one
+line two (this commit will be /undo-reverted)
+
+### REAL /undo OUTPUT (captured 2026-06-16T18:22:45Z)
+INFO: Using config file: /Users/milosvasic/.config/helixcode/config.json
+2026/06/16 21:22:45 Starting Raft consensus for node b2b92ea2-357f-4c23-8e60-481b397d8d91
+2026/06/16 21:22:45 Loaded 21 known hosts from /Users/milosvasic/.ssh/known_hosts
+Flags parsed: listWorkers=false, nonInteractive=false
+2026/06/16 21:22:45 ✅ DeepSeek provider initialized with 3 models
+F12 provider: using "deepseek"
+2026/06/16 21:22:45 telemetry: initialised (exporter=noop)
+2026/06/16 21:22:45 ask_user: wired (interactive=auto-detect, max-retries=3, timeout=5m0s)
+2026/06/16 21:22:46 sandbox: backend=none reason="sandboxing only available on Linux in v1; macOS Seatbelt + Windows Job Object deferred to F14.5"
+2026/06/16 21:22:46 approval: mode=suggest source=default sandbox_available=false
+2026/06/16 21:22:46 git_auto_commit: enabled=true cwd=/tmp/helix_retro_undo.7SO8F0 git_repo=true
+2026/06/16 21:22:46 subagent: manager initialised (max_concurrency=5)
+2026/06/16 21:22:46 smart-edit: wired (workdir=/tmp/helix_retro_undo.7SO8F0)
+        ___
+      ,'   `.
+     /  ,-.  \
+    |  ( @ )  |   ~ HelixCode
+     \  `-'  /
+      `.___,'
+  HelixCode — AI development, end to end
+=== Helix CLI Interactive Mode ===
+Type your prompt and press Enter; type '/help' for slash commands, '/exit' to quit.
+2026/06/16 21:22:46 Node b2b92ea2-357f-4c23-8e60-481b397d8d91 starting election for term 1 (peers=0)
+2026/06/16 21:22:46 Node b2b92ea2-357f-4c23-8e60-481b397d8d91 became leader for term 1
+2026/06/16 21:22:46 Consensus: Node b2b92ea2-357f-4c23-8e60-481b397d8d91 elected as leader
+2026/06/16 21:22:46 Consensus: Node b2b92ea2-357f-4c23-8e60-481b397d8d91 state changed to 2
+2026/06/16 21:22:46 Leader b2b92ea2-357f-4c23-8e60-481b397d8d91 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:22:46 ✅ DeepSeek catalog refreshed with 2 models (live /models)
+Provider: DeepSeek   Default model: deepseek-v4-flash
+
+helix> ✅ reverted last commit; HEAD is now 60a0d5350a536ad40abaf660b9f0cb1fec8c750a
+
+helix> Goodbye!
+=== STATE AFTER /undo ===
+60a0d53 Revert "second commit: add line two (target of /undo)"
+1759712 second commit: add line two (target of /undo)
+83f5830 initial commit: sample.txt with one line
+--- sample.txt after ---
+line one

@@ -1,0 +1,100 @@
+### COMMAND (real-user CLI REPL: /checkpoint create + restore — DESTRUCTIVE restore; ISOLATED temp repo /tmp/helix_retro_undo.7SO8F0)
+$ cd <isolated-temp-git-repo>; helix_code/bin/cli -provider deepseek
+  (typed: /checkpoint create good-state ; then externally mutated work.txt ; then /checkpoint restore <id>)
+
+### work.txt BEFORE checkpoint: GOOD STATE v1
+
+### REAL OUTPUT — step 1: create checkpoint (captured 2026-06-16T18:22:59Z)
+INFO: Using config file: /Users/milosvasic/.config/helixcode/config.json
+2026/06/16 21:22:59 Starting Raft consensus for node d27b48f3-851d-4661-95e4-8876036bdbb0
+2026/06/16 21:22:59 Loaded 21 known hosts from /Users/milosvasic/.ssh/known_hosts
+Flags parsed: listWorkers=false, nonInteractive=false
+2026/06/16 21:22:59 ✅ DeepSeek provider initialized with 3 models
+F12 provider: using "deepseek"
+2026/06/16 21:22:59 telemetry: initialised (exporter=noop)
+2026/06/16 21:22:59 ask_user: wired (interactive=auto-detect, max-retries=3, timeout=5m0s)
+2026/06/16 21:22:59 sandbox: backend=none reason="sandboxing only available on Linux in v1; macOS Seatbelt + Windows Job Object deferred to F14.5"
+2026/06/16 21:22:59 approval: mode=suggest source=default sandbox_available=false
+2026/06/16 21:22:59 git_auto_commit: enabled=true cwd=/tmp/helix_retro_undo.7SO8F0 git_repo=true
+2026/06/16 21:22:59 subagent: manager initialised (max_concurrency=5)
+2026/06/16 21:22:59 smart-edit: wired (workdir=/tmp/helix_retro_undo.7SO8F0)
+        ___
+      ,'   `.
+     /  ,-.  \
+    |  ( @ )  |   ~ HelixCode
+     \  `-'  /
+      `.___,'
+  HelixCode — AI development, end to end
+=== Helix CLI Interactive Mode ===
+Type your prompt and press Enter; type '/help' for slash commands, '/exit' to quit.
+2026/06/16 21:23:00 Node d27b48f3-851d-4661-95e4-8876036bdbb0 starting election for term 1 (peers=0)
+2026/06/16 21:23:00 Node d27b48f3-851d-4661-95e4-8876036bdbb0 became leader for term 1
+2026/06/16 21:23:00 Consensus: Node d27b48f3-851d-4661-95e4-8876036bdbb0 elected as leader
+2026/06/16 21:23:00 Consensus: Node d27b48f3-851d-4661-95e4-8876036bdbb0 state changed to 2
+2026/06/16 21:23:00 Leader d27b48f3-851d-4661-95e4-8876036bdbb0 sending heartbeat for term 1 (single-node cluster, no transport needed)
+2026/06/16 21:23:00 ✅ DeepSeek catalog refreshed with 2 models (live /models)
+Provider: DeepSeek   Default model: deepseek-v4-flash
+
+helix> ✅ checkpoint created: 20260616T182300.374399000-0000000001-31a48032 (backend: git)
+   label: good-state-v1
+
+helix> Goodbye!
+
+### work.txt after a (simulated bad) external edit: CORRUPTED BAD EDIT xxxx
+### REAL OUTPUT — step 2: /checkpoint restore 20260616T182300.374399000-0000000001-31a48032
+INFO: Using config file: /Users/milosvasic/.config/helixcode/config.json
+2026/06/16 21:23:00 Starting Raft consensus for node 05575ebc-e426-497d-af2f-a55b8432623f
+2026/06/16 21:23:00 Loaded 21 known hosts from /Users/milosvasic/.ssh/known_hosts
+Flags parsed: listWorkers=false, nonInteractive=false
+2026/06/16 21:23:00 ✅ DeepSeek provider initialized with 3 models
+F12 provider: using "deepseek"
+2026/06/16 21:23:00 telemetry: initialised (exporter=noop)
+2026/06/16 21:23:00 ask_user: wired (interactive=auto-detect, max-retries=3, timeout=5m0s)
+2026/06/16 21:23:00 sandbox: backend=none reason="sandboxing only available on Linux in v1; macOS Seatbelt + Windows Job Object deferred to F14.5"
+2026/06/16 21:23:00 approval: mode=suggest source=default sandbox_available=false
+2026/06/16 21:23:00 git_auto_commit: enabled=true cwd=/tmp/helix_retro_undo.7SO8F0 git_repo=true
+2026/06/16 21:23:00 subagent: manager initialised (max_concurrency=5)
+2026/06/16 21:23:00 smart-edit: wired (workdir=/tmp/helix_retro_undo.7SO8F0)
+        ___
+      ,'   `.
+     /  ,-.  \
+    |  ( @ )  |   ~ HelixCode
+     \  `-'  /
+      `.___,'
+  HelixCode — AI development, end to end
+=== Helix CLI Interactive Mode ===
+Type your prompt and press Enter; type '/help' for slash commands, '/exit' to quit.
+2026/06/16 21:23:00 ✅ DeepSeek catalog refreshed with 2 models (live /models)
+Provider: DeepSeek   Default model: deepseek-v4-flash
+
+helix> 2026/06/16 21:23:00 Node 05575ebc-e426-497d-af2f-a55b8432623f starting election for term 1 (peers=0)
+2026/06/16 21:23:00 Node 05575ebc-e426-497d-af2f-a55b8432623f became leader for term 1
+2026/06/16 21:23:00 Consensus: Node 05575ebc-e426-497d-af2f-a55b8432623f elected as leader
+2026/06/16 21:23:00 Consensus: Node 05575ebc-e426-497d-af2f-a55b8432623f state changed to 2
+2026/06/16 21:23:00 Leader 05575ebc-e426-497d-af2f-a55b8432623f sending heartbeat for term 1 (single-node cluster, no transport needed)
+✅ working tree restored to checkpoint 20260616T182300.374399000-0000000001-31a48032
+
+helix> Goodbye!
+
+### work.txt AFTER restore: CORRUPTED BAD EDIT xxxx
+
+### ROOT-CAUSE CHARACTERIZATION (FACT, captured 2026-06-16 — §11.4.6/§11.4.102)
+Restored-vs-not boundary established by a controlled tracked-vs-untracked comparison
+in the SAME isolated repo:
+  - TRACKED file (tracked.txt, git-committed before checkpoint):
+      create -> bad edit -> restore  ==> CORRECTLY restored ("TRACKED good v1" returned). WORKS.
+  - UNTRACKED file (work.txt, never git-added):
+      create -> bad edit -> restore  ==> NOT restored (stayed "CORRUPTED BAD EDIT xxxx").
+        `git ls-tree -r <checkpoint-ref>` shows ONLY sample.txt + tracked.txt — work.txt
+        was never snapshotted by the git-backend checkpoint.
+  - In BOTH cases the CLI printed the same success line:
+        "✅ working tree restored to checkpoint <id>"
+REAL DEFECT (anti-bluff finding): the git-backend /checkpoint snapshots & restores only
+git-TRACKED content, but /checkpoint restore prints an unconditional success message even
+when untracked working-tree files are NOT restored. A user who checkpoints a working tree
+containing untracked files, then edits/corrupts them, then restores, gets a green
+"working tree restored" message while those untracked files are silently left corrupted.
+This is a §11.4 sink-side success-message-vs-reality mismatch for the untracked-file case.
+Classification: real current defect, bounded to untracked files; tracked-file restore is
+genuinely working. Reported to the conductor for tracker filing (NOT fixed here — source is
+out of this stream's scope).
