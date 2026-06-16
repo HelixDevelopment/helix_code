@@ -181,6 +181,13 @@ func (p *LlamaCPPProvider) Generate(ctx context.Context, request *LLMRequest) (*
 	}
 	req.Header.Set("Content-Type", "application/json")
 
+	// Capture the request start BEFORE the round-trip so ProcessingTime
+	// measures the real wall-clock latency of the call. (Round-63 anti-bluff:
+	// the prior `time.Since(time.Now())` always evaluated to ~0, so every
+	// llama.cpp response reported a meaningless near-zero ProcessingTime,
+	// corrupting downstream latency consumers — notably the ensemble
+	// quality_weighted speed bonus at ensemble_provider.go and usage analytics.)
+	startTime := time.Now()
 	client := &http.Client{Timeout: p.config.ServerTimeout}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -211,11 +218,11 @@ func (p *LlamaCPPProvider) Generate(ctx context.Context, request *LLMRequest) (*
 			FinishReason string `json:"finish_reason"`
 		} `json:"choices"`
 		// Legacy llama.cpp shape
-		Content       string `json:"content"`
-		StoppedEOS    bool   `json:"stopped_eos"`
-		StoppedLimit  bool   `json:"stopped_limit"`
-		StoppedWord   bool   `json:"stopped_word"`
-		Usage         struct {
+		Content      string `json:"content"`
+		StoppedEOS   bool   `json:"stopped_eos"`
+		StoppedLimit bool   `json:"stopped_limit"`
+		StoppedWord  bool   `json:"stopped_word"`
+		Usage        struct {
 			PromptTokens     int `json:"prompt_tokens"`
 			CompletionTokens int `json:"completion_tokens"`
 			TotalTokens      int `json:"total_tokens"`
@@ -257,7 +264,7 @@ func (p *LlamaCPPProvider) Generate(ctx context.Context, request *LLMRequest) (*
 			TotalTokens:      result.Usage.TotalTokens,
 		},
 		FinishReason:   finishReason,
-		ProcessingTime: time.Since(time.Now()),
+		ProcessingTime: time.Since(startTime),
 		CreatedAt:      time.Now(),
 		Err:            sentinel,
 	}, nil
@@ -266,13 +273,17 @@ func (p *LlamaCPPProvider) Generate(ctx context.Context, request *LLMRequest) (*
 // mapLlamaCppStopFlagsToErr maps llama.cpp's legacy `/completion` boolean
 // stop-cause flags to the round-46 LLMResponse.Err sentinel + a synthetic
 // finish_reason string for FinishReason. Reference:
-//   https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md
+//
+//	https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md
+//
 // (server response fields: stopped_eos / stopped_limit / stopped_word /
-//  stopped_word_str). Closed mapping:
-//   - stopped_limit=true                                       → "length",  ErrResponseTruncated
-//   - stopped_eos=true                                         → "stop",    nil
-//   - stopped_word=true                                        → "stop",    nil  (custom stop seq hit)
-//   - all-false (mid-stream chunk or unknown termination)      → "",        nil
+//
+//	stopped_word_str). Closed mapping:
+//	 - stopped_limit=true                                       → "length",  ErrResponseTruncated
+//	 - stopped_eos=true                                         → "stop",    nil
+//	 - stopped_word=true                                        → "stop",    nil  (custom stop seq hit)
+//	 - all-false (mid-stream chunk or unknown termination)      → "",        nil
+//
 // llama.cpp exposes NO content-filter / safety-classifier signal on the
 // wire, so ErrResponseContentBlocked is NOT reachable here. If a future
 // llama.cpp release adds one, the helper + paired pinning test MUST be
@@ -323,9 +334,9 @@ func (p *LlamaCPPProvider) GenerateStream(ctx context.Context, request *LLMReque
 	}
 
 	payload := map[string]interface{}{
-		"model":      p.config.Model,
-		"prompt":     prompt,
-		"max_tokens": request.MaxTokens,
+		"model":       p.config.Model,
+		"prompt":      prompt,
+		"max_tokens":  request.MaxTokens,
 		"temperature": request.Temperature,
 		"stream":      true,
 	}

@@ -858,10 +858,26 @@ func (s *Server) getSystemStats(c *gin.Context) {
 }
 
 func (s *Server) getSystemStatus(c *gin.Context) {
-	// Check database connection
-	dbStatus := "healthy"
-	if err := s.db.HealthCheck(); err != nil {
-		dbStatus = "unhealthy"
+	// Check database connection.
+	//
+	// s.db may be nil — the server is constructible without a database
+	// (server.New(cfg, nil, rds); auth/managers are all guarded with
+	// `if db != nil`). The previous code called s.db.HealthCheck()
+	// unconditionally, which is a nil-RECEIVER dereference (panic) when
+	// s.db == nil — (*Database).HealthCheck guards a nil *pool* but a
+	// method call on a nil *Database receiver still dereferences the
+	// receiver to read db.Pool and SIGSEGVs. Every sibling endpoint
+	// (healthCheck, getServerInfo) already guards `s.db != nil`; this one
+	// did not. Report "disabled" when no database is wired, matching the
+	// getServerInfo `"enabled": s.db != nil` contract, rather than crash
+	// the handler (CONST-035 / Article XI §11.9 — a status endpoint must
+	// report status, not panic).
+	dbStatus := "disabled"
+	if s.db != nil {
+		dbStatus = "healthy"
+		if err := s.db.HealthCheck(); err != nil {
+			dbStatus = "unhealthy"
+		}
 	}
 
 	status := gin.H{
