@@ -1,83 +1,48 @@
 context: features
 description: >-
-  HelixCode feature-Status doc chain (§11.4.106 docs_chain, §11.4.45/§11.4.65
-  status-doc + universal-markdown-export covenants). The per-slice inventory
-  files under docs/features/inventory/*.md are the SOURCES; they aggregate into
-  the docs/features/Status.md status doc; Status_Summary.md is its two-audience
-  digest (§11.4.56); .html/.pdf are derived exports. Run
-  `docs_chain verify --root . features` as a pre-build gate;
-  `docs_chain sync --root . features` to regenerate. Content-hash change
-  detection is intrinsic to docs_chain (per CONSTITUTION_INTEGRATION.md — NOT
-  mtime, §11.4.86); no extra config needed to enable it.
+  HelixCode feature-Status doc chain (§11.4.106 docs_chain, §11.4.45/§11.4.65/§11.4.153).
+  docs/features/Status.md is a HAND-AUTHORED markdown SOURCE (the §11.4.153 per-feature
+  ledger — its 560+-row reconciled inventory, per-feature video-confirmation columns,
+  deepened sections and regression-guard table are hand-curated, NOT mechanically
+  derivable). docs/features/Status_Summary.md is its hand-authored two-audience digest
+  (§11.4.56). ONLY the .html/.pdf exports are derived (the same md->html->pdf builtin
+  pattern proven by .docs_chain/contexts/governance.yaml + issues.yaml). The
+  docs/features/inventory/*.md slices are supplementary research artefacts in their own
+  right; they are NOT aggregated into Status.md.
   #
-  # === CONFIDENCE / NEEDS-VERIFICATION (anti-bluff §11.4.6) ===
-  # SCHEMA SOURCE (VERIFIED): submodules/docs_chain/docs/CONFIG_SCHEMA.md
-  #   - top-level shape (context/description/nodes/edges/transforms): :34-48
-  #   - node spec (kind+path): :54-76 ; kinds markdown/html/pdf/summary/status
-  #     /status_summary: :67-76
-  #   - derive-from edge (from may be a LIST for multi-input): :84-95 (':93')
-  #   - transform spec builtin|exec, exec contract: :119-161
-  #   - builtins pandoc-html / weasyprint-pdf: :137-148
-  #   Cross-checked against two LIVE working contexts in this repo:
-  #   .docs_chain/contexts/governance.yaml (derive-from + builtin pandoc/weasyprint)
-  #   and .docs_chain/contexts/issues.yaml (derive-from + exec generator + sync).
-  #   => The YAML SHAPE below is VERIFIED against the documented + in-use contract.
-  #
-  # NEEDS-VERIFICATION (the two aggregation transforms, NOT the schema):
-  #   1. `aggregate-inventory` (inventory/*.md -> Status.md): there is NO builtin
-  #      that concatenates N markdown sources into one status doc, and NO existing
-  #      generator script for it (only scripts/generate_issues_summary.sh +
-  #      generate_fixed_summary.sh exist, which are ISSUES-tracker, not features).
-  #      The `exec:` path below (scripts/generate_features_status.sh) is a (now-existing)
-  #      PLACEHOLDER for a generator that DOES NOT YET EXIST. Until that script is
-  #      authored (read inventory/*.md, emit the aggregated Status.md body to the
-  #      staged temp path, byte-stable per CONFIG_SCHEMA.md:155-160), this edge
-  #      will FAIL at `docs_chain sync`. Two valid resolutions, OPERATOR/CONDUCTOR
-  #      to choose:
-  #        (a) author scripts/generate_features_status.sh (recommended), OR
-  #        (b) drop the aggregate edge and treat Status.md as a hand-authored
-  #            markdown source (then only the export edges below apply).
-  #   2. `gen-features-summary` (Status.md -> Status_Summary.md): same situation —
-  #      scripts/generate_features_summary.sh now EXISTS (authored 2026-06-15).
-  #   Until (1)+(2) scripts exist, ONLY the export edges (md->html->pdf via the
-  #   VERIFIED builtins) are runnable; the two exec edges are declared-but-pending.
-  #   This is declared honestly rather than inventing a working chain (§11.4.6).
+  # FIX (§11.4.102 systematic-debugging + §11.4.120 reconciliation, 2026-06-16):
+  # the PRIOR model declared Status.md a DERIVED `kind: status` target with an
+  # `aggregate-inventory` generator (scripts/generate_features_status.sh). That
+  # generator emits a LOSSY rev1 aggregation (859 lines = _status_header.md + raw
+  # inventory concat) that does NOT contain the hand-authored rev7 content
+  # (1003 lines), so a `docs_chain sync` CLOBBERED the hand-authored Status.md
+  # (observed 2026-06-16: rev7 -> rev1, 168 deletions; restored from git e414a496).
+  # ROOT CAUSE = derived-vs-source mis-modelling (a hand-authored ledger wired as a
+  # lossy-generated target). Resolution (b) from the prior header is adopted:
+  # Status.md/Status_Summary.md are hand-authored `kind: markdown` SOURCES and the
+  # aggregate-inventory + gen-features-summary edges are DROPPED. This matches the
+  # PROVEN governance.yaml/issues.yaml pattern (CLAUDE.md/Issues.md = markdown source,
+  # export edges only) so `docs_chain sync` regenerates ONLY the .html/.pdf exports
+  # from the hand-authored .md and can never again overwrite the ledger.
+  # The generators (scripts/generate_features_{status,summary}.sh) remain on disk,
+  # UNWIRED — a future operator may repurpose them, but they are no longer Status.md
+  # transforms. (.docx exports are produced out-of-band via pandoc per §11.4.153 —
+  # docs_chain has no docx builtin, so they are intentionally not modelled here.)
 nodes:
-  # --- sources: one markdown node per inventory slice (docs/features/inventory/*.md)
-  inv_internal:   { kind: markdown, path: docs/features/inventory/internal_services.md }
-  inv_cmd:        { kind: markdown, path: docs/features/inventory/cmd_and_clients.md }
-  inv_submods:    { kind: markdown, path: docs/features/inventory/submodules.md }
-  inv_ported:     { kind: markdown, path: docs/features/inventory/ported_cli_agents.md }
-  inv_deepened:   { kind: markdown, path: docs/features/inventory/deepened_round2.md }
-  # --- aggregate status doc (derived from all inventory sources)
-  status_md:      { kind: status,   path: docs/features/Status.md }
-  # --- two-audience summary (derived from the status doc)
-  status_summary: { kind: status_summary, path: docs/features/Status_Summary.md }
-  # --- exports
+  # --- hand-authored markdown SOURCES (NOT derived) ---
+  status_md:      { kind: markdown, path: docs/features/Status.md }
+  status_summary: { kind: markdown, path: docs/features/Status_Summary.md }
+  # --- derived exports (the ONLY derive edges) ---
   status_html:    { kind: html,     path: docs/features/Status.html }
   status_pdf:     { kind: pdf,      path: docs/features/Status.pdf }
   summary_html:   { kind: html,     path: docs/features/Status_Summary.html }
   summary_pdf:    { kind: pdf,      path: docs/features/Status_Summary.pdf }
 edges:
-  # NEEDS-VERIFICATION (transform script does not yet exist — see header):
-  # multi-input derive: all inventory slices -> aggregate Status.md
-  - { type: derive-from,
-      from: [inv_internal, inv_cmd, inv_submods, inv_ported, inv_deepened],
-      to: status_md, transform: aggregate-inventory }
-  # NEEDS-VERIFICATION (transform script does not yet exist — see header):
-  - { type: derive-from, from: status_md, to: status_summary, transform: gen-features-summary }
   # VERIFIED builtins (same pandoc/weasyprint pair as governance.yaml + issues.yaml):
   - { type: derive-from, from: status_md,      to: status_html,  transform: md-to-html }
   - { type: derive-from, from: status_html,    to: status_pdf,   transform: html-to-pdf }
   - { type: derive-from, from: status_summary, to: summary_html, transform: md-to-html }
   - { type: derive-from, from: summary_html,   to: summary_pdf,  transform: html-to-pdf }
 transforms:
-  # NEEDS-VERIFICATION: placeholder exec transforms — scripts not yet authored.
-  # Contract (CONFIG_SCHEMA.md:149-161): read ONLY declared inputs, write the
-  # aggregated body to the staged temp path docs_chain provides, exit 0/non-0,
-  # byte-stable output. docs_chain owns the atomic rename.
-  aggregate-inventory:  { exec: "scripts/generate_features_status.sh",  args: ["--stdout"] }
-  gen-features-summary: { exec: "scripts/generate_features_summary.sh", args: ["--stdout"] }
-  # VERIFIED builtins (proven in-use by governance.yaml + issues.yaml):
   md-to-html:           { builtin: pandoc-html }
   html-to-pdf:          { builtin: weasyprint-pdf }
