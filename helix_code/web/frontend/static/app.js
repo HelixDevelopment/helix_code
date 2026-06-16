@@ -1,14 +1,56 @@
 // app.js — plain-JS client for the HelixCode LLM generation endpoints.
 //
 // No build toolchain, no framework. Talks to the real server endpoints:
+//   POST /api/v1/auth/login    → JSON { token, user, session } (mints a JWT)
 //   POST /api/v1/llm/generate  → JSON { content, provider, model, usage }
 //   POST /api/v1/llm/stream    → text/event-stream of `data: <chunk>` frames
+//   POST /api/v1/specify        → JSON { output, provider, model, ... }
+//
+// Auth: the generation surfaces (/llm/generate, /llm/stream) and /specify are
+// auth-gated server-side (server.go: the llmCost + specify route groups carry
+// authMiddleware / VerifyJWTWithDB) because they drive real, paid providers.
+// The console logs in via the real /api/v1/auth/login endpoint, stores the
+// returned JWT in sessionStorage, and sends it as `Authorization: Bearer
+// <token>` on every paid call. Without a token those calls return 401 and the
+// output never populates — so login is required before generating.
 //
 // Every byte rendered comes from the server's real provider response — there
-// is no client-side simulation or canned output.
+// is no client-side simulation or canned output. No credential is hardcoded —
+// the operator types username + password into the real login form.
 
 (function () {
   "use strict";
+
+  // --- Auth token store -----------------------------------------------------
+  // The JWT lives in sessionStorage (cleared when the tab closes) — a session
+  // credential, never persisted to disk or logged. authHeaders() merges the
+  // Bearer header into a request's headers ONLY when a token is present, so
+  // unauthenticated GETs (provider/model discovery) still work token-free.
+  var TOKEN_KEY = "helixcode.jwt";
+
+  function getToken() {
+    try {
+      return window.sessionStorage.getItem(TOKEN_KEY) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function setToken(tok) {
+    try {
+      if (tok) window.sessionStorage.setItem(TOKEN_KEY, tok);
+      else window.sessionStorage.removeItem(TOKEN_KEY);
+    } catch (e) {
+      /* sessionStorage unavailable (private mode); token stays in memory only */
+    }
+  }
+
+  function authHeaders(base) {
+    var h = base || {};
+    var tok = getToken();
+    if (tok) h["Authorization"] = "Bearer " + tok;
+    return h;
+  }
 
   var form = document.getElementById("gen-form");
   var output = document.getElementById("output");
@@ -32,7 +74,7 @@
   async function generateOnce(body) {
     var res = await fetch("/api/v1/llm/generate", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(body),
     });
     var data = await res.json();
@@ -53,7 +95,7 @@
     output.textContent = "";
     var res = await fetch("/api/v1/llm/stream", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(body),
     });
     if (!res.ok || !res.body) {
@@ -130,7 +172,7 @@
   async function specifyOnce(body) {
     var res = await fetch("/api/v1/specify", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(body),
     });
     var data = await res.json();
@@ -161,4 +203,72 @@
       specSendBtn.disabled = false;
     }
   });
+
+  // --- Login (POST /api/v1/auth/login) --------------------------------------
+  //
+  // The paid endpoints above are auth-gated; the operator logs in here to mint
+  // a real JWT. We POST the real login endpoint, read the server's real
+  // `token`, and store it in sessionStorage. No credential is hardcoded — the
+  // username/password come from the real form inputs. The auth status line
+  // reflects the live token state read back from sessionStorage.
+
+  var loginForm = document.getElementById("login-form");
+  var loginStatus = document.getElementById("auth-status");
+  var loginBtn = document.getElementById("login-send");
+  var logoutBtn = document.getElementById("logout");
+
+  function setAuthStatus(text, isError) {
+    if (!loginStatus) return;
+    loginStatus.textContent = text || "";
+    loginStatus.className = "meta" + (isError ? " error" : "");
+  }
+
+  function refreshAuthStatus() {
+    if (getToken()) {
+      setAuthStatus("authenticated (token stored)");
+    } else {
+      setAuthStatus("not authenticated — log in to generate");
+    }
+  }
+
+  async function loginOnce(username, password) {
+    var res = await fetch("/api/v1/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: username, password: password }),
+    });
+    var data = await res.json();
+    if (!res.ok || data.status === "error" || !data.token) {
+      throw new Error(data.error || data.message || ("HTTP " + res.status));
+    }
+    setToken(data.token);
+  }
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var username = document.getElementById("login-username").value.trim();
+      var password = document.getElementById("login-password").value;
+      loginBtn.disabled = true;
+      setAuthStatus("logging in…");
+      try {
+        await loginOnce(username, password);
+        refreshAuthStatus();
+      } catch (err) {
+        setToken("");
+        setAuthStatus((err && err.message) || String(err), true);
+      } finally {
+        loginBtn.disabled = false;
+      }
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", function () {
+      setToken("");
+      refreshAuthStatus();
+    });
+  }
+
+  refreshAuthStatus();
 })();

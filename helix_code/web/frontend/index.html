@@ -20,6 +20,32 @@
     </header>
 
     <h1>HelixCode LLM Console</h1>
+
+    <h2 class="section-divider">Sign in</h2>
+    <p class="sub">
+      The generation endpoints are auth-gated (they drive real, paid
+      providers). Sign in via <code>POST /api/v1/auth/login</code> to mint a
+      JWT — it is held in this tab's session and sent as
+      <code>Authorization: Bearer …</code> on every generate / specify call.
+    </p>
+
+    <form id="login-form">
+      <label>
+        Username
+        <input id="login-username" type="text" autocomplete="username" placeholder="your username" required />
+      </label>
+      <label>
+        Password
+        <input id="login-password" type="password" autocomplete="current-password" placeholder="your password" required />
+      </label>
+      <div class="row">
+        <button id="logout" type="button">Sign out</button>
+        <button id="login-send" type="submit">Sign in</button>
+      </div>
+    </form>
+    <p id="auth-status" class="meta"></p>
+
+    <h2 class="section-divider">Generate</h2>
     <p class="sub">
       Sends a real request to <code>POST /api/v1/llm/generate</code>
       (or <code>/api/v1/llm/stream</code>). The server constructs a real

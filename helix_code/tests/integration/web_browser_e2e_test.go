@@ -4,6 +4,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -13,11 +14,26 @@ import (
 	"testing"
 	"time"
 
+	"dev.helix.code/internal/auth"
+	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/server"
 	"github.com/chromedp/chromedp"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// webBrowserRedMode reports whether the §11.4.115 polarity switch RED_WEB_AUTH is
+// armed. Default ("0") = standing GREEN guard (the authenticated login→generate
+// journey MUST complete and render real content). "1" = reproduce-the-defect on
+// the PRE-FIX frontend (a frontend that POSTs /generate with NO Authorization
+// header gets 401, #output never populates, the poll times out) — proving the
+// guard genuinely catches the unauth-frontend regression rather than passing
+// vacuously.
+func webBrowserRedMode(t *testing.T) bool {
+	t.Helper()
+	return strings.TrimSpace(os.Getenv("RED_WEB_AUTH")) == "1"
+}
 
 // web_browser_e2e_test.go — REAL browser-driven end-to-end exercise of the
 // HelixCode web client, proving the full
@@ -121,8 +137,32 @@ func innerModuleRoot(t *testing.T) string {
 // TestWebBrowserE2E_GenerateRoundTrip drives a real headless Chrome against the
 // real HelixCode web client served by the real server, with a live Ollama
 // behind /api/v1/llm/generate, and asserts the model's genuine answer reaches
-// the browser DOM.
+// the browser DOM — through the REAL authenticated user journey.
+//
+// §11.4.1 fix-A-creates-B / §11.4.118 discovery: a sibling stream correctly
+// landed authMiddleware on the paid /api/v1/llm/{generate,stream} + /specify
+// route groups (server.go: the llmCost + specify groups). That security gate is
+// CORRECT and is NOT reverted here (§11.4.120 reconcile-don't-revert). But the
+// web frontend POSTed those endpoints with NO Authorization header and had no
+// token mechanism — so post-gate the web UI got 401 and #output never
+// populated. THE FIX (web/frontend): a real login form mints a JWT via
+// /api/v1/auth/login, stores it in sessionStorage, and sends it as
+// `Authorization: Bearer <token>` on the paid calls. THIS test proves the fix
+// end-to-end through the real browse→sign-in→generate journey (§11.4.143).
+//
+// §11.4.115 polarity: GREEN (default) drives the full authenticated journey and
+// asserts the model's real answer renders. RED (RED_WEB_AUTH=1) deletes the
+// stored token AFTER login and just before submit, reproducing the pre-fix
+// unauth-frontend defect — generate returns 401, #output stays empty, the poll
+// times out — proving the guard genuinely catches the regression.
+//
+// Auth uses the REAL database (CONST-050(A) / §11.4): a real user is registered
+// against real PostgreSQL, the real /api/v1/auth/login mints a real JWT the real
+// authMiddleware (VerifyJWTWithDB) accepts. No mock, no fake, no hardcoded
+// shared credential — the username/password are unique per run.
 func TestWebBrowserE2E_GenerateRoundTrip(t *testing.T) {
+	red := webBrowserRedMode(t)
+
 	// --- Gate 1: live provider (mirror llm_generate_e2e_test.go) ------------
 	model, reachable := liveOllamaModel(t)
 	if !reachable {
@@ -136,7 +176,16 @@ func TestWebBrowserE2E_GenerateRoundTrip(t *testing.T) {
 	if !headlessBrowserAvailable() {
 		t.Skip("SKIP-OK: #P2-F23 chromium not available; cannot drive the real web client") //nolint
 	}
-	t.Logf("targeting live Ollama model %q via %s with a real headless browser", model, ollamaEndpoint)
+
+	// --- Gate 3: real database (auth backend) -------------------------------
+	// VerifyJWTWithDB needs a real active user row; a nil-DB server can never
+	// authenticate (auth.go returns ErrAuthBackendUnavailable). Connect to the
+	// real PostgreSQL the full-test stack provides; honest SKIP if absent.
+	dbCfg, ok := realDBConfigFromEnv()
+	if !ok {
+		t.Skip("SKIP-OK: no real database configured (set DB_HOST/HELIX_DATABASE_HOST); the web login→generate journey requires the real auth backend") //nolint
+	}
+	t.Logf("targeting live Ollama model %q via %s with a real headless browser + real auth DB %s:%d (RED=%v)", model, ollamaEndpoint, dbCfg.Host, dbCfg.Port, red)
 
 	// --- CWD fix: serve the frontend ----------------------------------------
 	// server.setupRoutes registers static routes relative to CWD. go test runs
@@ -153,9 +202,36 @@ func TestWebBrowserE2E_GenerateRoundTrip(t *testing.T) {
 	// local Ollama default — the exact out-of-the-box server path.
 	t.Setenv("HELIX_LLM_PROVIDER", "")
 
-	// --- Boot the real server ----------------------------------------------
+	// --- Connect the real DB + register a real user with known creds --------
+	// Used to drive the real login form. Distinct from realAuthedServer (which
+	// returns a token, not the password) because the BROWSER must type real
+	// credentials into the real form — the faithful end-user journey.
+	dbCtx, dbCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer dbCancel()
+	realDB, derr := database.New(dbCfg)
+	if derr != nil {
+		t.Skipf("SKIP-OK: real database at %s:%d unreachable: %v; cannot exercise the web auth journey", dbCfg.Host, dbCfg.Port, derr) //nolint
+	}
+	if pingErr := realDB.Pool.Ping(dbCtx); pingErr != nil {
+		realDB.Pool.Close()
+		t.Skipf("SKIP-OK: real database at %s:%d did not answer ping: %v", dbCfg.Host, dbCfg.Port, pingErr) //nolint
+	}
+	t.Cleanup(func() { realDB.Pool.Close() })
+
+	authSvc := auth.NewAuthService(
+		auth.AuthConfig{JWTSecret: authJWTSecret, TokenExpiry: time.Hour, BcryptCost: 4},
+		auth.NewAuthDB(realDB.Pool),
+	)
+	suffix := strings.ReplaceAll(uuid.NewString(), "-", "")[:12]
+	username := "web_e2e_" + suffix
+	password := "web-e2e-password-" + suffix // unique per run; never hardcoded/shared
+	if _, regErr := authSvc.Register(dbCtx, username, fmt.Sprintf("%s@e2e.test", username), password, "Web E2E User"); regErr != nil {
+		t.Skipf("SKIP-OK: could not register a real test user against %s:%d (schema migrated?): %v", dbCfg.Host, dbCfg.Port, regErr) //nolint
+	}
+
+	// --- Boot the real server WITH the real DB so login + auth work ---------
 	port := freePort(t)
-	srv := server.New(minimalServerConfig(port), nil, nil)
+	srv := server.New(realServerConfig(port), realDB, nil)
 	serveErr := make(chan error, 1)
 	go func() { serveErr <- srv.Start() }()
 	t.Cleanup(func() {
@@ -197,6 +273,9 @@ func TestWebBrowserE2E_GenerateRoundTrip(t *testing.T) {
 		_ = resp.Body.Close()
 		require.Equal(t, http.StatusOK, resp.StatusCode, "GET / must serve the frontend (CWD fix working)")
 		html := string(body[:n])
+		require.Contains(t, html, `id="login-username"`, "served index.html must contain the real login username input (the auth-gap fix)")
+		require.Contains(t, html, `id="login-password"`, "served index.html must contain the real login password input")
+		require.Contains(t, html, `id="login-send"`, "served index.html must contain the real sign-in button")
 		require.Contains(t, html, `id="prompt"`, "served index.html must contain the real prompt input")
 		require.Contains(t, html, `id="send"`, "served index.html must contain the real send button")
 		require.Contains(t, html, `id="output"`, "served index.html must contain the real output element")
@@ -225,24 +304,68 @@ func TestWebBrowserE2E_GenerateRoundTrip(t *testing.T) {
 
 	var renderedOutput string
 	var renderedMeta string
+	var authStatusText string
 	var screenshot []byte
 
-	err = chromedp.Run(runCtx,
-		// Load the real web client.
+	// --- Stage 1: the REAL login journey (the auth-gap fix) -----------------
+	// Drive the real login form: type the registered credentials into the real
+	// #login-username / #login-password inputs, click the real #login-send
+	// button. app.js loginOnce() POSTs /api/v1/auth/login, reads the server's
+	// real `token`, and stores it in sessionStorage. We wait until the live
+	// #auth-status DOM text reports authentication (set by refreshAuthStatus()
+	// only after a token is actually stored) — positive proof the JWT was
+	// minted by the real login endpoint and persisted client-side.
+	loginErr := chromedp.Run(runCtx,
 		chromedp.Navigate(base+"/"),
-		// Wait for the real prompt input to exist + be visible.
+		chromedp.WaitVisible(`#login-username`, chromedp.ByID),
+		chromedp.SendKeys(`#login-username`, username, chromedp.ByID),
+		chromedp.SendKeys(`#login-password`, password, chromedp.ByID),
+		chromedp.Click(`#login-send`, chromedp.ByID),
+		// Poll the live DOM until the auth status reports a stored token.
+		chromedp.Poll(
+			`/authenticated/.test((document.querySelector('#auth-status')||{}).textContent||'')`,
+			nil,
+			chromedp.WithPollingTimeout(20*time.Second),
+			chromedp.WithPollingInterval(200*time.Millisecond),
+		),
+		chromedp.Text(`#auth-status`, &authStatusText, chromedp.ByID),
+	)
+	require.NoError(t, loginErr, "the real browser login journey must complete (token minted via /api/v1/auth/login and stored)")
+	t.Logf("post-login #auth-status DOM text: %q", strings.TrimSpace(authStatusText))
+	require.Contains(t, authStatusText, "authenticated",
+		"the login form must mint+store a real JWT (sessionStorage); got auth status %q", authStatusText)
+	// Sanity: the token is genuinely present in sessionStorage post-login.
+	var tokenStored bool
+	require.NoError(t, chromedp.Run(runCtx,
+		chromedp.Evaluate(`!!window.sessionStorage.getItem('helixcode.jwt')`, &tokenStored)))
+	require.True(t, tokenStored, "a real JWT must be stored in sessionStorage after the real login")
+
+	// --- §11.4.115 RED reproduction: strip the token before generating ------
+	// In RED mode, delete the just-stored token so the generate POST goes out
+	// WITH NO Authorization header — exactly the pre-fix frontend behaviour.
+	// The auth gate then returns 401, app.js surfaces the error, #output never
+	// populates, and the poll below times out — proving the GREEN guard catches
+	// the unauth-frontend regression rather than passing vacuously.
+	if red {
+		require.NoError(t, chromedp.Run(runCtx,
+			chromedp.Evaluate(`window.sessionStorage.removeItem('helixcode.jwt'); true`, nil)))
+		t.Log("RED: stored JWT removed before generate — reproducing the pre-fix unauthenticated-frontend defect")
+	}
+
+	// --- Stage 2: the authenticated generate journey -----------------------
+	genErr := chromedp.Run(runCtx,
 		chromedp.WaitVisible(`#prompt`, chromedp.ByID),
 		// Type the discovered live model into the real #model input
-		// (web/frontend/index.html:25). app.js buildBody() (app.js:24-29)
-		// omits the model when this is blank, in which case the server
-		// defaults to "llama3.2"; we instead drive the model THIS host
-		// actually has installed so the real generation path can run —
-		// exactly as the sibling llm_generate_e2e_test.go names the model.
+		// (web/frontend/index.html). app.js buildBody() omits the model when
+		// this is blank, in which case the server defaults to "llama3.2"; we
+		// instead drive the model THIS host actually has installed so the real
+		// generation path can run — exactly as llm_generate_e2e_test.go does.
 		chromedp.SendKeys(`#model`, model, chromedp.ByID),
 		// Type the checkable prompt into the real textarea.
 		chromedp.SendKeys(`#prompt`, prompt, chromedp.ByID),
 		// Click the real submit button — fires the form#gen-form handler that
-		// POSTs /api/v1/llm/generate.
+		// POSTs /api/v1/llm/generate WITH the Authorization: Bearer header
+		// (authHeaders() in app.js attaches the stored JWT).
 		chromedp.Click(`#send`, chromedp.ByID),
 		// Wait until the real output element is non-empty: app.js writes
 		// data.content into #output ONLY after the server's real provider
@@ -258,7 +381,21 @@ func TestWebBrowserE2E_GenerateRoundTrip(t *testing.T) {
 		chromedp.Text(`#meta`, &renderedMeta, chromedp.ByID),
 		chromedp.CaptureScreenshot(&screenshot),
 	)
-	require.NoError(t, err, "the full browser→server→Ollama→browser round-trip must complete")
+
+	if red {
+		// PRE-FIX defect reproduced: with no token, the generate POST is 401,
+		// #output never populates, so the poll inside genErr times out (a
+		// deadline-exceeded error). That non-nil error IS the captured defect.
+		require.Error(t, genErr,
+			"RED expects the unauth-frontend defect PRESENT: a tokenless generate must NOT populate #output (poll must time out)")
+		// Capture what the user actually saw: the #meta error line (401).
+		var redMeta string
+		_ = chromedp.Run(runCtx, chromedp.Text(`#meta`, &redMeta, chromedp.ByID)) //nolint
+		t.Logf("RED captured: generate without token failed to render output; genErr=%v; #meta=%q", genErr, strings.TrimSpace(redMeta))
+		return
+	}
+
+	require.NoError(t, genErr, "the full authenticated browser→server→Ollama→browser round-trip must complete")
 
 	// --- Persist the screenshot (captured runtime evidence) -----------------
 	shotPath := filepath.Join(t.TempDir(), "web_browser_e2e_rendered.png")
