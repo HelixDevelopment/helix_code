@@ -115,11 +115,17 @@ func TestMCP_Stdio_ToolRegistryAdapter(t *testing.T) {
 	require.NoError(t, err)
 	reg.RegisterMCPManager(mgr)
 
-	// Confirm "echo:echo" was registered
-	tool, err := reg.Get("echo:echo")
+	// Confirm the echo tool was registered under its OpenAI/DeepSeek-compatible
+	// registry key. HXC-113 (commit 8f203793) deliberately changed MCP tool
+	// names from "server:name" to "server__name" so they match the LLM
+	// function-name grammar ^[A-Za-z0-9_-]+$ (a colon causes a 400 from
+	// OpenAI-compatible providers). The registry key for the ("echo","echo")
+	// pair is therefore "echo__echo", not the old "echo:echo".
+	const echoToolKey = "echo__echo"
+	tool, err := reg.Get(echoToolKey)
 	require.NoError(t, err)
 	require.NotNil(t, tool)
-	assert.Equal(t, "echo:echo", tool.Name())
+	assert.Equal(t, echoToolKey, tool.Name())
 
 	// Execute through the adapter — this exercises mcpTool.Execute → CallTool
 	result, execErr := tool.Execute(ctx, map[string]any{"text": "hello"})

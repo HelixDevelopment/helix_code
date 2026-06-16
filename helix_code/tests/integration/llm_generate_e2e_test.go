@@ -87,7 +87,7 @@ func liveOllamaModel(t *testing.T) (model string, reachable bool) {
 	if len(tags.Models) == 0 {
 		return "", true // reachable, no models
 	}
-	prefer := []string{"qwen2.5:0.5b", "llama3.2:1b", "llama3.2", "qwen2.5:1.5b"}
+	prefer := []string{"qwen2.5:0.5b", "llama3.2:1b", "llama3.2", "qwen2.5:1.5b", "qwen2.5:3b", "qwen2.5"}
 	for _, p := range prefer {
 		for _, m := range tags.Models {
 			if m.Name == p {
@@ -95,7 +95,22 @@ func liveOllamaModel(t *testing.T) (model string, reachable bool) {
 			}
 		}
 	}
-	return tags.Models[0].Name, true
+	// Fallback: prefer a general text model over a vision-only model. A
+	// vision model (e.g. moondream, llava, bakllava) returns empty/garbage
+	// for a plain arithmetic text prompt — selecting it as the fallback makes
+	// the test assert non-empty content against a model that cannot produce
+	// it, an environment-shaped false-FAIL (§11.4.6). Skip known vision-only
+	// model families when choosing the fallback.
+	visionOnly := []string{"moondream", "llava", "bakllava", "llama3.2-vision", "minicpm-v"}
+	for _, m := range tags.Models {
+		if !nameHasAnyPrefix(strings.ToLower(m.Name), visionOnly) {
+			return m.Name, true
+		}
+	}
+	// Every installed model is vision-only — none can answer the text prompt.
+	// Report "no usable model" so the test SKIPs honestly rather than failing
+	// on a model that structurally cannot produce the asserted output.
+	return "", true
 }
 
 // freePort asks the OS for an unused TCP port so the test server never collides
@@ -140,9 +155,21 @@ func TestLLMGenerateE2E(t *testing.T) {
 	// Ensure no cloud provider is named so resolveLLMProvider falls to the local
 	// Ollama default — the exact out-of-the-box server path.
 	t.Setenv("HELIX_LLM_PROVIDER", "")
+	// Pin the server's Ollama target to the SAME endpoint this test probed for
+	// an installed model, so the booted server calls the Ollama we validated
+	// (an OLLAMA_HOST inherited from a remote-infra env could point at a
+	// different Ollama with no models, producing a 502 the probe can't see).
+	t.Setenv("OLLAMA_HOST", ollamaEndpoint)
+
+	// /api/v1/llm/generate is now auth-gated (internal/server/server.go:308,
+	// standing guard internal/server/llm_auth_guard_test.go). Boot the server
+	// with the REAL database and a REAL registered user so the real
+	// authMiddleware (VerifyJWTWithDB) accepts a REAL minted token — no mock,
+	// no auth bypass (§11.4 / CONST-050(A)). Skips honestly if no real DB.
+	realDB, bearerToken := realAuthedServer(t)
 
 	port := freePort(t)
-	srv := server.New(minimalServerConfig(port), nil, nil)
+	srv := server.New(realServerConfig(port), realDB, nil)
 
 	// Start the real HTTP server in the background; stop it at test end.
 	serveErr := make(chan error, 1)
@@ -177,6 +204,7 @@ func TestLLMGenerateE2E(t *testing.T) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, base+"/api/v1/llm/generate", bytes.NewBufferString(bodyJSON))
 	require.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+bearerToken)
 
 	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err, "the real HTTP POST to the generate endpoint must succeed at the transport level")
@@ -205,6 +233,17 @@ func TestLLMGenerateE2E(t *testing.T) {
 
 	// Provider name proves a real Ollama provider was constructed and invoked.
 	assert.Equal(t, "ollama", decoded["provider"], "must name the real provider invoked")
+}
+
+// nameHasAnyPrefix reports whether s begins with any of the given prefixes.
+// Used to detect vision-only Ollama model families by name.
+func nameHasAnyPrefix(s string, prefixes []string) bool {
+	for _, p := range prefixes {
+		if strings.HasPrefix(s, p) {
+			return true
+		}
+	}
+	return false
 }
 
 // itoa is a tiny strconv.Itoa to avoid an extra import in a single-use spot.

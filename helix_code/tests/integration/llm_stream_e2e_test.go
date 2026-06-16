@@ -120,9 +120,18 @@ func TestLLMStreamE2E(t *testing.T) {
 	// Ensure no cloud provider is named so resolveLLMProvider falls to the local
 	// Ollama default — the exact out-of-the-box server path.
 	t.Setenv("HELIX_LLM_PROVIDER", "")
+	// Pin the server's Ollama target to the SAME endpoint this test probed (see
+	// llm_generate_e2e_test.go for the rationale).
+	t.Setenv("OLLAMA_HOST", ollamaEndpoint)
+
+	// /api/v1/llm/stream is now auth-gated (internal/server/server.go:309,
+	// standing guard internal/server/llm_auth_guard_test.go). Boot with the
+	// REAL database + a REAL registered user so the real authMiddleware accepts
+	// a REAL minted token — no mock, no bypass (§11.4 / CONST-050(A)).
+	realDB, bearerToken := realAuthedServer(t)
 
 	port := freePort(t)
-	srv := server.New(minimalServerConfig(port), nil, nil)
+	srv := server.New(realServerConfig(port), realDB, nil)
 
 	// Start the real HTTP server in the background; stop it at test end.
 	serveErr := make(chan error, 1)
@@ -161,6 +170,7 @@ func TestLLMStreamE2E(t *testing.T) {
 	require.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "text/event-stream")
+	req.Header.Set("Authorization", "Bearer "+bearerToken)
 
 	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err, "the real HTTP POST to the stream endpoint must succeed at the transport level")
