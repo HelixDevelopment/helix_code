@@ -92,6 +92,20 @@ commit history + the <code>docs/improvements/</code> evidence chain
 </tr>
 </thead>
 <tbody>
+<tr class="cell-status-obsolete">
+<td>2026-06-09</td>
+<td>HXC-044: internal/cognee — AMD-GPU rocm-smi JSON parser returns -1
+sentinel instead of parsed GPU-use value</td>
+<td>Bug</td>
+<td>Obsolete (→ Fixed.md)</td>
+<td>2026-06-09 session</td>
+<td>f27e986c</td>
+<td>Obsolete per §11.4.90 — Reason: not-reproducible; Since: 2026-06-09;
+Superseding-item: none. Originally found by an isolated-worktree full
+unit sweep (<code>go test ./internal/...</code> at HEAD 54ab4e95);
+triple-checked NON-reproducible on the canonical tree, so closed
+Obsolete rather than Fixed. Evidence: docs/qa/HXC-044/evidence.md.</td>
+</tr>
 <tr>
 <td>2026-05-29</td>
 <td>HXC-029: §11.4.98 full-automation compliance sweep — verify every
@@ -2150,7 +2164,9 @@ instead of parsed GPU-use value</h2>
 <p><strong>Status:</strong> Obsolete (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> docs/qa/HXC-044/evidence.md
 <strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
-<strong>Assigned-To:</strong> Claude</p>
+<strong>Assigned-To:</strong> Claude <strong>Obsolete-Details:</strong>
+Since: 2026-06-09; Reason: not-reproducible; Superseding-item: none;
+Triple-check evidence: docs/qa/HXC-044/evidence.md</p>
 <p>Found by isolated-worktree full unit sweep (go test ./internal/… HEAD
 54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md for
 the exact failing test + file:line + message. Genuine product defect

@@ -45,18 +45,42 @@ SRC="$ROOT/docs/Fixed.md"
 OUT="$ROOT/docs/Fixed_Summary.md"
 [[ -f "$SRC" ]] || { echo "FATAL: $SRC missing" >&2; exit 2; }
 
-# Count data rows by the Type column (3rd pipe field). Skip the header row
+# Count data rows. Columns (pipe-delimited): 1=Closure date, 2=Title, 3=Type,
+# 4=Status, 5=Round, 6=Commit(s), 7=Evidence. Skip the header row
 # ("| Closure |") and the separator ("|---|"). A data row's col-1 is a date.
-read -r BUG FEAT TASK TOTAL <<<"$(
+#
+# Two orthogonal classifications are emitted (§11.4.16 Type + §11.4.90 Obsolete
+# Status — Obsolete is a terminal Status orthogonal to Type, so an Obsolete row
+# is BOTH counted in its Type bucket AND broken out in the Obsolete aggregate):
+#   - Type buckets (3rd field): Bug / Feature / Task  (existing behavior, kept).
+#   - Obsolete count (4th field Status == "Obsolete (→ Fixed.md)").
+read -r BUG FEAT TASK OBSOLETE TOTAL <<<"$(
   awk -F'|' '
     /^\|/ {
       c1=$2; gsub(/^[ \t]+|[ \t]+$/, "", c1)
       if (c1 !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) next      # only YYYY-MM-DD data rows
       t=$4; gsub(/^[ \t]+|[ \t]+$/, "", t)
       if (t=="Bug") bug++; else if (t=="Feature") feat++; else if (t=="Task") task++
+      s=$5; gsub(/^[ \t]+|[ \t]+$/, "", s)
+      if (s ~ /^Obsolete \(/) obsolete++
       total++
     }
-    END { printf "%d %d %d %d\n", bug, feat, task, total }
+    END { printf "%d %d %d %d %d\n", bug, feat, task, obsolete, total }
+  ' "$SRC"
+)"
+
+# Per-item Obsolete list (§11.4.90 visibility): ID + title + Obsolete reason if
+# present in the Evidence/Status cells. Each line "  - <ID> — <title>".
+OBSOLETE_LIST="$(
+  awk -F'|' '
+    /^\|/ {
+      c1=$2; gsub(/^[ \t]+|[ \t]+$/, "", c1)
+      if (c1 !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) next
+      s=$5; gsub(/^[ \t]+|[ \t]+$/, "", s)
+      if (s !~ /^Obsolete \(/) next
+      title=$3; gsub(/^[ \t]+|[ \t]+$/, "", title)
+      printf "- %s\n", title
+    }
   ' "$SRC"
 )"
 
@@ -73,8 +97,13 @@ NEW="$(cat <<EOF
 | Bug | $BUG | \`Fixed (→ Fixed.md)\` |
 | Feature | $FEAT | \`Implemented (→ Fixed.md)\` |
 | Task | $TASK | \`Completed (→ Fixed.md)\` |
+| Obsolete | $OBSOLETE | \`Obsolete (→ Fixed.md)\` (§11.4.90 — terminal Status, orthogonal to Type) |
 
 **Total closed items**: $TOTAL (counted directly from the \`docs/Fixed.md\` closure table).
+
+## Obsolete items (§11.4.90)
+
+${OBSOLETE_LIST:-_(none)_}
 
 *Last regenerated: $TODAY by \`scripts/generate_fixed_summary.sh\`. HTML/PDF exports via \`scripts/regenerate-tracker-exports.sh\`.*
 EOF
