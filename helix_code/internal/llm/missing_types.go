@@ -73,6 +73,7 @@ const (
 	ProviderTypeHuggingFace ProviderType = "huggingface"
 	ProviderTypeMistral     ProviderType = "mistral"
 	ProviderTypeDeepSeek    ProviderType = "deepseek"
+	ProviderTypeXiaomi      ProviderType = "xiaomi"
 	ProviderTypeClickHouse  ProviderType = "clickhouse"
 	ProviderTypeSupabase    ProviderType = "supabase"
 	ProviderTypeDeepLake    ProviderType = "deeplake"
