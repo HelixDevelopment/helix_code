@@ -80,16 +80,18 @@ type OpenAICompatibleChoice struct {
 // string-encoded and raw-object forms — the same path the Groq/DeepSeek/
 // Mistral/OpenRouter providers use.
 type OpenAICompatibleMessage struct {
-	Role      string               `json:"role"`
-	Content   string               `json:"content"`
-	ToolCalls []openAIWireToolCall `json:"tool_calls,omitempty"`
+	Role             string               `json:"role"`
+	Content          string               `json:"content"`
+	ToolCalls        []openAIWireToolCall `json:"tool_calls,omitempty"`
+	ReasoningContent string               `json:"reasoning_content,omitempty"`
 }
 
 // OpenAICompatibleDelta represents a delta in streaming response
 type OpenAICompatibleDelta struct {
-	Role      string               `json:"role,omitempty"`
-	Content   string               `json:"content,omitempty"`
-	ToolCalls []openAIWireToolCall `json:"tool_calls,omitempty"`
+	Role             string               `json:"role,omitempty"`
+	Content          string               `json:"content,omitempty"`
+	ToolCalls        []openAIWireToolCall `json:"tool_calls,omitempty"`
+	ReasoningContent string               `json:"reasoning_content,omitempty"`
 }
 
 // OpenAICompatibleUsage represents token usage information
@@ -470,6 +472,14 @@ func (p *OpenAICompatibleProvider) convertFromOpenAIResponse(response *OpenAICom
 		llmResponse.Content = choice.Message.Content
 		llmResponse.ToolCalls = parseOpenAIWireToolCalls(choice.Message.ToolCalls)
 		llmResponse.FinishReason = choice.FinishReason
+
+		// Capture reasoning_content if present (Xiaomi MiMo deep thinking)
+		if choice.Message.ReasoningContent != "" {
+			if llmResponse.ProviderMetadata == nil {
+				llmResponse.ProviderMetadata = make(map[string]interface{})
+			}
+			llmResponse.ProviderMetadata["reasoning_content"] = choice.Message.ReasoningContent
+		}
 		// Round-53 LLMResponse.Err wiring (CONST-035 / Article XI §11.9):
 		// the OpenAICompatibleProvider fans out to ~11 backends (VLLM,
 		// LMStudio, Jan, LocalAI, FastChat, TextGen WebUI, KoboldAI,
@@ -603,6 +613,13 @@ func (p *OpenAICompatibleProvider) makeStreamingRequest(ctx context.Context, req
 					RequestID: requestID,
 					Content:   choice.Delta.Content,
 					CreatedAt: time.Now(),
+				}
+
+				// Capture streaming reasoning_content if present (Xiaomi MiMo deep thinking)
+				if choice.Delta.ReasoningContent != "" {
+					response.ProviderMetadata = map[string]interface{}{
+						"reasoning_content": choice.Delta.ReasoningContent,
+					}
 				}
 
 				select {

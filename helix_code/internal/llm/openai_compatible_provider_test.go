@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -751,4 +752,119 @@ func (m *mockReader) Read(p []byte) (n int, err error) {
 	p[0] = m.data[m.pos]
 	m.pos++
 	return 1, nil
+}
+
+func TestOpenAICompatibleProvider_ReasoningContent(t *testing.T) {
+	// Test that reasoning_content from wire response is captured in ProviderMetadata
+	msg := OpenAICompatibleMessage{
+		Role:             "assistant",
+		Content:          "The answer is 4.",
+		ReasoningContent: "Let me think step by step: 2+2=4",
+	}
+	if msg.ReasoningContent != "Let me think step by step: 2+2=4" {
+		t.Error("ReasoningContent not parsed from message")
+	}
+
+	// Test Delta also carries ReasoningContent
+	delta := OpenAICompatibleDelta{
+		Role:             "assistant",
+		Content:          "partial",
+		ReasoningContent: "thinking...",
+	}
+	if delta.ReasoningContent != "thinking..." {
+		t.Error("ReasoningContent not parsed from delta")
+	}
+
+	// Test that empty ReasoningContent is handled (omitempty)
+	emptyMsg := OpenAICompatibleMessage{
+		Role:    "assistant",
+		Content: "plain response",
+	}
+	if emptyMsg.ReasoningContent != "" {
+		t.Error("Empty ReasoningContent should be empty string")
+	}
+}
+
+func TestOpenAICompatibleProvider_ReasoningContent_InResponse(t *testing.T) {
+	// Simulate a wire response JSON with reasoning_content and verify it is
+	// captured into LLMResponse.ProviderMetadata after convertFromOpenAIResponse.
+	wireJSON := `{
+		"id": "chatcmpl-test",
+		"object": "chat.completion",
+		"created": 1700000000,
+		"model": "mimo-v2.5-pro",
+		"choices": [{
+			"index": 0,
+			"message": {
+				"role": "assistant",
+				"content": "The answer is 4.",
+				"reasoning_content": "Deep thinking: 2+2=4, confirmed."
+			},
+			"finish_reason": "stop"
+		}],
+		"usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
+	}`
+
+	var resp OpenAICompatibleResponse
+	if err := json.Unmarshal([]byte(wireJSON), &resp); err != nil {
+		t.Fatalf("failed to unmarshal wire response: %v", err)
+	}
+
+	if len(resp.Choices) == 0 {
+		t.Fatal("expected at least one choice")
+	}
+
+	msg := resp.Choices[0].Message
+	if msg.ReasoningContent != "Deep thinking: 2+2=4, confirmed." {
+		t.Errorf("ReasoningContent = %q, want %q", msg.ReasoningContent, "Deep thinking: 2+2=4, confirmed.")
+	}
+	if msg.Content != "The answer is 4." {
+		t.Errorf("Content = %q, want %q", msg.Content, "The answer is 4.")
+	}
+
+	// Now verify convertFromOpenAIResponse captures it into ProviderMetadata
+	provider := &OpenAICompatibleProvider{name: "test"}
+	llmResp := provider.convertFromOpenAIResponse(&resp, uuid.New(), time.Millisecond)
+	if llmResp.ProviderMetadata == nil {
+		t.Fatal("ProviderMetadata should not be nil when reasoning_content is present")
+	}
+	rc, ok := llmResp.ProviderMetadata["reasoning_content"].(string)
+	if !ok {
+		t.Fatalf("ProviderMetadata[reasoning_content] should be string, got %T", llmResp.ProviderMetadata["reasoning_content"])
+	}
+	if rc != "Deep thinking: 2+2=4, confirmed." {
+		t.Errorf("ProviderMetadata[reasoning_content] = %q, want %q", rc, "Deep thinking: 2+2=4, confirmed.")
+	}
+}
+
+func TestOpenAICompatibleProvider_ReasoningContent_Empty(t *testing.T) {
+	// When reasoning_content is absent/empty, ProviderMetadata should NOT be populated
+	wireJSON := `{
+		"id": "chatcmpl-test",
+		"object": "chat.completion",
+		"created": 1700000000,
+		"model": "gpt-4",
+		"choices": [{
+			"index": 0,
+			"message": {
+				"role": "assistant",
+				"content": "Plain answer."
+			},
+			"finish_reason": "stop"
+		}],
+		"usage": {"prompt_tokens": 5, "completion_tokens": 3, "total_tokens": 8}
+	}`
+
+	var resp OpenAICompatibleResponse
+	if err := json.Unmarshal([]byte(wireJSON), &resp); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	provider := &OpenAICompatibleProvider{name: "test"}
+	llmResp := provider.convertFromOpenAIResponse(&resp, uuid.New(), time.Millisecond)
+	if llmResp.ProviderMetadata != nil {
+		if _, exists := llmResp.ProviderMetadata["reasoning_content"]; exists {
+			t.Error("ProviderMetadata should not contain reasoning_content when wire has none")
+		}
+	}
 }
