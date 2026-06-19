@@ -211,6 +211,16 @@ func HostedOpenAICompatibleCatalogue() []HostedOpenAICompatible {
 		// provider). Docs: https://docs.mistral.ai/api/endpoint/fim ,
 		// https://mistral.ai/news/codestral/ . Chat-only use of codestral-latest
 		// remains available through the natively-wired mistral provider.
+		// xiaomi — live-verified 2026-06-19: GET https://api.xiaomimimo.com/v1/models
+		// returns HTTP 200 with 10 models. Auth: both Authorization: Bearer and api-key
+		// headers work. Docs: https://platform.xiaomimimo.com/llms-full.txt
+		{
+			Name:          "xiaomi",
+			BaseURL:       "https://api.xiaomimimo.com/v1",
+			KeyEnvAliases: []string{"XIAOMI_MIMO_API_KEY", "ApiKey_Xiaomi_MiMo"},
+			ModelEndpoint: "/models",
+			ChatEndpoint:  "/chat/completions",
+		},
 	}
 }
 
