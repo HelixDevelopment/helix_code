@@ -28,8 +28,8 @@ import (
 
 const (
 	xiaomiBaseURL    = "https://api.xiaomimimo.com/v1"
-	defaultModel     = "mimo-v2.5"
-	defaultTimeout   = 60 * time.Second
+	defaultModel     = "mimo-v2-flash"
+	defaultTimeout   = 120 * time.Second
 	streamingTimeout = 120 * time.Second
 )
 
