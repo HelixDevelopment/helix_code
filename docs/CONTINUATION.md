@@ -1490,3 +1490,34 @@ The §11.4.103-121 H2-anchor requirement: the verifier wants each anchor as a li
 - ❌ THEN add `exit $FAILURES` to `scripts/verify-governance-cascade.sh` (item 4) and re-run → must reach 0 failures → THEN the gate enforces.
 - **RESUMPTION (paste into fresh session):** "Read docs/CONTINUATION.md close-out 468g FINAL + qa-results/D2-FIX-evidence.txt for the proven H2-anchor pattern, then: (1) run `bash scripts/verify-governance-cascade.sh 2>&1 | tail` to get the exact per-file `## §11.4.NNN` missing lists for the 9 remaining submodules (challenges containers debate_orchestrator doc_processor event_bus helix_agent llm_ops llm_orchestrator llm_provider); (2) add the missing anchors as `## §11.4.NNN —` H2 headings (match existing §11.4.122 format, titles from root CLAUDE.md), commit governance-only + push each on its branch (ff-only, §11.4.113) + bump root pointers; (3) add `exit $FAILURES` to the verifier; (4) re-run → 0 failures; (5) then e2e (start Ollama), docs_chain sync, §11.4.65 export-regen. Anti-bluff §11.4: conductor-verify every subagent claim via ls-remote before bumping pointers."
 
+## Active Work — Xiaomi MiMo Integration (2026-06-19)
+
+### Status: IMPLEMENTED
+
+**Completed:**
+- Xiaomi MiMo provider implementation (`helix_code/internal/llm/xiaomi_provider.go`)
+- ASR + TTS endpoint support
+- Factory, key recognition, hosted catalogue, verifier registration
+- reasoning_content field fix
+- Integration tests (4/4 live API)
+- Stress + chaos tests (9/9)
+- Feature status documentation
+- HelixQA test bank (8 tests)
+- E2E challenge script
+- Dev config entry
+- 3 recordings in `/Volumes/T7/Downloads/Recordings/`
+- Pushed to GitHub + GitLab (20 commits)
+
+**In Progress:**
+- LLMsVerifier submodule integration (agent running)
+- HelixAgent submodule integration (agent running)
+
+**Known Issues:**
+- V2 models deprecated 2026-06-30 (auto-routes to V2.5)
+- Rate limits: 100 RPM on free tier
+
+**Next Steps:**
+- Complete LLMsVerifier + HelixAgent submodule integration
+- Push submodule pointer updates
+- Doc exports (HTML/PDF/DOCX)
+
