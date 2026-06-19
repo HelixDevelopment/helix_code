@@ -39,6 +39,7 @@ var dynamicNativelyWiredProviders = map[string]bool{
 	"qwen":       true,
 	"copilot":    true,
 	"ollama":     true,
+	"xiaomi":    true,
 }
 
 // DeriveKeyEnvAliases derives the ordered list of environment-variable names
