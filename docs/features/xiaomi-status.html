@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xiaomi MiMo Provider — Feature Status</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        h1 { color: #333; border-bottom: 2px solid #FF6700; padding-bottom: 10px; }
+        h2 { color: #555; margin-top: 30px; }
+        table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #FF6700; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        code { background-color: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        pre { background-color: #f4f4f4; padding: 15px; border-radius: 8px; overflow-x: auto; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; font-size: 0.9em; }
+        .meta { color: #666; font-size: 0.95em; }
+    </style>
+</head>
+<body>
+
+<h1>Xiaomi MiMo Provider — Feature Status</h1>
+
+<p class="meta"><strong>Date</strong>: 2026-06-19 &nbsp;|&nbsp; <strong>Status</strong>: Implemented (&rarr; Fixed.md) &nbsp;|&nbsp; <strong>Revision</strong>: 1</p>
+
+<h2>Component Overview</h2>
+
+<table>
+    <thead>
+        <tr><th>Component</th><th>Status</th><th>Evidence</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Provider implementation</td><td>&#10004; Implemented</td><td><code>helix_code/internal/llm/xiaomi_provider.go</code></td></tr>
+        <tr><td>ASR endpoint</td><td>&#10004; Implemented</td><td><code>TranscribeAudio()</code> method</td></tr>
+        <tr><td>TTS endpoint</td><td>&#10004; Implemented</td><td><code>SynthesizeSpeech()</code> method</td></tr>
+        <tr><td>Factory registration</td><td>&#10004; Implemented</td><td><code>case ProviderTypeXiaomi</code> in factory.go</td></tr>
+        <tr><td>Key recognition</td><td>&#10004; Implemented</td><td><code>XIAOMI_MIMO_API_KEY</code>, <code>ApiKey_Xiaomi_MiMo</code></td></tr>
+        <tr><td>Hosted catalogue</td><td>&#10004; Implemented</td><td>Entry in <code>openai_compatible_catalogue.go</code></td></tr>
+        <tr><td>Verifier natively wired</td><td>&#10004; Implemented</td><td><code>dynamicNativelyWiredProviders["xiaomi"]</code></td></tr>
+        <tr><td>reasoning_content</td><td>&#10004; Implemented</td><td>Captured in <code>ProviderMetadata</code></td></tr>
+        <tr><td>Dev config</td><td>&#10004; Implemented</td><td><code>config/dev/config.yaml</code> entry</td></tr>
+        <tr><td>Unit tests</td><td>&#10004; Passing</td><td>8 test files</td></tr>
+        <tr><td>Integration tests</td><td>&#10004; Passing</td><td>4/4 with live API evidence</td></tr>
+        <tr><td>Stress tests</td><td>&#10004; Passing</td><td>9/9 with rate limit evidence</td></tr>
+        <tr><td>Chaos tests</td><td>&#10004; Passing</td><td>6/6</td></tr>
+        <tr><td>Documentation</td><td>&#10004; Complete</td><td>Provider README + API reference</td></tr>
+    </tbody>
+</table>
+
+<h2>Models</h2>
+
+<table>
+    <thead>
+        <tr><th>Model</th><th>Context</th><th>Max Output</th><th>Capabilities</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>mimo-v2.5-pro</td><td>1M</td><td>128K</td><td>Text gen, deep thinking, tool calling, web search</td></tr>
+        <tr><td>mimo-v2.5</td><td>1M</td><td>128K</td><td>Omni-modal (text/image/video/audio)</td></tr>
+        <tr><td>mimo-v2-flash</td><td>256K</td><td>64K</td><td>Fast text gen, reasoning</td></tr>
+        <tr><td>mimo-v2.5-asr</td><td>8K</td><td>2K</td><td>Speech recognition</td></tr>
+        <tr><td>mimo-v2.5-tts</td><td>8K</td><td>8K</td><td>Speech synthesis</td></tr>
+        <tr><td>mimo-v2.5-tts-voiceclone</td><td>8K</td><td>8K</td><td>Voice cloning</td></tr>
+        <tr><td>mimo-v2.5-tts-voicedesign</td><td>8K</td><td>8K</td><td>Voice design</td></tr>
+    </tbody>
+</table>
+
+<h2>Evidence</h2>
+
+<ul>
+    <li>Live API verification: HTTP 200 on <code>/v1/models</code> and <code>/v1/chat/completions</code></li>
+    <li>Chat completion: 260 prompt + 20 completion tokens via mimo-v2-flash</li>
+    <li>Streaming: 18 chunks received</li>
+    <li>Tool calling: 1 tool call <code>get_weather(location:Tokyo)</code></li>
+    <li>Stress: 8/20 sequential successes (rate limit at iteration 8)</li>
+    <li>Chaos: 401 invalid key, 400 invalid model, context cancellation handled</li>
+</ul>
+
+<h2>Recordings</h2>
+
+<table>
+    <thead>
+        <tr><th>Recording</th><th>Content</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>helixcode-tui-xiaomi-verify-20260619-234112.cast</td><td>API verification</td></tr>
+        <tr><td>helixcode-tui-xiaomi-tests-20260619-234151.cast</td><td>Test suite execution</td></tr>
+    </tbody>
+</table>
+
+<div class="footer">
+    <p><strong>Sources verified 2026-06-19</strong></p>
+    <ul>
+        <li><a href="https://platform.xiaomimimo.com/llms-full.txt">https://platform.xiaomimimo.com/llms-full.txt</a></li>
+        <li><a href="https://github.com/XiaomiMiMo">https://github.com/XiaomiMiMo</a></li>
+        <li>Live API: <a href="https://api.xiaomimimo.com/v1">https://api.xiaomimimo.com/v1</a></li>
+    </ul>
+</div>
+
+</body>
+</html>
