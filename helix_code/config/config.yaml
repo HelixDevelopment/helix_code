@@ -136,7 +136,21 @@ llm:
         max_retries: 3
         streaming_support: true
         api_key: "" # Set via OPENROUTER_API_KEY
-    
+
+    xiaomi:
+      type: xiaomi
+      endpoint: "https://api.xiaomi.com/v1"
+      enabled: true
+      models:
+        - mimo-v2.5-pro
+        - mimo-v2.5
+        - mimo-v2-flash
+      parameters:
+        timeout: 30.0
+        max_retries: 3
+        streaming_support: true
+        api_key: "${XIAOMI_MIMO_API_KEY}"
+
     # HelixAgent providers
     helix-llm:
       type: helix-llm
