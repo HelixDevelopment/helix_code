@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"context"
 	"testing"
 )
 
@@ -112,5 +113,38 @@ func TestXiaomiProvider_ContextWindow(t *testing.T) {
 	ctx := provider.GetContextWindow()
 	if ctx < 256000 {
 		t.Errorf("GetContextWindow() = %d, want >= 256000", ctx)
+	}
+}
+
+func TestXiaomiProvider_ASRMethodExists(t *testing.T) {
+	config := ProviderConfigEntry{
+		Type:    ProviderTypeXiaomi,
+		APIKey:  "sk-test123",
+		Enabled: true,
+	}
+	provider, err := NewXiaomiProvider(config)
+	if err != nil {
+		t.Fatalf("NewXiaomiProvider: %v", err)
+	}
+	// Verify method exists and handles errors (will fail with HTTP error, not method-not-found)
+	_, err = provider.TranscribeAudio(context.Background(), []byte("test"), "test.wav")
+	if err != nil {
+		t.Logf("ASR method exists and handles errors: %v", err)
+	}
+}
+
+func TestXiaomiProvider_TTSMethodExists(t *testing.T) {
+	config := ProviderConfigEntry{
+		Type:    ProviderTypeXiaomi,
+		APIKey:  "sk-test123",
+		Enabled: true,
+	}
+	provider, err := NewXiaomiProvider(config)
+	if err != nil {
+		t.Fatalf("NewXiaomiProvider: %v", err)
+	}
+	_, err = provider.SynthesizeSpeech(context.Background(), "Hello", "")
+	if err != nil {
+		t.Logf("TTS method exists and handles errors: %v", err)
 	}
 }

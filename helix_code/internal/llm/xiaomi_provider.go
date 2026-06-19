@@ -1,9 +1,13 @@
 package llm
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"time"
 )
@@ -256,4 +260,97 @@ func (p *XiaomiProvider) GetContextWindow() int {
 // Delegates to the char-based fallback (1 token ~ 3.5 chars).
 func (p *XiaomiProvider) CountTokens(text string) (int, error) {
 	return CharBasedTokenCount(text)
+}
+
+// TranscribeAudio performs speech-to-text using Xiaomi MiMo ASR.
+// Endpoint: POST /v1/audio/transcriptions
+// Model: mimo-v2.5-asr
+func (p *XiaomiProvider) TranscribeAudio(ctx context.Context, audioData []byte, filename string) (string, error) {
+	var buf bytes.Buffer
+	writer := multipart.NewWriter(&buf)
+
+	part, err := writer.CreateFormFile("file", filename)
+	if err != nil {
+		return "", fmt.Errorf("create form file: %w", err)
+	}
+	if _, err := part.Write(audioData); err != nil {
+		return "", fmt.Errorf("write audio data: %w", err)
+	}
+
+	if err := writer.WriteField("model", "mimo-v2.5-asr"); err != nil {
+		return "", fmt.Errorf("write model field: %w", err)
+	}
+
+	writer.Close()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", p.baseURL+"/v1/audio/transcriptions", &buf)
+	if err != nil {
+		return "", fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+p.apiKey)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("transcription request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("transcription failed (%d): %s", resp.StatusCode, string(body))
+	}
+
+	var result struct {
+		Text string `json:"text"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("decode response: %w", err)
+	}
+
+	return result.Text, nil
+}
+
+// SynthesizeSpeech performs text-to-speech using Xiaomi MiMo TTS.
+// Endpoint: POST /v1/audio/speech
+// Models: mimo-v2.5-tts, mimo-v2.5-tts-voiceclone, mimo-v2.5-tts-voicedesign
+func (p *XiaomiProvider) SynthesizeSpeech(ctx context.Context, text string, model string) ([]byte, error) {
+	if model == "" {
+		model = "mimo-v2.5-tts"
+	}
+
+	reqBody := map[string]interface{}{
+		"model": model,
+		"input": text,
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("marshal request: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", p.baseURL+"/v1/audio/speech", bytes.NewReader(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+p.apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("tts request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("tts failed (%d): %s", resp.StatusCode, string(body))
+	}
+
+	audioData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read audio response: %w", err)
+	}
+
+	return audioData, nil
 }
