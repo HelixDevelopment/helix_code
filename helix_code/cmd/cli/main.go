@@ -1432,9 +1432,20 @@ func (c *CLI) handleListModels(ctx context.Context) error {
 		// retires the CLI-local single-alias presentProviders table at the
 		// production call site so both surfaces recognize keys identically
 		// (e.g. CLAUDE_API_KEY / DASHSCOPE_API_KEY secondary aliases).
-		models, err := c.verifierAdapter.GetWorkingModels(ctx, llm.PresentProviderNames())
+		present := llm.PresentProviderNames()
+		models, err := c.verifierAdapter.GetWorkingModels(ctx, present)
 		if err == nil && len(models) > 0 {
 			c.printVerifiedModels(models)
+
+			// Supplement: for any key-present provider with zero verified
+			// models (verifier DB has no data for that provider yet), append
+			// seed models from FallbackModels so the user sees ALL providers
+			// they configured — not just those the verifier has scored.
+			covered := make(map[string]bool, len(models))
+			for _, m := range models {
+				covered[m.Provider] = true
+			}
+			c.printSupplementalModels(present, covered)
 			return nil
 		}
 		// Log warning but continue to fallback
@@ -1453,6 +1464,12 @@ func (c *CLI) handleListModels(ctx context.Context) error {
 					"ContextSize": m.ContextSize,
 				}))
 			}
+			// Supplement: show seed models for other key-present providers
+			// that are not the active LLM provider.
+			present := llm.PresentProviderNames()
+			covered := make(map[string]bool)
+			covered[string(c.llmProvider.GetType())] = true
+			c.printSupplementalModels(present, covered)
 			return nil
 		}
 	}
@@ -1484,6 +1501,23 @@ func (c *CLI) printFallbackModels(models []*verifier.VerifiedModel) {
 	}
 }
 
+// printSupplementalModels appends seed models from FallbackModels for any
+// key-present provider whose models were NOT already covered by a prior
+// display pass (verified or provider-owned). This ensures that providers
+// with a configured API key always appear in --list-models output, even
+// when the verifier DB has no data for them yet.
+func (c *CLI) printSupplementalModels(present map[string]bool, covered map[string]bool) {
+	var supplemental []*verifier.VerifiedModel
+	for _, fm := range verifier.FallbackModels {
+		if present[fm.Provider] && !covered[fm.Provider] {
+			supplemental = append(supplemental, fm)
+		}
+	}
+	if len(supplemental) > 0 {
+		c.printFallbackModels(supplemental)
+	}
+}
+
 // providerEnvAliases maps a verifier provider type to the environment-variable
 // aliases that supply that provider's API key. A non-empty, non-placeholder
 // value in ANY alias marks the provider key-present. Decoupled, data-only table
@@ -1498,6 +1532,7 @@ var providerEnvAliases = map[string][]string{
 	"mistral":    {"MISTRAL_API_KEY"},
 	"xai":        {"XAI_API_KEY", "GROK_API_KEY"},
 	"openrouter": {"OPENROUTER_API_KEY"},
+	"xiaomi":     {"XIAOMI_MIMO_API_KEY", "ApiKey_Xiaomi_MiMo"},
 }
 
 // isPlaceholderKey reports whether a key value is an obvious placeholder that

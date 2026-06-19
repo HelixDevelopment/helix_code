@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFallbackModels_HasSevenEntries(t *testing.T) {
-	require.Len(t, FallbackModels, 7, "FallbackModels must have exactly 7 entries per CONST-035")
+func TestFallbackModels_HasEightEntries(t *testing.T) {
+	require.Len(t, FallbackModels, 8, "FallbackModels must have exactly 8 entries per CONST-035")
 }
 
 func TestFallbackModels_AllHaveRequiredFields(t *testing.T) {
@@ -27,7 +27,7 @@ func TestFallbackModels_ContainsExpectedProviders(t *testing.T) {
 	for _, m := range FallbackModels {
 		providers[m.Provider] = true
 	}
-	expected := []string{"ollama", "openai", "anthropic", "mistral", "gemini", "deepseek", "xai"}
+	expected := []string{"ollama", "openai", "anthropic", "mistral", "gemini", "deepseek", "xai", "xiaomi"}
 	for _, p := range expected {
 		assert.True(t, providers[p], "fallback models must contain provider %s", p)
 	}

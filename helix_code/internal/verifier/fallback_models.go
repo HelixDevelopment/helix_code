@@ -12,7 +12,7 @@ package verifier
 //            CONST-037 — LLMsVerifier Single Source of Truth Mandate
 //
 // Rules:
-//   - This list MUST NOT exceed 7 entries.
+//   - This list MUST NOT exceed 8 entries.
 //   - Every entry MUST have a real, working public API endpoint.
 //   - Scores MUST be realistic (range 0–10) and reflect known performance.
 //   - Local models MUST be marked OpenSource=true.
@@ -25,6 +25,7 @@ var FallbackModels = []*VerifiedModel{
 	{ID: "gemini-2.5-pro", Name: "Gemini 2.5 Pro", DisplayName: "Gemini 2.5 Pro", Provider: "gemini", ContextSize: 1000000, Source: "fallback", OverallScore: 8.7, Tier: 1},
 	{ID: "deepseek-chat", Name: "DeepSeek Chat", DisplayName: "DeepSeek Chat", Provider: "deepseek", ContextSize: 64000, Source: "fallback", OverallScore: 8.3, Tier: 2, OpenSource: true},
 	{ID: "grok-3-fast-beta", Name: "Grok-3 Fast Beta", DisplayName: "Grok-3 Fast Beta", Provider: "xai", ContextSize: 131072, Source: "fallback", OverallScore: 8.0, Tier: 1},
+	{ID: "mimo-v2.5-pro", Name: "MiMo V2.5 Pro", DisplayName: "Xiaomi MiMo V2.5 Pro", Provider: "xiaomi", ContextSize: 1000000, Source: "fallback", OverallScore: 8.1, Tier: 1},
 }
 
 // makeDefaultProviderScores returns the default provider score map used by
@@ -38,5 +39,6 @@ func makeDefaultProviderScores() map[string]float64 {
 		"gemini":    8.7,
 		"deepseek":  8.3,
 		"xai":       8.0,
+		"xiaomi":    8.1,
 	}
 }
