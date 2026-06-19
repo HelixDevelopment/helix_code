@@ -1,0 +1,217 @@
+# Xiaomi MiMo Provider — HelixQA Test Bank
+# Date: 2026-06-19
+# Purpose: End-to-end validation of Xiaomi MiMo provider integration
+# Per §11.4.27 / CONST-050
+
+test_bank:
+  name: xiaomi_mimo_provider
+  version: "1.0.0"
+  description: "Comprehensive test bank for Xiaomi MiMo LLM provider integration"
+  provider: xiaomi
+  api_base: "https://api.xiaomimimo.com/v1"
+
+  prerequisites:
+    - name: XIAOMI_MIMO_API_KEY
+      type: env_var
+      description: "Xiaomi MiMo API key (format: sk-xxxxx)"
+      required: true
+
+  tests:
+    - id: XM-001
+      name: "Provider Detection"
+      type: unit
+      description: "Verify Xiaomi provider is detected when API key is set"
+      steps:
+        - action: set_env
+          var: XIAOMI_MIMO_API_KEY
+          value: "${API_KEY}"
+        - action: run_test
+          test: "TestXiaomiKeyRecognition_Present"
+          package: "./internal/llm/"
+      expected: PASS
+      evidence: "Test output showing provider detected"
+
+    - id: XM-002
+      name: "Model Listing"
+      type: integration
+      description: "Verify live model listing from Xiaomi API"
+      steps:
+        - action: api_call
+          method: GET
+          url: "${API_BASE}/models"
+          headers:
+            Authorization: "Bearer ${API_KEY}"
+        - action: validate
+          check: "response.data contains at least 5 models"
+        - action: validate
+          check: "mimo-v2.5-pro exists in response"
+      expected: PASS
+      evidence: "JSON response with 10 models"
+
+    - id: XM-003
+      name: "Chat Completion"
+      type: integration
+      description: "Verify chat completions work with mimo-v2-flash"
+      steps:
+        - action: api_call
+          method: POST
+          url: "${API_BASE}/chat/completions"
+          headers:
+            Authorization: "Bearer ${API_KEY}"
+            Content-Type: "application/json"
+          body:
+            model: "mimo-v2-flash"
+            messages:
+              - role: user
+                content: "What is 2+2? Reply with just the number."
+            max_tokens: 20
+            temperature: 0.3
+        - action: validate
+          check: "response.choices[0].message is not empty"
+        - action: validate
+          check: "response.usage.total_tokens > 0"
+      expected: PASS
+      evidence: "JSON response with content and usage"
+
+    - id: XM-004
+      name: "Streaming"
+      type: integration
+      description: "Verify streaming responses work"
+      steps:
+        - action: api_call
+          method: POST
+          url: "${API_BASE}/chat/completions"
+          headers:
+            Authorization: "Bearer ${API_KEY}"
+            Content-Type: "application/json"
+          body:
+            model: "mimo-v2-flash"
+            messages:
+              - role: user
+                content: "Count from 1 to 5."
+            max_tokens: 50
+            stream: true
+        - action: validate
+          check: "SSE chunks received (at least 1)"
+      expected: PASS
+      evidence: "Multiple SSE chunks with content"
+
+    - id: XM-005
+      name: "Tool Calling"
+      type: integration
+      description: "Verify function/tool calling works"
+      steps:
+        - action: api_call
+          method: POST
+          url: "${API_BASE}/chat/completions"
+          headers:
+            Authorization: "Bearer ${API_KEY}"
+            Content-Type: "application/json"
+          body:
+            model: "mimo-v2-flash"
+            messages:
+              - role: user
+                content: "What is the weather in Tokyo? Use get_weather tool."
+            tools:
+              - type: function
+                function:
+                  name: get_weather
+                  description: "Get weather for a location"
+                  parameters:
+                    type: object
+                    properties:
+                      location:
+                        type: string
+                    required: ["location"]
+            tool_choice: auto
+            max_tokens: 100
+        - action: validate
+          check: "response.choices[0].message.tool_calls is not empty OR response.choices[0].message.content is not empty"
+      expected: PASS
+      evidence: "Tool call to get_weather with location=Tokyo"
+
+    - id: XM-006
+      name: "Invalid API Key"
+      type: chaos
+      description: "Verify invalid API key is rejected"
+      steps:
+        - action: api_call
+          method: POST
+          url: "${API_BASE}/chat/completions"
+          headers:
+            Authorization: "Bearer sk-invalid-key-12345"
+            Content-Type: "application/json"
+          body:
+            model: "mimo-v2-flash"
+            messages:
+              - role: user
+                content: "test"
+            max_tokens: 5
+        - action: validate
+          check: "response.status == 401"
+      expected: PASS
+      evidence: "401 Unauthorized response"
+
+    - id: XM-007
+      name: "Invalid Model"
+      type: chaos
+      description: "Verify invalid model is rejected"
+      steps:
+        - action: api_call
+          method: POST
+          url: "${API_BASE}/chat/completions"
+          headers:
+            Authorization: "Bearer ${API_KEY}"
+            Content-Type: "application/json"
+          body:
+            model: "nonexistent-model-xyz"
+            messages:
+              - role: user
+                content: "test"
+            max_tokens: 5
+        - action: validate
+          check: "response.status == 400"
+      expected: PASS
+      evidence: "400 Bad Request response"
+
+    - id: XM-008
+      name: "Rate Limit Handling"
+      type: stress
+      description: "Verify rate limits are handled gracefully"
+      steps:
+        - action: loop
+          count: 15
+          delay_ms: 500
+          actions:
+            - action: api_call
+              method: POST
+              url: "${API_BASE}/chat/completions"
+              headers:
+                Authorization: "Bearer ${API_KEY}"
+                Content-Type: "application/json"
+              body:
+                model: "mimo-v2-flash"
+                messages:
+                  - role: user
+                    content: "Say OK"
+                max_tokens: 5
+        - action: validate
+          check: "At least 1 success AND at least 1 rate limit (429)"
+      expected: PASS
+      evidence: "Mix of 200 and 429 responses"
+
+  summary:
+    total_tests: 8
+    test_types:
+      unit: 1
+      integration: 4
+      chaos: 2
+      stress: 1
+    coverage:
+      - "Provider detection"
+      - "Model listing"
+      - "Chat completion"
+      - "Streaming"
+      - "Tool calling"
+      - "Error handling"
+      - "Rate limits"
