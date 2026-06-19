@@ -95,6 +95,8 @@ func NewProvider(config ProviderConfigEntry) (Provider, error) {
 			koboldConfig.Timeout = time.Duration(val) * time.Second
 		}
 		return NewKoboldAIProvider(koboldConfig)
+	case ProviderTypeXiaomi:
+		return NewXiaomiProvider(config)
 	default:
 		return nil, fmt.Errorf("unsupported provider type: %s", config.Type)
 	}
