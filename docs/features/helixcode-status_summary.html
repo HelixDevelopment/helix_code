@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixcode-status_summary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixcode-status_summary</h1>
+</header>
+<h1 id="helixcode-status-summary">HelixCode — Status Summary</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-19</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-19</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Active Development</td>
+</tr>
+<tr>
+<td>Status detail</td>
+<td>docs/features/helixcode-status.md</td>
+</tr>
+<tr>
+<td>Prior summary</td>
+<td>docs/features/Status_Summary.md (Revision 4, 2026-06-16)</td>
+</tr>
+</tbody>
+</table>
+<p>Authoritative rollup of
+<code>docs/features/helixcode-status.md</code>. Anti-bluff (CONST-035 /
+§11.4.83 / §11.4.107): the video-confirmed count rises ONLY as real
+analyzed recordings land in
+<code>/Volumes/T7/Downloads/Recordings</code>; an un-recorded feature is
+honestly <code>pending</code>/<code>no</code>, never bluffed green.</p>
+<h2 id="rollup-by-overall">Rollup — by Overall</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Overall rollup</th>
+<th>Count</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>working-untaped</td>
+<td>324</td>
+<td>real + tested, no analyzed video yet</td>
+</tr>
+<tr>
+<td>partial</td>
+<td>168</td>
+<td>real but thin/unverified coverage OR partial wiring</td>
+</tr>
+<tr>
+<td>gap</td>
+<td>49</td>
+<td>scaffold / untested / planned-not-landed</td>
+</tr>
+<tr>
+<td>confirmed</td>
+<td>23</td>
+<td>real analyzed recording exists (Video: yes)</td>
+</tr>
+<tr>
+<td>n/a (test-support)</td>
+<td>3</td>
+<td>mocks/testutil/pprofutil — not user features</td>
+</tr>
+<tr>
+<td><strong>Total feature rows</strong></td>
+<td><strong>567</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="rollup-by-development-status">Rollup — by Development
+status</h2>
+<table>
+<thead>
+<tr>
+<th>Dev</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>done</td>
+<td>507</td>
+</tr>
+<tr>
+<td>partial</td>
+<td>40</td>
+</tr>
+<tr>
+<td>absent (planned-not-landed)</td>
+<td>12</td>
+</tr>
+<tr>
+<td>stub</td>
+<td>4</td>
+</tr>
+<tr>
+<td>n/a</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rollup-by-tests-coverage">Rollup — by Tests coverage</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tests</th>
+<th>Count</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>has integ/e2e</td>
+<td>67</td>
+<td>real-infra integration / end-to-end suites</td>
+</tr>
+<tr>
+<td>unit-level baseline</td>
+<td>~466</td>
+<td><code>unit</code> (combinable)</td>
+</tr>
+<tr>
+<td>none</td>
+<td>31</td>
+<td>untested surfaces — flagged honestly</td>
+</tr>
+<tr>
+<td>§11.4.118/§11.4.135 guard/race upgrade</td>
+<td>36 pkgs (43 files)</td>
+<td>standing regression + <code>-race</code> guards</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rollup-by-video-confirmation-anti-bluff">Rollup — by Video
+confirmation (anti-bluff)</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Video</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>confirmed (Video: yes, real analyzed recording)</td>
+<td>23 rows</td>
+</tr>
+<tr>
+<td>pending / no (not yet recorded or non-visual)</td>
+<td>544 rows</td>
+</tr>
+<tr>
+<td><code>helixcode-*</code> real recordings produced so far</td>
+<td>30+ (incl. 2026-06-16 CLI/API/TUI/Web sweep)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="key-counts">Key Counts</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client Applications</td>
+<td>8 (server, CLI, TUI, Desktop, Web, Android, iOS, Aurora OS,
+HarmonyOS)</td>
+</tr>
+<tr>
+<td>LLM Providers</td>
+<td>21 (including Xiaomi MiMo, Ensemble, OpenAI Compatible)</td>
+</tr>
+<tr>
+<td>Internal Packages</td>
+<td>67 (64 with tests, 3 test-support)</td>
+</tr>
+<tr>
+<td>CLI Top-Level Commands</td>
+<td>6</td>
+</tr>
+<tr>
+<td>CLI Subcommand Groups</td>
+<td>9</td>
+</tr>
+<tr>
+<td>CLI Interactive Commands</td>
+<td>18</td>
+</tr>
+<tr>
+<td>API Endpoints</td>
+<td>56 (12 public, 44 authenticated)</td>
+</tr>
+<tr>
+<td>Core Platform Submodules</td>
+<td>19 (HelixDevelopment + vasic-digital)</td>
+</tr>
+<tr>
+<td>vasic-digital Library Submodules</td>
+<td>48</td>
+</tr>
+<tr>
+<td>Third-Party Dependency Submodules</td>
+<td>3</td>
+</tr>
+<tr>
+<td>CLI Agent References</td>
+<td>55</td>
+</tr>
+<tr>
+<td>Total Submodules</td>
+<td>129</td>
+</tr>
+<tr>
+<td>Provider Supporting Components</td>
+<td>19</td>
+</tr>
+<tr>
+<td>Feature Rows (total)</td>
+<td>567</td>
+</tr>
+<tr>
+<td>Video-Confirmed Features</td>
+<td>23</td>
+</tr>
+<tr>
+<td>Real Recordings</td>
+<td>30+</td>
+</tr>
+</tbody>
+</table>
+<h2 id="coverage-completeness">Coverage Completeness</h2>
+<ul>
+<li><strong>Internal packages:</strong> 73/73 have ≥1 feature row (234
+internal-feature rows)</li>
+<li><strong>cmd tools:</strong> all 11 <code>helix_code/cmd/*</code>
+dirs rowed</li>
+<li><strong>Client apps:</strong> all 8 surfaces (CLI, TUI, Web,
+Desktop, Android, iOS, Aurora OS, HarmonyOS)</li>
+<li><strong>HTTP API:</strong> 18 endpoint groups rowed (56
+endpoints)</li>
+<li><strong>LLM Providers:</strong> 21 providers (19 with tests)</li>
+<li><strong>Submodules:</strong> 50 inventoried (55 capability
+rows)</li>
+<li><strong>Ported cli_agents:</strong> 33 rows (20 landed, 3 partial,
+10 planned)</li>
+</ul>
+<h2 id="video-confirmation-sweep-2026-06-16">Video-Confirmation Sweep
+2026-06-16</h2>
+<p>Real DeepSeek, fresh binaries, all analyzed: - <strong>CLI 9
+features</strong> (stream, generate, list-models, command, health,
+list-workers, notify, model+max-tokens, approval) - <strong>API 5
+features</strong> (health, models, generate, auth, tasks-crud) -
+<strong>TUI 2 features</strong> (llm-chat DeepSeek, navigation/theme
+tour) - <strong>Web 2 features incl. SSE streaming</strong>
+(llm-console, SSE stream)</p>
+<p>The <code>-stream</code> recording caught a §11.4.108 STALE-BINARY
+break → rebuilt → fixed + §11.4.135 guard added. The anti-bluff payoff
+of reading the recorded screen.</p>
+<h2 id="anti-bluff-payoff">Anti-Bluff Payoff</h2>
+<ul>
+<li><strong>BLUFF-001 resolved:</strong> LLM generation calls real
+<code>provider.Generate</code>/<code>GenerateStream</code></li>
+<li><strong>BLUFF-002 resolved:</strong> Model listing queries
+<code>providerManager.GetProviders()</code></li>
+<li><strong>BLUFF-003 resolved:</strong> Command execution uses
+<code>os/exec</code> with real exit codes</li>
+<li><strong>Stale-binary caught:</strong> CLI <code>-stream</code>
+recording detected §11.4.108 break</li>
+<li><strong>All recordings analyzed:</strong> Every video is READ, not
+just produced</li>
+</ul>
+<h2 id="infrastructure">Infrastructure</h2>
+<ul>
+<li><strong>Services on nezha.local:</strong> 11 deployed</li>
+<li><strong>Build system:</strong> <code>make build</code> →
+<code>bin/helixcode</code> (server), <code>bin/cli</code> (client)</li>
+<li><strong>Database:</strong> PostgreSQL 15+ via pgx/v5</li>
+<li><strong>Cache:</strong> Redis 7+ via go-redis/v9</li>
+<li><strong>Auth:</strong> JWT + bcrypt/argon2 + OAuth2</li>
+<li><strong>Config:</strong> Viper v1.21.0 + Cobra v1.8.0</li>
+</ul>
+<h2 id="sources-verified-2026-06-19">Sources verified 2026-06-19</h2>
+<ul>
+<li>Live codebase: <code>helix_code/internal/</code> (67 packages),
+<code>helix_code/cmd/</code> (11 dirs),
+<code>helix_code/applications/</code> (8 apps)</li>
+<li>LLM providers: <code>helix_code/internal/llm/</code> (21 provider
+files)</li>
+<li>API endpoints: <code>helix_code/internal/server/handlers.go</code>
+(56 endpoints)</li>
+<li>Prior status: <code>docs/features/Status.md</code> Revision 7
+(2026-06-16)</li>
+<li>Prior summary: <code>docs/features/Status_Summary.md</code> Revision
+4 (2026-06-16)</li>
+<li>Video corpus: <code>/Volumes/T7/Downloads/Recordings/</code> (30+
+recordings)</li>
+</ul>
+</body>
+</html>

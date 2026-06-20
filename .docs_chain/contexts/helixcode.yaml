@@ -1,0 +1,35 @@
+context: helixcode
+description: >-
+  HelixCode project-specific documentation sync chain (§11.4.106 docs_chain).
+  Covers the HelixCode feature-status ledger, its summary digest, the Xiaomi MiMo
+  provider reference, and the programme continuation guide. All .md files are
+  hand-authored SOURCES; only .html/.pdf siblings are derived. Run
+  `docs_chain verify --root . helixcode` as a pre-build gate;
+  `docs_chain sync --root . helixcode` to regenerate exports.
+nodes:
+  # --- hand-authored markdown SOURCES ---
+  helixcode_status_md:      { kind: markdown, path: docs/features/helixcode-status.md }
+  helixcode_summary_md:     { kind: markdown, path: docs/features/helixcode-status_summary.md }
+  xiaomi_mimo_md:           { kind: markdown, path: docs/providers/xiaomi-mimo.md }
+  continuation_md:          { kind: markdown, path: docs/CONTINUATION.md }
+  # --- derived exports (the ONLY derive edges) ---
+  helixcode_status_html:    { kind: html,     path: docs/features/helixcode-status.html }
+  helixcode_status_pdf:     { kind: pdf,      path: docs/features/helixcode-status.pdf }
+  helixcode_summary_html:   { kind: html,     path: docs/features/helixcode-status_summary.html }
+  helixcode_summary_pdf:    { kind: pdf,      path: docs/features/helixcode-status_summary.pdf }
+  xiaomi_mimo_html:         { kind: html,     path: docs/providers/xiaomi-mimo.html }
+  xiaomi_mimo_pdf:          { kind: pdf,      path: docs/providers/xiaomi-mimo.pdf }
+  continuation_html:        { kind: html,     path: docs/CONTINUATION.html }
+  continuation_pdf:         { kind: pdf,      path: docs/CONTINUATION.pdf }
+edges:
+  - { type: derive-from, from: helixcode_status_md,  to: helixcode_status_html,  transform: md-to-html }
+  - { type: derive-from, from: helixcode_status_html, to: helixcode_status_pdf,   transform: html-to-pdf }
+  - { type: derive-from, from: helixcode_summary_md,  to: helixcode_summary_html, transform: md-to-html }
+  - { type: derive-from, from: helixcode_summary_html, to: helixcode_summary_pdf, transform: html-to-pdf }
+  - { type: derive-from, from: xiaomi_mimo_md,         to: xiaomi_mimo_html,       transform: md-to-html }
+  - { type: derive-from, from: xiaomi_mimo_html,        to: xiaomi_mimo_pdf,        transform: html-to-pdf }
+  - { type: derive-from, from: continuation_md,         to: continuation_html,      transform: md-to-html }
+  - { type: derive-from, from: continuation_html,        to: continuation_pdf,       transform: html-to-pdf }
+transforms:
+  md-to-html:  { builtin: pandoc-html }
+  html-to-pdf: { builtin: weasyprint-pdf }

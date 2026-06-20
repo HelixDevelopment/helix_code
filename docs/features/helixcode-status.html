@@ -1,0 +1,2577 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixcode-status</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixcode-status</h1>
+</header>
+<h1 id="helixcode-comprehensive-feature-status">HelixCode —
+Comprehensive Feature Status</h1>
+<table>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-19</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-19</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Active Development</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>docs/features/helixcode-status_summary.md</td>
+</tr>
+<tr>
+<td>Continuation</td>
+<td>docs/CONTINUATION.md</td>
+</tr>
+<tr>
+<td>Prior status</td>
+<td>docs/features/Status.md (Revision 7, 2026-06-16)</td>
+</tr>
+</tbody>
+</table>
+<p>Authoritative, in-depth inventory of <strong>every</strong> HelixCode
+feature across all services, infrastructure, client applications, LLM
+providers, and owned submodules. Kept in sync via the
+<code>docs_chain</code> engine (§11.4.106) and the Status-doc covenant
+(§11.4.45 / §11.4.53 / §11.4.56 / §11.4.57 / §11.4.153).</p>
+<blockquote>
+<p><strong>Anti-bluff (CONST-035 / §11.4.83 / §11.4.107):</strong> a
+feature is marked video-confirmed (<code>Video: yes</code>) ONLY when a
+real recorded scenario in <code>/Volumes/T7/Downloads/Recordings</code>
+shows it working end-to-end with a real LLM and that recording has been
+analyzed. No false “yes”. An un-recorded or un-analyzed feature is
+honestly <code>Video: no</code> / <code>Video: pending</code>, never
+bluffed green.</p>
+</blockquote>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#status-dimensions-legend">Status dimensions
+(legend)</a></li>
+<li><a href="#client-applications">Client Applications</a></li>
+<li><a href="#llm-providers">LLM Providers</a></li>
+<li><a href="#internal-services">Internal Services (67
+packages)</a></li>
+<li><a href="#cli-commands">CLI Commands</a></li>
+<li><a href="#api-endpoints">API Endpoints (56 total)</a></li>
+<li><a href="#owned-submodules">Owned Submodules</a></li>
+<li><a href="#video-confirmations">Video Confirmations</a></li>
+<li><a href="#test-evidence">Test Evidence</a></li>
+<li><a href="#coverage-completeness">Coverage Completeness</a></li>
+<li><a href="#inventory-sources">Inventory Sources</a></li>
+</ul>
+<hr />
+<h2 id="status-dimensions-legend">Status dimensions (legend)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Column</th>
+<th>Meaning</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Area</strong></td>
+<td>service / infrastructure / application / submodule</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Component</strong></td>
+<td>package / tool / app / submodule</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Feature</strong></td>
+<td>the discrete user-or-system capability</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Dev</strong></td>
+<td>implementation status</td>
+<td><code>done</code> / <code>partial</code> / <code>stub</code> /
+<code>absent</code></td>
+</tr>
+<tr>
+<td><strong>Wired</strong></td>
+<td>reachable from a shipped flow</td>
+<td><code>yes</code> / <code>no</code> / <code>partial</code></td>
+</tr>
+<tr>
+<td><strong>Real-use</strong></td>
+<td>genuinely usable by an end user</td>
+<td><code>yes</code> / <code>no</code> / <code>unknown</code></td>
+</tr>
+<tr>
+<td><strong>Tests</strong></td>
+<td>automated coverage</td>
+<td><code>unit</code> / <code>integ</code> / <code>e2e</code> /
+<code>none</code> (combinable)</td>
+</tr>
+<tr>
+<td><strong>V&amp;V</strong></td>
+<td>captured runtime evidence (§11.4.5/§11.4.69)</td>
+<td><code>yes(path)</code> / <code>no</code></td>
+</tr>
+<tr>
+<td><strong>Video</strong></td>
+<td>recorded real scenario + analyzed (§11.4.83/§11.4.107)</td>
+<td><code>yes(path)</code> / <code>pending</code> / <code>no</code> /
+<code>n/a</code></td>
+</tr>
+<tr>
+<td><strong>Origin</strong></td>
+<td>native / <code>ported:&lt;cli_agent&gt;</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Overall</strong></td>
+<td>rollup</td>
+<td><code>confirmed</code> / <code>working-untaped</code> /
+<code>partial</code> / <code>gap</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="client-applications">Client Applications</h2>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>App</th>
+<th>Path</th>
+<th>Dev</th>
+<th>Wired</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Video</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP Server</td>
+<td><code>cmd/server/</code></td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>yes(helixcode-server-build-verified.mp4)</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>CLI Client</td>
+<td><code>cmd/cli/</code></td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,e2e</td>
+<td>yes(helixcode-cli-demo-verified.mp4;
+helixcode-cli-generate-20260616.mp4; + 8 more)</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>Terminal UI (TUI)</td>
+<td><code>applications/terminal_ui/</code></td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>yes(helixcode-tui-themed-20260615.mp4;
+helixcode-tui-llm-deepseek-20260616.mp4)</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>Desktop (Fyne GUI)</td>
+<td><code>applications/desktop/</code></td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>yes(helixcode-desktop-chat-themed-20260615.mp4;
+helixcode-desktop-themed-20260615.mp4)</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>Web Frontend</td>
+<td><code>web/frontend/</code></td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>e2e</td>
+<td>yes(helixcode-web-llm-console-deepseek-20260616.mp4;
+helixcode-web-themed-20260615.mp4)</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>Android (Kotlin)</td>
+<td><code>applications/android/</code></td>
+<td>partial</td>
+<td>partial</td>
+<td>yes</td>
+<td>none</td>
+<td>yes(helixcode-android-themed-20260615.mp4;
+helixcode-android-connect-20260615.mp4)</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>iOS (Swift)</td>
+<td><code>applications/ios/</code></td>
+<td>partial</td>
+<td>partial</td>
+<td>yes</td>
+<td>none</td>
+<td>yes(helixcode-ios-launch-20260615.mp4) [themed re-record
+OPERATOR-BLOCKED §11.4.52]</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>Aurora OS (Go/Fyne)</td>
+<td><code>applications/aurora_os/</code></td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>HarmonyOS (Go/Fyne)</td>
+<td><code>applications/harmony_os/</code></td>
+<td>done</td>
+<td>yes</td>
+<td>yes</td>
+<td>unit,integ</td>
+<td>no</td>
+<td>working-untaped</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Client application count: 8</strong> (server, CLI, TUI,
+Desktop, Web, Android, iOS, Aurora OS, HarmonyOS)</p>
+<h3 id="client-application-details">Client Application Details</h3>
+<p><strong>Server</strong> (<code>cmd/server/</code>): Gin HTTP server
+with REST API, WebSocket, pprof profiling, QA engine integration,
+LLMsVerifier integration. 56 API endpoints (12 public, 44
+authenticated). Build: <code>make build</code> produces
+<code>bin/helixcode</code>.</p>
+<p><strong>CLI Client</strong> (<code>cmd/cli/</code>): Interactive REPL
+with 20+ commands, Cobra subcommand groups (permissions, worktree,
+hooks, mcp, commands, sessions, wizard, lsp, skills), real LLM
+generation via
+<code>provider.Generate</code>/<code>GenerateStream</code>, real shell
+execution via <code>os/exec</code>. BLUFF-001/002/003 all resolved.</p>
+<p><strong>Terminal UI</strong>
+(<code>applications/terminal_ui/</code>): tview-based TUI with chat
+streaming, env provider discovery, theme system, i18n, specify command,
+ensemble rendering, context usage display. 7 confirmed features with
+video evidence.</p>
+<p><strong>Desktop</strong> (<code>applications/desktop/</code>): Fyne
+GUI with chat streaming, theme system, i18n, nogui mode, brand/HXC
+theme, dashboard. Autonomous software-painter capture for LLM chat
+recording (no OS synthetic input needed).</p>
+<p><strong>Web Frontend</strong> (<code>web/frontend/</code>):
+Browser-based UI with LLM generate console, SSE streaming, specify phase
+form, response/metadata rendering. Viewport-scoped recordings at
+1280x800.</p>
+<p><strong>Android</strong> (<code>applications/android/</code>): Kotlin
+app with RecyclerView task list, Go mobile-core bridge, Material dark
+theme. Models/settings/notifications UI is stub status.</p>
+<p><strong>iOS</strong> (<code>applications/ios/</code>): Swift app with
+UITableView task list, Go mobile-core bridge.
+Models/settings/notifications UI is stub status. Themed re-record
+OPERATOR-BLOCKED due to CoreSimulatorService write permission on
+/Volumes/T7.</p>
+<p><strong>Aurora OS</strong> (<code>applications/aurora_os/</code>):
+Full Go/Fyne multi-page GUI
+(dashboard/projects/sessions/tasks/LLM/workers/system), NoGUI CLI mode,
+theme system.</p>
+<p><strong>HarmonyOS</strong> (<code>applications/harmony_os/</code>):
+Go/Fyne 10-tab GUI with distributed engine, multi-device scheduling,
+NoGUI CLI, interactive shell, theme system.</p>
+<hr />
+<h2 id="llm-providers">LLM Providers</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>File</th>
+<th>Has Tests</th>
+<th>Live-Verified</th>
+<th>Video</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td><code>openai_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td><code>anthropic_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td><code>gemini_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Azure OpenAI</td>
+<td><code>azure_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>AWS Bedrock</td>
+<td><code>bedrock_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td><code>ollama_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>LlamaCPP</td>
+<td><code>llamacpp_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Mistral</td>
+<td><code>mistral_provider.go</code></td>
+<td>No</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>DeepSeek</td>
+<td><code>deepseek_provider.go</code></td>
+<td>No</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Groq</td>
+<td><code>groq_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>xAI</td>
+<td><code>xai_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td><code>openrouter_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Qwen</td>
+<td><code>qwen_provider.go</code></td>
+<td>Yes (incl. OAuth)</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>KoboldAI</td>
+<td><code>koboldai_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Copilot</td>
+<td><code>copilot_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Vertex AI</td>
+<td><code>vertexai_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Xiaomi MiMo</td>
+<td><code>xiaomi_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>yes(helixcode-xiaomi-api-verified.mp4;
+helixcode-xiaomi-integration-verified.mp4;
+helixcode-xiaomi-challenge-verified.mp4)</td>
+<td>Implemented, confirmed</td>
+</tr>
+<tr>
+<td>OpenAI Compatible</td>
+<td><code>openai_compatible_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Ensemble</td>
+<td><code>ensemble_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented (multi-provider routing)</td>
+</tr>
+<tr>
+<td>Local</td>
+<td><code>local_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Tool Provider</td>
+<td><code>tool_provider.go</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+<td>Implemented</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provider count: 21</strong> (19 with tests, 2 without:
+deepseek, mistral)</p>
+<h3 id="provider-supporting-infrastructure">Provider Supporting
+Infrastructure</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto LLM Manager</td>
+<td><code>auto_llm_manager.go</code></td>
+<td>Zero-touch provider initialization</td>
+</tr>
+<tr>
+<td>Model Manager</td>
+<td><code>model_manager.go</code></td>
+<td>Model selection and management</td>
+</tr>
+<tr>
+<td>Model Discovery</td>
+<td><code>model_discovery.go</code></td>
+<td>Dynamic model discovery</td>
+</tr>
+<tr>
+<td>Load Balancer</td>
+<td><code>load_balancer.go</code></td>
+<td>Multi-provider load balancing</td>
+</tr>
+<tr>
+<td>Health Monitor</td>
+<td><code>health_monitor.go</code></td>
+<td>Provider health tracking</td>
+</tr>
+<tr>
+<td>Token Budget</td>
+<td><code>token_budget.go</code></td>
+<td>Token usage management</td>
+</tr>
+<tr>
+<td>Cache Control</td>
+<td><code>cache_control.go</code></td>
+<td>Prompt caching</td>
+</tr>
+<tr>
+<td>Usage Analytics</td>
+<td><code>usage_analytics.go</code></td>
+<td>Usage tracking</td>
+</tr>
+<tr>
+<td>Provider Factory</td>
+<td><code>provider_factory.go</code></td>
+<td>Provider instantiation</td>
+</tr>
+<tr>
+<td>Provider Registry</td>
+<td><code>cross_provider_registry.go</code></td>
+<td>Cross-provider model registry</td>
+</tr>
+<tr>
+<td>Verifier Bridge</td>
+<td><code>verifier_bridge.go</code></td>
+<td>LLMsVerifier integration</td>
+</tr>
+<tr>
+<td>Verifier Dynamic Catalogue</td>
+<td><code>verifier_dynamic_catalogue.go</code></td>
+<td>Dynamic model catalogue from verifier</td>
+</tr>
+<tr>
+<td>Wizard</td>
+<td><code>wizard.go</code></td>
+<td>Interactive provider setup TUI</td>
+</tr>
+<tr>
+<td>Aliases</td>
+<td><code>aliases.go</code></td>
+<td>Model alias management</td>
+</tr>
+<tr>
+<td>Reasoning</td>
+<td><code>reasoning.go</code></td>
+<td>Reasoning/chain-of-thought support</td>
+</tr>
+<tr>
+<td>Compression</td>
+<td><code>compression/</code></td>
+<td>Response compression</td>
+</tr>
+<tr>
+<td>Prompt Cache</td>
+<td><code>promptcache/</code></td>
+<td>Prompt caching subsystem</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td><code>routing/</code></td>
+<td>Request routing</td>
+</tr>
+<tr>
+<td>Vision</td>
+<td><code>vision/</code></td>
+<td>Vision/multimodal support</td>
+</tr>
+<tr>
+<td>LiteLLM</td>
+<td><code>litellm/</code></td>
+<td>LiteLLM integration</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provider supporting components: 19</strong></p>
+<hr />
+<h2 id="internal-services">Internal Services</h2>
+<p>Inventory of every package under <code>helix_code/internal/</code>
+(67 packages). 64 have tests; 3 without (mocks, pprofutil, testutil) are
+test-support, not user features.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Package</th>
+<th>Description</th>
+<th>Has Tests</th>
+<th>Wired</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>adapters</td>
+<td>Umbrella for consumer-side adapters (speckit_debate_adapter)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>agent</td>
+<td>Multi-agent orchestration and coordination</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>agentbridge</td>
+<td>Wires HelixCode to real HelixAgent module</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>approval</td>
+<td>Central approval gate for user confirmations</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>approvalwire</td>
+<td>CONST-046 message-ID resolver seam</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>auth</td>
+<td>Authentication and authorization (JWT, bcrypt, sessions)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>autocommit</td>
+<td>Auto-commit functionality for agent operations</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>cache</td>
+<td>Multi-tier cache (config-gated L1/L2/L3)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>checkpoint</td>
+<td>Workspace checkpoints for session state</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>clarification</td>
+<td>Clarification question generation for ambiguous prompts</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>clientcore</td>
+<td>Shared agentic-capability wiring for all clients</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>cognee</td>
+<td>Integration with Cognee knowledge graph and memory</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>commands</td>
+<td>Slash command system with Markdown-based definitions</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>config</td>
+<td>Comprehensive configuration management (Viper-based)</td>
+<td>Yes</td>
+<td>Server, CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>context</td>
+<td>Context building and management for AI conversations</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>continua</td>
+<td>Continue.dev IDE integration</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>database</td>
+<td>PostgreSQL connectivity and schema management (pgx)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td>Deployment management</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>discovery</td>
+<td>Service/resource discovery (TTL, health, UDP multicast)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>editor</td>
+<td>Editor integration (unified-diff, whole-file, search-replace)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>ensembleui</td>
+<td>Display-formatting helpers for ensemble provider rendering</td>
+<td>Yes</td>
+<td>CLI, TUI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>event</td>
+<td>Event system (pub-sub, async/sync, task/workflow/worker types)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>fix</td>
+<td>Fix/patch management</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>focus</td>
+<td>Focus tracking for sessions (hierarchical, priority-based)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>hardware</td>
+<td>Hardware detection (CPU/GPU, optimal model-size inference)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>helixqa</td>
+<td>HelixQA engine integration for autonomous QA sessions</td>
+<td>Yes</td>
+<td>Server</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>hooks</td>
+<td>Lifecycle hooks and event handling (priority, async/sync)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>i18n_wiring</td>
+<td>i18n wiring (legacy)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>i18nwiring</td>
+<td>Central boot-time CONST-046 translator wiring</td>
+<td>Yes</td>
+<td>CLI, Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>infraboot</td>
+<td>Server infrastructure boot (containerized services)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>kilocode</td>
+<td>AST-aware multi-file refactoring (call-graph, rename, refactor)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>llm</td>
+<td>Multi-provider LLM integration (21 providers)</td>
+<td>Yes</td>
+<td>Server, CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>logging</td>
+<td>Structured logging (logrus/zap, named loggers)</td>
+<td>Yes</td>
+<td>Server, CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>logo</td>
+<td>Image processing for brand asset management</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>mcp</td>
+<td>Model Context Protocol server (JSON-RPC 2.0, WebSocket, OAuth)</td>
+<td>Yes</td>
+<td>Server, CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>memory</td>
+<td>Long-term memory and conversation management</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>mocks</td>
+<td>Mock implementations for unit testing only</td>
+<td>No</td>
+<td>Tests only</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>monitoring</td>
+<td>Metrics collection and system monitoring</td>
+<td>Yes</td>
+<td>Server</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>notification</td>
+<td>Multi-channel notification (Slack/Discord/Telegram/Email/Teams)</td>
+<td>Yes</td>
+<td>Server, CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>performance</td>
+<td>Production-grade performance optimization</td>
+<td>Yes</td>
+<td>Server</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>persistence</td>
+<td>File-based state management (session serialization, auto-save)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>planner</td>
+<td>Task planner and step executor</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>plantree</td>
+<td>Plan tree system (branching, merging, node management)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>plugins</td>
+<td>Plugin loading from directory (base framework, activation)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>pprofutil</td>
+<td>Opt-in pprof capture wiring</td>
+<td>No</td>
+<td>CLI</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>project</td>
+<td>Project lifecycle management (DB-backed storage)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>projectmemory</td>
+<td>Codex-style project-memory subsystem (loader, watcher,
+registry)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>provider</td>
+<td>Unified LLM provider interface definitions</td>
+<td>Yes</td>
+<td>Server, CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>providers</td>
+<td>AI and vector database integrations (fallback, load balancing)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>quality</td>
+<td>Quality scoring/analysis (gate, build verification, linting)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>redis</td>
+<td>Redis client integration (go-redis, key-value, pub/sub)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>render</td>
+<td>Fancy-mode terminal renderer (ANSI, frame buffer, streaming)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>repomap</td>
+<td>Semantic codebase mapping (symbol extraction, tree-sitter,
+ranking)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>roocode</td>
+<td>Roo-code CLI port (conversation store, code review)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>rules</td>
+<td>Hierarchical project rule management (glob/regex/exact
+matching)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>secrets</td>
+<td>API-key loader (reads .env, api_keys.sh, missing-var detection)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>security</td>
+<td>Comprehensive security management (scanning, zero-tolerance)</td>
+<td>Yes</td>
+<td>Server, CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>server</td>
+<td>HTTP server (Gin, JWT auth, 56 endpoints, QA handlers)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>session</td>
+<td>Development session management (lifecycle, modes, focus chain)</td>
+<td>Yes</td>
+<td>Server, CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>substrate</td>
+<td>Shared parallel-dispatch substrate (Unit interface, queue
+scheduler)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>task</td>
+<td>Distributed task management (checkpointing, dependencies,
+Redis)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>telemetry</td>
+<td>OpenTelemetry instrumentation (agent/LLM/tool spans)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>template</td>
+<td>Reusable template management (variable substitution, built-in
+lib)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>testutil</td>
+<td>Testing utilities</td>
+<td>No</td>
+<td>Tests only</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>theme</td>
+<td>Built-in UI themes (detection, loading, customization)</td>
+<td>Yes</td>
+<td>CLI, TUI, Desktop</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>tools</td>
+<td>Comprehensive tool ecosystem (shell, browser, fs, LSP, MCP,
+git)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>verifier</td>
+<td>LLMsVerifier integration (single source of truth, CONST-036)</td>
+<td>Yes</td>
+<td>Server, CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>version</td>
+<td>Build version information and metadata</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>voice</td>
+<td>Speech-to-text voice input (Whisper API, local fallback)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>worker</td>
+<td>Distributed worker pool (SSH, Raft consensus, cgroup isolation)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>workflow</td>
+<td>DAG-based workflow execution
+(planning/building/testing/refactoring)</td>
+<td>Yes</td>
+<td>Server</td>
+<td>working-untaped</td>
+</tr>
+<tr>
+<td>workspace</td>
+<td>Container-based per-task workspace management (Docker runner)</td>
+<td>Yes</td>
+<td>CLI</td>
+<td>partial</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total internal packages: 67</strong> (64 with tests, 3
+test-support: mocks, pprofutil, testutil)</p>
+<hr />
+<h2 id="cli-commands">CLI Commands</h2>
+<h3 id="top-level-commands-cmdcli">Top-Level Commands (cmd/cli/)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generate [prompt]</code></td>
+<td>Generate LLM response for a prompt</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>Show platform version, providers count, build info</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>server</code></td>
+<td>Start the HTTP server</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td><code>start</code></td>
+<td>Start the auto-LLM manager with monitoring</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>Run in auto mode with background processes</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>chat</code></td>
+<td>Interactive REPL chat session (default mode)</td>
+<td>Implemented, live</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cobra-subcommand-groups">Cobra Subcommand Groups</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Group</th>
+<th>Subcommands</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>permissions</code></td>
+<td>list, add, remove, check</td>
+<td>Implemented, tested</td>
+</tr>
+<tr>
+<td><code>worktree</code></td>
+<td>list, enter, exit, remove</td>
+<td>Implemented, tested</td>
+</tr>
+<tr>
+<td><code>hooks</code></td>
+<td>list, validate, test, enable, disable</td>
+<td>Implemented, tested</td>
+</tr>
+<tr>
+<td><code>mcp</code></td>
+<td>add, remove, list, test, auth, logs</td>
+<td>Implemented, tested</td>
+</tr>
+<tr>
+<td><code>commands</code></td>
+<td>list, show, run, reload</td>
+<td>Implemented, tested</td>
+</tr>
+<tr>
+<td><code>sessions</code></td>
+<td>list, show, delete</td>
+<td>Implemented, tested</td>
+</tr>
+<tr>
+<td><code>wizard</code></td>
+<td>(interactive/non-interactive provider setup)</td>
+<td>Implemented, tested</td>
+</tr>
+<tr>
+<td><code>lsp</code></td>
+<td>status, list-servers, restart, stop</td>
+<td>Implemented, tested</td>
+</tr>
+<tr>
+<td><code>skills</code></td>
+<td>list, show, invoke, reload</td>
+<td>Implemented, tested</td>
+</tr>
+</tbody>
+</table>
+<h3 id="interactiverepl-commands">Interactive/REPL Commands</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>handleGenerate</code></td>
+<td>Real LLM generation via provider.Generate/GenerateStream</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td><code>handleListModels</code></td>
+<td>Query all configured providers for models</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td><code>handleHealthCheck</code></td>
+<td>Check provider health status</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td><code>handleListWorkers</code></td>
+<td>List registered workers</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleAddWorker</code></td>
+<td>Add a new SSH worker</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleNotification</code></td>
+<td>Send notifications</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleCommand</code></td>
+<td>Execute shell commands via os/exec</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td><code>handleInteractive</code></td>
+<td>Full interactive REPL session</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td><code>handleCheckpoint</code></td>
+<td>Create/list/restore workspace checkpoints</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleDiff</code></td>
+<td>Show diff against a ref</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleDebate</code></td>
+<td>Run a debate on a topic</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleSpecify</code></td>
+<td>Run HelixSpecifier specification phase</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleUndo</code></td>
+<td>Undo last operation</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleQARun</code></td>
+<td>Start a QA session</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleQAList</code></td>
+<td>List QA sessions</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleQAReport</code></td>
+<td>Get QA session report</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleQAScreenshot</code></td>
+<td>Get QA session screenshot</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><code>handleQACancel</code></td>
+<td>Cancel a QA session</td>
+<td>Implemented</td>
+</tr>
+</tbody>
+</table>
+<h3 id="other-cmd-tools">Other cmd/ Tools</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Path</th>
+<th>Description</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>helix_config</td>
+<td><code>cmd/helix_config/</code></td>
+<td>Interactive provider/credential config wizard</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>config_test</td>
+<td><code>cmd/config_test/</code></td>
+<td>Config + provider-credential validator</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>i18n</td>
+<td><code>cmd/i18n/</code></td>
+<td>i18n bundle/translator tooling</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>infrastructure</td>
+<td><code>cmd/infrastructure/</code></td>
+<td>Container/k8s/registry readiness checks</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>performance_optimization</td>
+<td><code>cmd/performance_optimization/</code></td>
+<td>pprof profiling + bottleneck analysis</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>security_test</td>
+<td><code>cmd/security_test/</code></td>
+<td>Security test harness (PoC execution)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>security_fix</td>
+<td><code>cmd/security_fix/</code></td>
+<td>Finding ingestion + policy-driven fix</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>security_fix_standalone</td>
+<td><code>cmd/security_fix_standalone/</code></td>
+<td>Batch parallel security fix + audit-trail</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>security_scan</td>
+<td><code>cmd/security_scan/</code></td>
+<td>AST/pattern code scan + leak detect + SARIF</td>
+<td>Implemented (no tests)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="api-endpoints">API Endpoints</h2>
+<h3 id="public-endpoints-no-auth-12-total">Public Endpoints (no auth) —
+12 total</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/health</code></td>
+<td>Health check (DB + Redis)</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/health</code></td>
+<td>API-namespaced health check</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/server/info</code></td>
+<td>Server info</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/metrics</code></td>
+<td>System metrics</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/llm/providers</code></td>
+<td>List LLM providers</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/llm/providers/:id</code></td>
+<td>Get specific LLM provider</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/llm/models</code></td>
+<td>List LLM models</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/memory/systems</code></td>
+<td>List memory systems</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/memory/stats</code></td>
+<td>Memory statistics</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/ws</code></td>
+<td>WebSocket connection</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/static/*</code></td>
+<td>Static file serving</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/</code></td>
+<td>Web frontend index</td>
+<td>Implemented</td>
+</tr>
+</tbody>
+</table>
+<h3 id="authenticated-endpoints-44-total">Authenticated Endpoints — 44
+total</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/register</code></td>
+<td>User registration</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/login</code></td>
+<td>User login</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/logout</code></td>
+<td>User logout</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/refresh</code></td>
+<td>Refresh JWT token</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/users/me</code></td>
+<td>Get current user</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/users/me</code></td>
+<td>Update current user</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/users/me</code></td>
+<td>Delete current user</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/workers</code></td>
+<td>List workers</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/workers</code></td>
+<td>Create worker</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/workers/:id</code></td>
+<td>Get worker</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/workers/:id</code></td>
+<td>Update worker</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/workers/:id</code></td>
+<td>Delete worker</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/workers/:id/heartbeat</code></td>
+<td>Worker heartbeat</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/workers/:id/metrics</code></td>
+<td>Worker metrics</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/tasks</code></td>
+<td>List tasks</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks</code></td>
+<td>Create task</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/tasks/:id</code></td>
+<td>Get task</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/tasks/:id</code></td>
+<td>Update task</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/tasks/:id</code></td>
+<td>Delete task</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks/:id/assign</code></td>
+<td>Assign task</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks/:id/start</code></td>
+<td>Start task</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks/:id/complete</code></td>
+<td>Complete task</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks/:id/fail</code></td>
+<td>Fail task</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks/:id/checkpoint</code></td>
+<td>Create task checkpoint</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/tasks/:id/checkpoints</code></td>
+<td>Get task checkpoints</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks/:id/retry</code></td>
+<td>Retry task</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/projects</code></td>
+<td>List projects</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/projects</code></td>
+<td>Create project</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/projects/:id</code></td>
+<td>Get project</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/projects/:id</code></td>
+<td>Update project</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/projects/:id</code></td>
+<td>Delete project</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/projects/:id/sessions</code></td>
+<td>Get project sessions</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/projects/:projectId/workflows/planning</code></td>
+<td>Execute planning workflow</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/projects/:projectId/workflows/building</code></td>
+<td>Execute building workflow</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/projects/:projectId/workflows/testing</code></td>
+<td>Execute testing workflow</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/projects/:projectId/workflows/refactoring</code></td>
+<td>Execute refactoring workflow</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/sessions</code></td>
+<td>List sessions</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/sessions</code></td>
+<td>Create session</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/sessions/:id</code></td>
+<td>Get session</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/sessions/:id</code></td>
+<td>Update session</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/sessions/:id</code></td>
+<td>Delete session</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/stats</code></td>
+<td>System statistics</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/status</code></td>
+<td>System status</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/llm/generate</code></td>
+<td>LLM generation (real providers)</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/llm/stream</code></td>
+<td>LLM streaming (real providers)</td>
+<td>Implemented, live</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/specify</code></td>
+<td>HelixSpecifier specification phase</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/qa/session</code></td>
+<td>Start QA session</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/qa/sessions</code></td>
+<td>List QA sessions</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/qa/session/:id/status</code></td>
+<td>QA session status</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/qa/session/:id/report</code></td>
+<td>QA session report</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/qa/session/:id/screenshot/:name</code></td>
+<td>QA screenshot</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/qa/session/:id</code></td>
+<td>Cancel QA session</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/screenshot/engines</code></td>
+<td>List screenshot engines</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/screenshot/:platform</code></td>
+<td>Capture screenshot</td>
+<td>Implemented</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total API endpoints: 56</strong> (12 public, 44
+authenticated)</p>
+<hr />
+<h2 id="owned-submodules">Owned Submodules</h2>
+<h3 id="core-platform-submodules-helixdevelopment">Core Platform
+Submodules (HelixDevelopment)</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Path</th>
+<th>Purpose</th>
+<th>Integrated</th>
+<th>Wired</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixConstitution</td>
+<td><code>constitution/</code></td>
+<td>Governance rules, CLAUDE.md, AGENTS.md</td>
+<td>Yes (cascaded)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>HelixQA</td>
+<td><code>helix_qa/</code></td>
+<td>QA/challenge orchestration platform</td>
+<td>Yes (server)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>HelixAgent</td>
+<td><code>submodules/helix_agent/</code></td>
+<td>Agent framework</td>
+<td>Yes (CLI)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>HelixLLM</td>
+<td><code>submodules/helix_llm/</code></td>
+<td>LLM orchestration</td>
+<td>Yes</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>HelixMemory</td>
+<td><code>submodules/helix_memory/</code></td>
+<td>Memory subsystem</td>
+<td>Yes</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>HelixSpecifier</td>
+<td><code>submodules/helix_specifier/</code></td>
+<td>Specification generation</td>
+<td>Yes (CLI specify)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>LLMOrchestrator</td>
+<td><code>submodules/llm_orchestrator/</code></td>
+<td>LLM orchestration</td>
+<td>Yes</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>LLMProvider</td>
+<td><code>submodules/llm_provider/</code></td>
+<td>LLM provider abstraction</td>
+<td>Yes</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>LLMsVerifier</td>
+<td><code>submodules/llms_verifier/</code></td>
+<td>Model verification (CONST-036)</td>
+<td>Yes (server, CLI)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>VisionEngine</td>
+<td><code>submodules/vision_engine/</code></td>
+<td>Vision/multimodal processing</td>
+<td>Yes</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>DocProcessor</td>
+<td><code>submodules/doc_processor/</code></td>
+<td>Document processing</td>
+<td>Yes</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>DebateOrchestrator</td>
+<td><code>submodules/debate_orchestrator/</code></td>
+<td>Debate orchestration</td>
+<td>Yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>DagOrchestrator</td>
+<td><code>submodules/dag_orchestrator/</code></td>
+<td>DAG-based orchestration</td>
+<td>Yes</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>PipelineRuntime</td>
+<td><code>submodules/pipeline_runtime/</code></td>
+<td>Pipeline execution runtime</td>
+<td>Yes</td>
+<td>partial</td>
+</tr>
+</tbody>
+</table>
+<h3 id="core-platform-submodules-vasic-digital">Core Platform Submodules
+(vasic-digital)</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Path</th>
+<th>Purpose</th>
+<th>Integrated</th>
+<th>Wired</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Containers</td>
+<td><code>containers/</code></td>
+<td>Docker/container artifacts (§11.4.76)</td>
+<td>Yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Challenges</td>
+<td><code>challenges/</code></td>
+<td>Cross-cutting challenge bank</td>
+<td>Yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Security</td>
+<td><code>security/</code></td>
+<td>Security tooling</td>
+<td>Yes</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>Panoptic</td>
+<td><code>submodules/panoptic/</code></td>
+<td>Panoptic monitoring</td>
+<td>Yes</td>
+<td>no (out-of-process)</td>
+</tr>
+<tr>
+<td>DocsChain</td>
+<td><code>submodules/docs_chain/</code></td>
+<td>Documentation sync engine (§11.4.106)</td>
+<td>Yes</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vasic-digital-library-submodules-48-total">vasic-digital Library
+Submodules (48 total)</h3>
+<p>Agentic, Auth, AutoTemp, BackgroundTasks, Benchmark, Cache, Claritas,
+Concurrency, Config, Conversation, Database, Document, Embeddings,
+EventBus, Filesystem, Formatters, GandalfSolutions, HyperTune, I-LLM,
+I18n, Lazy, LeakHub, LLMOps, MCP_Module, Memory, Messaging, Middleware,
+Models, Normalize, Observability, Optimization, Ouroborous, Planning,
+PliniusCommon, Plugins, RAG, RateLimiter, Recovery, RedTeam,
+SelfImprove, SkillRegistry, Storage, Streaming, ToolSchema, TOON,
+VectorDB, Veritas, Watcher.</p>
+<h3 id="third-party-dependency-submodules-3-total">Third-Party
+Dependency Submodules (3 total)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>llama.cpp</td>
+<td><code>dependencies/LLama_CPP/</code></td>
+<td>Local LLM inference</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td><code>dependencies/Ollama/</code></td>
+<td>Local LLM management</td>
+</tr>
+<tr>
+<td>HuggingFace Hub</td>
+<td><code>dependencies/HuggingFace_Hub/</code></td>
+<td>Model hub integration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cli-agent-references-55-total">CLI Agent References (55
+total)</h3>
+<p>55 CLI agent reference implementations including: aider, claude-code,
+cline, codex, gemini-cli, plandex, qwen-code, crush, openhands, and many
+more.</p>
+<p><strong>Total submodules: 129</strong></p>
+<hr />
+<h2 id="video-confirmations">Video Confirmations</h2>
+<h3 id="feature-video-confirmations-11.4.153">Feature Video
+Confirmations (§11.4.153)</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Video</th>
+<th>Content Verified</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Xiaomi API</td>
+<td>helixcode-xiaomi-api-verified.mp4</td>
+<td>Yes (4/4 patterns)</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>Xiaomi Integration</td>
+<td>helixcode-xiaomi-integration-verified.mp4</td>
+<td>Yes (4/4 patterns)</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>Xiaomi Challenge</td>
+<td>helixcode-xiaomi-challenge-verified.mp4</td>
+<td>Yes (4/4 patterns)</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>Test Suite</td>
+<td>helixcode-test-suite-verified.mp4</td>
+<td>Yes (3/3 patterns)</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>CLI Demo</td>
+<td>helixcode-cli-demo-verified.mp4</td>
+<td>Yes (4/4 patterns)</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>Nano Clone</td>
+<td>helixcode-nano-demo-verified.mp4</td>
+<td>Yes (4/4 patterns)</td>
+<td>2026-06-15</td>
+</tr>
+<tr>
+<td>Server Build</td>
+<td>helixcode-server-build-verified.mp4</td>
+<td>Yes (2/2 patterns)</td>
+<td>2026-06-15</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="video-confirmation-sweep-2026-06-16-11.4.15311.4.158">Video-Confirmation
+Sweep 2026-06-16 (§11.4.153/§11.4.158)</h3>
+<p>Comprehensive real-DeepSeek video/recording confirmation sweep
+against fresh binaries. Every recording lives in
+<code>/Volumes/T7/Downloads/Recordings</code> with the
+<code>helixcode-</code> prefix, is a genuine real-LLM run, and has been
+analyzed.</p>
+<p><strong>CLI — 9 features</strong> (fresh <code>bin/cli</code>): -
+<code>-stream</code> (helixcode-cli-stream-20260616) -
+<code>/generate</code> (helixcode-cli-generate-20260616) -
+<code>-list-models</code> (helixcode-cli-list-models-20260616 — real
+deepseek-v4-flash/-pro catalog) - <code>-command</code> os/exec exit 0
+(helixcode-cli-command-20260616) - <code>-health</code>
+(helixcode-cli-health-20260616) - <code>-list-workers</code>
+(helixcode-cli-list-workers-20260616 — 0 workers, honest) -
+<code>-notify</code> (helixcode-cli-notify-20260616 — dispatch runs, no
+enabled sink = honest caveat) -
+<code>-model</code>/<code>-max-tokens</code> cap
+(helixcode-cli-model-maxtokens-20260616) -
+<code>-approval</code>/<code>-permission-mode</code>
+(helixcode-cli-approval-mode-20260616)</p>
+<p><strong>API — 5 features</strong> (server :8080): - health
+(helixcode-api-health-20260616) - models — 7-model catalog
+(helixcode-api-models-20260616) - generate — real DeepSeek tokens=203
+(helixcode-api-generate-20260616) - auth — register 201 / login→JWT /
+bad-pw rejected (helixcode-api-auth-20260616) - tasks-crud — 401
+enforced + real UUID persisted (helixcode-api-tasks-crud-20260616)</p>
+<p><strong>TUI — 2 features</strong> (fresh <code>bin/tui</code>): -
+llm-chat DeepSeek “The capital of Japan is Tokyo.”
+(helixcode-tui-llm-deepseek-20260616) - navigation/theme tour
+(helixcode-tui-navigation-20260616)</p>
+<p><strong>Web — 2 features incl. SSE streaming</strong> (fresh server):
+- llm-console non-stream tokens=203
+(helixcode-web-llm-console-deepseek-20260616.mp4) - SSE streaming
+“Python,JavaScript,Rust”
+(helixcode-web-04-deepseek-stream-20260616.png)</p>
+<h3 id="themed-brand-re-recordings-rev-3-2026-06-15">Themed Brand
+Re-Recordings (Rev 3, 2026-06-15)</h3>
+<p>5 of 6 clients have themed, real-LLM, window-scoped recordings: -
+<code>helixcode-cli-themed-20260615.mp4</code> — brand banner + real
+DeepSeek “2+2 equals 4” - <code>helixcode-web-themed-20260615.mp4</code>
+— dark theme + logo + real DeepSeek -
+<code>helixcode-tui-themed-20260615.mp4</code> — brand tview.Styles +
+banner + real DeepSeek -
+<code>helixcode-desktop-themed-20260615.mp4</code> — themed dashboard +
+embedded logo - <code>helixcode-android-themed-20260615.mp4</code> —
+Material dark + logo + real connect</p>
+<p><strong>iOS themed re-record is OPERATOR-BLOCKED</strong> (§11.4.52):
+CoreSimulatorService denied write to /Volumes/T7 for asset-catalog
+device-set creation.</p>
+<h3 id="desktop-chat-re-record-rev-5-2026-06-15">Desktop Chat Re-Record
+(Rev 5, 2026-06-15)</h3>
+<p><code>helixcode-desktop-chat-themed-20260615.mp4</code> — autonomous
+Fyne software-painter capture (no OS synthetic input): real DeepSeek
+“2+2 equals 4” rendered in brand-themed pixels, 49 frames, 12.25s,
+liveness verified.</p>
+<hr />
+<h2 id="test-evidence">Test Evidence</h2>
+<h3 id="test-coverage-summary">Test Coverage Summary</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit tests</td>
+<td>All passing</td>
+<td>64/67 packages have tests</td>
+</tr>
+<tr>
+<td>Integration tests</td>
+<td>All passing</td>
+<td>Real PostgreSQL + Redis + LLM</td>
+</tr>
+<tr>
+<td>E2E tests</td>
+<td>All passing</td>
+<td>Live API verification</td>
+</tr>
+<tr>
+<td>Stress tests</td>
+<td>All passing</td>
+<td>Concurrent contention + sustained load</td>
+</tr>
+<tr>
+<td>Chaos tests</td>
+<td>All passing</td>
+<td>Failure injection + recovery</td>
+</tr>
+<tr>
+<td>Anti-bluff scan</td>
+<td>Clean</td>
+<td>No “simulated”/“for now”/“TODO implement”</td>
+</tr>
+<tr>
+<td>§11.4.118/§11.4.135 guards</td>
+<td>36 packages</td>
+<td>Standing regression + -race guards</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="anti-bluff-payoff-the--stream-11.4.108-stale-binary-finding">Anti-Bluff
+Payoff — The -stream §11.4.108 Stale-Binary Finding</h3>
+<p>The CLI <code>-stream</code> recording attempt initially produced
+<code>invalid character 'd'</code> — a §11.4.108 STALE-BINARY break (the
+on-disk <code>bin/cli</code> predated a DeepSeek streaming-decode fix).
+Because the sweep READS the recorded screen, the break was caught
+instead of bluffed green. Fix: rebuilt <code>bin/cli</code> → streaming
+now emits real output; a §11.4.135 permanent regression guard was added
+(<code>internal/llm/deepseek_stream_guard_test.go</code>).</p>
+<hr />
+<h2 id="coverage-completeness">Coverage Completeness</h2>
+<h3 id="rev6-gap-pass-2026-06-16">Rev6 Gap-Pass (2026-06-16)</h3>
+<ul>
+<li><strong>Internal packages:</strong> 73/73 have ≥1 feature row. 234
+internal-feature rows.</li>
+<li><strong>cmd tools:</strong> all 11 <code>helix_code/cmd/*</code>
+dirs rowed.</li>
+<li><strong>Client apps:</strong> all 8 surfaces (CLI, TUI, Web,
+Desktop, Android, iOS, Aurora OS, HarmonyOS).</li>
+<li><strong>HTTP API:</strong> 18 endpoint groups rowed (56
+endpoints).</li>
+<li><strong>LLM Providers:</strong> 21 providers (19 with tests).</li>
+<li><strong>Submodules:</strong> 50 inventoried (55 capability rows;
+principal features).</li>
+<li><strong>Ported cli_agents:</strong> 33 rows (20 landed, 3 partial,
+10 planned — honest).</li>
+</ul>
+<h3 id="overall-rollup-from-status_summary.md-rev-4">Overall Rollup
+(from Status_Summary.md Rev 4)</h3>
+<table>
+<thead>
+<tr>
+<th>Overall</th>
+<th>Count</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>working-untaped</td>
+<td>324</td>
+<td>real + tested, no analyzed video yet</td>
+</tr>
+<tr>
+<td>partial</td>
+<td>168</td>
+<td>real but thin/unverified coverage</td>
+</tr>
+<tr>
+<td>gap</td>
+<td>49</td>
+<td>scaffold / untested / planned</td>
+</tr>
+<tr>
+<td>confirmed</td>
+<td>23</td>
+<td>real analyzed recording exists</td>
+</tr>
+<tr>
+<td>n/a (test-support)</td>
+<td>3</td>
+<td>mocks/testutil/pprofutil</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>567</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="inventory-sources">Inventory Sources</h2>
+<ul>
+<li><code>helix_code/internal/</code> — 67 packages (72 directories
+including i18n, test dirs)</li>
+<li><code>helix_code/cmd/</code> — 11 command directories</li>
+<li><code>helix_code/applications/</code> — 8 client applications</li>
+<li><code>helix_code/internal/llm/</code> — 21 provider files + 19
+supporting components</li>
+<li><code>helix_code/internal/server/</code> — 56 API endpoints</li>
+<li><code>docs/features/inventory/</code> — aggregated inventory
+sources</li>
+<li><code>/Volumes/T7/Downloads/Recordings/</code> — video evidence
+corpus</li>
+<li><code>docs/features/Status.md</code> (Rev 7, 2026-06-16) — prior
+comprehensive status</li>
+</ul>
+<hr />
+<h2 id="sources-verified-2026-06-19">Sources verified 2026-06-19</h2>
+<ul>
+<li>Live API: All 56 endpoints verified via source code</li>
+<li>LLM Providers: 21 providers verified in
+<code>helix_code/internal/llm/</code></li>
+<li>Client Applications: 8 apps verified in
+<code>helix_code/applications/</code></li>
+<li>Internal Packages: 67 packages verified in
+<code>helix_code/internal/</code></li>
+<li>Video Recordings: 30+ recordings in
+<code>/Volumes/T7/Downloads/Recordings/</code></li>
+<li>Prior Status: <code>docs/features/Status.md</code> Revision 7
+(2026-06-16)</li>
+</ul>
+</body>
+</html>
