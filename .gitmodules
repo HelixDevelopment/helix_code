@@ -385,3 +385,6 @@
 [submodule "submodules/pipeline_runtime"]
 	path = submodules/pipeline_runtime
 	url = git@github.com:HelixDevelopment/PipelineRuntime.git
+[submodule "submodules/claude-toolkit"]
+	path = submodules/claude-toolkit
+	url = git@github.com:vasic-digital/claude-toolkit.git
