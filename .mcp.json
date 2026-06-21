@@ -22,6 +22,16 @@
       },
       "disabled": false,
       "autoApprove": []
+    },
+    "open-design": {
+      "description": "OpenDesign MCP server for UI design system (§11.4.162). Requires OD daemon running on localhost:7456.",
+      "command": "npx",
+      "args": ["-y", "open-design-mcp"],
+      "env": {
+        "OD_DAEMON_URL": "http://localhost:7456"
+      },
+      "disabled": true,
+      "autoApprove": []
     }
   }
 }
