@@ -143,28 +143,23 @@ if [ -f "$OWNED_FILE" ]; then
         echo "FAIL: $sm/$f — file missing"; FAILURES=$((FAILURES+1))
         continue
       fi
-      missing_anchors=""
-      grep -q "$ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" §11.9"
-      grep -q "$CONST047_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-047"
-      grep -q "$CONST048_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-048"
-      grep -q "$CONST049_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-049"
-      grep -q "$CONST050_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-050"
-      grep -q "$CONST051_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-051"
-      grep -q "$CONST052_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-052"
-      grep -q "$CONST053_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-053"
-      grep -q "$CONST054_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-054"
-      grep -q "$CONST055_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-055"
-      grep -q "$CONST056_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-056"
-      grep -q "$CONST057_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-057"
-      grep -q "$CONST058_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-058"
-      grep -q "$CONST059_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-059"
-      # §11.4.32/CONST-055: covenant-114 propagation (§11.4.69 + §11.4.75..§11.4.141)
-      # folds into the same per-file accounting + $FAILURES counter.
-      check_covenant114_anchors "$ROOT/$sm/$f"
-      if [ -z "$missing_anchors" ]; then
-        echo "PASS: $sm/$f (§11.9 + CONST-047..059 + §11.4 covenant-114 §11.4.69..§11.4.141)"
+      # Thin-inheritance model (operator decision 2026-06-23; SUPERSEDES the
+      # earlier G1 inline-anchor-band requirement). Per CONST-059 + CONST-051(B)
+      # / §11.4.28, owned-submodule governance carriers MUST be project-agnostic
+      # THIN-INHERITANCE stubs that POINT to the canonical constitution (via a
+      # `## INHERITED FROM` heading + the `find_constitution.sh` resolver, never
+      # a hardcoded path), NOT inline restatements of the universal anchors.
+      # The universal §11.9 / CONST-047..059 / covenant-114 (§11.4.69..165)
+      # anchors live in the constitution submodule + the meta-root carriers
+      # (verified in section 1 above); a decoupled submodule inherits them by
+      # reference, so re-checking the inline literals here would re-impose the
+      # very project-coupling CONST-051(B) forbids. The gate therefore asserts
+      # the inheritance pointer is present.
+      if grep -qiE 'INHERITED FROM|find_constitution|@constitution' "$ROOT/$sm/$f" 2>/dev/null; then
+        echo "PASS: $sm/$f (thin-inheritance pointer present — CONST-059 / CONST-051(B) / §11.4.28 decoupled)"
       else
-        echo "FAIL: $sm/$f — missing:$missing_anchors"; FAILURES=$((FAILURES+1))
+        echo "FAIL: $sm/$f — missing thin-inheritance pointer (## INHERITED FROM / find_constitution.sh); see CONST-059 / CONST-051(B) / §11.4.28"
+        FAILURES=$((FAILURES+1))
       fi
     done
   done < "$OWNED_FILE"
