@@ -135,16 +135,24 @@ helix_code/                                # ← repo root (governance + submodu
 │                                         #   bluff-proofing/, llms_verifier/, helix_qa/
 │
 ├── helix_code/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo's primary inner directory; circular reference if promoted; see §3.2.1)
-├── helix_qa/        ← SUBMODULE: QA / challenge-orchestration platform
-├── challenges/     ← SUBMODULE: cross-cutting Challenge bank (Panoptic, banks/)
-├── containers/     ← SUBMODULE: Docker/container artefacts
-├── dependencies/   ← SUBMODULES: LLama_CPP, Ollama, HuggingFace_Hub, …
-├── security/       ← SUBMODULE: security tooling
-├── assets/         ← SUBMODULE: logos, themes, brand
-├── github_pages_website/ ← SUBMODULE: marketing site
-├── cli_agents/          ← reference CLI agents (aider, cline, plandex, openhands, …) — formerly Example_Projects/
-└── cli_agents_resources/ ← reference resources (Awesome-AI-Agents, Cheshire-Cat-Ai, …) — formerly Example_Resources/
+├── submodules/      ← grouped submodule layout (per .gitmodules): submodules/helix_qa, submodules/challenges,
+│                    #   submodules/containers, submodules/security, submodules/helix_agent, submodules/llms_verifier, …
+├── dependencies/   ← TRACKED DIRECTORY holding submodules: dependencies/LLama_CPP, dependencies/Ollama, dependencies/HuggingFace_Hub
+├── assets/         ← TRACKED DIRECTORY: logos, themes, brand (mode 040000 tree — NOT a submodule, no .gitmodules entry)
+├── github_pages_website/ ← SUBMODULE: marketing site (the one root-level submodule, mode 160000)
+├── cli_agents/          ← TRACKED DIRECTORY holding reference CLI-agent submodules (aider, cline, plandex, …) — formerly Example_Projects/
+└── cli_agents_resources/ ← TRACKED DIRECTORY holding reference-resource submodules (Awesome-AI-Agents, Cheshire-Cat-Ai, …) — formerly Example_Resources/
 ```
+
+> **§3.2 diagram accuracy note (verified 2026-06-22 against `git ls-tree HEAD` +
+> `.gitmodules`):** earlier revisions listed `helix_qa/`, `challenges/`,
+> `containers/`, `security/`, `helix_agent/` as SUBMODULES at the repo ROOT.
+> They are NOT at the root — per `.gitmodules` they use the grouped layout
+> `submodules/<name>/` (e.g. `path = submodules/containers`). `assets/`,
+> `dependencies/`, `cli_agents/`, `cli_agents_resources/` are tracked directories
+> (mode `040000 tree`), not submodules themselves (the submodules they contain
+> live one level down). The only root-level submodule is `github_pages_website/`
+> (mode `160000 commit`).
 
 #### 3.2.1 Inner Go application — `helix_code/` tracked subdirectory
 

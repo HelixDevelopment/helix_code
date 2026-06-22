@@ -12,7 +12,10 @@
 #
 # Closed Reason vocabulary (§11.4.90):
 #   superseded-by-design-change | superseded-by-later-mandate |
-#   feature-removed | duplicate-of | unsupported-topology
+#   feature-removed | duplicate-of | unsupported-topology | not-reproducible
+# (`not-reproducible` = a reported defect that does NOT reproduce on the
+#  canonical tree/baseline — an environment/isolated-worktree artifact, per
+#  the §11.4.90 closed vocabulary; the gate's list MUST mirror that source.)
 #
 # Exit: 0 if every Obsolete item is compliant (or none present),
 #       1 on any violation, 2 on usage / environment error.
@@ -25,7 +28,7 @@ FILES=("$DOCS/Issues.md" "$DOCS/Fixed.md")
 
 OBSOLETE_STATUS='Obsolete (→ Fixed.md)'
 # Pipe-separated closed vocabulary for awk regex matching.
-REASON_VOCAB='superseded-by-design-change|superseded-by-later-mandate|feature-removed|duplicate-of|unsupported-topology'
+REASON_VOCAB='superseded-by-design-change|superseded-by-later-mandate|feature-removed|duplicate-of|unsupported-topology|not-reproducible'
 
 violations=0
 checked=0

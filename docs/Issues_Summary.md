@@ -53,4 +53,4 @@
 
 **Counts**: 44 tracked item-sections in `docs/Issues.md` — **3 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
-*Last regenerated: 2026-06-16 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
+*Last regenerated: 2026-06-22 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*

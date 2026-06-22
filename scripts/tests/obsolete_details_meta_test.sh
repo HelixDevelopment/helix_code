@@ -76,6 +76,20 @@ cat > "$TMP/docs/Issues.md" <<'EOF'
 EOF
 assert_pass "compliant Obsolete item"
 
+# --- Reconciliation (§11.4.120): Reason: not-reproducible is in the
+#     §11.4.90 closed vocabulary and MUST be accepted (not a tautology —
+#     Mutation 2's `just-because` is still rejected above). ---
+cat > "$TMP/docs/Issues.md" <<'EOF'
+# Issues
+
+## XXX-006 — planted obsolete item with not-reproducible reason
+
+**Status:** Obsolete (→ Fixed.md)
+**Type:** Bug
+**Obsolete-Details:** Since: 2026-06-22; Reason: not-reproducible; Superseding-item: none; Triple-check: 10/10 canonical-tree non-reproduction in qa-results/obsolete/xxx006.log
+EOF
+assert_pass "compliant Obsolete item with Reason: not-reproducible"
+
 # --- Control: no Obsolete items at all → PASS ---
 cat > "$TMP/docs/Issues.md" <<'EOF'
 # Issues
