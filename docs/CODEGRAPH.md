@@ -16,18 +16,46 @@ npm install -g @colbymchenry/codegraph
 
 ## Configuration
 
-Configuration file: `.codegraph/config.json`
+> **IMPORTANT (verified 2026-06-22):** CodeGraph v1.0.1 is **zero-config** and
+> derives its exclusion scope **only from `.gitignore`** (+ `.git/info/exclude`),
+> **NOT** from `.codegraph/config.json`. The legacy `config.json` in this repo is
+> **inert** — it is no longer read by the tool. Editing it has no effect on what
+> gets indexed. The single source of truth for exclusion is the ignore files.
+> (Ref: https://colbymchenry.github.io/codegraph/getting-started/configuration/)
 
-**Included paths** (own-org submodules per §11.4.79):
-- `submodules/*` — all own-org submodules
-- `constitution/` — constitution submodule
-- `helix_code/` — inner Go application
+**Exclusion source of truth:** `.gitignore` (repo-tracked) and/or
+`.git/info/exclude` (local, non-tracking — preferred for paths that must stay
+git-tracked, e.g. `cli_agents/`).
 
-**Excluded paths** (per §11.4.10 + §11.4.79):
-- `cli_agents/*`, `cli_agents_resources/*` — third-party
-- `dependencies/LLama_CPP`, `dependencies/Ollama`, `dependencies/HuggingFace_Hub` — third-party
+**Must be excluded** (per §11.4.10 + §11.4.79) — verify each is actually absent
+from the index, NOT merely listed in the inert config:
+- `cli_agents/`, `cli_agents_resources/`, `github_pages_website/` — third-party
+- nested `submodules/**/submodules/**`, `submodules/**/cli_agents/**` — vendored trees
+- generated `**/*.gen.ts`, `**/worker-configuration.d.ts`
 - `**/.env`, `**/.env.*`, `**/*.key`, `**/*.pem`, `**/secrets/**` — credentials
-- Standard build artifacts, caches, vendor directories
+
+**Must be included** (own-org per §11.4.79): `submodules/*`, `constitution/`,
+`helix_code/` — confirmed present via live `codegraph_explore`.
+
+> **Anti-bluff note (§11.4):** `codegraph_validate.sh` historically validated
+> `config.json`'s lists — which the tool ignores — so a 18/18 PASS did NOT prove
+> third-party paths were excluded (36k `cli_agents` files were in fact indexed,
+> 4.38 GB DB → #850 watchdog kills). The validator MUST instead query the live DB
+> (`SELECT COUNT(*) FROM files WHERE path LIKE '<excluded>/%'` MUST be 0). See
+> `docs/research/codegraph_daemon_stability_20260622/findings.md`.
+
+## Tool selection — `codegraph_search` vs `codegraph_explore`
+
+`codegraph_search` is a SQLite **FTS5 implicit-AND symbol-NAME lookup** (matches a
+single symbol whose name/qualified-name/signature/docstring contains **all** the
+query tokens). A natural-language phrase like `"provider Generate LLM"` correctly
+returns **"No results found"** — no single symbol is named that. This is
+working-as-designed, **not** a broken index.
+
+- **Name a symbol → `codegraph_search`** (e.g. `OllamaProvider`, `NewOllamaProvider`).
+- **Ask a question / explore an area / multi-concept → `codegraph_explore`** (NL surface).
+
+(Ref: `docs/research/codegraph_search_rootcause_20260622/findings.md`.)
 
 ## Usage
 

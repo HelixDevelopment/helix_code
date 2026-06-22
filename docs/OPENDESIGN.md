@@ -76,7 +76,7 @@ Per constitution §11.4.162:
 - Use OpenDesign's design tokens/themes for color palette (light + dark)
 - Typography scale and spacing
 - Component-level design tokens
-- Project brand colors from canonical assets (assets/Logo.jpeg)
+- Project brand colors from canonical assets (assets/Logo.png)
 
 ## BYOK Configuration (for design generation)
 

@@ -6,7 +6,7 @@
 cd "$(git rev-parse --show-toplevel)"
 
 REPO_ROOT="$(pwd)"
-GOV_FILES=("CONSTITUTION.md" "CLAUDE.md" "AGENTS.md")
+GOV_FILES=("CONSTITUTION.md" "CLAUDE.md" "AGENTS.md" "QWEN.md" "GEMINI.md")
 PUSHED=0
 FAILED=0
 SKIPPED=0
