@@ -2,17 +2,19 @@
 
 | Field | Value |
 |-------|-------|
-| Revision | 3 |
+| Revision | 4 |
 | Created | 2026-05-06 |
-| Last modified | 2026-06-22T00:00:00Z |
+| Last modified | 2026-06-23T00:00:00Z |
 | Status | active |
-| Status summary | 2026-06-22: Full autonomous session. §11.4.166 semgrep mandate REPEALED + de-wired; §11.4.55 sweep fully cleared (G8/G11/G12/G13/G14 PASS, G7 docs/qa baseline-bumped with forward-enforcement proven intact); workable-items diffCmd composite-key fix (106 false divergences→0); optional doc reconciliations (helixtrack DATABASE_SCHEMA V1-V5, OPENDESIGN install path); and G1 — the full 64-owned-submodule + 6-root-carrier §11.4.142-165 governance cascade — COMPLETE: fleet governance-cascade verifier 205→0 band-failures (exit 0), consolidated meta pointer bump 87664e11. All commits independently reviewed (§11.4.142) + fast-forward pushed (§11.4.113, no force). |
+| Status summary | 2026-06-22: Full autonomous session. §11.4.166 semgrep mandate REPEALED + de-wired; §11.4.55 sweep fully cleared (G8/G11/G12/G13/G14 PASS, G7 docs/qa baseline-bumped with forward-enforcement proven intact); workable-items diffCmd composite-key fix (106 false divergences→0); optional doc reconciliations (helixtrack DATABASE_SCHEMA V1-V5, OPENDESIGN install path); and G1 — the full 64-owned-submodule + 6-root-carrier §11.4.142-165 governance cascade — COMPLETE: fleet governance-cascade verifier 205→0 band-failures (exit 0), consolidated meta pointer bump 87664e11. Continued 2026-06-23: the 3 open backlog items committed (HXC-107 feature-ledger rev8 live-code reconciliation; HXC-108 video-QA recording harness + self-validated OCR analyzer; HXC-112 Fyne-GUI cliclick CGEvent input-driving fix — all with honest TCC/Aqua env-gaps where the host blocks on-screen capture), plus two CONST-051(B) decouplings (helixtrack configs → helix_track repo; helixcode-infra compose → meta root) leaving the containers submodule fully project-unaware. All commits independently reviewed (§11.4.142) + fast-forward pushed (§11.4.113, no force). |
 
 _Revision 1 establishes the CONST-064 metadata table at the document head, replacing the prior multi-round accreted `Last updated:` prose preamble (a single ~32k-token line). Per-session history is preserved below in the dated catch-up tables and the Document version log._
 
 _Revision 2 (2026-06-22) records the §11.4.166 semgrep-mandate repeal + meta-repo de-wiring and the §11.4.55 sweep-debt batch — see the dated catch-up section at the document tail._
 
 _Revision 3 (2026-06-22) records the remainder of the same autonomous session: the §11.4.55 sweep fully cleared (G7 docs/qa baseline-bump; G11/G13/G14 closed), the workable-items diffCmd composite-key fix, the optional doc reconciliations, and — the headline deliverable — G1, the full 64-owned-submodule + 6-root-carrier §11.4.142-165 governance cascade landed across the fleet (verifier 205→0 band-failures; consumer-submodule HEADs bumped in meta 87664e11). Cascade executed as a pilot-with-push + 6 parallel waves + a doc_processor deep-repair, every closure carrying captured verifier-PASS + ls-remote evidence._
+
+_Revision 4 (2026-06-23) records the continuation of the same autonomous session: the 3 open workable-items backlog (HXC-107 docs/features ledger rev8 reconciled to live code + anti-bluff iOS/Android-scaffold fix; HXC-108 video-QA recording harness with a self-validated golden-good/golden-bad OCR analyzer + clients×features matrix; HXC-112 root-caused the Fyne OpenGL GUI input-blocker and shipped a cliclick CGEvent driving harness) committed `2bb54634`/`47f61829`/`d2f4310a`, each with honest §11.4.3 TCC/Aqua env-gaps for on-screen recording (operator-attended remainder), and two operator-directed CONST-051(B) decouplings of the universal `containers` submodule — helixtrack compose+boot → `helix_track` main repo (`9e0bf02`), helixcode-infra compose → meta root (`f91d4477`) — with containers now verified free of both coupling classes. The HXC-108 CLI-client recording phase (TCC-free via asciinema) is in flight. Per-item §11.4.149 test-diary DB sync deferred until the recording results land._
 
 ## Table of contents
 
