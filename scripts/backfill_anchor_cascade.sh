@@ -3,15 +3,29 @@
 # Deterministic governance-anchor backfill (CONST-047/049 cascade repair).
 #
 # Closes the verify-governance-cascade.sh gap by ADDITIVELY splicing the
-# verbatim canonical anchor sections from the golden, already-passing
-# reference submodule (helix_qa) into a target owned submodule's three
+# verbatim canonical anchor sections into a target owned submodule's three
 # governance files. Additive-only: never deletes/rewrites existing content
 # (§11.4.122 no-silent-removal). Idempotent: re-running is a no-op once green.
 #
+# TWO SOURCES, by anchor format (the gate greps for the EXACT literal of each):
+#   1. helix_qa golden submodule  — §11.9 + CONST-047..060 + the heading-format
+#      covenant-114 anchors (## / ### §11.4.NN —, ranges 69..134). helix_qa
+#      passes the verifier for THOSE anchors, so it is a valid golden for them.
+#   2. constitution submodule carriers (CANONICAL per §11.4.35) — the
+#      BOLD-INLINE covenant-114 band `**§11.4.N —` (range 142..165, the gate
+#      ceiling). helix_qa does NOT carry this band, so it cannot be a golden
+#      for it; the canonical constitution carriers do. The gate only checks the
+#      literal STRING `**§11.4.N —` per file, so all three target carriers are
+#      satisfied by sourcing the band from a constitution carrier that actually
+#      holds the bold-inline literals. constitution/Constitution.md carries this
+#      band in a NON-bold table/prose form (0/24 bold-inline literals), so it
+#      is NOT a valid source for the gate literal; constitution/CLAUDE.md and
+#      constitution/AGENTS.md each carry the full 24-anchor bold-inline band.
+#      Map: target CLAUDE.md + CONSTITUTION.md  <- constitution/CLAUDE.md band
+#           target AGENTS.md                    <- constitution/AGENTS.md band
+#
 # Usage:  scripts/backfill_anchor_cascade.sh <target-submodule-dir>
 #   e.g.  scripts/backfill_anchor_cascade.sh submodules/helix_agent
-#
-# Golden source: submodules/helix_qa (passes verify-governance-cascade.sh).
 # ============================================================================
 set -euo pipefail
 
@@ -19,11 +33,21 @@ ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
 
 GOLDEN="submodules/helix_qa"
+# Canonical bold-inline band source (§11.4.35). constitution/Constitution.md is
+# intentionally NOT used here: it lacks the bold-inline `**§11.4.N —` literals.
+CONST_CLAUDE="constitution/CLAUDE.md"
+CONST_AGENTS="constitution/AGENTS.md"
+# Bold-inline covenant-114 band the verifier requires: 142..165 (gate ceiling;
+# §11.4.166 REPEALED 2026-06-22, retired from the verifier's anchor list).
+BOLD_BAND_LO=142
+BOLD_BAND_HI=165
 TARGET="${1:?usage: backfill_anchor_cascade.sh <target-submodule-dir>}"
 TARGET="${TARGET%/}"
 
 [ -d "$GOLDEN" ] || { echo "FATAL: golden $GOLDEN missing"; exit 2; }
 [ -d "$TARGET" ] || { echo "FATAL: target $TARGET missing"; exit 2; }
+[ -f "$CONST_CLAUDE" ] || { echo "FATAL: canonical band source $CONST_CLAUDE missing"; exit 2; }
+[ -f "$CONST_AGENTS" ] || { echo "FATAL: canonical band source $CONST_AGENTS missing"; exit 2; }
 
 # Required CONST literals (verifier scope) + §11.9.
 CONST_TOKENS="CONST-047 CONST-048 CONST-049 CONST-050 CONST-051 CONST-052 CONST-053 CONST-054 CONST-055 CONST-056 CONST-057 CONST-058 CONST-059 CONST-060"
@@ -52,6 +76,22 @@ extract_sec119() {  # $1=golden_file
   awk '
     /^\*\*§11\.9 / && !started { started=1; print; next }
     started && /^## / { exit }
+    started { print }
+  ' "$1"
+}
+
+# Extract one BOLD-INLINE covenant-114 anchor section (`**§11.4.N —` band).
+# A section = from the line whose first chars are the anchor literal, up to the
+# line BEFORE the next bold-inline anchor opener (`**§11.4.`) or EOF. This
+# absorbs wrapped prose AND any standalone `**Canonical authority:**` blocks
+# that belong to the SAME anchor (they open with `**Canonical`, not `**§11.4.`),
+# so a multi-block anchor is captured whole. Match is by string index (the
+# literal contains §/— so a regex would need escaping); robust against the long
+# single-line paragraphs the canonical carriers use.
+extract_bold_anchor() {  # $1=source_file  $2=anchor_literal (e.g. "**§11.4.142 —")
+  awk -v h="$2" '
+    index($0, h)==1 && !started { started=1; print; next }
+    started && index($0, "**§11.4.")==1 { exit }
     started { print }
   ' "$1"
 }
@@ -96,12 +136,44 @@ for fname in CONSTITUTION.md CLAUDE.md AGENTS.md; do
     fi
   done < <(grep -E '^(##|###) §11\.4\.[0-9]+ —' "$gfile")
 
+  # --- §11.4.142..165 BOLD-INLINE band (`**§11.4.N —`) from the CANONICAL
+  #     constitution carriers (§11.4.35). The gate checks the literal STRING
+  #     per file, so AGENTS.md sources the band from constitution/AGENTS.md and
+  #     CLAUDE.md + CONSTITUTION.md source it from constitution/CLAUDE.md (the
+  #     carriers that actually hold the bold-inline literals; Constitution.md
+  #     does not). Append in ascending order, missing anchors only (idempotent).
+  case "$fname" in
+    AGENTS.md) bfile="$CONST_AGENTS" ;;
+    *)         bfile="$CONST_CLAUDE" ;;   # CLAUDE.md and CONSTITUTION.md
+  esac
+  n="$BOLD_BAND_LO"
+  while [ "$n" -le "$BOLD_BAND_HI" ]; do
+    lit="**§11.4.${n} —"
+    if grep -qF -- "$lit" "$bfile"; then
+      if ! grep -qF -- "$lit" "$tfile"; then
+        sec="$(extract_bold_anchor "$bfile" "$lit")"
+        if [ -n "$sec" ]; then
+          appended+=$'\n'"$sec"$'\n'; file_changed=1; echo "  + $fname: $lit"
+        else
+          echo "  ! $fname: $lit present in $bfile but extracted empty (NOT appended)" >&2
+        fi
+      fi
+    else
+      # The verifier requires this literal; if the canonical source lacks it we
+      # must surface it, not silently skip (§11.4.6 — no faked completeness).
+      echo "  ! $fname: canonical source $bfile is MISSING required literal $lit" >&2
+    fi
+    n=$((n+1))
+  done
+
   if [ "$file_changed" -eq 1 ]; then
     {
       printf '\n\n<!-- ============================================================\n'
       printf '     CASCADED GOVERNANCE ANCHORS (backfill_anchor_cascade.sh)\n'
-      printf '     Additive cascade from golden reference (helix_qa) per\n'
-      printf '     CONST-047/049 — universal anchors only, additive (§11.4.122).\n'
+      printf '     Additive cascade per CONST-047/049 — universal anchors only,\n'
+      printf '     additive (§11.4.122). Sources: helix_qa golden (heading-format\n'
+      printf '     anchors) + canonical constitution carriers (§11.4.35) for the\n'
+      printf '     bold-inline §11.4.142..165 band.\n'
       printf '     ============================================================ -->\n'
       printf '%s\n' "$appended"
     } >> "$tfile"
