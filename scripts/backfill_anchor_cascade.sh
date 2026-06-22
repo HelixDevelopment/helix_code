@@ -12,17 +12,24 @@
 #      covenant-114 anchors (## / ### §11.4.NN —, ranges 69..134). helix_qa
 #      passes the verifier for THOSE anchors, so it is a valid golden for them.
 #   2. constitution submodule carriers (CANONICAL per §11.4.35) — the
-#      BOLD-INLINE covenant-114 band `**§11.4.N —` (range 142..165, the gate
-#      ceiling). helix_qa does NOT carry this band, so it cannot be a golden
-#      for it; the canonical constitution carriers do. The gate only checks the
-#      literal STRING `**§11.4.N —` per file, so all three target carriers are
-#      satisfied by sourcing the band from a constitution carrier that actually
-#      holds the bold-inline literals. constitution/Constitution.md carries this
-#      band in a NON-bold table/prose form (0/24 bold-inline literals), so it
-#      is NOT a valid source for the gate literal; constitution/CLAUDE.md and
-#      constitution/AGENTS.md each carry the full 24-anchor bold-inline band.
+#      BOLD-INLINE covenant-114 band `**§11.4.N —` (range 135..165, the gate
+#      ceiling) PLUS the blockquote-prefixed §11.4.140 (`> **§11.4.140 —`, whose
+#      verifier literal is the BARE form `§11.4.140 —`). helix_qa does NOT carry
+#      this band, so it cannot be a golden for it; the canonical constitution
+#      carriers do. The gate only checks the literal STRING per file, so all
+#      three target carriers are satisfied by sourcing the band from a
+#      constitution carrier that actually holds the bold-inline literals.
+#      constitution/Constitution.md carries this band in a NON-bold table/prose
+#      form (0 bold-inline literals), so it is NOT a valid source for the gate
+#      literal; constitution/CLAUDE.md and constitution/AGENTS.md each carry the
+#      full bold-inline band.
 #      Map: target CLAUDE.md + CONSTITUTION.md  <- constitution/CLAUDE.md band
 #           target AGENTS.md                    <- constitution/AGENTS.md band
+#      NOTE: the band lower bound was 142 (bug): a repo lagging at ≤§11.4.139 was
+#      left with 135..141 unfixed (silent FAIL) — fleet-wide success masked it
+#      because every other repo already carried 135..141 from a prior cascade.
+#      CONST-058/CONST-059 fall back to the meta-repo ROOT CONSTITUTION.md when
+#      the helix_qa golden condensed them into an inline reference (no heading).
 #
 # Usage:  scripts/backfill_anchor_cascade.sh <target-submodule-dir>
 #   e.g.  scripts/backfill_anchor_cascade.sh submodules/helix_agent
@@ -37,10 +44,30 @@ GOLDEN="submodules/helix_qa"
 # intentionally NOT used here: it lacks the bold-inline `**§11.4.N —` literals.
 CONST_CLAUDE="constitution/CLAUDE.md"
 CONST_AGENTS="constitution/AGENTS.md"
-# Bold-inline covenant-114 band the verifier requires: 142..165 (gate ceiling;
+# Meta-repo ROOT CONSTITUTION.md — used ONLY as a fallback CONST-NNN section
+# source when the helix_qa golden condensed a CONST anchor into an inline
+# reference (no `## CONST-NNN:` heading) so extract_const_section() yields empty
+# for that file. The root CONSTITUTION.md carries `## CONST-058:` / `## CONST-059:`
+# heading sections the golden CONSTITUTION.md lacks. (§11.4.6 — no faked
+# completeness: a CONST literal that extracts empty MUST be sourced where it
+# genuinely exists, not silently skipped.)
+ROOT_CONSTITUTION="CONSTITUTION.md"
+# Bold-inline covenant-114 band the verifier requires: 135..165 (gate ceiling;
 # §11.4.166 REPEALED 2026-06-22, retired from the verifier's anchor list).
-BOLD_BAND_LO=142
+# Lowered from 142 to 135 so a repo lagging at ≤§11.4.139 (e.g. doc_processor at
+# §11.4.97) gets 135..141 spliced from the SAME canonical constitution carriers
+# the 142..165 band already uses — previously the loop started at 142 and NEVER
+# spliced 135..141, so a lagging repo was left with those anchors unfixed (silent
+# FAIL); fleet-wide success was only because every other repo already carried
+# 135..141 from a prior cascade. §11.4.140 is special-cased below: its verifier
+# literal is the BARE form `§11.4.140 —` and its opener line is blockquote-
+# prefixed (`> **§11.4.140 —`), so the col0 extract_bold_anchor() cannot match it.
+BOLD_BAND_LO=135
 BOLD_BAND_HI=165
+# Anchors in the band whose opener is NOT a col0 `**§11.4.N —` and so need a
+# dedicated extractor (see the band loop below). §11.4.140's canonical-carrier
+# opener is `> **§11.4.140 —` (inside a blockquote).
+BOLD_BAND_BLOCKQUOTE_ANCHORS=" 140 "
 TARGET="${1:?usage: backfill_anchor_cascade.sh <target-submodule-dir>}"
 TARGET="${TARGET%/}"
 
@@ -48,6 +75,7 @@ TARGET="${TARGET%/}"
 [ -d "$TARGET" ] || { echo "FATAL: target $TARGET missing"; exit 2; }
 [ -f "$CONST_CLAUDE" ] || { echo "FATAL: canonical band source $CONST_CLAUDE missing"; exit 2; }
 [ -f "$CONST_AGENTS" ] || { echo "FATAL: canonical band source $CONST_AGENTS missing"; exit 2; }
+[ -f "$ROOT_CONSTITUTION" ] || { echo "FATAL: CONST fallback source $ROOT_CONSTITUTION missing"; exit 2; }
 
 # Required CONST literals (verifier scope) + §11.9.
 CONST_TOKENS="CONST-047 CONST-048 CONST-049 CONST-050 CONST-051 CONST-052 CONST-053 CONST-054 CONST-055 CONST-056 CONST-057 CONST-058 CONST-059 CONST-060"
@@ -96,6 +124,23 @@ extract_bold_anchor() {  # $1=source_file  $2=anchor_literal (e.g. "**§11.4.142
   ' "$1"
 }
 
+# Extract a BLOCKQUOTE-PREFIXED covenant-114 anchor (canonical opener form
+# `> **§11.4.N —`, e.g. §11.4.140 which lives inside a Markdown blockquote).
+# A section = from the line whose first chars are `> **§11.4.N —`, up to the
+# line BEFORE the next anchor opener (either a col0 `**§11.4.` bold opener OR a
+# blockquote `> **§11.4.` opener) or EOF. The spliced text contains the BARE
+# `§11.4.N —` substring the verifier greps for (the gate uses grep -qF anywhere
+# in the line, so the `> **§11.4.140 — …` line satisfies it). Distinct from
+# extract_bold_anchor because that matches `**…` at col0 and the blockquote
+# opener has the `> ` prefix.
+extract_blockquote_anchor() {  # $1=source_file  $2=bq_anchor_literal (e.g. "> **§11.4.140 —")
+  awk -v h="$2" '
+    index($0, h)==1 && !started { started=1; print; next }
+    started && (index($0, "**§11.4.")==1 || index($0, "> **§11.4.")==1) { exit }
+    started { print }
+  ' "$1"
+}
+
 changed_any=0
 for fname in CONSTITUTION.md CLAUDE.md AGENTS.md; do
   gfile="$GOLDEN/$fname"
@@ -115,10 +160,26 @@ for fname in CONSTITUTION.md CLAUDE.md AGENTS.md; do
   fi
 
   # --- CONST-NNN ---
+  # Source each CONST section from the helix_qa golden by its `## CONST-NNN:`
+  # heading. When the golden CONDENSED a CONST anchor into an inline reference
+  # (no heading — true for CONST-058/CONST-059 in the golden CONSTITUTION.md),
+  # extract_const_section() returns EMPTY; fall back to the meta-repo ROOT
+  # CONSTITUTION.md which carries the `## CONST-NNN:` heading section. Without
+  # this fallback those two anchors silently extracted empty (NOT appended) for
+  # CONSTITUTION.md targets, leaving the literal absent — a verifier FAIL the
+  # cascade pretended to fix. (§11.4.6 — source the literal where it exists.)
   for ct in $CONST_TOKENS; do
     if ! grep -qF "$ct" "$tfile"; then
       sec="$(extract_const_section "$gfile" "$ct")"
-      if [ -n "$sec" ]; then appended+=$'\n'"$sec"$'\n'; file_changed=1; echo "  + $fname: $ct"; fi
+      if [ -z "$sec" ]; then
+        sec="$(extract_const_section "$ROOT_CONSTITUTION" "$ct")"
+        [ -n "$sec" ] && echo "  ~ $fname: $ct sourced from $ROOT_CONSTITUTION (golden lacks heading)"
+      fi
+      if [ -n "$sec" ]; then
+        appended+=$'\n'"$sec"$'\n'; file_changed=1; echo "  + $fname: $ct"
+      else
+        echo "  ! $fname: $ct missing from target but extracted empty from BOTH golden and $ROOT_CONSTITUTION (NOT appended)" >&2
+      fi
     fi
   done
 
@@ -136,18 +197,42 @@ for fname in CONSTITUTION.md CLAUDE.md AGENTS.md; do
     fi
   done < <(grep -E '^(##|###) §11\.4\.[0-9]+ —' "$gfile")
 
-  # --- §11.4.142..165 BOLD-INLINE band (`**§11.4.N —`) from the CANONICAL
-  #     constitution carriers (§11.4.35). The gate checks the literal STRING
-  #     per file, so AGENTS.md sources the band from constitution/AGENTS.md and
-  #     CLAUDE.md + CONSTITUTION.md source it from constitution/CLAUDE.md (the
-  #     carriers that actually hold the bold-inline literals; Constitution.md
-  #     does not). Append in ascending order, missing anchors only (idempotent).
+  # --- §11.4.135..165 BOLD-INLINE band (`**§11.4.N —`, plus the blockquote-
+  #     prefixed §11.4.140) from the CANONICAL constitution carriers (§11.4.35).
+  #     The gate checks the literal STRING per file, so AGENTS.md sources the
+  #     band from constitution/AGENTS.md and CLAUDE.md + CONSTITUTION.md source
+  #     it from constitution/CLAUDE.md (the carriers that actually hold the
+  #     bold-inline literals; Constitution.md does not). Append in ascending
+  #     order, missing anchors only (idempotent). Lower bound is 135 so a repo
+  #     lagging at ≤§11.4.139 receives 135..141 too (the original bug: band
+  #     started at 142, never splicing 135..141).
   case "$fname" in
     AGENTS.md) bfile="$CONST_AGENTS" ;;
     *)         bfile="$CONST_CLAUDE" ;;   # CLAUDE.md and CONSTITUTION.md
   esac
   n="$BOLD_BAND_LO"
   while [ "$n" -le "$BOLD_BAND_HI" ]; do
+    # §11.4.140 is BLOCKQUOTE-prefixed in the canonical carriers: the verifier
+    # greps the BARE form `§11.4.140 —` and the opener line is `> **§11.4.140 —`,
+    # so the col0 extract_bold_anchor() cannot match it. Use the bare-literal
+    # gate-check + the dedicated extract_blockquote_anchor() for these anchors.
+    if [ "${BOLD_BAND_BLOCKQUOTE_ANCHORS#* $n }" != "$BOLD_BAND_BLOCKQUOTE_ANCHORS" ]; then
+      gate_lit="§11.4.${n} —"            # bare form the verifier greps
+      src_lit="> **§11.4.${n} —"          # blockquote opener in the canonical carrier
+      if grep -qF -- "$src_lit" "$bfile"; then
+        if ! grep -qF -- "$gate_lit" "$tfile"; then
+          sec="$(extract_blockquote_anchor "$bfile" "$src_lit")"
+          if [ -n "$sec" ]; then
+            appended+=$'\n'"$sec"$'\n'; file_changed=1; echo "  + $fname: $gate_lit (blockquote)"
+          else
+            echo "  ! $fname: $src_lit present in $bfile but extracted empty (NOT appended)" >&2
+          fi
+        fi
+      else
+        echo "  ! $fname: canonical source $bfile is MISSING blockquote opener $src_lit" >&2
+      fi
+      n=$((n+1)); continue
+    fi
     lit="**§11.4.${n} —"
     if grep -qF -- "$lit" "$bfile"; then
       if ! grep -qF -- "$lit" "$tfile"; then
