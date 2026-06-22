@@ -1,0 +1,74 @@
+               
+               
+┌─────────────┐
+│ Scan Status │
+└─────────────┘
+  Scanning 112 files tracked by git with 1059 Code rules:
+                                                                                                                        
+  Language      Rules   Files          Origin      Rules                                                                
+ ─────────────────────────────        ───────────────────                                                               
+  <multilang>      47     112          Community    1059                                                                
+  go               84     100                                                                                           
+  yaml             31       2                                                                                           
+                                                                                                                        
+                
+                
+┌──────────────┐
+│ Scan Summary │
+└──────────────┘
+✅ Scan completed successfully.
+ • Findings: 4 (4 blocking)
+ • Rules run: 161
+ • Targets scanned: 112
+ • Parsed lines: ~100.0%
+ • Scan skipped: 
+   ◦ Files matching .semgrepignore patterns: 124
+ • Scan was limited to files tracked by git
+ • For a detailed list of skipped files and lines, run semgrep with the --verbose flag
+Ran 161 rules on 112 files: 4 findings.
+                   
+                   
+┌─────────────────┐
+│ 4 Code Findings │
+└─────────────────┘
+                                               
+    helix_code/internal/llm/auto_llm_manager.go
+   ❯❯❱ go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
+          ❰❰ Blocking ❱❱
+          Detected non-static command inside Command. Audit the input to 'exec.Command'. If unverified user  
+          data can reach this call site, this is a code injection vulnerability. A malicious actor can inject
+          a malicious script to execute arbitrary code.                                                      
+          Details: https://sg.run/W8lA                                                                       
+                                                                                                             
+          520┆ cmd := exec.Command("bash", "-c", script)
+                                                
+    helix_code/internal/llm/local_llm_manager.go
+   ❯❯❱ go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
+          ❰❰ Blocking ❱❱
+          Detected non-static command inside Command. Audit the input to 'exec.Command'. If unverified user  
+          data can reach this call site, this is a code injection vulnerability. A malicious actor can inject
+          a malicious script to execute arbitrary code.                                                      
+          Details: https://sg.run/W8lA                                                                       
+                                                                                                             
+          439┆ cmd := exec.CommandContext(ctx, "bash", "-c", provider.BuildScript)
+                                              
+    helix_code/internal/llm/model_converter.go
+   ❯❯❱ go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
+          ❰❰ Blocking ❱❱
+          Detected non-static command inside Command. Audit the input to 'exec.Command'. If unverified user  
+          data can reach this call site, this is a code injection vulnerability. A malicious actor can inject
+          a malicious script to execute arbitrary code.                                                      
+          Details: https://sg.run/W8lA                                                                       
+                                                                                                             
+          303┆ cmd := exec.CommandContext(ctx, tool.Command, job.Args...)
+                                                     
+    helix_code/internal/llm/model_download_manager.go
+   ❯❯❱ go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
+          ❰❰ Blocking ❱❱
+          Detected non-static command inside Command. Audit the input to 'exec.Command'. If unverified user  
+          data can reach this call site, this is a code injection vulnerability. A malicious actor can inject
+          a malicious script to execute arbitrary code.                                                      
+          Details: https://sg.run/W8lA                                                                       
+                                                                                                             
+          479┆ cmd := exec.Command(tool.Command, args...)
+

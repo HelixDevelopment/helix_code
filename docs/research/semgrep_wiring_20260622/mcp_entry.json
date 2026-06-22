@@ -1,0 +1,16 @@
+{
+  "_comment": "EXACT mcpServers entry to ADD to /Volumes/T7/Projects/helix_code/.mcp.json under the existing \"mcpServers\" object, as a sibling key to \"codegraph\", \"media-validator\", \"open-design\". Per §11.4.166 (semgrep mandate) + §11.4.78 step-3 MCP-wiring pattern. Do NOT replace the file — insert this key only. The onboarding agent does NOT edit .mcp.json (meta-git race avoidance); the conductor applies it.",
+  "semgrep": {
+    "description": "Semgrep static-analysis MCP server (§11.4.166). Local AST/scan/findings over the workspace; uses Community registry rules when SEMGREP_APP_TOKEN is absent (Pro/app tier honestly skipped per §11.4.3).",
+    "type": "stdio",
+    "command": "uvx",
+    "args": [
+      "semgrep-mcp"
+    ],
+    "env": {
+      "SEMGREP_PATH": "/opt/homebrew/bin/semgrep"
+    },
+    "disabled": false,
+    "autoApprove": []
+  }
+}

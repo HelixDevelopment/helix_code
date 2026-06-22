@@ -32,6 +32,19 @@
       },
       "disabled": true,
       "autoApprove": []
+    },
+    "semgrep": {
+      "description": "Semgrep static-analysis MCP server (§11.4.166). Local AST/scan/findings over the workspace; uses Community registry rules when SEMGREP_APP_TOKEN is absent (Pro/app tier honestly skipped per §11.4.3).",
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "semgrep-mcp"
+      ],
+      "env": {
+        "SEMGREP_PATH": "/opt/homebrew/bin/semgrep"
+      },
+      "disabled": false,
+      "autoApprove": []
     }
   }
 }
