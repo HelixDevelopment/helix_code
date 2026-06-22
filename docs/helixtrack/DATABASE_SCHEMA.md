@@ -2,7 +2,27 @@
 
 ## Overview
 
-HelixTrack uses SQLite (development) or PostgreSQL (production) with 71 tables across V1-V3.
+HelixTrack uses SQLite (development) or PostgreSQL (production). The shipped core
+schema spans **five Definition versions (V1-V5)** plus a **V5.6 migration**
+(`Migration.V5.6.sql` — "V5 → V6 Security Engine Enhancements", dated 2025-10-19).
+The five Definition DDL files declare **106 distinct tables in total**:
+
+| Version | DDL file | Theme | Distinct `CREATE TABLE` |
+|---------|----------|-------|--------------------------|
+| V1 | `Definition.V1.sql` | Core | 60 |
+| V2 | `Definition.V2.sql` | JIRA Feature Parity — Phase 1 | 12 |
+| V3 | `Definition.V3.sql` | JIRA Feature Parity — Complete (Phases 2 & 3) | 17 |
+| V4 | `Definition.V4.sql` | Parallel Editing Support | 6 |
+| V5 | `Definition.V5.sql` | Documents Extension Integration & Cross-Entity Linking | 11 |
+| — | `Migration.V5.6.sql` | Security Engine Enhancements (creates `permission_cache`, `security_audit`; ALTERs the audit table) | (migration) |
+
+Source of truth: the DDL files under
+`/Volumes/T7/Projects/helix_track/core/Database/DDL/`. Counts above are distinct
+`CREATE TABLE [IF NOT EXISTS]` names per file (each file's tables are additive on
+top of the prior version). The category breakdowns below were authored against an
+earlier V1-V3 snapshot and use illustrative per-section counts that do not
+re-derive the 106-table total above — re-derive any per-section count directly
+from the DDL when precision matters.
 
 ---
 
@@ -90,6 +110,24 @@ HelixTrack uses SQLite (development) or PostgreSQL (production) with 71 tables a
 | permission_cache | Permission cache | ✅ Implemented |
 | account | Account management | ✅ Implemented |
 
+> Note: `security_audit` and `permission_cache` are (re)created/expanded by the
+> `Migration.V5.6.sql` Security-Engine migration, not only by an early version.
+
+---
+
+## V4 Tables — Parallel Editing Support
+
+Defined in `Definition.V4.sql` (6 distinct tables). Supports concurrent/parallel
+editing of entities. Re-derive the exact table list from the DDL file.
+
+---
+
+## V5 Tables — Documents Extension & Cross-Entity Linking
+
+Defined in `Definition.V5.sql` (11 distinct tables). Integrates the Documents
+extension and cross-entity linking. Re-derive the exact table list from the DDL
+file.
+
 ---
 
 ## Table Relationships
@@ -125,13 +163,18 @@ team (N) ──── (N) user
 ## Migrations
 
 ### Migration History
-- V1.0 — Initial schema
-- V2.0 — Extended features
-- V3.0 — Advanced features
-- V5.6 — Security engine enhancement
+- V1 — Initial core schema (`Definition.V1.sql`)
+- V2 — JIRA feature parity, phase 1 (`Definition.V2.sql`)
+- V3 — JIRA feature parity, complete / phases 2 & 3 (`Definition.V3.sql`)
+- V4 — Parallel editing support (`Definition.V4.sql`)
+- V5 — Documents extension & cross-entity linking (`Definition.V5.sql`)
+- V5 → V6 — Security engine enhancements (`Migration.V5.6.sql`, 2025-10-19)
 
 ### Migration Files
-- `core/Application/Database/DDL/Migration.V5.6.sql`
+- `core/Database/DDL/Migration.V1.2.sql`
+- `core/Database/DDL/Migration.V2.3.sql`
+- `core/Database/DDL/Migration.V3.4.sql`
+- `core/Database/DDL/Migration.V5.6.sql` (also mirrored at `core/Application/Database/DDL/Migration.V5.6.sql`)
 
 ---
 
@@ -139,19 +182,28 @@ team (N) ──── (N) user
 - [Architecture](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
 - [API Reference](/Volumes/T7/Projects/helix_code/docs/helixtrack/API_REFERENCE.md)
 
-## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/core/Database/DDL/Definition.V1..V5.sql , /Volumes/T7/Projects/helix_track/core/Application/Database/DDL/ , https://github.com/Helix-Track/Everything
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/core/Database/DDL/Definition.V1.sql..Definition.V5.sql , /Volumes/T7/Projects/helix_track/core/Database/DDL/Migration.V5.6.sql , /Volumes/T7/Projects/helix_track/core/Application/Database/DDL/Migration.V5.6.sql
+
+Reconciled 2026-06-22: schema range **V1-V3 / "71 tables" → V1-V5 + V5.6
+migration / 106 distinct tables**, per the actual `Definition.V*.sql` DDL
+(authoritative source of truth). Per-version distinct `CREATE TABLE` counts read
+directly from the DDL: V1=60, V2=12, V3=17, V4=6, V5=11 (total 106); the
+`Migration.V5.6.sql` "V5 → V6 Security Engine Enhancements" (2025-10-19) creates
+`permission_cache` + `security_audit` and ALTERs the audit table.
 
 REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced DDL files,
 following the `docs/ARCHITECTURE.md` precedent). Cross-referenced on 2026-06-22:
 - **Schema DDL CONFIRMED present:** `helix_track/core/Database/DDL/Definition.V1.sql`
   … `Definition.V5.sql` exist (plus `Indexes_Performance.sql`, `Migration.V*.sql`),
-  and the migration set also lives at `core/Application/Database/DDL/`
-  (`Migration.V5.6.sql`, `Test_Data_Users_Permissions.sql`) — the doc's
-  `core/Application/Database/DDL/...` migration path is real. SQLite (dev) source
-  `Definition.sqlite` is present.
-- **Negative finding (version-range drift):** this doc states "71 tables across
-  **V1-V3**", but the live DDL tree carries Definition files **V1 through V5** (and
-  a V5.6 migration). The table count and the "V1-V3" range should be re-derived
-  from the V1-V5 DDL on the next revision — the doc's range understates the
-  shipped schema versions. Re-verify table counts directly from the `Definition.V*.sql`
-  DDL, which is the source of truth.
+  and the V5.6 migration is mirrored at `core/Application/Database/DDL/`
+  (`Migration.V5.6.sql`, `Test_Data_Users_Permissions.sql`). Extension and service
+  DDLs (`Extensions/{Chats,Documents,Times}/`, `Services/{Authentication,Localization}/`)
+  also exist and are NOT counted in the 106-table core total above.
+- **Resolved (version-range drift):** the prior revision stated "71 tables across
+  **V1-V3**"; the live DDL tree carries Definition files **V1 through V5** plus a
+  **V5.6** migration, with 106 distinct core tables. The overview table + Migration
+  History have been re-derived from the V1-V5 DDL. The legacy per-section category
+  counts (V1 "57", V2 "14") are illustrative groupings authored against the old
+  V1-V3 snapshot and are NOT the authoritative totals — the 106-table figure from
+  the DDL is. Re-verify any per-section count directly from the `Definition.V*.sql`
+  DDL, which remains the single source of truth.

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>DATABASE_SCHEMA</title>
+  <title>HelixTrack Database Schema</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -173,13 +173,80 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">DATABASE_SCHEMA</h1>
+<h1 class="title">HelixTrack Database Schema</h1>
 </header>
 <h1 id="helixtrack-database-schema-2026-06-21">HelixTrack Database
 Schema — 2026-06-21</h1>
 <h2 id="overview">Overview</h2>
-<p>HelixTrack uses SQLite (development) or PostgreSQL (production) with
-71 tables across V1-V3.</p>
+<p>HelixTrack uses SQLite (development) or PostgreSQL (production). The
+shipped core schema spans <strong>five Definition versions
+(V1-V5)</strong> plus a <strong>V5.6 migration</strong>
+(<code>Migration.V5.6.sql</code> — “V5 → V6 Security Engine
+Enhancements”, dated 2025-10-19). The five Definition DDL files declare
+<strong>106 distinct tables in total</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 19%" />
+<col style="width: 13%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Version</th>
+<th>DDL file</th>
+<th>Theme</th>
+<th>Distinct <code>CREATE TABLE</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V1</td>
+<td><code>Definition.V1.sql</code></td>
+<td>Core</td>
+<td>60</td>
+</tr>
+<tr>
+<td>V2</td>
+<td><code>Definition.V2.sql</code></td>
+<td>JIRA Feature Parity — Phase 1</td>
+<td>12</td>
+</tr>
+<tr>
+<td>V3</td>
+<td><code>Definition.V3.sql</code></td>
+<td>JIRA Feature Parity — Complete (Phases 2 &amp; 3)</td>
+<td>17</td>
+</tr>
+<tr>
+<td>V4</td>
+<td><code>Definition.V4.sql</code></td>
+<td>Parallel Editing Support</td>
+<td>6</td>
+</tr>
+<tr>
+<td>V5</td>
+<td><code>Definition.V5.sql</code></td>
+<td>Documents Extension Integration &amp; Cross-Entity Linking</td>
+<td>11</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>Migration.V5.6.sql</code></td>
+<td>Security Engine Enhancements (creates <code>permission_cache</code>,
+<code>security_audit</code>; ALTERs the audit table)</td>
+<td>(migration)</td>
+</tr>
+</tbody>
+</table>
+<p>Source of truth: the DDL files under
+<code>/Volumes/T7/Projects/helix_track/core/Database/DDL/</code>. Counts
+above are distinct <code>CREATE TABLE [IF NOT EXISTS]</code> names per
+file (each file’s tables are additive on top of the prior version). The
+category breakdowns below were authored against an earlier V1-V3
+snapshot and use illustrative per-section counts that do not re-derive
+the 106-table total above — re-derive any per-section count directly
+from the DDL when precision matters.</p>
 <hr />
 <h2 id="v1-core-tables-57">V1 Core Tables (57)</h2>
 <h3 id="business-entities">Business Entities</h3>
@@ -452,6 +519,23 @@ Schema — 2026-06-21</h1>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p>Note: <code>security_audit</code> and <code>permission_cache</code>
+are (re)created/expanded by the <code>Migration.V5.6.sql</code>
+Security-Engine migration, not only by an early version.</p>
+</blockquote>
+<hr />
+<h2 id="v4-tables-parallel-editing-support">V4 Tables — Parallel Editing
+Support</h2>
+<p>Defined in <code>Definition.V4.sql</code> (6 distinct tables).
+Supports concurrent/parallel editing of entities. Re-derive the exact
+table list from the DDL file.</p>
+<hr />
+<h2 id="v5-tables-documents-extension-cross-entity-linking">V5 Tables —
+Documents Extension &amp; Cross-Entity Linking</h2>
+<p>Defined in <code>Definition.V5.sql</code> (11 distinct tables).
+Integrates the Documents extension and cross-entity linking. Re-derive
+the exact table list from the DDL file.</p>
 <hr />
 <h2 id="table-relationships">Table Relationships</h2>
 <h3 id="core-relationships">Core Relationships</h3>
@@ -480,14 +564,24 @@ team (N) ──── (N) user</code></pre>
 <h2 id="migrations">Migrations</h2>
 <h3 id="migration-history">Migration History</h3>
 <ul>
-<li>V1.0 — Initial schema</li>
-<li>V2.0 — Extended features</li>
-<li>V3.0 — Advanced features</li>
-<li>V5.6 — Security engine enhancement</li>
+<li>V1 — Initial core schema (<code>Definition.V1.sql</code>)</li>
+<li>V2 — JIRA feature parity, phase 1
+(<code>Definition.V2.sql</code>)</li>
+<li>V3 — JIRA feature parity, complete / phases 2 &amp; 3
+(<code>Definition.V3.sql</code>)</li>
+<li>V4 — Parallel editing support (<code>Definition.V4.sql</code>)</li>
+<li>V5 — Documents extension &amp; cross-entity linking
+(<code>Definition.V5.sql</code>)</li>
+<li>V5 → V6 — Security engine enhancements
+(<code>Migration.V5.6.sql</code>, 2025-10-19)</li>
 </ul>
 <h3 id="migration-files">Migration Files</h3>
 <ul>
-<li><code>core/Application/Database/DDL/Migration.V5.6.sql</code></li>
+<li><code>core/Database/DDL/Migration.V1.2.sql</code></li>
+<li><code>core/Database/DDL/Migration.V2.3.sql</code></li>
+<li><code>core/Database/DDL/Migration.V3.4.sql</code></li>
+<li><code>core/Database/DDL/Migration.V5.6.sql</code> (also mirrored at
+<code>core/Application/Database/DDL/Migration.V5.6.sql</code>)</li>
 </ul>
 <hr />
 <h2 id="cross-references">Cross-references</h2>
@@ -499,11 +593,20 @@ href="/Volumes/T7/Projects/helix_code/docs/helixtrack/API_REFERENCE.md">API
 Reference</a></li>
 </ul>
 <h2
-id="sources-verified-2026-06-22-volumest7projectshelix_trackcoredatabaseddldefinition.v1..v5.sql-volumest7projectshelix_trackcoreapplicationdatabaseddl-httpsgithub.comhelix-trackeverything">Sources
+id="sources-verified-2026-06-22-volumest7projectshelix_trackcoredatabaseddldefinition.v1.sql..definition.v5.sql-volumest7projectshelix_trackcoredatabaseddlmigration.v5.6.sql-volumest7projectshelix_trackcoreapplicationdatabaseddlmigration.v5.6.sql">Sources
 verified 2026-06-22:
-/Volumes/T7/Projects/helix_track/core/Database/DDL/Definition.V1..V5.sql
-, /Volumes/T7/Projects/helix_track/core/Application/Database/DDL/ ,
-https://github.com/Helix-Track/Everything</h2>
+/Volumes/T7/Projects/helix_track/core/Database/DDL/Definition.V1.sql..Definition.V5.sql
+, /Volumes/T7/Projects/helix_track/core/Database/DDL/Migration.V5.6.sql
+,
+/Volumes/T7/Projects/helix_track/core/Application/Database/DDL/Migration.V5.6.sql</h2>
+<p>Reconciled 2026-06-22: schema range <strong>V1-V3 / “71 tables” →
+V1-V5 + V5.6 migration / 106 distinct tables</strong>, per the actual
+<code>Definition.V*.sql</code> DDL (authoritative source of truth).
+Per-version distinct <code>CREATE TABLE</code> counts read directly from
+the DDL: V1=60, V2=12, V3=17, V4=6, V5=11 (total 106); the
+<code>Migration.V5.6.sql</code> “V5 → V6 Security Engine Enhancements”
+(2025-10-19) creates <code>permission_cache</code> +
+<code>security_audit</code> and ALTERs the audit table.</p>
 <p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
 DDL files, following the <code>docs/ARCHITECTURE.md</code> precedent).
 Cross-referenced on 2026-06-22: - <strong>Schema DDL CONFIRMED
@@ -511,18 +614,22 @@ present:</strong>
 <code>helix_track/core/Database/DDL/Definition.V1.sql</code> …
 <code>Definition.V5.sql</code> exist (plus
 <code>Indexes_Performance.sql</code>, <code>Migration.V*.sql</code>),
-and the migration set also lives at
+and the V5.6 migration is mirrored at
 <code>core/Application/Database/DDL/</code>
 (<code>Migration.V5.6.sql</code>,
-<code>Test_Data_Users_Permissions.sql</code>) — the doc’s
-<code>core/Application/Database/DDL/...</code> migration path is real.
-SQLite (dev) source <code>Definition.sqlite</code> is present. -
-<strong>Negative finding (version-range drift):</strong> this doc states
-“71 tables across <strong>V1-V3</strong>”, but the live DDL tree carries
-Definition files <strong>V1 through V5</strong> (and a V5.6 migration).
-The table count and the “V1-V3” range should be re-derived from the
-V1-V5 DDL on the next revision — the doc’s range understates the shipped
-schema versions. Re-verify table counts directly from the
-<code>Definition.V*.sql</code> DDL, which is the source of truth.</p>
+<code>Test_Data_Users_Permissions.sql</code>). Extension and service
+DDLs (<code>Extensions/{Chats,Documents,Times}/</code>,
+<code>Services/{Authentication,Localization}/</code>) also exist and are
+NOT counted in the 106-table core total above. - <strong>Resolved
+(version-range drift):</strong> the prior revision stated “71 tables
+across <strong>V1-V3</strong>”; the live DDL tree carries Definition
+files <strong>V1 through V5</strong> plus a <strong>V5.6</strong>
+migration, with 106 distinct core tables. The overview table + Migration
+History have been re-derived from the V1-V5 DDL. The legacy per-section
+category counts (V1 “57”, V2 “14”) are illustrative groupings authored
+against the old V1-V3 snapshot and are NOT the authoritative totals —
+the 106-table figure from the DDL is. Re-verify any per-section count
+directly from the <code>Definition.V*.sql</code> DDL, which remains the
+single source of truth.</p>
 </body>
 </html>

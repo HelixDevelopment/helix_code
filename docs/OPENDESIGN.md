@@ -15,13 +15,24 @@ OpenDesign (https://github.com/nexu-io/open-design) is a local-first, open-sourc
 
 ## Installation
 
-### MCP Server (installed)
+Upstream now documents a one-line installer as the **preferred** path; a
+from-source / Docker path remains available. Both are described below.
+
+### Preferred: one-line curl installer (upstream-recommended)
+```bash
+# <agent> = claude | codex | cursor | copilot | openclaw | antigravity |
+#           gemini | pi | vibe | hermes | cline | trae | opencode | ...
+curl -fsSL https://open-design.ai/install.sh | sh -s <agent>
+```
+This wires Open Design (daemon + MCP adapter) for the named coding agent.
+
+### MCP Server (npm package — already installed in this project)
 ```bash
 npm install -g open-design-mcp
-# Version: 0.16.1
+# Version: 0.16.1 (npm `latest`, verified 2026-06-22)
 ```
 
-### Daemon (requires setup)
+### Daemon (manual setup — Docker or from source)
 The daemon can be run via Docker or from source:
 
 **Docker:**
@@ -32,11 +43,11 @@ cp .env.example .env
 docker compose up -d
 ```
 
-**From source:**
+**From source** (requires Node.js ~24 and pnpm 10.33.x per upstream quickstart):
 ```bash
-git clone git@github.com:nexu-io/open-design.git
+git clone https://github.com/nexu-io/open-design.git
 cd open-design
-corepack enable && pnpm install
+corepack enable && pnpm install   # pnpm 10.33.x; Node.js ~24
 pnpm tools-dev run web
 ```
 
@@ -100,6 +111,13 @@ To enable `od_generate_design`, add BYOK vars:
 
 ## Sources verified 2026-06-22: https://github.com/nexu-io/open-design , https://registry.npmjs.org/open-design-mcp/latest
 
+Reconciled 2026-06-22: install section updated to add the upstream-preferred
+**curl one-line installer** (`curl -fsSL https://open-design.ai/install.sh | sh -s
+<agent>`) and the from-source **toolchain pins (Node.js ~24 + pnpm 10.33.x)**; the
+existing `npm install -g open-design-mcp` (0.16.1) and Docker paths are retained.
+Both the curl-installer and the from-source path are now documented per the
+fetched upstream README/quickstart.
+
 Cross-referenced this doc against the latest official OpenDesign sources (fetched
 2026-06-22). Findings:
 - **MCP package version current.** npm `open-design-mcp` latest = **0.16.1**
@@ -111,10 +129,10 @@ Cross-referenced this doc against the latest official OpenDesign sources (fetche
   (`http://localhost:7456`) and a **stdio MCP server**. It also corroborates the
   150+ design-system `DESIGN.md` brand files and 100+ skills this doc cites
   (upstream states "100+ Skills", "150+ Design Systems", "261 Plugins").
-- **Negative finding (install method drift).** The upstream now documents a
-  one-line installer — `curl -fsSL https://open-design.ai/install.sh | sh -s
-  <agent>` — and from-source guidance of **Node ~24 + pnpm 10.33.x** (this doc
-  says `pnpm install`). The doc's `npm install -g open-design-mcp` still yields
-  the published 0.16.1 MCP server, so it is not wrong, but the upstream
-  curl-installer is the now-preferred path and the from-source toolchain pins
-  (Node 24 / pnpm 10.33.x) should be reflected on the next revision.
+- **Resolved (install method drift).** The upstream now documents a one-line
+  installer — `curl -fsSL https://open-design.ai/install.sh | sh -s <agent>` —
+  and from-source guidance of **Node ~24 + pnpm 10.33.x**. The Installation
+  section above has been reconciled to lead with the curl-installer (the
+  upstream-preferred path) and to pin the from-source toolchain (Node ~24 / pnpm
+  10.33.x). The `npm install -g open-design-mcp` path is retained because it
+  still yields the published 0.16.1 MCP server.

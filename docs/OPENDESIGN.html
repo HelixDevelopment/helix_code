@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>OPENDESIGN</title>
+  <title>OpenDesign — HelixCode Integration</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -238,7 +238,7 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">OPENDESIGN</h1>
+<h1 class="title">OpenDesign — HelixCode Integration</h1>
 </header>
 <h1 id="opendesign-helixcode-integration">OpenDesign — HelixCode
 Integration</h1>
@@ -259,38 +259,53 @@ to the daemon</li>
 <li><strong>Skills</strong> — 100+ design prompts/templates</li>
 </ol>
 <h2 id="installation">Installation</h2>
-<h3 id="mcp-server-installed">MCP Server (installed)</h3>
+<p>Upstream now documents a one-line installer as the
+<strong>preferred</strong> path; a from-source / Docker path remains
+available. Both are described below.</p>
+<h3
+id="preferred-one-line-curl-installer-upstream-recommended">Preferred:
+one-line curl installer (upstream-recommended)</h3>
 <div class="sourceCode" id="cb1"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> open-design-mcp</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Version: 0.16.1</span></span></code></pre></div>
-<h3 id="daemon-requires-setup">Daemon (requires setup)</h3>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># &lt;agent&gt; = claude | codex | cursor | copilot | openclaw | antigravity |</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#           gemini | pi | vibe | hermes | cline | trae | opencode | ...</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://open-design.ai/install.sh <span class="kw">|</span> <span class="fu">sh</span> <span class="at">-s</span> <span class="op">&lt;</span>agent<span class="op">&gt;</span></span></code></pre></div>
+<p>This wires Open Design (daemon + MCP adapter) for the named coding
+agent.</p>
+<h3 id="mcp-server-npm-package-already-installed-in-this-project">MCP
+Server (npm package — already installed in this project)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> open-design-mcp</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Version: 0.16.1 (npm `latest`, verified 2026-06-22)</span></span></code></pre></div>
+<h3 id="daemon-manual-setup-docker-or-from-source">Daemon (manual setup
+— Docker or from source)</h3>
 <p>The daemon can be run via Docker or from source:</p>
 <p><strong>Docker:</strong></p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:nexu-io/open-design.git /path/to/open-design</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/open-design/deploy</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div>
-<p><strong>From source:</strong></p>
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:nexu-io/open-design.git</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> open-design</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">corepack</span> enable <span class="kw">&amp;&amp;</span> <span class="ex">pnpm</span> install</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">pnpm</span> tools-dev run web</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:nexu-io/open-design.git /path/to/open-design</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/open-design/deploy</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div>
+<p><strong>From source</strong> (requires Node.js ~24 and pnpm 10.33.x
+per upstream quickstart):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/nexu-io/open-design.git</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> open-design</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">corepack</span> enable <span class="kw">&amp;&amp;</span> <span class="ex">pnpm</span> install   <span class="co"># pnpm 10.33.x; Node.js ~24</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">pnpm</span> tools-dev run web</span></code></pre></div>
 <h2 id="mcp-integration">MCP Integration</h2>
 <p>Add to <code>.mcp.json</code>:</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;open-design&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;npx&quot;</span><span class="fu">,</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;-y&quot;</span><span class="ot">,</span> <span class="st">&quot;open-design-mcp&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;env&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;OD_DAEMON_URL&quot;</span><span class="fu">:</span> <span class="st">&quot;http://localhost:7456&quot;</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;open-design&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;npx&quot;</span><span class="fu">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;-y&quot;</span><span class="ot">,</span> <span class="st">&quot;open-design-mcp&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;env&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;OD_DAEMON_URL&quot;</span><span class="fu">:</span> <span class="st">&quot;http://localhost:7456&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <h2 id="available-mcp-tools">Available MCP Tools</h2>
 <table>
 <thead>
@@ -343,16 +358,16 @@ assets (assets/Logo.png)</p>
 <h2 id="byok-configuration-for-design-generation">BYOK Configuration
 (for design generation)</h2>
 <p>To enable <code>od_generate_design</code>, add BYOK vars:</p>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;env&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;OD_DAEMON_URL&quot;</span><span class="fu">:</span> <span class="st">&quot;http://localhost:7456&quot;</span><span class="fu">,</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;BYOK_BASE_URL&quot;</span><span class="fu">:</span> <span class="st">&quot;https://your-ai-proxy.example.com/v1&quot;</span><span class="fu">,</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;BYOK_API_KEY&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;provider-api-key&gt;&quot;</span><span class="fu">,</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;BYOK_MODEL&quot;</span><span class="fu">:</span> <span class="st">&quot;open-design&quot;</span><span class="fu">,</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;BYOK_PROVIDER&quot;</span><span class="fu">:</span> <span class="st">&quot;openai&quot;</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;env&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;OD_DAEMON_URL&quot;</span><span class="fu">:</span> <span class="st">&quot;http://localhost:7456&quot;</span><span class="fu">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;BYOK_BASE_URL&quot;</span><span class="fu">:</span> <span class="st">&quot;https://your-ai-proxy.example.com/v1&quot;</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;BYOK_API_KEY&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;provider-api-key&gt;&quot;</span><span class="fu">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;BYOK_MODEL&quot;</span><span class="fu">:</span> <span class="st">&quot;open-design&quot;</span><span class="fu">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;BYOK_PROVIDER&quot;</span><span class="fu">:</span> <span class="st">&quot;openai&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <h2 id="cross-references">Cross-references</h2>
 <ul>
 <li>constitution/Constitution.md §11.4.162 (OpenDesign UI mandate)</li>
@@ -365,6 +380,14 @@ configuration)</li>
 id="sources-verified-2026-06-22-httpsgithub.comnexu-ioopen-design-httpsregistry.npmjs.orgopen-design-mcplatest">Sources
 verified 2026-06-22: https://github.com/nexu-io/open-design ,
 https://registry.npmjs.org/open-design-mcp/latest</h2>
+<p>Reconciled 2026-06-22: install section updated to add the
+upstream-preferred <strong>curl one-line installer</strong>
+(<code>curl -fsSL https://open-design.ai/install.sh | sh -s &lt;agent&gt;</code>)
+and the from-source <strong>toolchain pins (Node.js ~24 + pnpm
+10.33.x)</strong>; the existing
+<code>npm install -g open-design-mcp</code> (0.16.1) and Docker paths
+are retained. Both the curl-installer and the from-source path are now
+documented per the fetched upstream README/quickstart.</p>
 <p>Cross-referenced this doc against the latest official OpenDesign
 sources (fetched 2026-06-22). Findings: - <strong>MCP package version
 current.</strong> npm <code>open-design-mcp</code> latest =
@@ -378,14 +401,14 @@ doc lists: an Express + SQLite <strong>daemon</strong> on port
 <strong>stdio MCP server</strong>. It also corroborates the 150+
 design-system <code>DESIGN.md</code> brand files and 100+ skills this
 doc cites (upstream states “100+ Skills”, “150+ Design Systems”, “261
-Plugins”). - <strong>Negative finding (install method drift).</strong>
-The upstream now documents a one-line installer —
-<code>curl -fsSL https://open-design.ai/install.sh | sh -s   &lt;agent&gt;</code>
-— and from-source guidance of <strong>Node ~24 + pnpm 10.33.x</strong>
-(this doc says <code>pnpm install</code>). The doc’s
-<code>npm install -g open-design-mcp</code> still yields the published
-0.16.1 MCP server, so it is not wrong, but the upstream curl-installer
-is the now-preferred path and the from-source toolchain pins (Node 24 /
-pnpm 10.33.x) should be reflected on the next revision.</p>
+Plugins”). - <strong>Resolved (install method drift).</strong> The
+upstream now documents a one-line installer —
+<code>curl -fsSL https://open-design.ai/install.sh | sh -s &lt;agent&gt;</code>
+— and from-source guidance of <strong>Node ~24 + pnpm 10.33.x</strong>.
+The Installation section above has been reconciled to lead with the
+curl-installer (the upstream-preferred path) and to pin the from-source
+toolchain (Node ~24 / pnpm 10.33.x). The
+<code>npm install -g open-design-mcp</code> path is retained because it
+still yields the published 0.16.1 MCP server.</p>
 </body>
 </html>
