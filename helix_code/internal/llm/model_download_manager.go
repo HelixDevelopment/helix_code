@@ -476,7 +476,7 @@ func (m *ModelDownloadManager) convertModel(inputPath string, targetFormat Model
 	progressChan <- *progress
 
 	// Execute conversion command
-	cmd := exec.Command(tool.Command, args...)
+	cmd := exec.Command(tool.Command, args...) // nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command -- static "python" binary; user input passed as separate argv via execve (no shell)
 
 	// Set environment variables if specified
 	if len(tool.EnvVars) > 0 {

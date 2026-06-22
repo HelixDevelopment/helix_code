@@ -436,7 +436,7 @@ func (m *LocalLLMManager) buildProvider(ctx context.Context, provider *LocalLLMP
 			env = append(env, fmt.Sprintf("%s=%s", k, v))
 		}
 
-		cmd := exec.CommandContext(ctx, "bash", "-c", provider.BuildScript)
+		cmd := exec.CommandContext(ctx, "bash", "-c", provider.BuildScript) // nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command -- BuildScript sourced only from static providerDefinitions map literals; never deserialized/config-loaded (see docs/research/semgrep_exec_triage_20260622)
 		cmd.Dir = dir
 		cmd.Env = env
 

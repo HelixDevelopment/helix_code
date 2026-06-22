@@ -300,7 +300,7 @@ func (c *ModelConverter) runConversion(ctx context.Context, job *ConversionJob, 
 	defer logFile.Close()
 
 	// Prepare command
-	cmd := exec.CommandContext(ctx, tool.Command, job.Args...)
+	cmd := exec.CommandContext(ctx, tool.Command, job.Args...) // nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command -- static "python" binary; user input passed as separate argv via execve (no shell)
 
 	// Set environment variables
 	if len(tool.EnvVars) > 0 {

@@ -517,7 +517,7 @@ func (m *AutoLLMManager) autoBuildProvider(provider *AutoProvider) error {
 	}
 
 	// Execute build command
-	cmd := exec.Command("bash", "-c", script)
+	cmd := exec.Command("bash", "-c", script) // nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command -- BuildScript sourced only from static providerDefinitions map literals; never deserialized/config-loaded (see docs/research/semgrep_exec_triage_20260622)
 	cmd.Dir = provider.DataPath
 
 	// Set environment
