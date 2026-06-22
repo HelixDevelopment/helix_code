@@ -112,6 +112,52 @@ if [ -f "$CONFIG_FILE" ]; then
     done
 fi
 
+# 7. LIVE INDEX AUDIT (§11.4.78/§11.4.79 — AUTHORITATIVE).
+# CodeGraph v1.x is zero-config: it derives index scope from .gitignore, NOT from
+# .codegraph/config.json (which is INERT/no-longer-read). Checks 4-6 above inspect
+# config.json and are therefore advisory only — a config-only PASS that does not
+# query the real index is a §11.4 PASS-bluff. This section queries the LIVE DB so
+# the validator reports what is ACTUALLY indexed.
+echo ""
+echo "--- Check: LIVE index audit (authoritative — excluded paths MUST be absent from the DB) ---"
+if [ -f "$DB_FILE" ] && command -v sqlite3 &>/dev/null; then
+    # third-party / non-code trees MUST NOT be in the index (§11.4.79 + §11.4.10)
+    for pat in "cli_agents/%" "cli_agents_resources/%" "github_pages_website/%" "dependencies/LLama_CPP/%" "dependencies/Ollama/%"; do
+        cnt=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM files WHERE path LIKE '$pat';" 2>/dev/null || echo "ERR")
+        base="${pat%/\%}"
+        if [ "$cnt" = "0" ]; then
+            pass "live DB: 0 indexed files under $base"
+        elif [ "$cnt" = "ERR" ]; then
+            skip "live DB query failed for $base"
+        else
+            fail "live DB: $cnt files under $base ARE indexed (exclusion NOT effective — fix root .gitignore + 'codegraph index'; config.json is INERT per §11.4.78)"
+        fi
+    done
+    # own-org submodules MUST be present (§11.4.79 — an index that lacks them is a bluff)
+    for inc in "submodules/helix_qa/%" "submodules/llm_provider/%" "constitution/%"; do
+        cnt=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM files WHERE path LIKE '$inc';" 2>/dev/null || echo "ERR")
+        base="${inc%/\%}"
+        if [ "$cnt" != "0" ] && [ "$cnt" != "ERR" ]; then
+            pass "live DB: own-org $base indexed ($cnt files, §11.4.79)"
+        else
+            fail "live DB: own-org $base NOT indexed (count=$cnt) — must be included per §11.4.79"
+        fi
+    done
+    # credentials MUST never be indexed (§11.4.10)
+    for sec in "%.env" "%.pem" "%.key"; do
+        cnt=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM files WHERE path LIKE '$sec';" 2>/dev/null || echo "ERR")
+        if [ "$cnt" = "0" ]; then
+            pass "live DB: 0 indexed files matching $sec (§11.4.10)"
+        elif [ "$cnt" = "ERR" ]; then
+            skip "live DB query failed for $sec"
+        else
+            fail "live DB: $cnt credential-like files ($sec) ARE indexed — §11.4.10 leak risk"
+        fi
+    done
+else
+    skip "LIVE index audit (sqlite3 or codegraph.db missing)"
+fi
+
 # Summary
 echo ""
 echo "=== Validation Summary ==="
