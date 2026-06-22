@@ -2593,7 +2593,7 @@ func drainProviderStream(chunkChan chan llm.LLMResponse, errCh chan error, onChu
 //	/checkpoint restore <id>     restore the working tree to a snapshot
 //
 // Anti-bluff (§11.4 / CONST-035): every path drives the real Manager against
-// the real filesystem — there is no simulated/printed-only output. Restore
+// the real filesystem — there is no fake/printed-only output. Restore
 // writes real bytes back to disk (covered by internal/checkpoint round-trip
 // tests).
 func (c *CLI) handleCheckpoint(ctx context.Context, args string) error {
@@ -2740,7 +2740,7 @@ func (c *CLI) handleDiff(ctx context.Context, ref string) error {
 // prompts) into the (ctx, prompt) (string, error) shape the adapter requires.
 //
 // Anti-bluff (§11.4 / CONST-035): the invoker makes a REAL provider.Generate
-// call — no simulated/synthesised output. When no provider is configured the
+// call — no fabricated/synthesised output. When no provider is configured the
 // command refuses cleanly rather than fabricating a debate. The adapter
 // itself refuses (ErrSpeckitDebateInvokerNotProvided) if a nil invoker were
 // ever passed, and surfaces orchestrator errors verbatim.
@@ -2827,7 +2827,7 @@ func (c *CLI) handleDebate(ctx context.Context, topic string) error {
 //	result, err := pillar.ExecutePhase(ctx, types.PhaseSpecify, &types.PhaseInput{...})
 //
 // Anti-bluff (§11.4 / CONST-035): the responder round-trips every phase debate
-// turn through a REAL provider.Generate call — no simulated output. The speckit
+// turn through a REAL provider.Generate call — no fabricated output. The speckit
 // engine itself REQUIRES a real DebateFunc: a nil DebateFunc returns
 // speckit.ErrDebateFuncNotConfigured (the round-28 §11.4 audit removed the prior
 // fabricating branch). When no provider/model is configured, OR the engine/debate
