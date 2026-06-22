@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Revision | 4 |
+| Revision | 5 |
 | Created | 2026-05-06 |
 | Last modified | 2026-06-23T00:00:00Z |
 | Status | active |
@@ -15,6 +15,8 @@ _Revision 2 (2026-06-22) records the §11.4.166 semgrep-mandate repeal + meta-re
 _Revision 3 (2026-06-22) records the remainder of the same autonomous session: the §11.4.55 sweep fully cleared (G7 docs/qa baseline-bump; G11/G13/G14 closed), the workable-items diffCmd composite-key fix, the optional doc reconciliations, and — the headline deliverable — G1, the full 64-owned-submodule + 6-root-carrier §11.4.142-165 governance cascade landed across the fleet (verifier 205→0 band-failures; consumer-submodule HEADs bumped in meta 87664e11). Cascade executed as a pilot-with-push + 6 parallel waves + a doc_processor deep-repair, every closure carrying captured verifier-PASS + ls-remote evidence._
 
 _Revision 4 (2026-06-23) records the continuation of the same autonomous session: the 3 open workable-items backlog (HXC-107 docs/features ledger rev8 reconciled to live code + anti-bluff iOS/Android-scaffold fix; HXC-108 video-QA recording harness with a self-validated golden-good/golden-bad OCR analyzer + clients×features matrix; HXC-112 root-caused the Fyne OpenGL GUI input-blocker and shipped a cliclick CGEvent driving harness) committed `2bb54634`/`47f61829`/`d2f4310a`, each with honest §11.4.3 TCC/Aqua env-gaps for on-screen recording (operator-attended remainder), and two operator-directed CONST-051(B) decouplings of the universal `containers` submodule — helixtrack compose+boot → `helix_track` main repo (`9e0bf02`), helixcode-infra compose → meta root (`f91d4477`) — with containers now verified free of both coupling classes. The HXC-108 CLI-client recording phase (TCC-free via asciinema) is in flight. Per-item §11.4.149 test-diary DB sync deferred until the recording results land._
+
+_Revision 5 (2026-06-23) records the session's later work + a governance-model DECISION. (a) §11.4.149 diary tooling: the workable-items binary lacked a `diary` subcommand (storage existed, main.go never dispatched it) — added `diary add/list/summary` with a PASS-requires-evidence-file constraint + 7 tests, both binaries rebuilt (linux on thinker.local), integrated the upstream constitution decoupling `09c636e` by ff-merge, pushed constitution `1d9e3ce` to all 6 upstreams, meta pointer `f012ac2f`. (b) Recordings: CLI 6/6 (`1b820b50`) + TUI/server 2/2 (`faba91a4`) OCR-validated PASS with real output — historical BLUFF-001/002/003 re-cleared live, the server case end-to-end through real JWT auth + real podman PostgreSQL/Redis. (c) HXC-107 ledger exports regenerated to rev8 (`a57e192d`). (d) GOVERNANCE-MODEL DECISION (operator): owned-submodule carriers follow the THIN-INHERITANCE model (CONST-059/CONST-051(B)/§11.4.28 — a `## INHERITED FROM` + find_constitution.sh pointer, NOT inline anchor restatements), SUPERSEDING the G1 inline-band cascade. `verify-governance-cascade.sh` section 2 flipped to assert the pointer (`f7ab1ee4`, §1.1-mutation-proven, review GO); fleet 3 FAIL → 0 (all 64 carry the pointer; the parallel session's `e15c02a` containers thin-stub now PASSes). Section 1 (root/constitution universal-anchor verification) untouched. OPEN: the physical thinning of the 63 still-inline carriers is the parallel session's migration (canonical mechanism not in-repo); `scripts/propagate-governance.sh` is now CONTRADICTORY (it re-inlines) and needs updating/retiring under the thin model._
 
 ## Table of contents
 
