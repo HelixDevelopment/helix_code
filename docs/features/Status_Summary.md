@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Revision | 4 |
+| Revision | 5 |
 | Created | 2026-06-15 |
-| Last modified | 2026-06-16 |
-| Status | active (rev7 — 2026-06-16 video-confirmation sweep) |
+| Last modified | 2026-06-22 |
+| Status | active (rev8 — HXC-107 code-reconciliation audit synced from Status.md rev8: internal-pkg 73→72, cli_agents 51→50, submodules 67-on-disk → 65 rowed + 2 documented exclusions) |
 | Status detail | docs/features/Status.md |
 
 Authoritative rollup of `docs/features/Status.md`. Anti-bluff (CONST-035 /
@@ -74,15 +74,23 @@ re-record is OPERATOR-BLOCKED** (§11.4.52 — `CoreSimulatorService` denied wri
 `/Volumes/T7`; host TCC change out of agent scope). Everything else is honestly
 `pending` — the conductor owns video confirmation.
 
-## Coverage completeness (rev6 gap-pass, 2026-06-16)
+## Coverage completeness (rev8 code-reconciliation, verified vs live tree 2026-06-22)
 
-- **Internal packages:** 73/73 have ≥1 feature row (the last gap,
-  `internal/i18n_wiring`, closed this rev). 234 internal-feature rows.
+- **Internal packages:** 72/72 dirs have ≥1 feature row (71 with production code +
+  `internal/i18n_wiring`, the sole test-only dir). 234 internal-feature rows.
+  (rev8: count corrected 73→72 per `ls -d helix_code/internal/*/` = 72 — the prior
+  "73/73" was an off-by-one.)
 - **cmd tools:** all 11 `helix_code/cmd/*` dirs rowed.
-- **Client apps:** all 6 surfaces (CLI, TUI, Web, Desktop, Android, iOS) +
-  Aurora OS / Harmony OS rowed.
+- **Client apps:** all 6 `applications/*` dirs (Desktop, Terminal-UI, iOS, Android,
+  Aurora OS, Harmony OS) rowed; 8 client *surfaces* total counting CLI (`cmd/cli`) +
+  Web (`internal/server`). iOS/Android confirmed buildable rev8 (real Gradle/Xcode
+  chains + gomobile-bind artifacts present — prior "not buildable" claim struck).
 - **HTTP API:** 18 endpoint groups rowed.
-- **Submodules:** 50 inventoried (55 capability rows; principal features).
-- **Ported cli_agents:** 33 rows (20 landed, 3 partial, 10 planned — honest).
+- **Submodules:** 67 on disk (`ls -d submodules/*/`) → 65 carry ≥1 `| submodule |`
+  capability row + 2 documented exclusions (`docs_chain`, `challenges`) = 0 silently
+  missing (rev8: `claude-toolkit` row added; 135 feature rows across 65 distinct
+  names. The prior "50 inventoried / 55 rows" undercounted.)
+- **Ported cli_agents:** 33 rows (20 landed, 3 partial, 10 planned — honest), over
+  the 50-agent `cli_agents/` catalogue (= 50 `.gitmodules` entries; rev8: 51→50).
 
 See `docs/features/Status.md` for the full per-feature table.
