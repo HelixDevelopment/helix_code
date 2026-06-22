@@ -177,10 +177,14 @@
 </header>
 <h1 id="helixcode-feature-status">HelixCode Feature Status</h1>
 <table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
 <tbody>
 <tr>
 <td>Revision</td>
-<td>7</td>
+<td>8</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -188,11 +192,16 @@
 </tr>
 <tr>
 <td>Last modified</td>
-<td>2026-06-16</td>
+<td>2026-06-22</td>
 </tr>
 <tr>
 <td>Status</td>
-<td>active (population in progress)</td>
+<td>active (rev8 — HXC-107 code-reconciliation audit, verified against
+live tree 2026-06-22: iOS/Android false-scaffold claim corrected (build
+chains + gomobile artifacts confirmed present), internal-pkg count 73→72
+(i18n_wiring sole test-only), cli_agents count 51→50 (= 50 .gitmodules
+entries), submodule reconciliation 67-on-disk → 65 rowed + 2 documented
+exclusions (claude-toolkit row added))</td>
 </tr>
 <tr>
 <td>Status summary</td>
@@ -370,8 +379,10 @@ one-shot claim.</p>
 <tbody>
 <tr>
 <td>internal services + infra</td>
-<td><code>helix_code/internal/*</code> (73 pkgs)</td>
-<td>complete — every package has ≥1 row (rev6)</td>
+<td><code>helix_code/internal/*</code> (72 dirs; 71 with prod code +
+<code>i18n_wiring</code> test-only)</td>
+<td>complete — every package has ≥1 row (rev6; count corrected 73→72
+rev8)</td>
 </tr>
 <tr>
 <td>cmd tools + client apps</td>
@@ -387,9 +398,10 @@ capabilities)</td>
 </tr>
 <tr>
 <td>ported cli_agents capabilities</td>
-<td><code>cli_agents/*</code> (51 vendored) → HelixCode landed
+<td><code>cli_agents/*</code> (50 vendored) → HelixCode landed
 ports</td>
-<td>complete — landed ports + planned, honest</td>
+<td>complete — landed ports + planned, honest (count corrected 51→50
+rev8)</td>
 </tr>
 <tr>
 <td>§11.4.118/§11.4.135 regression-guard round</td>
@@ -401,11 +413,18 @@ ports</td>
 <blockquote>
 <p><strong>rev6 completeness gap-pass (2026-06-16):</strong>
 cross-checked the live table against
-<code>ls helix_code/internal/</code> (73 pkgs),
-<code>helix_code/cmd/*</code> (11 dirs),
-<code>helix_code/applications/*</code> (8),
+<code>ls helix_code/internal/</code> (72 dirs — 71 with prod code +
+<code>i18n_wiring</code> test-only; rev8 corrected the prior “73”
+off-by-one), <code>helix_code/cmd/*</code> (11 dirs),
+<code>helix_code/applications/*</code> (6 dirs:
+desktop/terminal_ui/ios/android/aurora_os/harmony_os — 8 client
+<em>surfaces</em> total counting CLI=<code>cmd/cli</code> +
+Web=<code>internal/server</code>),
 <code>helix_code/internal/server</code> endpoint groups, the
-<code>cli_agents/</code> catalogue (51), and <code>submodules/*</code>.
+<code>cli_agents/</code> catalogue (50 —
+<code>ls -d cli_agents/*/</code> = 50, matching 50
+<code>.gitmodules</code> <code>path = cli_agents/</code> entries; rev8
+corrected the prior “51” off-by-one), and <code>submodules/*</code>.
 Result: every internal package, every cmd tool, every client app, every
 HTTP API group, and every inventoried submodule now maps to ≥1 feature
 row OR a documented exclusion. The single remaining internal-package gap
@@ -1614,11 +1633,35 @@ scope)</td>
 (only <code>main.go</code>) — marked <code>Tests=none</code>,
 <code>Overall=gap</code>. Untested scanner = bluff risk per
 CONST-048/CONST-050.</p></li>
-<li><p><strong>iOS / Android are scaffolds</strong>: real source (JSON
-parse, list bind, Go mobile-core bridge) but single-screen, hardcoded
-localhost test server, <strong>no Xcode project / no
-Gradle+manifest</strong> → not buildable, not recordable.
-<code>Real-use=no</code>, <code>Overall=gap</code>.</p></li>
+<li><p><strong>iOS / Android are single-screen apps WITH full build
+scaffolding</strong> (rev8 correction, 2026-06-16, §11.4.6/§11.4.108 —
+the prior “no Xcode project / no Gradle+manifest → not buildable” claim
+was FALSE and is struck): both ship a complete build chain AND a real
+gomobile-bind core artifact. <strong>Android:</strong>
+<code>applications/android/build.gradle</code> +
+<code>app/build.gradle</code> (<code>namespace dev.helix.code</code>,
+compileSdk 35, applicationId <code>dev.helix.code</code>, versionName
+3.0.0), <code>app/src/main/AndroidManifest.xml</code>,
+<code>gradlew</code>/<code>settings.gradle</code>, 3 Kotlin sources, and
+a built <code>app/libs/mobilecore.aar</code> (gomobile bind of
+<code>helix_code/shared/mobile_core</code>). <strong>iOS:</strong>
+<code>HelixCode.xcodeproj/project.pbxproj</code> + the XcodeGen
+<code>project.yml</code> it is generated from, 4 Swift sources, and a
+built <code>Frameworks/HelixCore.xcframework</code> (ios-arm64 +
+simulator slices, gomobile bind — “no simulation”, per the project.yml
+header). Honest residual: the apps are <strong>single-screen</strong>
+(Connect + task-list only; 3–4 source files each), so the “Models /
+settings / notifications / theme UI” rows remain genuinely
+<code>stub</code>/<code>gap</code>. Full feature exercise still needs a
+device/emulator (Android: Genymotion via adb; iOS: simulator — the iOS
+themed re-record is host-TCC <code>OPERATOR-BLOCKED</code> per the iOS
+row). So: build scaffolding + Go-core bridge are REAL and present
+(<code>Connect + task list</code> rows are <code>partial</code>, not
+<code>gap</code>); the un-built secondary screens stay
+<code>stub</code>. The corrected basis does not change the
+<code>📹</code> honesty (Android <code>📹 yes</code> from real device
+recording stands; iOS launch recording stands, themed re-record
+OPERATOR-BLOCKED).</p></li>
 <li><p><strong>Aurora OS / Harmony OS are genuine Go/Fyne apps</strong>
 (buildable via <code>make aurora-os</code> /
 <code>make harmony-os</code>, comprehensive unit+integration tests) —
@@ -3866,13 +3909,14 @@ across the wiring model).</p>
 <h2 id="internal-services-infrastructure">Internal services +
 infrastructure</h2>
 <p>Inventory of every feature under <code>helix_code/internal/*</code>
-(73 packages). Assessed from code evidence (impl reality, wiring,
-<code>_test.go</code> presence) per CONST-035 / §11.4.107 anti-bluff.
-<code>📹 Video</code> is <code>no</code> for every row (recordings are
-the conductor’s job once a real analyzed recording exists);
-<code>Overall</code> is never <code>confirmed</code> for the same
-reason. <code>Origin</code> is <code>native</code> (HelixCode’s own
-code).</p>
+(72 dirs — 71 with production code + <code>i18n_wiring</code> test-only;
+the prior “73” was an off-by-one corrected rev8). Assessed from code
+evidence (impl reality, wiring, <code>_test.go</code> presence) per
+CONST-035 / §11.4.107 anti-bluff. <code>📹 Video</code> is
+<code>no</code> for every row (recordings are the conductor’s job once a
+real analyzed recording exists); <code>Overall</code> is never
+<code>confirmed</code> for the same reason. <code>Origin</code> is
+<code>native</code> (HelixCode’s own code).</p>
 <table>
 <colgroup>
 <col style="width: 8%" />
@@ -7429,10 +7473,12 @@ completeness, marked <code>n/a</code>.</li>
 <code>working-untaped</code> row is a candidate for a recorded scenario;
 none is video-confirmed yet (📹 <code>no</code> throughout).</li>
 </ul>
-<p>234 features inventoried across 73 packages (the
-<code>i18n_wiring</code> end-to-end integration package added this round
-closes the last internal-package gap — every package under
-<code>helix_code/internal/*</code> now has ≥1 feature row).</p>
+<p>234 features inventoried across 72 internal dirs (71 with production
+code + <code>i18n_wiring</code>, which is a test-only end-to-end
+integration package). Every dir under <code>helix_code/internal/*</code>
+now has ≥1 feature row. (Count corrected 73→72 rev8: the prior “73”
+double-counted; ground truth is 72 dirs per
+<code>ls -d helix_code/internal/*/</code>.)</p>
 <h3
 id="regression-guard-coverage-11.4.118-11.4.135-round-this-session">Regression-guard
 coverage (§11.4.118 / §11.4.135 round — this session)</h3>
@@ -7730,12 +7776,13 @@ surfaces are unchanged, so <code>📹 Video=no</code>.</p>
 capabilities</h2>
 <p>Evidence-backed inventory of capabilities <strong>actually ported
 into HelixCode</strong> from the <code>cli_agents/</code> reference
-catalogue (51 vendored reference agents). Per CONST-035 anti-bluff: this
-lists ONLY capabilities with landed code evidence (package
-<code>doc.go</code> origin headers, CONTINUATION.md P2-Fxx CLOSED
-ledger, POWER_FEATURES_PORTING_PLAN rev2 file:line reconciliation, git
-port commits) — NOT every cli_agent’s full feature set.
-Planned-but-not-landed items are marked
+catalogue (50 vendored reference agents; count corrected 51→50 rev8 per
+<code>ls -d cli_agents/*/</code> = 50 = 50 <code>.gitmodules</code>
+entries). Per CONST-035 anti-bluff: this lists ONLY capabilities with
+landed code evidence (package <code>doc.go</code> origin headers,
+CONTINUATION.md P2-Fxx CLOSED ledger, POWER_FEATURES_PORTING_PLAN rev2
+file:line reconciliation, git port commits) — NOT every cli_agent’s full
+feature set. Planned-but-not-landed items are marked
 <code>Dev=absent</code>/<code>partial</code> honestly. <strong>No
 feature is <code>📹 yes</code></strong> (no recordings analyzed for
 ported features). <strong>Overall is never
@@ -9385,9 +9432,50 @@ i18n, types)</td>
 <td>native</td>
 <td>gap</td>
 </tr>
+<tr>
+<td>submodule</td>
+<td>claude-toolkit</td>
+<td>Bash multi-account / CLI-agent provisioning toolkit (scripts/config
++ OpenCode integration; not Go, out-of-process tooling)</td>
+<td>done</td>
+<td>no</td>
+<td>no</td>
+<td>none</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>native</td>
+<td>gap</td>
+</tr>
 </tbody>
 </table>
-<p>55 features across 50 submodules.</p>
+<p>135 feature rows across 65 distinct owned-submodule names in this
+section (rev8: <code>claude-toolkit</code> added — it was on disk +
+<code>.gitmodules</code>-registered
+(<code>git@github.com:vasic-digital/claude-toolkit.git</code>) but had
+no ledger row; it is a Bash toolkit, not Go, <code>Wired=no</code>).</p>
+<blockquote>
+<p><strong>rev8 submodule-count reconciliation (2026-06-22, §11.4.6 —
+re-counted against live tree; supersedes the prior “50/55/51” figures
+which undercounted):</strong> <code>ls -d submodules/*/</code> shows
+<strong>67</strong> registered submodule dirs (all in
+<code>.gitmodules</code> under <code>path = submodules/</code>).
+Ground-truth reconciliation: <strong>65 of the 67 have ≥1
+<code>| submodule |</code> capability row</strong> in this section
+(verified by diffing the rowed submodule-name set against the on-disk
+dir set); the remaining <strong>2 (<code>docs_chain</code>,
+<code>challenges</code>) are documented exclusions</strong> per the
+coverage-depth honesty note below (infra/tooling, out of feature-row
+scope). So: <strong>67 on disk → 65 rowed + 2 documented exclusions = 0
+silently missing.</strong>
+(<code>containers</code>/<code>helix_qa</code>/<code>panoptic</code>/<code>helix_specifier</code>/<code>helix_agent</code>
+ARE among the 65 rowed, as consumed QA/infra capabilities — not
+double-counted.) The earlier “51 capability rows” figure counted only
+the principal-capabilities sub-table, not every
+<code>| submodule |</code> row in the section; the honest section total
+is 135 rows / 65 distinct names. No submodule on disk is silently
+missing.</p>
+</blockquote>
 <h3 id="coverage-depth-honesty">Coverage-depth honesty</h3>
 <ul>
 <li><strong>Shallow-inventoried (principal features only; deeper

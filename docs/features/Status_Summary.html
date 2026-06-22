@@ -178,10 +178,14 @@
 <h1 id="helixcode-feature-status-summary">HelixCode Feature Status —
 Summary</h1>
 <table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
 <tbody>
 <tr>
 <td>Revision</td>
-<td>4</td>
+<td>5</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -189,11 +193,13 @@ Summary</h1>
 </tr>
 <tr>
 <td>Last modified</td>
-<td>2026-06-16</td>
+<td>2026-06-22</td>
 </tr>
 <tr>
 <td>Status</td>
-<td>active (rev7 — 2026-06-16 video-confirmation sweep)</td>
+<td>active (rev8 — HXC-107 code-reconciliation audit synced from
+Status.md rev8: internal-pkg 73→72, cli_agents 51→50, submodules
+67-on-disk → 65 rowed + 2 documented exclusions)</td>
 </tr>
 <tr>
 <td>Status detail</td>
@@ -383,21 +389,34 @@ re-record is OPERATOR-BLOCKED</strong> (§11.4.52 —
 <code>/Volumes/T7</code>; host TCC change out of agent scope).
 Everything else is honestly <code>pending</code> — the conductor owns
 video confirmation.</p>
-<h2 id="coverage-completeness-rev6-gap-pass-2026-06-16">Coverage
-completeness (rev6 gap-pass, 2026-06-16)</h2>
+<h2
+id="coverage-completeness-rev8-code-reconciliation-verified-vs-live-tree-2026-06-22">Coverage
+completeness (rev8 code-reconciliation, verified vs live tree
+2026-06-22)</h2>
 <ul>
-<li><strong>Internal packages:</strong> 73/73 have ≥1 feature row (the
-last gap, <code>internal/i18n_wiring</code>, closed this rev). 234
-internal-feature rows.</li>
+<li><strong>Internal packages:</strong> 72/72 dirs have ≥1 feature row
+(71 with production code + <code>internal/i18n_wiring</code>, the sole
+test-only dir). 234 internal-feature rows. (rev8: count corrected 73→72
+per <code>ls -d helix_code/internal/*/</code> = 72 — the prior “73/73”
+was an off-by-one.)</li>
 <li><strong>cmd tools:</strong> all 11 <code>helix_code/cmd/*</code>
 dirs rowed.</li>
-<li><strong>Client apps:</strong> all 6 surfaces (CLI, TUI, Web,
-Desktop, Android, iOS) + Aurora OS / Harmony OS rowed.</li>
+<li><strong>Client apps:</strong> all 6 <code>applications/*</code> dirs
+(Desktop, Terminal-UI, iOS, Android, Aurora OS, Harmony OS) rowed; 8
+client <em>surfaces</em> total counting CLI (<code>cmd/cli</code>) + Web
+(<code>internal/server</code>). iOS/Android confirmed buildable rev8
+(real Gradle/Xcode chains + gomobile-bind artifacts present — prior “not
+buildable” claim struck).</li>
 <li><strong>HTTP API:</strong> 18 endpoint groups rowed.</li>
-<li><strong>Submodules:</strong> 50 inventoried (55 capability rows;
-principal features).</li>
+<li><strong>Submodules:</strong> 67 on disk
+(<code>ls -d submodules/*/</code>) → 65 carry ≥1
+<code>| submodule |</code> capability row + 2 documented exclusions
+(<code>docs_chain</code>, <code>challenges</code>) = 0 silently missing
+(rev8: <code>claude-toolkit</code> row added; 135 feature rows across 65
+distinct names. The prior “50 inventoried / 55 rows” undercounted.)</li>
 <li><strong>Ported cli_agents:</strong> 33 rows (20 landed, 3 partial,
-10 planned — honest).</li>
+10 planned — honest), over the 50-agent <code>cli_agents/</code>
+catalogue (= 50 <code>.gitmodules</code> entries; rev8: 51→50).</li>
 </ul>
 <p>See <code>docs/features/Status.md</code> for the full per-feature
 table.</p>
