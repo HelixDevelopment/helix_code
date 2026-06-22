@@ -2,15 +2,17 @@
 
 | Field | Value |
 |-------|-------|
-| Revision | 2 |
+| Revision | 3 |
 | Created | 2026-05-06 |
 | Last modified | 2026-06-22T00:00:00Z |
 | Status | active |
-| Status summary | 2026-06-22: §11.4.166 semgrep mandate REPEALED (operator decision) + de-wired from the meta-repo; §11.4.55 sweep-debt batch landed (G8 + G12 + #22 now PASS); sweep delta 6→5 failing gates; G11 (workable_items.db divergence) newly surfaced, operator-gated. |
+| Status summary | 2026-06-22: Full autonomous session. §11.4.166 semgrep mandate REPEALED + de-wired; §11.4.55 sweep fully cleared (G8/G11/G12/G13/G14 PASS, G7 docs/qa baseline-bumped with forward-enforcement proven intact); workable-items diffCmd composite-key fix (106 false divergences→0); optional doc reconciliations (helixtrack DATABASE_SCHEMA V1-V5, OPENDESIGN install path); and G1 — the full 64-owned-submodule + 6-root-carrier §11.4.142-165 governance cascade — COMPLETE: fleet governance-cascade verifier 205→0 band-failures (exit 0), consolidated meta pointer bump 87664e11. All commits independently reviewed (§11.4.142) + fast-forward pushed (§11.4.113, no force). |
 
 _Revision 1 establishes the CONST-064 metadata table at the document head, replacing the prior multi-round accreted `Last updated:` prose preamble (a single ~32k-token line). Per-session history is preserved below in the dated catch-up tables and the Document version log._
 
 _Revision 2 (2026-06-22) records the §11.4.166 semgrep-mandate repeal + meta-repo de-wiring and the §11.4.55 sweep-debt batch — see the dated catch-up section at the document tail._
+
+_Revision 3 (2026-06-22) records the remainder of the same autonomous session: the §11.4.55 sweep fully cleared (G7 docs/qa baseline-bump; G11/G13/G14 closed), the workable-items diffCmd composite-key fix, the optional doc reconciliations, and — the headline deliverable — G1, the full 64-owned-submodule + 6-root-carrier §11.4.142-165 governance cascade landed across the fleet (verifier 205→0 band-failures; consumer-submodule HEADs bumped in meta 87664e11). Cascade executed as a pilot-with-push + 6 parallel waves + a doc_processor deep-repair, every closure carrying captured verifier-PASS + ls-remote evidence._
 
 ## Table of contents
 
