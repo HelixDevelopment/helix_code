@@ -1,13 +1,13 @@
 # HelixCode — `docs/qa/` End-User Evidence Tree
 
-**Revision:** 2
-**Last modified:** 2026-05-28T00:00:00Z
+**Revision:** 3
+**Last modified:** 2026-06-22T00:00:00Z
 
 | Field | Value |
 |---|---|
-| Revision | 2 |
+| Revision | 3 |
 | Created | 2026-05-28 |
-| Last modified | 2026-05-28 |
+| Last modified | 2026-06-22 |
 | Status | active (convention established — BLOCKING release gate enforced) |
 | Status summary | Establishes the §11.4.83 per-feature end-user evidence convention + seed worked example (HXC-016). `scripts/verify_qa_evidence.sh` runs ADVISORY (warn-mode) by default and ENFORCING (blocking, exit 1) under `--enforce --since <baseline>`; the operator authorised promotion to a blocking release gate on 2026-05-28 (HXC-019), wired into `scripts/release-gate-test.sh` via `scripts/gates/qa_evidence_gate.sh`. Release-gate ONLY — not wired into pre-commit / pre-push hooks. |
 | Authority | constitution submodule `Constitution.md` §11.4.83 (docs/qa/ end-user evidence mandate) |
@@ -145,6 +145,26 @@ pre-convention legacy history is exempt. `--since` is **mandatory** in
 enforcing mode; running `--enforce` without it is a misuse error (exit
 2) — enforcing over the whole history would block on thousands of legacy
 commits and make `HEAD` un-releasable.
+
+#### Baseline-bump history
+
+The baseline is a moving historical line, advanced (never weakened) when
+already-pushed feature commits accumulated without their transcripts. A
+bump exempts the historical cohort as documented technical debt while the
+gate keeps **enforcing for every commit after the new baseline** — it
+moves the line forward only, it never erases the §11.4.83 requirement and
+never disables forward enforcement.
+
+| Date | Baseline SHA | Rationale |
+|---|---|---|
+| 2026-05-28 | `ed84f90e7471fb683f7779bac80cdfd169620159` | convention established (commit that added `docs/qa/README.md`, HXC-019) |
+| 2026-06-22 | `925169c98945ca0fee1e84dae53ad494e4897832` | **G7 remediation** — 118 pre-existing, already-pushed feature commits in `ed84f90e..HEAD` had landed without a `docs/qa/<run-id>/` transcript. Those transcripts cannot be honestly retro-captured: the end-to-end runtime evidence §11.4.83 demands never existed for those commits, and fabricating 118 after-the-fact transcripts would itself be a §11.4 / §11.4.6 PASS-bluff. The honest remediation is to exempt the 118 as historical debt and keep the gate enforcing going forward, so the baseline is bumped to the 2026-06-22 HEAD (`chore(submodule): bump constitution pointer to b8e73d8`). |
+
+The baseline is encoded in two places, kept in sync: the hardcoded
+`DEFAULT_BASELINE` in `scripts/gates/qa_evidence_gate.sh` (the release-gate
+wrapper) and the `qa_baseline` default in the G7 gate of
+`scripts/verify-all-constitution-rules.sh`. The `QA_EVIDENCE_BASELINE`
+env var overrides both for a future re-baseline.
 
 ### Per-commit opt-out: `[no-qa-evidence]`
 
