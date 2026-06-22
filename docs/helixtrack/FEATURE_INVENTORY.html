@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>FEATURE_INVENTORY</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">FEATURE_INVENTORY</h1>
+</header>
+<h1 id="helixtrack-feature-inventory-2026-06-21">HelixTrack Feature
+Inventory — 2026-06-21</h1>
+<h2 id="overview">Overview</h2>
+<p>Comprehensive inventory of all HelixTrack features across all
+platforms.</p>
+<hr />
+<h2 id="core-features">Core Features</h2>
+<h3 id="projects">1. Projects</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Project list</li>
+<li>Project detail</li>
+<li>Project form</li>
+<li>Project settings</li>
+</ul></li>
+<li><strong>API:</strong> <code>/api/v1/projects</code></li>
+<li><strong>Database:</strong> <code>project</code> table</li>
+</ul>
+<h3 id="tickets">2. Tickets</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Tickets list</li>
+<li>Ticket detail</li>
+<li>Ticket form</li>
+<li>Ticket relationships</li>
+<li>Ticket workflows</li>
+<li>My tickets</li>
+</ul></li>
+<li><strong>API:</strong> <code>/api/v1/tickets</code></li>
+<li><strong>Database:</strong> <code>ticket</code> table</li>
+</ul>
+<h3 id="boards">3. Boards</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Boards list</li>
+<li>Board detail (Kanban)</li>
+<li>Board form</li>
+<li>Board settings</li>
+</ul></li>
+<li><strong>Features:</strong>
+<ul>
+<li>Drag-and-drop</li>
+<li>WIP limits</li>
+<li>Column management</li>
+</ul></li>
+<li><strong>API:</strong> <code>/api/v1/boards</code></li>
+</ul>
+<h3 id="comments">4. Comments</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Comment list</li>
+<li>Comment form</li>
+</ul></li>
+<li><strong>API:</strong> <code>/api/v1/comments</code></li>
+<li><strong>Database:</strong> <code>comment</code> table</li>
+</ul>
+<h3 id="chat">5. Chat</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Chat list</li>
+<li>Chat room</li>
+<li>Message composer</li>
+<li>Emoji picker</li>
+<li>Attachment preview</li>
+<li>Message reactions</li>
+<li>Presence badge</li>
+</ul></li>
+<li><strong>Services:</strong>
+<ul>
+<li>Chat service</li>
+<li>Chat WebSocket service</li>
+</ul></li>
+</ul>
+<h3 id="workflows">6. Workflows</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Workflows list</li>
+<li>Workflow detail</li>
+<li>Workflow form</li>
+</ul></li>
+<li><strong>API:</strong> <code>/api/v1/workflows</code></li>
+</ul>
+<h3 id="users">7. Users</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>User list</li>
+<li>User profile</li>
+<li>User settings</li>
+</ul></li>
+<li><strong>API:</strong> <code>/api/v1/users</code></li>
+<li><strong>Database:</strong> <code>user</code> table</li>
+</ul>
+<h3 id="teams">8. Teams</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Team list</li>
+<li>Team detail</li>
+<li>Team form</li>
+</ul></li>
+<li><strong>API:</strong> <code>/api/v1/teams</code></li>
+</ul>
+<h3 id="documents">9. Documents</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Document list</li>
+<li>Document editor</li>
+<li>Document preview</li>
+</ul></li>
+<li><strong>Features:</strong>
+<ul>
+<li>Markdown support</li>
+<li>Export (PDF, HTML, DOCX)</li>
+<li>Version history</li>
+</ul></li>
+</ul>
+<h3 id="reports">10. Reports</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Report list</li>
+<li>Report viewer</li>
+<li>Custom reports</li>
+</ul></li>
+<li><strong>Features:</strong>
+<ul>
+<li>Ticket statistics</li>
+<li>Team performance</li>
+<li>Project progress</li>
+</ul></li>
+</ul>
+<h3 id="dashboard">11. Dashboard</h3>
+<ul>
+<li><strong>Status:</strong> ⚠️ Basic</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Dashboard view</li>
+</ul></li>
+<li><strong>Issues:</strong> Placeholder, needs real data</li>
+</ul>
+<h3 id="settings">12. Settings</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>User settings</li>
+<li>Project settings</li>
+<li>System settings</li>
+</ul></li>
+</ul>
+<h3 id="localization">13. Localization</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Components:</strong>
+<ul>
+<li>Localization management</li>
+<li>Translation editor</li>
+</ul></li>
+<li><strong>Features:</strong>
+<ul>
+<li>Multi-language support</li>
+<li>RTL support</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="platform-features">Platform Features</h2>
+<h3 id="web-client-angular-19">Web Client (Angular 19)</h3>
+<ul>
+<li><strong>Framework:</strong> Angular 19 + Angular Material</li>
+<li><strong>Theme:</strong> Lime Green #BCE63B, Teal #7AA590, Mint
+#B2E3C2</li>
+<li><strong>Features:</strong>
+<ul>
+<li>Responsive design</li>
+<li>Dark/light theme</li>
+<li>Keyboard shortcuts</li>
+<li>Drag-and-drop</li>
+<li>Real-time updates (WebSocket)</li>
+</ul></li>
+</ul>
+<h3 id="desktop-client-tauri-angular">Desktop Client (Tauri +
+Angular)</h3>
+<ul>
+<li><strong>Framework:</strong> Tauri + Angular</li>
+<li><strong>Platforms:</strong> macOS, Windows, Linux</li>
+<li><strong>Features:</strong>
+<ul>
+<li>Native menus</li>
+<li>Window management</li>
+<li>System tray (planned)</li>
+<li>Global shortcuts (planned)</li>
+</ul></li>
+</ul>
+<h3 id="android-client-kotlin-compose">Android Client (Kotlin +
+Compose)</h3>
+<ul>
+<li><strong>Framework:</strong> Kotlin + Jetpack Compose</li>
+<li><strong>SDK:</strong> compileSdk 35, minSdk 29</li>
+<li><strong>Features:</strong>
+<ul>
+<li>Material Design 3</li>
+<li>Dark/light theme</li>
+<li>Offline support (planned)</li>
+</ul></li>
+</ul>
+<h3 id="ios-client-swiftui">iOS Client (SwiftUI)</h3>
+<ul>
+<li><strong>Framework:</strong> SwiftUI</li>
+<li><strong>Platforms:</strong> iOS 16+, macOS 13+</li>
+<li><strong>Features:</strong>
+<ul>
+<li>Native SwiftUI</li>
+<li>Dark/light theme</li>
+<li>Offline support (planned)</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="backend-features">Backend Features</h2>
+<h3 id="authentication">Authentication</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Methods:</strong> JWT, OAuth (planned)</li>
+<li><strong>Features:</strong>
+<ul>
+<li>Login/Register</li>
+<li>Password reset</li>
+<li>Session management</li>
+</ul></li>
+</ul>
+<h3 id="database">Database</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Engines:</strong> SQLite (dev), PostgreSQL (prod)</li>
+<li><strong>Tables:</strong> 71 (V1-V3)</li>
+<li><strong>Features:</strong>
+<ul>
+<li>Migrations</li>
+<li>Backup/restore</li>
+</ul></li>
+</ul>
+<h3 id="api">API</h3>
+<ul>
+<li><strong>Status:</strong> ✅ Implemented</li>
+<li><strong>Type:</strong> REST + WebSocket</li>
+<li><strong>Features:</strong>
+<ul>
+<li>CRUD operations</li>
+<li>Real-time updates</li>
+<li>File uploads</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="feature-gaps">Feature Gaps</h2>
+<h3 id="high-priority">HIGH Priority</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dashboard</td>
+<td>⚠️ Basic</td>
+<td>User experience</td>
+</tr>
+<tr>
+<td>Dark mode</td>
+<td>⚠️ Partial</td>
+<td>User preference</td>
+</tr>
+<tr>
+<td>Animations</td>
+<td>⚠️ Basic</td>
+<td>User experience</td>
+</tr>
+<tr>
+<td>Responsive design</td>
+<td>⚠️ Partial</td>
+<td>Mobile users</td>
+</tr>
+</tbody>
+</table>
+<h3 id="medium-priority">MEDIUM Priority</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System tray</td>
+<td>❌ Missing</td>
+<td>Desktop UX</td>
+</tr>
+<tr>
+<td>Global shortcuts</td>
+<td>❌ Missing</td>
+<td>Desktop UX</td>
+</tr>
+<tr>
+<td>Offline support</td>
+<td>❌ Missing</td>
+<td>Mobile users</td>
+</tr>
+<tr>
+<td>File drag-and-drop</td>
+<td>❌ Missing</td>
+<td>User experience</td>
+</tr>
+</tbody>
+</table>
+<h3 id="low-priority">LOW Priority</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Custom themes</td>
+<td>❌ Missing</td>
+<td>User preference</td>
+</tr>
+<tr>
+<td>Plugin system</td>
+<td>❌ Missing</td>
+<td>Extensibility</td>
+</tr>
+<tr>
+<td>AI features</td>
+<td>❌ Missing</td>
+<td>Productivity</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md">Architecture</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/GAP_ANALYSIS.md">Gap
+Analysis</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/IMPLEMENTATION_PLAN.md">Implementation
+Plan</a></li>
+</ul>
+<h2
+id="sources-verified-2026-06-22-volumest7projectshelix_track-sibling-helixtrack-source-tree-httpsgithub.comhelix-trackeverything">Sources
+verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling
+HelixTrack source tree) , https://github.com/Helix-Track/Everything</h2>
+<p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
+HelixTrack source tree + upstream umbrella, following the
+<code>docs/ARCHITECTURE.md</code> precedent). Cross-referenced on
+2026-06-22: - The feature inventory + present/❌-missing assessments are
+derived from the present sibling tree
+(<code>helix_track/{core,web_client,desktop_client,   android_client,aurora_os_client}</code>)
+and reconcile against the umbrella’s component/submodule set on
+<code>github.com/Helix-Track/Everything</code>. - The ❌-Missing rows
+(Plugin system, AI features) are honest gap markers, not claims of
+presence — consistent with the companion GAP_ANALYSIS.md. - No
+external-service version claim to staleness-check; this is a structural
+feature ledger of the HelixTrack project’s own code. Re-verify
+per-feature presence directly against the <code>helix_track/</code> tree
+as it evolves.</p>
+</body>
+</html>

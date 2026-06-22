@@ -143,3 +143,16 @@ HelixTrack is a comprehensive JIRA alternative with multiple clients but signifi
 - [Architecture Overview](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
 - [UI/UX Findings](/Volumes/T7/Projects/helix_code/docs/helixtrack/UI_UX_FINDINGS.md)
 - [Missing Features Report](/Volumes/T7/Projects/helix_track/core/MISSING_FEATURES_REPORT.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/core/ (sibling HelixTrack source tree) , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+source tree, following the `docs/ARCHITECTURE.md` precedent). Cross-referenced on
+2026-06-22:
+- The gap analysis ("comprehensive clients but core-backend implementation gaps")
+  is derived from the present sibling `helix_track/core/` tree vs the client trees;
+  the cited `core/MISSING_FEATURES_REPORT.md` lives in that sibling tree.
+- The umbrella `github.com/Helix-Track/Everything` confirms the many-client +
+  Core-service shape that motivates the "gaps in the core backend" thesis.
+- This is an assessment doc, not external instructions; no version claim to
+  staleness-check. Re-derive the gaps from the live `core/` tree as it advances.

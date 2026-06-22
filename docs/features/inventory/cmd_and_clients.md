@@ -98,3 +98,19 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 - **No row is `confirmed`** — every `📹 Video=no`; rollups are `working-untaped` (real + tested, no video), `partial` (real but thin/unverified test coverage), or `gap` (scaffold or untested).
 
 **Feature count: 67 rows** (CLI REPL 14, CLI subcommand groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7, desktop 6, mobile 8, other cmd tools 11 + security_scan 1).
+
+## Sources verified 2026-06-22: helix_code/cmd/* , helix_code/applications/* , helix_code/web/* , helix_code/tests/integration/*_e2e_test.go
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — no external service documented).
+Cross-referenced against the live tree on 2026-06-22:
+- **`helix_code/cmd/*` = 21 entries** (11 tool subdirs incl. `cli`, `server`,
+  `helix_config`, `security_scan`, `performance_optimization`, etc.) — the
+  "other cmd tools 11 + security_scan 1" tally matches the subdir set.
+- **`helix_code/applications/*` = 6 dirs** (cli / tui / web / desktop / mobile
+  families) — consistent with the per-client recordability matrix.
+- **Web LLM e2e tests confirmed present:** `helix_code/tests/integration/{llm_generate,llm_stream,specify_server}_e2e_test.go`
+  exist (the doc's `Tests=e2e` / `V&V=yes(docs/qa/web-llm-e2e-20260615/)` claim is
+  backed by real files, not asserted).
+- **No external-service version claims in this doc** → nothing to staleness-check;
+  the row data is structural evidence about HelixCode's own code.

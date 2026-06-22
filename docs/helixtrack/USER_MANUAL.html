@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>USER_MANUAL</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">USER_MANUAL</h1>
+</header>
+<h1 id="helixtrack-user-manual-2026-06-21">HelixTrack User Manual —
+2026-06-21</h1>
+<h2 id="overview">Overview</h2>
+<p>HelixTrack is a modern, open-source project management and issue
+tracking system.</p>
+<hr />
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="first-login">First Login</h3>
+<ol type="1">
+<li>Open HelixTrack in your browser</li>
+<li>Click “Register” to create an account</li>
+<li>Fill in your details (username, email, password)</li>
+<li>Click “Register” to complete</li>
+<li>Login with your credentials</li>
+</ol>
+<h3 id="dashboard">Dashboard</h3>
+<p>After login, you’ll see the dashboard with: - Recent projects - Your
+assigned tickets - Activity feed - Quick actions</p>
+<hr />
+<h2 id="projects">Projects</h2>
+<h3 id="creating-a-project">Creating a Project</h3>
+<ol type="1">
+<li>Click “Projects” in the sidebar</li>
+<li>Click “Create Project”</li>
+<li>Fill in project details:
+<ul>
+<li>Name: Project name</li>
+<li>Key: Short identifier (e.g., “PROJ”)</li>
+<li>Description: Project description</li>
+<li>Lead: Project lead</li>
+</ul></li>
+<li>Click “Create”</li>
+</ol>
+<h3 id="managing-projects">Managing Projects</h3>
+<ul>
+<li><strong>View:</strong> Click on project name</li>
+<li><strong>Edit:</strong> Click “Edit” button</li>
+<li><strong>Delete:</strong> Click “Delete” button (requires
+confirmation)</li>
+</ul>
+<hr />
+<h2 id="tickets">Tickets</h2>
+<h3 id="creating-a-ticket">Creating a Ticket</h3>
+<ol type="1">
+<li>Navigate to a project</li>
+<li>Click “Create Ticket”</li>
+<li>Fill in ticket details:
+<ul>
+<li>Title: Ticket title</li>
+<li>Description: Detailed description</li>
+<li>Type: Bug, Feature, Task, Epic, Story</li>
+<li>Priority: Lowest, Low, Medium, High, Highest</li>
+<li>Assignee: Team member</li>
+</ul></li>
+<li>Click “Create”</li>
+</ol>
+<h3 id="ticket-workflow">Ticket Workflow</h3>
+<ol type="1">
+<li><strong>Open</strong> — Newly created</li>
+<li><strong>In Progress</strong> — Being worked on</li>
+<li><strong>Review</strong> — Under review</li>
+<li><strong>Testing</strong> — Being tested</li>
+<li><strong>Completed</strong> — Done</li>
+<li><strong>Blocked</strong> — Waiting on dependency</li>
+</ol>
+<h3 id="ticket-actions">Ticket Actions</h3>
+<ul>
+<li><strong>Assign:</strong> Click “Assign” and select team member</li>
+<li><strong>Comment:</strong> Add comments in the comment section</li>
+<li><strong>Attach:</strong> Upload files and attachments</li>
+<li><strong>Link:</strong> Link related tickets</li>
+</ul>
+<hr />
+<h2 id="boards">Boards</h2>
+<h3 id="kanban-board">Kanban Board</h3>
+<ol type="1">
+<li>Click “Boards” in the sidebar</li>
+<li>Select a board</li>
+<li>Drag and drop tickets between columns</li>
+<li>Filter by assignee, priority, or type</li>
+</ol>
+<h3 id="board-columns">Board Columns</h3>
+<ul>
+<li><strong>Backlog:</strong> Not yet started</li>
+<li><strong>To Do:</strong> Ready to start</li>
+<li><strong>In Progress:</strong> Being worked on</li>
+<li><strong>Review:</strong> Under review</li>
+<li><strong>Done:</strong> Completed</li>
+</ul>
+<hr />
+<h2 id="chat">Chat</h2>
+<h3 id="starting-a-chat">Starting a Chat</h3>
+<ol type="1">
+<li>Click “Chat” in the sidebar</li>
+<li>Select a channel or direct message</li>
+<li>Type your message</li>
+<li>Press Enter to send</li>
+</ol>
+<h3 id="chat-features">Chat Features</h3>
+<ul>
+<li><strong>Emoji:</strong> Click emoji button</li>
+<li><strong>Attachments:</strong> Click attachment button</li>
+<li><strong>Reactions:</strong> Click on message to react</li>
+<li><strong>Threads:</strong> Reply to specific messages</li>
+</ul>
+<hr />
+<h2 id="documents">Documents</h2>
+<h3 id="creating-documents">Creating Documents</h3>
+<ol type="1">
+<li>Click “Documents” in the sidebar</li>
+<li>Click “Create Document”</li>
+<li>Enter title and content</li>
+<li>Click “Save”</li>
+</ol>
+<h3 id="document-features">Document Features</h3>
+<ul>
+<li><strong>Markdown:</strong> Write in Markdown</li>
+<li><strong>Export:</strong> Export to PDF, HTML, DOCX</li>
+<li><strong>Share:</strong> Share with team members</li>
+<li><strong>Version History:</strong> Track changes</li>
+</ul>
+<hr />
+<h2 id="reports">Reports</h2>
+<h3 id="viewing-reports">Viewing Reports</h3>
+<ol type="1">
+<li>Click “Reports” in the sidebar</li>
+<li>Select report type:
+<ul>
+<li>Ticket statistics</li>
+<li>Team performance</li>
+<li>Project progress</li>
+<li>Time tracking</li>
+</ul></li>
+</ol>
+<h3 id="custom-reports">Custom Reports</h3>
+<ol type="1">
+<li>Click “Create Report”</li>
+<li>Select metrics</li>
+<li>Configure filters</li>
+<li>Save report</li>
+</ol>
+<hr />
+<h2 id="settings">Settings</h2>
+<h3 id="user-settings">User Settings</h3>
+<ol type="1">
+<li>Click “Settings” in the sidebar</li>
+<li>Update profile:
+<ul>
+<li>Avatar</li>
+<li>Name</li>
+<li>Email</li>
+<li>Password</li>
+</ul></li>
+<li>Configure notifications</li>
+<li>Set preferences</li>
+</ol>
+<h3 id="project-settings">Project Settings</h3>
+<ol type="1">
+<li>Navigate to project</li>
+<li>Click “Settings”</li>
+<li>Configure:
+<ul>
+<li>Members</li>
+<li>Workflows</li>
+<li>Custom fields</li>
+<li>Permissions</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="keyboard-shortcuts">Keyboard Shortcuts</h2>
+<table>
+<thead>
+<tr>
+<th>Shortcut</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Ctrl+N</code></td>
+<td>Create new ticket</td>
+</tr>
+<tr>
+<td><code>Ctrl+S</code></td>
+<td>Save current form</td>
+</tr>
+<tr>
+<td><code>Ctrl+F</code></td>
+<td>Search</td>
+</tr>
+<tr>
+<td><code>Esc</code></td>
+<td>Close dialog</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/API_REFERENCE.md">API
+Reference</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/DEPLOYMENT_GUIDE.md">Deployment
+Guide</a></li>
+</ul>
+<h2
+id="sources-verified-2026-06-22-volumest7projectshelix_track-sibling-helixtrack-source-tree-httpsgithub.comhelix-trackeverything">Sources
+verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling
+HelixTrack source tree) , https://github.com/Helix-Track/Everything</h2>
+<p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
+HelixTrack source tree + upstream umbrella, following the
+<code>docs/ARCHITECTURE.md</code> precedent). Cross-referenced on
+2026-06-22: - The manual describes the HelixTrack project (a project
+management / issue tracking system) whose clients + Core service are
+confirmed present locally and in the
+<code>github.com/Helix-Track/Everything</code> umbrella repo. - Keyboard
+shortcuts and UI flows describe the project’s own clients (Angular 19
+web/desktop, confirmed from their <code>package.json</code>); no
+external third-party service version is asserted that needs
+staleness-checking. - This is end-user documentation for HelixTrack
+itself; re-verify any step against the live client/backend behaviour as
+the project evolves.</p>
+</body>
+</html>

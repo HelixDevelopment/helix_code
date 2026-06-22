@@ -104,3 +104,25 @@ codegraph status
 - constitution/Constitution.md §11.4.79 (own-org submodules included)
 - constitution/Constitution.md §11.4.80 (regular update + sync)
 - constitution/Constitution.md §11.4.77 (regeneration mechanism)
+
+## Sources verified 2026-06-22: https://registry.npmjs.org/@colbymchenry/codegraph/latest , https://colbymchenry.github.io/codegraph/getting-started/configuration/
+
+Cross-referenced this doc against the latest official CodeGraph sources (fetched
+2026-06-22). Findings:
+- **Version current.** npm `@colbymchenry/codegraph` latest = **1.0.1** (registry
+  `latest` tag; description "Local-first code intelligence for AI agents (MCP).
+  Self-contained — bundles its own runtime."). This doc's "CodeGraph v1.0.1"
+  claim is accurate.
+- **Exclusion source-of-truth confirmed.** The official configuration page
+  confirms CodeGraph is "zero-config" with "no config file to write or keep in
+  sync" — exclusions are driven by `.gitignore` (honored via git in git repos,
+  read directly root+nested in non-git projects) plus built-in defaults
+  (`node_modules`, `vendor`, `dist`, `build`, `target`, `.venv`, `Pods`,
+  `.next`, files > 1 MB), with `!negation` overrides in `.gitignore`. This
+  corroborates the doc's "config.json is inert; `.gitignore`/`.git/info/exclude`
+  are the single source of truth" claim — NO contradiction.
+- **Negative finding.** The fetched configuration page does not document a
+  `codegraph sync` subcommand under that exact name; the §11.4.80 sync flow this
+  doc references comes from the constitution-submodule `codegraph_*.sh` wrappers,
+  not the upstream CLI surface. Treat the upstream CLI contract as authoritative
+  for raw `codegraph` invocations.

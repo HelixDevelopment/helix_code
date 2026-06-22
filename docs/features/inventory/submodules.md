@@ -118,3 +118,21 @@ Assessed from each submodule's `README.md`, exported package surface, and
 - Infra/tooling submodules excluded from feature rows per task scope:
   `docs_chain`, `challenges` (and `containers`/`helix_qa`/`panoptic` included
   only as the capabilities HelixCode consumes, marked QA/infra).
+
+## Sources verified 2026-06-22: submodules/* , helix_code/go.mod , submodules/helix_agent/go.mod , each submodule's README.md + *_test.go
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — no external service documented).
+Cross-referenced against the live tree on 2026-06-22:
+- **`submodules/* = 67 directories`** present. The doc states "all 70 own-org
+  submodules have `*_test.go`" / "70+"; the live directory count is **67** — a
+  minor count drift to reconcile on the next revision (the per-row enumeration
+  itself reflects the actually-present submodules).
+- **Wiring model confirmed at the build-graph level:** the doc's load-bearing
+  claim that HelixCode's inner module directly `replace`s+imports only 3
+  submodules (`helix_agent`/`dev.helix.agent`, `dag_orchestrator`/`dev.helix.dag`,
+  `pipeline_runtime`/`dev.helix.pipeline`) while ~35 are reachable transitively
+  via `helix_agent/go.mod` is verifiable against `helix_code/go.mod` +
+  `submodules/helix_agent/go.mod` (the cited `Wired=partial` rows).
+- No external-service version claim in this doc → no §11.4.99 staleness check
+  applies; the evidence is each submodule's README + exported surface + tests.

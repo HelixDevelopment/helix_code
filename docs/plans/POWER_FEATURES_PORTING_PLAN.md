@@ -380,3 +380,22 @@ Researched 2026-06-14 by read-only subagents against the in-repo vendored copies
 - bridle: `bridle/CLAUDE.md`, `bridle/AGENTS.md`, `.claude-plugin/marketplace.json` (marketplace, not an agent)
 
 HelixCode baseline verified against: `helix_code/internal/{agent,repomap,mcp,plugins,verifier,session,hooks,worker,memory,voice,clarification,task,autocommit,roocode,kilocode,planner,plantree,approval,approvalwire,quality,server,telemetry,context}` and `helix_code/applications/*`, plus `docs/plans/HXC-031-codex-cline-port.md`.
+
+## Sources verified 2026-06-22: cli_agents/*/{README,AGENTS,CLAUDE}.md , helix_code/internal/* , helix_code/applications/* , docs/plans/HXC-031-codex-cline-port.md
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — this is a port-mapping PLAN, not
+operator instructions for an external service). The plan's own `Method` field
+already declares it: read-only research of `cli_agents/<agent>/` READMEs+docs
+cross-checked against `helix_code/internal/*` + `helix_code/applications/*`.
+Cross-referenced on 2026-06-22:
+- The rev2 reconciliation paths it corrected (`internal/autonomy` →
+  `internal/workflow/autonomy`, `internal/planner` → `internal/workflow/planmode`)
+  are real moves in the live tree — the rev2 status update IS the §11.4.99
+  correction record for this doc.
+- **Honest status preserved:** the doc is explicitly `Status: DRAFT — research +
+  plan only, NO code` and Phases 2–7 are marked unimplemented; no green bluff.
+- **`cli_agents/* = 50 directories`** present (the vendored reference catalogue
+  the per-agent doc-paths point at). No external-service version claim → no
+  upstream-staleness check applies (vendored reference copies, not a live
+  service this doc instructs against).

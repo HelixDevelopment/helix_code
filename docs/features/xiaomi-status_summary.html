@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>xiaomi-status_summary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">xiaomi-status_summary</h1>
+</header>
+<h1 id="xiaomi-mimo-provider-status-summary">Xiaomi MiMo Provider —
+Status Summary</h1>
+<p><strong>Status</strong>: ✅ Implemented <strong>Date</strong>:
+2026-06-19 <strong>Models</strong>: 10 (text gen, ASR, TTS)
+<strong>Tests</strong>: All passing (unit, integration, stress, chaos)
+<strong>Evidence</strong>: Live API verification captured</p>
+<h2
+id="sources-verified-2026-06-22-helix_codeinternalllmxiaomi_provider.go-helix_codeinternalllmxiaomi_provider.md-httpsgithub.comxiaomimimomimo">Sources
+verified 2026-06-22: helix_code/internal/llm/xiaomi_provider.go ,
+helix_code/internal/llm/XIAOMI_PROVIDER.md ,
+https://github.com/XiaomiMiMo/MiMo</h2>
+<p>Cross-referenced this summary against the in-repo provider source and
+the external Xiaomi MiMo upstream (fetched/read 2026-06-22). Findings: -
+<strong>“10 models” confirmed from repo source.</strong>
+<code>helix_code/internal/llm/xiaomi_provider.go</code> defines exactly
+10 model entries — <code>mimo-v2.5-pro</code>, <code>mimo-v2.5</code>,
+<code>mimo-v2-pro</code>, <code>mimo-v2-omni</code>,
+<code>mimo-v2-flash</code>, <code>mimo-v2.5-asr</code>,
+<code>mimo-v2.5-tts</code>, <code>mimo-v2.5-tts-voiceclone</code>,
+<code>mimo-v2.5-tts-voicedesign</code>, <code>mimo-v2-tts</code> — with
+<code>TranscribeAudio()</code> (ASR) + <code>SynthesizeSpeech()</code>
+(TTS) endpoints against base URL
+<code>https://api.xiaomimimo.com/v1</code>. The “10 (text gen, ASR,
+TTS)” claim is accurate against the implementation (the implementation
+IS the source of truth for this provider per CONST-036/037 + §11.4.35).
+- <strong>Negative finding (external corroboration gap —
+important).</strong> The public upstream
+<code>github.com/XiaomiMiMo/MiMo</code> documents the open-source
+<strong>MiMo-7B</strong> family (Base / RL-Zero / SFT / RL / RL-0530),
+explicitly math/code-reasoning and “NOT multimodal, ASR, or TTS.” It
+does NOT corroborate the commercial <strong>MiMo-V2.5</strong> API
+lineup (omni-modal / ASR / TTS) this provider targets. The authoritative
+source for the V2.5 commercial endpoint is the key-gated
+<code>https://api.xiaomimimo.com/v1</code> service (a public GET of its
+root returns 404 without an API key/path — expected), NOT the
+open-source MiMo-7B repo. Anyone validating these model IDs must do so
+against a live keyed call to the commercial endpoint, not the public
+GitHub repo. - <strong>External model-family is genuinely
+third-party.</strong> Anthropic’s models overview (platform.claude.com)
+lists no Xiaomi/MiMo models — confirming MiMo is an external provider
+integrated via HelixCode’s OpenAI-compatible surface, not an Anthropic
+offering.</p>
+</body>
+</html>

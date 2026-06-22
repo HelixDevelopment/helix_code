@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DATABASE_SCHEMA</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">DATABASE_SCHEMA</h1>
+</header>
+<h1 id="helixtrack-database-schema-2026-06-21">HelixTrack Database
+Schema — 2026-06-21</h1>
+<h2 id="overview">Overview</h2>
+<p>HelixTrack uses SQLite (development) or PostgreSQL (production) with
+71 tables across V1-V3.</p>
+<hr />
+<h2 id="v1-core-tables-57">V1 Core Tables (57)</h2>
+<h3 id="business-entities">Business Entities</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>project</td>
+<td>Projects/workspaces</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>ticket</td>
+<td>Issues/tasks</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>user</td>
+<td>Users</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>comment</td>
+<td>Comments</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>team</td>
+<td>Teams</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>attachment</td>
+<td>File attachments</td>
+<td>⚠️ Partial</td>
+</tr>
+<tr>
+<td>label</td>
+<td>Labels/tags</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>priority</td>
+<td>Priorities</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>resolution</td>
+<td>Resolutions</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>component</td>
+<td>Components</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>cycle</td>
+<td>Sprints/iterations</td>
+<td>❌ Missing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workflow-entities">Workflow Entities</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>workflow</td>
+<td>Workflow definitions</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>workflow_step</td>
+<td>Workflow steps</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>ticket_type</td>
+<td>Ticket types</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>ticket_status</td>
+<td>Ticket statuses</td>
+<td>❌ Missing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="board-entities">Board Entities</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>board</td>
+<td>Kanban/Scrum boards</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>board_column</td>
+<td>Board columns</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>board_ticket</td>
+<td>Board-ticket mapping</td>
+<td>❌ Missing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="user-entities">User Entities</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>user_role</td>
+<td>User roles</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>permission</td>
+<td>Permissions</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>user_preference</td>
+<td>User preferences</td>
+<td>❌ Missing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="system-entities">System Entities</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>system_info</td>
+<td>System metadata</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>audit_log</td>
+<td>Audit trail</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>notification</td>
+<td>Notifications</td>
+<td>❌ Missing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="v2-extension-tables-14">V2 Extension Tables (14)</h2>
+<h3 id="enhanced-features">Enhanced Features</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ticket_relationship</td>
+<td>Ticket relationships</td>
+<td>⚠️ Partial</td>
+</tr>
+<tr>
+<td>ticket_link</td>
+<td>Ticket links</td>
+<td>⚠️ Partial</td>
+</tr>
+<tr>
+<td>ticket_watchers</td>
+<td>Ticket watchers</td>
+<td>⚠️ Partial</td>
+</tr>
+<tr>
+<td>ticket_time_entry</td>
+<td>Time tracking</td>
+<td>⚠️ Partial</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workflow-extensions">Workflow Extensions</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>workflow_transition</td>
+<td>Workflow transitions</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>workflow_condition</td>
+<td>Workflow conditions</td>
+<td>❌ Missing</td>
+</tr>
+<tr>
+<td>workflow_action</td>
+<td>Workflow actions</td>
+<td>❌ Missing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="v3-advanced-tables">V3 Advanced Tables</h2>
+<h3 id="security">Security</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>security_audit</td>
+<td>Security audit log</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>permission_cache</td>
+<td>Permission cache</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>account</td>
+<td>Account management</td>
+<td>✅ Implemented</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="table-relationships">Table Relationships</h2>
+<h3 id="core-relationships">Core Relationships</h3>
+<pre><code>project (1) ──── (N) ticket
+project (1) ──── (N) board
+project (1) ──── (N) cycle
+project (1) ──── (N) component
+ticket (1) ──── (N) comment
+ticket (1) ──── (N) attachment
+ticket (N) ──── (N) label
+user (1) ──── (N) ticket (assignee)
+user (1) ──── (N) comment
+team (N) ──── (N) user</code></pre>
+<hr />
+<h2 id="indexes">Indexes</h2>
+<h3 id="performance-indexes">Performance Indexes</h3>
+<ul>
+<li><code>idx_ticket_project_id</code> — Ticket lookup by project</li>
+<li><code>idx_ticket_status</code> — Ticket lookup by status</li>
+<li><code>idx_ticket_assignee</code> — Ticket lookup by assignee</li>
+<li><code>idx_comment_ticket_id</code> — Comment lookup by ticket</li>
+<li><code>idx_audit_created</code> — Audit log by date</li>
+<li><code>idx_audit_user_id</code> — Audit log by user</li>
+</ul>
+<hr />
+<h2 id="migrations">Migrations</h2>
+<h3 id="migration-history">Migration History</h3>
+<ul>
+<li>V1.0 — Initial schema</li>
+<li>V2.0 — Extended features</li>
+<li>V3.0 — Advanced features</li>
+<li>V5.6 — Security engine enhancement</li>
+</ul>
+<h3 id="migration-files">Migration Files</h3>
+<ul>
+<li><code>core/Application/Database/DDL/Migration.V5.6.sql</code></li>
+</ul>
+<hr />
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md">Architecture</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/API_REFERENCE.md">API
+Reference</a></li>
+</ul>
+<h2
+id="sources-verified-2026-06-22-volumest7projectshelix_trackcoredatabaseddldefinition.v1..v5.sql-volumest7projectshelix_trackcoreapplicationdatabaseddl-httpsgithub.comhelix-trackeverything">Sources
+verified 2026-06-22:
+/Volumes/T7/Projects/helix_track/core/Database/DDL/Definition.V1..V5.sql
+, /Volumes/T7/Projects/helix_track/core/Application/Database/DDL/ ,
+https://github.com/Helix-Track/Everything</h2>
+<p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
+DDL files, following the <code>docs/ARCHITECTURE.md</code> precedent).
+Cross-referenced on 2026-06-22: - <strong>Schema DDL CONFIRMED
+present:</strong>
+<code>helix_track/core/Database/DDL/Definition.V1.sql</code> …
+<code>Definition.V5.sql</code> exist (plus
+<code>Indexes_Performance.sql</code>, <code>Migration.V*.sql</code>),
+and the migration set also lives at
+<code>core/Application/Database/DDL/</code>
+(<code>Migration.V5.6.sql</code>,
+<code>Test_Data_Users_Permissions.sql</code>) — the doc’s
+<code>core/Application/Database/DDL/...</code> migration path is real.
+SQLite (dev) source <code>Definition.sqlite</code> is present. -
+<strong>Negative finding (version-range drift):</strong> this doc states
+“71 tables across <strong>V1-V3</strong>”, but the live DDL tree carries
+Definition files <strong>V1 through V5</strong> (and a V5.6 migration).
+The table count and the “V1-V3” range should be re-derived from the
+V1-V5 DDL on the next revision — the doc’s range understates the shipped
+schema versions. Re-verify table counts directly from the
+<code>Definition.V*.sql</code> DDL, which is the source of truth.</p>
+</body>
+</html>

@@ -242,3 +242,20 @@ ws://localhost:8080/ws?token=<jwt_token>
 ## Cross-references
 - [Architecture](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
 - [Implementation Plan](/Volumes/T7/Projects/helix_code/docs/helixtrack/IMPLEMENTATION_PLAN.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/core/ (sibling HelixTrack source tree) , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+source tree, following the `docs/ARCHITECTURE.md` precedent — HelixTrack is a
+sibling own-org project, not a third-party live service this doc instructs against).
+Cross-referenced on 2026-06-22:
+- The sibling source tree `/Volumes/T7/Projects/helix_track/core/` is present
+  locally and is the authoritative source for these REST endpoints / request-
+  response shapes / status codes; auth is JWT-Bearer (confirmed in
+  `helix_track/auth/{ARCHITECTURE,README}.md`).
+- The upstream umbrella repo `github.com/Helix-Track/Everything` confirms a Core
+  backend service exists in the HelixTrack project.
+- **Negative finding:** the GitHub umbrella README does NOT itemise the individual
+  endpoints — endpoint-level detail is derived from the local `core/` tree, which
+  is the source to re-verify against when the backend changes. The `localhost:8080`
+  base URL is a dev-default, not a deployed endpoint.

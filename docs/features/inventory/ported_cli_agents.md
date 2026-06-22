@@ -64,3 +64,24 @@ plan only, NO code", its Phases 2–7 (diff-sandbox, branches, rewind, tangent, 
 server, spec-driven, OS sandbox) are unimplemented, and HXC-031 (codex multimodal + cline computer-use)
 is a DRAFT plan with no code. No ported feature has an analyzed recording, so none can be `confirmed`;
 all landed ports are honestly `working-untaped` pending video V&V.
+
+## Sources verified 2026-06-22: cli_agents/* , helix_code/internal/* (port doc.go origin headers) , docs/CONTINUATION.md (P2-Fxx ports ledger) , docs/plans/POWER_FEATURES_PORTING_PLAN.md , docs/plans/HXC-031-codex-cline-port.md
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees +
+in-repo ledgers, following the `docs/ARCHITECTURE.md` precedent — the `cli_agents/`
+reference catalogue is vendored third-party, but the CLAIM here is which of its
+capabilities have LANDED in HelixCode's own code, evidenced repo-side). Cross-
+referenced against the live tree on 2026-06-22:
+- **`cli_agents/* = 50 directories`** present (the reference catalogue this slice
+  draws from; note `_status_header.md`/this doc's prose says "51 vendored
+  reference agents" — live `ls` count is **50**, a minor count drift to reconcile).
+- Landed ports are evidenced by package `doc.go` origin headers under
+  `helix_code/internal/*`, the `docs/CONTINUATION.md` P2-Fxx CLOSED ledger, and the
+  `POWER_FEATURES_PORTING_PLAN.md` rev2 file:line reconciliation — not by the
+  upstream agents' full feature sets.
+- **Negative finding restated:** `docs/plans/HXC-031-codex-cline-port.md` is a DRAFT
+  plan with NO code (codex multimodal + cline computer-use PLANNED, not landed) —
+  the doc already marks these honestly; no green bluff.
+- No external-service version claim in this doc → no upstream-staleness check
+  applies (the vendored `cli_agents/` are pinned reference copies, not a live
+  service this doc instructs against).

@@ -6,41 +6,170 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>ported_cli_agents</title>
   <style>
-
-span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-
-ul.task-list[class]{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-font-size: inherit;
-width: 0.8em;
-margin: 0 0.8em 0.2em -1.6em;
-vertical-align: middle;
-}
-.display.math{display: block; text-align: center; margin: 0.5rem auto;}
-</style>
-  <style type="text/css">
-table {
-border-collapse: collapse;
-}
-table td,
-table th {
-border: 1px solid #cccccc;
-padding: 4px 8px;
-vertical-align: top;
-}
-
-tr.cell-status-obsolete > td {
-background-color: #E0E0E0;
-}
-
-tr.cell-status-obsolete > td:nth-child(2),
-tr.cell-status-obsolete > td:last-child {
-text-decoration: line-through;
-}
-</style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
 </head>
 <body>
 <header id="title-block-header">
@@ -604,5 +733,35 @@ unimplemented, and HXC-031 (codex multimodal + cline computer-use) is a
 DRAFT plan with no code. No ported feature has an analyzed recording, so
 none can be <code>confirmed</code>; all landed ports are honestly
 <code>working-untaped</code> pending video V&amp;V.</p>
+<h2
+id="sources-verified-2026-06-22-cli_agents-helix_codeinternal-port-doc.go-origin-headers-docscontinuation.md-p2-fxx-ports-ledger-docsplanspower_features_porting_plan.md-docsplanshxc-031-codex-cline-port.md">Sources
+verified 2026-06-22: cli_agents/* , helix_code/internal/* (port doc.go
+origin headers) , docs/CONTINUATION.md (P2-Fxx ports ledger) ,
+docs/plans/POWER_FEATURES_PORTING_PLAN.md ,
+docs/plans/HXC-031-codex-cline-port.md</h2>
+<p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
+repo trees + in-repo ledgers, following the
+<code>docs/ARCHITECTURE.md</code> precedent — the
+<code>cli_agents/</code> reference catalogue is vendored third-party,
+but the CLAIM here is which of its capabilities have LANDED in
+HelixCode’s own code, evidenced repo-side). Cross- referenced against
+the live tree on 2026-06-22: -
+<strong><code>cli_agents/* = 50 directories</code></strong> present (the
+reference catalogue this slice draws from; note
+<code>_status_header.md</code>/this doc’s prose says “51 vendored
+reference agents” — live <code>ls</code> count is <strong>50</strong>, a
+minor count drift to reconcile). - Landed ports are evidenced by package
+<code>doc.go</code> origin headers under
+<code>helix_code/internal/*</code>, the
+<code>docs/CONTINUATION.md</code> P2-Fxx CLOSED ledger, and the
+<code>POWER_FEATURES_PORTING_PLAN.md</code> rev2 file:line
+reconciliation — not by the upstream agents’ full feature sets. -
+<strong>Negative finding restated:</strong>
+<code>docs/plans/HXC-031-codex-cline-port.md</code> is a DRAFT plan with
+NO code (codex multimodal + cline computer-use PLANNED, not landed) —
+the doc already marks these honestly; no green bluff. - No
+external-service version claim in this doc → no upstream-staleness check
+applies (the vendored <code>cli_agents/</code> are pinned reference
+copies, not a live service this doc instructs against).</p>
 </body>
 </html>

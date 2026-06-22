@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>UI_UX_FINDINGS</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">UI_UX_FINDINGS</h1>
+</header>
+<h1 id="helixtrack-uiux-findings-main-stream-analysis">HelixTrack UI/UX
+Findings — Main Stream Analysis</h1>
+<h2 id="date-2026-06-21">Date: 2026-06-21</h2>
+<hr />
+<h2 id="web-client-angular-19">Web Client (Angular 19)</h2>
+<h3 id="dashboard">Dashboard</h3>
+<ul>
+<li><strong>Status:</strong> Basic placeholder — needs comprehensive
+redesign</li>
+<li><strong>Issues:</strong> Static cards, no real data, no animations,
+no widgets</li>
+<li><strong>Recommendation:</strong> Implement real dashboard with
+charts, stats, recent activity</li>
+</ul>
+<h3 id="kanban-board">Kanban Board</h3>
+<ul>
+<li><strong>Status:</strong> Well-implemented with CDK
+drag-and-drop</li>
+<li><strong>Strengths:</strong> WIP limits, column management, ticket
+cards</li>
+<li><strong>Issues:</strong>
+<ul>
+<li>Hardcoded colors (rgba(0,0,0,…)) instead of CSS variables</li>
+<li>No animations on drag operations</li>
+<li>No smooth transitions on card movements</li>
+<li>Background color #f5f5f5 instead of theme variable</li>
+</ul></li>
+<li><strong>Recommendation:</strong> Apply theme variables, add drag
+animations</li>
+</ul>
+<h3 id="theme-system">Theme System</h3>
+<ul>
+<li><strong>Status:</strong> Comprehensive CSS custom properties</li>
+<li><strong>Colors:</strong> Lime Green #BCE63B, Teal #7AA590, Mint
+#B2E3C2</li>
+<li><strong>Issues:</strong>
+<ul>
+<li>Some components use hardcoded colors instead of variables</li>
+<li>Missing dark theme implementation</li>
+<li>Inconsistent use of design tokens</li>
+</ul></li>
+<li><strong>Recommendation:</strong> Enforce theme variables everywhere,
+implement dark mode</li>
+</ul>
+<h3 id="component-library">Component Library</h3>
+<ul>
+<li><strong>Status:</strong> Uses Angular Material</li>
+<li><strong>Strengths:</strong> Consistent Material Design
+components</li>
+<li><strong>Issues:</strong>
+<ul>
+<li>Some custom components don’t follow Material patterns</li>
+<li>Missing custom HelixTrack component library</li>
+</ul></li>
+<li><strong>Recommendation:</strong> Create HelixTrack-specific
+component library</li>
+</ul>
+<hr />
+<h2 id="desktop-client-tauri-angular">Desktop Client (Tauri +
+Angular)</h2>
+<h3 id="window-management">Window Management</h3>
+<ul>
+<li><strong>Status:</strong> Basic Tauri configuration</li>
+<li><strong>Issues:</strong>
+<ul>
+<li>Default window size 800x600 (too small)</li>
+<li>No window state persistence</li>
+<li>No native menu configuration</li>
+<li>No system tray integration</li>
+</ul></li>
+<li><strong>Recommendation:</strong> Implement proper window
+management</li>
+</ul>
+<h3 id="native-integration">Native Integration</h3>
+<ul>
+<li><strong>Status:</strong> Minimal</li>
+<li><strong>Missing:</strong>
+<ul>
+<li>System tray icon</li>
+<li>Global keyboard shortcuts</li>
+<li>Native notifications</li>
+<li>File drag-and-drop</li>
+<li>Auto-updater</li>
+</ul></li>
+<li><strong>Recommendation:</strong> Add native desktop features</li>
+</ul>
+<hr />
+<h2 id="android-client-kotlin-compose">Android Client (Kotlin +
+Compose)</h2>
+<h3 id="architecture">Architecture</h3>
+<ul>
+<li><strong>Status:</strong> Good architecture with Hilt DI</li>
+<li><strong>SDK:</strong> compileSdk 35, minSdk 29</li>
+<li><strong>Strengths:</strong> Modern Kotlin, Jetpack Compose,
+Navigation component</li>
+</ul>
+<h3 id="uiux">UI/UX</h3>
+<ul>
+<li><strong>Status:</strong> Needs investigation</li>
+<li><strong>Missing info:</strong> Component structure, theme
+implementation, animations</li>
+</ul>
+<hr />
+<h2 id="ios-client-swiftui">iOS Client (SwiftUI)</h2>
+<h3 id="architecture-1">Architecture</h3>
+<ul>
+<li><strong>Status:</strong> SwiftUI with GRDB, Lottie, Markdown UI</li>
+<li><strong>Platforms:</strong> iOS 16+, macOS 13+</li>
+<li><strong>Strengths:</strong> Modern SwiftUI, good dependency
+choices</li>
+</ul>
+<h3 id="uiux-1">UI/UX</h3>
+<ul>
+<li><strong>Status:</strong> Needs investigation</li>
+<li><strong>Missing info:</strong> View structure, theme implementation,
+animations</li>
+</ul>
+<hr />
+<h2 id="cross-platform-issues">Cross-Platform Issues</h2>
+<h3 id="consistency">Consistency</h3>
+<ul>
+<li><strong>Issue:</strong> Each client may have different UI/UX</li>
+<li><strong>Recommendation:</strong> Create shared design system</li>
+</ul>
+<h3 id="theme">Theme</h3>
+<ul>
+<li><strong>Issue:</strong> Brand colors defined differently per
+platform</li>
+<li><strong>Recommendation:</strong> Create centralized design
+tokens</li>
+</ul>
+<h3 id="animations">Animations</h3>
+<ul>
+<li><strong>Issue:</strong> Inconsistent animation quality</li>
+<li><strong>Recommendation:</strong> Define animation standards</li>
+</ul>
+<hr />
+<h2 id="priority-items">Priority Items</h2>
+<h3 id="high-priority">High Priority</h3>
+<ol type="1">
+<li><strong>Dashboard redesign</strong> — Real data, widgets,
+charts</li>
+<li><strong>Theme enforcement</strong> — CSS variables everywhere</li>
+<li><strong>Dark mode</strong> — Implement across all clients</li>
+<li><strong>Animations</strong> — Smooth transitions,
+micro-interactions</li>
+</ol>
+<h3 id="medium-priority">Medium Priority</h3>
+<ol type="1">
+<li><strong>Component library</strong> — HelixTrack-specific
+components</li>
+<li><strong>Desktop native features</strong> — System tray,
+notifications</li>
+<li><strong>Responsive design</strong> — Mobile-friendly web client</li>
+<li><strong>Accessibility</strong> — WCAG compliance</li>
+</ol>
+<h3 id="low-priority">Low Priority</h3>
+<ol type="1">
+<li><strong>Performance optimization</strong> — Virtual scrolling, lazy
+loading</li>
+<li><strong>Advanced animations</strong> — Lottie, complex
+transitions</li>
+<li><strong>Custom themes</strong> — User-configurable themes</li>
+</ol>
+<hr />
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md">HelixTrack
+Architecture</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_track/docs/WEB_CLIENT_ANALYSIS.md">Web
+Client Analysis</a> (pending subagent)</li>
+<li><a
+href="/Volumes/T7/Projects/helix_track/docs/DESKTOP_CLIENT_ANALYSIS.md">Desktop
+Client Analysis</a> (pending subagent)</li>
+</ul>
+<h2
+id="sources-verified-2026-06-22-volumest7projectshelix_trackweb_clientpackage.json-volumest7projectshelix_trackdesktop_clientpackage.json-httpsgithub.comhelix-trackeverything">Sources
+verified 2026-06-22:
+/Volumes/T7/Projects/helix_track/web_client/package.json ,
+/Volumes/T7/Projects/helix_track/desktop_client/package.json ,
+https://github.com/Helix-Track/Everything</h2>
+<p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
+HelixTrack client source, following the
+<code>docs/ARCHITECTURE.md</code> precedent). Cross-referenced on
+2026-06-22: - <strong>Angular 19 CONFIRMED:</strong> both
+<code>helix_track/web_client/package.json</code> and
+<code>desktop_client/package.json</code> pin
+<code>"@angular/core": "^19.0.0"</code>. This doc’s “Web Client (Angular
+19)” heading is accurate. - <strong>Honest in-progress markers
+preserved:</strong> the cross-referenced
+<code>WEB_CLIENT_ANALYSIS.md</code> /
+<code>DESKTOP_CLIENT_ANALYSIS.md</code> are explicitly tagged “(pending
+subagent)” — the doc does not claim findings it has not produced. - This
+is a UI/UX findings doc for HelixTrack’s own clients; no
+external-service version claim to staleness-check beyond the Angular pin
+(confirmed current to the source). Re-confirm the framework version from
+the client <code>package.json</code> files as they upgrade.</p>
+</body>
+</html>

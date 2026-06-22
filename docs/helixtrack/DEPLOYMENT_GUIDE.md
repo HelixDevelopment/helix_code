@@ -221,3 +221,18 @@ tar -czf spaces-backup.tar.gz /data/spaces/
 ## Cross-references
 - [Architecture](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
 - [API Reference](/Volumes/T7/Projects/helix_code/docs/helixtrack/API_REFERENCE.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling HelixTrack source tree) , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+source tree + upstream umbrella, following the `docs/ARCHITECTURE.md` precedent).
+Cross-referenced on 2026-06-22:
+- The deployment steps describe the sibling HelixTrack project (Core backend +
+  Web/Desktop clients confirmed present locally and in the
+  `github.com/Helix-Track/Everything` umbrella).
+- **Negative finding:** deployment-platform-specific commands (any third-party
+  runtime/CLI versions invoked) were NOT re-verified against their respective
+  upstream docs in this pass — only the HelixTrack source structure was confirmed.
+  Before relying on any external-tool command here (container runtime, package
+  manager), re-verify against that tool's latest official docs per §11.4.99. The
+  backup/data paths are illustrative of the project layout.

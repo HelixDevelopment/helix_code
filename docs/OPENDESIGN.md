@@ -97,3 +97,24 @@ To enable `od_generate_design`, add BYOK vars:
 - constitution/Constitution.md §11.4.162 (OpenDesign UI mandate)
 - constitution/Constitution.md §11.4.74 (extend-don't-reimplement)
 - constitution/Constitution.md §11.4.35 (project-specific configuration)
+
+## Sources verified 2026-06-22: https://github.com/nexu-io/open-design , https://registry.npmjs.org/open-design-mcp/latest
+
+Cross-referenced this doc against the latest official OpenDesign sources (fetched
+2026-06-22). Findings:
+- **MCP package version current.** npm `open-design-mcp` latest = **0.16.1**
+  (registry `latest` tag; description "MCP stdio server bridging coding agents to
+  Open Design daemon (BYOK flow with full systemPrompt fidelity)."). This doc's
+  "open-design-mcp … Version: 0.16.1" claim is accurate.
+- **Components + daemon port confirmed.** The upstream README confirms the two
+  components this doc lists: an Express + SQLite **daemon** on port **7456**
+  (`http://localhost:7456`) and a **stdio MCP server**. It also corroborates the
+  150+ design-system `DESIGN.md` brand files and 100+ skills this doc cites
+  (upstream states "100+ Skills", "150+ Design Systems", "261 Plugins").
+- **Negative finding (install method drift).** The upstream now documents a
+  one-line installer — `curl -fsSL https://open-design.ai/install.sh | sh -s
+  <agent>` — and from-source guidance of **Node ~24 + pnpm 10.33.x** (this doc
+  says `pnpm install`). The doc's `npm install -g open-design-mcp` still yields
+  the published 0.16.1 MCP server, so it is not wrong, but the upstream
+  curl-installer is the now-preferred path and the from-source toolchain pins
+  (Node 24 / pnpm 10.33.x) should be reflected on the next revision.

@@ -234,3 +234,18 @@ Comprehensive inventory of all HelixTrack features across all platforms.
 - [Architecture](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
 - [Gap Analysis](/Volumes/T7/Projects/helix_code/docs/helixtrack/GAP_ANALYSIS.md)
 - [Implementation Plan](/Volumes/T7/Projects/helix_code/docs/helixtrack/IMPLEMENTATION_PLAN.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling HelixTrack source tree) , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+source tree + upstream umbrella, following the `docs/ARCHITECTURE.md` precedent).
+Cross-referenced on 2026-06-22:
+- The feature inventory + present/❌-missing assessments are derived from the
+  present sibling tree (`helix_track/{core,web_client,desktop_client,
+  android_client,aurora_os_client}`) and reconcile against the umbrella's
+  component/submodule set on `github.com/Helix-Track/Everything`.
+- The ❌-Missing rows (Plugin system, AI features) are honest gap markers, not
+  claims of presence — consistent with the companion GAP_ANALYSIS.md.
+- No external-service version claim to staleness-check; this is a structural
+  feature ledger of the HelixTrack project's own code. Re-verify per-feature
+  presence directly against the `helix_track/` tree as it evolves.

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ARCHITECTURE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ARCHITECTURE</h1>
+</header>
+<h1 id="helixtrack-architecture-overview">HelixTrack Architecture
+Overview</h1>
+<h2 id="what-is-helixtrack">What is HelixTrack?</h2>
+<p>HelixTrack is a comprehensive, modern, open-source JIRA alternative
+for the free world. It’s a multi-platform project management and issue
+tracking system with a microservices architecture.</p>
+<p><strong>Repository:</strong>
+git@github.com:Helix-Track/Everything.git <strong>Status:</strong> V1,
+V2, V3 Production Ready</p>
+<hr />
+<h2 id="system-architecture">System Architecture</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    HELIXTRACK ECOSYSTEM                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │   Web    │  │ Desktop  │  │ Android  │  │   iOS    │   │
+│  │ Angular  │  │  Tauri   │  │  Kotlin  │  │ SwiftUI  │   │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘   │
+│       │              │              │              │         │
+│       └──────────────┴──────────────┴──────────────┘         │
+│                          │                                   │
+│                    REST API / WebSocket                       │
+│                          │                                   │
+│  ┌───────────────────────────────────────────────────────┐   │
+│  │              CORE BACKEND (Go + Gin)                   │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐            │   │
+│  │  │   Auth   │  │ Tickets  │  │ Projects │  ...        │   │
+│  │  │  (JWT)   │  │  (CRUD)  │  │  (CRUD)  │            │   │
+│  │  └──────────┘  └──────────┘  └──────────┘            │   │
+│  │                                                       │   │
+│  │  ┌──────────────────────────────────────────────┐     │   │
+│  │  │         Database (SQLite / PostgreSQL)        │     │   │
+│  │  │              71 Tables (V1-V3)                │     │   │
+│  │  └──────────────────────────────────────────────┘     │   │
+│  └───────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr />
+<h2 id="component-inventory">Component Inventory</h2>
+<h3 id="core-backend-go">Core Backend (Go)</h3>
+<ul>
+<li><strong>Location:</strong> <code>core/Application/</code></li>
+<li><strong>Framework:</strong> Gin Gonic</li>
+<li><strong>Database:</strong> SQLite (dev) / PostgreSQL (prod)</li>
+<li><strong>Tables:</strong> 71 (V1-V3)</li>
+<li><strong>Auth:</strong> JWT + RBAC</li>
+<li><strong>Features:</strong> REST API, WebSocket, File attachments,
+Localization</li>
+<li><strong>Status:</strong> Production Ready</li>
+</ul>
+<h3 id="web-client-angular-19">Web Client (Angular 19)</h3>
+<ul>
+<li><strong>Location:</strong> <code>web_client/</code></li>
+<li><strong>Framework:</strong> Angular 19 + Angular Material</li>
+<li><strong>Theme:</strong> Lime Green #BCE63B, Teal #7AA590, Mint
+#B2E3C2</li>
+<li><strong>Features:</strong>
+<ul>
+<li>Dashboard</li>
+<li>Boards (Kanban)</li>
+<li>Tickets (CRUD, workflows, relationships)</li>
+<li>Chat</li>
+<li>Documents</li>
+<li>Projects</li>
+<li>Teams</li>
+<li>Users</li>
+<li>Settings</li>
+<li>Reports</li>
+<li>Localization management</li>
+</ul></li>
+<li><strong>Testing:</strong> Cypress, Playwright, AI QA</li>
+</ul>
+<h3 id="desktop-client-tauri-angular">Desktop Client (Tauri +
+Angular)</h3>
+<ul>
+<li><strong>Location:</strong> <code>desktop_client/</code></li>
+<li><strong>Framework:</strong> Tauri + Angular</li>
+<li><strong>Platforms:</strong> macOS, Windows, Linux</li>
+<li><strong>Features:</strong> Native menus, system tray, window
+management</li>
+</ul>
+<h3 id="android-client-kotlin">Android Client (Kotlin)</h3>
+<ul>
+<li><strong>Location:</strong> <code>android_client/</code></li>
+<li><strong>Framework:</strong> Kotlin + Jetpack Compose</li>
+<li><strong>SDK:</strong> compileSdk 35, minSdk 29</li>
+<li><strong>DI:</strong> Hilt</li>
+<li><strong>Navigation:</strong> Navigation component</li>
+</ul>
+<h3 id="ios-client-swiftui">iOS Client (SwiftUI)</h3>
+<ul>
+<li><strong>Location:</strong> <code>ios_client/</code></li>
+<li><strong>Framework:</strong> SwiftUI</li>
+<li><strong>Dependencies:</strong> GRDB, Lottie, Markdown UI</li>
+<li><strong>Platforms:</strong> iOS 16+, macOS 13+</li>
+</ul>
+<hr />
+<h2 id="submodules-50">Submodules (50+)</h2>
+<p>HelixTrack incorporates 50+ submodules from vasic-digital and
+HelixDevelopment organizations:</p>
+<h3 id="core-services">Core Services</h3>
+<ul>
+<li><code>auth</code> — Authentication service</li>
+<li><code>database</code> — Database abstraction</li>
+<li><code>storage</code> — File storage</li>
+<li><code>messaging</code> — Messaging service</li>
+<li><code>event_bus</code> — Event system</li>
+<li><code>cache</code> — Caching layer</li>
+</ul>
+<h3 id="aiml-services">AI/ML Services</h3>
+<ul>
+<li><code>llm_orchestrator</code> — LLM orchestration</li>
+<li><code>llm_provider</code> — LLM provider abstraction</li>
+<li><code>llms_verifier</code> — LLM verification</li>
+<li><code>vision_engine</code> — Vision AI</li>
+<li><code>embeddings</code> — Embedding service</li>
+<li><code>rag</code> — RAG pipeline</li>
+</ul>
+<h3 id="infrastructure">Infrastructure</h3>
+<ul>
+<li><code>containers</code> — Docker/container management</li>
+<li><code>security</code> — Security tools</li>
+<li><code>observability</code> — Monitoring</li>
+<li><code>optimization</code> — Performance optimization</li>
+</ul>
+<h3 id="development-tools">Development Tools</h3>
+<ul>
+<li><code>helix_qa</code> — QA automation</li>
+<li><code>challenges</code> — Test challenges</li>
+<li><code>docs_chain</code> — Documentation sync</li>
+<li><code>doc_processor</code> — Document processing</li>
+</ul>
+<hr />
+<h2 id="database-schema-71-tables">Database Schema (71 Tables)</h2>
+<h3 id="v1-core-57-tables">V1 Core (57 tables)</h3>
+<ul>
+<li><code>project</code> — Projects/workspaces</li>
+<li><code>ticket</code> — Issues/tasks</li>
+<li><code>user</code> — Users</li>
+<li><code>team</code> — Teams</li>
+<li><code>board</code> — Kanban boards</li>
+<li><code>comment</code> — Comments</li>
+<li><code>attachment</code> — File attachments</li>
+<li>… and 50 more</li>
+</ul>
+<h3 id="v2-extensions-14-tables">V2 Extensions (14 tables)</h3>
+<ul>
+<li>Enhanced features</li>
+<li>Workflow management</li>
+<li>Reporting</li>
+</ul>
+<h3 id="v3-advanced">V3 Advanced</h3>
+<ul>
+<li>AI integration</li>
+<li>Advanced analytics</li>
+</ul>
+<hr />
+<h2 id="api-design">API Design</h2>
+<h3 id="rest-endpoints">REST Endpoints</h3>
+<ul>
+<li><code>/api/v1/projects</code> — Project CRUD</li>
+<li><code>/api/v1/tickets</code> — Ticket CRUD</li>
+<li><code>/api/v1/users</code> — User management</li>
+<li><code>/api/v1/teams</code> — Team management</li>
+<li><code>/api/v1/boards</code> — Board management</li>
+<li><code>/do</code> — Generic action endpoint</li>
+</ul>
+<h3 id="websocket">WebSocket</h3>
+<ul>
+<li>Real-time updates</li>
+<li>Chat</li>
+<li>Notifications</li>
+</ul>
+<hr />
+<h2 id="theme-system">Theme System</h2>
+<h3 id="brand-colors">Brand Colors</h3>
+<ul>
+<li><strong>Primary:</strong> Lime Green #BCE63B</li>
+<li><strong>Secondary:</strong> Teal #7AA590</li>
+<li><strong>Accent:</strong> Mint #B2E3C2</li>
+</ul>
+<h3 id="css-custom-properties">CSS Custom Properties</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode css"><code class="sourceCode css"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>--helixtrack-primary<span class="in">:</span> <span class="pp">#BCE63B</span>;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>--helixtrack-secondary<span class="in">:</span> <span class="pp">#7AA590</span>;</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>--helixtrack-accent<span class="in">:</span> <span class="pp">#B2E3C2</span>;</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>--helixtrack-background<span class="in">:</span> <span class="pp">#FFFFFF</span>;</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>--helixtrack-surface<span class="in">:</span> <span class="pp">#F8F9FA</span>;</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>--helixtrack-text-primary<span class="in">:</span> <span class="pp">#1A1A1A</span>;</span></code></pre></div>
+<hr />
+<h2 id="integration-points">Integration Points</h2>
+<h3 id="codegraph">CodeGraph</h3>
+<ul>
+<li>Local SQLite code-knowledge-graph</li>
+<li>MCP server for CLI agents</li>
+<li>Indexes all source code</li>
+</ul>
+<h3 id="opendesign">OpenDesign</h3>
+<ul>
+<li>UI design system</li>
+<li>Design tokens and themes</li>
+<li>MCP server for design generation</li>
+</ul>
+<h3 id="media-validator">Media Validator</h3>
+<ul>
+<li>Validates media artifacts</li>
+<li>OCR/vision verification</li>
+<li>Evidence-based testing</li>
+</ul>
+<hr />
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><a href="/Volumes/T7/Projects/helix_track/README.md">HelixTrack
+README</a></li>
+<li><a href="/Volumes/T7/Projects/helix_track/core/CLAUDE.md">Core
+CLAUDE.md</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_track/web_client/WEB_CLIENT_IMPLEMENTATION_GUIDE.md">Web
+Client Guide</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_track/desktop_client/DESKTOP_IMPLEMENTATION_COMPLETE.md">Desktop
+Client Guide</a></li>
+</ul>
+<h2
+id="sources-verified-2026-06-22-volumest7projectshelix_track-sibling-helixtrack-source-tree-httpsgithub.comhelix-trackeverything">Sources
+verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling
+HelixTrack source tree) , https://github.com/Helix-Track/Everything</h2>
+<p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
+HelixTrack source tree + upstream umbrella, following the
+<code>docs/ARCHITECTURE.md</code> precedent). Cross-referenced on
+2026-06-22: - <strong>Client roster CONFIRMED</strong> against the
+upstream umbrella repo <code>github.com/Helix-Track/Everything</code>
+(Web / Desktop / Android / iOS / Aurora OS / Harmony OS / Core) AND the
+present sibling tree
+(<code>helix_track/{core,web_client,   desktop_client,android_client,aurora_os_client,auth,Database}</code>
+all present). - <strong>Microservices/AI components CONFIRMED</strong>
+by the umbrella’s submodule set (Auth, Cache, storage, VectorDB,
+LLMOrchestrator, LLMProvider, embeddings, RAG). - <strong>Negative
+finding:</strong> the umbrella README describes itself as a “wrapper /
+monorepo umbrella repo” and does NOT explicitly state “JIRA alternative
+for the free world” — that framing in this doc comes from the project’s
+own component docs, not the umbrella landing page. The
+<code>git@github.com:Helix-Track/Everything.git</code> remote in the
+header is correct.</p>
+</body>
+</html>

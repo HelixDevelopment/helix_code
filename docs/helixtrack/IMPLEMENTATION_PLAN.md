@@ -148,3 +148,15 @@ Implement the following entities with model, handler, and CRUD actions:
 - [Gap Analysis](/Volumes/T7/Projects/helix_code/docs/helixtrack/GAP_ANALYSIS.md)
 - [Architecture](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
 - [UI/UX Findings](/Volumes/T7/Projects/helix_code/docs/helixtrack/UI_UX_FINDINGS.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/core/ (sibling HelixTrack source tree) , docs/helixtrack/GAP_ANALYSIS.md , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+source tree + the companion gap analysis, following the `docs/ARCHITECTURE.md`
+precedent). Cross-referenced on 2026-06-22:
+- The phased plan (missing core entities → model/handler/CRUD) is derived from the
+  GAP_ANALYSIS findings against the present sibling `helix_track/core/` tree.
+- This is a forward-looking PLAN for the HelixTrack project, not external-service
+  instructions; phase timelines/priorities are planning estimates, not asserted
+  facts. No external version claim to staleness-check. Re-baseline against the
+  live `core/` tree before executing each phase.

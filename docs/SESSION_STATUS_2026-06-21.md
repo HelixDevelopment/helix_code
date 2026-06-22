@@ -121,3 +121,20 @@
 4. Create test coverage for all changes
 5. Commit and push all changes
 6. Continue with next workable items
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling source tree analyzed) , docs/helixtrack/* , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — this is a point-in-time SESSION
+record of subagent/main-stream activity, not operator instructions for an external
+service). Cross-referenced on 2026-06-22:
+- The HelixTrack analysis streams this session tracked are evidenced by the
+  produced `docs/helixtrack/*` artefacts, derived from the present sibling source
+  tree `/Volumes/T7/Projects/helix_track/` (core / web_client / desktop_client /
+  android_client / aurora_os_client / auth / Database all present locally).
+- The upstream umbrella repo `github.com/Helix-Track/Everything` confirms the
+  HelixTrack client roster (Web / Desktop / Android / iOS / Aurora OS / Harmony OS
+  / Core) this session investigated.
+- Being a dated session snapshot, this doc is inherently point-in-time; its
+  "IN PROGRESS / COMPLETE" states reflect 2026-06-21 and are not re-asserted as
+  current. No external-service version claim to staleness-check.

@@ -273,3 +273,15 @@ conductor's job once a real analyzed recording exists); `Overall` is never
   recorded scenario; none is video-confirmed yet (📹 `no` throughout).
 
 233 features inventoried across 72 packages.
+
+## Sources verified 2026-06-22: helix_code/internal/*
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — no external service documented).
+Cross-referenced against the live tree on 2026-06-22:
+- **`helix_code/internal/*` = 72 packages — CONFIRMED** (`ls -d helix_code/internal/*/`
+  = 72), matching the "across 72 packages" rollup. The per-row `Dev`/`Wired`/`Tests`
+  assessments are structural evidence (impl reality + `_test.go` presence) about
+  HelixCode's own code.
+- No external-service version claims in this doc → no §11.4.99 staleness check
+  applies; nothing to contradict against an upstream source.

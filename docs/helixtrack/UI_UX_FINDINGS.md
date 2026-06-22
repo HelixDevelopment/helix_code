@@ -130,3 +130,19 @@
 - [HelixTrack Architecture](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
 - [Web Client Analysis](/Volumes/T7/Projects/helix_track/docs/WEB_CLIENT_ANALYSIS.md) (pending subagent)
 - [Desktop Client Analysis](/Volumes/T7/Projects/helix_track/docs/DESKTOP_CLIENT_ANALYSIS.md) (pending subagent)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/web_client/package.json , /Volumes/T7/Projects/helix_track/desktop_client/package.json , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+client source, following the `docs/ARCHITECTURE.md` precedent). Cross-referenced on
+2026-06-22:
+- **Angular 19 CONFIRMED:** both `helix_track/web_client/package.json` and
+  `desktop_client/package.json` pin `"@angular/core": "^19.0.0"`. This doc's
+  "Web Client (Angular 19)" heading is accurate.
+- **Honest in-progress markers preserved:** the cross-referenced
+  `WEB_CLIENT_ANALYSIS.md` / `DESKTOP_CLIENT_ANALYSIS.md` are explicitly tagged
+  "(pending subagent)" — the doc does not claim findings it has not produced.
+- This is a UI/UX findings doc for HelixTrack's own clients; no external-service
+  version claim to staleness-check beyond the Angular pin (confirmed current to the
+  source). Re-confirm the framework version from the client `package.json` files
+  as they upgrade.

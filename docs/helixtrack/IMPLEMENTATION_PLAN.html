@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>IMPLEMENTATION_PLAN</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">IMPLEMENTATION_PLAN</h1>
+</header>
+<h1 id="helixtrack-implementation-plan-2026-06-21">HelixTrack
+Implementation Plan — 2026-06-21</h1>
+<h2 id="phase-1-core-backend-completion-high-priority">Phase 1: Core
+Backend Completion (HIGH Priority)</h2>
+<h3 id="missing-core-entities">1.1 Missing Core Entities</h3>
+<p>Implement the following entities with model, handler, and CRUD
+actions:</p>
+<table>
+<thead>
+<tr>
+<th>Entity</th>
+<th>Priority</th>
+<th>Dependencies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ticket_type</td>
+<td>HIGH</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ticket_status</td>
+<td>None</td>
+<td>None</td>
+</tr>
+<tr>
+<td>workflow</td>
+<td>HIGH</td>
+<td>None</td>
+</tr>
+<tr>
+<td>workflow_step</td>
+<td>HIGH</td>
+<td>workflow</td>
+</tr>
+<tr>
+<td>board</td>
+<td>HIGH</td>
+<td>project</td>
+</tr>
+<tr>
+<td>cycle</td>
+<td>HIGH</td>
+<td>project</td>
+</tr>
+<tr>
+<td>priority</td>
+<td>HIGH</td>
+<td>None</td>
+</tr>
+<tr>
+<td>resolution</td>
+<td>HIGH</td>
+<td>None</td>
+</tr>
+<tr>
+<td>label</td>
+<td>HIGH</td>
+<td>None</td>
+</tr>
+<tr>
+<td>component</td>
+<td>MEDIUM</td>
+<td>project</td>
+</tr>
+<tr>
+<td>attachment</td>
+<td>MEDIUM</td>
+<td>ticket</td>
+</tr>
+<tr>
+<td>user_role</td>
+<td>HIGH</td>
+<td>user</td>
+</tr>
+<tr>
+<td>permission</td>
+<td>HIGH</td>
+<td>user_role</td>
+</tr>
+<tr>
+<td>audit_log</td>
+<td>MEDIUM</td>
+<td>all entities</td>
+</tr>
+</tbody>
+</table>
+<h3 id="api-endpoints">1.2 API Endpoints</h3>
+<ul>
+<li><code>/api/v1/ticket-types</code> — CRUD</li>
+<li><code>/api/v1/ticket-statuses</code> — CRUD</li>
+<li><code>/api/v1/workflows</code> — CRUD</li>
+<li><code>/api/v1/boards</code> — CRUD</li>
+<li><code>/api/v1/cycles</code> — CRUD</li>
+<li><code>/api/v1/priorities</code> — CRUD</li>
+<li><code>/api/v1/resolutions</code> — CRUD</li>
+<li><code>/api/v1/labels</code> — CRUD</li>
+</ul>
+<hr />
+<h2 id="phase-2-web-client-enhancement-high-priority">Phase 2: Web
+Client Enhancement (HIGH Priority)</h2>
+<h3 id="dashboard-redesign">2.1 Dashboard Redesign</h3>
+<ul>
+<li>Real data widgets (project stats, ticket counts, recent
+activity)</li>
+<li>Charts (ticket trends, burndown, velocity)</li>
+<li>Animations (card transitions, data loading)</li>
+<li>Responsive layout</li>
+</ul>
+<h3 id="theme-enforcement">2.2 Theme Enforcement</h3>
+<ul>
+<li>Audit all components for hardcoded colors</li>
+<li>Replace with CSS variables</li>
+<li>Implement dark mode</li>
+<li>Create design token system</li>
+</ul>
+<h3 id="animations-transitions">2.3 Animations &amp; Transitions</h3>
+<ul>
+<li>Page transitions (route animations)</li>
+<li>Card hover effects</li>
+<li>Drag-and-drop feedback</li>
+<li>Loading states</li>
+<li>Micro-interactions</li>
+</ul>
+<h3 id="responsive-design">2.4 Responsive Design</h3>
+<ul>
+<li>Mobile-friendly layouts</li>
+<li>Touch gestures</li>
+<li>Adaptive components</li>
+</ul>
+<hr />
+<h2 id="phase-3-desktop-client-enhancement-medium-priority">Phase 3:
+Desktop Client Enhancement (MEDIUM Priority)</h2>
+<h3 id="native-features">3.1 Native Features</h3>
+<ul>
+<li>System tray icon</li>
+<li>Global keyboard shortcuts</li>
+<li>Native notifications</li>
+<li>File drag-and-drop</li>
+<li>Auto-updater</li>
+<li>Window state persistence</li>
+</ul>
+<h3 id="uiux">3.2 UI/UX</h3>
+<ul>
+<li>Desktop-specific layouts</li>
+<li>Native menu bar</li>
+<li>Keyboard navigation</li>
+</ul>
+<hr />
+<h2 id="phase-4-mobile-client-enhancement-medium-priority">Phase 4:
+Mobile Client Enhancement (MEDIUM Priority)</h2>
+<h3 id="android">4.1 Android</h3>
+<ul>
+<li>Complete feature parity with web</li>
+<li>Theme consistency</li>
+<li>Animations</li>
+<li>Offline support</li>
+</ul>
+<h3 id="ios">4.2 iOS</h3>
+<ul>
+<li>Complete feature parity with web</li>
+<li>Theme consistency</li>
+<li>Animations</li>
+<li>Offline support</li>
+</ul>
+<hr />
+<h2 id="phase-5-cross-platform-design-system-low-priority">Phase 5:
+Cross-Platform Design System (LOW Priority)</h2>
+<h3 id="opendesign-integration">5.1 OpenDesign Integration</h3>
+<ul>
+<li>Create shared design tokens</li>
+<li>Implement theme system</li>
+<li>Create component library</li>
+<li>Document design guidelines</li>
+</ul>
+<h3 id="shared-components">5.2 Shared Components</h3>
+<ul>
+<li>Button variants</li>
+<li>Card components</li>
+<li>Form elements</li>
+<li>Navigation patterns</li>
+</ul>
+<hr />
+<h2 id="phase-6-testing-quality-high-priority">Phase 6: Testing &amp;
+Quality (HIGH Priority)</h2>
+<h3 id="unit-tests">6.1 Unit Tests</h3>
+<ul>
+<li>Core backend: 80%+ coverage</li>
+<li>Web client: 80%+ coverage</li>
+<li>Desktop client: 70%+ coverage</li>
+<li>Mobile clients: 70%+ coverage</li>
+</ul>
+<h3 id="integration-tests">6.2 Integration Tests</h3>
+<ul>
+<li>API integration tests</li>
+<li>WebSocket tests</li>
+<li>Database tests</li>
+</ul>
+<h3 id="e2e-tests">6.3 E2E Tests</h3>
+<ul>
+<li>Web: Cypress/Playwright</li>
+<li>Desktop: Tauri E2E</li>
+<li>Mobile: Espresso/XCUITest</li>
+</ul>
+<hr />
+<h2 id="timeline">Timeline</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Duration</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 1</td>
+<td>2-3 weeks</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>2-3 weeks</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>1-2 weeks</td>
+<td>MEDIUM</td>
+</tr>
+<tr>
+<td>Phase 4</td>
+<td>2-3 weeks</td>
+<td>MEDIUM</td>
+</tr>
+<tr>
+<td>Phase 5</td>
+<td>1-2 weeks</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>Phase 6</td>
+<td>Ongoing</td>
+<td>HIGH</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/GAP_ANALYSIS.md">Gap
+Analysis</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md">Architecture</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/UI_UX_FINDINGS.md">UI/UX
+Findings</a></li>
+</ul>
+<h2
+id="sources-verified-2026-06-22-volumest7projectshelix_trackcore-sibling-helixtrack-source-tree-docshelixtrackgap_analysis.md-httpsgithub.comhelix-trackeverything">Sources
+verified 2026-06-22: /Volumes/T7/Projects/helix_track/core/ (sibling
+HelixTrack source tree) , docs/helixtrack/GAP_ANALYSIS.md ,
+https://github.com/Helix-Track/Everything</h2>
+<p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
+HelixTrack source tree + the companion gap analysis, following the
+<code>docs/ARCHITECTURE.md</code> precedent). Cross-referenced on
+2026-06-22: - The phased plan (missing core entities →
+model/handler/CRUD) is derived from the GAP_ANALYSIS findings against
+the present sibling <code>helix_track/core/</code> tree. - This is a
+forward-looking PLAN for the HelixTrack project, not external-service
+instructions; phase timelines/priorities are planning estimates, not
+asserted facts. No external version claim to staleness-check.
+Re-baseline against the live <code>core/</code> tree before executing
+each phase.</p>
+</body>
+</html>

@@ -61,3 +61,21 @@ else is marked truthfully. Population is an ongoing program, NOT a one-shot clai
 | cmd tools + client apps | `helix_code/cmd/*` (21) + `applications/*` (cli/tui/web/desktop/mobile) | inventory dispatched |
 | owned submodules | `submodules/*` (70+) | inventory dispatched |
 | ported cli_agents capabilities | `cli_agents/*` → HelixCode | inventory dispatched |
+
+## Sources verified 2026-06-22: helix_code/internal/* , helix_code/cmd/* , helix_code/applications/* , submodules/* , cli_agents/*
+
+This document is REPO-STATE-DERIVED (per §11.4.99 the "sources" are the
+cross-referenced repo trees, following the `docs/ARCHITECTURE.md` precedent — no
+external service is documented here). Cross-referenced the population-progress
+counts against the live tree on 2026-06-22 (`ls -d <tree>/*/` counts):
+- **`helix_code/internal/*` = 72 packages — CONFIRMED** (matches "72 pkgs").
+- **`helix_code/cmd/*` = 21 entries — CONFIRMED** (`ls helix_code/cmd/` = 21
+  total entries: 11 tool subdirs + 10 top-level `.go`/`_test.go` files; the
+  "(21)" count is entries, not subdirs-only).
+- **`helix_code/applications/*` = 6 dirs** (cli/tui/web/desktop/mobile families
+  present) — consistent.
+- **Negative finding (minor count drift).** `submodules/*` live count = **67**
+  directories, not "70+" as the row states; `cli_agents/*` live count = **50**
+  directories. These slice labels slightly overstate the live directory counts
+  and should be reconciled to 67 / 50 on the next revision (the inventory bodies
+  themselves enumerate the actual present components).

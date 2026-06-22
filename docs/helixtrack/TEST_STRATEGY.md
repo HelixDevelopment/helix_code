@@ -189,3 +189,16 @@ make test-ios
 - [Implementation Plan](/Volumes/T7/Projects/helix_code/docs/helixtrack/IMPLEMENTATION_PLAN.md)
 - [Gap Analysis](/Volumes/T7/Projects/helix_code/docs/helixtrack/GAP_ANALYSIS.md)
 - [Architecture](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling HelixTrack source tree; core test suites + web_client cypress) , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+source tree, following the `docs/ARCHITECTURE.md` precedent). Cross-referenced on
+2026-06-22:
+- The test strategy targets the present sibling HelixTrack tree; real test scaffolding
+  is present (e.g. `helix_track/desktop_client/cypress/` + `cypress.config.ts`,
+  `core/*test*` suites) confirming the cross-platform test surface this strategy
+  plans for.
+- This is a project-internal STRATEGY for HelixTrack, not external-tool instructions;
+  it asserts no third-party-tool version that needs staleness-checking. Re-baseline
+  coverage targets against the live test suites as they grow.

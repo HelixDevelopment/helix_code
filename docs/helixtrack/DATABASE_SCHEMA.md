@@ -138,3 +138,20 @@ team (N) ──── (N) user
 ## Cross-references
 - [Architecture](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
 - [API Reference](/Volumes/T7/Projects/helix_code/docs/helixtrack/API_REFERENCE.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/core/Database/DDL/Definition.V1..V5.sql , /Volumes/T7/Projects/helix_track/core/Application/Database/DDL/ , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced DDL files,
+following the `docs/ARCHITECTURE.md` precedent). Cross-referenced on 2026-06-22:
+- **Schema DDL CONFIRMED present:** `helix_track/core/Database/DDL/Definition.V1.sql`
+  … `Definition.V5.sql` exist (plus `Indexes_Performance.sql`, `Migration.V*.sql`),
+  and the migration set also lives at `core/Application/Database/DDL/`
+  (`Migration.V5.6.sql`, `Test_Data_Users_Permissions.sql`) — the doc's
+  `core/Application/Database/DDL/...` migration path is real. SQLite (dev) source
+  `Definition.sqlite` is present.
+- **Negative finding (version-range drift):** this doc states "71 tables across
+  **V1-V3**", but the live DDL tree carries Definition files **V1 through V5** (and
+  a V5.6 migration). The table count and the "V1-V3" range should be re-derived
+  from the V1-V5 DDL on the next revision — the doc's range understates the
+  shipped schema versions. Re-verify table counts directly from the `Definition.V*.sql`
+  DDL, which is the source of truth.

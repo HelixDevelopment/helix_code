@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CODEGRAPH</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CODEGRAPH</h1>
+</header>
+<h1 id="codegraph-helixcode-integration">CodeGraph — HelixCode
+Integration</h1>
+<h2 id="overview">Overview</h2>
+<p>CodeGraph (<code>@colbymchenry/codegraph</code>) is a local SQLite
+semantic code-knowledge-graph exposed to agents over MCP. It provides
+100% local, zero-cloud code intelligence for all CLI agents working on
+HelixCode.</p>
+<p><strong>Constitution reference:</strong> §11.4.78, §11.4.79,
+§11.4.80</p>
+<h2 id="installation">Installation</h2>
+<p>CodeGraph is installed globally:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> @colbymchenry/codegraph</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Binary: /Users/milosvasic/.local/bin/codegraph</span></span></code></pre></div>
+<h2 id="configuration">Configuration</h2>
+<blockquote>
+<p><strong>IMPORTANT (verified 2026-06-22):</strong> CodeGraph v1.0.1 is
+<strong>zero-config</strong> and derives its exclusion scope
+<strong>only from <code>.gitignore</code></strong> (+
+<code>.git/info/exclude</code>), <strong>NOT</strong> from
+<code>.codegraph/config.json</code>. The legacy <code>config.json</code>
+in this repo is <strong>inert</strong> — it is no longer read by the
+tool. Editing it has no effect on what gets indexed. The single source
+of truth for exclusion is the ignore files. (Ref:
+https://colbymchenry.github.io/codegraph/getting-started/configuration/)</p>
+</blockquote>
+<p><strong>Exclusion source of truth:</strong> <code>.gitignore</code>
+(repo-tracked) and/or <code>.git/info/exclude</code> (local,
+non-tracking — preferred for paths that must stay git-tracked,
+e.g. <code>cli_agents/</code>).</p>
+<p><strong>Must be excluded</strong> (per §11.4.10 + §11.4.79) — verify
+each is actually absent from the index, NOT merely listed in the inert
+config: - <code>cli_agents/</code>, <code>cli_agents_resources/</code>,
+<code>github_pages_website/</code> — third-party - nested
+<code>submodules/**/submodules/**</code>,
+<code>submodules/**/cli_agents/**</code> — vendored trees - generated
+<code>**/*.gen.ts</code>, <code>**/worker-configuration.d.ts</code> -
+<code>**/.env</code>, <code>**/.env.*</code>, <code>**/*.key</code>,
+<code>**/*.pem</code>, <code>**/secrets/**</code> — credentials</p>
+<p><strong>Must be included</strong> (own-org per §11.4.79):
+<code>submodules/*</code>, <code>constitution/</code>,
+<code>helix_code/</code> — confirmed present via live
+<code>codegraph_explore</code>.</p>
+<blockquote>
+<p><strong>Anti-bluff note (§11.4):</strong>
+<code>codegraph_validate.sh</code> historically validated
+<code>config.json</code>’s lists — which the tool ignores — so a 18/18
+PASS did NOT prove third-party paths were excluded (36k
+<code>cli_agents</code> files were in fact indexed, 4.38 GB DB → #850
+watchdog kills). The validator MUST instead query the live DB
+(<code>SELECT COUNT(*) FROM files WHERE path LIKE '&lt;excluded&gt;/%'</code>
+MUST be 0). See
+<code>docs/research/codegraph_daemon_stability_20260622/findings.md</code>.</p>
+</blockquote>
+<h2 id="tool-selection-codegraph_search-vs-codegraph_explore">Tool
+selection — <code>codegraph_search</code> vs
+<code>codegraph_explore</code></h2>
+<p><code>codegraph_search</code> is a SQLite <strong>FTS5 implicit-AND
+symbol-NAME lookup</strong> (matches a single symbol whose
+name/qualified-name/signature/docstring contains <strong>all</strong>
+the query tokens). A natural-language phrase like
+<code>"provider Generate LLM"</code> correctly returns <strong>“No
+results found”</strong> — no single symbol is named that. This is
+working-as-designed, <strong>not</strong> a broken index.</p>
+<ul>
+<li><strong>Name a symbol → <code>codegraph_search</code></strong>
+(e.g. <code>OllamaProvider</code>, <code>NewOllamaProvider</code>).</li>
+<li><strong>Ask a question / explore an area / multi-concept →
+<code>codegraph_explore</code></strong> (NL surface).</li>
+</ul>
+<p>(Ref:
+<code>docs/research/codegraph_search_rootcause_20260622/findings.md</code>.)</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Index the project</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> index</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check status</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> status</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Start MCP server (for CLI agents)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> serve <span class="at">--mcp</span> <span class="at">--path</span> /Volumes/T7/Projects/helix_code</span></code></pre></div>
+<h2 id="mcp-integration">MCP Integration</h2>
+<p>Configured in <code>.mcp.json</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;codegraph&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;stdio&quot;</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;/Users/milosvasic/.local/bin/codegraph&quot;</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;serve&quot;</span><span class="ot">,</span> <span class="st">&quot;--mcp&quot;</span><span class="ot">,</span> <span class="st">&quot;--path&quot;</span><span class="ot">,</span> <span class="st">&quot;/Volumes/T7/Projects/helix_code&quot;</span><span class="ot">]</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="regeneration-mechanism-11.4.77">Regeneration Mechanism
+(§11.4.77)</h2>
+<p>The <code>.codegraph/codegraph.db</code> file is gitignored.
+Regeneration:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> index</span></code></pre></div>
+<h2 id="verification">Verification</h2>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> status</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show: indexed files, total symbols, database size</span></span></code></pre></div>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li>constitution/Constitution.md §11.4.78 (CodeGraph mandate)</li>
+<li>constitution/Constitution.md §11.4.79 (own-org submodules
+included)</li>
+<li>constitution/Constitution.md §11.4.80 (regular update + sync)</li>
+<li>constitution/Constitution.md §11.4.77 (regeneration mechanism)</li>
+</ul>
+<h2
+id="sources-verified-2026-06-22-httpsregistry.npmjs.orgcolbymchenrycodegraphlatest-httpscolbymchenry.github.iocodegraphgetting-startedconfiguration">Sources
+verified 2026-06-22: https://registry.npmjs.org/<span class="citation"
+data-cites="colbymchenry/codegraph/latest">@colbymchenry/codegraph/latest</span>
+,
+https://colbymchenry.github.io/codegraph/getting-started/configuration/</h2>
+<p>Cross-referenced this doc against the latest official CodeGraph
+sources (fetched 2026-06-22). Findings: - <strong>Version
+current.</strong> npm <code>@colbymchenry/codegraph</code> latest =
+<strong>1.0.1</strong> (registry <code>latest</code> tag; description
+“Local-first code intelligence for AI agents (MCP). Self-contained —
+bundles its own runtime.”). This doc’s “CodeGraph v1.0.1” claim is
+accurate. - <strong>Exclusion source-of-truth confirmed.</strong> The
+official configuration page confirms CodeGraph is “zero-config” with “no
+config file to write or keep in sync” — exclusions are driven by
+<code>.gitignore</code> (honored via git in git repos, read directly
+root+nested in non-git projects) plus built-in defaults
+(<code>node_modules</code>, <code>vendor</code>, <code>dist</code>,
+<code>build</code>, <code>target</code>, <code>.venv</code>,
+<code>Pods</code>, <code>.next</code>, files &gt; 1 MB), with
+<code>!negation</code> overrides in <code>.gitignore</code>. This
+corroborates the doc’s “config.json is inert;
+<code>.gitignore</code>/<code>.git/info/exclude</code> are the single
+source of truth” claim — NO contradiction. - <strong>Negative
+finding.</strong> The fetched configuration page does not document a
+<code>codegraph sync</code> subcommand under that exact name; the
+§11.4.80 sync flow this doc references comes from the
+constitution-submodule <code>codegraph_*.sh</code> wrappers, not the
+upstream CLI surface. Treat the upstream CLI contract as authoritative
+for raw <code>codegraph</code> invocations.</p>
+</body>
+</html>

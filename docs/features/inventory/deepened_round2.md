@@ -210,3 +210,19 @@ Each previously-thin entry is enumerated into discrete features in the SAME
 **Round-2 deepened feature count: 145 rows** (73 internal across 12 packages +
 72 submodule across helix_agent 19, security 11, helix_specifier 10,
 helix_qa 14, panoptic 10, distributed across the wiring model).
+
+## Sources verified 2026-06-22: helix_code/internal/* , submodules/{helix_agent,security,helixspecifier,helix_qa,panoptic}/
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — no external service documented).
+This round-2 deepening re-reads packages round-1 flagged shallow; cross-referenced
+against the live tree on 2026-06-22:
+- The deepened rows resolve against real `helix_code/internal/*` package source and
+  the named own-org submodules under `submodules/*` (`helix_agent`, `security`,
+  `helix_qa`, `panoptic`, helix_specifier).
+- The doc already records its own source-read corrections (round-1 stub claims
+  verified false by direct source reads: `workspace` docker stop/remove, `voice`
+  recorder) — those ARE the §11.4.99 negative findings for this slice, captured
+  inline at the head of the file.
+- No external-service version claims in this doc → no staleness check applies;
+  the evidence is structural (impl reality / wiring / `_test.go` presence).

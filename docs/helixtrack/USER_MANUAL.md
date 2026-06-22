@@ -176,3 +176,17 @@ After login, you'll see the dashboard with:
 ## Cross-references
 - [API Reference](/Volumes/T7/Projects/helix_code/docs/helixtrack/API_REFERENCE.md)
 - [Deployment Guide](/Volumes/T7/Projects/helix_code/docs/helixtrack/DEPLOYMENT_GUIDE.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling HelixTrack source tree) , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+source tree + upstream umbrella, following the `docs/ARCHITECTURE.md` precedent).
+Cross-referenced on 2026-06-22:
+- The manual describes the HelixTrack project (a project management / issue
+  tracking system) whose clients + Core service are confirmed present locally and
+  in the `github.com/Helix-Track/Everything` umbrella repo.
+- Keyboard shortcuts and UI flows describe the project's own clients (Angular 19
+  web/desktop, confirmed from their `package.json`); no external third-party
+  service version is asserted that needs staleness-checking.
+- This is end-user documentation for HelixTrack itself; re-verify any step against
+  the live client/backend behaviour as the project evolves.

@@ -160,3 +160,19 @@ Security architecture and best practices for HelixTrack.
 ## Cross-references
 - [Architecture](/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md)
 - [Deployment Guide](/Volumes/T7/Projects/helix_code/docs/helixtrack/DEPLOYMENT_GUIDE.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/auth/ (sibling HelixTrack source tree) , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+auth source, following the `docs/ARCHITECTURE.md` precedent). Cross-referenced on
+2026-06-22:
+- **JWT/Bearer auth CONFIRMED** in the present sibling tree
+  `helix_track/auth/{ARCHITECTURE,README}.md`; the umbrella
+  `github.com/Helix-Track/Everything` confirms a dedicated Auth service in the
+  HelixTrack architecture.
+- **Negative finding:** generic security best-practices in this guide (TLS,
+  incident response, rate-limiting) are HelixTrack-project-internal guidance and
+  were NOT re-verified against any external security-standard's latest revision in
+  this pass — only the auth-mechanism (JWT) was confirmed against the source tree.
+  Re-verify any cited external standard/CVE/library guidance per §11.4.99 before
+  treating it as current.

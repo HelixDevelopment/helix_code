@@ -210,3 +210,20 @@ HelixTrack incorporates 50+ submodules from vasic-digital and HelixDevelopment o
 - [Core CLAUDE.md](/Volumes/T7/Projects/helix_track/core/CLAUDE.md)
 - [Web Client Guide](/Volumes/T7/Projects/helix_track/web_client/WEB_CLIENT_IMPLEMENTATION_GUIDE.md)
 - [Desktop Client Guide](/Volumes/T7/Projects/helix_track/desktop_client/DESKTOP_IMPLEMENTATION_COMPLETE.md)
+
+## Sources verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling HelixTrack source tree) , https://github.com/Helix-Track/Everything
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced HelixTrack
+source tree + upstream umbrella, following the `docs/ARCHITECTURE.md` precedent).
+Cross-referenced on 2026-06-22:
+- **Client roster CONFIRMED** against the upstream umbrella repo
+  `github.com/Helix-Track/Everything` (Web / Desktop / Android / iOS / Aurora OS /
+  Harmony OS / Core) AND the present sibling tree (`helix_track/{core,web_client,
+  desktop_client,android_client,aurora_os_client,auth,Database}` all present).
+- **Microservices/AI components CONFIRMED** by the umbrella's submodule set
+  (Auth, Cache, storage, VectorDB, LLMOrchestrator, LLMProvider, embeddings, RAG).
+- **Negative finding:** the umbrella README describes itself as a "wrapper /
+  monorepo umbrella repo" and does NOT explicitly state "JIRA alternative for the
+  free world" — that framing in this doc comes from the project's own component
+  docs, not the umbrella landing page. The `git@github.com:Helix-Track/Everything.git`
+  remote in the header is correct.

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>TEST_STRATEGY</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">TEST_STRATEGY</h1>
+</header>
+<h1 id="helixtrack-test-strategy-2026-06-21">HelixTrack Test Strategy —
+2026-06-21</h1>
+<h2 id="overview">Overview</h2>
+<p>Comprehensive test strategy for HelixTrack across all platforms and
+components.</p>
+<hr />
+<h2 id="test-types">Test Types</h2>
+<h3 id="unit-tests">1. Unit Tests</h3>
+<ul>
+<li><strong>Purpose:</strong> Test individual components/functions in
+isolation</li>
+<li><strong>Tools:</strong>
+<ul>
+<li>Backend: Go testing package</li>
+<li>Web: Jasmine + Karma</li>
+<li>Desktop: Jasmine + Karma</li>
+<li>Android: JUnit + Mockito</li>
+<li>iOS: XCTest</li>
+</ul></li>
+<li><strong>Coverage Target:</strong> 80%+ for all platforms</li>
+</ul>
+<h3 id="integration-tests">2. Integration Tests</h3>
+<ul>
+<li><strong>Purpose:</strong> Test component interactions</li>
+<li><strong>Tools:</strong>
+<ul>
+<li>Backend: Go testing + test containers</li>
+<li>Web: Angular TestBed</li>
+<li>Desktop: Angular TestBed</li>
+<li>Android: Espresso</li>
+<li>iOS: XCUITest</li>
+</ul></li>
+<li><strong>Coverage Target:</strong> 60%+ for critical paths</li>
+</ul>
+<h3 id="e2e-tests">3. E2E Tests</h3>
+<ul>
+<li><strong>Purpose:</strong> Test complete user workflows</li>
+<li><strong>Tools:</strong>
+<ul>
+<li>Web: Cypress + Playwright</li>
+<li>Desktop: Tauri E2E</li>
+<li>Android: Espresso</li>
+<li>iOS: XCUITest</li>
+</ul></li>
+<li><strong>Coverage Target:</strong> Critical user journeys</li>
+</ul>
+<h3 id="performance-tests">4. Performance Tests</h3>
+<ul>
+<li><strong>Purpose:</strong> Test system performance under load</li>
+<li><strong>Tools:</strong>
+<ul>
+<li>Backend: Go benchmark tests</li>
+<li>Web: Lighthouse + Web Vitals</li>
+<li>Desktop: Tauri performance profiling</li>
+<li>Android: Android Profiler</li>
+<li>iOS: Instruments</li>
+</ul></li>
+<li><strong>Targets:</strong>
+<ul>
+<li>API response time: &lt; 200ms</li>
+<li>Page load: &lt; 2s</li>
+<li>Frame rate: 60fps</li>
+</ul></li>
+</ul>
+<h3 id="security-tests">5. Security Tests</h3>
+<ul>
+<li><strong>Purpose:</strong> Test security vulnerabilities</li>
+<li><strong>Tools:</strong>
+<ul>
+<li>SAST: Go security scanners</li>
+<li>DAST: OWASP ZAP</li>
+<li>Dependency: npm audit, go mod verify</li>
+</ul></li>
+<li><strong>Coverage:</strong> All public endpoints</li>
+</ul>
+<h3 id="accessibility-tests">6. Accessibility Tests</h3>
+<ul>
+<li><strong>Purpose:</strong> Test WCAG compliance</li>
+<li><strong>Tools:</strong>
+<ul>
+<li>Web: axe-playwright</li>
+<li>Desktop: axe-playwright</li>
+<li>Android: Accessibility Scanner</li>
+<li>iOS: Accessibility Inspector</li>
+</ul></li>
+<li><strong>Target:</strong> WCAG 2.1 AA compliance</li>
+</ul>
+<hr />
+<h2 id="test-matrix">Test Matrix</h2>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 8%" />
+<col style="width: 17%" />
+<col style="width: 6%" />
+<col style="width: 17%" />
+<col style="width: 13%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Unit</th>
+<th>Integration</th>
+<th>E2E</th>
+<th>Performance</th>
+<th>Security</th>
+<th>Accessibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Core Backend</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Web Client</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Desktop Client</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Android Client</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>iOS Client</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-automation">Test Automation</h2>
+<h3 id="cicd-integration">CI/CD Integration</h3>
+<ul>
+<li><strong>Backend:</strong> Go test + coverage</li>
+<li><strong>Web:</strong> ng test + ng e2e</li>
+<li><strong>Desktop:</strong> ng test + Tauri E2E</li>
+<li><strong>Android:</strong> gradle test + gradle
+connectedAndroidTest</li>
+<li><strong>iOS:</strong> xcodebuild test</li>
+</ul>
+<h3 id="test-scripts">Test Scripts</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Backend</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> core/Application <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./...</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Web Client</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> web_client <span class="kw">&amp;&amp;</span> <span class="ex">npm</span> test <span class="kw">&amp;&amp;</span> <span class="ex">npm</span> run test:e2e</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Desktop Client</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> desktop_client <span class="kw">&amp;&amp;</span> <span class="ex">npm</span> test <span class="kw">&amp;&amp;</span> <span class="ex">npm</span> run test:e2e</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Android Client</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> android_client <span class="kw">&amp;&amp;</span> <span class="ex">./gradlew</span> test <span class="kw">&amp;&amp;</span> <span class="ex">./gradlew</span> connectedAndroidTest</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># iOS Client</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ios_client <span class="kw">&amp;&amp;</span> <span class="ex">xcodebuild</span> test</span></code></pre></div>
+<hr />
+<h2 id="test-data-management">Test Data Management</h2>
+<h3 id="test-fixtures">Test Fixtures</h3>
+<ul>
+<li>Backend: SQL seed files</li>
+<li>Web: JSON fixtures</li>
+<li>Desktop: JSON fixtures</li>
+<li>Android: JSON fixtures</li>
+<li>iOS: JSON fixtures</li>
+</ul>
+<h3 id="test-databases">Test Databases</h3>
+<ul>
+<li>Backend: SQLite in-memory</li>
+<li>Web: Mock services</li>
+<li>Desktop: Mock services</li>
+<li>Android: Room in-memory</li>
+<li>iOS: GRDB in-memory</li>
+</ul>
+<hr />
+<h2 id="test-reporting">Test Reporting</h2>
+<h3 id="coverage-reports">Coverage Reports</h3>
+<ul>
+<li>Backend: go tool cover</li>
+<li>Web: Istanbul</li>
+<li>Desktop: Istanbul</li>
+<li>Android: JaCoCo</li>
+<li>iOS: Xcode coverage</li>
+</ul>
+<h3 id="test-results">Test Results</h3>
+<ul>
+<li>Backend: go test -v</li>
+<li>Web: Karma reporters</li>
+<li>Desktop: Karma reporters</li>
+<li>Android: Android test reports</li>
+<li>iOS: Xcode test reports</li>
+</ul>
+<hr />
+<h2 id="test-execution">Test Execution</h2>
+<h3 id="local-development">Local Development</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run all tests</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-all</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run specific platform</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-backend</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-web</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-desktop</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-android</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-ios</span></code></pre></div>
+<h3 id="cicd-pipeline">CI/CD Pipeline</h3>
+<ul>
+<li>Pre-commit: Lint + format check</li>
+<li>Pre-push: Unit tests</li>
+<li>Pull request: Full test suite</li>
+<li>Merge: Integration tests</li>
+<li>Release: E2E + performance + security</li>
+</ul>
+<hr />
+<h2 id="test-maintenance">Test Maintenance</h2>
+<h3 id="regular-tasks">Regular Tasks</h3>
+<ul>
+<li>Update test fixtures</li>
+<li>Review test coverage</li>
+<li>Fix flaky tests</li>
+<li>Update test documentation</li>
+</ul>
+<h3 id="test-debt-tracking">Test Debt Tracking</h3>
+<ul>
+<li>Track failing tests</li>
+<li>Monitor coverage trends</li>
+<li>Review test quality</li>
+</ul>
+<hr />
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/IMPLEMENTATION_PLAN.md">Implementation
+Plan</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/GAP_ANALYSIS.md">Gap
+Analysis</a></li>
+<li><a
+href="/Volumes/T7/Projects/helix_code/docs/helixtrack/ARCHITECTURE.md">Architecture</a></li>
+</ul>
+<h2
+id="sources-verified-2026-06-22-volumest7projectshelix_track-sibling-helixtrack-source-tree-core-test-suites-web_client-cypress-httpsgithub.comhelix-trackeverything">Sources
+verified 2026-06-22: /Volumes/T7/Projects/helix_track/ (sibling
+HelixTrack source tree; core test suites + web_client cypress) ,
+https://github.com/Helix-Track/Everything</h2>
+<p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
+HelixTrack source tree, following the <code>docs/ARCHITECTURE.md</code>
+precedent). Cross-referenced on 2026-06-22: - The test strategy targets
+the present sibling HelixTrack tree; real test scaffolding is present
+(e.g. <code>helix_track/desktop_client/cypress/</code> +
+<code>cypress.config.ts</code>, <code>core/*test*</code> suites)
+confirming the cross-platform test surface this strategy plans for. -
+This is a project-internal STRATEGY for HelixTrack, not external-tool
+instructions; it asserts no third-party-tool version that needs
+staleness-checking. Re-baseline coverage targets against the live test
+suites as they grow.</p>
+</body>
+</html>
