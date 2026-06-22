@@ -50,12 +50,12 @@ COVENANT114_ANCHORS=(
   "§11.4.140 —"
   # §11.4.141 — bold inline format (1 new entry)
   "**§11.4.141 —"
-  # §11.4.142..§11.4.166 — bold inline format (25 entries; ceiling 166 as of 2026-06-22)
+  # §11.4.142..§11.4.165 — bold inline format (24 entries; ceiling 165 — §11.4.166 REPEALED 2026-06-22, anchor retired)
   "**§11.4.142 —" "**§11.4.143 —" "**§11.4.144 —" "**§11.4.145 —" "**§11.4.146 —"
   "**§11.4.147 —" "**§11.4.148 —" "**§11.4.149 —" "**§11.4.150 —" "**§11.4.151 —"
   "**§11.4.152 —" "**§11.4.153 —" "**§11.4.154 —" "**§11.4.155 —" "**§11.4.156 —"
   "**§11.4.157 —" "**§11.4.158 —" "**§11.4.159 —" "**§11.4.160 —" "**§11.4.161 —"
-  "**§11.4.162 —" "**§11.4.163 —" "**§11.4.164 —" "**§11.4.165 —" "**§11.4.166 —"
+  "**§11.4.162 —" "**§11.4.163 —" "**§11.4.164 —" "**§11.4.165 —"
 )
 
 # Map "## §11.4.NN —" -> CM-COVENANT-114-NN-PROPAGATION (exact gate ID in FAILs).
@@ -97,7 +97,7 @@ done
 # 1b. Root govfiles — covenant-114 propagation (§11.4.69, §11.4.75..97).
 #     All 5 consumer-extension govfiles must carry every cascaded anchor.
 echo ""
-echo "--- Root govfiles — covenant-114 propagation (§11.4.69, §11.4.75..§11.4.166) ---"
+echo "--- Root govfiles — covenant-114 propagation (§11.4.69, §11.4.75..§11.4.165) ---"
 for f in CLAUDE.md AGENTS.md QWEN.md GEMINI.md CRUSH.md CONSTITUTION.md; do
   if [ ! -f "$ROOT/$f" ]; then
     echo "FAIL: root/$f — file missing (covenant-114 scope)"; FAILURES=$((FAILURES+1))
