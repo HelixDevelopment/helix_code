@@ -2,12 +2,15 @@
 
 | Field | Value |
 |-------|-------|
-| Revision | 1 |
+| Revision | 2 |
 | Created | 2026-05-06 |
-| Last modified | 2026-06-15 |
+| Last modified | 2026-06-22T00:00:00Z |
 | Status | active |
+| Status summary | 2026-06-22: §11.4.166 semgrep mandate REPEALED (operator decision) + de-wired from the meta-repo; §11.4.55 sweep-debt batch landed (G8 + G12 + #22 now PASS); sweep delta 6→5 failing gates; G11 (workable_items.db divergence) newly surfaced, operator-gated. |
 
 _Revision 1 establishes the CONST-064 metadata table at the document head, replacing the prior multi-round accreted `Last updated:` prose preamble (a single ~32k-token line). Per-session history is preserved below in the dated catch-up tables and the Document version log._
+
+_Revision 2 (2026-06-22) records the §11.4.166 semgrep-mandate repeal + meta-repo de-wiring and the §11.4.55 sweep-debt batch — see the dated catch-up section at the document tail._
 
 ## Table of contents
 
@@ -1520,4 +1523,31 @@ The §11.4.103-121 H2-anchor requirement: the verifier wants each anchor as a li
 - Complete LLMsVerifier + HelixAgent submodule integration
 - Push submodule pointer updates
 - Doc exports (HTML/PDF/DOCX)
+
+## close-out — 2026-06-22: §11.4.166 semgrep-mandate REPEAL + meta-repo de-wiring + §11.4.55 sweep-debt batch
+
+Operator decision (2026-06-22): semgrep is no longer a mandatory requirement. All work below is FACT — already committed + pushed before this CONTINUATION update; the conductor reviews + commits this doc edit.
+
+### What landed
+
+- **§11.4.166 REPEAL (constitution `4ff4985 → 2953179`):** §11.4.166 replaced with a visible REPEALED tombstone across `Constitution.md` + `CLAUDE.md` + `AGENTS.md` + `QWEN.md` + `GEMINI.md` (metadata Revisions bumped, html/pdf regenerated). Removed `scripts/semgrep`, `scripts/hooks/semgrep_precommit.sh`, the `submodules/semgrep` git submodule, `docs/semgrep`, `docs/.semgrep`, and `.docs_chain/contexts/semgrep_status.yaml`. Pushed to all 6 constitution upstreams. Independent §11.4.142 review GO.
+- **Meta-repo de-wiring (`26dd71b0 → 8dd43e9d`):** removed the semgrep MCP server from `.mcp.json`; deleted `.docs_chain/contexts/semgrep_status.yaml` + `docs/semgrep/Status.md`; dropped the retired 11.4.166 from `scripts/verify-governance-cascade.sh` expected-anchor list (anchor ceiling now 165); bumped the constitution submodule pointer. Pushed github + gitlab.
+- **KEPT (NOT a semgrep dependency, per §11.4.124):** `buildscript_provenance_guard_test.go` + the 4 `// nosemgrep` annotations in `helix_code/internal/llm` are a real command-injection security guard, independent of semgrep — retained.
+- **§11.4.55 sweep-debt batch (`8dd43e9d → e3a71d97`, 14 files; independent §11.4.142 review GO; pushed github + gitlab):**
+  - **G8** — §11.4.120 obsolete-details gate reconciliation: `REASON_VOCAB` now mirrors §11.4.90 (incl. `not-reproducible`); paired meta-test positive case added; `docs/Fixed.md` HXC-044 Triple-check token fixed; gate now PASSes.
+  - **#22** — `CLAUDE.md §3.2`: `assets/` corrected to tracked-dir-not-submodule; root-level submodule lines corrected to the `submodules/` grouped layout.
+  - **G12** — `Issues_Summary` + `Fixed_Summary` regenerated, both `--check` PASS.
+  - **G14** — html/pdf siblings regenerated via docs_chain fixed + governance contexts + a direct Issues_Summary export.
+
+### State
+
+- **Sweep delta: 6 failing gates → 5** (G8 + G12 now PASS, no regression from the semgrep removal).
+- **Remaining failing gates** (all operator-gated / out of scope for this batch): G1 (fleet cascade, out of scope), G7 (docs/qa evidence backlog), G13 (Sources-verified footers), G11 (the newly-surfaced DB divergence below).
+- **G11 DISCOVERED (operator-gated, NOT touched):** `docs/workable_items.db` has a large PRE-EXISTING bidirectional divergence from `Issues.md`/`Fixed.md` (over 40 items, incl. a type conflict HXC-036 md=Bug db=Task). docs_chain's issues-context correctly refused a silent merge (authority `items_db`). Resolution direction is an operator decision; the tracked SSoT DB was left pristine.
+
+### Next
+
+- **Operator decision needed (G11):** choose the reconciliation direction for `docs/workable_items.db` ↔ `Issues.md`/`Fixed.md` (incl. the HXC-036 type conflict) before any sync runs.
+- G7 / G13 / G1 remain operator-gated.
+- **In flight (separate background stream):** container distribution config update per CONST-045 — `thinker.local` + `amber.local` enrolled, `nezha.local` distribution-disabled.
 

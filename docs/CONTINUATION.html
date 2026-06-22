@@ -179,6 +179,10 @@
 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
 <table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
 <thead>
 <tr>
 <th>Field</th>
@@ -188,7 +192,7 @@ CLI-Agent Fusion — Programme Continuation Guide</h1>
 <tbody>
 <tr>
 <td>Revision</td>
-<td>1</td>
+<td>2</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -196,11 +200,18 @@ CLI-Agent Fusion — Programme Continuation Guide</h1>
 </tr>
 <tr>
 <td>Last modified</td>
-<td>2026-06-15</td>
+<td>2026-06-22T00:00:00Z</td>
 </tr>
 <tr>
 <td>Status</td>
 <td>active</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>2026-06-22: §11.4.166 semgrep mandate REPEALED (operator decision) +
+de-wired from the meta-repo; §11.4.55 sweep-debt batch landed (G8 + G12
++ #22 now PASS); sweep delta 6→5 failing gates; G11 (workable_items.db
+divergence) newly surfaced, operator-gated.</td>
 </tr>
 </tbody>
 </table>
@@ -209,6 +220,9 @@ document head, replacing the prior multi-round accreted
 <code>Last updated:</code> prose preamble (a single ~32k-token line).
 Per-session history is preserved below in the dated catch-up tables and
 the Document version log.</em></p>
+<p><em>Revision 2 (2026-06-22) records the §11.4.166 semgrep-mandate
+repeal + meta-repo de-wiring and the §11.4.55 sweep-debt batch — see the
+dated catch-up section at the document tail.</em></p>
 <h2 id="table-of-contents">Table of contents</h2>
 <ul>
 <li><a
@@ -7332,5 +7346,88 @@ to GitHub + GitLab (20 commits)</p>
 <p><strong>Next Steps:</strong> - Complete LLMsVerifier + HelixAgent
 submodule integration - Push submodule pointer updates - Doc exports
 (HTML/PDF/DOCX)</p>
+<h2
+id="close-out-2026-06-22-11.4.166-semgrep-mandate-repeal-meta-repo-de-wiring-11.4.55-sweep-debt-batch">close-out
+— 2026-06-22: §11.4.166 semgrep-mandate REPEAL + meta-repo de-wiring +
+§11.4.55 sweep-debt batch</h2>
+<p>Operator decision (2026-06-22): semgrep is no longer a mandatory
+requirement. All work below is FACT — already committed + pushed before
+this CONTINUATION update; the conductor reviews + commits this doc
+edit.</p>
+<h3 id="what-landed-5">What landed</h3>
+<ul>
+<li><strong>§11.4.166 REPEAL (constitution
+<code>4ff4985 → 2953179</code>):</strong> §11.4.166 replaced with a
+visible REPEALED tombstone across <code>Constitution.md</code> +
+<code>CLAUDE.md</code> + <code>AGENTS.md</code> + <code>QWEN.md</code> +
+<code>GEMINI.md</code> (metadata Revisions bumped, html/pdf
+regenerated). Removed <code>scripts/semgrep</code>,
+<code>scripts/hooks/semgrep_precommit.sh</code>, the
+<code>submodules/semgrep</code> git submodule,
+<code>docs/semgrep</code>, <code>docs/.semgrep</code>, and
+<code>.docs_chain/contexts/semgrep_status.yaml</code>. Pushed to all 6
+constitution upstreams. Independent §11.4.142 review GO.</li>
+<li><strong>Meta-repo de-wiring
+(<code>26dd71b0 → 8dd43e9d</code>):</strong> removed the semgrep MCP
+server from <code>.mcp.json</code>; deleted
+<code>.docs_chain/contexts/semgrep_status.yaml</code> +
+<code>docs/semgrep/Status.md</code>; dropped the retired 11.4.166 from
+<code>scripts/verify-governance-cascade.sh</code> expected-anchor list
+(anchor ceiling now 165); bumped the constitution submodule pointer.
+Pushed github + gitlab.</li>
+<li><strong>KEPT (NOT a semgrep dependency, per §11.4.124):</strong>
+<code>buildscript_provenance_guard_test.go</code> + the 4
+<code>// nosemgrep</code> annotations in
+<code>helix_code/internal/llm</code> are a real command-injection
+security guard, independent of semgrep — retained.</li>
+<li><strong>§11.4.55 sweep-debt batch (<code>8dd43e9d → e3a71d97</code>,
+14 files; independent §11.4.142 review GO; pushed github +
+gitlab):</strong>
+<ul>
+<li><strong>G8</strong> — §11.4.120 obsolete-details gate
+reconciliation: <code>REASON_VOCAB</code> now mirrors §11.4.90
+(incl. <code>not-reproducible</code>); paired meta-test positive case
+added; <code>docs/Fixed.md</code> HXC-044 Triple-check token fixed; gate
+now PASSes.</li>
+<li><strong>#22</strong> — <code>CLAUDE.md §3.2</code>:
+<code>assets/</code> corrected to tracked-dir-not-submodule; root-level
+submodule lines corrected to the <code>submodules/</code> grouped
+layout.</li>
+<li><strong>G12</strong> — <code>Issues_Summary</code> +
+<code>Fixed_Summary</code> regenerated, both <code>--check</code>
+PASS.</li>
+<li><strong>G14</strong> — html/pdf siblings regenerated via docs_chain
+fixed + governance contexts + a direct Issues_Summary export.</li>
+</ul></li>
+</ul>
+<h3 id="state-10">State</h3>
+<ul>
+<li><strong>Sweep delta: 6 failing gates → 5</strong> (G8 + G12 now
+PASS, no regression from the semgrep removal).</li>
+<li><strong>Remaining failing gates</strong> (all operator-gated / out
+of scope for this batch): G1 (fleet cascade, out of scope), G7 (docs/qa
+evidence backlog), G13 (Sources-verified footers), G11 (the
+newly-surfaced DB divergence below).</li>
+<li><strong>G11 DISCOVERED (operator-gated, NOT touched):</strong>
+<code>docs/workable_items.db</code> has a large PRE-EXISTING
+bidirectional divergence from
+<code>Issues.md</code>/<code>Fixed.md</code> (over 40 items, incl. a
+type conflict HXC-036 md=Bug db=Task). docs_chain’s issues-context
+correctly refused a silent merge (authority <code>items_db</code>).
+Resolution direction is an operator decision; the tracked SSoT DB was
+left pristine.</li>
+</ul>
+<h3 id="next-10">Next</h3>
+<ul>
+<li><strong>Operator decision needed (G11):</strong> choose the
+reconciliation direction for <code>docs/workable_items.db</code> ↔︎
+<code>Issues.md</code>/<code>Fixed.md</code> (incl. the HXC-036 type
+conflict) before any sync runs.</li>
+<li>G7 / G13 / G1 remain operator-gated.</li>
+<li><strong>In flight (separate background stream):</strong> container
+distribution config update per CONST-045 — <code>thinker.local</code> +
+<code>amber.local</code> enrolled, <code>nezha.local</code>
+distribution-disabled.</li>
+</ul>
 </body>
 </html>
