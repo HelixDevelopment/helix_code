@@ -1139,7 +1139,7 @@ func TestClientAddMemory(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, "mem-123", resp.ID)
 	})
 
@@ -1196,7 +1196,7 @@ func TestClientSearchMemory(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, 1, resp.TotalCount)
 		assert.Len(t, resp.Results, 1)
 		assert.Equal(t, "result content", resp.Results[0].Content)
@@ -1219,7 +1219,7 @@ func TestClientSearchMemory(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, 0, resp.TotalCount)
 	})
 
@@ -1273,7 +1273,7 @@ func TestClientCognify(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, "processing", resp.Status)
 	})
 
@@ -1326,7 +1326,7 @@ func TestClientSearchInsights(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Len(t, resp.Insights, 1)
 	})
 }
@@ -1356,7 +1356,7 @@ func TestClientSearchGraphCompletion(t *testing.T) {
 		resp, err := client.SearchGraphCompletion(ctx, "test query", []string{"test"}, 10)
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, 1, resp.TotalCount)
 	})
 }
@@ -1394,7 +1394,7 @@ func TestClientDatasetOperations(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		require.NotNil(t, resp.Dataset)
 		assert.Equal(t, "1f264d9a-0000-5671-86ca-d9160f627969", resp.Dataset.ID)
 		assert.Equal(t, "test-dataset", resp.Dataset.Name)
@@ -1422,7 +1422,7 @@ func TestClientDatasetOperations(t *testing.T) {
 		resp, err := client.ListDatasets(ctx)
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, 2, resp.Total)
 		assert.Len(t, resp.Datasets, 2)
 	})
@@ -1528,7 +1528,7 @@ func TestClientProcessCodePipeline(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.True(t, resp.Processed)
 	})
 }
@@ -1566,7 +1566,7 @@ func TestClientVisualizeGraph(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Len(t, resp.Graph.Nodes, 1)
 		assert.Len(t, resp.Graph.Edges, 1)
 	})
@@ -1598,7 +1598,7 @@ func TestClientDeleteData(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, 5, resp.Deleted)
 	})
 }
@@ -1625,7 +1625,7 @@ func TestClientGetHealth(t *testing.T) {
 		health, err := client.GetHealth(ctx)
 
 		assert.NoError(t, err)
-		assert.NotNil(t, health)
+		require.NotNil(t, health) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, "healthy", health.Status)
 		assert.True(t, client.IsConnected())
 	})
@@ -1647,7 +1647,7 @@ func TestClientGetHealth(t *testing.T) {
 		health, err := client.GetHealth(ctx)
 
 		assert.NoError(t, err)
-		assert.NotNil(t, health)
+		require.NotNil(t, health) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, "unhealthy", health.Status)
 		assert.False(t, client.IsConnected())
 	})
@@ -1697,7 +1697,7 @@ func TestClientAddBatchMemory(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.NotNil(t, resp)
+		require.NotNil(t, resp) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, 2, resp.Processed)
 		assert.Equal(t, 2, addCalls, "batch must issue one real /api/v1/add per item")
 	})
@@ -2028,7 +2028,7 @@ func TestCogneeManagerGetHealth(t *testing.T) {
 
 		health, err := cm.GetHealth(context.Background())
 		assert.NoError(t, err)
-		assert.NotNil(t, health)
+		require.NotNil(t, health) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, "not_initialized", health.Status)
 	})
 }
@@ -2165,21 +2165,21 @@ func TestNewHandler(t *testing.T) {
 		}
 
 		handler := NewHandler(service)
-		assert.NotNil(t, handler)
+		require.NotNil(t, handler) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.NotNil(t, handler.service)
 		assert.NotNil(t, handler.logger)
 	})
 
 	t.Run("NewHandler_NilService", func(t *testing.T) {
 		handler := NewHandler(nil)
-		assert.NotNil(t, handler)
+		require.NotNil(t, handler) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Nil(t, handler.service)
 		assert.NotNil(t, handler.logger)
 	})
 
 	t.Run("NewHandlerWithManager_NilManager", func(t *testing.T) {
 		handler := NewHandlerWithManager(nil)
-		assert.NotNil(t, handler)
+		require.NotNil(t, handler) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Nil(t, handler.service)
 		assert.Nil(t, handler.manager)
 		assert.NotNil(t, handler.logger)
@@ -2195,7 +2195,7 @@ func TestNewHandler(t *testing.T) {
 		}
 
 		handler := NewHandlerWithManager(manager)
-		assert.NotNil(t, handler)
+		require.NotNil(t, handler) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.NotNil(t, handler.manager)
 		assert.NotNil(t, handler.logger)
 	})
@@ -2798,7 +2798,7 @@ func TestServiceCacheMethods(t *testing.T) {
 
 		// Verify cached
 		cached := service.getCachedMemory("mem-123")
-		assert.NotNil(t, cached)
+		require.NotNil(t, cached) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, "mem-123", cached.ID)
 	})
 
@@ -2818,7 +2818,7 @@ func TestServiceCacheMethods(t *testing.T) {
 
 		// Verify cached
 		cached := service.getCachedDataset("test-dataset")
-		assert.NotNil(t, cached)
+		require.NotNil(t, cached) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, "test-dataset", cached.Name)
 	})
 
@@ -2836,7 +2836,7 @@ func TestServiceCacheMethods(t *testing.T) {
 
 		// Verify cached
 		cached := service.getCachedSearch("cache-key")
-		assert.NotNil(t, cached)
+		require.NotNil(t, cached) // FailNow on nil to avoid a nil-deref panic masking the real signal
 		assert.Equal(t, 1, cached.TotalCount)
 	})
 }

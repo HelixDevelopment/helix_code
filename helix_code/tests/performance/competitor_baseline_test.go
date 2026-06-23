@@ -18,8 +18,23 @@ import (
 	"testing"
 )
 
-// repoRootFromTest walks up from this test file to the meta-repo root
-// (identified by the presence of CONSTITUTION.md + the scripts/ dir).
+// baselineScriptRelPath is the canonical location of the competitor wall-clock
+// baseline harness, relative to whichever repo root contains it.
+const baselineScriptRelPath = "scripts/testing/competitor_speed_baseline.sh"
+
+// repoRootFromTest walks up from this test file and returns the FIRST ancestor
+// that actually contains the competitor baseline harness
+// (scripts/testing/competitor_speed_baseline.sh).
+//
+// NOTE: an earlier version keyed off the presence of CONSTITUTION.md + a
+// scripts/testing/ directory. That heuristic broke once the inner Go module
+// (helix_code/) gained its own CONSTITUTION.md AND its own scripts/testing/
+// directory (CONST-066 export tooling) WITHOUT the baseline script: the walker
+// stopped one level too early — at the inner module — where the harness does
+// not live, so the script was reported "missing" even though it exists at the
+// meta-repo root. Keying directly off the script the test exercises makes the
+// resolver match the predicate the test actually depends on, and skips past
+// false-positive ancestors that merely happen to have a scripts/testing/ dir.
 func repoRootFromTest(t *testing.T) string {
 	t.Helper()
 	_, thisFile, _, ok := runtime.Caller(0)
@@ -28,8 +43,7 @@ func repoRootFromTest(t *testing.T) string {
 	}
 	dir := filepath.Dir(thisFile)
 	for i := 0; i < 12; i++ {
-		if fileExists(filepath.Join(dir, "CONSTITUTION.md")) &&
-			dirExists(filepath.Join(dir, "scripts", "testing")) {
+		if fileExists(filepath.Join(dir, baselineScriptRelPath)) {
 			return dir
 		}
 		parent := filepath.Dir(dir)
@@ -38,18 +52,14 @@ func repoRootFromTest(t *testing.T) string {
 		}
 		dir = parent
 	}
-	t.Fatal("could not locate meta-repo root from test path")
+	t.Fatalf("could not locate %s from test path (walked up from %s)",
+		baselineScriptRelPath, filepath.Dir(thisFile))
 	return ""
 }
 
 func fileExists(p string) bool {
 	st, err := os.Stat(p)
 	return err == nil && !st.IsDir()
-}
-
-func dirExists(p string) bool {
-	st, err := os.Stat(p)
-	return err == nil && st.IsDir()
 }
 
 // TestCompetitorBaselineScript_RunsEndToEnd runs the real baseline harness and

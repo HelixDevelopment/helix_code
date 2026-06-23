@@ -615,7 +615,8 @@ func TestCriticalPath_ConfigurationLoading(t *testing.T) {
 				Port: 5432,
 			},
 			Auth: config.AuthConfig{
-				JWTSecret: "test-jwt-secret-32-chars-long-for-testing",
+				JWTSecret:  "test-jwt-secret-32-chars-long-for-testing",
+				BcryptCost: 12,
 			},
 			LLM: config.LLMConfig{
 				DefaultProvider: "local",

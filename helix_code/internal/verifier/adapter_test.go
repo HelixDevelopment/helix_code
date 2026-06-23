@@ -98,8 +98,22 @@ func TestAdapter_GetVerifiedModels_FallbackOnError(t *testing.T) {
 
 	models, err := adapter.GetVerifiedModels(context.Background())
 	require.ErrorIs(t, err, ErrUsingFallback)
-	require.Len(t, models, 7, "should return fallback models")
-	assert.Equal(t, "fallback", models[0].Source)
+	require.Len(t, models, 8, "should return all 8 fallback models")
+
+	// Validate the real fallback set: every entry sourced as fallback, and the
+	// exact provider/ID set matches FallbackModels (incl. the xiaomi mimo-v2.5-pro
+	// seed added in commit 1771c855).
+	gotByID := make(map[string]string, len(models))
+	for _, m := range models {
+		assert.Equal(t, "fallback", m.Source, "fallback model %q must be sourced as fallback", m.ID)
+		gotByID[m.ID] = m.Provider
+	}
+	for _, want := range FallbackModels {
+		provider, ok := gotByID[want.ID]
+		require.Truef(t, ok, "fallback set must include model %q (provider %q)", want.ID, want.Provider)
+		assert.Equalf(t, want.Provider, provider, "model %q provider mismatch", want.ID)
+	}
+	assert.Equal(t, "xiaomi", gotByID["mimo-v2.5-pro"], "xiaomi mimo-v2.5-pro must be present in the fallback set")
 }
 
 func TestAdapter_filterByProviderConfig(t *testing.T) {
