@@ -174,6 +174,49 @@ func resolveLLMProvider(providerName, model string) (llm.Provider, error) {
 	return provider, nil
 }
 
+// resolveDefaultModel fills in a request that OMITTED the model with a
+// VERIFIED-AVAILABLE model from the provider's own catalog.
+//
+// CONST-036 / CONST-037: LLMsVerifier is the single source of truth and every
+// model surfaced MUST be verified-available, so the default is sourced from
+// provider.GetModels() (which, for the OpenAI-compatible cloud providers,
+// refreshes LIVE from the provider's own `GET /models` on first call) — never
+// a hardcoded literal. The first catalog entry is the provider's currently
+// served, leading model.
+//
+// The historical defect this guards (server defect: empty/default-model
+// Generate → upstream 400 → API 502): a Generate that omitted the model left
+// llm.LLMRequest.Model == "" all the way to the wire. DeepSeek (and any
+// provider that does not synthesise its own default) then rejected the empty
+// model — e.g. `400: "The supported API model names are deepseek-v4-pro or
+// deepseek-v4-flash, but you passed ."`. The fix never lets an empty model
+// reach the provider when the catalog can supply a verified one.
+//
+// When the request already names a model, or the catalog is empty (offline /
+// unreachable provider — that staleness is the verifier's concern, not the
+// server's to mask), the model is left unchanged and the provider's own
+// default-handling / honest error path takes over. This is the same behaviour
+// as before for those cases — the change is strictly additive on the
+// previously-broken empty-model-against-a-reachable-catalog path.
+func resolveDefaultModel(provider llm.Provider, requested string) string {
+	if strings.TrimSpace(requested) != "" {
+		return requested
+	}
+	for _, m := range provider.GetModels() {
+		// Prefer the verifier-facing Name; fall back to the catalog ID when a
+		// provider populates only ID. Skip blank entries defensively.
+		if name := strings.TrimSpace(m.Name); name != "" {
+			return name
+		}
+		if id := strings.TrimSpace(m.ID); id != "" {
+			return id
+		}
+	}
+	// Catalog empty (offline/unreachable). Leave it empty: the provider's own
+	// default-or-honest-error path handles it — we do NOT invent a model.
+	return ""
+}
+
 // generateLLM handles POST /api/v1/llm/generate — a real, non-streaming
 // completion. It returns the provider's actual response Content plus usage.
 func (s *Server) generateLLM(c *gin.Context) {
@@ -198,6 +241,11 @@ func (s *Server) generateLLM(c *gin.Context) {
 		return
 	}
 	defer func() { _ = provider.Close() }()
+
+	// CONST-036/037: when the request omitted the model, resolve it to a
+	// verified-available model from the provider's catalog so an empty model is
+	// never sent upstream (server defect: empty-model → provider 400 → API 502).
+	llmReq.Model = resolveDefaultModel(provider, llmReq.Model)
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
 	defer cancel()
@@ -254,6 +302,10 @@ func (s *Server) streamLLM(c *gin.Context) {
 		return
 	}
 	defer func() { _ = provider.Close() }()
+
+	// CONST-036/037: same verified-available default-model resolution as the
+	// non-streaming path — an omitted model must not reach the provider empty.
+	llmReq.Model = resolveDefaultModel(provider, llmReq.Model)
 
 	c.Writer.Header().Set("Content-Type", "text/event-stream")
 	c.Writer.Header().Set("Cache-Control", "no-cache")
