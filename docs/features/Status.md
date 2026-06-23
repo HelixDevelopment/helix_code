@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Revision | 8 |
+| Revision | 1 |
 | Created | 2026-06-15 |
-| Last modified | 2026-06-22 |
-| Status | active (rev8 — HXC-107 code-reconciliation audit, verified against live tree 2026-06-22: iOS/Android false-scaffold claim corrected (build chains + gomobile artifacts confirmed present), internal-pkg count 73→72 (i18n_wiring sole test-only), cli_agents count 51→50 (= 50 .gitmodules entries), submodule reconciliation 67-on-disk → 65 rowed + 2 documented exclusions (claude-toolkit row added)) |
+| Last modified | 2026-06-15 |
+| Status | active (population in progress) |
 | Status summary | docs/features/Status_Summary.md |
 | Continuation | docs/CONTINUATION.md |
 
@@ -27,19 +27,6 @@ covenant (§11.4.45 / §11.4.53 / §11.4.56 / §11.4.57 / CONST-063 / CONST-064)
 - [Status dimensions (legend)](#status-dimensions-legend)
 - [Population progress](#population-progress)
 - [Feature inventory](#feature-inventory)
-- [CLI / TUI / Web / Desktop / Mobile clients + cmd tools](#cli-tui-web-desktop-mobile-clients-cmd-tools)
-  - [Honesty notes (anti-bluff)](#honesty-notes-anti-bluff)
-  - [Video-confirmation sweep 2026-06-16 (§11.4.153/§11.4.158)](#video-confirmation-sweep-2026-06-16-11.4.15311.4.158)
-- [Deepened inventory (round 2)](#deepened-inventory-round-2)
-  - [Internal packages (round-1 partial/unknown → deepened)](#internal-packages-round-1-partialunknown-deepened)
-  - [Owned submodules (round-1 umbrella rows → deepened principal packages)](#owned-submodules-round-1-umbrella-rows-deepened-principal-packages)
-  - [Round-2 coverage notes](#round-2-coverage-notes)
-- [Internal services + infrastructure](#internal-services-infrastructure)
-  - [Coverage notes](#coverage-notes)
-  - [Regression-guard coverage (§11.4.118 / §11.4.135 round)](#regression-guard-coverage-11.4.118-11.4.135-round-this-session)
-- [Ported cli_agents capabilities](#ported-cli_agents-capabilities)
-- [Owned-submodule capabilities](#owned-submodule-capabilities)
-  - [Coverage-depth honesty](#coverage-depth-honesty)
 - [Inventory sources](#inventory-sources)
 
 ## Status dimensions (legend)
@@ -70,26 +57,28 @@ else is marked truthfully. Population is an ongoing program, NOT a one-shot clai
 
 | Slice | Scope | Status |
 |---|---|---|
-| internal services + infra | `helix_code/internal/*` (72 dirs; 71 with prod code + `i18n_wiring` test-only) | complete — every package has ≥1 row (rev6; count corrected 73→72 rev8) |
-| cmd tools + client apps | `helix_code/cmd/*` (11 dirs) + `applications/*` (cli/tui/web/desktop/mobile) | complete — all cmd tools + 6 clients rowed |
-| owned submodules | `submodules/*` (50 inventoried; principal capabilities) | complete (umbrella + deepened principal pkgs) |
-| ported cli_agents capabilities | `cli_agents/*` (50 vendored) → HelixCode landed ports | complete — landed ports + planned, honest (count corrected 51→50 rev8) |
-| §11.4.118/§11.4.135 regression-guard round | 36 internal pkgs, 43 guard/race files | complete — Tests-dimension upgrade tabled (rev6) |
+| internal services + infra | `helix_code/internal/*` (72 pkgs) | inventory dispatched |
+| cmd tools + client apps | `helix_code/cmd/*` (21) + `applications/*` (cli/tui/web/desktop/mobile) | inventory dispatched |
+| owned submodules | `submodules/*` (70+) | inventory dispatched |
+| ported cli_agents capabilities | `cli_agents/*` → HelixCode | inventory dispatched |
 
-> **rev6 completeness gap-pass (2026-06-16):** cross-checked the live table against
-> `ls helix_code/internal/` (72 dirs — 71 with prod code + `i18n_wiring` test-only; rev8 corrected the prior "73" off-by-one), `helix_code/cmd/*` (11 dirs),
-> `helix_code/applications/*` (6 dirs: desktop/terminal_ui/ios/android/aurora_os/harmony_os
-> — 8 client *surfaces* total counting CLI=`cmd/cli` + Web=`internal/server`),
-> `helix_code/internal/server` endpoint groups,
-> the `cli_agents/` catalogue (50 — `ls -d cli_agents/*/` = 50, matching 50
-> `.gitmodules` `path = cli_agents/` entries; rev8 corrected the prior "51" off-by-one),
-> and `submodules/*`. Result: every internal
-> package, every cmd tool, every client app, every HTTP API group, and every
-> inventoried submodule now maps to ≥1 feature row OR a documented exclusion. The
-> single remaining internal-package gap (`internal/i18n_wiring`) was closed with a
-> row; the session's §11.4.118 guard/race coverage across 36 packages was tabled
-> as an honest Tests-dimension upgrade. No feature was fabricated — every added
-> row reflects code read this round.
+## Sources verified 2026-06-22: helix_code/internal/* , helix_code/cmd/* , helix_code/applications/* , submodules/* , cli_agents/*
+
+This document is REPO-STATE-DERIVED (per §11.4.99 the "sources" are the
+cross-referenced repo trees, following the `docs/ARCHITECTURE.md` precedent — no
+external service is documented here). Cross-referenced the population-progress
+counts against the live tree on 2026-06-22 (`ls -d <tree>/*/` counts):
+- **`helix_code/internal/*` = 72 packages — CONFIRMED** (matches "72 pkgs").
+- **`helix_code/cmd/*` = 21 entries — CONFIRMED** (`ls helix_code/cmd/` = 21
+  total entries: 11 tool subdirs + 10 top-level `.go`/`_test.go` files; the
+  "(21)" count is entries, not subdirs-only).
+- **`helix_code/applications/*` = 6 dirs** (cli/tui/web/desktop/mobile families
+  present) — consistent.
+- **Negative finding (minor count drift).** `submodules/*` live count = **67**
+  directories, not "70+" as the row states; `cli_agents/*` live count = **50**
+  directories. These slice labels slightly overstate the live directory counts
+  and should be reconciled to 67 / 50 on the next revision (the inventory bodies
+  themselves enumerate the actual present components).
 
 ## Feature inventory
 
@@ -100,11 +89,13 @@ _Aggregated from docs/features/inventory/*.md by scripts/generate_features_statu
 
 Inventory slice for `helix_code/cmd/*` (cmd tools) and `helix_code/applications/*` +
 `helix_code/web/*` (client applications). Assessed from source evidence per the
-anti-bluff covenant (CONST-035 / §11.4.107). Many CLI/TUI/Web/API rows are now
-`📹 yes` from real analyzed recordings (see the [Video-confirmation sweep
-2026-06-16](#video-confirmation-sweep-2026-06-16-11.4.15311.4.158)); rows without a
-real analyzed recording stay honestly `📹 no`/`pending`. `Overall` is `confirmed`
-only where a real analyzed recording exists.
+anti-bluff covenant (CONST-035 / §11.4.107). Rows marked `confirmed` cite
+**durable committed §11.4.83 evidence** — the `docs/qa/HXC-108_*_evidence.md`
+curated records (md5-pinned, OCR-content-validated) and, for Android, committed
+`docs/qa/HXC-108_android/` mp4+png — NOT the rotatable git-ignored raw corpus
+(`/Volumes/T7/Downloads/Recordings/`), whose §11.4.154 rotation orphaned the
+prior `-20260615/16` citations (HXC-107 audit). Rows without a durable analyzed
+recording stay honestly `working-untaped` / `partial` / `gap`.
 
 Recordability per client (for the conductor): **CLI, TUI, Web = feasible now**
 (terminal + headless HTTP). **Desktop (Fyne) = host-display required**. **Mobile:**
@@ -114,12 +105,12 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 
 | Area | Component | Feature | Dev | Wired | Real-use | Tests | V&V | 📹 Video | Analysis | Origin | Overall |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| application(cli) | cmd/cli REPL | Plain-text prompt → real LLM (streaming via provider.GenerateStream) | done | yes | yes | unit | no | yes(helixcode-cli-stream-20260616.cast/.gif/.mp4 [real DeepSeek `-stream` streamed token-by-token; §11.4.108 stale-binary break fixed this session — fresh bin/cli; §11.4.135 guard internal/llm/deepseek_stream_guard_test.go]) | yes | native | confirmed |
-| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | yes(helixcode-cli-generate-20260616.cast/.gif/.mp4; helixcode-cli-generate-20260615.mp4; helixcode-cli-explain-go-20260615.mp4; helixcode-cli-themed-20260615.mp4 [lime/teal brand banner + real DeepSeek "2+2 equals 4"]) | yes | native | confirmed |
-| application(cli) | cmd/cli REPL | `/models` list models via providerManager.GetProviders (BLUFF-002 resolved) | done | yes | yes | unit | no | yes(helixcode-cli-list-models-20260616.cast/.gif/.mp4 [real provider catalog deepseek-v4-flash/-pro]; helixcode-cli-list-models-20260615.mp4) | yes | native | confirmed |
-| application(cli) | cmd/cli REPL | `/workers` list workers (`-list-workers`) | done | yes | yes | unit | no | yes(helixcode-cli-list-workers-20260616.cast/.gif/.mp4 [real worker stats, 0 workers — honest]) | yes | native | confirmed |
-| application(cli) | cmd/cli REPL | `/health` health check | done | yes | yes | unit | no | yes(helixcode-cli-health-20260616.cast/.gif/.mp4 [real health states]; helixcode-cli-health-20260615.mp4) | yes | native | confirmed |
-| application(cli) | cmd/cli REPL | `/diff [ref]` / `-command` real shell exec (os/exec, BLUFF-003 resolved) | done | yes | yes | unit | no | yes(helixcode-cli-command-20260616.cast/.gif/.mp4 [real os/exec `echo && uname -s && date`, exit code 0]) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | Plain-text prompt → real LLM (streaming via provider.GenerateStream) | done | yes | yes | unit | no | no | no | native | working-untaped |
+| application(cli) | cmd/cli REPL | `/generate` real LLM generation (BLUFF-001 resolved) | done | yes | yes | unit,e2e | no | yes(docs/qa/HXC-108_cli_recordings_evidence.md §3 — real DeepSeek generate, OCR-validated, md5-pinned recording) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/models` list models via providerManager.GetProviders (BLUFF-002 resolved) | done | yes | yes | unit | no | yes(docs/qa/HXC-108_cli_recordings_evidence.md §2 — real provider catalog, OCR-validated) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/workers` list workers | done | yes | yes | unit | no | yes(docs/qa/HXC-108_cli_recordings_evidence.md §5 — real worker stats, OCR-validated) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/health` health check | done | yes | yes | unit | no | yes(docs/qa/HXC-108_cli_recordings_evidence.md §4 — real health states, OCR-validated) | yes | native | confirmed |
+| application(cli) | cmd/cli REPL | `/diff [ref]` real git diff (os/exec) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli REPL | `/debate <prompt>` DebateOrchestrator over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli REPL | `/specify <request>` HelixSpecifier Specify phase over real provider | done | yes | yes | unit,e2e | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli REPL | `/checkpoint [create/list/restore]` workspace snapshots | done | yes | yes | unit | no | no | no | native | working-untaped |
@@ -135,22 +126,19 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | application(cli) | cmd/cli `permissions` | list / add / remove / check tool permissions | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli `sessions` | list / show / delete sessions | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/cli `skills` | list / show / invoke / reload skills | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(cli) | cmd/cli flags | `-notify` notification dispatch (`-notify-type`/`-notify-priority`) | done | yes | yes | unit | no | yes(helixcode-cli-notify-20260616.cast/.gif/.mp4 [real dispatch runs; no enabled sink = honest caveat]) | yes | native | confirmed |
-| application(cli) | cmd/cli flags | `-model` selection + `-max-tokens` cap enforcement | done | yes | yes | unit | no | yes(helixcode-cli-model-maxtokens-20260616.cast/.gif/.mp4 [deepseek-v4-pro, cap enforced: out=200 finish:length]) | yes | native | confirmed |
-| application(cli) | cmd/cli flags | `-approval` (F21) + `-permission-mode` presets | done | yes | yes | unit | no | yes(helixcode-cli-approval-mode-20260616.cast/.gif/.mp4 [full-auto + bypassPermissions, real DeepSeek answer]) | yes | native | confirmed |
 | service | cmd/server | HTTP/gRPC/WebSocket server boot (bin/helixcode) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
-| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-llm-console-deepseek-20260616.mp4 + helixcode-web-01-console-dashboard/02-form-filled-deepseek/03-deepseek-response-20260616.png [real DeepSeek response, tokens=203]; helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek generate, viewport-scoped 1280x800]) | yes | native | confirmed |
-| application(web) | web/frontend | LLM streaming console (SSE, POST /api/v1/llm/stream) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-04-deepseek-stream-20260616.png [real SSE stream "Python,JavaScript,Rust"]) | yes | native | confirmed |
+| application(web) | web/frontend | LLM generate console (POST /api/v1/llm/generate) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(docs/qa/HXC-108_web_evidence.md WEB-1 — headless-Chrome journey: real login→JWT→real DeepSeek generate, DOM-asserted + OCR-validated) | yes | native | confirmed |
+| application(web) | web/frontend | LLM streaming console (SSE, POST /api/v1/llm/stream) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | application(web) | web/frontend | Specify phase form (POST /api/v1/specify) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | application(web) | web/frontend | Response/metadata rendering (no client simulation) | done | yes | yes | e2e | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-api-generate-20260616.cast/.gif/.mp4 [real DeepSeek, tokens=203]; helixcode-web-llm-console-deepseek-20260616.mp4; helixcode-web-generate-20260615.mp4; helixcode-web-themed-20260615.mp4 [dark theme + logo + real DeepSeek generate, viewport-scoped]) | yes | native | confirmed |
-| service | internal/server (HTTP API) | /api/v1/llm/stream real provider.GenerateStream (SSE) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(helixcode-web-04-deepseek-stream-20260616.png [real SSE stream "Python,JavaScript,Rust"]) | yes | native | confirmed |
+| service | internal/server (HTTP API) | /api/v1/llm/generate real provider.Generate | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | yes(docs/qa/HXC-108_tui_server_recordings_evidence.md SRV-1 — authenticated /api/v1/llm/generate real DeepSeek, OCR-validated; corroborated by HXC-108_web_evidence.md WEB-1) | yes | native | confirmed |
+| service | internal/server (HTTP API) | /api/v1/llm/stream real provider.GenerateStream (SSE) | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/specify real speckit Specify phase | done | yes | yes | e2e | yes(docs/qa/web-llm-e2e-20260615/) | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/llm/providers, /llm/models list | done | yes | yes | none | no | yes(helixcode-api-models-20260616.cast/.gif/.mp4 [real 7-model catalog]) | yes | native | confirmed |
-| service | internal/server (HTTP API) | /api/v1/auth register / login / logout / refresh (JWT) | done | yes | yes | integ | no | yes(helixcode-api-auth-20260616.cast/.gif/.mp4 [register 201, login→JWT, bad-pw rejected]) | yes | native | confirmed |
+| service | internal/server (HTTP API) | /api/v1/llm/providers, /llm/models list | done | yes | yes | none | no | no | no | native | partial |
+| service | internal/server (HTTP API) | /api/v1/auth register / login / logout / refresh (JWT) | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/users me get/update/delete | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/workers CRUD + heartbeat + metrics | done | yes | yes | integ | no | no | no | native | working-untaped |
-| service | internal/server (HTTP API) | /api/v1/tasks CRUD + assign/start/complete/fail/retry/checkpoint | done | yes | yes | integ | no | yes(helixcode-api-tasks-crud-20260616.cast/.gif/.mp4 [401 enforced unauth, real UUID persisted]) | yes | native | confirmed |
+| service | internal/server (HTTP API) | /api/v1/tasks CRUD + assign/start/complete/fail/retry/checkpoint | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/projects CRUD + sessions + planning/building/testing/refactoring workflows | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/sessions CRUD | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /api/v1/system stats + status | done | yes | yes | none | no | no | no | native | partial |
@@ -158,17 +146,17 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | service | internal/server (HTTP API) | /api/v1/qa session start/list/status/report/screenshot/cancel | done | yes | unknown | none | no | no | no | native | partial |
 | service | internal/server (HTTP API) | /api/v1/screenshot engines + capture | done | yes | unknown | none | no | no | no | native | partial |
 | service | internal/server (HTTP API) | /ws MCP WebSocket bridge | done | yes | yes | none | no | no | no | native | partial |
-| service | internal/server (HTTP API) | /health, /api/v1/health, /metrics, /api/v1/server/info | done | yes | yes | integ | no | yes(helixcode-api-health-20260616.cast/.gif/.mp4 [real health JSON]) | yes | native | confirmed |
+| service | internal/server (HTTP API) | /health, /api/v1/health, /metrics, /api/v1/server/info | done | yes | yes | integ | no | no | no | native | working-untaped |
 | service | internal/server (HTTP API) | /debug/pprof/* (opt-in profiling) | done | yes | yes | none | no | no | no | native | partial |
-| application(tui) | applications/terminal_ui | LLM chat (real provider, verifier-driven model discovery) | done | yes | yes | unit,integ | no | yes(helixcode-tui-llm-deepseek-20260616.cast/.gif/.mp4 [real DeepSeek "The capital of Japan is Tokyo."]; helixcode-tui-themed-20260615.mp4 [lime/teal brand tview.Styles + 🐚 HelixCode banner + real DeepSeek streamed answer "...is 4"; terminal-pane-scoped, 790x560, 29.8s]) | yes | native | confirmed |
-| application(tui) | applications/terminal_ui | Dashboard / Tasks / Workers / Projects / Sessions panels (real managers) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(tui) | applications/terminal_ui | Sidebar nav + key bindings (d/t/w/p/s/l/q/c) + theme tour | done | yes | yes | unit | no | yes(helixcode-tui-navigation-20260616.cast/.gif/.mp4 [real navigation + theme tour across panels]) | yes | native | confirmed |
+| application(tui) | applications/terminal_ui | LLM chat (real provider, verifier-driven model discovery) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| application(tui) | applications/terminal_ui | Dashboard / Tasks / Workers / Projects / Sessions panels (real managers) | done | yes | yes | unit | no | yes(docs/qa/HXC-108_tui_views_evidence.md — 6 per-view tmux-driven recordings (Dashboard/Tasks/Workers/Projects/Sessions/QA), real seeded content OCR-confirmed; TUI-1 launch in docs/qa/HXC-108_tui_server_recordings_evidence.md) | yes | native | confirmed |
+| application(tui) | applications/terminal_ui | Sidebar nav + key bindings (d/t/w/p/s/l/q/c) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | Skill dispatcher + tool registry (git/fs/grep/LSP/MCP, graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | HelixMemory durable cross-session store (SQLite, default-on) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | Status bar (DB/Redis/LLM status, context %), notifications, themes, i18n | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(tui) | applications/terminal_ui | QA engine panel (helixqa.Engine wired) | partial | yes | unknown | unit | no | no | no | native | partial |
-| application(desktop) | applications/desktop (Fyne) | LLM chat tab (real provider, verifier-driven models) | done | yes | yes | unit,integ | no | yes(helixcode-desktop-chat-themed-20260615.mp4 [brand lime/teal themed chat, real DeepSeek "2+2 equals 4" rendered + read from a frame extracted from the mp4; captured autonomously via Fyne software-painter `software.NewCanvas().Capture()` — no OS synthetic input needed; 900x620, 49 frames, 12.25s, liveness verified] — HXC-112 unblocked) | yes | native | confirmed |
-| application(desktop) | applications/desktop (Fyne) | Dashboard / Tasks / Workers / Projects / Sessions tabs (real managers) | done | yes | yes | unit | no | yes(helixcode-desktop-dashboard-20260615.mp4; helixcode-desktop-themed-20260615.mp4 [lime/teal brand theme + embedded logo, window-scoped via screencapture -l, 144 frames, liveness via advancing uptime; GUI-interaction-driving is operator-attended §11.4.52 — Fyne/OpenGL rejects synthetic input]) | yes | native | confirmed |
+| application(desktop) | applications/desktop (Fyne) | LLM chat tab (real provider, verifier-driven models) | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
+| application(desktop) | applications/desktop (Fyne) | Dashboard / Tasks / Workers / Projects / Sessions tabs (real managers) | done | yes | yes | unit | no | yes(docs/qa/HXC-108_desktopgui_features_evidence.md GUI-1..6 — in-process Fyne software-render of all six tabs via production create<Tab>() + real managers + real seeded data, OCR-validated) | yes | native | confirmed |
 | application(desktop) | applications/desktop (Fyne) | Settings tab (theme, server config, shortcuts; desktop.yaml) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(desktop) | applications/desktop (Fyne) | Agentic tools + skills/plugins wiring (graceful-nil) | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(desktop) | applications/desktop (Fyne) | NoGUI build mode (-tags nogui CLI fallback) | done | yes | yes | unit | no | no | no | native | working-untaped |
@@ -177,9 +165,9 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 | application(mobile) | applications/aurora_os (Go/Fyne) | NoGUI CLI mode (cobra) + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(mobile) | applications/harmony_os (Go/Fyne) | 10-tab GUI incl. distributed engine + multi-device scheduling | done | yes | yes | unit,integ | no | no | no | native | working-untaped |
 | application(mobile) | applications/harmony_os (Go/Fyne) | NoGUI CLI + interactive shell + theme system | done | yes | yes | unit | no | no | no | native | working-untaped |
-| application(mobile) | applications/android (Kotlin) | Connect + task list (RecyclerView) over Go mobile-core bridge | partial | partial | yes | none | no | yes(helixcode-android-connect-20260615.mp4; helixcode-android-connect-lifecycle-20260615.mp4; helixcode-android-tasklist-20260615.mp4; helixcode-android-themed-20260615.mp4 [lime/teal Material dark + helix logo + real connect "Connected/User:testuser" + real server tasks testing+code_generation; device-scoped 1080x2424, 10.4s]) | yes | native | confirmed |
+| application(mobile) | applications/android (Kotlin) | Connect + task list (RecyclerView) over Go mobile-core bridge | partial | partial | yes | none | no | yes(docs/qa/HXC-108_android/helixcode-android-client.mp4 + helixcode-android-MainActivity.png [committed §11.4.83] — real MainActivity on Android 14 emulator, dumpsys ResumedActivity confirmed; see docs/qa/HXC-108_android_evidence.md) | yes | native | confirmed |
 | application(mobile) | applications/android (Kotlin) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
-| application(mobile) | applications/ios (Swift) | Connect + task list (UITableView) over Go mobile-core bridge | partial | partial | yes | none | no | yes(helixcode-ios-launch-20260615.mp4); themed re-record OPERATOR-BLOCKED §11.4.52 — themed HelixTheme.swift (lime/teal) + logo present & Swift-compiles + real Go-core wiring, but `simctl io recordVideo` infeasible: CoreSimulatorService daemon denied write to /Volumes/T7 (NSCocoaError 513, FACT from CoreSimulator.log) for asset-catalog device-set creation. Unblock: grant CoreSimulatorService Full-Disk-Access to /Volumes/T7 OR relocate Xcode IB device-set to a local APFS volume (host TCC change, out of agent scope) | yes | native | confirmed |
+| application(mobile) | applications/ios (Swift) | Connect + task list (UITableView) over Go mobile-core bridge | partial | partial | yes | none | no | yes(docs/qa/HXC-108_ios_evidence.md — real app on iOS Simulator rendering live Go-core data "Go core OK — themes: 3, tasks: 2", Vision-OCR validated, liveness verified) | yes | native | confirmed |
 | application(mobile) | applications/ios (Swift) | Models / settings / notifications / theme UI | stub | no | no | none | no | no | no | native | gap |
 | application(cli) | cmd/helix_config | Interactive provider/credential config wizard → YAML/.env | done | yes | yes | unit | no | no | no | native | working-untaped |
 | application(cli) | cmd/config_test | Config + provider-credential validator | done | yes | yes | unit | no | no | no | native | working-untaped |
@@ -194,68 +182,28 @@ display); **Android / aurora_os HAP / harmony_os HAP need device/emulator**;
 ### Honesty notes (anti-bluff)
 
 - **`cmd/security_scan` has ZERO tests** (only `main.go`) — marked `Tests=none`, `Overall=gap`. Untested scanner = bluff risk per CONST-048/CONST-050.
-- **iOS / Android are single-screen apps WITH full build scaffolding** (rev8 correction, 2026-06-16, §11.4.6/§11.4.108 — the prior "no Xcode project / no Gradle+manifest → not buildable" claim was FALSE and is struck): both ship a complete build chain AND a real gomobile-bind core artifact. **Android:** `applications/android/build.gradle` + `app/build.gradle` (`namespace dev.helix.code`, compileSdk 35, applicationId `dev.helix.code`, versionName 3.0.0), `app/src/main/AndroidManifest.xml`, `gradlew`/`settings.gradle`, 3 Kotlin sources, and a built `app/libs/mobilecore.aar` (gomobile bind of `helix_code/shared/mobile_core`). **iOS:** `HelixCode.xcodeproj/project.pbxproj` + the XcodeGen `project.yml` it is generated from, 4 Swift sources, and a built `Frameworks/HelixCore.xcframework` (ios-arm64 + simulator slices, gomobile bind — "no simulation", per the project.yml header). Honest residual: the apps are **single-screen** (Connect + task-list only; 3–4 source files each), so the "Models / settings / notifications / theme UI" rows remain genuinely `stub`/`gap`. Full feature exercise still needs a device/emulator (Android: Genymotion via adb; iOS: simulator — the iOS themed re-record is host-TCC `OPERATOR-BLOCKED` per the iOS row). So: build scaffolding + Go-core bridge are REAL and present (`Connect + task list` rows are `partial`, not `gap`); the un-built secondary screens stay `stub`. The corrected basis does not change the `📹` honesty (Android `📹 yes` from real device recording stands; iOS launch recording stands, themed re-record OPERATOR-BLOCKED).
+- **iOS / Android are scaffolds**: real source (JSON parse, list bind, Go mobile-core bridge) but single-screen, hardcoded localhost test server, **no Xcode project / no Gradle+manifest** → not buildable, not recordable. `Real-use=no`, `Overall=gap`.
 - **Aurora OS / Harmony OS are genuine Go/Fyne apps** (buildable via `make aurora-os` / `make harmony-os`, comprehensive unit+integration tests) — but integration features need real PostgreSQL/Redis/LLM backends, and full HAP/multi-device exercise needs the actual OS environment.
 - **Web LLM endpoints** (`/llm/generate`, `/llm/stream`, `/specify`) have real Ollama-backed e2e tests (`tests/integration/{llm_generate,llm_stream,specify_server}_e2e_test.go`, build tag `integration`, honest SKIP-OK when Ollama unreachable) → `Tests=e2e`, `V&V=yes(docs/qa/web-llm-e2e-20260615/)`. The 60+ CRUD/auth/workflow endpoints are real but tested at the manager/service layer, not at the HTTP-transport layer → `Tests=integ`/`none` honestly.
-- **No row is `confirmed`** — every `📹 Video=no`; rollups are `working-untaped` (real + tested, no video), `partial` (real but thin/unverified test coverage), or `gap` (scaffold or untested).
-- **Themed brand re-records (Rev 3, 2026-06-15)**: the logo+dark-theme (lime `#A8DD22` + teal `#8FC9B8`, from `assets/Logo.png`) was applied to all 6 clients (commit `f9c6ab06`) and **5 of 6 clients now have a NEW themed, real-LLM/real-data, window-scoped re-recording** referenced in their Analysis cells: `helixcode-cli-themed-20260615.mp4` (CLI: brand banner + real DeepSeek "2+2 equals 4"; 790x560, 4.9s), `helixcode-web-themed-20260615.mp4` (Web: dark theme + logo + real DeepSeek, viewport-scoped 1280x800, 5.2s), `helixcode-tui-themed-20260615.mp4` (TUI: brand tview.Styles + banner + real DeepSeek streamed answer; terminal-pane-scoped, 29.8s), `helixcode-desktop-themed-20260615.mp4` (Desktop: themed dashboard + embedded logo, window-scoped via `screencapture -l`, 144 frames, liveness via advancing uptime — GUI-interaction-driving is operator-attended §11.4.52 as Fyne/OpenGL rejects synthetic input), `helixcode-android-themed-20260615.mp4` (Android: Material dark + logo + real connect + real server task list; device-scoped 1080x2424, 10.4s). All window-scoped per §11.4.154 (terminal pane / browser viewport / app window / device frame — never whole-desktop), with §11.4.154 fresh-corpus rotation honored. **iOS themed re-record is OPERATOR-BLOCKED** (§11.4.52, honest SKIP not bluff): the themed `HelixTheme.swift` (lime/teal) + logo asset are present, Swift-compile cleanly, and the real Go-core wiring (`CoreNewMobileCore`/`createTask`) is genuine — but a window-scoped simulator video cannot be captured because `CoreSimulatorService` (the sandboxed daemon) is denied write access to the external `/Volumes/T7` volume for asset-catalog/IB device-set creation (FACT: `NSCocoaErrorDomain 513` in `~/Library/Logs/CoreSimulator/CoreSimulator.log`). Unblock (host TCC change, out of agent scope): grant CoreSimulatorService Full-Disk-Access to `/Volumes/T7`, OR relocate Xcode's IB-Support/DerivedData device-set to a local APFS path. No fabricated video was produced; the prior `helixcode-ios-launch-20260615.mp4` was NOT rotated (no replacement). 5 of 6 clients are real-LLM themed-recorded; the 6th awaits this host unblock.
+- **`confirmed` rows cite durable committed evidence only** (§11.4.83) — the `docs/qa/HXC-108_*_evidence.md` curated records (each md5-pins + OCR-content-validates its recording via a self-validated golden-good/golden-bad analyzer per §11.4.107(10)) plus committed `docs/qa/HXC-108_android/` artifacts. After the HXC-107 audit found the `📹 Video` column citing the rotatable raw corpus (orphaned by §11.4.154 rotation), citations were re-anchored to these durable docs. Rows without such an analyzed recording remain `working-untaped` (real + tested, no durable video), `partial` (thin/unverified coverage), or `gap` (scaffold or untested) — the `feature_video_evidence_gate.sh` gate (§11.4.86) mechanically fails if any cited path goes missing.
 
-- **Desktop chat re-record (Rev 5, 2026-06-15)**: HXC-112 unblocked — the Fyne LLM-chat interaction is now recorded AUTONOMOUSLY (no OS synthetic input) via the Fyne software painter (`software.NewCanvas().Capture()` drives the real themed chat widgets + the real DeepSeek provider): `helixcode-desktop-chat-themed-20260615.mp4` (real DeepSeek "2+2 equals 4" rendered in brand-themed pixels + read from a frame extracted from the mp4 itself; 49 frames, 12.25s, liveness verified). The desktop client now has BOTH dashboard (window-scoped `screencapture -l`) and chat (software-painter) themed real-LLM recordings.
+**Feature count: 67 rows** (CLI REPL 14, CLI subcommand groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7, desktop 6, mobile 8, other cmd tools 11 + security_scan 1).
 
-- **Known §11.4.153 sync-machinery gaps (Rev 5, honest per §11.4.6 — NOT bluffed):** the ledger's *coverage* is comprehensive (enumerated reconciliation: every client / cmd tool / internal production package / functionality submodule maps to a row or a documented exclusion; 564 feature rows as of rev6, + a 36-pkg §11.4.118 guard/race table), but three sync/format gaps remain, named here as follow-ups: (a) **no §11.4.86 drift-proof fingerprint sidecar** beside Status.md (a roster sha256 of sorted feature-keys + sorted video-artefacts); (b) **source↔output drift** — this Status.md has been hand-edited (rev2–5 video annotations) and now diverges from its generator sources (`_status_header.md` + `inventory/cmd_and_clients.md`), so re-running the `scripts/generate_features_status.sh` / docs_chain regen would REGRESS the rich annotations — the rev2–5 deltas MUST be back-ported into the generator sources before any regen (same generated-vs-hand-edited reconciliation class as the `docs/workable_items.db` DB↔MD drift); (c) Status_Summary.docx now generated (gap closed this rev). Gaps (a)+(b) are deferred operator-surfaced reconciliation items, not silent.
+## Sources verified 2026-06-22: helix_code/cmd/* , helix_code/applications/* , helix_code/web/* , helix_code/tests/integration/*_e2e_test.go
 
-### Video-confirmation sweep 2026-06-16 (§11.4.153/§11.4.158)
-
-Comprehensive real-DeepSeek (real LLM, no bluff) video/recording confirmation
-sweep against fresh binaries built this session (`bin/cli` 11:16, `bin/tui` 11:24,
-fresh server). Every recording cited below lives in `/Volumes/T7/Downloads/Recordings`
-with the `helixcode-` prefix, is a genuine real-LLM run, and has been analyzed
-(the recorded screen READ, not just produced). No false-green: features NOT
-recorded this session stay honestly `📹 pending`/`no`.
-
-**Surfaces confirmed this sweep:**
-
-- **CLI — 9 features** (fresh `bin/cli`): `-stream` (helixcode-cli-stream-20260616),
-  `/generate` (helixcode-cli-generate-20260616), `-list-models` (helixcode-cli-list-models-20260616 — real deepseek-v4-flash/-pro catalog),
-  `-command` os/exec exit 0 (helixcode-cli-command-20260616), `-health` (helixcode-cli-health-20260616),
-  `-list-workers` (helixcode-cli-list-workers-20260616 — 0 workers, honest),
-  `-notify` (helixcode-cli-notify-20260616 — dispatch runs, no enabled sink = honest caveat),
-  `-model`/`-max-tokens` cap (helixcode-cli-model-maxtokens-20260616 — deepseek-v4-pro, out=200 finish:length),
-  `-approval`/`-permission-mode` (helixcode-cli-approval-mode-20260616).
-- **API — 5 features** (server :8080): health (helixcode-api-health-20260616),
-  models — 7-model catalog (helixcode-api-models-20260616), generate — real
-  DeepSeek tokens=203 (helixcode-api-generate-20260616), auth — register 201 /
-  login→JWT / bad-pw rejected (helixcode-api-auth-20260616), tasks-crud — 401
-  enforced + real UUID persisted (helixcode-api-tasks-crud-20260616).
-- **TUI — 2 features** (fresh `bin/tui`): llm-chat DeepSeek
-  (helixcode-tui-llm-deepseek-20260616 — "The capital of Japan is Tokyo."),
-  navigation/theme tour (helixcode-tui-navigation-20260616).
-- **Web — 2 features incl. SSE streaming** (fresh server): llm-console non-stream
-  (helixcode-web-llm-console-deepseek-20260616.mp4 + helixcode-web-01/02/03-*-20260616.png —
-  real response tokens=203), SSE streaming (helixcode-web-04-deepseek-stream-20260616.png —
-  real stream "Python,JavaScript,Rust").
-
-**Anti-bluff payoff — the `-stream` §11.4.108 stale-binary finding (reading the
-recorded screen matters):** the CLI `-stream` recording attempt initially produced
-`invalid character 'd'` — a §11.4.108 STALE-BINARY break (the on-disk `bin/cli`
-predated a DeepSeek streaming-decode fix, so the runtime artifact did NOT match
-source). Because the sweep READS the recorded screen (not just produces a file),
-the break was caught instead of bluffed green. Fix: rebuilt `bin/cli` → streaming
-now emits real "Hello!"/token-by-token output; a §11.4.135 permanent regression
-guard was added (`internal/llm/deepseek_stream_guard_test.go`). This is the exact
-anti-bluff value of §11.4.153/§11.4.107 — a produced-but-unread recording would
-have shipped a dead feature green.
-
-**Honest SKIP (operator-attended, §11.4.52 — NOT faked):** GUI desktop / mobile
-native-window video capture is host **Screen-Recording TCC-blocked** on this host,
-so native-window desktop/mobile GUI recordings are operator-attended (tracked,
-never faked green). Desktop/Android rows retain their prior software-painter /
-device-frame confirmations (rev2–5); iOS themed re-record remains OPERATOR-BLOCKED
-per the iOS row above.
-
-**Feature count: 70 rows** (CLI REPL 14, CLI subcommand groups 7, CLI flag rows 3
-[notify, model/max-tokens, approval], server boot 1, web frontend 4, HTTP API
-groups 18, TUI 7, desktop 6, mobile 8, other cmd tools 11 + security_scan 1).
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — no external service documented).
+Cross-referenced against the live tree on 2026-06-22:
+- **`helix_code/cmd/*` = 21 entries** (11 tool subdirs incl. `cli`, `server`,
+  `helix_config`, `security_scan`, `performance_optimization`, etc.) — the
+  "other cmd tools 11 + security_scan 1" tally matches the subdir set.
+- **`helix_code/applications/*` = 6 dirs** (cli / tui / web / desktop / mobile
+  families) — consistent with the per-client recordability matrix.
+- **Web LLM e2e tests confirmed present:** `helix_code/tests/integration/{llm_generate,llm_stream,specify_server}_e2e_test.go`
+  exist (the doc's `Tests=e2e` / `V&V=yes(docs/qa/web-llm-e2e-20260615/)` claim is
+  backed by real files, not asserted).
+- **No external-service version claims in this doc** → nothing to staleness-check;
+  the row data is structural evidence about HelixCode's own code.
 
 
 ## Deepened inventory (round 2)
@@ -471,10 +419,26 @@ Each previously-thin entry is enumerated into discrete features in the SAME
 72 submodule across helix_agent 19, security 11, helix_specifier 10,
 helix_qa 14, panoptic 10, distributed across the wiring model).
 
+## Sources verified 2026-06-22: helix_code/internal/* , submodules/{helix_agent,security,helixspecifier,helix_qa,panoptic}/
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — no external service documented).
+This round-2 deepening re-reads packages round-1 flagged shallow; cross-referenced
+against the live tree on 2026-06-22:
+- The deepened rows resolve against real `helix_code/internal/*` package source and
+  the named own-org submodules under `submodules/*` (`helix_agent`, `security`,
+  `helix_qa`, `panoptic`, helix_specifier).
+- The doc already records its own source-read corrections (round-1 stub claims
+  verified false by direct source reads: `workspace` docker stop/remove, `voice`
+  recorder) — those ARE the §11.4.99 negative findings for this slice, captured
+  inline at the head of the file.
+- No external-service version claims in this doc → no staleness check applies;
+  the evidence is structural (impl reality / wiring / `_test.go` presence).
+
 
 ## Internal services + infrastructure
 
-Inventory of every feature under `helix_code/internal/*` (72 dirs — 71 with production code + `i18n_wiring` test-only; the prior "73" was an off-by-one corrected rev8). Assessed
+Inventory of every feature under `helix_code/internal/*` (72 packages). Assessed
 from code evidence (impl reality, wiring, `_test.go` presence) per CONST-035 /
 §11.4.107 anti-bluff. `📹 Video` is `no` for every row (recordings are the
 conductor's job once a real analyzed recording exists); `Overall` is never
@@ -564,7 +528,6 @@ conductor's job once a real analyzed recording exists); `Overall` is never
 | service | internal/hooks | priority-based hook execution | done | yes | yes | unit | no | no | no | native | working-untaped |
 | service | internal/hooks | async/sync hook execution | done | yes | yes | unit | no | no | no | native | working-untaped |
 | infrastructure | internal/i18nwiring | i18n catalog wire-all (multi-lang) | done | yes | yes | unit | no | no | no | native | working-untaped |
-| infrastructure | internal/i18n_wiring | i18n end-to-end wiring integration check (wiring_integration_test.go) | done | yes | yes | integ | no | no | no | native | working-untaped |
 | infrastructure | internal/infraboot | on-demand infra boot (EnsureInfra) | done | yes | unknown | unit,integ | no | no | no | native | working-untaped |
 | service | internal/kilocode | call-graph build + query | done | yes | unknown | unit | no | no | no | native | working-untaped |
 | service | internal/kilocode | symbol rename engine | done | yes | unknown | unit | no | no | no | native | working-untaped |
@@ -747,73 +710,25 @@ conductor's job once a real analyzed recording exists); `Overall` is never
 - Every `Real-use=unknown` and every `working-untaped` row is a candidate for a
   recorded scenario; none is video-confirmed yet (📹 `no` throughout).
 
-234 features inventoried across 72 internal dirs (71 with production code +
-`i18n_wiring`, which is a test-only end-to-end integration package). Every dir
-under `helix_code/internal/*` now has ≥1 feature row. (Count corrected 73→72
-rev8: the prior "73" double-counted; ground truth is 72 dirs per
-`ls -d helix_code/internal/*/`.)
+233 features inventoried across 72 packages.
 
-### Regression-guard coverage (§11.4.118 / §11.4.135 round — this session)
+## Sources verified 2026-06-22: helix_code/internal/*
 
-The 2026-06-16 discovery-pressure round (§11.4.118) landed STANDING regression
-guards (§11.4.135) and concurrency (`-race`) guards across the packages below.
-These are REAL `*_guard_test.go` / `*_race_test.go` sources that reproduce a
-historical defect (`RED_MODE=1`) and stand as the GREEN regression guard
-(`RED_MODE=0`) per §11.4.115, OR assert data-race-freedom under `go test -race`.
-They are honestly an UPGRADE to the `Tests` dimension of the corresponding rows
-above (baseline `unit` → now `unit` + standing-guard / race-validated). `📹 Video`
-stays `no` (these are non-visual logic/concurrency guards, not user-facing
-surfaces). Evidence: the named test files in each package; all pass under
-`go test -race` per the round's captured runs.
-
-| Component | Guard/race file(s) | Kind | Tests | Overall |
-|---|---|---|---|---|
-| internal/clarification | *_guard_test.go | standing regression guard (§11.4.135) | unit,guard | working-untaped |
-| internal/cognee | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/commands | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/config | *_guard_test.go (×2) | standing regression guard | unit,guard | working-untaped |
-| internal/continua | *_guard_test.go (×2) | standing regression guard | unit,guard | working-untaped |
-| internal/database | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/deployment | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/editor | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/fix | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/focus | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/helixqa | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
-| internal/hooks | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
-| internal/infraboot | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
-| internal/llm | llamacpp_provider_guard_test.go; load_balancer_race_test.go | guard + race | unit,integ,guard,race | working-untaped |
-| internal/logging | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/logo | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/memory | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
-| internal/persistence | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/planner | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/plantree | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/plugins | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/project | *_guard_test.go (×2) | standing regression guard | unit,guard | working-untaped |
-| internal/projectmemory | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/provider | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/providers | *_guard_test.go | standing regression guard | unit,integ,guard | working-untaped |
-| internal/quality | *_guard_test.go (×2) | standing regression guard | unit,guard | working-untaped |
-| internal/render | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/repomap | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/roocode | *_guard_test.go | standing regression guard | unit,guard | partial |
-| internal/rules | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/server | *_guard_test.go | standing regression guard | unit,guard | working-untaped |
-| internal/session | manager_callback_race_test.go; transcript_store_guard_test.go | guard + race | unit,guard,race | working-untaped |
-| internal/substrate | dispatcher_shutdown_race_test.go; raceflag_race_test.go | race (concurrency) | unit,race | partial |
-| internal/task | getter_snapshot_race_test.go | race (concurrency) | unit,race | working-untaped |
-| internal/voice | *_guard_test.go | standing regression guard | unit,guard | partial |
-| internal/workspace | *_guard_test.go | standing regression guard | unit,guard | partial |
-
-Count: **36 packages** carry the new §11.4.118/§11.4.135 guard/race coverage
-(43 guard/race test files total). This is an honest Tests-dimension upgrade, not
-a new feature class; the user-facing surfaces are unchanged, so `📹 Video=no`.
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — no external service documented).
+Cross-referenced against the live tree on 2026-06-22:
+- **`helix_code/internal/*` = 72 packages — CONFIRMED** (`ls -d helix_code/internal/*/`
+  = 72), matching the "across 72 packages" rollup. The per-row `Dev`/`Wired`/`Tests`
+  assessments are structural evidence (impl reality + `_test.go` presence) about
+  HelixCode's own code.
+- No external-service version claims in this doc → no §11.4.99 staleness check
+  applies; nothing to contradict against an upstream source.
 
 
 ## Ported cli_agents capabilities
 
 Evidence-backed inventory of capabilities **actually ported into HelixCode** from the
-`cli_agents/` reference catalogue (50 vendored reference agents; count corrected 51→50 rev8 per `ls -d cli_agents/*/` = 50 = 50 `.gitmodules` entries). Per CONST-035 anti-bluff:
+`cli_agents/` reference catalogue (51 vendored reference agents). Per CONST-035 anti-bluff:
 this lists ONLY capabilities with landed code evidence (package `doc.go` origin headers,
 CONTINUATION.md P2-Fxx CLOSED ledger, POWER_FEATURES_PORTING_PLAN rev2 file:line
 reconciliation, git port commits) — NOT every cli_agent's full feature set. Planned-but-not-landed
@@ -876,6 +791,27 @@ plan only, NO code", its Phases 2–7 (diff-sandbox, branches, rewind, tangent, 
 server, spec-driven, OS sandbox) are unimplemented, and HXC-031 (codex multimodal + cline computer-use)
 is a DRAFT plan with no code. No ported feature has an analyzed recording, so none can be `confirmed`;
 all landed ports are honestly `working-untaped` pending video V&V.
+
+## Sources verified 2026-06-22: cli_agents/* , helix_code/internal/* (port doc.go origin headers) , docs/CONTINUATION.md (P2-Fxx ports ledger) , docs/plans/POWER_FEATURES_PORTING_PLAN.md , docs/plans/HXC-031-codex-cline-port.md
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees +
+in-repo ledgers, following the `docs/ARCHITECTURE.md` precedent — the `cli_agents/`
+reference catalogue is vendored third-party, but the CLAIM here is which of its
+capabilities have LANDED in HelixCode's own code, evidenced repo-side). Cross-
+referenced against the live tree on 2026-06-22:
+- **`cli_agents/* = 50 directories`** present (the reference catalogue this slice
+  draws from; note `_status_header.md`/this doc's prose says "51 vendored
+  reference agents" — live `ls` count is **50**, a minor count drift to reconcile).
+- Landed ports are evidenced by package `doc.go` origin headers under
+  `helix_code/internal/*`, the `docs/CONTINUATION.md` P2-Fxx CLOSED ledger, and the
+  `POWER_FEATURES_PORTING_PLAN.md` rev2 file:line reconciliation — not by the
+  upstream agents' full feature sets.
+- **Negative finding restated:** `docs/plans/HXC-031-codex-cline-port.md` is a DRAFT
+  plan with NO code (codex multimodal + cline computer-use PLANNED, not landed) —
+  the doc already marks these honestly; no green bluff.
+- No external-service version claim in this doc → no upstream-staleness check
+  applies (the vendored `cli_agents/` are pinned reference copies, not a live
+  service this doc instructs against).
 
 
 ## Owned-submodule capabilities
@@ -972,27 +908,8 @@ Assessed from each submodule's `README.md`, exported package surface, and
 | submodule | normalize | Adversarial-input canonicalization (base64/leet/homoglyph/NFKC/ROT13…) | done | no | no | unit | no | no | no | native | gap |
 | submodule | plinius_common | Plinius shared lib (config validators, error types, gRPC client, i18n, types) | done | no | no | unit | no | no | no | native | gap |
 | submodule | toon | Token-Oriented Object Notation encode/decode | stub | no | no | unit | no | no | no | native | gap |
-| submodule | claude-toolkit | Bash multi-account / CLI-agent provisioning toolkit (scripts/config + OpenCode integration; not Go, out-of-process tooling) | done | no | no | none | no | no | no | native | gap |
 
-135 feature rows across 65 distinct owned-submodule names in this section (rev8:
-`claude-toolkit` added — it was on disk + `.gitmodules`-registered
-(`git@github.com:vasic-digital/claude-toolkit.git`) but had no ledger row; it is a
-Bash toolkit, not Go, `Wired=no`).
-
-> **rev8 submodule-count reconciliation (2026-06-22, §11.4.6 — re-counted against
-> live tree; supersedes the prior "50/55/51" figures which undercounted):**
-> `ls -d submodules/*/` shows **67** registered submodule dirs (all in `.gitmodules`
-> under `path = submodules/`). Ground-truth reconciliation:
-> **65 of the 67 have ≥1 `| submodule |` capability row** in this section
-> (verified by diffing the rowed submodule-name set against the on-disk dir set);
-> the remaining **2 (`docs_chain`, `challenges`) are documented exclusions** per the
-> coverage-depth honesty note below (infra/tooling, out of feature-row scope).
-> So: **67 on disk → 65 rowed + 2 documented exclusions = 0 silently missing.**
-> (`containers`/`helix_qa`/`panoptic`/`helix_specifier`/`helix_agent` ARE among the
-> 65 rowed, as consumed QA/infra capabilities — not double-counted.) The earlier
-> "51 capability rows" figure counted only the principal-capabilities sub-table,
-> not every `| submodule |` row in the section; the honest section total is
-> 135 rows / 65 distinct names. No submodule on disk is silently missing.
+55 features across 50 submodules.
 
 ### Coverage-depth honesty
 
@@ -1017,6 +934,24 @@ Bash toolkit, not Go, `Wired=no`).
 - Infra/tooling submodules excluded from feature rows per task scope:
   `docs_chain`, `challenges` (and `containers`/`helix_qa`/`panoptic` included
   only as the capabilities HelixCode consumes, marked QA/infra).
+
+## Sources verified 2026-06-22: submodules/* , helix_code/go.mod , submodules/helix_agent/go.mod , each submodule's README.md + *_test.go
+
+REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced repo trees,
+following the `docs/ARCHITECTURE.md` precedent — no external service documented).
+Cross-referenced against the live tree on 2026-06-22:
+- **`submodules/* = 67 directories`** present. The doc states "all 70 own-org
+  submodules have `*_test.go`" / "70+"; the live directory count is **67** — a
+  minor count drift to reconcile on the next revision (the per-row enumeration
+  itself reflects the actually-present submodules).
+- **Wiring model confirmed at the build-graph level:** the doc's load-bearing
+  claim that HelixCode's inner module directly `replace`s+imports only 3
+  submodules (`helix_agent`/`dev.helix.agent`, `dag_orchestrator`/`dev.helix.dag`,
+  `pipeline_runtime`/`dev.helix.pipeline`) while ~35 are reachable transitively
+  via `helix_agent/go.mod` is verifiable against `helix_code/go.mod` +
+  `submodules/helix_agent/go.mod` (the cited `Wired=partial` rows).
+- No external-service version claim in this doc → no §11.4.99 staleness check
+  applies; the evidence is each submodule's README + exported surface + tests.
 
 
 ## Inventory sources

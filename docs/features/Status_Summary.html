@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Status_Summary</title>
+  <title>HelixCode Feature Status Summary</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -173,7 +173,7 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Status_Summary</h1>
+<h1 class="title">HelixCode Feature Status Summary</h1>
 </header>
 <h1 id="helixcode-feature-status-summary">HelixCode Feature Status —
 Summary</h1>
@@ -209,12 +209,14 @@ Status.md rev8: internal-pkg 73→72, cli_agents 51→50, submodules
 </table>
 <p>Authoritative rollup of <code>docs/features/Status.md</code>.
 Anti-bluff (CONST-035 / §11.4.83 / §11.4.107): the video-confirmed count
-rises ONLY as real analyzed recordings land in
-<code>/Volumes/T7/Downloads/Recordings</code>; an un-recorded feature is
-honestly <code>📹 pending</code>/<code>no</code>, never bluffed green.
-Counts below are computed over the <strong>567 twelve-column feature
-rows</strong> in the live table (Area-prefixed rows; +3 new CLI flag
-rows added by the 2026-06-16 sweep).</p>
+rises ONLY as real analyzed recordings land as DURABLE committed
+evidence under <code>docs/qa/</code> (NOT the rotatable raw corpus — see
+the HXC-107 audit <code>docs/qa/HXC-107_ledger_audit.md</code>); an
+un-recorded feature is honestly <code>📹 pending</code>/<code>no</code>,
+never bluffed green. The <code>feature_video_evidence_gate.sh</code>
+gate (§11.4.86) mechanically fails if any <code>confirmed</code> row’s
+cited durable path goes missing. Counts below are computed over the
+<strong>567 twelve-column feature rows</strong> in the live table.</p>
 <h2 id="rollup-by-overall">Rollup — by Overall</h2>
 <table>
 <colgroup>
@@ -232,8 +234,8 @@ rows added by the 2026-06-16 sweep).</p>
 <tbody>
 <tr>
 <td>working-untaped</td>
-<td>324</td>
-<td>real + tested, no analyzed video yet</td>
+<td>337</td>
+<td>real + tested, no DURABLE analyzed video yet</td>
 </tr>
 <tr>
 <td>partial</td>
@@ -247,9 +249,12 @@ rows added by the 2026-06-16 sweep).</p>
 </tr>
 <tr>
 <td>confirmed</td>
-<td>23</td>
-<td>real analyzed recording exists (📹 yes) — +13 from the 2026-06-16
-sweep</td>
+<td>10</td>
+<td>real analyzed recording with DURABLE committed evidence (§11.4.83) —
+corrected down from 23 per the HXC-107 audit: the 13 rows the 2026-06-16
+sweep marked confirmed cited the rotatable raw corpus (§11.4.154) with
+no durable anchor and were honestly reclassified
+<code>working-untaped</code></td>
 </tr>
 <tr>
 <td>n/a (test-support)</td>

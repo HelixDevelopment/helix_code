@@ -10,19 +10,21 @@
 
 Authoritative rollup of `docs/features/Status.md`. Anti-bluff (CONST-035 /
 §11.4.83 / §11.4.107): the video-confirmed count rises ONLY as real analyzed
-recordings land in `/Volumes/T7/Downloads/Recordings`; an un-recorded feature is
-honestly `📹 pending`/`no`, never bluffed green. Counts below are computed over
-the **567 twelve-column feature rows** in the live table (Area-prefixed rows; +3
-new CLI flag rows added by the 2026-06-16 sweep).
+recordings land as DURABLE committed evidence under `docs/qa/` (NOT the rotatable
+raw corpus — see the HXC-107 audit `docs/qa/HXC-107_ledger_audit.md`); an
+un-recorded feature is honestly `📹 pending`/`no`, never bluffed green. The
+`feature_video_evidence_gate.sh` gate (§11.4.86) mechanically fails if any
+`confirmed` row's cited durable path goes missing. Counts below are computed over
+the **567 twelve-column feature rows** in the live table.
 
 ## Rollup — by Overall
 
 | Overall rollup | Count | Meaning |
 |---|---|---|
-| working-untaped | 324 | real + tested, no analyzed video yet |
+| working-untaped | 337 | real + tested, no DURABLE analyzed video yet |
 | partial | 168 | real but thin/unverified coverage OR partial wiring |
 | gap | 49 | scaffold / untested / planned-not-landed |
-| confirmed | 23 | real analyzed recording exists (📹 yes) — +13 from the 2026-06-16 sweep |
+| confirmed | 10 | real analyzed recording with DURABLE committed evidence (§11.4.83) — corrected down from 23 per the HXC-107 audit: the 13 rows the 2026-06-16 sweep marked confirmed cited the rotatable raw corpus (§11.4.154) with no durable anchor and were honestly reclassified `working-untaped` |
 | n/a (test-support) | 3 | mocks/testutil/pprofutil — not user features |
 | **Total feature rows** | **567** | |
 
