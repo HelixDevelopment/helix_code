@@ -441,15 +441,37 @@ func TestFetcher_FetchMultiple(t *testing.T) {
 		urls[i] = s.URL
 	}
 
-	start := time.Now()
+	// Establish a SEQUENTIAL baseline on the SAME servers/host so the
+	// invariant is a RATIO (concurrent vs sequential), not an absolute
+	// wall-clock cap. Each server sleeps ~10ms, so sequential ≈ N*10ms while
+	// concurrent ≈ max(individual) ≈ 10ms. A ratio is immune to host speed,
+	// GC pauses, scheduler jitter, and -race overhead.
+	seqStart := time.Now()
+	for _, u := range urls {
+		_, err := wt.fetcher.Fetch(context.Background(), u, FetchOptions{})
+		require.NoError(t, err)
+	}
+	sequentialDuration := time.Since(seqStart)
+
+	concStart := time.Now()
 	results, err := wt.fetcher.FetchMultiple(context.Background(), urls, FetchOptions{})
-	duration := time.Since(start)
+	concurrentDuration := time.Since(concStart)
 
 	require.NoError(t, err)
 	assert.Len(t, results, 3)
 
-	// Should be faster than sequential (3 * 10ms = 30ms)
-	assert.Less(t, duration, 50*time.Millisecond)
+	// RELATIVE INVARIANT: concurrent fetch of N URLs must be meaningfully
+	// faster than fetching them one-by-one. The real property of
+	// FetchMultiple is concurrency, which means total time tracks
+	// max(individual) rather than sum(individual). We require concurrent to
+	// be at most 70% of sequential — a generous margin that still proves
+	// genuine parallelism (a serial regression would land at ~100%) without
+	// flaking when both runs are slowed equally by host load.
+	assert.Less(t, concurrentDuration, sequentialDuration,
+		"concurrent FetchMultiple was not faster than sequential fetching — concurrency appears broken")
+	assert.Less(t, concurrentDuration, (sequentialDuration*7)/10,
+		"concurrent FetchMultiple (%v) was not meaningfully faster than sequential (%v) — expected it to track max(individual), not sum",
+		concurrentDuration, sequentialDuration)
 
 	for i, result := range results {
 		assert.Contains(t, string(result.Content), fmt.Sprintf("Response %d", i))

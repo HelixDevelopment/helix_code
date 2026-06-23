@@ -153,13 +153,25 @@ func TestEventBus_NoSubscribers(t *testing.T) {
 func TestEventBus_AsyncMode(t *testing.T) {
 	bus := NewEventBus(true)
 
+	// handlerDelay is the deliberate delay the subscriber blocks for. The
+	// real property under test is that async Publish fires-and-forgets and
+	// returns WITHOUT blocking on this delay — not that it returns under any
+	// particular millisecond count. We assert the semantics (publish returns
+	// while the handler is still mid-flight) and express timing as a generous
+	// RATIO against this known delay, immune to host speed / GC / scheduler
+	// jitter under -race.
+	const handlerDelay = 100 * time.Millisecond
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	called := false
+	// started fires the moment the handler begins; called fires only after it
+	// finishes. Using atomics makes the cross-goroutine reads race-clean.
+	var started, called atomic.Bool
 	handler := func(ctx context.Context, event Event) error {
-		time.Sleep(100 * time.Millisecond)
-		called = true
+		started.Store(true)
+		time.Sleep(handlerDelay)
+		called.Store(true)
 		wg.Done()
 		return nil
 	}
@@ -176,12 +188,25 @@ func TestEventBus_AsyncMode(t *testing.T) {
 	duration := time.Since(start)
 
 	assert.NoError(t, err)
-	// Publish should return immediately in async mode
-	assert.Less(t, duration, 50*time.Millisecond)
 
-	// Wait for handler to complete
+	// SEMANTIC INVARIANT: async Publish must NOT block on the slow handler —
+	// when it returns, the handler must NOT have completed yet. This is the
+	// real definition of "async" and is independent of absolute wall-clock.
+	assert.False(t, called.Load(),
+		"async Publish returned but the slow handler already completed — Publish blocked on it (not async)")
+
+	// RELATIVE TIMING INVARIANT: Publish returns well before the handler's
+	// delay elapses. Use half the handler delay as a generous ceiling tied to
+	// the workload (not a tight host-dependent 50ms absolute), so legitimate
+	// async dispatch never flakes under load while a synchronous regression
+	// (duration >= handlerDelay) is still caught.
+	assert.Less(t, duration, handlerDelay/2,
+		"async Publish took too long relative to the handler delay — it appears to be blocking")
+
+	// Wait for the handler to actually run and complete, then confirm delivery.
 	wg.Wait()
-	assert.True(t, called)
+	assert.True(t, started.Load(), "handler was never invoked")
+	assert.True(t, called.Load(), "handler did not complete")
 }
 
 func TestEventBus_PublishAndWait(t *testing.T) {
