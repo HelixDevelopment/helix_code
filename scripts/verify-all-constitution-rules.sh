@@ -541,6 +541,34 @@ if want_gate G14; then
 fi
 
 # ---------------------------------------------------------------------------
+# G15 — §11.4.153/§11.4.86 feature-Status video-evidence durability
+# ---------------------------------------------------------------------------
+if want_gate G15; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G15 — §11.4.153/§11.4.86 feature video-evidence durability (CM-FEATURE-STATUS-VIDEO-CONFIRMED)"
+    if bash "$ROOT/scripts/gates/feature_video_evidence_gate.sh" >/tmp/g15-fve.out 2>&1; then
+        gate_pass G15 "$(tail -1 /tmp/g15-fve.out | sed 's/^GATE PASS: //')"
+    else
+        gate_fail G15 "docs/features/Status.md confirmed row cites missing/rotatable evidence or roster drifted (see /tmp/g15-fve.out)" \
+            "$(tail -5 /tmp/g15-fve.out)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# G16 — §11.4.135 Android challenge-matrix per-OS-dispatch contract guard
+# ---------------------------------------------------------------------------
+if want_gate G16; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G16 — §11.4.135 challenge-matrix runner contract (CM-REGRESSION-GUARD; HXC-108/112)"
+    if bash "$ROOT/helix_code/scripts/tests/run_challenge_matrix_test.sh" >/tmp/g16-rcm.out 2>&1; then
+        gate_pass G16 "$(grep -oE 'RESULT: [0-9]+ passed, [0-9]+ failed' /tmp/g16-rcm.out | tail -1) — run-challenge-matrix dispatch/preflight contract pinned"
+    else
+        gate_fail G16 "run-challenge-matrix.sh dispatch/preflight/honest-SKIP contract regressed (see /tmp/g16-rcm.out)" \
+            "$(tail -6 /tmp/g16-rcm.out)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo
