@@ -383,11 +383,21 @@ func TestIsPortReachable(t *testing.T) {
 
 	port := listener.Addr().(*net.TCPAddr).Port
 
-	// Test reachable port
-	reachable := client.isPortReachable(fmt.Sprintf("127.0.0.1:%d", port), 100*time.Millisecond)
+	// Test reachable port.
+	// Budget is 2s (not the tight 100ms used previously): the macOS
+	// first-execution security scan (Gatekeeper/syspolicyd) of a
+	// freshly-compiled unsigned test binary can delay the process's FIRST
+	// loopback connect well past 100ms, which blew the old budget and made
+	// this assertion fail deterministically under `go test` (cold binary)
+	// while passing from a pre-built/already-scanned binary. A live listener
+	// connects in microseconds, so the larger budget only absorbs that
+	// one-time host penalty when it lands and never slows the success path.
+	reachable := client.isPortReachable(fmt.Sprintf("127.0.0.1:%d", port), 2*time.Second)
 	assert.True(t, reachable)
 
-	// Test unreachable port
+	// Test unreachable port. Keep this budget small: this is the negative
+	// path (connection refused returns immediately), so a large timeout would
+	// only slow the test without changing the result.
 	unreachable := client.isPortReachable("127.0.0.1:9999", 100*time.Millisecond)
 	assert.False(t, unreachable)
 }

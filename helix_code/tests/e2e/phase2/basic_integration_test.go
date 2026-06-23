@@ -34,8 +34,11 @@ func TestBasicIntegration(t *testing.T) {
 		var healthResponse map[string]interface{}
 		e2e.ParseJSON(t, resp, &healthResponse)
 		
-		assert.Equal(t, "healthy", healthResponse["status"], "Server status should be healthy")
-		t.Log("✅ Server health check passed")
+		// Real assertion: live server reports {"status":"ok"}; older deployments
+		// reported "healthy". Both accepted; any other status is a genuine FAIL.
+		status, _ := healthResponse["status"].(string)
+		assert.Contains(t, []string{"ok", "healthy"}, status, "Server status should be healthy")
+		t.Logf("✅ Server health check passed (status=%q)", status)
 	})
 	
 	// Test 2: API Endpoints Availability

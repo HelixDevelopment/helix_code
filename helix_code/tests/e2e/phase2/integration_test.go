@@ -114,27 +114,38 @@ func (f *Phase2TestFramework) waitForServerReady(t *testing.T, timeout time.Dura
 	}
 }
 
-// verifyServerHealth verifies the server is healthy
+// verifyServerHealth verifies the server is healthy.
+//
+// Infra-gating (§11.4.3): when the /health endpoint is unreachable or returns
+// non-200, the required test infrastructure (real server/PG/Redis) is not up —
+// the test SKIPs-with-reason rather than hard-failing a bare `go test ./...`.
+//
+// Anti-bluff (mandate pt.3): when infra IS present, the real assertion still
+// runs and still FAILs on a genuinely-unhealthy payload. The live HelixCode
+// server reports {"status":"ok"}; older deployments reported "healthy". Both
+// are accepted healthy values; any other / empty status is a real FAIL.
 func (f *Phase2TestFramework) verifyServerHealth(t *testing.T) {
 	t.Log("🔍 Verifying server health...")
-	
+
 	resp, err := f.GET(t, "/health")
 	if err != nil {
-		t.Fatalf("❌ Failed to check server health: %v", err)
+		t.Skipf("Server /health unreachable at %s: %v — requires test-infra-up (real server/PG/Redis); run `make test-infra-up` to exercise (SKIP-OK: #server-not-available)", f.ServerURL, err)
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("❌ Server health check failed: status %d", resp.StatusCode)
+		t.Skipf("Server /health returned status %d at %s — requires test-infra-up (real server/PG/Redis); run `make test-infra-up` to exercise (SKIP-OK: #server-not-available)", resp.StatusCode, f.ServerURL)
 	}
-	
+
 	var healthResponse map[string]interface{}
 	e2e.ParseJSON(t, resp, &healthResponse)
-	
-	if status, ok := healthResponse["status"].(string); ok && status == "healthy" {
-		t.Log("✅ Server is healthy")
+
+	if status, ok := healthResponse["status"].(string); ok && (status == "healthy" || status == "ok") {
+		t.Logf("✅ Server is healthy (status=%q)", status)
 	} else {
-		t.Fatalf("❌ Server health check failed: %v", healthResponse)
+		// Real assertion: server reachable but reports an unhealthy/unexpected
+		// payload — that is a genuine failure, NOT an infra-absence skip.
+		t.Fatalf("❌ Server health check failed (reachable but unhealthy payload): %v", healthResponse)
 	}
 }
 

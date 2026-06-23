@@ -101,6 +101,27 @@ func TestHealthMonitor_CheckServiceHealth_TCP(t *testing.T) {
 	err = registry.Register(info)
 	require.NoError(t, err)
 
+	// Warm-up dials: a freshly-compiled unsigned test binary on macOS can pay
+	// a one-time first-execution security-scan (Gatekeeper/syspolicyd) penalty
+	// on its FIRST loopback connect(s). Under `go test` (cold binary) that
+	// penalty was consumed inside the health check's CheckTimeout,
+	// deterministically producing Healthy==false even though the listener is
+	// live (the same binary PASSes when pre-built/already-scanned). A single
+	// warm-up dial is not always enough — the penalty can consume the whole
+	// first dial — so we loop until we observe a genuinely fast connect
+	// (< 50ms), which confirms the binary is warm before the timed health
+	// check below runs against the listener's true (microsecond) latency.
+	for i := 0; i < 10; i++ {
+		start := time.Now()
+		warm, derr := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", port), 2*time.Second)
+		if derr == nil {
+			_ = warm.Close()
+			if time.Since(start) < 50*time.Millisecond {
+				break // binary is warm; the host scan penalty is paid
+			}
+		}
+	}
+
 	// Check health
 	result, err := hm.CheckServiceHealth("test-service")
 	require.NoError(t, err)
