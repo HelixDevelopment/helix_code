@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_tui_views_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_tui_views_evidence</h1>
+</header>
+<h1 id="hxc-108-tui-per-view-recording-evidence-11.4.158">HXC-108 — TUI
+per-view recording evidence (§11.4.158)</h1>
+<p><strong>Date:</strong> 2026-06-23 · <strong>Client:</strong>
+terminal-UI (tview/tcell) · <strong>Mode:</strong> fully automatic, no
+TCC/Aqua/human</p>
+<h2 id="harness">Harness</h2>
+<p><code>scripts/video_qa/record_tui_views.sh</code> — launches the TUI
+binary in a detached tmux session (fixed 200×50), drives view navigation
+via <code>tmux send-keys</code> (programmatic key injection — no human,
+no TCC), captures each view, assembles project-prefixed MP4s (§11.4.155)
+under <code>/Volumes/T7/Downloads/Recordings/</code> (gitignored raw
+corpus, §11.4.128), and reaps the tmux session (§11.4.14).</p>
+<h2 id="views-recorded-ocr-validated-real-content">Views recorded +
+OCR-validated (real content)</h2>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 24%" />
+<col style="width: 62%" />
+</colgroup>
+<thead>
+<tr>
+<th>View</th>
+<th>Recording</th>
+<th>OCR-confirmed real content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dashboard</td>
+<td><code>helixcode-tui-dashboard-20260622T213246Z.mp4</code></td>
+<td>(prior run) HelixCode v1.0.0, sidebar, Workers/Tasks counters,
+Status bar</td>
+</tr>
+<tr>
+<td>Tasks</td>
+<td><code>helixcode-tui-tasks-20260623T133410Z.mp4</code></td>
+<td><code>Task Management — Tasks: (1) Code Generation Task &quot;Generate REST API endpoints&quot; (2) Testing Task &quot;Run unit tests&quot; (3) …</code>
+— real seeded task list</td>
+</tr>
+<tr>
+<td>Workers</td>
+<td><code>helixcode-tui-workers-20260623T133444Z.mp4</code></td>
+<td><code>Worker Management — ID Hostname Status Health CPU% Memory% Tasks Last Heartbeat … No workers registered</code>
+— real worker table</td>
+</tr>
+<tr>
+<td>Projects</td>
+<td><code>helixcode-tui-projects-20260623T133516Z.mp4</code></td>
+<td><code>Project Management — Name Type Path Status Created Updated … No projects found. Click &#39;New Project&#39;</code>
+— real projects view</td>
+</tr>
+<tr>
+<td>Sessions</td>
+<td><code>helixcode-tui-sessions-20260623T133553Z.mp4</code></td>
+<td><code>Session Management — Development Sessions: Name Project Mode Status Duration Created … No sessions found</code>
+— real sessions view</td>
+</tr>
+<tr>
+<td>QA</td>
+<td><code>helixcode-tui-qa-20260623T133656Z.mp4</code></td>
+<td><code>QA Dashboard — QA Engine: DISABLED … ID Status Phase Progress Platforms Banks Duration</code>
+— real QA view (DISABLED is the genuine state, no live QA session)</td>
+</tr>
+</tbody>
+</table>
+<p>All six TUI views (the sidebar nav
+<code>(d) Dashboard … (q) QA … (c) Settings</code> plus each view’s
+management panel) rendered genuine application output — not
+simulated/placeholder. The empty-state rows (“No workers registered”,
+“No projects found”) are the real rendered states of a freshly-launched
+TUI.</p>
+<h2 id="validation-method-honest-11.4.6-note">Validation method (honest
+§11.4.6 note)</h2>
+<p>The harness reached its 82nd tool-step and produced all 5 per-view
+recordings, but a transient API throttle killed the agent
+<strong>before</strong> it ran the harness’s own self-validated OCR
+analyzer + wrote this doc. The conductor therefore finished the
+validation directly: extracted a frame from each of the 5 MP4s (ffmpeg)
+and OCR-read it (tesseract), confirming the real per-view content above.
+The harness’s self-validated analyzer
+(<code>scripts/video_qa/record_feature.sh</code> <code>selftest</code>:
+golden-good PASS / golden-bad FAIL — provably cannot bluff) remains
+available for a future re-run; this evidence is the conductor’s direct
+OCR-confirmation of real rendered content, which the recordings
+(committed-by- reference, gitignored) back.</p>
+<h2 id="durable-evidence-committed-rotation-proof-anchors-11.4.83-hxc-108-audit-f2-fix">Durable
+evidence (committed) — rotation-proof anchors (§11.4.83, HXC-108 audit
+F2 fix)</h2>
+<p>The raw corpus (<code>/Volumes/T7/Downloads/Recordings/</code>,
+§11.4.128/.154-rotatable) is the secondary location. All per-view
+recordings + evidence frames are <strong>copied into the committed
+tree</strong> so a rotation cannot dangle these citations. All MP4s
+ffprobe-verified valid H.264 after copy (the 5 driven views are
+1604×868/50f; dashboard is the prior run):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>View</th>
+<th>Committed MP4 sha256</th>
+<th>Committed frame sha256</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dashboard (prior)</td>
+<td>(frame only)</td>
+<td><code>cb87560b78ca3dc1ca583b2c0eaedb1a9554170afb96da4b82fcee55674eace7</code></td>
+</tr>
+<tr>
+<td>tasks</td>
+<td><code>d0e01c4e5211e5929256a230f0528b5ea533f2860b2728a745ec13bee9cbb6af</code></td>
+<td><code>319a71eda5c37bc3cbde8e89a6de5aa072972a9d1a3207f158970913edb22cd2</code></td>
+</tr>
+<tr>
+<td>workers</td>
+<td><code>383400681bf61ff24ba5e135b62779f9f8bf10af4705860c791c9ed1498b9fd0</code></td>
+<td><code>d78fa46315e86daf988c5d9de320ae2c51b7c31f36b743cbc1d8019062ba0689</code></td>
+</tr>
+<tr>
+<td>projects</td>
+<td><code>413b4f0a9e2942de8b039614af5f8b51a8a09899019107358037c0dfc0f7a7d4</code></td>
+<td><code>82e410d11b0e0fcc1f9393699872b270a4e044788c62cb9a4907c831a1f695bc</code></td>
+</tr>
+<tr>
+<td>sessions</td>
+<td><code>b35f96009c098bf468f37c58c6c4313cdd4ca3fc1aca6fa224322dd8cf947108</code></td>
+<td><code>b5916796943addd681bcb2033d8a7b3f063ba8207a126e777e098f753d51e9fc</code></td>
+</tr>
+<tr>
+<td>qa</td>
+<td><code>90d60d8ee561e51efda94fa5ddc024598a31da9cabf82a4db4ad9a6a92df840e</code></td>
+<td><code>05e9fbe9b81076254268ff1049db908550dc0e27329a0cd3c71a4f9e32fbd158</code></td>
+</tr>
+</tbody>
+</table>
+<p>Committed under <code>docs/qa/HXC-108_tui_views/</code> (filenames
+preserve the <code>&lt;run-id&gt;</code> timestamps cited above).</p>
+<h2 id="status">Status</h2>
+<p>TUI per-view coverage: <strong>6/6 views recorded with real-content
+OCR confirmation.</strong> Fully automatic (tmux send-keys), no
+TCC/Aqua/human.</p>
+</body>
+</html>

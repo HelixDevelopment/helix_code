@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_video_qa_matrix</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_video_qa_matrix</h1>
+</header>
+<h1 id="hxc-108-video-qa-recording-harness-clients-features-matrix">HXC-108
+— Video-QA Recording Harness: Clients × Features Matrix</h1>
+<p><strong>Owner:</strong> HXC-108 (video-QA recording harness)
+<strong>Harness:</strong>
+<code>scripts/video_qa/record_feature.sh</code> (+
+<code>scripts/video_qa/find_window_id.swift</code>)
+<strong>Revision:</strong> 1 <strong>Last modified:</strong> 2026-06-22
+<strong>Status:</strong> harness mechanics PROVEN (analyzer
+self-validation PASS); live window-scoped recording is an honest host
+TCC env-gap on the current dev host (§11.4.3) — see “Host capability
+gap” below.</p>
+<p>This document enumerates HelixCode’s client surfaces × the features
+recordable per client, per §11.4.153 (per-feature status) / §11.4.158
+(intensive recording coverage) / §11.4.143 (real-user-journey for app
+surfaces). It marks which features are recordable NOW via the CLI/TUI
+non-interactive paths versus which are GUI-input-dependent and therefore
+owned by the concurrent <strong>HXC-112</strong> desktop-GUI stream
+(this harness deliberately stays clear of HXC-112’s
+<code>helix_code/applications/desktop/</code>,
+<code>helix_code/scripts/testing/</code>, and any
+<code>helix_code-hxc112-*</code> recording — §11.4.119
+single-resource-owner).</p>
+<blockquote>
+<p><strong>Coordination note.</strong> Two recording streams exist.
+HXC-112 drives the desktop Fyne GUI under
+<code>helix_code/scripts/testing/</code>. HXC-108 (this harness) lives
+under <code>scripts/video_qa/</code> and uses the recording scope-prefix
+<code>helixcode-&lt;client&gt;-&lt;feature&gt;-*</code> (self-test:
+<code>helixcode-harness_selftest-*</code>), so corpus rotation
+(§11.4.154(B)) only ever touches <strong>this</strong> harness’s own
+files.</p>
+</blockquote>
+<h2 id="resolved-facts-fact-11.4.6">Resolved facts (FACT, §11.4.6)</h2>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 33%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project prefix (§11.4.151/.155)</td>
+<td><code>helixcode</code></td>
+<td><code>HELIX_RELEASE_PREFIX</code> in <code>&lt;root&gt;/.env</code>
+(env-first; dir-name fallback would be <code>helix_code</code>)</td>
+</tr>
+<tr>
+<td>Recordings dir (§11.4.158 host override)</td>
+<td><code>/Volumes/T7/Downloads/Recordings</code></td>
+<td>root <code>CLAUDE.md</code> §11.4.158 project instantiation</td>
+</tr>
+<tr>
+<td>Built client binaries</td>
+<td><code>helix_code/bin/{helixcode, cli, tui/helix-tui, helix-desktop, helixcode-web-fresh, helixcode-infra}</code></td>
+<td><code>ls helix_code/bin/</code></td>
+</tr>
+<tr>
+<td>Client app sources</td>
+<td><code>helix_code/applications/{desktop, terminal_ui, android, ios, aurora_os, harmony_os}</code></td>
+<td><code>ls helix_code/applications/</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="clients-recordable-features">Clients × recordable features</h2>
+<p>Legend — <strong>Input class:</strong>
+<code>CLI</code>/<code>TUI</code> = scriptable non-interactive,
+recordable by THIS harness now · <code>GUI</code> = GUI-input-dependent,
+<strong>HXC-112-gated</strong> (not recorded here) · <code>SERVER</code>
+= HTTP/API, recordable via curl-driven terminal · <code>MOBILE</code> =
+device/emulator, future phase.</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 18%" />
+<col style="width: 9%" />
+<col style="width: 40%" />
+<col style="width: 14%" />
+<col style="width: 7%" />
+</colgroup>
+<thead>
+<tr>
+<th>Client</th>
+<th>Binary / source</th>
+<th>Feature</th>
+<th>Recordable command (deterministic)</th>
+<th>Input class</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI</td>
+<td><code>helix_code/bin/cli</code></td>
+<td>version banner</td>
+<td><code>cli -version</code></td>
+<td>CLI</td>
+<td>HXC-108 now</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>helix_code/bin/cli</code></td>
+<td>health check</td>
+<td><code>cli -health</code></td>
+<td>CLI</td>
+<td>HXC-108 now</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>helix_code/bin/cli</code></td>
+<td>list models (CONST-036, LLMsVerifier)</td>
+<td><code>cli -list-models</code></td>
+<td>CLI</td>
+<td>HXC-108 now (needs verifier/providers reachable)</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>helix_code/bin/cli</code></td>
+<td>list workers</td>
+<td><code>cli -list-workers</code></td>
+<td>CLI</td>
+<td>HXC-108 now</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>helix_code/bin/cli</code></td>
+<td>non-interactive generate (real LLM)</td>
+<td><code>cli -non-interactive -prompt &quot;What is 2+2?&quot; -model &lt;m&gt;</code></td>
+<td>CLI</td>
+<td>HXC-108 now (needs provider key/Ollama)</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>helix_code/bin/cli</code></td>
+<td>streaming generate</td>
+<td><code>cli -non-interactive -stream -prompt &quot;...&quot;</code></td>
+<td>CLI</td>
+<td>HXC-108 now (provider-gated)</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>helix_code/bin/cli</code></td>
+<td>command execution (BLUFF-003 path)</td>
+<td><code>cli -command &quot;echo hi&quot;</code></td>
+<td>CLI</td>
+<td>HXC-108 now</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>helix_code/bin/cli</code></td>
+<td>QA bank list / run</td>
+<td><code>cli -qa-list</code> ·
+<code>cli -qa-run -qa-banks &lt;b&gt;</code></td>
+<td>CLI</td>
+<td>HXC-108 now (qa-server gated for -qa-run)</td>
+</tr>
+<tr>
+<td>TUI</td>
+<td><code>helix_code/bin/tui</code> (<code>helix-tui</code>)</td>
+<td>terminal-UI boot + panes</td>
+<td>launch in Terminal window, drive keys</td>
+<td>TUI</td>
+<td>HXC-108 now (window-scoped)</td>
+</tr>
+<tr>
+<td>Server</td>
+<td><code>helix_code/bin/helixcode</code></td>
+<td>HTTP boot + health endpoint</td>
+<td>start server, <code>curl /health</code> in same window</td>
+<td>SERVER</td>
+<td>HXC-108 now</td>
+</tr>
+<tr>
+<td>Server</td>
+<td><code>helix_code/bin/helixcode</code></td>
+<td><code>/api/v1/llm/generate</code> real output</td>
+<td><code>curl -X POST .../generate -d &#39;{...}&#39;</code></td>
+<td>SERVER</td>
+<td>HXC-108 now (infra+provider gated)</td>
+</tr>
+<tr>
+<td>Desktop GUI</td>
+<td><code>helix_code/applications/desktop</code>
+(<code>helix-desktop</code>)</td>
+<td>Fyne window, chat, settings, model picker</td>
+<td>GUI click/type</td>
+<td><strong>GUI</strong></td>
+<td><strong>HXC-112</strong></td>
+</tr>
+<tr>
+<td>Web</td>
+<td><code>helix_code/bin/helixcode-web-fresh</code></td>
+<td>browser UI</td>
+<td>browser-driven (chromedp/playwright)</td>
+<td>GUI</td>
+<td>HXC-112 / future</td>
+</tr>
+<tr>
+<td>Mobile (iOS)</td>
+<td><code>helix_code/applications/ios</code></td>
+<td>app launch + chat journey (§11.4.143)</td>
+<td>simulator UI journey</td>
+<td>MOBILE</td>
+<td>future phase</td>
+</tr>
+<tr>
+<td>Mobile (Android)</td>
+<td><code>helix_code/applications/android</code></td>
+<td>app launch + chat journey (§11.4.143)</td>
+<td>emulator UI journey</td>
+<td>MOBILE</td>
+<td>future phase</td>
+</tr>
+<tr>
+<td>Mobile (Aurora/Harmony)</td>
+<td><code>helix_code/applications/{aurora_os,harmony_os}</code></td>
+<td>app launch</td>
+<td>device journey</td>
+<td>MOBILE</td>
+<td>future phase</td>
+</tr>
+</tbody>
+</table>
+<h2 id="recording-validation-contract-per-feature">Recording +
+validation contract (per feature)</h2>
+<p>For each recordable feature the harness produces, per §11.4.159: 1.
+<strong>Window-scoped</strong> capture only
+(<code>screencapture -l&lt;id&gt;</code> / <code>-v -l&lt;id&gt;</code>)
+— never whole-desktop (§11.4.154). 2. Output <strong>MP4 H.264
+<code>+faststart</code> <code>yuv420p</code></strong> at
+<code>/Volumes/T7/Downloads/Recordings/helixcode-&lt;client&gt;-&lt;feature&gt;-&lt;ts&gt;.mp4</code>
+(§11.4.155). 3. <strong>Fresh-corpus rotation</strong> of ONLY this
+harness’s own scope-prefixed prior files first (§11.4.154(B)). 4.
+<strong>Read-the-screen</strong> OCR content-validation against
+<code>--expect</code> patterns, anti-bluff scan for
+<code>TODO implement</code>/<code>simulate</code>/<code>placeholder</code>/<code>for now</code>
+(§11.4.158/.160/.163); PASS only when expected content is genuinely read
+back AND no bluff pattern present. 5. <strong>Self-validated
+analyzer</strong> (golden-good PASS + golden-bad FAIL) so the analyzer
+itself cannot bluff (§11.4.107(10)).</p>
+<h2 id="host-capability-gap-11.4.3-fact-captured-never-faked">Host
+capability gap (§11.4.3 — FACT, captured, never faked)</h2>
+<p><code>record_feature.sh probe-caps</code> on the current dev host
+(2026-06-22, macOS 15.5) reports:</p>
+<pre><code>  [OK ] screencapture -R region still
+  [GAP] screencapture -l&lt;id&gt; window still — &quot;could not create image from window&quot;
+  [GAP] screencapture -v window video    — &quot;The operation could not be completed&quot;
+  [OK ] OCR (magick render + tesseract read) under TMPDIR=/Volumes/T7/tmp</code></pre>
+<p><strong>Interpretation:</strong> macOS TCC on this host grants
+Screen-Recording for region/full-screen STILLS, but blocks both
+window-by-id capture primitives (<code>-l&lt;id&gt;</code> still AND
+<code>-v</code> video). Because §11.4.154 forbids a whole-desktop/region
+substitute for a window, the harness SKIPs live recording with the exact
+failing primitive + reproducer rather than fake it. The harness is
+otherwise fully proven (see self-test evidence in
+<code>docs/qa/HXC-108_selftest_evidence.md</code>). To unblock live
+recording: grant the controlling app full Screen-Recording (incl. video)
+in System Settings → Privacy &amp; Security → Screen Recording, then run
+from a GUI-foreground session — OR run the harness on a host where
+<code>probe-caps</code> shows <code>[OK]</code> for the window
+primitives.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li><code>helix_code/bin/cli -help</code> (flag inventory),
+<code>ls helix_code/bin</code>, <code>ls helix_code/applications</code>
+— 2026-06-22.</li>
+<li>Host capability probe <code>record_feature.sh probe-caps</code> —
+2026-06-22.</li>
+</ul>
+</body>
+</html>

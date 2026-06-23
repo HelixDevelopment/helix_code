@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-107_ledger_audit</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-107_ledger_audit</h1>
+</header>
+<h1 id="hxc-107-feature-status-ledger-enumerated-completeness-audit-11.4.153-11.4.118">HXC-107
+— Feature-Status Ledger Enumerated-Completeness Audit (§11.4.153 /
+§11.4.118)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td>Audit date</td>
+<td>2026-06-23</td>
+</tr>
+<tr>
+<td>Target</td>
+<td><code>docs/features/Status.md</code> (rev 8, 123 KB, 1029
+lines)</td>
+</tr>
+<tr>
+<td>Method</td>
+<td>Enumerate live codebase → reconcile against ledger rows; spot-check
+evidence paths + backing code</td>
+</tr>
+<tr>
+<td>Verdict</td>
+<td><strong>GAPS-FOUND</strong> — enumeration is genuinely complete, but
+the §11.4.153 video-confirmation layer is
+<strong>stale/bluffed</strong>: every <code>📹 yes</code> evidence path
+cited has been rotated away and no longer exists on disk</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="verdict-summary">Verdict summary</h2>
+<ul>
+<li><strong>Enumeration completeness (§11.4.118 (a)/(b)/(c) axis):
+PASS.</strong> Every component/client/package/submodule in the live tree
+maps to ≥1 ledger row or a documented exclusion. No
+code-present-but-ledger-missing feature found. No fabricated
+(ledger-row-without-code) row found in spot-check.</li>
+<li><strong>§11.4.153 video-confirmation integrity: FAIL.</strong> 23
+rows are marked <code>Overall=confirmed</code> and cite
+<code>📹 yes(&lt;recording&gt;)</code> evidence, but <strong>all 34
+concretely-checkable cited recording files (out of 58 distinct cited
+names) are MISSING</strong> from
+<code>/Volumes/T7/Downloads/Recordings</code>. The §11.4.154
+fresh-corpus rotation has replaced the <code>-20260615/-20260616</code>
+recordings the ledger cites with a newer
+<code>-20260622/-20260623</code> corpus. Per §11.4.153 (“a confirmed row
+whose evidence path is missing is a bluff”), these 23
+<code>confirmed</code> rows are currently un-backed.</li>
+</ul>
+<hr />
+<h2 id="a-structural-reconciliation-code-and-ledger-pass">(a) Structural
+reconciliation — code AND ledger (PASS)</h2>
+<p>All five structural counts the ledger claims match the live tree
+EXACTLY:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Live-tree count</th>
+<th>Ledger claim</th>
+<th>Match</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/internal/*</code></td>
+<td>72 dirs</td>
+<td>72 (71 prod + <code>i18n_wiring</code> test-only)</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>helix_code/cmd/*</code></td>
+<td>11 dirs</td>
+<td>11</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>helix_code/applications/*</code></td>
+<td>6 dirs (android, aurora_os, desktop, harmony_os, ios,
+terminal_ui)</td>
+<td>6</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>submodules/*</code></td>
+<td>67 dirs (all <code>.gitmodules</code>-registered)</td>
+<td>67 → 65 rowed + 2 excluded</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>cli_agents/*</code></td>
+<td>50 dirs (= 50 <code>.gitmodules</code> entries)</td>
+<td>50 (scoped to landed ports)</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>All 72 internal dirs</strong> have ≥1 row (verified each
+name against the ledger’s “Internal services + infrastructure” +
+“Deepened inventory” sections). Both <code>i18nwiring</code> and
+<code>i18n_wiring</code> exist on disk as distinct dirs and both are
+rowed.</li>
+<li><strong>All 11 cmd dirs</strong> rowed (cli, config_test,
+helix_config, i18n, infrastructure, performance_optimization,
+security_fix, security_fix_standalone, security_scan, security_test,
+server).</li>
+<li><strong>All 67 submodule dirs</strong> accounted: 65 carry ≥1
+<code>| submodule |</code> row; the 2 exclusions
+(<code>docs_chain</code>, <code>challenges</code>) are documented
+infra/tooling. <code>claude-toolkit</code> (added rev8) confirmed
+present on disk.</li>
+<li><code>helix_code/web/frontend</code> confirmed present (ledger cites
+<code>web/frontend</code> rows).</li>
+</ul>
+<h2 id="b-code-present-but-missing-from-ledger-none-found">(b) Code
+present but MISSING from ledger — NONE FOUND</h2>
+<p>Every live dir maps to a row. The only intentional non-1:1 mapping is
+<code>cli_agents/*</code> (50 vendored agents), where the ledger
+explicitly scopes the “Ported cli_agents capabilities” section to
+<em>landed ports only</em>, not every vendored agent’s full feature set
+— a documented §11.4.6 scoping decision, not a silent gap.</p>
+<h2 id="c-ledger-rows-with-no-backing-code-none-found">(c) Ledger rows
+with NO backing code — NONE FOUND</h2>
+<p>Spot-checked backing <code>.go</code> files for sampled internal rows
+(all real code present):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Row component</th>
+<th>prod .go</th>
+<th>test .go</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>internal/voice</td>
+<td>6</td>
+<td>3</td>
+<td>real</td>
+</tr>
+<tr>
+<td>internal/kilocode</td>
+<td>8</td>
+<td>3</td>
+<td>real</td>
+</tr>
+<tr>
+<td>internal/continua</td>
+<td>7</td>
+<td>4</td>
+<td>real</td>
+</tr>
+<tr>
+<td>internal/clarification</td>
+<td>4</td>
+<td>3</td>
+<td>real</td>
+</tr>
+<tr>
+<td>internal/approvalwire</td>
+<td>2</td>
+<td>1</td>
+<td>real</td>
+</tr>
+<tr>
+<td>internal/infraboot</td>
+<td>1</td>
+<td>3</td>
+<td>real</td>
+</tr>
+<tr>
+<td>internal/substrate</td>
+<td>1</td>
+<td>4</td>
+<td>real</td>
+</tr>
+<tr>
+<td>internal/i18n_wiring</td>
+<td>0</td>
+<td>1</td>
+<td><strong>honestly</strong> flagged test-only — not a false claim</td>
+</tr>
+</tbody>
+</table>
+<p>All 16 spot-checked “ported” rows (approval, autocommit,
+tools/browser, projectmemory, plantree, workspace, voice, repomap,
+kilocode, roocode, continua, agent/profiles, checkpoint,
+workflow/autonomy, workflow/planmode, tools/askuser) resolve to real
+packages on disk.</p>
+<hr />
+<h2 id="spot-check-of-confirmed-evidence-paths-11.4.153-fail">Spot-check
+of “confirmed” evidence paths (§11.4.153) — <strong>FAIL</strong></h2>
+<p>Recordings dir <code>/Volumes/T7/Downloads/Recordings</code> exists
+and holds <strong>43 <code>helixcode-</code> artifacts</strong>, but
+they are a <strong>newer corpus</strong> (<code>-20260622T*</code> /
+<code>-20260623T*</code>). The ledger’s <code>📹 yes</code> cells cite
+the <strong>older <code>-20260615</code>/<code>-20260616</code>
+corpus</strong>, which the §11.4.154 fresh-corpus rotation has since
+deleted.</p>
+<ul>
+<li>Rows marked <code>Overall=confirmed</code>: <strong>23</strong></li>
+<li>Distinct cited recording filenames referencing
+<code>-20260615/16</code>: <strong>58</strong></li>
+<li>Concretely-checkable cited files → on-disk: <strong>HIT=0 /
+MISS=34</strong> (zero survive)</li>
+<li>Specifically MISSING (sample):
+<code>helixcode-cli-stream-20260616.mp4</code>,
+<code>helixcode-cli-generate-20260616.mp4</code>,
+<code>helixcode-cli-list-models-20260616.mp4</code>,
+<code>helixcode-api-generate-20260616.mp4</code>,
+<code>helixcode-tui-llm-deepseek-20260616.mp4</code>,
+<code>helixcode-web-llm-console-deepseek-20260616.mp4</code>,
+<code>helixcode-desktop-chat-themed-20260615.mp4</code>,
+<code>helixcode-android-themed-20260615.mp4</code>,
+<code>helixcode-ios-launch-20260615.mp4</code>,
+<code>helixcode-web-04-deepseek-stream-20260616.png</code>.</li>
+</ul>
+<p><strong>Root cause:</strong> the ledger cites the <strong>raw,
+rotatable, git-ignored corpus</strong> (§11.4.128 / §11.4.154) in the
+<code>📹 Video</code> column instead of <strong>durable curated
+<code>docs/qa/&lt;run-id&gt;/</code> evidence</strong> (§11.4.83). When
+a later recording run rotated the corpus, every <code>confirmed</code>
+claim was orphaned. (The <code>V&amp;V</code> column for the web rows
+DOES cite a durable path — <code>docs/qa/web-llm-e2e-20260615/</code> —
+which still exists and is valid.)</p>
+<p><strong>Stale in both directions:</strong> disk now holds NEW
+evidence the ledger does not reflect —
+<code>helixcode-cli-{generate,list_models,health,command_exec,list_workers,version}-20260622T*</code>,
+<code>helixcode-server-api-20260622T*</code>,
+<code>helixcode-tui-{dashboard,projects,qa,sessions,tasks,workers}-2026062*</code>,
+<code>helixcode-web-llmchat-20260623T*</code>,
+<code>helixcode-desktopgui-llmchat-20260623T*</code>,
+<code>helixcode-ios-launch-render-20260623-*</code> (each with
+<code>.evidence_frame.png</code> + several with <code>.pane.txt</code>).
+So the ledger simultaneously cites dead paths AND omits the live
+ones.</p>
+<h2 id="format-exports-sources-pass">4-format exports + sources
+(PASS)</h2>
+<p>All present: <code>Status.{md,html,pdf,docx}</code> and
+<code>Status_Summary.{md,html,pdf,docx}</code>. All 5 inventory sources
+present (<code>cmd_and_clients</code>, <code>deepened_round2</code>,
+<code>internal_services</code>, <code>ported_cli_agents</code>,
+<code>submodules</code> — each .md/.html/.pdf).
+<code>docs/qa/web-llm-e2e-20260615/</code> (cited V&amp;V path)
+exists.</p>
+<hr />
+<h2 id="recommended-ledger-fixes">Recommended ledger fixes</h2>
+<ol type="1">
+<li><strong>Re-anchor the <code>📹 Video</code> column to durable
+§11.4.83 evidence.</strong> Curate the current
+<code>-20260622/-20260623</code> recordings into
+<code>docs/qa/&lt;run-id&gt;/</code> and cite those durable paths, OR
+downgrade the 23 <code>confirmed</code> rows to
+<code>working-untaped</code> until a durable recording is cited. Citing
+the rotatable raw corpus is the defect that orphaned every
+confirmation.</li>
+<li><strong>Refresh the ledger to the live corpus.</strong> Re-point
+CLI/API/TUI/Web/Desktop/iOS rows to the new <code>-2026062*</code>
+recordings (which exist with <code>.evidence_frame.png</code> + OCR
+<code>.pane.txt</code> evidence), instead of the deleted
+<code>-2026061*</code> names.</li>
+<li><strong>Close the ledger’s own flagged gap (a):</strong> add the
+§11.4.86 drift-proof fingerprint sidecar over BOTH the feature-key
+roster AND the video-artefact roster, so a rotated/missing evidence file
+mechanically fails a freshness gate instead of silently bluffing
+green.</li>
+<li><strong>Back-port rev2–5 hand-edits into the generator
+sources</strong> before any docs_chain regen (the ledger’s flagged gap
+(b)) so regen does not regress annotations.</li>
+</ol>
+<h2 id="honest-boundary-11.4.6">Honest boundary (§11.4.6)</h2>
+<p>This audit proves enumerated completeness (every code dir is rowed;
+no fabricated rows in the sampled set) and proves the §11.4.153
+evidence-path bluff (cited recordings gone). It does NOT re-verify
+per-row Dev/Wired/Real-use correctness beyond file presence, and the
+backing-code spot-check sampled ~24 of 564+ rows — a representative, not
+exhaustive, sample.</p>
+</body>
+</html>

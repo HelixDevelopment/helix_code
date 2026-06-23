@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_liveness_verification</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_liveness_verification</h1>
+</header>
+<h1 id="hxc-108-11.4.107-liveness-freeze-oracle-verification-of-committed-durable-recordings">HXC-108
+— §11.4.107 Liveness / Freeze-Oracle Verification of Committed Durable
+Recordings</h1>
+<p><strong>Date:</strong> 2026-06-23 <strong>Scope:</strong> Confirm the
+committed durable <code>docs/qa/HXC-108_*</code> mp4 recordings show
+GENUINELY ADVANCING frames (not a frozen/stale single image), per
+Constitution §11.4.107 (liveness battery / freeze-detection oracle).
+<strong>Tooling:</strong> <code>ffprobe</code> + <code>ffmpeg</code>
+(<code>/opt/homebrew/bin</code>, host). <strong>Read-only on
+recordings.</strong> No commit performed.</p>
+<hr />
+<h2 id="method-11.4.107-freeze-oracle-multi-signal-11.4.6-honest-judgment">Method
+(§11.4.107 freeze oracle, multi-signal — §11.4.6 honest judgment)</h2>
+<p>A single captured frame is not proof (§11.4.107). For each mp4 we
+captured THREE independent signals and combined them rather than
+trusting any one in isolation:</p>
+<ol type="1">
+<li><strong>Frame count + duration + fps</strong>
+(<code>ffprobe -count_frames</code>) — a 1-frame / single-image video
+FAILs liveness.</li>
+<li><strong>Distinct-frame count</strong> via <code>mpdecimate</code>
+(drops near-duplicate frames; survivors = genuinely distinct content
+frames) — this is the perceptual freeze oracle. <strong>1 distinct frame
+⇒ frozen-stale.</strong></li>
+<li><strong>First-frame vs last-frame distinctness</strong>
+(frame-accurate PNG extract + md5) — first≠last ⇒ content genuinely
+changed across the window (advancing), not one stale image.</li>
+<li><strong><code>freezedetect=n=-60dB:d=0.5</code></strong> captured
+for reference. NOTE (§11.4.6 honest boundary): the default −60 dB
+threshold is extremely sensitive and flags a legitimately-static
+TUI/status screen as “frozen”; freezedetect ALONE cannot distinguish
+<em>rendered-but-static real UI</em> from <em>frozen-stale-bluff</em>,
+so it is used only as a corroborating signal — the distinct-frame count
++ first≠last are the decisive oracles.</li>
+</ol>
+<h3 id="verdict-vocabulary">Verdict vocabulary</h3>
+<ul>
+<li><strong>live</strong> — many distinct frames advancing across the
+window (genuinely-advancing).</li>
+<li><strong>static-real</strong> — real genuine content, few changes (a
+status/list screen that renders then sits); ≥2 distinct frames AND
+first≠last ⇒ NOT frozen, acceptable per §11.4.107.</li>
+<li><strong>FROZEN-BLUFF</strong> — exactly 1 distinct frame the whole
+duration / first==last ⇒ real defect, re-record.</li>
+</ul>
+<hr />
+<h2 id="per-mp4-results-11.4.118-enumerated-coverage-12-of-12-committed-mp4s-checked">Per-mp4
+results (§11.4.118 enumerated coverage — 12 of 12 committed mp4s
+checked)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 11%" />
+<col style="width: 8%" />
+<col style="width: 9%" />
+<col style="width: 5%" />
+<col style="width: 24%" />
+<col style="width: 12%" />
+<col style="width: 14%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Recording</th>
+<th style="text-align: right;">Frames</th>
+<th style="text-align: right;">Dur (s)</th>
+<th style="text-align: right;">fps</th>
+<th style="text-align: right;">Distinct (mpdecimate)</th>
+<th style="text-align: center;">first≠last</th>
+<th style="text-align: center;">freezedetect</th>
+<th style="text-align: center;">Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>HXC-108_android/helixcode-android-client.mp4</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">19.92</td>
+<td style="text-align: right;">~1.7 avg</td>
+<td style="text-align: right;">25 (76%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">minimal</td>
+<td style="text-align: center;"><strong>live</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>HXC-108_cli/helixcode-cli-command_exec-…mp4</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">3.30</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4 (12%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">partial</td>
+<td style="text-align: center;"><strong>live</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>HXC-108_cli/helixcode-cli-generate-…mp4</td>
+<td style="text-align: right;">68</td>
+<td style="text-align: right;">6.80</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">7 (10%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">partial</td>
+<td style="text-align: center;"><strong>live</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>HXC-108_cli/helixcode-cli-version-…mp4</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">3.50</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5 (14%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">partial</td>
+<td style="text-align: center;"><strong>live</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>HXC-108_tui_server/helixcode-server-api-…mp4</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">4.80</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5 (10%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">partial</td>
+<td style="text-align: center;"><strong>live</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>HXC-108_tui_server/helixcode-tui-dashboard-…mp4</td>
+<td style="text-align: right;">131</td>
+<td style="text-align: right;">13.10</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">6 (5%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">periodic</td>
+<td style="text-align: center;"><strong>live</strong> (updates <span class="citation" data-cites="0">@0</span>,0.1,5.1,10.1s)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>HXC-108_tui_views/helixcode-tui-projects-…mp4</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">5.00</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3 (6%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">mostly static</td>
+<td style="text-align: center;"><strong>static-real</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>HXC-108_tui_views/helixcode-tui-qa-…mp4</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">5.00</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3 (6%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">mostly static</td>
+<td style="text-align: center;"><strong>static-real</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>HXC-108_tui_views/helixcode-tui-sessions-…mp4</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">5.00</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3 (6%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">mostly static</td>
+<td style="text-align: center;"><strong>static-real</strong></td>
+</tr>
+<tr>
+<td>10</td>
+<td>HXC-108_tui_views/helixcode-tui-tasks-…mp4</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">5.00</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3 (6%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">mostly static</td>
+<td style="text-align: center;"><strong>static-real</strong></td>
+</tr>
+<tr>
+<td>11</td>
+<td>HXC-108_tui_views/helixcode-tui-workers-…mp4</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">5.00</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3 (6%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">mostly static</td>
+<td style="text-align: center;"><strong>static-real</strong></td>
+</tr>
+<tr>
+<td>12</td>
+<td>HXC-108_web/helixcode-web-llmchat-…mp4</td>
+<td style="text-align: right;">419</td>
+<td style="text-align: right;">13.97</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">8 (2%)</td>
+<td style="text-align: center;">DIFFERENT</td>
+<td style="text-align: center;">streaming</td>
+<td style="text-align: center;"><strong>live</strong> (updates ~every 2s
+<span class="citation" data-cites="0">@0</span>,2,4,6,8,10s — LLM token
+stream)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>iOS:</strong> no committed mp4 — evidence is a single frame +
+<code>ffprobe</code> stamp (per the run notes). Honestly noted: liveness
+oracle N/A (no video to analyze). Not counted in the 12; not a
+FROZEN-BLUFF (it never claimed a video).</p>
+<hr />
+<h2 id="interpretation-11.4.6">Interpretation (§11.4.6)</h2>
+<ul>
+<li><strong>Zero FROZEN-BLUFF findings.</strong> No recording is a
+single frozen/stale image. The decisive proof: <strong>every one of the
+12 has first-frame ≠ last-frame AND ≥3 distinct (mpdecimate-survivor)
+frames</strong> — a frozen-stale bluff would show exactly 1 distinct
+frame and identical first/last.</li>
+<li>The <strong>6 “live”</strong> recordings (android, 3× cli,
+server-api, dashboard, web-llmchat) show clear content advancement: the
+Android client at 76% distinct frames is unambiguously live; the
+dashboard updates periodically (0/0.1/5.1/10.1s); the web LLM-chat
+advances every ~2s consistent with token streaming.</li>
+<li>The <strong>5 TUI-view “static-real”</strong> recordings
+(projects/qa/sessions/tasks/workers) legitimately render the view once
+then sit — 3 distinct frames (initial blank → rendered view → minor
+change) over a 5s window. This is <em>rendered-but-static real UI</em>,
+NOT a frozen black/stale frame: each has a genuine content transition
+(first≠last) and the OCR-content-verification (prior run) already
+confirmed the right content is on screen. Per §11.4.107 honest boundary,
+a deliberately-static real screen with a real distinct frame count is
+acceptable and MUST NOT be false-FAILed as frozen.</li>
+</ul>
+<hr />
+<h2 id="overall-verdict">Overall verdict</h2>
+<p><strong>PASS — liveness confirmed for all 12 committed durable
+mp4s.</strong> 6 genuinely-advancing (live), 5 static-but-real (real
+content, expected few changes for a TUI status/list screen), 1 (android)
+strongly live. <strong>No frozen-stale-bluff detected; no re-record
+required.</strong> iOS honestly carries no committed mp4 (frame +
+ffprobe-stamp only) — liveness oracle not applicable there.</p>
+<p>This confirmation COMPLEMENTS (does not replace) the prior OCR
+content-verification and the §11.4.5 captured-evidence layer.</p>
+</body>
+</html>

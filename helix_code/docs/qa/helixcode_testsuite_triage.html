@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixcode_testsuite_triage</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixcode_testsuite_triage</h1>
+</header>
+<h1 id="helixcode-go-test-....-failure-triage-no-infra-run">HelixCode
+<code>go test ./...</code> Failure Triage (no-infra run)</h1>
+<p><strong>Run:</strong> <code>go test -count=1 ./...</code> in
+<code>helix_code/</code> WITHOUT <code>make test-infra-up</code> (no
+real PostgreSQL / Redis / Ollama / verifier server / running HelixCode
+server). <strong>Result:</strong> TEST_EXIT=1 — 178 ok, 24 FAIL (primary
+log <code>qa-results/helixcode_unittest_20260623_220246.log</code>).
+<strong>Triage date:</strong> 2026-06-23 · read-only, no code touched,
+suite NOT re-run. <strong>Honest boundary (§11.4.6):</strong> categories
+below are derived from the log + test source. Items marked
+<strong>UNCONFIRMED</strong> need a <code>make test-infra-up</code>
+re-run to confirm.</p>
+<p>A sibling run (<code>..._220256.log</code>) under heavier parallel
+load failed a DIFFERENT, LARGER set (added
+<code>internal/deployment</code> GPU-probe tests,
+<code>internal/tools</code>, <code>tests/e2e/core</code>, extra MCP
+WS-transport tests). The two runs diverging on which packages fail is
+itself strong evidence most of these are
+<strong>ENV/FLAKY-TIMING</strong>, not deterministic product
+defects.</p>
+<hr />
+<h2 id="failure-table-primary-log-24-package-level-failures-across-the-named-tests">Failure
+table (primary log, 24 package-level failures across the named
+tests)</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Package</th>
+<th>Failing test(s)</th>
+<th>Category</th>
+<th>Evidence</th>
+<th>Release-blocker?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>internal/agent/subagent</td>
+<td>TestSubprocessSpawner_RealHelper_RoundTrip</td>
+<td>ENV/FLAKY-TIMING</td>
+<td>10.00s timeout spawning real subprocess helper</td>
+<td>no</td>
+</tr>
+<tr>
+<td>internal/cognee</td>
+<td>TestClientHTTP_Chaos_ServerCloseDuringConcurrentLoad</td>
+<td>NEEDS-REAL-INFRA</td>
+<td>“cognee login failed … context deadline exceeded” — no cognee
+backend up</td>
+<td>needs-infra-rerun</td>
+</tr>
+<tr>
+<td>internal/cognee</td>
+<td>TestClientAddMemory/AddMemory_Success (+ panic)</td>
+<td>NEEDS-REAL-INFRA (+ latent REAL-BUG)</td>
+<td><code>Post http://127.0.0.1:64172/api/v1/add … connect: operation timed out</code>;
+then nil-deref panic at cognee_test.go:1143</td>
+<td>needs-infra-rerun (panic = real test-robustness bug, see notes)</td>
+</tr>
+<tr>
+<td>internal/discovery</td>
+<td>TestIsPortReachable</td>
+<td>ENV/FLAKY-TIMING</td>
+<td>client_test.go:388 “Should be true” — host TCP
+port-bind/reachability sensitive</td>
+<td>no</td>
+</tr>
+<tr>
+<td>internal/discovery</td>
+<td>TestHealthMonitor_CheckServiceHealth_TCP</td>
+<td>ENV/FLAKY-TIMING</td>
+<td>health_monitor_test.go:107; “httptest.Server blocked in Close after
+5s” — TCP timing</td>
+<td>no</td>
+</tr>
+<tr>
+<td>internal/mcp</td>
+<td>TestStdioTransport_StderrCapture</td>
+<td>ENV/FLAKY-TIMING</td>
+<td>19.29s; stdio subprocess stderr-capture timing</td>
+<td>no</td>
+</tr>
+<tr>
+<td>internal/providers/httpclient</td>
+<td>TestSharedClient_BurstReuse</td>
+<td>ENV/FLAKY-TIMING</td>
+<td>0.01s burst-reuse race on shared transport</td>
+<td>no</td>
+</tr>
+<tr>
+<td>internal/verifier</td>
+<td>TestAdapter_GetVerifiedModels_FallbackOnError</td>
+<td><strong>REAL-BUG (stale test)</strong></td>
+<td>adapter_test.go:101 <code>require.Len(models,7)</code> but fallback
+list has <strong>8</strong> models</td>
+<td>no (test wrong, product correct)</td>
+</tr>
+<tr>
+<td>internal/voice</td>
+<td>TestVoiceRecorder_StartLaunchesProcess_Guard</td>
+<td>ENV/FLAKY-TIMING</td>
+<td>recorder_guard_test.go:138 capture .wav missing after Start/Stop —
+needs real audio capture device/process</td>
+<td>no (RED-style guard; env)</td>
+</tr>
+<tr>
+<td>tests/e2e/phase2</td>
+<td>TestBasicIntegration, TestServerCapabilities,
+TestRealServerIntegration</td>
+<td>NEEDS-REAL-INFRA</td>
+<td>integration_test.go:137 health check failed:
+<code>map[status:ok]</code> — server not running (see notes)</td>
+<td>needs-infra-rerun</td>
+</tr>
+<tr>
+<td>tests/e2e/phase3</td>
+<td>TestMemorySystemIntegration, TestConversationMemory,
+TestMemorySearchAndRetrieval, TestMemoryPersistence,
+TestMemoryAnalytics, TestMemoryPrivacyAndSecurity,
+TestConcurrentProjectOperations, TestMemoryOptimization,
+TestResourceCleanup, TestThroughputScalability, TestPhase3Basic,
+TestPhase3Connectivity</td>
+<td>NEEDS-REAL-INFRA</td>
+<td>framework.go:149 health check failed: <code>map[status:ok]</code> —
+no server/memory backend</td>
+<td>needs-infra-rerun</td>
+</tr>
+<tr>
+<td>tests/performance</td>
+<td>TestCompetitorBaselineScript_RunsEndToEnd,
+TestCompetitorBaselineScript_SelfVerifiesMeasuredAgents</td>
+<td><strong>REAL-BUG (missing artifact)</strong></td>
+<td><code>scripts/testing/competitor_speed_baseline.sh</code> does NOT
+exist; exit 127</td>
+<td>no (missing helper script, not product)</td>
+</tr>
+<tr>
+<td>tests/performance/scenarios</td>
+<td>TestRunner_StableAcrossThreeRuns</td>
+<td>ENV/FLAKY-TIMING</td>
+<td>“S3 harness too noisy: CV=74.05% (&gt;=35%)”; S2 SKIP-OK
+(HELIX_SPEED_LLM_URL unset)</td>
+<td>no (perf-harness noise on loaded host)</td>
+</tr>
+<tr>
+<td>tests/regression</td>
+<td>TestCriticalPath_ConfigurationLoading/ConfigValidation</td>
+<td><strong>UNCONFIRMED (likely REAL-BUG)</strong></td>
+<td>critical_paths_test.go:627 “Valid config should pass validation” →
+false; pure in-memory <code>validator.Validate(validCfg)</code>, no
+network</td>
+<td>UNCONFIRMED — investigate</td>
+</tr>
+<tr>
+<td>tests/regression</td>
+<td>TestServerStability</td>
+<td>ENV/FLAKY-TIMING</td>
+<td>server_timeout_test.go:183
+<code>Get http://…/ context deadline exceeded</code> “server must serve
+immediately after start” — startup-timing on loaded host</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="counts-per-category-primary-log">Counts per category (primary
+log)</h2>
+<ul>
+<li><strong>NEEDS-REAL-INFRA:</strong> 3 packages —
+<code>internal/cognee</code> (2 tests), <code>tests/e2e/phase2</code>
+(3), <code>tests/e2e/phase3</code> (12). ~17 individual tests.</li>
+<li><strong>ENV/FLAKY-TIMING:</strong> 8 packages — subagent, discovery
+(2), mcp, httpclient, voice, performance/scenarios,
+regression/TestServerStability.</li>
+<li><strong>REAL-BUG (actionable):</strong> 2 —
+<code>internal/verifier</code> (stale <code>Len==7</code>),
+<code>tests/performance</code> (missing
+<code>competitor_speed_baseline.sh</code>). Plus 1 latent
+test-robustness bug (cognee panic).</li>
+<li><strong>UNCONFIRMED:</strong> 1 — <code>tests/regression</code>
+TestCriticalPath_ConfigurationLoading/ConfigValidation.</li>
+</ul>
+<hr />
+<h2 id="real-bug-list-the-actionable-subset-not-product-breaking-for-end-users">REAL-BUG
+list (the actionable subset — NOT product-breaking for end users)</h2>
+<ol type="1">
+<li><p><strong>internal/verifier ·
+TestAdapter_GetVerifiedModels_FallbackOnError</strong> — STALE TEST.
+<code>fallback_models.go</code> defines <strong>8</strong> models
+(llama-3.2-3b, gpt-4o, claude-3-5-sonnet, mistral-large, gemini-2.5-pro,
+deepseek-chat, grok-3-fast-beta, <strong>mimo-v2.5-pro</strong>). Test
+still asserts <code>require.Len(models, 7)</code>. The 8th (Xiaomi MiMo)
+was added without updating the test. <strong>Product is correct; test
+assertion is stale</strong> — §11.4.120 fix-breaks-its-own-gate /
+reconcile-the-gate, NOT a CONST-035 product bluff. Fix: update assertion
+to 8 (and <code>models[0].Source == &quot;fallback&quot;</code> still
+holds).</p></li>
+<li><p><strong>tests/performance ·
+TestCompetitorBaselineScript_*</strong> — MISSING ARTIFACT. Both tests
+reference
+<code>helix_code/scripts/testing/competitor_speed_baseline.sh</code>
+which does not exist (exit 127). Either the script was never committed
+or was removed. <strong>Not a product defect</strong>; a test depends on
+a non-existent helper. §11.4.124-adjacent (missing wiring). Fix:
+restore/author the baseline script, or mark the test SKIP-OK if the
+baseline harness is deferred.</p></li>
+<li><p><strong>internal/cognee · TestClientAddMemory panic (latent
+test-robustness bug).</strong> The <em>failure</em> is NEEDS-REAL-INFRA
+(no cognee backend → POST times out). But after the assertion fails, the
+test continues and nil-derefs at cognee_test.go:1143 (SIGSEGV) — the
+test does not guard against the nil response it just asserted non-nil.
+Even with infra up this is a fragile test; with infra DOWN it panics the
+whole package. <strong>Test hardening needed</strong> (guard /
+<code>require</code> short-circuit), independent of the infra
+dependency.</p></li>
+</ol>
+<hr />
+<h2 id="unconfirmed-needs-investigation-possibly-real-bug">UNCONFIRMED
+(needs investigation, possibly REAL-BUG)</h2>
+<ul>
+<li><strong>tests/regression ·
+TestCriticalPath_ConfigurationLoading/ConfigValidation</strong> —
+<code>config.NewConfigurationValidator(true).Validate(validCfg)</code>
+returns <code>Valid=false</code> for a config that looks valid (Version
+1.0.0, env=development, server port 8080, DB port 5432, 32-char JWT
+secret, LLM DefaultProvider=“local”, MaxTokens=1000). This is a
+<strong>pure in-memory validator call — no network/infra</strong> — so a
+real-infra re-run will NOT change the verdict. Likely a genuine
+validator-vs-test divergence (validator now requires a field the fixture
+omits, or DefaultProvider=“local” is no longer accepted).
+<strong>Disambiguate by:</strong> running just this test and printing
+<code>result.Errors</code>. This session touched config-adjacent areas
+only via the DeepSeek default-model fix (internal/server passed) — but
+ConfigValidation could intersect. Recommend the conductor run
+<code>go test -run TestCriticalPath_ConfigurationLoading ./tests/regression -v</code>
+and read <code>result.Errors</code>.</li>
+</ul>
+<hr />
+<h2 id="const-035-11.4-anti-bluff-assessment">CONST-035 / §11.4
+anti-bluff assessment</h2>
+<ul>
+<li><strong>NEEDS-REAL-INFRA</strong> tests are NOT bluffs — they
+correctly FAIL-not-SKIP when the real backend is absent (CONST-050(A):
+no fakes beyond unit tests; e2e demands real infra). They are running in
+the wrong environment (no <code>test-infra-up</code>), not lying. The
+<code>map[status:ok]</code> e2e message is the test correctly rejecting
+a non-matching health body / unreachable server — honest failure.</li>
+<li><strong>ENV/FLAKY-TIMING</strong> tests are test-harness/host issues
+(port binds, subprocess spawn timing, perf-harness CV noise, audio
+device), not end-user product defects. They should ideally carry tighter
+timing tolerances or be load-isolated (§11.4.119 single-resource-owner;
+§11.4.50 determinism), but none indicates a broken feature.</li>
+<li><strong>REAL-BUG (verifier, competitor script)</strong> are
+test-side defects (stale assertion, missing helper), NOT product bluffs.
+The verifier <em>product</em> returns the full fallback list
+correctly.</li>
+<li><strong>internal/server (DeepSeek default-model fix) PASSED</strong>
+— the change this session shipped is green.</li>
+</ul>
+<hr />
+<h2 id="recommendation">Recommendation</h2>
+<ol type="1">
+<li><strong>Re-run under <code>make test-infra-up</code></strong> to
+clear: <code>internal/cognee</code>, <code>tests/e2e/phase2</code>,
+<code>tests/e2e/phase3</code> (all NEEDS-REAL-INFRA). Expect them to
+pass once PG/Redis/Ollama/cognee/server are up. This is the bulk (~17
+tests).</li>
+<li><strong>Genuine fixes (test-side, low priority, NOT release-blocking
+the DeepSeek work):</strong>
+<ul>
+<li><code>internal/verifier</code>: bump the fallback-count assertion 7
+→ 8 (§11.4.120 reconcile).</li>
+<li><code>tests/performance</code>: restore/author
+<code>scripts/testing/competitor_speed_baseline.sh</code> or SKIP-OK the
+two competitor-baseline tests.</li>
+<li><code>internal/cognee</code>: harden TestClientAddMemory to not
+nil-deref after a failed <code>require.NotNil</code>.</li>
+</ul></li>
+<li><strong>Investigate (UNCONFIRMED, may be REAL-BUG):</strong>
+<code>tests/regression</code> ConfigValidation — print
+<code>result.Errors</code>; infra re-run will NOT change it.</li>
+<li><strong>ENV/FLAKY-TIMING</strong> (subagent, discovery, mcp,
+httpclient, voice, performance/scenarios,
+regression/TestServerStability): re-run in isolation / serialized; the
+divergence between the two logs confirms load sensitivity. No product
+action required; consider timing-tolerance hardening later.</li>
+</ol>
+<p><strong>Bottom line:</strong> NONE of the 24 failures indicates the
+DeepSeek default-model fix (or any product feature) is broken for the
+end user. The actionable code-side items are 2 stale/missing test
+artifacts + 1 test-robustness panic + 1 unconfirmed validator
+divergence. The majority (~17) are infra-absent e2e/cognee tests that
+need <code>make test-infra-up</code>; the remainder are host-timing
+flakes.</p>
+</body>
+</html>

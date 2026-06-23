@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_desktopgui_features_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_desktopgui_features_evidence</h1>
+</header>
+<h1 id="hxc-108-helixcode-desktop-gui-fyne-real-video-qa-recordings-of-the-non-llm-chat-features-curated-evidence">HXC-108
+— HelixCode Desktop GUI (Fyne): Real Video-QA Recordings of the
+non-LLM-chat features (curated evidence)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Run-id</strong></td>
+<td>HXC-108_desktopgui_features</td>
+</tr>
+<tr>
+<td><strong>Date (UTC)</strong></td>
+<td>2026-06-23</td>
+</tr>
+<tr>
+<td><strong>HEAD at recording</strong></td>
+<td><code>9301a264</code></td>
+</tr>
+<tr>
+<td><strong>Surface</strong></td>
+<td>HelixCode <strong>desktop GUI</strong> (Fyne v2.7.0) —
+<code>helix_code/applications/desktop</code> — the six tabs BEYOND
+LLM-chat: <strong>Dashboard, Tasks, Workers, Projects, Sessions,
+Settings</strong> (LLM-chat already covered by <code>HXC-108_*</code>
+LLM-chat slice via <code>gui_record_test.go</code>)</td>
+</tr>
+<tr>
+<td><strong>Capture method</strong></td>
+<td><strong>Fully in-process</strong> Fyne software renderer + in-memory
+test driver (<code>fyne.io/fyne/v2/test</code> +
+<code>.../driver/software</code>). <code>test.NewApp()</code> → no real
+window / no WindowServer / no GL / <strong>no TCC</strong>; each frame
+software-painted via <code>software.RenderCanvas(canvas, theme)</code>
+(== <code>Canvas.Capture()</code> under a software painter). Runs in ANY
+launchd domain incl. Background — satisfies §11.4.98 (no Aqua, no human,
+rerunnable). Identical mechanism to the proven LLM-chat harness
+<code>gui_record_test.go</code>.</td>
+</tr>
+<tr>
+<td><strong>Harness</strong></td>
+<td><code>helix_code/applications/desktop/gui_record_features_test.go</code>
+(build tag <code>!nogui</code>, zero production weight) — extends the
+<code>gui_record_test.go</code> pattern</td>
+</tr>
+<tr>
+<td><strong>Wrapper</strong></td>
+<td><code>scripts/video_qa/record_gui_features_inprocess.sh</code>
+(assembles per-feature MP4 + OCR-validates)</td>
+</tr>
+<tr>
+<td><strong>Recordings dir</strong></td>
+<td><code>/Volumes/T7/Downloads/Recordings/</code> (gitignored raw
+corpus, §11.4.128)</td>
+</tr>
+<tr>
+<td><strong>Prefix</strong></td>
+<td><code>helixcode</code> (from <code>HELIX_RELEASE_PREFIX</code> in
+<code>&lt;repo-root&gt;/.env</code>, §11.4.155/.151)</td>
+</tr>
+<tr>
+<td><strong>MP4 format</strong></td>
+<td>H.264 / <code>yuv420p</code> / <code>+faststart</code>, 1200×800
+(§11.4.159(B))</td>
+</tr>
+<tr>
+<td><strong>Validator</strong></td>
+<td>harness <code>scripts/video_qa/record_feature.sh</code>
+<code>ocr-analyze</code> (tesseract OCR), self-validated
+golden-good/golden-bad per §11.4.107(10)</td>
+</tr>
+<tr>
+<td><strong>Recording resource ownership</strong></td>
+<td>§11.4.119 — this agent rendered ENTIRELY in-process (Fyne software
+canvas, no terminal). A concurrent TUI recorder owns the tmux/asciinema
+resource; <strong>no contention</strong> (disjoint resources).</td>
+</tr>
+<tr>
+<td><strong>Anti-bluff</strong></td>
+<td>each rendered frame OCR-scanned for
+<code>simulated</code>/<code>simulate</code>/<code>TODO implement</code>/<code>placeholder</code>/<code>for now</code>/<code>in production this would</code>
+by <code>ocr-analyze</code> → <strong>all clean</strong>; every feature
+uses REAL managers + REAL bundle-backed i18n + REAL seeded data (no
+fabrication)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-is-real-here-no-simulation-11.4.2-11.4.107-11.4.158">What
+is REAL here (no simulation — §11.4.2 / §11.4.107 / §11.4.158)</h2>
+<ul>
+<li>Each tab is built by the <strong>same production
+<code>create&lt;Tab&gt;()</code> method</strong> <code>main.go</code>’s
+<code>setupUI()</code> calls — <code>createDashboardTab</code> /
+<code>createTasksTab</code> / <code>createWorkersTab</code> /
+<code>createProjectsTab</code> / <code>createSessionsTab</code> /
+<code>createSettingsTab</code>. The captured frames are the REAL
+rendered Fyne widget trees, NOT hand-rebuilt facsimiles, so they cannot
+drift from production.</li>
+<li>The <code>DesktopApp</code> is wired with the REAL managers
+production uses (<code>task.NewTaskManager</code> +
+<code>worker.NewWorkerManager</code>(in-memory repo) +
+<code>project.NewManager</code> + <code>session.NewManager</code> +
+<code>NewThemeManager</code>) and the REAL bundle-backed i18n translator
+(<code>i18n.NewTranslator()</code>), exactly as the fixed GUI
+<code>main()</code> does — so labels render localized prose, not raw
+message-ID echoes (HXC-111 guard composes).</li>
+<li>Where a feature involves data, REAL data is seeded through the REAL
+manager APIs (<code>CreateTask</code> / <code>AddWorker</code> /
+<code>CreateProject</code> — against a real on-disk path / session
+<code>Create</code>) and the REAL interaction is driven
+(<code>test.Type</code>/<code>test.Tap</code>/<code>Select.SetSelected</code>/<code>List.OnSelected</code>).
+Each test ALSO hard-asserts the real manager state changed (e.g. ≥1
+task/worker/project/session present, theme switch took) — proving the
+production closure ran, not just rendered.</li>
+</ul>
+<h2 id="analyzer-self-validation-the-validator-provably-cannot-bluff-11.4.10710">Analyzer
+self-validation (the validator provably cannot bluff) —
+§11.4.107(10)</h2>
+<p><code>record_feature.sh selftest</code>, captured this session:</p>
+<pre><code>[gui-feat] self-validating OCR analyzer (golden-good/golden-bad)…
+[gui-feat] analyzer self-validation: PASS</code></pre>
+<p>The golden-good fixture (expected probe string) PASSes; the
+golden-bad fixture (a string NOT on screen,
+<code>HELIXCODE_WRONG_PATTERN_9999</code>) FAILs — so the analyzer
+reading back every PASS below provably cannot bluff.</p>
+<h2 id="calibration-note-11.4.6-patterns-calibrated-on-the-projects-own-frames">Calibration
+note (§11.4.6 — patterns calibrated on the project’s own frames)</h2>
+<p>Expected OCR patterns per feature were chosen from the project’s OWN
+rendered frames (OCR-confirmed below), favouring tokens that survive
+tesseract on the Fyne software-render AND uniquely prove the real
+feature. <code>ocr-analyze</code> is ALL-must-match. This calibrates the
+<em>patterns</em>, never the <em>content</em>.</p>
+<hr />
+<h2 id="per-feature-results-all-six-pass-recorded-ocr-content-validated">PER-FEATURE
+RESULTS — all six <strong>PASS</strong> (recorded + OCR
+content-validated)</h2>
+<p>In-process harness (all green):</p>
+<pre><code>--- PASS: TestRecordDesktopGUIDashboard (5.48s)   RECORD-OK dashboard: 5 frames
+--- PASS: TestRecordDesktopGUITasks     (0.20s)   RECORD-OK tasks: 4 frames, 2 real tasks
+--- PASS: TestRecordDesktopGUIWorkers   (0.21s)   RECORD-OK workers: 4 frames, 2 real workers
+--- PASS: TestRecordDesktopGUIProjects  (0.23s)   RECORD-OK projects: 4 frames
+--- PASS: TestRecordDesktopGUISessions  (0.24s)   RECORD-OK sessions: 4 frames
+--- PASS: TestRecordDesktopGUISettings  (0.27s)   RECORD-OK settings: 4 frames</code></pre>
+<h3 id="gui-1.-dashboard-real-brand-header-live-stats-cards-quick-actions-pass">GUI-1.
+Dashboard — real brand header + live stats cards + Quick Actions —
+<strong>PASS</strong></h3>
+<ul>
+<li><strong>Real data:</strong> a real task + a real worker seeded; the
+per-second stats goroutine repaints non-zero totals over a 4-sample
+window.</li>
+<li><strong>MP4:</strong>
+<code>helixcode-desktopgui-dashboard-20260623T110359Z.mp4</code> (md5
+<code>c302e2b8a032f62384a468d1c54e0c95</code>, 5 frames →
+H.264/yuv420p/1200×800).</li>
+<li><strong>OCR expected (all-must-match):</strong>
+<code>HelixCode|Workers|Quick Actions</code> →
+<strong>PASS</strong>.</li>
+<li><strong>Real-content excerpt (OCR of a captured frame):</strong>
+<code># HelixCode - Distributed AI Development Platform  Workers Tasks System  Total: 1 ... Status: Operational Uptime: 00:00:05 ... Quick Actions  New Task ... Add Worker  LLM Chat  New Project</code></li>
+</ul>
+<h3 id="gui-2.-tasks-real-task-list-real-create-task-through-the-production-button-closure-pass">GUI-2.
+Tasks — real task list + real “Create Task” through the production
+button closure — <strong>PASS</strong></h3>
+<ul>
+<li><strong>Real interaction:</strong> seeded one task, then
+<code>test.Type</code> into the description entry +
+<code>test.Tap</code> the real Create button; harness asserts the real
+manager now holds 2 tasks.</li>
+<li><strong>MP4:</strong>
+<code>helixcode-desktopgui-tasks-20260623T110359Z.mp4</code> (md5
+<code>327319062af6a51de55f15d7ec16fca3</code>, 4 frames). OCR matched on
+<code>frame_0002.png</code> (post-create-tap).</li>
+<li><strong>OCR expected:</strong>
+<code>Tasks|Recorded task|Create Task</code> →
+<strong>PASS</strong>.</li>
+<li><strong>Real-content excerpt:</strong>
+<code>Tasks  [pending] testing - Verify task list renders  [pending] building - Recorded task from full-automation GUI test  New Task: building + Create Task  Refresh</code>
+— the task added by the real button-tap is genuinely in the rendered
+list.</li>
+</ul>
+<h3 id="gui-3.-workers-real-worker-list-real-add-worker-through-the-production-closure-pass">GUI-3.
+Workers — real worker list + real “Add Worker” through the production
+closure — <strong>PASS</strong></h3>
+<ul>
+<li><strong>Real interaction:</strong> seeded
+<code>worker-seed-1</code>, then typed a host + tapped the real Add
+Worker button; harness asserts ≥1 worker (2 present).</li>
+<li><strong>MP4:</strong>
+<code>helixcode-desktopgui-workers-20260623T110359Z.mp4</code> (md5
+<code>cfb90f8a1c7f182bffa993efec90f319</code>, 4 frames).</li>
+<li><strong>OCR expected:</strong>
+<code>Workers|worker-seed-1|Add Worker</code> →
+<strong>PASS</strong>.</li>
+<li><strong>Real-content excerpt (final driven frame,
+<code>frame_0003.png</code>):</strong>
+<code>Workers  [active] worker-seed-1 - 10.0.0.5 (healthy)  [pending] worker-192.168.1.42-... - 192.168.1.42 (unhealthy)  Add Worker: Host ... Add Worker  Refresh</code>
+— BOTH the seeded worker AND the worker added by the real Add-Worker tap
+are rendered (interaction genuinely captured, not
+initial-frame-only).</li>
+</ul>
+<h3 id="gui-4.-projects-real-project-created-via-the-project-manager-real-row-selection-details-panel-pass">GUI-4.
+Projects — real project created via the project manager + real
+row-selection details panel — <strong>PASS</strong></h3>
+<ul>
+<li><strong>Real data:</strong>
+<code>project.Manager.CreateProject</code> against a REAL on-disk path
+(the manager validates the path exists — no fabrication); cache
+refreshed; real <code>List.OnSelected(0)</code> drives the details
+panel.</li>
+<li><strong>MP4:</strong>
+<code>helixcode-desktopgui-projects-20260623T110359Z.mp4</code> (md5
+<code>5fb40e98625b428ab27f6b284a4c355d</code>, 4 frames).</li>
+<li><strong>OCR expected:</strong>
+<code>Projects|HelixCode Recorder|Project Details</code> →
+<strong>PASS</strong>.</li>
+<li><strong>Real-content excerpt:</strong>
+<code>Projects  Create New Project: ... HelixCode Recorder (generic) ... Create Project  Set as Active  Delete Project  Project Details  Name: HelixCode Recorder ... /Volumes/T7/tmp/.../helixcode-rec  Description: GUI recording target  Created: 23 Jun 26 14:02 MSK</code>
+— the real created project’s details rendered after a real
+selection.</li>
+</ul>
+<h3 id="gui-5.-sessions-real-session-created-via-the-session-manager-real-row-selection-details-panel-pass">GUI-5.
+Sessions — real session created via the session manager + real
+row-selection details panel — <strong>PASS</strong></h3>
+<ul>
+<li><strong>Real data:</strong>
+<code>session.Manager.Create(...)</code>; cache refreshed; real
+<code>List.OnSelected(0)</code> drives the details panel.</li>
+<li><strong>MP4:</strong>
+<code>helixcode-desktopgui-sessions-20260623T110359Z.mp4</code> (md5
+<code>565b00b863f12d4cf0e4ca0aebfa254c</code>, 4 frames).</li>
+<li><strong>OCR expected:</strong>
+<code>Sessions|Recorder Session|Session Details</code> →
+<strong>PASS</strong>.</li>
+<li><strong>Real-content excerpt:</strong>
+<code>Sessions  Recorder Session [paused] building  Session Details  Name: Recorder Session  Mode: building  Status: paused  Project ID: proj-rec-1  Description: GUI recording session  Created: 23 Jun 26 14:02 MSK ... Create New Session: ... Session Controls: Start Session Pause Session Resume Session Complete Session</code>
+— the real session’s details rendered after a real selection.</li>
+</ul>
+<h3 id="gui-6.-settings-real-themeserverdbllmabout-cards-real-theme-switch-through-the-production-select-closure-pass">GUI-6.
+Settings — real theme/server/db/LLM/about cards + real theme switch
+through the production Select closure — <strong>PASS</strong></h3>
+<ul>
+<li><strong>Real interaction:</strong> the production theme
+<code>Select</code>’s <code>OnChanged</code> closure driven via
+<code>SetSelected</code> to a different available theme; harness asserts
+<code>ThemeManager.GetCurrentTheme()</code> changed (Helix → Dark). The
+theme-info card repaints with the new theme’s real colours.</li>
+<li><strong>MP4:</strong>
+<code>helixcode-desktopgui-settings-20260623T110359Z.mp4</code> (md5
+<code>5f1b2b78cd12e785c6e45b555d8e4463</code>, 4 frames).</li>
+<li><strong>OCR expected:</strong>
+<code>Current Theme|Primary|Server Connection</code> →
+<strong>PASS</strong>.</li>
+<li><strong>Real-content excerpt (final driven frame,
+<code>frame_0003.png</code>):</strong>
+<code>Theme  Select application theme  dark  Current Theme  Name: Dark  Dark: true  Primary: #2E86AB  Secondary: #A23B72  Accent: #F18F01  Server Connection  Server URL: ...  Timeout (seconds): ...  Database  Host: ... Test Connection</code>
+— the real theme switch to <strong>Dark</strong> is reflected in the
+re-rendered theme-info card.</li>
+</ul>
+<hr />
+<h2 id="honest-gaps-notes-11.4.3-11.4.6">Honest gaps / notes (§11.4.3 /
+§11.4.6)</h2>
+<ul>
+<li><strong>No SKIPs.</strong> Unlike the LLM-chat slice (which honestly
+SKIPs without an API key), these six tabs render local domain state and
+need NO LLM provider — so all six recorded unconditionally.</li>
+<li><strong>Dialogs not exercised.</strong> Buttons that open Fyne modal
+dialogs (<code>dialog.ShowInformation</code> / <code>ShowConfirm</code>
+/ <code>ShowError</code>) are not driven here — modal dialogs render on
+the window overlay; the in-process software canvas capture path was kept
+to the tab content. The tabs’ primary feature surfaces (lists, forms,
+details panels, theme switch, live stats) ARE driven and captured.
+Driving overlay dialogs is a documented follow-up, not a faked
+pass.</li>
+<li><strong>Raw frames are ephemeral</strong> (the wrapper rotates its
+own scope per §11.4.154 and cleans its temp frames base on exit). The
+committable record is this curated doc + the gitignored MP4s under the
+recordings dir; the harness + wrapper regenerate them deterministically
+(<code>scripts/video_qa/record_gui_features_inprocess.sh</code>).</li>
+</ul>
+<h2 id="reproduce">Reproduce</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Full pipeline (build harness → 6 MP4s → analyzer self-validate → OCR-validate each):</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/video_qa/record_gui_features_inprocess.sh</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Harness only (frames to a chosen dir):</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> helix_code <span class="kw">&amp;&amp;</span> <span class="va">HELIX_GUI_FEATURES_FRAMES_DIR</span><span class="op">=</span>/tmp/feat <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-run</span> <span class="st">&#39;TestRecordDesktopGUI(Dashboard|Tasks|Workers|Projects|Sessions|Settings)&#39;</span> <span class="at">-v</span> ./applications/desktop/</span></code></pre></div>
+</body>
+</html>

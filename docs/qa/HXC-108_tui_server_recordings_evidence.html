@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_tui_server_recordings_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_tui_server_recordings_evidence</h1>
+</header>
+<h1 id="hxc-108-helixcode-tui-server-real-video-qa-recordings-curated-evidence">HXC-108
+— HelixCode TUI + Server: Real Video-QA Recordings (curated
+evidence)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Run-id</strong></td>
+<td>HXC-108_tui_server_recordings</td>
+</tr>
+<tr>
+<td><strong>Date (UTC)</strong></td>
+<td>2026-06-22 / 2026-06-23</td>
+</tr>
+<tr>
+<td><strong>HEAD at recording</strong></td>
+<td><code>1b820b50</code> (CLI-evidence commit); binaries built at prior
+HEAD; HEAD later advanced to <code>f012ac2f</code> via a parallel
+constitution-pointer bump that does not touch these binaries</td>
+</tr>
+<tr>
+<td><strong>Surfaces</strong></td>
+<td>HelixCode <strong>terminal-UI</strong> client
+(<code>helix_code/applications/terminal_ui</code> → built binary) +
+HelixCode <strong>server</strong> (<code>cmd/server</code> →
+<code>helix_code/bin/helixcode</code>, Gin API)</td>
+</tr>
+<tr>
+<td><strong>Capture method</strong></td>
+<td><strong>asciinema</strong> (terminal session → text cast) →
+<strong>agg</strong> (GIF) → <strong>ffmpeg</strong> (MP4 H.264
+<code>+faststart</code> <code>yuv420p</code>).
+<strong>TCC-free</strong>: needs NO macOS Screen-Recording grant. The
+harness’s native <code>screencapture -l&lt;wid&gt;</code> window path is
+TCC-blocked on this host (confirmed again by <code>selftest</code>
+<code>[live] SKIP</code> below) — same env-gap as the CLI slice.</td>
+</tr>
+<tr>
+<td><strong>Recordings dir</strong></td>
+<td><code>/Volumes/T7/Downloads/Recordings/</code> (gitignored raw
+corpus, §11.4.128)</td>
+</tr>
+<tr>
+<td><strong>Prefix</strong></td>
+<td><code>helixcode</code> (from <code>HELIX_RELEASE_PREFIX</code> in
+<code>&lt;repo-root&gt;/.env</code>, §11.4.155/.151)</td>
+</tr>
+<tr>
+<td><strong>Validator</strong></td>
+<td>harness <code>scripts/video_qa/record_feature.sh</code>
+<code>ocr-analyze</code> (tesseract OCR), self-validated
+golden-good/golden-bad per §11.4.107(10)</td>
+</tr>
+<tr>
+<td><strong>Recording resource ownership</strong></td>
+<td>§11.4.119 — this agent was the SINGLE recording-resource owner for
+this slice (CLI slice already done); no other recorder ran
+concurrently</td>
+</tr>
+<tr>
+<td><strong>Anti-bluff</strong></td>
+<td>both captured casts scanned for
+<code>simulated</code>/<code>simulate</code>/<code>TODO implement</code>/<code>placeholder</code>/<code>for now</code>/<code>in production this would</code>
+→ <strong>all clean</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="analyzer-self-validation-the-validator-provably-cannot-bluff">Analyzer
+self-validation (the validator provably cannot bluff)</h2>
+<p><code>record_feature.sh selftest</code> (§11.4.107(10)), captured
+this session:</p>
+<pre><code>[golden-good] OCR-VERDICT: PASS (all expected patterns present, no bluff): HELIXCODE_OCR_PROBE_4242
+[golden-bad ] OCR-VERDICT: FAIL (missing expected pattern(s): HELIXCODE_WRONG_PATTERN_9999)
+ANALYZER SELF-VALIDATION: PASS (golden-good PASS rc=0, golden-bad FAIL rc=1) — analyzer cannot bluff
+[live] SKIP (honest env-gap §11.4.3): screencapture window path TCC-blocked — refusing whole-desktop fallback
+SELFTEST: PARTIAL-PASS (analyzer self-validation PASS; live screencapture an honest env-gap §11.4.3)</code></pre>
+<p>Every PASS below is read back by <strong>this same</strong>
+self-validated OCR analyzer.</p>
+<h2 id="calibration-note-11.4.6-patterns-calibrated-on-the-projects-own-frames">Calibration
+note (§11.4.6 — patterns calibrated on the project’s own frames)</h2>
+<p>The agg monospace render produces stable OCR substitutions: a
+space-prefixed <code>0</code>→<code>@</code> (so
+<code>Total: 0</code>→<code>Total: @</code>), and long tokens that
+line-wrap (e.g. <code>total_tokens</code> breaks across two lines as
+<code>total_</code> + <code>tokens</code>). Expected patterns were
+therefore chosen from tokens that survive OCR <strong>and</strong>
+uniquely prove the real feature. The underlying real output is captured
+verbatim in the supplementary <code>.cast</code> files. This calibrates
+the <em>patterns</em>, never the <em>content</em>.</p>
+<blockquote>
+<p><strong>Render-path finding (this session):</strong> the harness
+<code>record</code> subcommand uses <code>screencapture</code>
+(TCC-blocked). The CLI slice’s TCC-free route was
+asciinema→agg→ffmpeg→OCR. agg’s bitmap monospace IS tesseract-readable
+at the agg-default render size, but the TUI has a ~15–17 s provider-init
+period before the tview dashboard paints, so the harness’s built-in
+fps=1/first-30-frames <code>validate</code> sampler misses the painted
+frames. A small deterministic helper
+(<code>/Volumes/T7/tmp/render_validate.sh</code>, ephemeral) renders the
+full cast and selects the frame with the most expected-pattern hits as
+the canonical evidence frame, then validates it with the SAME
+self-validated <code>ocr-analyze</code> analyzer. This is a
+sampling-window adaptation, not an analyzer change.</p>
+</blockquote>
+<hr />
+<h2 id="durable-evidence-committed-rotation-proof-anchors-11.4.83-hxc-108-audit-f2-fix">Durable
+evidence (committed) — rotation-proof anchors (§11.4.83, HXC-108 audit
+F2 fix)</h2>
+<p>The raw corpus (<code>/Volumes/T7/Downloads/Recordings/</code>,
+§11.4.128/.154-rotatable) is the secondary location. The two
+load-bearing recordings (TUI dashboard render + server real-API flow) +
+their evidence frames are <strong>copied into the committed
+tree</strong> so a rotation cannot dangle these citations:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Committed artifact</th>
+<th>sha256</th>
+<th>raw-corpus md5 (verified byte-identical pre-copy)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/qa/HXC-108_tui_server/helixcode-tui-dashboard-20260622T213246Z.mp4</code>
+(h264 790×560 131f)</td>
+<td><code>e062b8df6eb25c8431604aad91ee604b92bc2f6724b6ccca1bd86c5d43314e61</code></td>
+<td><code>607df3c63fcb5880aa32edaaf35cbc4d</code></td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_tui_server/helixcode-tui-dashboard-20260622T213246Z.evidence_frame.png</code></td>
+<td><code>cb87560b78ca3dc1ca583b2c0eaedb1a9554170afb96da4b82fcee55674eace7</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_tui_server/helixcode-server-api-20260622T214152Z.mp4</code>
+(h264 790×560 48f)</td>
+<td><code>98e32d4f9e6c6d3cd53dd70f308646a45dc899dc07d3f7b0c2a969c0b16b85c5</code></td>
+<td><code>0aea0e9677d3214ea9679e101fab07f3</code></td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_tui_server/helixcode-server-api-20260622T214152Z.evidence_frame.png</code></td>
+<td><code>c4e060bcf09930db4d46e1cdc9f517c5d7a718d89eecb22a3ae7ed339dd3e755</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Both MP4s ffprobe-verified valid H.264 after copy.</p>
+<h2 id="per-feature-results">PER-FEATURE RESULTS</h2>
+<h3 id="tui-1.-terminal-ui-dashboard-launch-real-tview-dashboard-render-pass">TUI-1.
+terminal-UI dashboard — launch → real tview dashboard render —
+<strong>PASS</strong></h3>
+<ul>
+<li><p><strong>Driver:</strong>
+<code>cd helix_code &amp;&amp; &lt;tui-binary&gt;</code> launched under
+asciinema’s PTY; warm 24 s for live provider init + paint;
+<code>SIGINT</code> for clean exit (the TUI’s only quit path — see
+interaction limit below).</p></li>
+<li><p><strong>MP4:</strong>
+<code>helixcode-tui-dashboard-20260622T213246Z.mp4</code> (md5
+<code>607df3c63fcb5880aa32edaaf35cbc4d</code>,
+H.264/yuv420p/131f)</p></li>
+<li><p><strong>Evidence frame:</strong>
+<code>helixcode-tui-dashboard-20260622T213246Z.evidence_frame.png</code></p></li>
+<li><p><strong>OCR-validated real output excerpt</strong> (read back
+from the recording):</p>
+<pre><code>HelixCode v1.0.0
+(d) Dashboard  (t) Tasks  (w) Workers  (p) Projects
+(s) Sessions   (l) LLM    (q) QA       (c) Settings
+HelixCode — Enterprise distributed AI development platform
+Workers  Total: 0      Tasks  Total: 0
+Status: Ready | User: Not logged in | Session: None</code></pre></li>
+<li><p><strong>Validator verdict:</strong>
+<code>OCR-VERDICT: PASS</code> —
+<code>--expect &quot;HelixCode v1.0.0|Enterprise distributed AI development platform|Workers|Tasks|Sessions|Settings|Status&quot;</code>
+→ 7/7. This is the genuine tview-rendered dashboard (real sidebar nav,
+real empty worker/task pools, honest “Not logged in” state) — not
+simulated. The binary initialized real providers from <code>.env</code>
+(DeepSeek/Mistral/Groq/OpenRouter live <code>/models</code> catalogs
+visible on stderr) and ran in DB/Redis-degraded mode (chat/LLM
+available).</p></li>
+<li><p><strong>Interaction limit (honest, §11.4.3):</strong> the TUI is
+a fully-interactive tview app with NO command-line flags and NO
+headless/non-interactive mode; sidebar navigation
+(<code>d/t/w/p/s/l/q/c</code>) requires live keypresses that a recorded
+shell cannot reliably inject into tcell’s raw-mode input, and quit is
+signal-only (<code>SIGINT</code>/<code>SIGTERM</code>). The
+recordable-now non-interactive slice is <strong>launch + dashboard
+render</strong>, captured + validated above. Deeper per-view captures
+(Tasks/Workers/LLM-chat screens) would require a scripted PTY
+key-injection harness (e.g. tmux send-keys against the live tcell
+session) — a follow-up if the conductor wants per-view
+recordings.</p></li>
+</ul>
+<h3 id="srv-1.-server-real-health-apiv1serverinfo-authenticated-apiv1llmgenerate-bluff-001-pass">SRV-1.
+server — real <code>/health</code> + <code>/api/v1/server/info</code> +
+authenticated <code>/api/v1/llm/generate</code> (BLUFF-001) —
+<strong>PASS</strong></h3>
+<ul>
+<li><p><strong>Setup:</strong> launched
+<code>helix_code/bin/helixcode</code> (HelixCode Server v3.0.0, build
+2026-06-20, commit 454319f1) on port <strong>18080</strong> via a temp
+<code>HELIX_CONFIG</code> copy (no tracked-config edit; port 8080 was
+held by an unrelated foreign <code>htCore</code> process, left
+untouched). The server <strong>auto-booted podman PostgreSQL
+(<code>:55432</code>) + Redis (<code>:56379</code>)</strong> per
+§11.4.76 on-demand-infra, connected to both, and created/verified its
+schema. <code>/health</code> returned 200 in 1 s.</p></li>
+<li><p><strong>Real end-to-end flow (curl against the live
+server):</strong></p>
+<ul>
+<li><code>POST /api/v1/auth/register</code> → <strong>201</strong>, real
+user persisted to PostgreSQL (uuid
+<code>109b324c-76d5-408a-bd4d-103e1f8e112a</code>).</li>
+<li><code>POST /api/v1/auth/login</code> → <strong>200</strong>, real
+288-char JWT.</li>
+<li><code>POST /api/v1/llm/generate</code> (Bearer JWT) →
+<strong>200</strong>, <strong>real DeepSeek response</strong>.</li>
+</ul></li>
+<li><p><strong>MP4:</strong>
+<code>helixcode-server-api-20260622T214152Z.mp4</code> (md5
+<code>0aea0e9677d3214ea9679e101fab07f3</code>,
+H.264/yuv420p/48f)</p></li>
+<li><p><strong>Evidence frame:</strong>
+<code>helixcode-server-api-20260622T214152Z.evidence_frame.png</code>
+(whole session fits one 80×24 screen)</p></li>
+<li><p><strong>OCR-validated real output excerpt</strong> (read back
+from the recording):</p>
+<pre><code>$ curl http://localhost:18080/health
+{&quot;status&quot;:&quot;healthy&quot;,&quot;timestamp&quot;:&quot;2026-06-22T21:41:53.30136Z&quot;,&quot;version&quot;:&quot;1.0.0&quot;}
+$ curl http://localhost:18080/api/v1/server/info
+    &quot;database&quot;: { &quot;connected&quot;: true,
+    &quot;go_version&quot;: &quot;1.24&quot;, &quot;name&quot;: &quot;HelixCode Server&quot;,
+    &quot;redis&quot;: { &quot;connected&quot;: true, &quot;version&quot;: &quot;1.0.0&quot;
+$ curl -X POST http://localhost:18080/api/v1/llm/generate  (auth, real DeepSeek)
+{&quot;content&quot;:&quot;4&quot;,&quot;finish_reason&quot;:&quot;stop&quot;,&quot;model&quot;:&quot;deepseek-chat&quot;,&quot;provider&quot;:&quot;DeepSeek&quot;,
+ &quot;status&quot;:&quot;success&quot;,&quot;usage&quot;:{&quot;completion_tokens&quot;:1,&quot;prompt_tokens&quot;:17,&quot;total_tokens&quot;:18}}</code></pre></li>
+<li><p><strong>Validator verdict:</strong>
+<code>OCR-VERDICT: PASS</code> —
+<code>--expect &quot;healthy|connected|HelixCode Server|go_version|deepseek-chat|DeepSeek|finish_reason|prompt_tokens&quot;</code>
+→ 8/8.</p></li>
+<li><p><strong>BLUFF-001 cleared:</strong> the model genuinely answered
+<code>2+2 = 4</code> via a real DeepSeek call with genuine token
+accounting
+(<code>prompt_tokens:17 completion_tokens:1 total_tokens:18</code>) —
+impossible for a simulated response. The
+<code>/api/v1/server/info</code> real
+<code>database.connected:true</code> + <code>redis.connected:true</code>
+prove a live backing stack.</p></li>
+<li><p><strong>Teardown (§11.4.14):</strong> <code>SIGINT</code> →
+server logged <code>✅ Server exited properly</code> /
+<code>✅ Database connection pool closed</code>; <code>:18080</code>
+freed; foreign <code>htCore</code> on <code>:8080</code> untouched;
+podman infra (already healthy before launch, orchestrator-managed) left
+running.</p></li>
+</ul>
+<h3 id="srv-2.-server-unauthenticated-discovery-endpoints-real-providermodel-data-pass-supplementary-captured-as-json-not-video">SRV-2.
+server unauthenticated discovery endpoints (real provider/model data) —
+<strong>PASS</strong> (supplementary, captured as JSON not video)</h3>
+<p>Probed on the live server (not separately video-recorded; the SRV-1
+recording is the canonical video): -
+<code>GET /api/v1/llm/providers</code> → <strong>200</strong>, 8 real
+providers: OpenAI, Anthropic, Mistral, Gemini, DeepSeek, Xai, Xiaomi
+(+1), each with model counts + <code>status:available</code> (BLUFF-002
+class — real provider data, not hardcoded). -
+<code>GET /api/v1/llm/models</code> → <strong>200</strong>, real catalog
+with per-model
+<code>context_length</code>/<code>score</code>/<code>provider</code>/<code>tier</code>/<code>verified</code>
+metadata. - <code>GET /api/v1/system/stats</code> → <strong>401</strong>
+(auth-guarded — honest).</p>
+<hr />
+<h2 id="skip-not-recorded-here-honest-11.4.3">SKIP / not recorded here
+(honest §11.4.3)</h2>
+<ul>
+<li><strong>TUI per-view screens</strong>
+(Tasks/Workers/LLM-chat/Settings beyond the landing dashboard): the TUI
+has no scriptable navigation path; reliable per-view capture needs a PTY
+key-injection harness (tmux send-keys against the live tcell session).
+Recordable in a follow-up — honest interaction limit, NOT a faked
+PASS.</li>
+<li><strong>Server streaming generate</strong>
+(<code>POST /api/v1/llm/stream</code>): not separately recorded;
+non-streaming generate already proves the real authenticated LLM
+path.</li>
+<li><strong>Desktop GUI / mobile</strong>: out of this TUI+server slice
+(Desktop Fyne GUI is HXC-112-gated).</li>
+</ul>
+<h2 id="env-gap-the-reason-for-the-asciinema-route-11.4.3">Env gap (the
+reason for the asciinema route, §11.4.3)</h2>
+<p>The harness’s native window-video path
+(<code>screencapture -v -V&lt;n&gt; -l&lt;wid&gt;</code> +
+still-timelapse fallback) is <strong>TCC-blocked</strong> on this host
+(<code>could not create image from window</code>). The harness correctly
+refuses a whole-desktop fallback (§11.4.154) and SKIPs its live path
+(confirmed by <code>selftest [live] SKIP</code>). The asciinema
+text-capture route needs <strong>no</strong> Screen-Recording grant and
+produces the same MP4 + OCR-validation, so both surfaces were recorded
+TCC-free.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li><code>helix_code/applications/terminal_ui/main.go</code> (TUI entry:
+tview app, no flags, SIGINT-only quit) — 2026-06-23.</li>
+<li><code>helix_code/internal/server/server.go</code> +
+<code>cmd/server/main.go</code> +
+<code>internal/server/handlers.go</code> +
+<code>internal/server/llm_generate.go</code> (real routes, auth-guarded
+generate, register/login) — 2026-06-23.</li>
+<li>Live runs of every feature before recording (confirmed genuinely
+working before any recording, §11.4.6) — 2026-06-23.</li>
+<li><code>docs/qa/HXC-108_cli_recordings_evidence.md</code> (CLI slice;
+same TCC-free asciinema route + analyzer).</li>
+</ul>
+</body>
+</html>

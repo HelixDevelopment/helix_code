@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_selftest_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_selftest_evidence</h1>
+</header>
+<h1 id="hxc-108-video-qa-harness-self-test-evidence">HXC-108 — Video-QA
+Harness Self-Test Evidence</h1>
+<p><strong>Harness:</strong>
+<code>scripts/video_qa/record_feature.sh selftest</code>
+<strong>Captured:</strong> 2026-06-22 (UTC), dev host macOS 15.5
+<strong>Revision:</strong> 1 <strong>Discipline:</strong> §11.4.6 real
+evidence · §11.4.3 honest env-gap · §11.4.107(10) self-validated
+analyzer</p>
+<h2 id="what-the-self-test-proves">What the self-test proves</h2>
+<p>The self-test proves the harness mechanics on a NON-GUI target (no
+HXC-112 contention), per the HXC-108 brief: record a deterministic
+on-screen string, then prove the OCR analyzer READS that known string
+back (golden-good PASS) AND FAILS on a wrong expected-pattern
+(golden-bad FAIL). Scope-prefix:
+<code>helixcode-harness_selftest-*</code>.</p>
+<h2 id="result-summary">Result summary</h2>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 34%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Check</th>
+<th>Verdict</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project-prefix resolution</td>
+<td>PASS</td>
+<td><code>resolve-prefix</code> → <code>helixcode</code> (from
+<code>.env</code> <code>HELIX_RELEASE_PREFIX</code>)</td>
+</tr>
+<tr>
+<td>Analyzer golden-good (expect real string)</td>
+<td><strong>PASS (rc=0)</strong></td>
+<td>OCR read <code>HELIXCODE_OCR_PROBE_4242</code>, all expected
+patterns present</td>
+</tr>
+<tr>
+<td>Analyzer golden-bad (expect absent string)</td>
+<td><strong>FAIL (rc=1)</strong></td>
+<td>OCR read real string; <code>HELIXCODE_WRONG_PATTERN_9999</code>
+correctly NOT matched</td>
+</tr>
+<tr>
+<td>Analyzer bluff-catch (string present +
+<code>TODO implement</code>)</td>
+<td><strong>FAIL (rc=1)</strong></td>
+<td>anti-bluff pattern <code>todo implement</code> detected → FAIL even
+though expected pattern present</td>
+</tr>
+<tr>
+<td>Analyzer self-validation overall</td>
+<td><strong>PASS</strong></td>
+<td>golden-good rc=0 AND golden-bad rc=1 → analyzer provably cannot
+bluff</td>
+</tr>
+<tr>
+<td>Live window-scoped recording</td>
+<td><strong>SKIP (§11.4.3 env-gap)</strong></td>
+<td>both window capture primitives TCC-blocked on host; harness refuses
+whole-desktop fallback</td>
+</tr>
+</tbody>
+</table>
+<p>Self-test exit code: <strong>0</strong> (<code>PARTIAL-PASS</code>:
+analyzer self-validation PASS; live recording an honest env-gap).</p>
+<h2 id="captured-run-analyzer-self-validation-the-load-bearing-anti-bluff-proof">Captured
+run — analyzer self-validation (the load-bearing anti-bluff proof)</h2>
+<pre><code>[20:18:39] ANALYZER SELF-VALIDATION: PASS (golden-good PASS rc=0, golden-bad FAIL rc=1) — analyzer cannot bluff</code></pre>
+<h2 id="captured-run-standalone-golden-good-golden-bad-bluff-catch">Captured
+run — standalone golden-good / golden-bad / bluff-catch</h2>
+<pre><code>--- render a known string into an image (simulating an on-screen frame) ---
+frame: PNG image data, 1100 x 220, 8-bit grayscale, non-interlaced
+
+--- GOLDEN-GOOD: ocr-analyze expects the real string -&gt; MUST PASS ---
+ocr-analyze: image=frame.png extracted_chars=24
+OCR-VERDICT: PASS (all expected patterns present, no bluff): HELIXCODE_OCR_PROBE_4242
+  golden-good exit: 0 (0=PASS expected)
+
+--- GOLDEN-BAD: ocr-analyze expects a string NOT on screen -&gt; MUST FAIL ---
+ocr-analyze: image=frame.png extracted_chars=24
+OCR-VERDICT: FAIL (missing expected pattern(s): HELIXCODE_WRONG_PATTERN_9999)
+  golden-bad exit: 1 (1=FAIL expected)
+
+--- BLUFF-CATCH: a frame with &#39;TODO implement&#39; -&gt; MUST FAIL even if expected pattern present ---
+ocr-analyze: image=bluff.png extracted_chars=39
+OCR-VERDICT: FAIL (anti-bluff pattern present: &quot;todo implement&quot;)
+  bluff-catch exit: 1 (1=FAIL expected)</code></pre>
+<h2 id="captured-run-live-recording-honest-skip-11.4.3-never-faked">Captured
+run — live recording honest SKIP (§11.4.3, never faked)</h2>
+<pre><code>[live] launching Terminal window (marker=HELIXCODE_WIN_...) running: echo HELIXCODE_OCR_PROBE_4242; sleep 5
+[live] discover: owner+title miss (titles likely hidden by privacy grant); owner-only fallback for &#39;Terminal&#39;
+[live] discovered window id=27097; capturing window-scoped for 6s
+[live] native window video unavailable (screencapture: capture error The operation could not be completed); trying window-scoped STILL timelapse fallback
+[live] SKIP (honest env-gap §11.4.3): record: window-scoped capture blocked by host
+       (screencapture -v video AND -l&lt;id&gt; still both failed: &#39;could not create image from window&#39;).
+       Reproduce: screencapture -v -V2 -l27097 /tmp/x.mov ; screencapture -o -l27097 /tmp/x.png .
+       Refusing whole-desktop fallback.</code></pre>
+<h2 id="host-capability-probe-re-runnable">Host capability probe
+(re-runnable)</h2>
+<p><code>scripts/video_qa/record_feature.sh probe-caps</code>:</p>
+<pre><code>host capture capabilities (probed 2026-06-22T20:16:19Z):
+  [OK ] screencapture -R region still
+  [GAP] screencapture -l&lt;id&gt; window still (id=27097) — window-scoped recording requires this OR window video
+  [GAP] screencapture -v window video (macOS Screen-Recording video TCC grant)
+  [OK ] OCR (magick render + tesseract read) under TMPDIR=/Volumes/T7/tmp</code></pre>
+<h2 id="root-cause-findings-systematic-debugging-11.4.102-fixed-during-build">Root-cause
+findings (systematic-debugging §11.4.102, fixed during build)</h2>
+<ol type="1">
+<li><strong>Selftest aborted before analyzer self-validation</strong> —
+<code>record_feature</code> uses <code>skip()</code>/<code>fail()</code>
+which <code>exit</code>; a function-level <code>exit</code> killed the
+whole script before the analyzer half. <strong>Fix:</strong> run the
+live-recording attempt in an isolated subshell <code>( ... )</code> so
+its SKIP is contained.</li>
+<li><strong>OCR silently read empty under <code>/tmp</code></strong> —
+this host’s Homebrew tesseract/leptonica 1.87.0 is DENIED read access to
+<code>/tmp</code> (=<code>/private/tmp</code>) image files
+(“findFileFormat: image file not found” on a file that exists) but reads
+files under <code>$TMPDIR</code> (<code>/Volumes/T7/tmp</code>) and
+<code>$HOME</code> fine. <strong>Fix:</strong> all scratch files moved
+to a <code>$TMPDIR</code>-rooted work dir; never <code>/tmp</code>.
+(This was a hidden FALSE-NEGATIVE bluff surface — OCR would have
+reported “no content” on perfectly valid frames.)</li>
+<li><strong><code>magick -font Courier</code> failed</strong> — the
+<code>Courier</code> font alias is unresolvable on this host.
+<strong>Fix:</strong> render with a real font file
+(<code>/System/Library/Fonts/Menlo.ttc</code>), default-font fallback
+otherwise.</li>
+<li><strong>Window-title discovery missed</strong> — macOS returns EMPTY
+window titles to a CLI process without the privacy grant.
+<strong>Fix:</strong> owner+title first, then documented owner-only
+fallback (still window-scoped — a single window id — never
+whole-desktop).</li>
+<li><strong>Window capture itself TCC-blocked</strong> — both
+<code>screencapture -v</code> (video) and <code>-l&lt;id&gt;</code>
+(window still) fail on this host. <strong>Outcome:</strong> honest SKIP
+with reproducer; never a whole-desktop fallback (§11.4.154).</li>
+</ol>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li>Self-test + standalone analyzer runs captured live this session —
+2026-06-22.</li>
+</ul>
+</body>
+</html>

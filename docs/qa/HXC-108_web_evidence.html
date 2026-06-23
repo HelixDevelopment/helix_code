@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_web_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_web_evidence</h1>
+</header>
+<h1 id="hxc-108-helixcode-web-client-real-video-qa-recording-curated-evidence">HXC-108
+— HelixCode WEB client: Real Video-QA Recording (curated evidence)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Run-id</strong></td>
+<td>HXC-108_web</td>
+</tr>
+<tr>
+<td><strong>Date (UTC)</strong></td>
+<td>2026-06-23</td>
+</tr>
+<tr>
+<td><strong>HEAD at recording</strong></td>
+<td><code>b04e9bf5</code> (binaries built at prior HEAD; server binary
+<code>helix_code/bin/helixcode</code> HelixCode Server v3.0.0, build
+2026-06-20, commit <code>454319f1</code>)</td>
+</tr>
+<tr>
+<td><strong>Surface</strong></td>
+<td>HelixCode <strong>WEB</strong> client — the in-browser LLM Console
+(<code>helix_code/web/frontend/index.html</code> +
+<code>static/app.js</code>/<code>app.css</code>/<code>logo.png</code>)
+served by the Gin server (<code>cmd/server</code> →
+<code>bin/helixcode</code>) at
+<code>Static(&quot;/&quot;, &quot;./web/frontend/index.html&quot;)</code> +
+<code>Static(&quot;/static&quot;, &quot;./web/frontend/static&quot;)</code>
+(<code>internal/server/server.go:369-370</code>)</td>
+</tr>
+<tr>
+<td><strong>Capture method</strong></td>
+<td><strong>headless Chrome via chromedp</strong> (Go dep
+<code>github.com/chromedp/chromedp v0.15.1</code>, present in the inner
+module). Frames captured directly from the headless-browser viewport via
+<code>chromedp.CaptureScreenshot</code> → ffmpeg H.264
+<code>+faststart</code> <code>yuv420p</code>. <strong>TCC-free +
+window-scoped by construction</strong> (§11.4.154/.159): chromedp
+captures ONLY the 1280×1400 browser viewport — never the host desktop —
+so it needs NO macOS Screen-Recording grant (unlike the
+<code>screencapture</code> window path that is TCC-blocked on this host,
+see the TUI/server slice).</td>
+</tr>
+<tr>
+<td><strong>Recordings dir</strong></td>
+<td><code>/Volumes/T7/Downloads/Recordings/</code> (gitignored raw
+corpus, §11.4.128; outside the repo tree → inherently untracked)</td>
+</tr>
+<tr>
+<td><strong>Prefix</strong></td>
+<td><code>helixcode</code> (from <code>HELIX_RELEASE_PREFIX</code> in
+<code>&lt;repo-root&gt;/.env</code>, §11.4.155/.151)</td>
+</tr>
+<tr>
+<td><strong>Recording resource ownership</strong></td>
+<td>§11.4.119 — this agent was the SOLE owner of the server port
+(<code>:18080</code>) + the headless browser for this slice; no
+desktop/terminal_ui/ios harness was touched, no <code>gui_record*</code>
+/ <code>record_tui_views.sh</code> invoked</td>
+</tr>
+<tr>
+<td><strong>Fresh-corpus rotation</strong></td>
+<td>§11.4.154 — no prior <code>helixcode-web-*</code> artefacts existed;
+nothing to rotate</td>
+</tr>
+<tr>
+<td><strong>Validator</strong></td>
+<td>DOM-content assertions inside the chromedp harness (per-step real
+rendered-content checks) + tesseract OCR of the final response frame,
+with a golden-good/golden-bad analyzer self-validation
+(§11.4.107(10)/§11.4.160)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="artifacts">Artifacts</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Path</th>
+<th>md5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Journey MP4</td>
+<td><code>/Volumes/T7/Downloads/Recordings/helixcode-web-llmchat-20260623T131944Z.mp4</code></td>
+<td><code>ddf3eaf6b157fa92b3bdf90635565d96</code></td>
+</tr>
+<tr>
+<td>Evidence frame (final response)</td>
+<td><code>/Volumes/T7/Downloads/Recordings/helixcode-web-llmchat-20260623T131944Z.evidence_frame.png</code></td>
+<td><code>79e5f48385101c8413d31df7aa9f34db</code></td>
+</tr>
+</tbody>
+</table>
+<p>MP4: H.264 / yuv420p / 1280×1256 / 419 frames / ~13.97 s /
+<code>+faststart</code>.</p>
+<h2 id="harness-tcc-free-headless-chrome">Harness (TCC-free, headless
+Chrome)</h2>
+<p><code>helix_code/tmp/web_record/main.go</code> (gitignored
+<code>tmp/</code>; <code>go vet ./tmp/web_record/</code> → clean). It:
+1. launches headless Chrome (<code>ExecPath</code> = the host Google
+Chrome, 1280×1400 viewport), 2. navigates to
+<code>http://localhost:18080/</code>, 3. drives the REAL user journey
+through the page’s own UI — fill the real login form → click
+<strong>Sign in</strong> (mints a real server-side JWT) → fill
+provider/model/prompt → click <strong>Generate</strong>, 4. captures one
+PNG frame per step from the browser viewport, 5. reads the live DOM at
+each step and <strong>asserts real rendered content</strong> (a 401 /
+error page / empty output is a FAIL, never a faked PASS —
+§11.4.2/§11.4.107).</p>
+<p>Credentials are runtime-generated by the caller and passed via env
+(<code>WEB_USER</code>/<code>WEB_PASS</code>) — <strong>never hardcoded,
+never logged into evidence</strong> (§11.4.10).</p>
+<h2 id="server-boot-reused-hxc-108-approach-11.4.76-on-demand-infra">Server
+boot (reused HXC-108 approach, §11.4.76 on-demand-infra)</h2>
+<p><code>bin/helixcode</code> launched from <code>helix_code/</code> (so
+<code>./web/frontend</code> resolves) with <code>HELIX_CONFIG</code>
+pointing at a <strong>temp config copy</strong>
+(<code>port: 18080</code>, no tracked-config edit; port 8080 held by an
+unrelated foreign <code>htCore</code> process, left untouched).
+Auto-boot detected the already-healthy podman PostgreSQL
+(<code>:55432</code>) + Redis (<code>:56379</code>) and repointed cfg to
+them; <code>✅ Database connection established</code> +
+<code>✅ Database schema already exists</code>. <code>/health</code> →
+HTTP 200 in ~2 s. Web UI <code>GET /</code> → real
+<code>&lt;title&gt;HelixCode — LLM Console&lt;/title&gt;</code>;
+<code>/static/app.js|app.css|logo.png</code> → all 200;
+<code>GET /api/v1/llm/providers</code> → 8 real providers.</p>
+<h2 id="durable-evidence-committed-rotation-proof-anchors-11.4.83-hxc-108-audit-f2-fix">Durable
+evidence (committed) — rotation-proof anchors (§11.4.83, HXC-108 audit
+F2 fix)</h2>
+<p>The raw corpus (<code>/Volumes/T7/Downloads/Recordings/</code>,
+§11.4.128/.154-rotatable) is the secondary location. The load-bearing
+journey MP4 + final-response evidence frame are <strong>copied into the
+committed tree</strong> so a rotation cannot dangle these citations:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Committed artifact</th>
+<th>sha256</th>
+<th>raw-corpus md5 (verified byte-identical pre-copy)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/qa/HXC-108_web/helixcode-web-llmchat-20260623T131944Z.mp4</code>
+(h264 1280×1256 419f)</td>
+<td><code>3d827d223a4611e8faca445207a2c377d4b28bd30e3bd37ed514f5537b692b24</code></td>
+<td><code>ddf3eaf6b157fa92b3bdf90635565d96</code></td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_web/helixcode-web-llmchat-20260623T131944Z.evidence_frame.png</code></td>
+<td><code>28e06e45e53b35e9900efcc28d0b08f94d541c77a44c8537d4f2a53db17f83c8</code></td>
+<td><code>79e5f48385101c8413d31df7aa9f34db</code></td>
+</tr>
+</tbody>
+</table>
+<p>The MP4 ffprobe-verified valid H.264 after copy.</p>
+<h2 id="per-feature-result">PER-FEATURE RESULT</h2>
+<h3 id="web-1.-browser-llm-console-load-real-login-real-jwt-real-authenticated-generate-bluff-001-pass">WEB-1.
+browser LLM Console — load → real login (real JWT) → real authenticated
+generate (BLUFF-001) — <strong>PASS</strong></h3>
+<p>Real user registered through the live API before driving the UI:
+<code>POST /api/v1/auth/register</code> → <strong>201</strong> (uuid
+<code>322cf640-9bfc-4d55-8053-dcfce93ca6ad</code>, persisted to
+PostgreSQL); the web UI then logged that user in through its own
+form.</p>
+<p>Harness journey output (DOM read-backs, verbatim):</p>
+<pre><code>DOM title=&quot;HelixCode — LLM Console&quot;  h1=&quot;HelixCode LLM Console&quot;
+DOM auth-status=&quot;authenticated (token stored)&quot;           ← real JWT minted via POST /api/v1/auth/login
+DOM output=&quot;HELIXCODE_WEB_OK4&quot;                            ← real LLM response rendered in the page
+DOM meta=&quot;provider=DeepSeek model=deepseek-v4-flash tokens=146 finish=stop&quot;
+RESULT: PASS</code></pre>
+<p>Frames (browser viewport): <code>01_console_loaded</code>,
+<code>02_login_filled</code>, <code>03_authenticated</code>,
+<code>04_generate_filled</code>, <code>05_generate_requesting</code>,
+<code>06_generate_response</code>.</p>
+<p><strong>OCR-validated rendered content</strong> (read back from the
+final frame by tesseract):</p>
+<pre><code>HelixCode LLM Console
+authenticated (token stored)
+Provider (optional, e.g.   deepseek
+Model (optional)           deepseek-v4-flash
+Reply with exactly: HELIXCODE_WEB_OK and then the answer to 2+2
+| Response
+HELIXCODE_WEB_OK4</code></pre>
+<p>OCR golden pattern hits: 5/6 (<code>HelixCode</code>,
+<code>Response</code>, <code>DeepSeek</code>,
+<code>deepseek-v4-flash</code>, <code>authenticated</code>;
+<code>tokens</code> sits below the viewport fold in the still frame but
+is DOM-asserted in the <code>meta</code> line above).</p>
+<p><strong>Analyzer self-validation (§11.4.107(10), the validator
+provably cannot bluff):</strong> - <code>[golden-good]</code> PASS — the
+real sentinel <code>HELIXCODE_WEB_OK</code> IS present in the rendered
+frame. - <code>[golden-bad ]</code> PASS — the absent pattern
+<code>HELIXCODE_WRONG_PATTERN_9999</code> is correctly reported missing
+(no hallucinated hit).</p>
+<p><strong>BLUFF-001 cleared:</strong> the model genuinely answered
+<code>HELIXCODE_WEB_OK</code> + <code>4</code> via a real DeepSeek call
+with genuine token accounting (<code>tokens=146</code>,
+<code>finish=stop</code>) — impossible for a simulated response. Every
+byte in the <code>#output</code>/<code>#meta</code> regions came from
+the server’s real provider-backed response; the only “no simulation”
+string OCR sees is the page’s own static anti-bluff disclaimer copy (UI
+chrome describing that output is real), not the LLM reply.</p>
+<h2 id="real-upstream-finding-honest-11.4.6-not-a-bluff-surfaced-for-the-conductor">Real
+upstream finding (honest, §11.4.6 — not a bluff, surfaced for the
+conductor)</h2>
+<p>The web Generate form with an EMPTY model returned <strong>HTTP
+502</strong>:</p>
+<pre><code>generation failed: DeepSeek request failed: DeepSeek API returned status 400:
+  {&quot;error&quot;:{&quot;message&quot;:&quot;The supported API model names are deepseek-v4-pro or
+   deepseek-v4-flash, but you passed .&quot;}}</code></pre>
+<p>This is a <strong>real upstream API change</strong>, not a transient:
+DeepSeek deprecated <code>deepseek-chat</code> (which
+<code>/api/v1/llm/providers</code> still advertises for the
+<code>deepseek</code> provider) in favour of
+<code>deepseek-v4-pro</code> / <code>deepseek-v4-flash</code>. With an
+explicit valid model (<code>deepseek-v4-flash</code> or
+<code>deepseek-v4-pro</code>) the same endpoint returns a real
+<code>content:&quot;4&quot;</code> (verified both via curl AND via the web UI
+above). The recording therefore drives the journey with an explicit
+valid model. <strong>Suggested follow-up (conductor):</strong> the
+server’s default-model resolution for DeepSeek (empty model → request
+body <code>model=&quot;&quot;</code>) needs to map to a currently-supported model,
+and the <code>/llm/providers</code> catalog for <code>deepseek</code>
+should reflect <code>deepseek-v4-*</code> rather than the deprecated
+<code>deepseek-chat</code>.</p>
+<h2 id="teardown-11.4.14">Teardown (§11.4.14)</h2>
+<p><code>SIGINT</code> → server logged
+<code>🛑 Shutting down server...</code> /
+<code>✅ Server exited properly</code> /
+<code>✅ Database connection pool closed</code>; <code>:18080</code>
+freed; foreign <code>htCore</code> on <code>:8080</code> untouched;
+podman infra (already healthy before launch, orchestrator-managed) left
+running.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li><code>helix_code/web/frontend/index.html</code> +
+<code>static/app.js</code> (real login → JWT → authenticated
+<code>/api/v1/llm/generate</code>, no client-side simulation) —
+2026-06-23.</li>
+<li><code>helix_code/internal/server/server.go:369-370</code> (web UI
+served at <code>/</code> + <code>/static</code>) — 2026-06-23.</li>
+<li><code>helix_code/cmd/server/main.go</code> +
+<code>internal/config/config.go</code> (<code>HELIX_CONFIG</code>
+config-path env, §11.4.76 auto-boot) — 2026-06-23.</li>
+<li>Live runs (register/login/generate via curl AND via the web UI)
+confirmed genuinely working before + during recording (§11.4.6) —
+2026-06-23.</li>
+<li><code>docs/qa/HXC-108_tui_server_recordings_evidence.md</code>
+(sibling TUI+server slice; same server-boot approach + analyzer).</li>
+</ul>
+</body>
+</html>

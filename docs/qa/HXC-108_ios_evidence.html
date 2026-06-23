@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_ios_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_ios_evidence</h1>
+</header>
+<h1 id="hxc-108-helixcode-ios-app-fully-automatic-simulator-recording-evidence">HXC-108
+— HelixCode iOS App Fully-Automatic Simulator Recording Evidence</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-23</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-23</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>PASS — app built, launched, recorded, OCR-validated on iOS
+Simulator</td>
+</tr>
+<tr>
+<td>Feature class</td>
+<td>§11.4.69 <code>video_display</code> (UI render) + §11.4.158
+intensive recording coverage</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#environment-captured">Environment (captured)</a></li>
+<li><a href="#buildability">Buildability</a></li>
+<li><a href="#build-blocker-root-cause-and-reversible-fix">Build-blocker
+root cause and reversible fix</a></li>
+<li><a href="#recording--ocr-validation">Recording + OCR
+validation</a></li>
+<li><a href="#analyzer-self-validation">Analyzer
+self-validation</a></li>
+<li><a href="#cleanup--reversibility">Cleanup / reversibility</a></li>
+<li><a href="#verdict">Verdict</a></li>
+</ul>
+<h2 id="summary">Summary</h2>
+<p>The HelixCode iOS app
+(<code>helix_code/applications/ios/HelixCode.xcodeproj</code>, scheme
+<code>HelixCode</code>) was built, installed, launched, and
+screen-recorded <strong>fully automatically</strong> on the iOS
+Simulator — no TCC grant, no human interaction. The recording and
+screenshots show the <strong>real</strong> app UI rendering <strong>live
+data from the embedded Go core</strong>
+(<code>HelixCore.xcframework</code> over cgo):
+<code>Go core OK — themes: 3, tasks: 2</code> plus two tasks seeded
+through the core. Content was verified by macOS Vision OCR, and the OCR
+analyzer was self-validated (golden-good accepted, golden-bad black
+frame rejected) per §11.4.107(10).</p>
+<p>This was NOT a clean first build — a real CoreSimulator/environment
+blocker had to be root-caused and surmounted with a reversible host-side
+fix (documented below). No step was faked.</p>
+<h2 id="environment-captured">Environment (captured)</h2>
+<ul>
+<li>Xcode 16.4 (Build 16F6); iOS Simulator SDK 18.5.</li>
+<li>Simulator: <strong>iPhone 16, iOS 18.5</strong> (UDID
+<code>DC8B1905-F2E5-425D-A2DE-42C27B390AC5</code>).</li>
+<li>Host: arm64 (Apple Silicon). <code>HelixCore.xcframework</code>
+ships an <code>ios-arm64_x86_64-simulator</code> slice (arch
+<code>x86_64 arm64</code>) — compatible.</li>
+<li>Project: single scheme <code>HelixCode</code>;
+<code>CODE_SIGNING_ALLOWED=NO</code>; bundle id
+<code>dev.helix.code.ios</code>; embeds
+<code>HelixCore.xcframework</code> (the real Go mobile core).</li>
+</ul>
+<h2 id="buildability">Buildability</h2>
+<p><strong>PASS.</strong> Build command (final, succeeding):</p>
+<pre><code>cd helix_code/applications/ios &amp;&amp; \
+xcodebuild -project HelixCode.xcodeproj -scheme HelixCode -configuration Debug \
+  -destination &#39;platform=iOS Simulator,id=DC8B1905-F2E5-425D-A2DE-42C27B390AC5&#39; \
+  -derivedDataPath /tmp/helixcode_ios_dd CODE_SIGNING_ALLOWED=NO build
+# =&gt; ** BUILD SUCCEEDED **  (EXIT=0)</code></pre>
+<p>Produced <code>.app</code> (real, well-formed):</p>
+<ul>
+<li><code>HelixCode</code> — Mach-O 64-bit executable arm64 (simulator
+slice).</li>
+<li><code>Frameworks/HelixCore.framework</code> embedded.</li>
+<li><code>HelixCode.debug.dylib</code> 51.5 MB (the substantial Go core
+— not a stub).</li>
+<li><code>Assets.car</code> (284 KB), <code>Info.plist</code>
+(<code>CFBundleIdentifier=dev.helix.code.ios</code>).</li>
+</ul>
+<p>Swift compilation, the gomobile Go-core link, and
+<code>__preview.dylib</code> all succeeded on the very first attempt;
+only the asset-catalog stage failed initially (see below).</p>
+<h2 id="build-blocker-root-cause-and-reversible-fix">Build-blocker root
+cause and reversible fix</h2>
+<p><strong>Initial failure (EXIT=65):</strong> <code>actool</code>
+(asset-catalog <code>CompileAssetCatalogVariant thinned</code>) could
+not create its transient <code>IBSimDeviceTypeiPad3x</code> render
+device for iOS 18.5 — “Device was allocated but was stuck in creation
+state.”</p>
+<p><strong>Root cause (FACT, from
+<code>~/Library/Logs/CoreSimulator/CoreSimulator.log</code>):</strong></p>
+<pre><code>Error copying sample content to path
+  /Volumes/T7/Library-Developer-Xcode/UserData/IB Support/Simulator Devices/&lt;uuid&gt;/data :
+  NSCocoaErrorDomain Code=513 &quot;You don&#39;t have permission to save the file ...&quot;
+  NSUnderlyingError ... NSPOSIXErrorDomain Code=1 &quot;Operation not permitted&quot;</code></pre>
+<ul>
+<li><code>~/Library/Developer/Xcode</code> is a symlink to
+<code>/Volumes/T7/Library-Developer-Xcode</code>, so the IB device set
+physically lives on the <strong>T7 external volume</strong>, mounted
+<code>hfs, local, noowners</code>
+(<code>mount | grep /Volumes/T7</code>).</li>
+<li>Under <code>noowners</code>, the sandboxed
+<code>CoreSimulatorService</code> daemon cannot create the device’s
+<code>data</code> dir (<code>Operation not permitted</code>), even
+though the shell user can write there. A normal
+<code>simctl create</code> into the <em>default</em> device set
+(<code>~/Library/Developer/CoreSimulator/Devices</code>, internal disk)
+succeeds — proving the failure is specific to the relocated IB set on
+the noowners volume.</li>
+<li>The project’s <code>TARGETED_DEVICE_FAMILY=&quot;1,2&quot;</code> forces
+actool to need an iPad-3x render device;
+<code>TARGETED_DEVICE_FAMILY=1</code>,
+<code>IBSC_SIMULATOR_DEVICE_SET_PATH</code>, and
+<code>ASSETCATALOG_COMPILER_SKIP_APP_STORE_DEPLOYMENT=YES</code>
+overrides were all tried and did <strong>not</strong> bypass it (the
+path is baked into actool’s default device-set).</li>
+</ul>
+<p><strong>Reversible fix applied:</strong> relocated the IB
+<code>Simulator Devices</code> directory off the <code>noowners</code>
+T7 volume onto an internal owners-enforced path
+(<code>/System/Volumes/Data/...</code>, daemon-writable) via a symlink,
+preserving the original as <code>Simulator Devices.t7bak</code>. Rebuild
+then <strong>succeeded</strong>. Fix fully reverted afterward (symlink
+removed, original restored — see Cleanup). This is a
+<strong>host-environment</strong> blocker, not a HelixCode source
+defect.</p>
+<h2 id="recording-ocr-validation">Recording + OCR validation</h2>
+<ul>
+<li>Recording:
+<code>helixcode-ios-launch-render-20260623-141821.mp4</code>
+<ul>
+<li><code>/Volumes/T7/Downloads/Recordings/</code> (raw corpus,
+gitignored per §11.4.128).</li>
+<li>md5 <code>e565c6bde216926cbb3d21990bfd6c5d</code>; H.264; 1178x2556;
+<strong>144 frames</strong>; <strong>11.945 s</strong>; 3.17 MB (via
+<code>simctl io recordVideo</code> — window-scoped to the simulator
+device, no desktop, §11.4.159(A)).</li>
+<li>§11.4.155 project-name prefix <code>helixcode-ios-</code> (from
+lowercased project root).</li>
+</ul></li>
+<li>Curated still:
+<code>helixcode-ios-launch-render-20260623-141821.png</code>.</li>
+</ul>
+<p><strong>Liveness (§11.4.107):</strong> per-frame avg luma varies
+across the timeline (44 → 118 light-appearance toggle → 78 → ~16
+relaunch transition → back to 44); 6+ distinct frame hashes — genuine
+motion, NOT a frozen/black frame.</p>
+<p><strong>Content (macOS Vision OCR — robust on dark UI where tesseract
+returned empty):</strong> 9 of 12 sampled recording frames (f_001–f_008,
+f_012) contain the full app UI; f_009–f_011 are the relaunch
+black-launch-screen transition (matching the luma dip). OCR of an app
+frame / screenshot yields, verbatim:</p>
+<pre><code>HelixCode
+HelixCode iOS
+Disconnected
+User: (none)
+Go core OK - themes: 3, tasks: 2
+Connect
+Build iOS client - created
+Wire Go core — created</code></pre>
+<p>These are §11.4.2 real outputs —
+<code>Go core OK — themes: 3, tasks: 2</code> and the two task rows are
+<strong>live data from the Go core</strong>
+(<code>getAvailableThemes()</code>, <code>getTasks()</code>,
+<code>createTask()</code>), not hardcoded/simulated.
+<code>Disconnected</code> is correct (no server runs in the simulator).
+No “simulated”/“placeholder”/“TODO” text.</p>
+<p>All §11.4.159(K) expected patterns present:
+<code>HelixCode iOS</code>, <code>Disconnected</code>,
+<code>Go core OK - themes: 3, tasks: 2</code>, <code>Connect</code>,
+<code>Build iOS client</code>, <code>Wire Go core</code>.</p>
+<h2 id="durable-evidence-committed-rotation-proof-anchors-11.4.83-hxc-108-audit-f2-fix">Durable
+evidence (committed) — rotation-proof anchors (§11.4.83, HXC-108 audit
+F2 fix)</h2>
+<p>The raw corpus (<code>/Volumes/T7/Downloads/Recordings/</code>,
+§11.4.128/.154-rotatable) is the secondary location. The load-bearing
+key still frame is <strong>copied into the committed tree</strong>; the
+3.17 MB MP4 exceeds the per-byte commit budget, so its identity is
+pinned by a committed ffprobe+md5 stamp (the still frame is the durable
+visual evidence):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Committed artifact</th>
+<th>sha256</th>
+<th>raw-corpus md5 (verified byte-identical pre-copy)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/qa/HXC-108_ios/helixcode-ios-launch-render-20260623-141821.png</code></td>
+<td><code>4467408ec80b9097a7f7461915f32046a9eb2153367354cae1093b50e8ac22b3</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_ios/helixcode-ios-launch-render-20260623-141821.mp4.ffprobe-stamp.txt</code>
+(pins the raw MP4: h264 1178×2556 144f 11.945s, md5
+<code>e565c6bde216926cbb3d21990bfd6c5d</code>)</td>
+<td>(text stamp)</td>
+<td><code>e565c6bde216926cbb3d21990bfd6c5d</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="analyzer-self-validation">Analyzer self-validation</h2>
+<p>Per §11.4.107(10) — the OCR analyzer provably cannot bluff:</p>
+<ul>
+<li>golden-bad (synthetic black frame) → <code>HelixCode iOS</code>
+matches = <strong>0</strong> (rejected).</li>
+<li>golden-good (app screenshot) → <code>HelixCode iOS</code> matches =
+<strong>1</strong> (accepted).</li>
+<li>Verdict: <strong>ANALYZER SELF-VALIDATION PASS.</strong></li>
+</ul>
+<h2 id="cleanup-reversibility">Cleanup / reversibility</h2>
+<ul>
+<li>App terminated; simulator <code>DC8B1905-...</code> powered off —
+restored to its pre-run <code>Shutdown</code> state (§11.4.14; we booted
+it, so we shut it down). Other simulators untouched.</li>
+<li>IB <code>Simulator Devices</code> relocation fully reverted: symlink
+removed, original T7 directory restored from <code>.t7bak</code>.</li>
+<li>Raw recording corpus under
+<code>/Volumes/T7/Downloads/Recordings/</code> is gitignored per
+§11.4.128; this evidence doc is the curated committable record
+(§11.4.83).</li>
+<li>No commit/push performed — returned for conductor review
+(§11.4.142).</li>
+</ul>
+<h2 id="verdict">Verdict</h2>
+<p><strong>PASS — fully-automatic iOS Simulator build + launch +
+recording achieved with captured, OCR-validated, self-validated evidence
+of the real HelixCode iOS app rendering live Go-core data.</strong> The
+only obstacle was a host-environment CoreSimulator permission blocker
+(noowners external volume), root-caused and surmounted reversibly — not
+a code defect, not faked.</p>
+</body>
+</html>

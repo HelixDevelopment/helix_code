@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_cli_recordings_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_cli_recordings_evidence</h1>
+</header>
+<h1 id="hxc-108-helixcode-cli-client-real-video-qa-recordings-curated-evidence">HXC-108
+— HelixCode CLI Client: Real Video-QA Recordings (curated evidence)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Run-id</strong></td>
+<td>HXC-108_cli_recordings</td>
+</tr>
+<tr>
+<td><strong>Date (UTC)</strong></td>
+<td>2026-06-22 / 2026-06-23</td>
+</tr>
+<tr>
+<td><strong>HEAD</strong></td>
+<td><code>a92a851f03e24080814a2954f7c807b96f8f74d3</code></td>
+</tr>
+<tr>
+<td><strong>Surface</strong></td>
+<td>HelixCode CLI client (<code>helix_code/bin/cli</code>)</td>
+</tr>
+<tr>
+<td><strong>Capture method</strong></td>
+<td><strong>asciinema</strong> (terminal session → text cast) →
+<code>agg</code> (GIF) → <code>ffmpeg</code> (MP4 H.264
+<code>+faststart</code> <code>yuv420p</code>).
+<strong>TCC-free</strong>: needs NO macOS Screen-Recording grant (the
+harness’s native <code>screencapture -l&lt;wid&gt;</code> window path is
+TCC-blocked on this host — see §“Env gap” below).</td>
+</tr>
+<tr>
+<td><strong>Recordings dir</strong></td>
+<td><code>/Volumes/T7/Downloads/Recordings/</code> (gitignored raw
+corpus, §11.4.128)</td>
+</tr>
+<tr>
+<td><strong>Prefix</strong></td>
+<td><code>helixcode</code> (from <code>HELIX_RELEASE_PREFIX</code> in
+<code>&lt;repo-root&gt;/.env</code>, §11.4.155/.151)</td>
+</tr>
+<tr>
+<td><strong>Validator</strong></td>
+<td>harness
+<code>scripts/video_qa/record_feature.sh validate</code>/<code>ocr-analyze</code>
+— tesseract OCR over sampled frames; self-validated (golden-good PASS /
+golden-bad FAIL) per §11.4.107(10)</td>
+</tr>
+<tr>
+<td><strong>Anti-bluff</strong></td>
+<td>every captured cast scanned for
+<code>simulated</code>/<code>simulate</code>/<code>TODO implement</code>/<code>placeholder</code>/<code>for now</code>/<code>in production this would</code>
+→ <strong>all clean</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="analyzer-self-validation-the-validator-provably-cannot-bluff">Analyzer
+self-validation (the validator provably cannot bluff)</h2>
+<p><code>record_feature.sh selftest</code> (§11.4.107(10)):</p>
+<pre><code>[golden-good] OCR-VERDICT: PASS (all expected patterns present, no bluff): HELIXCODE_OCR_PROBE_4242
+[golden-bad ] OCR-VERDICT: FAIL (missing expected pattern(s): HELIXCODE_WRONG_PATTERN_9999)
+ANALYZER SELF-VALIDATION: PASS (golden-good PASS rc=0, golden-bad FAIL rc=1) — analyzer cannot bluff</code></pre>
+<p>Every PASS below is read back by <strong>this same</strong>
+self-validated OCR analyzer.</p>
+<h2 id="calibration-note-11.4.6-patterns-calibrated-on-the-projects-own-frames">Calibration
+note (§11.4.6 — patterns calibrated on the project’s own frames)</h2>
+<p>tesseract renders this terminal font with a few stable substitutions:
+a space-prefixed <code>0</code>→<code>@</code> (so
+<code>HelixCode 0.1.0</code>→<code>HelixCode @.1.0</code>,
+<code>Active Workers: 0</code>→<code>Active Workers: @</code>), and
+<code>[exit=0]</code>→<code>lexit=0]</code>. Expected patterns were
+therefore chosen from tokens that survive OCR <strong>and</strong>
+uniquely prove the real feature (e.g. <code>go: go1.26.2</code>,
+<code>Total Memory: 0.00 GB</code>,
+<code>HELIXCODE_CMD_PROOF_123</code>, <code>42</code>). Emoji glyphs (📊
+✅ ⚠️) do not OCR and are not relied on. This is a calibration of the
+<em>patterns</em>, never of the <em>content</em> — the underlying real
+output is captured verbatim in the supplementary <code>.cast</code>
+files.</p>
+<hr />
+<h2 id="durable-evidence-committed-rotation-proof-anchors-11.4.83-hxc-108-audit-f2-fix">Durable
+evidence (committed) — rotation-proof anchors (§11.4.83, HXC-108 audit
+F2 fix)</h2>
+<p>The raw corpus (<code>/Volumes/T7/Downloads/Recordings/</code>,
+§11.4.128/.154-rotatable) is the secondary location. The three
+load-bearing BLUFF-clearing recordings + key frames are <strong>copied
+into the committed tree</strong> so a rotation cannot dangle these
+citations (per the android-doc best-practice the HXC-108 evidence audit
+flagged):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Committed artifact</th>
+<th>sha256</th>
+<th>raw-corpus md5 (verified byte-identical pre-copy)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/qa/HXC-108_cli/helixcode-cli-version-20260622T210649Z.mp4</code>
+(h264 790×560 35f)</td>
+<td><code>7ca44a11e491ae809ab342076f9909b4b40f7e40ccc000e186f6801c3bee3b66</code></td>
+<td><code>6e2317d99dd2f4a6f76a5b49cd753ae6</code></td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_cli/helixcode-cli-version-20260622T210649Z.evidence_frame.png</code></td>
+<td><code>b014785fbb0badc92a2fd24f40a383f42bae7ba4e62a83acea59c97026720c05</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_cli/helixcode-cli-generate-20260622T210841Z.mp4</code>
+(h264 790×560 68f)</td>
+<td><code>1d170e33f82373ed9849e60bbf4250963311c801f159d1dd6adb071d70684f85</code></td>
+<td><code>b7a5664f296a2dac9cc8de5f50ee1578</code></td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_cli/helixcode-cli-generate-20260622T210841Z.evidence_frame.png</code></td>
+<td><code>07a132b1802ecd342c70f5d5c3ad5da755230bb0b4f8f2b89da35dff38279fa7</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_cli/helixcode-cli-command_exec-20260622T211241Z.mp4</code>
+(h264 790×560 33f)</td>
+<td><code>68df1efdc86882e0b5ffc2d0c1eccf7fcb07f637278ffee3b4155b4e6d0836dc</code></td>
+<td><code>c49bf4ea02dd28eeae6c988642d5b463</code></td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_cli/helixcode-cli-command_exec-20260622T211241Z.evidence_frame.png</code></td>
+<td><code>3ece74ff62e13daa08a505b826f77ba373029dc291a4e031850e3f62e10cac22</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>All three MP4s ffprobe-verified valid H.264 after copy. The remaining
+recordings (list-models, health, list-workers) live in the raw corpus
+only (non-BLUFF-class, secondary).</p>
+<h2 id="per-feature-results">PER-FEATURE RESULTS</h2>
+<h3 id="version-cli--version-pass-deterministic">1. version —
+<code>cli -version</code> — <strong>PASS</strong> (deterministic)</h3>
+<ul>
+<li><p><strong>Command:</strong>
+<code>./bin/cli -version</code></p></li>
+<li><p><strong>MP4:</strong>
+<code>helixcode-cli-version-20260622T210649Z.mp4</code> (md5
+<code>6e2317d99dd2f4a6f76a5b49cd753ae6</code>,
+H.264/yuv420p/35f)</p></li>
+<li><p><strong>OCR-validated real output excerpt</strong> (read back
+from the recording):</p>
+<pre><code>HelixCode — AI development, end to end
+HelixCode 0.1.0 (commit: dev, built: unknown, go: go1.26.2)
+[exit=0]</code></pre></li>
+<li><p><strong>Validator verdict:</strong>
+<code>RECORDING-VERDICT: PASS</code> —
+<code>--expect &quot;AI development, end to end|go: go1.26.2|exit=0&quot;</code>.
+The real build string <code>go: go1.26.2</code> proves the genuine
+compiled banner.</p></li>
+</ul>
+<h3 id="list-models-cli--list-models-pass-bluff-002-cleared">2.
+list-models — <code>cli -list-models</code> — <strong>PASS</strong>
+(BLUFF-002 cleared)</h3>
+<ul>
+<li><p><strong>Command:</strong>
+<code>./bin/cli -list-models</code></p></li>
+<li><p><strong>MP4:</strong>
+<code>helixcode-cli-list_models-20260622T210824Z.mp4</code> (md5
+<code>4751ac5ab1d1394cad55407a27e3a13a</code>,
+H.264/yuv420p/44f)</p></li>
+<li><p><strong>Real provider behaviour captured</strong> (NOT a
+hardcoded list — real <code>providerManager.GetProviders()</code> + live
+<code>/models</code>):</p>
+<pre><code>DeepSeek provider initialized with 3 models
+F12 provider: using &quot;deepseek&quot;
+=== Available Models ===
+DeepSeek catalog refreshed with 2 models (live /models)
+ID: deepseek-v4-flash   Provider: deepseek   Context Size: 128000   Status: available
+ID: deepseek-v4-pro     Provider: deepseek   Context Size: 128000   Status: available
+ID: mistral-large       Provider: mistral    Score: SC:7.8    Context Size: 128000
+ID: gemini-2.5-pro      Provider: gemini     Score: SC:8.7    Context Size: 1000000
+ID: mimo-v2.5-pro       Provider: xiaomi     Score: SC:8.1    Context Size: 1000000</code></pre></li>
+<li><p><strong>Validator verdicts (two complementary asserts, both from
+this one recording):</strong></p>
+<ul>
+<li>Provider-init proof (frame extracted at recording time, harness
+<code>ocr-analyze</code>): <code>OCR-VERDICT: PASS</code> —
+<code>--expect &quot;DeepSeek provider initialized|deepseek|Available Models&quot;</code>.</li>
+<li>Real-catalog proof (harness <code>validate</code>):
+<code>RECORDING-VERDICT: PASS</code> —
+<code>--expect &quot;mistral-large|gemini-2.5-pro|Context Size: 128000|exit=0&quot;</code>.</li>
+</ul></li>
+<li><p><strong>Note:</strong> in a 24-row terminal the output scrolls;
+the 1 fps <code>validate</code> sampler caught the catalog tail in its
+sampled frames, and the init/<code>live /models</code> lines were
+verified on a higher-fps frame from the same MP4 via the identical
+self-validated analyzer. The real catalog (with per-model real
+scores/context-sizes) is the load-bearing BLUFF-002 proof.</p></li>
+</ul>
+<h3 id="generate-cli--prompt--model-deepseek-v4-flash-pass-bluff-001-cleared">3.
+generate — <code>cli -prompt … -model deepseek-v4-flash</code> —
+<strong>PASS</strong> (BLUFF-001 cleared)</h3>
+<ul>
+<li><p><strong>Command:</strong>
+<code>./bin/cli -prompt &quot;What is 2+2? Answer with just the number.&quot; -model deepseek-v4-flash -max-tokens 50</code></p></li>
+<li><p><strong>MP4:</strong>
+<code>helixcode-cli-generate-20260622T210841Z.mp4</code> (md5
+<code>b7a5664f296a2dac9cc8de5f50ee1578</code>,
+H.264/yuv420p/68f)</p></li>
+<li><p><strong>Real LLM transaction captured on one screen</strong> (all
+OCR-readable):</p>
+<pre><code>=== Generating with deepseek-v4-flash ===
+Prompt: What is 2+2? Answer with just the number.
+4
+DeepSeek catalog refreshed with 2 models (live /models)
+tokens: in=17 out=18 total=35   context: 35/128000 (0%)   time: 1.36s   tps: 13.2   finish: stop
+Generation completed
+[exit=0]</code></pre></li>
+<li><p><strong>Validator verdict:</strong>
+<code>RECORDING-VERDICT: PASS</code> —
+<code>--expect &quot;Answer with just the number|live /models|finish: stop|exit=0&quot;</code>.
+The real model answer <code>4</code>, the live <code>/models</code>
+refresh, and the genuine token accounting (<code>in=17 out=18</code>,
+<code>time: 1.36s</code>, <code>finish: stop</code>) prove a real
+DeepSeek call — <strong>not</strong> a “simulated response”.</p></li>
+</ul>
+<h3 id="health-cli--health-pass">4. health — <code>cli -health</code> —
+<strong>PASS</strong></h3>
+<ul>
+<li><p><strong>Command:</strong> <code>./bin/cli -health</code></p></li>
+<li><p><strong>MP4:</strong>
+<code>helixcode-cli-health-20260622T211234Z.mp4</code> (md5
+<code>b727ef1ddb4b99dd76b4933cd5cc4fb1</code>,
+H.264/yuv420p/37f)</p></li>
+<li><p><strong>OCR-validated real output:</strong></p>
+<pre><code>=== System Health Check ===
+⚠️ Worker Pool: No healthy workers
+⚠️ Notification System: No enabled channels
+✅ System is operational
+[exit=0]</code></pre></li>
+<li><p><strong>Validator verdict:</strong>
+<code>RECORDING-VERDICT: PASS</code> —
+<code>--expect &quot;System Health Check|System is operational|exit=0&quot;</code>.
+Honest real state (it reports the genuine absence of
+workers/notification channels, not a faked all-green).</p></li>
+</ul>
+<h3 id="list-workers-cli--list-workers-pass">5. list-workers —
+<code>cli -list-workers</code> — <strong>PASS</strong></h3>
+<ul>
+<li><p><strong>Command:</strong>
+<code>./bin/cli -list-workers</code></p></li>
+<li><p><strong>MP4:</strong>
+<code>helixcode-cli-list_workers-20260622T211238Z.mp4</code> (md5
+<code>3711b290051a5894bb399767a42a9b5d</code>,
+H.264/yuv420p/33f)</p></li>
+<li><p><strong>OCR-validated real output:</strong></p>
+<pre><code>=== Worker Statistics ===
+Total Workers: 0    Active Workers: 0    Healthy Workers: 0
+Total CPU: 0    Total Memory: 0.00 GB    Total GPU: 0
+[exit=0]</code></pre></li>
+<li><p><strong>Validator verdict:</strong>
+<code>RECORDING-VERDICT: PASS</code> —
+<code>--expect &quot;Worker Statistics|Total Workers: 0|Total Memory: 0.00 GB&quot;</code>.
+Honest empty-pool state (no workers enrolled here).</p></li>
+</ul>
+<h3 id="command-execution-cli--command-pass-bluff-003-cleared">6.
+command execution — <code>cli -command …</code> — <strong>PASS</strong>
+(BLUFF-003 cleared)</h3>
+<ul>
+<li><p><strong>Command:</strong>
+<code>./bin/cli -command &quot;echo HELIXCODE_CMD_PROOF_123 &amp;&amp; expr 6 * 7&quot;</code></p></li>
+<li><p><strong>MP4:</strong>
+<code>helixcode-cli-command_exec-20260622T211241Z.mp4</code> (md5
+<code>c49bf4ea02dd28eeae6c988642d5b463</code>,
+H.264/yuv420p/33f)</p></li>
+<li><p><strong>OCR-validated real output:</strong></p>
+<pre><code>=== Executing Command ===
+Command: echo HELIXCODE_CMD_PROOF_123 &amp;&amp; expr 6 * 7
+HELIXCODE_CMD_PROOF_123
+42
+✅ Command completed (exit code: 0)
+[exit=0]</code></pre></li>
+<li><p><strong>Validator verdict:</strong>
+<code>RECORDING-VERDICT: PASS</code> —
+<code>--expect &quot;Executing Command|HELIXCODE_CMD_PROOF_123|Command completed (exit code: 0)&quot;</code>.
+<strong>Strongest anti-bluff proof in the batch</strong>: the shell
+genuinely <em>computed</em> <code>expr 6 * 7 = 42</code> (real
+<code>os/exec</code>, real exit code) — impossible for a print-and-sleep
+simulation.</p></li>
+</ul>
+<hr />
+<h2 id="skip-not-recorded-here-honest-11.4.3">SKIP / not recorded here
+(honest §11.4.3)</h2>
+<ul>
+<li><strong>Streaming generate</strong> (<code>-stream</code>): not
+separately recorded; non-streaming generate already proves the real LLM
+path. Recordable now in a follow-up if the conductor wants the streaming
+variant captured distinctly.</li>
+<li><strong><code>-qa-run</code></strong> (QA session start): requires a
+reachable <code>qa-server</code> (default
+<code>http://localhost:8080</code>) — server-infra-gated; honest SKIP
+rather than a faked PASS. <code>-qa-list</code> recordable now if
+desired.</li>
+<li><strong>Server <code>/api/v1/llm/generate</code>, Desktop GUI,
+mobile</strong>: out of this CLI slice (Desktop GUI is HXC-112-gated;
+server needs infra up).</li>
+</ul>
+<h2 id="env-gap-the-reason-for-the-asciinema-route-11.4.3">Env gap (the
+reason for the asciinema route, §11.4.3)</h2>
+<p>The committed harness’s native window-video path
+(<code>screencapture -v -V&lt;n&gt; -l&lt;wid&gt;</code> and the
+still-timelapse fallback <code>screencapture -o -l&lt;wid&gt;</code>) is
+<strong>TCC-blocked</strong> on this host:</p>
+<pre><code>screencapture: capture error The operation could not be completed
+could not create image from window</code></pre>
+<p>The harness correctly refuses a whole-desktop fallback (§11.4.154)
+and SKIPs its live path. The asciinema text-capture route used here
+needs <strong>no</strong> Screen-Recording grant and produces the same
+MP4 + OCR-validation, so all CLI features were recorded TCC-free.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li><code>helix_code/bin/cli -help</code> (real flag inventory) —
+2026-06-22.</li>
+<li>Direct runs of each feature before recording (confirmed genuinely
+working before any recording, §11.4.6) — 2026-06-22.</li>
+<li><code>docs/qa/HXC-108_video_qa_matrix.md</code> (authoritative
+CLI×feature scope).</li>
+</ul>
+</body>
+</html>

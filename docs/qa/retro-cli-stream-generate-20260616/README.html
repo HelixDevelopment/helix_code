@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="retro-capture-cli-streaming-llm-generation--stream">Retro-capture:
+CLI streaming LLM generation (<code>-stream</code>)</h1>
+<p><strong>Retro-captured 2026-06-16 vs HEAD <code>9e6e0458</code>
+(<code>9e6e0458f93b7e50ee6d47d8324b34f02e77b31c</code>).</strong> Fresh
+CURRENT run on the running System — explicitly a retro-capture on
+2026-06-16, NOT original/historical evidence (§11.4.6 / §11.4.123).
+Backfills the §11.4.83 docs/qa gap (G7) for the streaming-generation
+surface.</p>
+<h2 id="what-was-exercised-real-end-user-cli-path">What was exercised
+(real end-user CLI path)</h2>
+<p>Provider: DeepSeek.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Feature</th>
+<th>Real result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cli_stream_generate.txt</code></td>
+<td><code>cli -non-interactive -provider deepseek -stream -prompt &quot;Count from 1 to 5...&quot;</code></td>
+<td>Real streamed model output <code>1\n2\n3\n4\n5</code> +
+<code>✅ Generation completed</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="anti-bluff-notes">Anti-bluff notes</h2>
+<ul>
+<li>Real streamed provider response over the <code>-stream</code> path;
+output is the model’s, not a placeholder (§11.4 / §11.4.2).</li>
+</ul>
+</body>
+</html>

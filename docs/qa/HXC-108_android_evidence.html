@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HXC-108_android_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HXC-108_android_evidence</h1>
+</header>
+<h1 id="hxc-108-android-client-recording-evidence-11.4.158-11.4.143">HXC-108
+— Android Client Recording Evidence (§11.4.158 / §11.4.143)</h1>
+<p><strong>Run-id:</strong> HXC-108_android · <strong>Date:</strong>
+2026-06-23 <strong>Gate host (§11.4.119 single-owner):</strong>
+thinker.local — Linux 6.17 x86_64, 16 cores, <code>/dev/kvm</code>
+present, podman 4.9.3 (rootless, §11.4.161). <strong>Sanctioned path
+(§6.X):</strong> <code>helix_code/scripts/run-challenge-matrix.sh</code>
+→ Android emulator INSIDE a rootless podman container (image
+<code>localhost/lava-android-emulator:api34-x86_64</code>);
+install/launch/screenrecord driven in-container via
+<code>podman exec</code> / <code>adb -e</code> / <code>podman cp</code>.
+No host-direct <code>emulator</code>/<code>adb</code>. <strong>Recording
+prefix (§11.4.155):</strong> <code>helixcode</code>. <strong>Window
+scope (§11.4.154):</strong> the emulator device frame (1080×1920), not a
+desktop.</p>
+<blockquote>
+<p>Durable evidence committed under
+<code>docs/qa/HXC-108_android/</code> per §11.4.83 (NOT the rotatable
+git-ignored raw corpus — the exact §11.4.154-rotation bluff the HXC-107
+audit caught; see <code>docs/qa/HXC-107_ledger_audit.md</code>).</p>
+</blockquote>
+<hr />
+<h2 id="durable-artifacts-committed">Durable artifacts (committed)</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/qa/HXC-108_android/helixcode-android-client.mp4</code></td>
+<td>The recording — H.264, 1080×1920, 33 frames (ffprobe-verified).</td>
+</tr>
+<tr>
+<td><code>docs/qa/HXC-108_android/helixcode-android-MainActivity.png</code></td>
+<td>Key frame — the genuine HelixCode Android client.</td>
+</tr>
+</tbody>
+</table>
+<p>Raw run artifacts (also on disk, git-ignored §11.4.128):
+<code>/Volumes/T7/Downloads/Recordings/helixcode-android-client-20260623-190817.{mp4,png,logcat.txt}</code>;
+on thinker <code>~/helixcode-recordings/</code>.</p>
+<h2 id="content-verification-11.4.158-11.4.107-11.4.123-pass">Content
+verification (§11.4.158 / §11.4.107 / §11.4.123) — PASS</h2>
+<p>The recorded frame shows the <strong>real HelixCode Android client
+MainActivity</strong> running on Android 14 — NOT a black /
+boot-animation / crash / stub frame: - Green
+<strong>“HelixCode”</strong> title bar (brand). - The HelixCode spiral
+logo rendered. - Status <strong>“Disconnected”</strong> in red — a REAL
+runtime connection state, not placeholder text. - A
+<strong>“User:”</strong> label. - A green <strong>CONNECT</strong>
+button. - Android 14 system UI chrome (status bar clock 4:09,
+wifi/signal/battery icons).</p>
+<p>Corroborating runtime signal (§11.4.108): <code>dumpsys</code>
+reported <code>ResumedActivity: dev.helix.code/.MainActivity</code> (the
+app is genuinely foregrounded). APK install reported
+<code>Success</code>; the installed APK md5
+(<code>e85b19af9cdd292b6150bffab2dc277c</code>) matched the macOS-built
+<code>app-debug.apk</code> (real native Go core embedded).</p>
+<p>The conductor independently re-verified: <code>ffprobe</code>
+confirms h264 1080×1920 / 33 frames, and visually read the committed PNG
+(the description above is what is genuinely on screen).</p>
+<h2 id="blockers-hit-resolved-during-the-run-facts-11.4.6">Blockers hit
++ resolved during the run (FACTs, §11.4.6)</h2>
+<ol type="1">
+<li><strong>Rootless <code>/dev/kvm</code> denial</strong> —
+<code>ProbeKVM</code> failed
+(<code>This user doesn&#39;t have permissions to use KVM</code>): image runs
+as <code>USER emulator</code> (uid 1000) → host subuid lacks the
+<code>/dev/kvm</code> ACL. Fixed with <code>--userns=keep-id</code>
+(container-uid-1000 → host user who holds the ACL). Verified
+<code>Boot completed in 29201 ms</code>.</li>
+<li><strong><code>podman cp $CN:/sdcard/...</code> “no such
+file”</strong> — <code>/sdcard</code> is in the emulator GUEST, not the
+container fs. Fixed with a two-hop pull: <code>adb -e pull</code>
+guest→container <code>/tmp</code>, then <code>podman cp</code>
+container→host.</li>
+<li><strong>Intermittent early container exit</strong> — emulator (PID
+1) died if a screencap ran first. Fixed by record-first ordering. No
+leftover <code>helixcode-emu</code> containers after teardown.</li>
+</ol>
+<h2 id="submodule-gap-surfaced-11.4.74-extend-dont-reimplement-follow-up">Submodule
+gap surfaced (§11.4.74 extend-don’t-reimplement) — follow-up</h2>
+<p><code>submodules/containers/pkg/emulator/containerized.go</code>
+<code>buildContainerRunArgs</code> passes only
+<code>--device /dev/kvm</code> and lacks <code>--userns=keep-id</code>,
+so its <code>Containerized.Boot</code> would hit the same rootless
+<code>ProbeKVM</code> denial. <strong>Recommended upstream fix:</strong>
+add <code>--userns=keep-id</code> (rootless podman) in
+<code>buildContainerRunArgs</code>. The wrapper adds the flag itself for
+now and documents the gap inline; the submodule was NOT modified (left
+for conductor/operator decision per §11.4.74).</p>
+<h2 id="verdict">Verdict</h2>
+<p>Android §11.4.158 client recording: <strong>PASS</strong> — real,
+content-verified, via the §6.X-sanctioned containerized path on a Linux
+KVM host. The macOS-podman path remains §11.4.112
+structurally-impossible
+(<code>docs/research/android_emulator_podman_macos_20260623/feasibility.md</code>);
+this is the research’s recommended path [A] realised.</p>
+</body>
+</html>
