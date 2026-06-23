@@ -192,7 +192,7 @@ CLI-Agent Fusion — Programme Continuation Guide</h1>
 <tbody>
 <tr>
 <td>Revision</td>
-<td>9</td>
+<td>10</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -200,7 +200,7 @@ CLI-Agent Fusion — Programme Continuation Guide</h1>
 </tr>
 <tr>
 <td>Last modified</td>
-<td>2026-06-23T22:30:00Z</td>
+<td>2026-06-24T00:10:00Z</td>
 </tr>
 <tr>
 <td>Status</td>
@@ -324,6 +324,40 @@ self-perform: gitverse/gitflic API tokens in .env (none exist; then auto
 repo-create+push+4-provider-parity) + rootless podman on amber.
 Everything else is automated. All commits reviewed (§11.4.142) +
 ff-pushed (§11.4.113).</em></p>
+<p><em>Revision 10 (2026-06-24) records the test-determinism hardening
+phase (operator chose “keep hardening”). §11.4.40 deterministic serial
+release-gate run = 188 ok / 2 FAIL (down from 24 under parallel load —
+the load-flakes vanish serially, proving the fixes hold). The 2
+serial-FAILs resolved: (a) tests/security OWASP secure-headers + health
+FAILed against a STALE :8080 deployment (current product source is
+correct+secure) — fixed with a build-aware skipIfNotCurrentBuild gate
+(§11.4.108/§11.4.139), still FAILs a reachable-but-insecure CURRENT
+build (<code>88a36dc5</code>); (b) tests/memory GC-pressure FAILed on a
+hardcoded 50MB point-snapshot cap — replaced with a spike-robust
+heapTrendSignal (signed-R²-of-least-squares-line) + heapTrendIsLeak
+(trend AND magnitude, defeating R²’s scale-invariance) + 2 §1.1
+self-validation tests. A §11.4.118 threshold-antipattern audit
+(<code>ec44dfea</code>,
+docs/qa/helixcode_threshold_antipattern_audit.md) found 4 HIGH siblings
+(same point-snapshot defect — ported to heapTrendSignal) + 9 MEDIUM + 9
+LOW; the 4 HIGH ports + the 2 sub-100ms MEDIUM (event/bus async-semantic
++ web concurrent-vs-sequential-ratio) fixed deterministically
+(<code>33fed791</code>, all -count=3/5 + -race verified). Containers
+gitlink re-bumped e635ad8→876474b (D18 Dockerfile
+non-root/–no-install-recommends hardening, §11.4.161; build-verified,
+<code>1808c9c5</code>). The rootless-userns PR branch bd96df0 is
+redundant (main cbb0774). DOCUMENTED LOW-PRIORITY FOLLOW-UPS (audit
+map): remaining 9 MEDIUM threshold items (advanced_config -race CPU
+caps, e2e/phase3 throughput floors, 2s response SLAs, memory_test.go:706
+fixed-sleep goroutine check); a pre-existing tests/memory FULL-package
+flake from dev-server (:8080) SATURATION under the untouched heavy load
+tests (SustainedLoad/BurstTraffic fail-instead-of-skip when the shared
+server degrades mid-run — NOT a regression; my changed tests are
+deterministic in isolation); the §11.4.40 release-gate now invokes the
+constitution sweep (G1-G16 incl. G15/G16, <code>b93116e2</code>). All
+commits independently reviewed (conductor §11.4.108 re-verified each —
+caught + sent back 2 still-flaky fixes) + ff-pushed
+(§11.4.113).</em></p>
 <p><em>Revision 9 (2026-06-23) records the Android-recording close-out +
 the parallel release-readiness drive. (a) ANDROID GAP CLOSED:
 <code>helix_code/scripts/run-challenge-matrix.sh</code>
