@@ -140,6 +140,18 @@ task rows are **live data from the Go core** (`getAvailableThemes()`,
 All §11.4.159(K) expected patterns present: `HelixCode iOS`, `Disconnected`,
 `Go core OK - themes: 3, tasks: 2`, `Connect`, `Build iOS client`, `Wire Go core`.
 
+## Durable evidence (committed) — rotation-proof anchors (§11.4.83, HXC-108 audit F2 fix)
+
+The raw corpus (`/Volumes/T7/Downloads/Recordings/`, §11.4.128/.154-rotatable) is the
+secondary location. The load-bearing key still frame is **copied into the committed
+tree**; the 3.17 MB MP4 exceeds the per-byte commit budget, so its identity is pinned
+by a committed ffprobe+md5 stamp (the still frame is the durable visual evidence):
+
+| Committed artifact | sha256 | raw-corpus md5 (verified byte-identical pre-copy) |
+|---|---|---|
+| `docs/qa/HXC-108_ios/helixcode-ios-launch-render-20260623-141821.png` | `4467408ec80b9097a7f7461915f32046a9eb2153367354cae1093b50e8ac22b3` | — |
+| `docs/qa/HXC-108_ios/helixcode-ios-launch-render-20260623-141821.mp4.ffprobe-stamp.txt` (pins the raw MP4: h264 1178×2556 144f 11.945s, md5 `e565c6bde216926cbb3d21990bfd6c5d`) | (text stamp) | `e565c6bde216926cbb3d21990bfd6c5d` |
+
 ## Analyzer self-validation
 
 Per §11.4.107(10) — the OCR analyzer provably cannot bluff:

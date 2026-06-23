@@ -37,6 +37,24 @@ available for a future re-run; this evidence is the conductor's direct
 OCR-confirmation of real rendered content, which the recordings (committed-by-
 reference, gitignored) back.
 
+## Durable evidence (committed) — rotation-proof anchors (§11.4.83, HXC-108 audit F2 fix)
+
+The raw corpus (`/Volumes/T7/Downloads/Recordings/`, §11.4.128/.154-rotatable) is the
+secondary location. All per-view recordings + evidence frames are **copied into the
+committed tree** so a rotation cannot dangle these citations. All MP4s ffprobe-verified
+valid H.264 after copy (the 5 driven views are 1604×868/50f; dashboard is the prior run):
+
+| View | Committed MP4 sha256 | Committed frame sha256 |
+|---|---|---|
+| dashboard (prior) | (frame only) | `cb87560b78ca3dc1ca583b2c0eaedb1a9554170afb96da4b82fcee55674eace7` |
+| tasks | `d0e01c4e5211e5929256a230f0528b5ea533f2860b2728a745ec13bee9cbb6af` | `319a71eda5c37bc3cbde8e89a6de5aa072972a9d1a3207f158970913edb22cd2` |
+| workers | `383400681bf61ff24ba5e135b62779f9f8bf10af4705860c791c9ed1498b9fd0` | `d78fa46315e86daf988c5d9de320ae2c51b7c31f36b743cbc1d8019062ba0689` |
+| projects | `413b4f0a9e2942de8b039614af5f8b51a8a09899019107358037c0dfc0f7a7d4` | `82e410d11b0e0fcc1f9393699872b270a4e044788c62cb9a4907c831a1f695bc` |
+| sessions | `b35f96009c098bf468f37c58c6c4313cdd4ca3fc1aca6fa224322dd8cf947108` | `b5916796943addd681bcb2033d8a7b3f063ba8207a126e777e098f753d51e9fc` |
+| qa | `90d60d8ee561e51efda94fa5ddc024598a31da9cabf82a4db4ad9a6a92df840e` | `05e9fbe9b81076254268ff1049db908550dc0e27329a0cd3c71a4f9e32fbd158` |
+
+Committed under `docs/qa/HXC-108_tui_views/` (filenames preserve the `<run-id>` timestamps cited above).
+
 ## Status
 TUI per-view coverage: **6/6 views recorded with real-content OCR confirmation.**
 Fully automatic (tmux send-keys), no TCC/Aqua/human.

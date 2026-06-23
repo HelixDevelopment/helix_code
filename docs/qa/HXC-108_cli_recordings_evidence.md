@@ -28,6 +28,26 @@ tesseract renders this terminal font with a few stable substitutions: a space-pr
 
 ---
 
+## Durable evidence (committed) — rotation-proof anchors (§11.4.83, HXC-108 audit F2 fix)
+
+The raw corpus (`/Volumes/T7/Downloads/Recordings/`, §11.4.128/.154-rotatable) is the
+secondary location. The three load-bearing BLUFF-clearing recordings + key frames are
+**copied into the committed tree** so a rotation cannot dangle these citations
+(per the android-doc best-practice the HXC-108 evidence audit flagged):
+
+| Committed artifact | sha256 | raw-corpus md5 (verified byte-identical pre-copy) |
+|---|---|---|
+| `docs/qa/HXC-108_cli/helixcode-cli-version-20260622T210649Z.mp4` (h264 790×560 35f) | `7ca44a11e491ae809ab342076f9909b4b40f7e40ccc000e186f6801c3bee3b66` | `6e2317d99dd2f4a6f76a5b49cd753ae6` |
+| `docs/qa/HXC-108_cli/helixcode-cli-version-20260622T210649Z.evidence_frame.png` | `b014785fbb0badc92a2fd24f40a383f42bae7ba4e62a83acea59c97026720c05` | — |
+| `docs/qa/HXC-108_cli/helixcode-cli-generate-20260622T210841Z.mp4` (h264 790×560 68f) | `1d170e33f82373ed9849e60bbf4250963311c801f159d1dd6adb071d70684f85` | `b7a5664f296a2dac9cc8de5f50ee1578` |
+| `docs/qa/HXC-108_cli/helixcode-cli-generate-20260622T210841Z.evidence_frame.png` | `07a132b1802ecd342c70f5d5c3ad5da755230bb0b4f8f2b89da35dff38279fa7` | — |
+| `docs/qa/HXC-108_cli/helixcode-cli-command_exec-20260622T211241Z.mp4` (h264 790×560 33f) | `68df1efdc86882e0b5ffc2d0c1eccf7fcb07f637278ffee3b4155b4e6d0836dc` | `c49bf4ea02dd28eeae6c988642d5b463` |
+| `docs/qa/HXC-108_cli/helixcode-cli-command_exec-20260622T211241Z.evidence_frame.png` | `3ece74ff62e13daa08a505b826f77ba373029dc291a4e031850e3f62e10cac22` | — |
+
+All three MP4s ffprobe-verified valid H.264 after copy. The remaining recordings
+(list-models, health, list-workers) live in the raw corpus only (non-BLUFF-class,
+secondary).
+
 ## PER-FEATURE RESULTS
 
 ### 1. version — `cli -version` — **PASS** (deterministic)

@@ -33,6 +33,22 @@ The agg monospace render produces stable OCR substitutions: a space-prefixed `0`
 
 ---
 
+## Durable evidence (committed) — rotation-proof anchors (§11.4.83, HXC-108 audit F2 fix)
+
+The raw corpus (`/Volumes/T7/Downloads/Recordings/`, §11.4.128/.154-rotatable) is the
+secondary location. The two load-bearing recordings (TUI dashboard render + server
+real-API flow) + their evidence frames are **copied into the committed tree** so a
+rotation cannot dangle these citations:
+
+| Committed artifact | sha256 | raw-corpus md5 (verified byte-identical pre-copy) |
+|---|---|---|
+| `docs/qa/HXC-108_tui_server/helixcode-tui-dashboard-20260622T213246Z.mp4` (h264 790×560 131f) | `e062b8df6eb25c8431604aad91ee604b92bc2f6724b6ccca1bd86c5d43314e61` | `607df3c63fcb5880aa32edaaf35cbc4d` |
+| `docs/qa/HXC-108_tui_server/helixcode-tui-dashboard-20260622T213246Z.evidence_frame.png` | `cb87560b78ca3dc1ca583b2c0eaedb1a9554170afb96da4b82fcee55674eace7` | — |
+| `docs/qa/HXC-108_tui_server/helixcode-server-api-20260622T214152Z.mp4` (h264 790×560 48f) | `98e32d4f9e6c6d3cd53dd70f308646a45dc899dc07d3f7b0c2a969c0b16b85c5` | `0aea0e9677d3214ea9679e101fab07f3` |
+| `docs/qa/HXC-108_tui_server/helixcode-server-api-20260622T214152Z.evidence_frame.png` | `c4e060bcf09930db4d46e1cdc9f517c5d7a718d89eecb22a3ae7ed339dd3e755` | — |
+
+Both MP4s ffprobe-verified valid H.264 after copy.
+
 ## PER-FEATURE RESULTS
 
 ### TUI-1. terminal-UI dashboard — launch → real tview dashboard render — **PASS**

@@ -1,0 +1,17 @@
+# iOS recording ffprobe + integrity stamp (durable anchor for the raw-corpus MP4)
+#
+# The full 3.17 MB iOS simulator recording is too large to commit per-byte
+# (§11.4.128 raw corpus). The load-bearing still frame
+# (helixcode-ios-launch-render-20260623-141821.png, committed beside this file)
+# IS the durable evidence; this stamp pins the MP4's identity so the
+# rotatable raw-corpus citation remains verifiable after a §11.4.154 rotation.
+#
+# Raw corpus path: /Volumes/T7/Downloads/Recordings/helixcode-ios-launch-render-20260623-141821.mp4
+# md5:  e565c6bde216926cbb3d21990bfd6c5d
+#
+# ffprobe (video stream v:0), captured 2026-06-23:
+codec_name=h264
+width=1178
+height=2556
+duration=11.945000
+nb_read_frames=144
