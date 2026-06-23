@@ -2326,44 +2326,76 @@ currently this Issues.md is the source of truth and Summary is
 hand-maintained).* ## HXC-107 — Feature Status docs program
 (docs/features) — comprehensive per-feature inventory across all
 components/clients/submodules/ported-cli_agents, docs_chain-synced</p>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
-Claude</p>
-<p>Round-1 inventory landed: ~388 features catalogued (233 internal, 67
-cmd/clients, 55 submodule, 33 ported) in docs/features/Status.md +
-Status_Summary.md with the full dimension schema
-(Dev/Wired/Real-use/Tests/V&amp;V/Video/Analysis/Origin/Overall). 0
-video-confirmed (honest). ONGOING: deeper inventory of flagged packages;
-docs_chain context wiring (§11.4.106); raise video-confirmed as
-recordings land.</p>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Task
+<strong>Operator-Block-Details:</strong> WHAT: Feature-Status ledger
+DELIVERED and honest: docs/features/Status.md (4-format incl DOCX,
+11.4.153), Status_Summary, inventory, codebase-reconciled. Per-feature
+video-confirmation column complete for the 6 recordable clients; the 3
+unrecordable platforms (Android, Aurora, Harmony) are honestly
+gap-marked. WHY: Full 11.4.153 video-confirmation cannot reach 100
+percent while Android (11.4.112 structurally-impossible on macOS) and
+Aurora/Harmony (vendor SDK absent) remain unrecordable on this host —
+same residual as HXC-108. UNBLOCK: [A] Resolve the HXC-108 residual
+(Linux x86_64 KVM gate host, vendor SDKs, or 6.X policy) so the 3
+platforms gain video confirmation. [B] Accept the ledger as complete
+with the 3 platforms honestly gap-marked (current state) and close
+HXC-107 on that basis. WHO: User <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Feature Status docs program (docs/features) — comprehensive
+per-feature inventory across all
+components/clients/submodules/ported-cli_agents, docs_chain-synced</p>
 <h2
 id="hxc-108-video-qa-program-record-all-clients-x-all-features-with-strongest-models-ensemble---volumest7downloadsrecordings-analyze-fix">HXC-108
 — Video-QA program: record all clients x all features with strongest
 models + ensemble -&gt; /Volumes/T7/Downloads/Recordings, analyze +
 fix</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Task
+<strong>Operator-Block-Details:</strong> WHAT: Recordable-client
+11.4.158 coverage COMPLETE (CLI, server, desktop-GUI 7-tab headless,
+iOS, web, TUI 6-views — 6 PASS diary entries, real OCR-validated).
+Residual: 3 platforms unrecordable on this macOS host without
+operator-provided resources. WHY: Android emulator under rootless podman
+on macOS is 11.4.112 structurally-impossible (no /dev/kvm to containers;
+verified accel.go and cited sources,
+docs/research/android_emulator_podman_macos_20260623/feasibility.md).
+Aurora and Harmony vendor SDKs absent (11.4.98B operator bootstrap). The
+6.X guard blocks host-direct emulator as gate evidence. UNBLOCK: [A]
+Enrol a Linux x86_64 KVM gate host (local, CI, or
+CONTAINERS_REMOTE_HOST_n) so run-challenge-matrix.sh containerized
+runner produces sanctioned Android recording. [B] Operator 6.X policy
+decision: carve a macOS host-direct exception OR accept
+operator_attended SKIP for macOS Android. [C] Install Aurora OS SDK 4.0
+or later and Harmony DevEco SDK (or enrol target devices) for Aurora and
+Harmony. [D] Accept current recordable-client coverage as the 11.4.158
+release scope and defer mobile and exotic platforms. WHO: User
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
-<p>Foundation verified: DeepSeek V3 (strongest) + Mistral Large + Groq
-Llama-3.3-70B ensemble real through helix stack. Recordable now:
-CLI/TUI/Web/Desktop(host display, operator-approved). Android Genymotion
-live via adb. Each recording must show real use-case scenarios, be
-analyzed, problems fixed/retested. Feeds the Status docs video-confirmed
-column. ONGOING multi-round.</p>
+<p>Video-QA program: record all clients x all features with strongest
+models + ensemble -&gt; /Volumes/T7/Downloads/Recordings, analyze +
+fix</p>
 <h2
 id="hxc-112-desktop-gui-feature-recording-fyne-opengl-canvas-ignores-osascript-synthetic-clicks-need-cliclickreal-event-automation-to-record-llm-chat-in-gui">HXC-112
 — Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript
 synthetic clicks — need cliclick/real-event automation to record
 LLM-chat in-GUI</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
-Claude</p>
-<p>Fyne renders via OpenGL (no native accessibility); osascript ‘click
-at’ does not register on the canvas, so in-GUI feature interaction (LLM
-Chat, tab nav) cannot be driven for recording via AppleScript.
-helixcode-desktop-dashboard-20260615.mp4 honestly shows the working
-dashboard + live uptime but not feature interaction. Need cliclick (real
-CGEvent mouse) or a Fyne test-driver to record the desktop LLM-chat
-feature end-to-end.</p>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Task
+<strong>Operator-Block-Details:</strong> WHAT: Recording OBJECTIVE met:
+LLM-chat in-GUI plus all 7 Fyne tabs recorded via HEADLESS in-process
+software-render, real output OCR-validated (see HXC-108 desktop-GUI
+evidence). Root cause of the click problem confirmed (11.4.102): Fyne
+GL-only canvas, no accessibility tree, osascript synthetic clicks
+ignored. WHY: The literal cliclick CGEvents-to-HID input-automation path
+(for true input-driven, not headless, GUI recording) needs an Aqua
+WindowServer session plus a macOS Accessibility TCC grant, which an
+SSH/tmux session lacks — 11.4.98B operator bootstrap the System cannot
+self-perform. UNBLOCK: [A] Grant macOS Accessibility (TCC) to the
+terminal and run in an Aqua session so cliclick HID input-automation
+drives the real GUI for input-driven recording. [B] Accept the headless
+software-render recording as sufficient 11.4.158 GUI coverage (objective
+already met) and close HXC-112. WHO: User <strong>Created-By:</strong>
+Claude <strong>Assigned-To:</strong> Claude</p>
+<p>Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript
+synthetic clicks — need cliclick/real-event automation to record
+LLM-chat in-GUI</p>
 </body>
 </html>
