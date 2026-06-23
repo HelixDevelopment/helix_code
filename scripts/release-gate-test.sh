@@ -394,6 +394,30 @@ else
     echo "WARN: $QA_EVIDENCE_GATE missing — §11.4.83 evidence gate skipped" >&2
 fi
 
+# --------- §11.4.32/§11.4.40 constitution-rule sweep release gate ---------
+# CONST-055 / §11.4.32 names scripts/verify-all-constitution-rules.sh the
+# canonical enforcement engine: it runs EVERY implementable rule gate
+# (G1..G16 — incl. G15 feature-video evidence + G16 challenge-matrix
+# contract) against the post-pull tree and exits non-zero (exit 1) on any
+# FAILURE. Historically that sweep ran only on the §11.4.32 constitution-pull
+# path, so the gates did NOT block a release tag (§11.4.40 release-readiness
+# gap). Wired here so the full sweep is a blocking pre-tag step: a non-zero
+# sweep exit forces the whole release gate red (EXIT_CODE=1) regardless of the
+# per-submodule Go-test outcome. ENV-skip semantics do NOT apply to
+# constitution-rule violations.
+CONSTITUTION_SWEEP="$REPO_ROOT/scripts/verify-all-constitution-rules.sh"
+CONSTITUTION_SWEEP_RC=0
+if [[ -f "$CONSTITUTION_SWEEP" ]]; then
+    if [[ $MODE_JSON -eq 0 ]]; then
+        bash "$CONSTITUTION_SWEEP" || CONSTITUTION_SWEEP_RC=$?
+    else
+        # Keep JSON stream clean — gate output goes to the log dir.
+        bash "$CONSTITUTION_SWEEP" >"$LOG_DIR/constitution_sweep.log" 2>&1 || CONSTITUTION_SWEEP_RC=$?
+    fi
+else
+    echo "WARN: $CONSTITUTION_SWEEP missing — §11.4.32 constitution-rule sweep skipped" >&2
+fi
+
 # --------- Match glob helper ---------
 match_only() {
     local sm="$1"
@@ -578,6 +602,13 @@ if [[ "$QA_EVIDENCE_RC" -ne 0 ]]; then
     EXIT_CODE=1
 fi
 
+# §11.4.32/§11.4.40 constitution-rule sweep is always blocking on the release
+# gate: any gate failure (G1..G16) forces the whole gate red regardless of the
+# Go-test outcome. ENV-skip semantics do NOT apply to constitution violations.
+if [[ "$CONSTITUTION_SWEEP_RC" -ne 0 ]]; then
+    EXIT_CODE=1
+fi
+
 if [[ $MODE_JSON -eq 1 ]]; then
     # Hand-rolled JSON (no jq dependency). Round 89 adds env/logic split.
     printf '{\n'
@@ -599,6 +630,7 @@ if [[ $MODE_JSON -eq 1 ]]; then
     printf '  "total_bare_skip": %d,\n' "$TOTAL_BARE"
     printf '  "early_stop": %s,\n' "$([[ $EARLY_STOP -eq 1 ]] && echo true || echo false)"
     printf '  "qa_evidence_gate_rc": %d,\n' "$QA_EVIDENCE_RC"
+    printf '  "constitution_sweep_rc": %d,\n' "$CONSTITUTION_SWEEP_RC"
     printf '  "log_dir": "%s",\n' "$LOG_DIR"
     printf '  "exit_code": %d,\n' "$EXIT_CODE"
     printf '  "results": [\n'
@@ -630,6 +662,7 @@ else
     echo "  ENV-CLASS total:         $N_ENV_CLASS"
     echo "  LOGIC-CLASS total:       $N_LOGIC_CLASS"
     echo "  qa-evidence gate (11.4.83): $([[ $QA_EVIDENCE_RC -eq 0 ]] && echo PASS || echo "FAIL (rc=$QA_EVIDENCE_RC)")"
+    echo "  constitution sweep (11.4.32/.40 G1..G16): $([[ $CONSTITUTION_SWEEP_RC -eq 0 ]] && echo PASS || echo "FAIL (rc=$CONSTITUTION_SWEEP_RC)")"
     echo "  log dir:                 $LOG_DIR"
     if [[ $MODE_SKIP_ENV -eq 1 ]]; then
         echo "  --skip-env-failures:     ON (ENV-CLASS reported but non-blocking)"
