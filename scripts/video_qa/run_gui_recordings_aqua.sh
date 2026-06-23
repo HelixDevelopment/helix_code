@@ -2,6 +2,13 @@
 # =============================================================================
 # run_gui_recordings_aqua.sh — operator-run GUI feature recorder (HXC-108 GUI slice)
 # -----------------------------------------------------------------------------
+# SUPERSEDED for automation (2026-06-23, §11.4.98): the FULLY-AUTOMATIC headless
+# recorder `scripts/video_qa/record_gui_inprocess.sh` (Fyne software-renderer,
+# no TCC / no Aqua / no human) is the primary GUI-recording path and needs no
+# operator step. This script is retained ONLY as a manual fallback for capturing
+# exact on-screen WindowServer pixels, which still requires an Aqua session +
+# the TCC grants below. Prefer record_gui_inprocess.sh.
+# -----------------------------------------------------------------------------
 # WHY THIS EXISTS: the agent's session is in the launchd *Background* domain, so
 # it cannot attach a Fyne/GLFW window to the WindowServer (no on-screen capture).
 # The desktop-GUI feature recordings must run from a logged-in *Aqua* session.
