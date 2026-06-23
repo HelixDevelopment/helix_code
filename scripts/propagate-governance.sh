@@ -1,96 +1,57 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Governance Propagation Script
+# Governance Propagation Script — RETIRED (no-op)
+# ============================================================================
+#
+# RETIRED 2026-06-23 per the operator's thin-inheritance governance-model
+# decision (CONST-059 / CONST-051(B) / §11.4.28).
+#
+# WHAT THIS SCRIPT USED TO DO (and why it is now WRONG):
+#   It copied the five repo-root governance files (CONSTITUTION.md, CLAUDE.md,
+#   AGENTS.md, QWEN.md, GEMINI.md) verbatim INTO every owned submodule, then
+#   committed + pushed them. That is "inline restatement" propagation — the
+#   OLD model. Under the thin-inheritance model it is a CONST-051(B)/§11.4.28
+#   VIOLATION: it re-injects project-specific inline content into submodules
+#   that are supposed to be project-agnostic thin-inheritance stubs which only
+#   POINT to the canonical constitution (via a `## INHERITED FROM` heading +
+#   the `find_constitution.sh` resolver, never a hardcoded path).
+#
+# THE CURRENT MODEL (what replaces this script):
+#   - Owned-submodule governance carriers are THIN-INHERITANCE STUBS. The
+#     universal §11.9 / CONST-047..059 / covenant-114 anchors live ONLY in the
+#     constitution submodule + the meta-root carriers; submodules inherit them
+#     by reference. `scripts/verify-governance-cascade.sh` (section 2) asserts
+#     the inheritance pointer is present — it no longer demands inline anchors.
+#   - The canonical thin-stub CONVERSION of submodule carriers is owned by the
+#     governance-migration mechanism (the process that produced e.g. the
+#     `containers` thin stub) — NOT by this script. Re-implementing a converter
+#     here would risk diverging from that canonical format, so this script is
+#     deliberately retired rather than rewritten.
+#
+# This file is kept (not deleted) because `./scripts/propagate-governance.sh`
+# is a documented command; it now no-ops with this notice so a stale invocation
+# can never re-couple a submodule.
 # ============================================================================
 
-cd "$(git rev-parse --show-toplevel)"
+set -euo pipefail
 
-REPO_ROOT="$(pwd)"
-GOV_FILES=("CONSTITUTION.md" "CLAUDE.md" "AGENTS.md" "QWEN.md" "GEMINI.md")
-PUSHED=0
-FAILED=0
-SKIPPED=0
-TIMEOUT=10
+cat <<'NOTICE'
+=== propagate-governance.sh is RETIRED (no-op) ===
 
-# Only propagate into HelixCode-owned submodules; skip third-party repos.
-is_owned() {
-    local p="$1"
-    case "$p" in
-        Challenges|Security|Containers|HelixQA) return 0 ;;
-        HelixAgent|helix_agent/HelixLLM|helix_agent/HelixMemory|helix_agent/HelixSpecifier) return 0 ;;
-        submodules/*) return 0 ;;
-        *) return 1 ;;
-    esac
-}
+This script previously re-inlined the root governance files into every owned
+submodule. That contradicts the thin-inheritance model (operator decision
+2026-06-23; CONST-059 / CONST-051(B) / §11.4.28): owned-submodule carriers are
+project-agnostic thin-inheritance STUBS that point to the constitution via
+find_constitution.sh, NOT inline copies of the gov files.
 
-echo "=== Governance Propagation ==="
-echo "Repo: $REPO_ROOT"
-echo ""
+  • Governance is verified, not propagated-by-copy:
+      bash scripts/verify-governance-cascade.sh
+    (section 2 asserts each owned-submodule carrier has the inheritance pointer)
 
-while IFS= read -r line; do
-    path=$(echo "$line" | awk '{print $2}')
+  • The canonical thin-stub conversion of submodule carriers is owned by the
+    governance-migration mechanism, not this script.
 
-    if ! is_owned "$path"; then
-        SKIPPED=$((SKIPPED + 1))
-        continue
-    fi
+No files were copied, committed, or pushed. This invocation did nothing.
+NOTICE
 
-    if [ ! -e "$path/.git" ]; then
-        SKIPPED=$((SKIPPED + 1))
-        continue
-    fi
-
-    cd "$path"
-
-    copied=0
-    for file in "${GOV_FILES[@]}"; do
-        src="$REPO_ROOT/$file"
-        if [ -f "$src" ]; then
-            cp "$src" .
-            git add "$file" > /dev/null 2>&1 || true
-            copied=$((copied + 1))
-        fi
-    done
-
-    if [ "$copied" -eq 0 ]; then
-        SKIPPED=$((SKIPPED + 1))
-        cd "$REPO_ROOT"
-        continue
-    fi
-
-    if git diff --cached --quiet; then
-        SKIPPED=$((SKIPPED + 1))
-        cd "$REPO_ROOT"
-        continue
-    fi
-
-    if ! git commit -m "chore(governance): propagate Constitution, CLAUDE.md, AGENTS.md" > /dev/null 2>&1; then
-        SKIPPED=$((SKIPPED + 1))
-        cd "$REPO_ROOT"
-        continue
-    fi
-
-    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-    if [ "$branch" = "HEAD" ] || [ -z "$branch" ]; then
-        echo "⚠ DETACHED_HEAD: $path — skipping push (checkout main first)"
-        FAILED=$((FAILED + 1))
-        cd "$REPO_ROOT"
-        continue
-    fi
-    if timeout "$TIMEOUT" git push origin "$branch" > /dev/null 2>&1; then
-        echo "✅ PUSHED: $path ($branch)"
-        PUSHED=$((PUSHED + 1))
-    else
-        echo "❌ PUSH_FAIL: $path (no write access or timeout)"
-        FAILED=$((FAILED + 1))
-    fi
-
-    cd "$REPO_ROOT"
-done < <(git submodule status)
-
-echo ""
-echo "Summary: Pushed=$PUSHED Failed=$FAILED Skipped=$SKIPPED"
-
-echo "→ Pushing main repository..."
-git push origin main && git push gitlab main 2>/dev/null
-echo "✅ Main repository pushed"
+exit 0
