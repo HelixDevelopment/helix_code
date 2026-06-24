@@ -344,7 +344,7 @@ stress-chaos 82 ok/0 races; HelixQA 40 api banks (332 pass; fails =
 auth-seed-absent SKIP-class / 2 bank-drift / 3 ensemble-lsp-skills
 bank-over-assert [server correct §11.4.122]); constitution sweep 16/16.
 (e) DISCOVERED+FIXED, each RED→GREEN + independent §11.4.142 review-GO +
-ff-pushed: governance G7/G12/G14 (a8c5ff24); verifier <em>FromVerifier
+ff-pushed: governance G7/G12/G14 (a8c5ff24); verifier _FromVerifier
 real-TCP-dial-starvation flake → in-memory httptest client (07b54b47);
 cognee package load-determinism (GPU-probe timeout-var asymmetry +
 stress-test connection-storm → keep-alive, b058c7c2); e2e-challenges
@@ -361,14 +361,29 @@ web/desktop/mobile clients, ~65 untouched submodules, full provider
 matrix. NET: exactly 1 genuine product defect (MCP lock-hold) across the
 whole cycle — everything else test-determinism/env/bank-side; the System
 genuinely works (live :18080 corroborated by 102 security + 332 HelixQA
-assertions). REMAINING (next loop iteration): submodule-integration per
-the committed plan (security gitlink bump; challenges no_suspend-scanner
-doc-exclusion + skip-fix integrate onto advanced main [partially
-redundant — 2/5 files already upstream]; helix_qa bank-reclassification
-[ensemble/lsp/skills + 2 drifts] + gitlink bump with build-test;
-constitution e1bb125 §11.4.55 cascade of §11.4.167/168) + the
-operator-scoped release-tag decision (§11.4.66/§11.4.126(A)). 30
-commits, all ff-pushed (§11.4.113, no force).</em></p>
+assertions). SUBMODULE-INTEGRATION COMPLETED (all FF, §11.4.113 no
+force): challenges → a9601d9 (3 still-needed SKIP-OK skip-fix files
+re-applied onto advanced main 4769198; 2 redundant discarded; the
+no_suspend-scanner fix was redundant — upstream 08e1331 already fixed
+it; gitlink bump 4b0eab2d); security → b69c7d9 (gitlink-only, not
+imported, governance/decouple commits; bump 294659f4); helix_qa →
+9f94c53 (onto advanced main d45bd3d + the §11.4.122-honest
+bank-reclassification: HXC-ENS/LSP/SKILL-001 → <em>skip:true+reason
+[features genuinely unshipped, server correct, assertions
+intact/reversible], HXC-API-015/SEC-010 drift-fixed to the server’s
+verbatim strings; live :18080 sink-side proof captured §11.4.69;
+MANDATORY build-test GREEN — go build ./… + go test ./internal/helixqa
+./internal/server all exit 0; gitlink bump 4f2c221a). REMAINING
+(deliberate / operator-scoped, NOT idle-blocked autonomous work): (a)
+constitution e1bb125 §11.4.55 cascade of §11.4.167/168 — DEFERRED, the
+consumer is self-consistent at its recorded gitlink 1d9e3ce (carriers
+match it, no current-gate failure); the obligation arises only on the
+atomic bump+cascade (§11.4.49), and the carrier work intersects the
+parallel session’s thin-model migration → a deliberate coordinated step,
+not a session-tail rush; (b) the release-tag scope decision
+(§11.4.66/§11.4.126(A) — operator’s call: defer Aurora/Harmony? the
+§11.4.151 helixcode- prefix). 33 commits, all ff-pushed (§11.4.113, no
+force).</em></p>
 <p><em>Revision 11 (2026-06-24, “do it all”) records the
 threshold-antipattern remediation tail + platform-runner completion.
 Acted on the §11.4.118 audit’s actionable MEDIUM items:
