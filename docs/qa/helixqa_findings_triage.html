@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_findings_triage</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_findings_triage</h1>
+</header>
+<h1 id="helixqa-bank-vs-server-fail-triage-vv-run-server-18080">HelixQA
+bank-vs-server FAIL triage (V&amp;V run, server :18080)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Date</td>
+<td>2026-06-24</td>
+</tr>
+<tr>
+<td>Server</td>
+<td><code>http://localhost:18080</code> (fresh, IDLE)</td>
+</tr>
+<tr>
+<td>Method</td>
+<td>READ-ONLY: curl probes + source read
+(<code>internal/server/handlers.go</code>, <code>server.go</code>) +
+bank read (<code>submodules/helix_qa/banks/</code>)</td>
+</tr>
+<tr>
+<td>Author</td>
+<td>RESPAWN subagent (§11.4.147), data-only (§11.4.6/§11.4.120)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="captured-actual-responses">Captured actual responses</h2>
+<pre><code>GET /api/v1/server/info →
+{&quot;info&quot;:{&quot;database&quot;:{&quot;connected&quot;:true,&quot;enabled&quot;:true},
+ &quot;features&quot;:{&quot;auth_enabled&quot;:true,&quot;mcp_enabled&quot;:true,&quot;notifications_enabled&quot;:true},
+ &quot;go_version&quot;:&quot;1.24&quot;,&quot;name&quot;:&quot;HelixCode Server&quot;,&quot;redis&quot;:{&quot;connected&quot;:true,&quot;enabled&quot;:true},
+ &quot;start_time&quot;:&quot;...&quot;,&quot;uptime&quot;:&quot;...&quot;,&quot;version&quot;:&quot;1.0.0&quot;},&quot;status&quot;:&quot;success&quot;}
+
+POST /api/v1/auth/refresh (no Authorization header) →
+  HTTP 401  {&quot;message&quot;:&quot;Authorization header required&quot;,&quot;status&quot;:&quot;error&quot;}
+
+POST /api/v1/auth/login (body `not json{`, Content-Type: application/json) →
+  HTTP 400  {&quot;error&quot;:&quot;invalid character ... looking for beginning of object key string&quot;,
+             &quot;message&quot;:&quot;Invalid request&quot;,&quot;status&quot;:&quot;error&quot;}</code></pre>
+<h2 id="source-facts">Source facts</h2>
+<p><code>getServerInfo</code> (<code>handlers.go:1077-1105</code>) emits
+<code>features</code> from exactly the three capabilities wired into the
+<code>Server</code> struct (<code>server.go</code>): <code>auth</code>,
+<code>mcp</code>, <code>notification</code>. There is NO struct field,
+NO route, and NO info-flag for lsp / plugins / skills / ensemble.
+Streaming HAS a real route+handler (<code>/api/v1/llm/stream</code> →
+<code>streamLLM</code>, <code>llm_generate.go:283</code>) but NO info
+flag.</p>
+<p>Package presence in <code>internal/</code>: <code>mcp</code>✔
+<code>agent</code>✔ <code>plugins</code>✔ ; <code>lsp</code>✘
+<code>skills</code>✘ <code>ensemble</code>✘.</p>
+<h2 id="per-finding-verdict">Per-finding verdict</h2>
+<h3 id="hxc-api-015-refresh-without-auth-bank-drift">1. HXC-API-015 —
+refresh-without-auth → <strong>BANK-DRIFT</strong></h3>
+<ul>
+<li>Bank (<code>helixcode-full-qa-api.json:389</code>):
+<code>expect_status:401</code>,
+<code>expect_body_contains:"authorization"</code> (lowercase).</li>
+<li>Server: 401 ✔ but body says
+<code>"Authorization header required"</code> (capital A). The substring
+match is case-sensitive → fails on <code>"authorization"</code>.</li>
+<li>Server behavior is CORRECT (401 + clear message). The assertion’s
+literal is wrong.</li>
+<li><strong>Fix (bank):</strong> change
+<code>expect_body_contains</code> to <code>"Authorization"</code> (or
+<code>"Authorization header required"</code>).</li>
+</ul>
+<h3 id="hxc-sec-010-malformed-json-login-bank-drift">2. HXC-SEC-010 —
+malformed-JSON login → <strong>BANK-DRIFT</strong></h3>
+<ul>
+<li>Bank (<code>helixcode-security-validation.json:208</code>):
+<code>expect_status:400</code>,
+<code>expect_body_contains:"invalid_request"</code>.</li>
+<li>Server: 400 ✔ (correctly NOT 500), body
+<code>{"message":"Invalid request",...}</code>. The token
+<code>invalid_request</code> (snake_case) does not appear; the server
+uses the human string <code>Invalid request</code>.</li>
+<li>Server behavior is CORRECT (the actual security property — 400 not
+500 — holds). The assertion expects a snake_case error code the server
+never emits.</li>
+<li><strong>Fix (bank):</strong> change
+<code>expect_body_contains</code> to
+<code>"Invalid request"</code>.</li>
+</ul>
+<h3 id="hxc-ens-001-ensemble-in-serverinfo-real-server-gap">3.
+HXC-ENS-001 — ensemble in /server/info → <strong>REAL SERVER
+GAP</strong></h3>
+<ul>
+<li>Bank (<code>helixcode-ensemble-members.yaml:72</code>):
+<code>expect_body_contains:"ensemble"</code> in
+<code>$.info</code>.</li>
+<li>Server: not present. No ensemble field/route;
+<code>internal/ensemble</code> absent (ensemble surfaced via
+<code>internal/agent</code>/verifier, not advertised in info).</li>
+<li><strong>Fix (server):</strong> add ensemble advertisement to
+<code>getServerInfo</code> <code>features</code>
+(e.g. <code>ensemble_enabled</code> / member descriptor) reflecting the
+real Helix Agent ensemble wiring, OR — if ensemble is genuinely not a
+server capability — this becomes BANK-DRIFT. Current code: ensemble is
+NOT a server-info capability, so server-side decision required
+(advertise it, or move the assertion off /server/info per §11.4.122
+don’t silently drop).</li>
+</ul>
+<h3 id="hxc-lsp-001-lsp_enabled-flag-real-server-gap-conditional">4.
+HXC-LSP-001 — lsp_enabled flag → <strong>REAL SERVER GAP
+(conditional)</strong></h3>
+<ul>
+<li>Bank (<code>helixcode-lsp.yaml:61</code>):
+<code>expect_body_contains:"lsp_enabled"</code>.</li>
+<li>Server: absent. No <code>lsp</code> struct field, no route,
+<code>internal/lsp</code> package absent.</li>
+<li><strong>Fix:</strong> If LSP is a shipped server capability, add
+<code>lsp_enabled</code> to <code>features</code>. If LSP is NOT
+implemented in the server, the assertion is asserting an unimplemented
+feature → either implement+advertise, or reclassify the bank item
+honestly (NOT a metadata-only PASS).</li>
+</ul>
+<h3 id="hxc-plugin-001-plugins_enabled-flag-real-server-gap">5.
+HXC-PLUGIN-001 — plugins_enabled flag → <strong>REAL SERVER
+GAP</strong></h3>
+<ul>
+<li>Bank (<code>helixcode-plugins.yaml:49</code>):
+<code>expect_body_contains:"plugins_enabled"</code>.</li>
+<li>Server: absent from info. BUT <code>internal/plugins</code> package
+EXISTS — the capability is in the codebase, just not wired into the
+Server struct or advertised.</li>
+<li><strong>Fix (server):</strong> wire plugins into <code>Server</code>
+and add <code>plugins_enabled</code> to <code>getServerInfo</code>
+<code>features</code>. This is a genuine info-exposure gap (feature
+exists, flag omitted).</li>
+</ul>
+<h3
+id="hxc-skill-001-skills_enabled-flag-real-server-gap-conditional">6.
+HXC-SKILL-001 — skills_enabled flag → <strong>REAL SERVER GAP
+(conditional)</strong></h3>
+<ul>
+<li>Bank (<code>helixcode-skills.yaml:49</code>):
+<code>expect_body_contains:"skills_enabled"</code>.</li>
+<li>Server: absent. No <code>skills</code> field/route;
+<code>internal/skills</code> package absent.</li>
+<li><strong>Fix:</strong> same shape as LSP — if skills is a server
+capability, advertise <code>skills_enabled</code>; otherwise
+implement+advertise or reclassify honestly.</li>
+</ul>
+<h3 id="hxc-stream-001-streaming-flag-real-server-gap-strongest-case">7.
+HXC-STREAM-001 — streaming flag → <strong>REAL SERVER GAP (strongest
+case)</strong></h3>
+<ul>
+<li>Bank (<code>helixcode-streaming.yaml:57</code>):
+<code>expect_body_contains:"streaming"</code>.</li>
+<li>Server: streaming IS genuinely wired — real route
+<code>POST /api/v1/llm/stream</code> → <code>streamLLM</code>
+(<code>llm_generate.go:283</code>). The capability WORKS but
+<code>getServerInfo</code> omits any streaming flag.</li>
+<li><strong>Fix (server):</strong> add
+<code>streaming_enabled: true</code> (capability is real and reachable)
+to <code>getServerInfo</code> <code>features</code>. Clearest “feature
+enabled but /server/info omits it” case.</li>
+</ul>
+<h2 id="summary">Summary</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Finding</th>
+<th>Verdict</th>
+<th>Fix side</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HXC-API-015</td>
+<td>BANK-DRIFT</td>
+<td>bank: <code>"authorization"</code>→<code>"Authorization"</code></td>
+</tr>
+<tr>
+<td>HXC-SEC-010</td>
+<td>BANK-DRIFT</td>
+<td>bank:
+<code>"invalid_request"</code>→<code>"Invalid request"</code></td>
+</tr>
+<tr>
+<td>HXC-ENS-001</td>
+<td>REAL GAP (or bank if ensemble not a server capability)</td>
+<td>server: advertise ensemble in /server/info</td>
+</tr>
+<tr>
+<td>HXC-LSP-001</td>
+<td>REAL GAP (conditional on LSP being shipped)</td>
+<td>server: add <code>lsp_enabled</code> or honestly reclassify</td>
+</tr>
+<tr>
+<td>HXC-PLUGIN-001</td>
+<td>REAL GAP (pkg exists, flag omitted)</td>
+<td>server: wire+advertise <code>plugins_enabled</code></td>
+</tr>
+<tr>
+<td>HXC-SKILL-001</td>
+<td>REAL GAP (conditional on skills being shipped)</td>
+<td>server: add <code>skills_enabled</code> or honestly reclassify</td>
+</tr>
+<tr>
+<td>HXC-STREAM-001</td>
+<td>REAL GAP (capability real, flag omitted)</td>
+<td>server: add <code>streaming_enabled</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>2 BANK-DRIFT, 5 REAL SERVER /server/info EXPOSURE
+GAPs.</strong> STREAM and PLUGIN are unambiguous (capability
+exists/works, flag omitted). ENS/LSP/SKILL are real gaps IF the
+capability is a server feature; LSP/SKILL packages are absent from
+<code>internal/</code>, so those two need a server-side decision:
+implement+advertise, or reclassify the bank item honestly (never a
+metadata-only PASS).</p>
+</body>
+</html>

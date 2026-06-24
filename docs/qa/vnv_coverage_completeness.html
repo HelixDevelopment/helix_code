@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>vnv_coverage_completeness</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">vnv_coverage_completeness</h1>
+</header>
+<h1
+id="helixcode-vv-coverage-completeness-map-11.4.118-honesty-layer">HelixCode
+V&amp;V Coverage-Completeness Map (§11.4.118 honesty layer)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Date</td>
+<td>2026-06-24</td>
+</tr>
+<tr>
+<td>Server</td>
+<td><code>http://localhost:18080</code> (fresh, autoboot
+PG/Redis/Ollama)</td>
+</tr>
+<tr>
+<td>Method</td>
+<td>READ-ONLY: read
+<code>docs/qa/helixcode_vnv_execution_plan.md</code>, the two Makefiles,
+<code>helix_code/qa-results/*</code> cycle logs,
+<code>docs/features/Status.md</code></td>
+</tr>
+<tr>
+<td>Author</td>
+<td>coverage-completeness subagent, data-only (§11.4.6 / §11.4.3)</td>
+</tr>
+<tr>
+<td>Purpose</td>
+<td>Make this cycle’s V&amp;V boundary EXPLICIT. “No other issues” is
+only credible with this enumerated set. NOT a claim of
+completeness.</td>
+</tr>
+</tbody>
+</table>
+<p>This map enumerates what ran, what was honestly SKIP-justified, and
+what was left un-attempted (SHOULD-RUN). It cross-references the
+executed <code>qa-results</code> logs against the full test-type
+catalogue in the execution plan.</p>
+<hr />
+<h2
+id="honesty-correction-vs-the-cycle-brief-11.4.6-data-over-narrative">0.
+Honesty correction vs the cycle brief (§11.4.6 — data over
+narrative)</h2>
+<p>The originating brief described “unit wave (133 ok)” and
+“constitution sweep 16/16”. The captured logs say otherwise — recorded
+here so the cycle is not misrepresented as cleaner than it is:</p>
+<ul>
+<li><strong>Unit wave
+(<code>helixcode_unit_wave_20260624_110425.log</code>):</strong> 133
+packages <code>ok</code>, <strong>but the overall run FAILED</strong> —
+<code>dev.helix.code/internal/cognee</code> FAILs (60.4s), and 5
+hardware GPU-probe unit tests FAIL on this host:
+<code>TestGetGPUUsage_ProbeChain_NvidiaPreferred</code>,
+<code>…_FallsBackToAMD</code>,
+<code>TestProbeAppleGPU_ParsesIoregOutput</code>,
+<code>…_HandlesMultipleGPUs</code>,
+<code>…_HandlesWhitespaceVariants</code>. The GPU-probe failures are
+host-hardware dependent (no nvidia-smi/rocm; Apple ioreg variant
+parsing) → should be <code>uname -s</code>-gated SKIPs per §11.4.81, not
+hard FAILs. <code>cognee</code> FAIL needs a §11.4.102 root-cause (it
+also recurs in the stress/chaos <code>cognee_*</code> dirs).</li>
+<li><strong>Constitution sweep
+(<code>constitution-sweep.log</code>):</strong> <strong>13 PASS / 3
+FAIL</strong>, NOT 16/16. Failing gates are all doc-sync/governance, not
+product: <strong>G7</strong> (feature commits lack
+<code>docs/qa/&lt;run-id&gt;/</code> evidence), <strong>G12</strong>
+(Issues/Fixed summary docs stale), <strong>G14</strong>
+(<code>docs_chain verify --all</code> drift). G16 (challenge matrix)
+PASS.</li>
+<li><strong>e2e (phase3) PASS</strong> confirmed
+(<code>e2e_20260624_112208.log</code>, EXIT 0).</li>
+<li><strong>e2e-challenges FAILED</strong>
+(<code>e2e_challenges_…/runner.log</code>): 0.00% success, 4 failed + 2
+validation-failed, <strong>Total Tokens: 0</strong> — the 0-token figure
+means no real LLM generation tokens flowed through the challenge path
+(timeout bug under fix; treat as a live defect, not a pass).</li>
+<li><strong>HelixQA api: 169 PASS / 25 SKIP / 18 FAIL</strong>
+confirmed. NOTE: the <code>helixqa_findings_triage.md</code> triaged
+only <strong>7</strong> of the 18 FAILs (2 bank-drift + 5
+<code>/server/info</code> exposure gaps). The remaining FAILs include
+<strong>auth-login 401 “invalid credentials”</strong> (e.g. HXC-WRK-010)
+— a server seed/credential mismatch, NOT yet triaged; un-triaged FAILs
+are an open coverage gap inside the bank run.</li>
+</ul>
+<hr />
+<h2 id="ran-this-cycle-verdict-captured">1. RAN this cycle (verdict
+captured)</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test type</th>
+<th>Command</th>
+<th>Verdict (from log)</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compile / <code>go vet</code></td>
+<td><code>make verify-compile</code> / vet</td>
+<td>PASS</td>
+<td><code>go-vet.log</code>,
+<code>helixcode_govet_20260624_110433.log</code></td>
+</tr>
+<tr>
+<td>Unit (hermetic)</td>
+<td><code>make test</code></td>
+<td><strong>133 ok but FAIL</strong> (cognee + 5 GPU-probe)</td>
+<td><code>helixcode_unit_wave_20260624_110425.log</code></td>
+</tr>
+<tr>
+<td>Verifier unit</td>
+<td><code>make test-verifier-unit</code></td>
+<td>ran (PASS)</td>
+<td><code>verifier-unit.log</code></td>
+</tr>
+<tr>
+<td>Integration</td>
+<td><code>make test-integration-full</code></td>
+<td>PASS (incl. IDOR green)</td>
+<td><code>integration_*_20260624_11*.log</code></td>
+</tr>
+<tr>
+<td>E2E (phase3)</td>
+<td><code>make test-e2e-full</code> (phase3)</td>
+<td>PASS</td>
+<td><code>e2e_20260624_112208.log</code></td>
+</tr>
+<tr>
+<td>E2E challenges</td>
+<td><code>tests/e2e/challenges -all</code></td>
+<td><strong>FAIL</strong> (0%, 0 tokens, timeout bug)</td>
+<td><code>e2e_challenges_20260624_112611/runner.log</code></td>
+</tr>
+<tr>
+<td>HelixQA api banks</td>
+<td><code>helixqa http --banks …api…</code></td>
+<td>169 PASS / 25 SKIP / 18 FAIL</td>
+<td><code>helixqa_api_20260624_112930/helixqa.log</code></td>
+</tr>
+<tr>
+<td>Constitution sweep</td>
+<td>governance sweep</td>
+<td><strong>13/16 PASS</strong> (G7/G12/G14 FAIL)</td>
+<td><code>constitution-sweep.log</code></td>
+</tr>
+<tr>
+<td>Benchmark sanity</td>
+<td><code>make test-benchmark</code> (sanity)</td>
+<td>ran</td>
+<td><code>bench-sanity.log</code>,
+<code>bench-sanity-challenges.log</code></td>
+</tr>
+<tr>
+<td>Challenges anti-bluff</td>
+<td>scan + anchors</td>
+<td>ran</td>
+<td><code>challenges-anti-bluff-scan.log</code>,
+<code>…-anchors.log</code></td>
+</tr>
+<tr>
+<td>Stress + chaos</td>
+<td><code>stress-chaos</code> (partial)</td>
+<td><strong>PARTIAL</strong> — ~1500 scenario evidence dirs present
+(<code>client_http_*</code>, <code>cognee_*</code> etc.) but no captured
+single suite verdict; <code>cognee</code> chaos overlaps the unit
+FAIL</td>
+<td><code>qa-results/20260624T09*Z/</code> dirs</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="skip-justified-11.4.3-honest-missing-depsdkcredential-named">2.
+SKIP-justified (§11.4.3 — honest, missing dep/SDK/credential named)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Why SKIP-justified</th>
+<th>Un-SKIP needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Real cloud-LLM generation
+(OpenAI/Anthropic/Gemini/Groq/Mistral/Cohere/Azure/Bedrock)</td>
+<td><code>.env.full-test</code> ships <strong>mock</strong> keys →
+mock-llm-server; no real wire calls</td>
+<td>real API keys in non-mock <code>.env</code></td>
+</tr>
+<tr>
+<td>Verifier integration
+(<code>make test-verifier-integration</code>)</td>
+<td>LLMsVerifier service @ <code>:8081</code> not booted in this
+run</td>
+<td>boot verifier service (own submodule — borderline-cheap, see
+§4)</td>
+</tr>
+<tr>
+<td>HelixQA mobile/TV banks (<code>full-qa-android*</code>,
+<code>nexus-mobile-ios</code>, <code>capture-android</code>)</td>
+<td>no Android/iOS device/emulator/simulator + ADB/Xcode; iOS has no
+Xcode project</td>
+<td>device/emulator + platform SDK</td>
+</tr>
+<tr>
+<td>HelixQA desktop banks
+(<code>nexus-desktop-macos/windows/linux</code>)</td>
+<td>desktop GUI build + host display required</td>
+<td>per-OS desktop binary on a display</td>
+</tr>
+<tr>
+<td>Mobile client tests (Android/Aurora HAP/Harmony HAP)</td>
+<td>device/emulator required</td>
+<td>device/emulator</td>
+</tr>
+<tr>
+<td>Desktop (Fyne) GUI runtime tests</td>
+<td>host display server required (CI headless)</td>
+<td>display (<code>desktop-nogui</code> build is partial proxy)</td>
+</tr>
+<tr>
+<td>Xiaomi provider challenge
+(<code>xiaomi_provider_challenge.go</code>,
+<code>qa-integration/xiaomi_test_bank.yaml</code>)</td>
+<td>real Xiaomi provider credential</td>
+<td>real Xiaomi key</td>
+</tr>
+<tr>
+<td>Security scanners snyk / sonarqube</td>
+<td>need <code>SNYK_TOKEN</code> / <code>SONAR_TOKEN</code></td>
+<td>tokens</td>
+</tr>
+<tr>
+<td>Sibling-project HelixQA banks (<code>atmosphere*</code>,
+<code>boba-*</code>, <code>openclawing2-*</code>, <code>yole-*</code>,
+<code>nexus-*</code>)</td>
+<td>not HelixCode — different SUT</td>
+<td>out of scope</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2
+id="should-run-un-attempted-not-a-justified-skip-un-exercised-but-runnable">3.
+SHOULD-RUN — un-attempted, NOT a justified SKIP (un-exercised but
+runnable)</h2>
+<p>These had no missing dependency this cycle; they were simply not
+run.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Command</th>
+<th>Why it should have run</th>
+<th>Cost vs current infra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Security suite</strong></td>
+<td><code>make test-security-full</code></td>
+<td>core security test type, infra present</td>
+<td>CHEAP (server-touching, serial on :18080)</td>
+</tr>
+<tr>
+<td><strong>Stress + chaos (complete)</strong></td>
+<td><code>make stress-chaos</code> +
+<code>make stress-chaos-infra</code></td>
+<td>only partial evidence dirs exist, no captured suite verdict</td>
+<td>CHEAP (unit hermetic; infra needs PG+Redis, present)</td>
+</tr>
+<tr>
+<td><strong>Load / perf</strong></td>
+<td><code>make test-load-full</code></td>
+<td>perf/load test type entirely absent</td>
+<td>CHEAP (server-touching, serial)</td>
+</tr>
+<tr>
+<td><strong>Coverage (-race)</strong></td>
+<td><code>make test-coverage</code></td>
+<td>no coverage profile captured this cycle</td>
+<td>CHEAP (hermetic)</td>
+</tr>
+<tr>
+<td><strong>Static security scanners</strong></td>
+<td><code>make scan-gosec scan-trivy scan-grype</code> (root)</td>
+<td>open-source, no creds</td>
+<td>CHEAP (no infra)</td>
+</tr>
+<tr>
+<td><strong>Remaining HelixQA api banks</strong></td>
+<td><code>helixqa http --banks &lt;not-yet-run&gt;</code></td>
+<td>only one api invocation captured; mcp-fs / persistent-memory /
+protected-subresources / static-routes / cors banks not confirmed
+run</td>
+<td>CHEAP (serial on :18080)</td>
+</tr>
+<tr>
+<td><strong>HelixQA web banks</strong></td>
+<td><code>helixqa run --platform web --browser-url …</code></td>
+<td>web client browser flows have ZERO V&amp;V this cycle</td>
+<td>BORDERLINE (needs selenium :4444 / chromedp :9222 up + browser-url
+reaching the server)</td>
+</tr>
+<tr>
+<td><strong>Challenges submodule full</strong></td>
+<td><code>cd submodules/challenges &amp;&amp; make qa-all</code> (+
+<code>new-capabilities</code>)</td>
+<td>only anti-bluff scan + bench-sanity ran</td>
+<td>CHEAP for <code>qa-all</code> (hermetic); capability runs need
+:8080</td>
+</tr>
+<tr>
+<td><strong>Unit FAIL remediation</strong></td>
+<td>fix/SKIP-gate the 5 GPU-probe tests (§11.4.81) + root-cause
+<code>cognee</code></td>
+<td>unit wave is not green</td>
+<td>CHEAP (unit-level)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2
+id="unknown-unknown-surface-subsystems-with-no-vv-evidence-this-cycle">4.
+Unknown-unknown surface — subsystems with NO V&amp;V evidence this
+cycle</h2>
+<p>Cross-referencing <code>docs/features/Status.md</code> Areas (257
+service rows, 114 infrastructure, 134 submodule, 30 cli / 7 tui / 4 web
+/ 6 desktop / 8 mobile) against what actually ran, these had NO runtime
+V&amp;V this cycle (at most hermetic unit coverage, which the §11.4.108
+four-layer rule does not count as runtime-on-clean-target evidence):</p>
+<ol type="1">
+<li><strong>Web client (browser flows)</strong> — api-only HelixQA ran;
+no selenium/chromedp browser session drove the web UI.</li>
+<li><strong>Desktop (Fyne) GUI runtime</strong> — no run (display
+gap).</li>
+<li><strong>Mobile clients (Android/iOS/Aurora/Harmony)</strong> — no
+run (device/SDK gap).</li>
+<li><strong>LSP / skills / ensemble capabilities</strong> —
+<code>internal/lsp</code>, <code>internal/skills</code>,
+<code>internal/ensemble</code> packages are ABSENT (per triage); banks
+assert their <code>*_enabled</code> flags → these are real gaps with NO
+working V&amp;V, only FAILing assertions. <code>plugins</code> +
+streaming exist but are not advertised in <code>/server/info</code>
+(info-exposure gaps).</li>
+<li><strong>~65 owned submodules</strong> — of the 134 submodule rows,
+only <code>helix_qa</code> (used as the framework) and
+<code>challenges</code> (anti-bluff scan) were exercised. The rest
+(security, helix_agent, helixspecifier, panoptic, containers,
+docs_chain, llms_verifier runtime, etc.) had no V&amp;V dispatched in
+this cycle.</li>
+<li><strong>cli_agents ported capabilities</strong> — Status.md lists a
+“Ported cli_agents” slice; no dedicated port-capability run this
+cycle.</li>
+<li><strong>Many internal services covered only by hermetic unit
+tests</strong> (no real-infra integration/e2e this cycle):
+e.g. <code>deployment</code>, <code>discovery</code>,
+<code>hardware</code> (GPU-probe FAILing), <code>focus</code>,
+<code>editor</code>, <code>repomap</code>, <code>template</code>,
+<code>rules</code>, <code>hooks</code>, <code>version</code>. Their
+“working” status rests on unit tests, not runtime evidence.</li>
+<li><strong>Real provider matrix</strong> — only Ollama (local) +
+mock-llm-server exercised; the CONST-039 “all providers” surface
+(OpenAI/Anthropic/Gemini/DeepSeek/Groq/
+Mistral/xAI/OpenRouter/Llama.cpp) has no real-wire V&amp;V (mock
+keys).</li>
+</ol>
+<p>Honest boundary (§11.4.6): this list reduces the unknown-unknown
+surface; it does NOT prove the un-exercised subsystems work. They are
+honest coverage gaps, not implied-clean.</p>
+<hr />
+<h2
+id="prioritized-cheaply-runnable-now-candidates-additional-vv-wave">5.
+Prioritized “cheaply-runnable-now” candidates (additional V&amp;V
+wave)</h2>
+<p>Against the CURRENT booted infra (<code>:18080</code> +
+PG/Redis/Ollama, no new deps), serialized on the single server per
+§11.4.119:</p>
+<ol type="1">
+<li><strong><code>make test-security-full</code></strong> — highest
+value, server-touching, serial.</li>
+<li><strong><code>make stress-chaos</code> then
+<code>make stress-chaos-infra</code></strong> — complete the partial run
++ capture a single suite verdict (and re-confirm the <code>cognee</code>
+chaos vs unit FAIL relationship — likely one root cause,
+§11.4.102).</li>
+<li><strong><code>make test-load-full</code> +
+<code>make test-benchmark</code></strong> — fills the entirely-absent
+perf/load type; load is serial, benchmark hermetic [bg].</li>
+<li><strong>Remaining HelixQA api banks</strong> in ONE
+<code>helixqa http</code> invocation (the api banks not yet confirmed
+run) — serial on :18080.</li>
+<li><strong><code>cd submodules/challenges &amp;&amp; make qa-all</code></strong>
+— hermetic, parallel-safe [bg].</li>
+<li><strong>Root static scanners
+<code>make scan-gosec scan-trivy scan-grype</code></strong> — no infra,
+parallel-safe [bg].</li>
+<li><strong><code>make test-coverage</code></strong> — hermetic
+[bg].</li>
+<li><strong>Unit-level fixes:</strong> <code>uname -s</code>-gate the 5
+GPU-probe tests (§11.4.81) and root-cause the <code>cognee</code> unit
+FAIL — cheap, makes the unit wave green.</li>
+</ol>
+<p><strong>Genuinely blocked (stay §11.4.3 SKIP this wave):</strong>
+real cloud-LLM generation (no keys), mobile/desktop client tests
+(devices/SDK/display), Xiaomi (real key), snyk/sonarqube (tokens).
+<strong>Borderline (cheap only if their service/containers are
+booted):</strong> verifier-integration (<code>:8081</code>, own
+submodule — boot it to un-SKIP) and HelixQA web banks (selenium :4444 /
+chromedp :9222 + browser-url reaching the server on the host-remapped
+:18080).</p>
+</body>
+</html>

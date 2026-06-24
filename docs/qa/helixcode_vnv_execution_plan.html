@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixcode_vnv_execution_plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixcode_vnv_execution_plan</h1>
+</header>
+<h1
+id="helixcode-vv-execution-plan-full-test-challenge-helixqa-cycle">HelixCode
+V&amp;V Execution Plan — full test / Challenge / HelixQA cycle</h1>
+<p><strong>Generated:</strong> 2026-06-24 · <strong>Scope:</strong>
+ordered, executable V&amp;V plan for a freshly-booted infra run.
+<strong>Authority:</strong> §11.4.6 (data, no bluff), §11.4.3 (honest
+SKIP), §11.4.119 (single-resource-owner partitioning), §11.4.89
+(background long tests). <strong>Repo root:</strong>
+<code>/Volumes/T7/Projects/helix_code</code> · <strong>Inner
+app:</strong> <code>helix_code/</code> (run all <code>make test*</code>
+from here).</p>
+<p>All commands below cite the file that defines them. Durations are
+classes, not measured.</p>
+<hr />
+<h2 id="test-type-catalogue-exact-invocations">0. Test-type catalogue
+(exact invocations)</h2>
+<p>Two Makefiles. Root <code>Makefile</code> = governance gates only.
+Inner <code>helix_code/Makefile</code> = real build/test.</p>
+<h3 id="inner-application-helix_codemakefile">Inner application —
+<code>helix_code/Makefile</code></h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 22%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Step</th>
+<th>Exact command (run from <code>helix_code/</code>)</th>
+<th>Infra dep</th>
+<th>Server?</th>
+<th>Duration</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>compile gate</td>
+<td><code>make verify-compile</code>
+(<code>go build -tags=nogui ./...</code>)</td>
+<td>none</td>
+<td>no</td>
+<td>short</td>
+<td>inner Makefile L319</td>
+</tr>
+<tr>
+<td>unit (hermetic)</td>
+<td><code>make test</code> (<code>go test -v ./...</code>,
+cache-on)</td>
+<td>none</td>
+<td>no</td>
+<td>medium</td>
+<td>inner Makefile L107</td>
+</tr>
+<tr>
+<td>unit (full, no-skip)</td>
+<td><code>make test-unit-full</code> (env <code>.env.full-test</code>,
+<code>-count=1</code>, 15m, <code>./internal/...</code>)</td>
+<td><strong>test-infra-up</strong></td>
+<td>no</td>
+<td>medium</td>
+<td>inner Makefile L228</td>
+</tr>
+<tr>
+<td>integration</td>
+<td><code>make test-integration-full</code>
+(<code>-tags=integration -count=1</code> 20m <code>./...</code>)</td>
+<td><strong>test-infra-up</strong></td>
+<td>PG/Redis/Ollama</td>
+<td>long</td>
+<td>inner Makefile L234</td>
+</tr>
+<tr>
+<td>e2e challenges</td>
+<td><code>make test-e2e-full</code> →
+<code>cd tests/e2e/challenges &amp;&amp; go run cmd/runner/main.go -all</code></td>
+<td><strong>test-infra-up</strong></td>
+<td><strong>live server :8080</strong></td>
+<td>long</td>
+<td>inner Makefile L240</td>
+</tr>
+<tr>
+<td>security</td>
+<td><code>make test-security-full</code> (<code>-count=1</code> 20m
+<code>./tests/security/...</code>)</td>
+<td><strong>test-infra-up</strong></td>
+<td>some</td>
+<td>long</td>
+<td>inner Makefile L246</td>
+</tr>
+<tr>
+<td>load</td>
+<td><code>make test-load-full</code> (<code>./test/load/...</code>
+30m)</td>
+<td><strong>test-infra-up</strong></td>
+<td>live server</td>
+<td>long</td>
+<td>inner Makefile L252</td>
+</tr>
+<tr>
+<td>stress+chaos (unit)</td>
+<td><code>make stress-chaos</code>
+(<code>-race -run 'Stress\|Chaos'</code> across ~35 internal pkgs)</td>
+<td>none</td>
+<td>no</td>
+<td>long</td>
+<td>inner Makefile L114</td>
+</tr>
+<tr>
+<td>stress+chaos meta</td>
+<td><code>make stress-chaos-meta</code>
+(<code>-run TestMeta</code>)</td>
+<td>none</td>
+<td>no</td>
+<td>medium</td>
+<td>inner Makefile L121</td>
+</tr>
+<tr>
+<td>stress+chaos infra</td>
+<td><code>make stress-chaos-infra</code>
+(<code>-tags=integration -race</code>, real PG+Redis)</td>
+<td><strong>test-infra-up</strong></td>
+<td>PG/Redis</td>
+<td>long</td>
+<td>inner Makefile L132</td>
+</tr>
+<tr>
+<td>coverage</td>
+<td><code>make test-coverage</code>
+(<code>-race -coverprofile</code>)</td>
+<td>none</td>
+<td>no</td>
+<td>long</td>
+<td>inner Makefile L146</td>
+</tr>
+<tr>
+<td>benchmark</td>
+<td><code>make test-benchmark</code></td>
+<td>none</td>
+<td>no</td>
+<td>long</td>
+<td>inner Makefile L157</td>
+</tr>
+<tr>
+<td><strong>everything, zero-skip</strong></td>
+<td><code>make test-full</code> (unit + integration, env-loaded,
+<code>-count=1</code> 30m)</td>
+<td><strong>test-infra-up</strong></td>
+<td>yes</td>
+<td>very long</td>
+<td>inner Makefile L220</td>
+</tr>
+<tr>
+<td><strong>all types in sequence</strong></td>
+<td><code>make test-complete</code> (unit-full → integration-full →
+e2e-full → security-full → load-full → benchmark →
+verifier-challenges)</td>
+<td><strong>test-infra-up</strong></td>
+<td>yes</td>
+<td>very long</td>
+<td>inner Makefile L258</td>
+</tr>
+<tr>
+<td>verifier unit</td>
+<td><code>make test-verifier-unit</code>
+(<code>-count=1 ./internal/verifier/...</code>)</td>
+<td>none</td>
+<td>no</td>
+<td>medium</td>
+<td>inner Makefile L274</td>
+</tr>
+<tr>
+<td>verifier integration</td>
+<td><code>make test-verifier-integration</code>
+(<code>-tags=integration</code>) — needs verifier @
+<code>:8081</code></td>
+<td><strong>verifier svc :8081</strong></td>
+<td>verifier</td>
+<td>medium</td>
+<td>inner Makefile L280</td>
+</tr>
+<tr>
+<td>verifier challenges</td>
+<td><code>make test-verifier-challenges</code> (hardcode + capability
+grep gates)</td>
+<td>none (cap needs verifier)</td>
+<td>no</td>
+<td>short</td>
+<td>inner Makefile L286</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong><code>-count=1</code> is load-bearing</strong> on every
+<code>*-full</code> / <code>verifier-*</code> target: real-infra runs
+must re-execute (cached PASS = CONST-035 false-success). Plain
+<code>make test</code> keeps cache (hermetic).</p>
+</blockquote>
+<h3 id="root-governance-gates-makefile">Root governance gates —
+<code>Makefile</code></h3>
+<p><code>make verify-compile</code> is inner. Root:
+<code>make no-silent-skips</code>,
+<code>make verify-governance-cascade</code>,
+<code>make verify-foundation</code> (composite),
+<code>make bluff-detector</code>, <code>make scan-secrets-root</code>.
+These are pre-flight gates, not the runtime V&amp;V cycle — run them
+first but they need no infra.</p>
+<hr />
+<h2 id="infra-boot-two-distinct-mechanisms">1. Infra boot — two distinct
+mechanisms</h2>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 42%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>What it boots</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>make test-infra-up</code></strong> (from
+<code>helix_code/</code>)</td>
+<td><code>docker-compose.full-test.yml</code> via auto-detected
+<code>docker compose</code>/<code>podman compose</code> (inner Makefile
+L194). Boots: <strong>postgres:16</strong> (:5432, db
+<code>helixcode_test</code>, user <code>helixcode</code>, pwd
+<code>helixcode_test_password</code>), <strong>redis:7</strong> (:6379,
+no pwd), memcached (:11211), <strong>ollama</strong> (:11434, pulls
+<code>llama2:7b</code>), <strong>mock-llm-server</strong> (:8090 —
+OpenAI/Anthropic/etc. all point here), selenium-chrome (:4444), chromedp
+(:9222), ssh-server+3 ssh-workers (:2222-2225), pulseaudio, cognee
+(:8000), weaviate, chromadb (:8082), qdrant (:6333), mock-slack (:8091),
+prometheus (:9090), grafana (:3000), <strong>helixcode server
+(:8080)</strong>. Sleeps 30s for health.</td>
+<td>the test/Challenge/HelixQA cycle</td>
+</tr>
+<tr>
+<td><strong><code>./helix start</code></strong> (repo root facade)</td>
+<td><code>docker-compose.helix.yml</code> (the standalone
+<em>product</em> stack — single <code>helixcode</code> container
+exposing API :8080, SSH :2222, Web :3000). NOT the test stack.</td>
+<td>running the product standalone</td>
+</tr>
+</tbody>
+</table>
+<p><strong>“Distribute by starting the helixcode main binary”:</strong>
+the test stack’s <code>helixcode</code> service (compose L461, port
+<code>8080:8080</code>) IS <code>bin/helixcode</code> =
+<code>cmd/server</code>. It depends on PG+Redis+Ollama being healthy
+first — <code>test-infra-up</code> brings them up together. The e2e
+runner, load tests, and all <code>api</code>/<code>web</code> HelixQA
+banks hit <code>http://localhost:8080</code>, so the server MUST be up +
+healthy before those steps. Env for server-side test runs comes from
+<code>.env.full-test</code>
+(<code>set -a &amp;&amp; . ./.env.full-test</code>), which is what every
+<code>*-full</code> target sources.</p>
+<p><strong>Credentials note:</strong> <code>.env.full-test</code> uses
+<strong>mock</strong> keys for ALL cloud LLM providers
+(<code>OPENAI_API_KEY=mock-...</code>, base →
+<code>http://localhost:8090</code>). Real cloud-provider generation is
+NOT exercised by this stack — only Ollama (real, local) +
+mock-llm-server. Tests asserting real cloud-provider wire behaviour are
+honest-SKIP candidates (no real key present).</p>
+<p>Teardown: <code>make test-infra-down</code> (<code>down -v</code>,
+drops volumes).</p>
+<hr />
+<h2 id="challenges">2. Challenges</h2>
+<p><strong>Two distinct Challenge surfaces:</strong></p>
+<ol type="1">
+<li><strong>Inner e2e challenges</strong> —
+<code>helix_code/tests/e2e/challenges/cmd/runner/main.go</code>.
+<ul>
+<li>Run:
+<code>cd helix_code/tests/e2e/challenges &amp;&amp; go run cmd/runner/main.go -all</code></li>
+<li>Or via <code>make test-e2e-full</code> (sources env + same
+command).</li>
+<li>Flags (main.go L20-36): <code>-challenge &lt;id&gt;</code>,
+<code>-interfaces cli,tui,rest,websocket</code> (default
+<code>cli</code>),
+<code>-distributions single,worker_2,worker_5,worker_10</code>,
+<code>-providers ollama</code>, <code>-models llama2</code>,
+<code>-max-concurrent 3</code> (default), <code>-timeout 45m</code>,
+<code>-list</code>, <code>-export-report &lt;file&gt;</code>,
+<code>-results-dir</code>, <code>-logs-dir</code>.</li>
+<li>Definitions (<code>definitions/</code>, 6 challenges):
+<code>ascii-art-generator</code>, <code>cli-task-manager</code>,
+<code>json-validator-cli</code>, <code>notes-project</code>,
+<code>tic-tac-toe-tui</code>, <code>url-shortener</code>.</li>
+<li><strong>Infra:</strong> needs live server :8080 + Ollama (default
+provider <code>ollama</code>/<code>llama2</code>). These drive real LLM
+generation through the server.</li>
+</ul></li>
+<li><strong><code>submodules/challenges</code></strong>
+(vasic-digital/Challenges) — Go module with its own Makefile.
+<ul>
+<li><code>cd submodules/challenges &amp;&amp; make qa-all</code> (=
+build + vet + test), <code>make challenge</code>,
+<code>make new-capabilities</code> (=
+<code>challenge-agentic-subagents</code> +
+<code>challenge-persistent-memory</code>), <code>make anti-bluff</code>
+(scan + anchors + mutation).</li>
+<li>Banks under <code>banks/</code> (<code>examples</code>,
+<code>yole</code>); fixtures/baselines under
+<code>challenges/</code>.</li>
+<li><strong>Infra:</strong>
+<code>make test</code>/<code>test-race</code> hermetic;
+<code>make test-integration</code> + the <code>challenge-*</code>
+capability runs may need the live HelixCode stack.</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="helixqa-submoduleshelix_qa-helixdevelopmenthelixqa">3. HelixQA —
+<code>submodules/helix_qa</code> (HelixDevelopment/HelixQA)</h2>
+<p>The autonomous QA framework. Binary <code>cmd/helixqa</code> with
+subcommands (main.go L56-72): <strong><code>run</code></strong>
+(multi-platform pipeline), <code>list</code>, <code>report</code>,
+<strong><code>autonomous</code></strong>,
+<strong><code>http</code></strong> (run a bank’s <code>http:</code>
+cases against a live server, NO browser/LLM — main.go L97),
+<code>replay</code>, <code>signoff</code>, <code>version</code>.</p>
+<h3
+id="invocation-canonical-from-inner-makefile-l722-helixqa-challenge">Invocation
+(canonical, from inner Makefile L722
+<code>helixqa-challenge</code>)</h3>
+<pre><code>cd submodules/helix_qa &amp;&amp; go run ./cmd/helixqa run \
+  --banks ./banks/full-qa-api,./banks/full-qa-web \
+  --platform api,web \
+  --browser-url http://localhost:8080 \
+  --output ./qa-results/helixcode-&lt;ts&gt; \
+  --report markdown,html,json --validate --tickets</code></pre>
+<p><code>run</code> flags (main.go L116-150):
+<code>--banks &lt;comma-paths&gt;</code> (required),
+<code>--platform android|web|desktop|all</code> (default
+<code>all</code>), <code>--browser-url</code>, <code>--output</code>,
+<code>--report</code>, <code>--validate</code>, <code>--tickets</code>.
+&gt; NOTE the inner Makefile’s <code>HELIXQA_DIR := ../HelixQA</code>
+path is the legacy flat layout; the actual submodule is at
+<code>submodules/helix_qa/</code>. Run the
+<code>go run ./cmd/helixqa ...</code> command from
+<code>submodules/helix_qa/</code> directly (do NOT rely on
+<code>make helixqa-challenge</code>’s <code>../HelixQA</code> path
+unless that sibling exists).</p>
+<h3 id="test-banks-submoduleshelix_qabanks-120-.yaml.json">Test BANKS
+(<code>submodules/helix_qa/banks/</code>, ~120
+<code>.yaml</code>/<code>.json</code>)</h3>
+<p>HelixCode-targeted banks (the relevant ones for this run), grouped by
+platform need:</p>
+<ul>
+<li><strong><code>api</code> (server-only, parallel-safe via
+<code>http</code> subcommand — no browser/LLM):</strong>
+<code>helixcode-auth.yaml</code>, <code>helixcode-system.yaml</code>,
+<code>helixcode-health-readiness.yaml</code>,
+<code>helixcode-cors-middleware.yaml</code>,
+<code>helixcode-static-routes.yaml</code>,
+<code>helixcode-protected-subresources.yaml</code>,
+<code>helixcode-task-workflow.yaml</code>,
+<code>helixcode-worker-management.yaml</code>,
+<code>helixcode-mcp.yaml</code>, <code>helixcode-mcp-fs.yaml</code>,
+<code>helixcode-lsp.yaml</code>,
+<code>helixcode-memory-systems.yaml</code>,
+<code>helixcode-persistent-memory.yaml</code>,
+<code>helixcode-providers-verifier.yaml</code>,
+<code>helixcode-skills.yaml</code>, <code>helixcode-plugins.yaml</code>,
+<code>helixcode-ensemble-members.yaml</code>,
+<code>helixcode-streaming.yaml</code> (api + tui),
+<code>full-qa-api.yaml</code>.</li>
+<li><strong><code>web</code> (needs selenium :4444 / chromedp :9222 +
+server :8080):</strong> <code>full-qa-web.yaml</code>,
+<code>helixcode-qa-screenshot.yaml</code>.</li>
+<li><strong><code>tui</code>:</strong>
+<code>helixcode-streaming.yaml</code> (tui cases),
+<code>tui-recording-validation.yaml</code>.</li>
+<li><strong>mobile / other-platform (NOT HelixCode core — SKIP
+candidates here):</strong> <code>full-qa-android*</code>,
+<code>full-qa-androidtv*</code>, <code>nexus-mobile-ios.yaml</code>,
+<code>nexus-desktop-*</code>, <code>capture-android.yaml</code>, plus
+<code>atmosphere*</code>, <code>boba-*</code>,
+<code>openclawing2-*</code>, <code>yole-*</code>, <code>nexus-*</code>
+(sibling-project banks).</li>
+</ul>
+<p>Server-only fast path (no browser, no LLM):
+<code>go run ./cmd/helixqa http --banks &lt;api-banks&gt; --browser-url http://localhost:8080</code>
+— runs the <code>http:</code> cases against the live server.</p>
+<p>Build/test the framework itself:
+<code>cd submodules/helix_qa &amp;&amp; make build</code> /
+<code>make test</code> / <code>make qa-all</code> (=
+<code>challenge</code> + <code>anti-bluff</code>).</p>
+<h3 id="helixcode-side-xiaomi-bank">HelixCode-side xiaomi bank</h3>
+<p><code>helix_code/qa-integration/xiaomi_test_bank.yaml</code> +
+<code>helix_code/tests/e2e/challenges/xiaomi_provider_challenge.go</code>
+— a provider-specific challenge (real Xiaomi LLM provider).
+<strong>Needs a real Xiaomi API credential</strong> → honest §11.4.3
+SKIP if absent.</p>
+<hr />
+<h2
+id="ordered-execution-plan-boot-unit-integration-e2e-challenges-helixqa-securityperf">4.
+ORDERED execution plan (boot → unit → integration → e2e → Challenges →
+HelixQA → security/perf)</h2>
+<p>Legend: <strong>[serial-server]</strong> = hammers the single
+<code>:8080</code> server, MUST be the exclusive driver (§11.4.119);
+<strong>[parallel-safe]</strong> = no shared exclusive resource;
+<strong>[bg]</strong> = run backgrounded per §11.4.89.</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 16%" />
+<col style="width: 25%" />
+<col style="width: 19%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Command</th>
+<th>Infra</th>
+<th>§11.4.119</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0a</td>
+<td>Governance pre-flight</td>
+<td>(root)
+<code>make verify-foundation &amp;&amp; make verify-governance-cascade</code></td>
+<td>none</td>
+<td>parallel-safe</td>
+</tr>
+<tr>
+<td>0b</td>
+<td>Compile gate</td>
+<td>(<code>helix_code/</code>) <code>make verify-compile</code></td>
+<td>none</td>
+<td>parallel-safe</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Unit (hermetic)</td>
+<td>(<code>helix_code/</code>) <code>make test</code></td>
+<td>none</td>
+<td>parallel-safe [bg]</td>
+</tr>
+<tr>
+<td>1b</td>
+<td>Verifier unit</td>
+<td>(<code>helix_code/</code>) <code>make test-verifier-unit</code></td>
+<td>none</td>
+<td>parallel-safe [bg]</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Boot infra</strong></td>
+<td>(<code>helix_code/</code>) <code>make test-infra-up</code> (waits
+30s; pulls llama2:7b); then <code>make test-infra-status</code> to
+confirm PG/Redis/Ollama/<strong>helixcode :8080</strong> healthy</td>
+<td>docker/podman</td>
+<td>—</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Integration</td>
+<td>(<code>helix_code/</code>)
+<code>make test-integration-full</code></td>
+<td>PG/Redis/Ollama</td>
+<td>mostly parallel-safe (own DB); avoid concurrent with server-driving
+steps</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Stress+chaos (unit then infra)</td>
+<td><code>make stress-chaos</code> (none) ;
+<code>make stress-chaos-infra</code> (PG+Redis)</td>
+<td>none / PG+Redis</td>
+<td>unit parallel-safe; infra serialize w/ #3 on DB</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>E2E challenges</strong></td>
+<td>(<code>helix_code/</code>) <code>make test-e2e-full</code> (server
+:8080 + Ollama)</td>
+<td>full stack</td>
+<td><strong>[serial-server]</strong> — drives :8080 + Ollama
+generation</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Challenges submodule</td>
+<td><code>cd submodules/challenges &amp;&amp; make qa-all</code> ;
+capability: <code>make new-capabilities</code></td>
+<td>hermetic / live stack</td>
+<td>qa-all parallel-safe; capability runs
+<strong>[serial-server]</strong> if they hit :8080</td>
+</tr>
+<tr>
+<td>7</td>
+<td>HelixQA api banks (fast, server-only)</td>
+<td><code>cd submodules/helix_qa &amp;&amp; go run ./cmd/helixqa http --banks ./banks/helixcode-auth.yaml,...,./banks/full-qa-api.yaml --browser-url http://localhost:8080</code></td>
+<td>server :8080</td>
+<td><strong>[serial-server]</strong> (all share :8080 — run as ONE
+invocation, not concurrent)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>HelixQA full run (api+web+validate+tickets)</td>
+<td><code>cd submodules/helix_qa &amp;&amp; go run ./cmd/helixqa run --banks ./banks/full-qa-api.yaml,./banks/full-qa-web.yaml --platform api,web --browser-url http://localhost:8080 --output ./qa-results/helixcode-&lt;ts&gt; --report markdown,html,json --validate --tickets</code></td>
+<td>server :8080 + selenium :4444 / chromedp :9222</td>
+<td><strong>[serial-server]</strong> — exclusive over :8080 AND the
+single browser session</td>
+</tr>
+<tr>
+<td>9</td>
+<td>HelixQA framework self-test</td>
+<td><code>cd submodules/helix_qa &amp;&amp; make qa-all</code></td>
+<td>hermetic</td>
+<td>parallel-safe [bg]</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Security</td>
+<td>(<code>helix_code/</code>) <code>make test-security-full</code> ;
+root scanners <code>make scan-gosec scan-trivy</code> (need no
+infra)</td>
+<td>full stack / none</td>
+<td>server-touching parts <strong>[serial-server]</strong>; static
+scanners parallel-safe [bg]</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Load / perf</td>
+<td>(<code>helix_code/</code>) <code>make test-load-full</code> ;
+<code>make test-benchmark</code> (none)</td>
+<td>server :8080 / none</td>
+<td>load <strong>[serial-server]</strong>; benchmark parallel-safe
+[bg]</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Verifier integration</td>
+<td>(<code>helix_code/</code>)
+<code>make test-verifier-integration</code></td>
+<td><strong>verifier @ :8081</strong></td>
+<td>parallel-safe (own service)</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Teardown</td>
+<td>(<code>helix_code/</code>) <code>make test-infra-down</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>§11.4.119 hard rule:</strong> Steps <strong>5, 7, 8,
+10(server), 11(load)</strong> all exclusively drive the single
+<code>:8080</code> server (and steps 8 the single browser). They MUST be
+<strong>serialized</strong> — exactly one server-driving step at a time.
+Parallel-safe <code>[bg]</code> steps (1, 1b, 9, 10-scanners,
+11-benchmark, 12) MAY run concurrently with a server-driving step since
+they touch no shared exclusive resource. Per §11.4.89, long steps (3, 5,
+8, 10, 11) run via
+<code>nohup … &gt; qa-results/&lt;id&gt;.log 2&gt;&amp;1 &amp; disown</code>.</p>
+<p><strong>Alternative one-shot:</strong>
+<code>make test-complete</code> runs unit-full → integration-full →
+e2e-full → security-full → load-full → benchmark → verifier-challenges
+in sequence (already serial; inner Makefile L258) — but it does NOT
+include the HelixQA banks (steps 7-9) or the Challenges submodule (step
+6), which must be run separately.</p>
+<hr />
+<h2
+id="honest-11.4.3-skip-candidates-credentialsdk-the-system-likely-lacks">5.
+Honest §11.4.3 SKIP candidates (credential/SDK the System likely
+lacks)</h2>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 35%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Why it SKIPs</th>
+<th>Needed to un-SKIP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Real cloud-LLM provider generation
+(OpenAI/Anthropic/Gemini/Groq/Mistral/Cohere/Azure/AWS Bedrock)</td>
+<td><code>.env.full-test</code> ships <strong>mock</strong> keys →
+<code>:8090</code> mock-llm-server; no real wire calls</td>
+<td>real API keys in a non-mock <code>.env</code></td>
+</tr>
+<tr>
+<td><code>xiaomi_provider_challenge.go</code> +
+<code>qa-integration/xiaomi_test_bank.yaml</code></td>
+<td>needs real Xiaomi provider credential</td>
+<td>real Xiaomi key</td>
+</tr>
+<tr>
+<td>Verifier integration
+(<code>make test-verifier-integration</code>)</td>
+<td>needs LLMsVerifier service @ <code>http://localhost:8081</code> (NOT
+in full-test compose — cognee uses :8081→8080 host map; confirm verifier
+separately)</td>
+<td>run the verifier service</td>
+</tr>
+<tr>
+<td>HelixQA mobile/TV banks (<code>full-qa-android*</code>,
+<code>nexus-mobile-ios</code>, <code>capture-android</code>)</td>
+<td>need real Android/iOS device or emulator/simulator + ADB/Xcode
+SDK</td>
+<td>device + platform SDK</td>
+</tr>
+<tr>
+<td>HelixQA desktop banks
+(<code>nexus-desktop-macos/windows/linux</code>)</td>
+<td>need the desktop GUI build on that OS</td>
+<td>per-OS desktop binary</td>
+</tr>
+<tr>
+<td>Security scanners <code>make scan-snyk</code> /
+<code>make scan-sonarqube</code></td>
+<td>need <code>SNYK_TOKEN</code> / <code>SONAR_TOKEN</code> in
+<code>helix_code/.env</code></td>
+<td>tokens (open-source scanners gosec/trivy/grype run without)</td>
+</tr>
+<tr>
+<td>Sibling-project HelixQA banks (<code>atmosphere*</code>,
+<code>boba-*</code>, <code>openclawing2-*</code>,
+<code>yole-*</code>)</td>
+<td>not HelixCode — different system under test</td>
+<td>out of scope for HelixCode run</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="pre-flight-verification-before-claiming-any-pass-11.4.6">6.
+Pre-flight verification before claiming any PASS (§11.4.6)</h2>
+<ol type="1">
+<li><code>make test-infra-status</code> — confirm PG, Redis, Ollama, and
+<strong>helixcode :8080</strong> all <code>healthy</code> (the server is
+the §11.4.119 shared resource).</li>
+<li><code>curl -fsS http://localhost:8080/health</code> (or
+<code>/readyz</code>) returns 200 before any server-driving step
+(5/7/8/10/11).</li>
+<li><code>curl -fsS http://localhost:11434/api/tags</code> lists
+<code>llama2:7b</code> before the e2e challenges (provider
+<code>ollama</code>).</li>
+<li>Every PASS carries a captured-evidence artefact path (qa-results/
+log, report file) — no metadata-only PASS.</li>
+</ol>
+</body>
+</html>
