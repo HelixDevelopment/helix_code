@@ -2,9 +2,16 @@
 
 # HelixCode - Distributed AI Development Platform
 
-**Version**: 1.0.0  
+**Version**: 1.1.0  
 **Package**: `dev.helix.code`  
 **License**: MIT
+
+| Field         | Value                                              |
+|---------------|----------------------------------------------------|
+| Revision      | 2                                                  |
+| Created       | 2025-10-31                                         |
+| Last modified | 2026-06-24                                         |
+| Status        | Current — synced to release `helixcode-v1.1.0`     |
 
 HelixCode is an enterprise-grade distributed AI development platform that enables intelligent task division, work preservation, and cross-platform development workflows. Built with Go and designed for scalability, HelixCode provides a robust foundation for distributed computing with automatic checkpointing, rollback functionality, and real-time monitoring.
 
@@ -291,12 +298,18 @@ repository's actual state on **2026-05-29**:
 - **PostgreSQL 15+ / Redis 7+** — consistent with the authoritative tech stack in `CLAUDE.md`
   §3.1 (pgx/v5 on PostgreSQL 15+, go-redis/v9 on Redis 7+); both minimums remain valid against
   current upstream (PostgreSQL 17 / Redis 7.x are the current GA lines, backward-compatible).
-- **Negative finding** — this README still uses the legacy §11.4.44 bold-line header
-  (Version/Package/License) rather than the §11.4.61 metadata table; migration is deferred to a
-  dedicated docs pass (does not affect instruction correctness).
+- **Release sync (2026-06-24)** — the `**Version**` field was bumped `1.0.0` → `1.1.0` to track
+  the `helixcode-v1.1.0` release tag (minor bump over `helixcode-v1.0.0`); verified against
+  `git tag -l 'helixcode-v*'` (only `helixcode-v1.0.0` and `helixcode-v1.1.0` exist; `v1.1.0`
+  tagged 2026-06-24).
+- **Metadata table added (2026-06-24)** — the prior negative finding (legacy §11.4.44 bold-line
+  header used instead of the §11.4.61/§CONST-064 metadata table) is resolved: the four mandatory
+  rows (Revision/Created/Last modified/Status) are now present. `Created` (2025-10-31) is sourced
+  from the README's first commit (`git log --reverse -- README.md`), not guessed.
 
 Re-verify before the next release boundary or if any tool above ships a breaking change
 (§11.4.99(C) — instructions older than 6 months are stale).
 
-Sources verified 2026-05-29: https://go.dev/doc/devel/release ; repo cross-reference
-(`helix_code/go.mod`, `go.mod`, on-disk paths, `git remote`, `CLAUDE.md` §3.1).
+Sources verified 2026-06-24: https://go.dev/doc/devel/release ; repo cross-reference
+(`helix_code/go.mod`, `go.mod`, on-disk paths, `git remote`, `CLAUDE.md` §3.1, `git tag -l`,
+`git log -- README.md`).
