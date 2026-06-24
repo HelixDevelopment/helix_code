@@ -1083,7 +1083,14 @@ var gpuTelemetryLogger = logging.NewLoggerWithName("cognee_gpu_telemetry")
 // because nvidia-smi typically completes in 10-50ms; 2s is generous
 // for first-invocation driver warmup yet still well under the
 // metric-collection cadence.
-const nvidiaSmiQueryTimeout = 2 * time.Second
+//
+// var (not const) so tests exercising the PARSER / probe-CHAIN against
+// a hermetic fake binary can raise it for load-robustness — under heavy
+// parallel `go test ./...` the fake subprocess can be signal-killed
+// before completing within the 2s window, returning the sentinel and
+// flaking the parse assert. Mirrors the HXC-064 fix already applied to
+// rocmSmiQueryTimeout; prod default unchanged.
+var nvidiaSmiQueryTimeout = 2 * time.Second
 
 // nvidiaSmiCacheTTL is the lifetime of the most-recent successful
 // reading. Round 43 deliberately keeps this short so the value tracks
@@ -1447,7 +1454,14 @@ func lookupRocmUtilisation(fields map[string]string) (string, bool) {
 // budget as nvidia-smi + rocm-smi — typical ioreg completion is
 // 50-200ms on Apple Silicon, 2s covers cold-cache + larger device
 // trees on Intel Macs with multiple display controllers.
-const appleIoregQueryTimeout = 2 * time.Second
+//
+// var (not const) so tests exercising the PARSER / probe-CHAIN against
+// a hermetic fake binary can raise it for load-robustness — under heavy
+// parallel `go test ./...` the fake subprocess can be signal-killed
+// before completing within the 2s window, returning the sentinel and
+// flaking the parse assert. Mirrors the HXC-064 fix already applied to
+// rocmSmiQueryTimeout; prod default unchanged.
+var appleIoregQueryTimeout = 2 * time.Second
 
 // appleIoregCommand is overridable for tests. Production code MUST use
 // the exec.CommandContext factory; tests inject a fake via PATH
@@ -1647,7 +1661,14 @@ func parseAppleIoregUtilization(raw []byte) (float64, bool) {
 // Intentionally longer than nvidia-smi / rocm-smi / ioreg (2s) because
 // intel_gpu_top must wait one full -s interval (1000ms here) before
 // emitting the first JSON object; 3s gives a 2-sample margin.
-const intelGPUTopQueryTimeout = 3 * time.Second
+//
+// var (not const) so tests exercising the PARSER / probe-CHAIN against
+// a hermetic fake binary can raise it for load-robustness — under heavy
+// parallel `go test ./...` the fake subprocess can be signal-killed
+// before completing within the window, returning the sentinel and
+// flaking the parse assert. Mirrors the HXC-064 fix already applied to
+// rocmSmiQueryTimeout; prod default unchanged.
+var intelGPUTopQueryTimeout = 3 * time.Second
 
 // intelGPUTopSampleIntervalMS is the -s argument to intel_gpu_top.
 // 1000ms (1Hz) balances responsiveness against the kernel-driver

@@ -55,14 +55,38 @@ func newTestClient(t testing.TB, baseURL string) *Client {
 		},
 	})
 	c.SetBaseURL(baseURL)
-	c.SetTimeout(3 * time.Second)
-	// Disable HTTP keep-alives for the hermetic test transport so no idle
-	// connection goroutines linger past the request. This is a TEST-TRANSPORT
-	// concern only (it keeps the §11.4.85 goroutine-leak guard honest — a lingering
-	// keep-alive conn-handler is not a Client leak); the production Client uses the
-	// default keep-alive transport, which IS exercised by the sustained/concurrent
-	// throughput assertions. Same-package test access to the unexported httpClient.
-	c.httpClient.Transport = &http.Transport{DisableKeepAlives: true}
+	// HXC-064 (§11.4.50 determinism): 8s client timeout (was 3s). A larger headroom for
+	// the §11.4.85 concurrent stress test (16×50 = 800 calls) so the slowest call's
+	// scheduling latency under real machine load cannot blow the client timeout (the
+	// hermetic backend ALWAYS responds). 8s stays < the chaos suite's 10s guard, so the
+	// hang_past_timeout fault (6s server sleep) still returns under the guard and no
+	// fault assertion is weakened.
+	c.SetTimeout(8 * time.Second)
+	// HXC-064 (§11.4.50 determinism): a SINGLE reused keep-alive connection
+	// (MaxConnsPerHost=1, MaxIdleConnsPerHost=1) for the hermetic test backend.
+	//
+	// Forensic root cause (measured, not guessed). The §11.4.85 concurrent test was
+	// load-flaky in TWO mutually-exclusive ways even when run ALONE (each ~1-in-3 at
+	// high repetition), and both stem from the transport, not the product:
+	//   • DisableKeepAlives (the previous setting): each of the 800 calls opens + tears
+	//     down its OWN TCP connection. (a) The transient server-side conn-handler
+	//     goroutines had not all exited within RunConcurrent's fixed 50ms post-run
+	//     settle window → runtime.NumGoroutine() delta exceeded the tolerance-4 leak
+	//     guard ("goroutine leak delta>4"); (b) the rapid connect/close storm exhausted
+	//     ephemeral sockets on macOS → connection errors ("reported N errors").
+	//   • A multi-connection keep-alive pool: each PARKED idle connection holds ~3
+	//     goroutines (client read+write loop + server conn-handler), so even a pool of 2
+	//     parks ~6 — a DETERMINISTIC leak delta of 6 > tolerance 4.
+	// A single reused keep-alive connection is the only shape that satisfies BOTH the
+	// RunConcurrent leak guard (1 conn → delta ~3 ≤ tolerance 4) AND avoids the connect
+	// storm (conn is reused, never re-handshaked → no socket exhaustion, no timeouts).
+	// Serializing the WIRE does NOT weaken the concurrency assertion: the property under
+	// test is the bearer-login TOKEN-CACHE race — 16 goroutines concurrently hit
+	// attachAuth()/login() and contend on c.mu, independent of the connection count
+	// (the loginHits 1..=Parallelism bound below still proves the cache holds under that
+	// concurrent first-use race). c.Close() (t.Cleanup below) drains the idle conn at
+	// test end. Same-package access to the unexported httpClient.
+	c.httpClient.Transport = &http.Transport{MaxConnsPerHost: 1, MaxIdleConnsPerHost: 1}
 	t.Cleanup(func() { _ = c.Close() })
 	return c
 }

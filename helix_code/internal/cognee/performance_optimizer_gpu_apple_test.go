@@ -80,6 +80,28 @@ func scrubPathToOnlyApple(t *testing.T, dir string) {
 	t.Setenv("PATH", dir)
 }
 
+// raiseAllGPUProbeTimeoutsForTest raises every vendor probe's now-var
+// shell-out timeout to a generous value for the lifetime of the test and
+// restores them after. HXC-064 (§11.4.50 determinism): a probe-CHAIN
+// test drives the REAL exec.CommandContext path against hermetic fake
+// binaries through every vendor probe runGPUUsageProbeChain visits;
+// under heavy parallel `go test ./...` load any of those fake
+// subprocesses can be signal-killed before completing within the 2s/3s
+// production window, returning the sentinel and flaking the chain assert.
+// Raising all four timeouts (NVIDIA + AMD + Apple + Intel) makes the
+// chain tests load-robust without touching production defaults.
+func raiseAllGPUProbeTimeoutsForTest(t *testing.T) {
+	t.Helper()
+	oNV, oAMD, oAPL, oINT := nvidiaSmiQueryTimeout, rocmSmiQueryTimeout, appleIoregQueryTimeout, intelGPUTopQueryTimeout
+	nvidiaSmiQueryTimeout = 30 * time.Second
+	rocmSmiQueryTimeout = 30 * time.Second
+	appleIoregQueryTimeout = 30 * time.Second
+	intelGPUTopQueryTimeout = 30 * time.Second
+	t.Cleanup(func() {
+		nvidiaSmiQueryTimeout, rocmSmiQueryTimeout, appleIoregQueryTimeout, intelGPUTopQueryTimeout = oNV, oAMD, oAPL, oINT
+	})
+}
+
 // ──────────────────────────────────────────────────────────────────
 // Apple-specific tests
 // ──────────────────────────────────────────────────────────────────
@@ -97,6 +119,16 @@ func TestProbeAppleGPU_NoIoreg_ReturnsSentinel(t *testing.T) {
 }
 
 func TestProbeAppleGPU_ParsesIoregOutput(t *testing.T) {
+	// HXC-064 (§11.4.50 determinism): this test exercises the PARSER, not
+	// the production timeout. Under heavy parallel `go test ./...` load the
+	// fake ioreg subprocess can be signal-killed before completing within
+	// the production 2s window, returning the sentinel and flaking the parse
+	// assert. Raise the (now-var) timeout generously for this parser test;
+	// restore after (parity with the AMD parser tests).
+	origTO := appleIoregQueryTimeout
+	appleIoregQueryTimeout = 30 * time.Second
+	t.Cleanup(func() { appleIoregQueryTimeout = origTO })
+
 	// echo (not printf) — printf would interpret '%"' as a format
 	// specifier and abort. Sample ioreg snippet with the canonical
 	// "Device Utilization %" line.
@@ -110,6 +142,13 @@ func TestProbeAppleGPU_ParsesIoregOutput(t *testing.T) {
 }
 
 func TestProbeAppleGPU_HandlesMultipleGPUs(t *testing.T) {
+	// HXC-064 (§11.4.50): parser test — raise the now-var timeout so the
+	// fake ioreg subprocess is not signal-killed under parallel load before
+	// the parse completes; restore after (parity with the AMD parser tests).
+	origTO := appleIoregQueryTimeout
+	appleIoregQueryTimeout = 30 * time.Second
+	t.Cleanup(func() { appleIoregQueryTimeout = origTO })
+
 	// Two "Device Utilization %" lines (rare on real macOS — only on
 	// Intel Macs with both integrated + discrete AGX-aware drivers —
 	// but the parser MUST aggregate via mean per round-49 documented
@@ -127,6 +166,13 @@ echo '    "Device Utilization %" = 60'`
 }
 
 func TestProbeAppleGPU_HandlesWhitespaceVariants(t *testing.T) {
+	// HXC-064 (§11.4.50): parser test — raise the now-var timeout so the
+	// fake ioreg subprocess is not signal-killed under parallel load before
+	// the parse completes; restore after (parity with the AMD parser tests).
+	origTO := appleIoregQueryTimeout
+	appleIoregQueryTimeout = 30 * time.Second
+	t.Cleanup(func() { appleIoregQueryTimeout = origTO })
+
 	// Real ioreg output has varied indentation depending on tree depth
 	// (some lines deeply indented, some flush-left). The regex MUST
 	// tolerate every reasonable whitespace permutation around the '='.
@@ -276,6 +322,7 @@ func TestParseAppleIoregUtilization_SingleMatch(t *testing.T) {
 
 func TestGetGPUUsage_ProbeChain_FallsBackToApple(t *testing.T) {
 	resetGPUUsageCacheForTest()
+	raiseAllGPUProbeTimeoutsForTest(t)
 	// nvidia-smi + rocm-smi missing → both probes return sentinel →
 	// chain falls through to Apple probe which returns 50.
 	dir := t.TempDir()

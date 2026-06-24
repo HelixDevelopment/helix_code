@@ -281,6 +281,7 @@ func TestParseRocmSmiUtilization_UnknownKey(t *testing.T) {
 
 func TestGetGPUUsage_ProbeChain_NvidiaPreferred(t *testing.T) {
 	resetGPUUsageCacheForTest()
+	raiseAllGPUProbeTimeoutsForTest(t)
 	// Both probes available: nvidia returns 50, rocm returns 80.
 	// Chain MUST return 50 (nvidia preferred).
 	dir := t.TempDir()
@@ -295,6 +296,7 @@ func TestGetGPUUsage_ProbeChain_NvidiaPreferred(t *testing.T) {
 
 func TestGetGPUUsage_ProbeChain_FallsBackToAMD(t *testing.T) {
 	resetGPUUsageCacheForTest()
+	raiseAllGPUProbeTimeoutsForTest(t)
 	// nvidia-smi missing → NVIDIA probe returns sentinel → chain falls
 	// through to AMD probe which returns 70.
 	dir := t.TempDir()

@@ -322,6 +322,7 @@ func TestParseIntelGPUTopUtilization_MixedValidAndNoBusy(t *testing.T) {
 
 func TestGetGPUUsage_ProbeChain_FallsBackToIntel(t *testing.T) {
 	resetGPUUsageCacheForTest()
+	raiseAllGPUProbeTimeoutsForTest(t)
 	// nvidia-smi + rocm-smi + ioreg missing → all three probes return
 	// sentinel → chain falls through to Intel probe which returns 33.
 	dir := t.TempDir()
