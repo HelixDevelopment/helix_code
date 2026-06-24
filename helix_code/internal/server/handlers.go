@@ -1095,6 +1095,19 @@ func (s *Server) getServerInfo(c *gin.Context) {
 			"auth_enabled":          s.auth != nil,
 			"mcp_enabled":           s.mcp != nil,
 			"notifications_enabled": s.notification != nil,
+			// streaming_enabled is true because POST /api/v1/llm/stream is a
+			// real, registered route backed by s.streamLLM (server.go) that
+			// performs genuine provider streaming (llm_generate.go:streamLLM).
+			// The capability is always wired for a server built by New, so the
+			// flag is honestly constant true (CONST-035 / Article XI §11.9).
+			"streaming_enabled": true,
+			// plugins_enabled reflects the server's real plugin registry
+			// (server.go pluginRegistry). It is non-nil for any server built by
+			// New, so the flag is true — the server genuinely owns a plugin
+			// registry into which plugins found under the plugin directory are
+			// loaded at boot (§11.4.122: advertised only because the capability
+			// is real, never a cosmetic flag).
+			"plugins_enabled": s.pluginRegistry != nil,
 		},
 	}
 

@@ -10,10 +10,12 @@ import (
 	"dev.helix.code/internal/auth"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
+	"dev.helix.code/internal/plugins"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // setupTestServer creates a test server with mock dependencies
@@ -50,6 +52,10 @@ func setupTestServer(t *testing.T) *Server {
 		redis:  nil,
 		auth:   authService,
 		router: gin.New(),
+		// Mirror the production New() wiring: a real server always owns a
+		// plugin registry, so the test server must too (otherwise getServerInfo
+		// would honestly report plugins_enabled=false for a malformed server).
+		pluginRegistry: plugins.NewRegistry(),
 	}
 
 	server.setupRoutes()
@@ -275,6 +281,54 @@ func TestGetServerInfo(t *testing.T) {
 	assert.Contains(t, info, "database")
 	assert.Contains(t, info, "redis")
 	assert.Contains(t, info, "features")
+}
+
+// TestGetServerInfo_AdvertisesStreamingAndPlugins is a §11.4.115 RED→GREEN
+// regression guard for the /server/info capability-exposure gap (HelixQA
+// HXC-STREAM-001 + HXC-PLUGIN-001). Before the fix, getServerInfo's features
+// map advertised only auth/mcp/notifications, omitting two GENUINELY-wired
+// server capabilities: streaming (POST /api/v1/llm/stream → streamLLM) and the
+// server plugin registry. This test asserts both flags are present and true.
+//
+// RED  (pre-fix handler): the features map lacks "streaming_enabled" and
+//
+//	"plugins_enabled" → the two require.Contains assertions FAIL on the
+//	old code, proving the gap was real (§11.4.115 reproduce-on-broken).
+//
+// GREEN (post-fix handler): both flags present and true → PASS, the standing
+//
+//	guard against regressing the /server/info exposure (CONST-035 / §11.9).
+func TestGetServerInfo_AdvertisesStreamingAndPlugins(t *testing.T) {
+	server := setupTestServer(t)
+
+	router := gin.New()
+	router.GET("/api/v1/server/info", server.getServerInfo)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/server/info", nil)
+	router.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
+
+	info, ok := response["info"].(map[string]interface{})
+	require.True(t, ok, "info object present")
+	features, ok := info["features"].(map[string]interface{})
+	require.True(t, ok, "features object present")
+
+	// streaming: real route POST /api/v1/llm/stream → streamLLM.
+	require.Contains(t, features, "streaming_enabled",
+		"features must advertise streaming_enabled (real /api/v1/llm/stream route)")
+	require.Equal(t, true, features["streaming_enabled"],
+		"streaming_enabled must be true — the streaming route is always wired")
+
+	// plugins: real server plugin registry (s.pluginRegistry).
+	require.Contains(t, features, "plugins_enabled",
+		"features must advertise plugins_enabled (real server plugin registry)")
+	require.Equal(t, true, features["plugins_enabled"],
+		"plugins_enabled must be true — the server owns a real plugin registry")
 }
 
 // ========================================

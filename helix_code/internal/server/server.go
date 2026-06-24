@@ -14,6 +14,7 @@ import (
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/mcp"
 	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/plugins"
 	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/redis"
 	"dev.helix.code/internal/session"
@@ -41,6 +42,14 @@ type Server struct {
 	startTime      time.Time
 	verifierResult *verifier.BootstrapResult
 	qaEngine       *helixqa.Engine
+	// pluginRegistry is the server's real plugin registry. It is always
+	// instantiated (never nil for a server built by New); on boot the server
+	// loads any plugins found under the "plugins" directory (a path relative to
+	// the server process working directory) into it via plugins.Loader. /server/info advertises
+	// plugins_enabled reflecting that this registry is genuinely wired — NOT a
+	// cosmetic flag (CONST-035 / §11.4.122: a capability flag is advertised only
+	// because the server truly owns the plugin registry it names).
+	pluginRegistry *plugins.Registry
 }
 
 // New creates a new HTTP server
@@ -105,6 +114,29 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 	// Initialize session manager
 	sessionMgr := session.NewManager()
 
+	// Initialize the plugin registry. The server genuinely owns a plugin
+	// registry; any plugins present under the plugin directory are loaded into
+	// it at boot. The registry is created unconditionally so plugins_enabled in
+	// /server/info reflects a real, wired capability rather than a cosmetic flag
+	// (CONST-035 / Article XI §11.9 / §11.4.122). An absent or empty plugin
+	// directory yields an empty-but-valid registry (the feature is enabled; it
+	// simply has zero plugins loaded yet).
+	pluginRegistry := plugins.NewRegistry()
+	pluginDir := "plugins"
+	pluginLoader := plugins.NewLoader(pluginDir)
+	if loaded, err := pluginLoader.LoadAll(context.Background()); err != nil {
+		log.Printf("⚠️  Failed to load plugins from %q: %v (continuing with empty registry)", pluginDir, err)
+	} else {
+		for _, p := range loaded {
+			if regErr := pluginRegistry.Register(p); regErr != nil {
+				log.Printf("⚠️  Failed to register plugin %q: %v", p.Name(), regErr)
+			}
+		}
+		if len(loaded) > 0 {
+			log.Printf("✅ Loaded %d plugin(s) into the server plugin registry", len(loaded))
+		}
+	}
+
 	// Initialize LLMsVerifier subsystem if enabled
 	var verifierResult *verifier.BootstrapResult
 	if cfg.Verifier != nil && cfg.Verifier.Enabled {
@@ -142,6 +174,7 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 		startTime:      time.Now(),
 		verifierResult: verifierResult,
 		qaEngine:       qaEngine,
+		pluginRegistry: pluginRegistry,
 	}
 
 	// Setup routes
