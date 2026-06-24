@@ -192,7 +192,7 @@ CLI-Agent Fusion — Programme Continuation Guide</h1>
 <tbody>
 <tr>
 <td>Revision</td>
-<td>12</td>
+<td>13</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -200,7 +200,7 @@ CLI-Agent Fusion — Programme Continuation Guide</h1>
 </tr>
 <tr>
 <td>Last modified</td>
-<td>2026-06-24T14:00:00Z</td>
+<td>2026-06-24T15:30:00Z</td>
 </tr>
 <tr>
 <td>Status</td>
@@ -324,6 +324,36 @@ self-perform: gitverse/gitflic API tokens in .env (none exist; then auto
 repo-create+push+4-provider-parity) + rootless podman on amber.
 Everything else is automated. All commits reviewed (§11.4.142) +
 ff-pushed (§11.4.113).</em></p>
+<p><em>Revision 13 (2026-06-24) records the RELEASE cut (operator chose
+“cut a release tag” via the §11.4.66 next-step decision).
+<strong><code>helixcode-v1.1.0</code> published</strong> — a minor
+increment on the prior <code>helixcode-v1.0.0</code> (this cycle’s 7
+fixes + the plugin-registry feature + hardening; evidence-determined per
+§11.4.6/§11.4.73, prefix <code>helixcode</code> from .env
+HELIX_RELEASE_PREFIX per §11.4.151). Validation = this session’s fresh
+comprehensive V&amp;V (§11.4.40). Tag scope (§11.4.151 same prefix
+across main + owned submodules, all annotated, additive, NO force
+§11.4.113, ls-remote-verified): MAIN published to github+gitlab (tag at
+57435241; README v1.1.0-sync + this CONTINUATION are post-tag
+housekeeping); 117/118 OWNED submodules tagged+pushed+verified
+(incl. constitution, github_pages_website, 49 cli_agents/caf-<em>, 66
+submodules/</em>, many on both github+gitlab); 1 PARTIAL —
+submodules/models verified on github+gitlab, honest-fail on
+gitflic/gitverse (repo-absent — the §11.4.98(B) gitverse/gitflic
+bootstrap gap); 12 third-party correctly NOT tagged;
+cli_agents/claude-code-source flagged (personal namespace milos85vasic,
+not owned-org — operator to confirm if it should be included). 0
+outright failures; the transient SSH-rate-limit wave was paced-retry
+reconciled with no false-positive pushed-claims. The annotation carries
+the validated scope + the honest §11.4.118 deferred-gaps (Aurora/Harmony
+SDK-blocked, web/desktop/mobile UIs, full provider matrix). README
+synced to v1.1.0 + §CONST-064 metadata table added (ea40bc91). RESIDUAL
+(operator-bootstrap §11.4.98(B), unchanged): gitverse/gitflic API tokens
+(4-provider parity + the models mirror); the constitution §11.4.167/168
+cascade (deferred — consumer self-consistent,
+parallel-session-coordinated); Aurora/Harmony SDKs. 35 commits + 1
+published release this cycle, all ff/additive-pushed (§11.4.113, no
+force).</em></p>
 <p>_Revision 12 (2026-06-24) records the full
 commit→push→rebuild→boot→V&amp;V→fix cycle (operator: “rebuild
 everything, run all tests + Challenges + comprehensive HelixQA, boot
