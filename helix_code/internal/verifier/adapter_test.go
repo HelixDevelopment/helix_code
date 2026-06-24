@@ -40,7 +40,15 @@ func TestAdapter_GetVerifiedModels_FromVerifier(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(server.URL, "", 0)
+	// Use the httptest server's own client so the round-trip goes through its
+	// in-memory-tuned transport rather than a fresh net/http.Client doing a real
+	// TCP dial. Under heavy concurrent host load a real TCP dial can be starved
+	// (connect/accept contention), making client.GetModels error and the adapter
+	// fall through to the fallback list — which surfaced as a non-deterministic
+	// "using fallback model list" failure for this hermetic test (§11.4.50,
+	// §11.4.119). server.Client() removes that starvation vector without
+	// weakening the assertion: the verifier path is still exercised end-to-end.
+	client := NewClient(server.URL, "", 0).WithHTTPClient(server.Client())
 	health := NewHealthMonitor(5, 3, 60*time.Second)
 	cache := NewCache(5*time.Minute, nil)
 	cfg := &AdapterConfig{Enabled: true}
@@ -67,7 +75,9 @@ func TestAdapter_GetVerifiedModels_CacheHit(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(server.URL, "", 0)
+	// In-memory transport via server.Client() — see TestAdapter_GetVerifiedModels_FromVerifier
+	// for the rationale (avoid real-TCP starvation flake; §11.4.50, §11.4.119).
+	client := NewClient(server.URL, "", 0).WithHTTPClient(server.Client())
 	health := NewHealthMonitor(5, 3, 60*time.Second)
 	cache := NewCache(5*time.Minute, nil)
 	cfg := &AdapterConfig{Enabled: true}
@@ -90,7 +100,11 @@ func TestAdapter_GetVerifiedModels_FallbackOnError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(server.URL, "", 0)
+	// In-memory transport via server.Client() — see TestAdapter_GetVerifiedModels_FromVerifier
+	// for the rationale. Here the server returns HTTP 500, so the error path
+	// (and the fallback assertion below) is still exercised; the in-memory
+	// transport only removes the unrelated TCP-starvation flake (§11.4.50).
+	client := NewClient(server.URL, "", 0).WithHTTPClient(server.Client())
 	health := NewHealthMonitor(5, 3, 60*time.Second)
 	cache := NewCache(5*time.Minute, nil)
 	cfg := &AdapterConfig{Enabled: true}
@@ -156,7 +170,9 @@ func TestAdapter_GetProviderStatus(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(server.URL, "", 0)
+	// In-memory transport via server.Client() — see TestAdapter_GetVerifiedModels_FromVerifier
+	// for the rationale (avoid real-TCP starvation flake; §11.4.50, §11.4.119).
+	client := NewClient(server.URL, "", 0).WithHTTPClient(server.Client())
 	health := NewHealthMonitor(5, 3, 60*time.Second)
 	cache := NewCache(5*time.Minute, nil)
 	cfg := &AdapterConfig{Enabled: true}
@@ -181,7 +197,9 @@ func TestAdapter_ForceRefresh(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(server.URL, "", 0)
+	// In-memory transport via server.Client() — see TestAdapter_GetVerifiedModels_FromVerifier
+	// for the rationale (avoid real-TCP starvation flake; §11.4.50, §11.4.119).
+	client := NewClient(server.URL, "", 0).WithHTTPClient(server.Client())
 	health := NewHealthMonitor(5, 3, 60*time.Second)
 	cache := NewCache(5*time.Minute, nil)
 	cfg := &AdapterConfig{Enabled: true}
