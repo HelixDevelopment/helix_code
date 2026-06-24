@@ -120,14 +120,20 @@ func NewMCPServer() *MCPServer {
 // made any tool whose ID differs from its Name uncallable (-32601 Tool not
 // found) by a spec-conformant client.
 func (s *MCPServer) RegisterTool(tool *Tool) error {
+	// Mutate the map under the write-lock, then RELEASE it BEFORE logging.
+	// log.Print serialises on the standard logger's process-global mutex and
+	// writes to stderr; performing that I/O while holding toolMux turns a
+	// microsecond map insert into a critical section gated by global log +
+	// stderr contention, blocking every concurrent reader (handleListTools /
+	// handleCallTool / GetToolCount) for the duration of the write.
 	s.toolMux.Lock()
-	defer s.toolMux.Unlock()
-
 	if _, exists := s.tools[tool.Name]; exists {
+		s.toolMux.Unlock()
 		return fmt.Errorf("%s", tr(context.Background(), "internal_mcp_server_tool_already_registered", map[string]any{"ToolID": tool.Name}))
 	}
-
 	s.tools[tool.Name] = tool
+	s.toolMux.Unlock()
+
 	log.Print(tr(context.Background(), "internal_mcp_server_tool_registered", map[string]any{"ToolName": tool.Name, "ToolID": tool.ID}))
 	return nil
 }
@@ -246,9 +252,14 @@ func (s *MCPServer) handleInitialize(session *MCPSession, message *MCPMessage) {
 
 // handleListTools handles the tools/list method
 func (s *MCPServer) handleListTools(session *MCPSession, message *MCPMessage) {
+	// Build the tool snapshot under the read-lock, then RELEASE the lock BEFORE
+	// any I/O. Holding toolMux across sendMessage/WriteJSON (which JSON-marshals
+	// the whole tools array and takes the connection's write-mutex) needlessly
+	// widens the critical section: under concurrent RegisterTool load, Go's
+	// writer-preferring RWMutex makes queued writers block, which then blocks
+	// every subsequent reader, serialising all callers behind the slowest List.
+	// handleCallTool already follows this copy-under-lock-then-act discipline.
 	s.toolMux.RLock()
-	defer s.toolMux.RUnlock()
-
 	tools := make([]map[string]interface{}, 0, len(s.tools))
 	for _, tool := range s.tools {
 		tools = append(tools, map[string]interface{}{
@@ -257,6 +268,7 @@ func (s *MCPServer) handleListTools(session *MCPSession, message *MCPMessage) {
 			"parameters":  tool.Parameters,
 		})
 	}
+	s.toolMux.RUnlock()
 
 	response := MCPMessage{
 		ID:   message.ID,
