@@ -199,7 +199,7 @@ func (e *ChallengeExecutor) executeCLI(ctx context.Context, spec *ChallengeSpec,
 	startTime := time.Now()
 
 	// Create LLM client with REAL API
-	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys)
+	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys, e.config.DefaultTimeout)
 	e.log(logFile, "LLM client created successfully")
 
 	// Call REAL LLM API
@@ -450,7 +450,7 @@ func (e *ChallengeExecutor) executeTUI(ctx context.Context, spec *ChallengeSpec,
 	startTime := time.Now()
 
 	// Create LLM client with REAL API
-	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys)
+	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys, e.config.DefaultTimeout)
 	e.log(logFile, "LLM client created successfully")
 
 	// Call REAL LLM API with TUI-specific system prompt
@@ -528,7 +528,7 @@ func (e *ChallengeExecutor) executeREST(ctx context.Context, spec *ChallengeSpec
 	startTime := time.Now()
 
 	// Create LLM client with REAL API
-	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys)
+	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys, e.config.DefaultTimeout)
 	e.log(logFile, "LLM client created successfully")
 
 	// Call REAL LLM API with REST-specific system prompt

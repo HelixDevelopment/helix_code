@@ -18,14 +18,30 @@ type LLMClient struct {
 	client   *http.Client
 }
 
-// NewLLMClient creates a new LLM client
-func NewLLMClient(provider LLMProviderType, model string, apiKeys *APIKeys) *LLMClient {
+// defaultLLMClientTimeout is a generous fallback used only when NewLLMClient is
+// called with a non-positive timeout. Large multi-file challenges against slow
+// local models (e.g. Ollama) routinely exceed any small fixed cap, so the real
+// budget MUST come from the orchestrator's -timeout (config.DefaultTimeout).
+const defaultLLMClientTimeout = 45 * time.Minute
+
+// NewLLMClient creates a new LLM client.
+//
+// The per-request HTTP timeout is driven by the orchestrator's challenge
+// timeout (config.DefaultTimeout, plumbed through from the runner's -timeout
+// flag) so a large challenge gets its full budget instead of being clipped at a
+// hardcoded cap. The request context passed to Complete() still bounds the call
+// independently (whichever deadline fires first wins). A non-positive timeout
+// falls back to defaultLLMClientTimeout.
+func NewLLMClient(provider LLMProviderType, model string, apiKeys *APIKeys, timeout time.Duration) *LLMClient {
+	if timeout <= 0 {
+		timeout = defaultLLMClientTimeout
+	}
 	return &LLMClient{
 		provider: provider,
 		model:    model,
 		apiKeys:  apiKeys,
 		client: &http.Client{
-			Timeout: 120 * time.Second,
+			Timeout: timeout,
 		},
 	}
 }

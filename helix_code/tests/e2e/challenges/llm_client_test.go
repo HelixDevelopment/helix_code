@@ -12,7 +12,8 @@ func TestNewLLMClient(t *testing.T) {
 		XAI: &XAIConfig{APIKey: "test-key"},
 	}
 
-	client := NewLLMClient(ProviderXAI, "grok-beta", apiKeys)
+	// timeout 0 must fall back to the generous default (no more hardcoded 120s cap).
+	client := NewLLMClient(ProviderXAI, "grok-beta", apiKeys, 0)
 
 	if client == nil {
 		t.Fatal("Expected non-nil client")
@@ -34,14 +35,21 @@ func TestNewLLMClient(t *testing.T) {
 		t.Error("Expected HTTP client to be initialized")
 	}
 
-	if client.client.Timeout != 120*time.Second {
-		t.Errorf("Expected 120s timeout, got %v", client.client.Timeout)
+	// 0 → generous default fallback, NOT a small hardcoded cap.
+	if client.client.Timeout != defaultLLMClientTimeout {
+		t.Errorf("Expected fallback timeout %v, got %v", defaultLLMClientTimeout, client.client.Timeout)
+	}
+
+	// An explicit orchestrator timeout MUST be honored verbatim (drives the per-request cap).
+	explicit := NewLLMClient(ProviderXAI, "grok-beta", apiKeys, 20*time.Minute)
+	if explicit.client.Timeout != 20*time.Minute {
+		t.Errorf("Expected explicit timeout 20m, got %v", explicit.client.Timeout)
 	}
 }
 
 func TestLLMClient_UnsupportedProvider(t *testing.T) {
 	apiKeys := &APIKeys{}
-	client := NewLLMClient(LLMProviderType("unsupported"), "model", apiKeys)
+	client := NewLLMClient(LLMProviderType("unsupported"), "model", apiKeys, 0)
 
 	ctx := context.Background()
 	req := &CompletionRequest{
@@ -74,7 +82,7 @@ func TestLLMClient_MissingAPIKey(t *testing.T) {
 	for _, provider := range providers {
 		t.Run(string(provider), func(t *testing.T) {
 			apiKeys := &APIKeys{} // Empty - no keys configured
-			client := NewLLMClient(provider, "test-model", apiKeys)
+			client := NewLLMClient(provider, "test-model", apiKeys, 0)
 
 			ctx := context.Background()
 			req := &CompletionRequest{
@@ -170,7 +178,7 @@ func TestLLMClient_OllamaIntegration(t *testing.T) {
 	// It's optional and will be skipped if Ollama isn't available
 
 	apiKeys := &APIKeys{}
-	client := NewLLMClient(ProviderOllama, "llama2", apiKeys)
+	client := NewLLMClient(ProviderOllama, "llama2", apiKeys, 0)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -210,7 +218,7 @@ func TestLLMClient_ContextCancellation(t *testing.T) {
 	apiKeys := &APIKeys{
 		XAI: &XAIConfig{APIKey: "test-key"},
 	}
-	client := NewLLMClient(ProviderXAI, "grok-beta", apiKeys)
+	client := NewLLMClient(ProviderXAI, "grok-beta", apiKeys, 0)
 
 	// Create a context that's already cancelled
 	ctx, cancel := context.WithCancel(context.Background())
@@ -237,7 +245,7 @@ func TestLLMClient_ContextTimeout(t *testing.T) {
 	apiKeys := &APIKeys{
 		XAI: &XAIConfig{APIKey: "test-key"},
 	}
-	client := NewLLMClient(ProviderXAI, "grok-beta", apiKeys)
+	client := NewLLMClient(ProviderXAI, "grok-beta", apiKeys, 0)
 
 	// Create a context with very short timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Nanosecond)
@@ -282,7 +290,7 @@ func TestLLMClient_MultipleProviders(t *testing.T) {
 
 	for _, p := range providers {
 		t.Run(string(p.provider), func(t *testing.T) {
-			client := NewLLMClient(p.provider, p.model, apiKeys)
+			client := NewLLMClient(p.provider, p.model, apiKeys, 0)
 
 			if client == nil {
 				t.Fatal("Expected non-nil client")
@@ -301,17 +309,23 @@ func TestLLMClient_MultipleProviders(t *testing.T) {
 
 func TestLLMClient_HTTPClientTimeout(t *testing.T) {
 	apiKeys := &APIKeys{}
-	client := NewLLMClient(ProviderOllama, "llama2", apiKeys)
 
-	// Verify HTTP client has correct timeout
-	if client.client.Timeout != 120*time.Second {
-		t.Errorf("Expected 120 second timeout, got %v", client.client.Timeout)
+	// 0 → generous default fallback (no hardcoded 120s cap that clipped large challenges).
+	client := NewLLMClient(ProviderOllama, "llama2", apiKeys, 0)
+	if client.client.Timeout != defaultLLMClientTimeout {
+		t.Errorf("Expected fallback timeout %v, got %v", defaultLLMClientTimeout, client.client.Timeout)
+	}
+
+	// An explicit orchestrator timeout drives the per-request HTTP cap verbatim.
+	explicit := NewLLMClient(ProviderOllama, "llama2", apiKeys, 20*time.Minute)
+	if explicit.client.Timeout != 20*time.Minute {
+		t.Errorf("Expected explicit timeout 20m, got %v", explicit.client.Timeout)
 	}
 }
 
 func TestLLMClient_EmptyPrompt(t *testing.T) {
 	apiKeys := &APIKeys{}
-	client := NewLLMClient(ProviderOllama, "llama2", apiKeys)
+	client := NewLLMClient(ProviderOllama, "llama2", apiKeys, 0)
 
 	ctx := context.Background()
 	req := &CompletionRequest{
@@ -329,7 +343,7 @@ func TestLLMClient_EmptyPrompt(t *testing.T) {
 
 func TestLLMClient_LargePrompt(t *testing.T) {
 	apiKeys := &APIKeys{}
-	client := NewLLMClient(ProviderOllama, "llama2", apiKeys)
+	client := NewLLMClient(ProviderOllama, "llama2", apiKeys, 0)
 
 	// Create a large prompt (10KB)
 	largePrompt := string(make([]byte, 10*1024))
@@ -352,7 +366,7 @@ func TestLLMClient_GeminiWithKey(t *testing.T) {
 	apiKeys := &APIKeys{
 		Gemini: &GeminiConfig{APIKey: "test-gemini-key"},
 	}
-	client := NewLLMClient(ProviderGemini, "gemini-pro", apiKeys)
+	client := NewLLMClient(ProviderGemini, "gemini-pro", apiKeys, 0)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -379,7 +393,7 @@ func TestLLMClient_MistralWithKey(t *testing.T) {
 	apiKeys := &APIKeys{
 		Mistral: &MistralConfig{APIKey: "test-mistral-key"},
 	}
-	client := NewLLMClient(ProviderMistral, "mistral-large-latest", apiKeys)
+	client := NewLLMClient(ProviderMistral, "mistral-large-latest", apiKeys, 0)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -402,7 +416,7 @@ func TestLLMClient_MistralWithKey(t *testing.T) {
 
 func TestLLMClient_SpecialCharactersInPrompt(t *testing.T) {
 	apiKeys := &APIKeys{}
-	client := NewLLMClient(ProviderOllama, "llama2", apiKeys)
+	client := NewLLMClient(ProviderOllama, "llama2", apiKeys, 0)
 
 	// Test with special characters, unicode, etc.
 	specialPrompts := []string{
