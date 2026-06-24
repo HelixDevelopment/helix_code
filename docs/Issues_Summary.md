@@ -1,63 +1,56 @@
-# Issues_Summary
+# HelixCode — Issues Summary
 
-Open workable items (current_location = Issues), regenerated from the SQLite single-source-of-truth (§11.4.12).
+> Generated **mechanically** from `docs/Issues.md` by `scripts/generate_issues_summary.sh` per Constitution §11.4.91 (summary clarity) + §11.4.12 (CM-ISSUES-SUMMARY-SYNC). Do not hand-edit — re-run the generator. Title column carries each item's H2 heading (self-contained, ≥40 chars per §11.4.91); Notes is the first Closure/Evidence/Resolution line.
+>
+> **Prefix convention:** IDs are scope-prefixed (`HXC`=root project; `HXA`=HelixAgent; `HXL`=HelixLLM; `HXQ`=HelixQA; `HXV`=LLMsVerifier; `VEN`=VisionEngine; `PAN`=panoptic; `OPS`=LLMOps). See `docs/Issues.md` "Prefix convention" for the legacy `ISSUE-NNN` mapping.
 
-## Counts by Type × Status
+| ID | Title | Type | Status | Discovered | Notes |
+|---|---|---|---|---|---|
+| VEN-001 | VisionEngine `helix-gitlab` remote repo missing (404) | Task | Completed (→ Fixed.md) | 2026-05-19 | Closed — full closure record in docs/Fixed.md (Completed (→ Fixed.md)) |
+| HXL-001 | HelixLLM `internal/agents/tools/analysis_test.go` hardcoded absolute path | Bug | Fixed (→ Fixed.md) | 2026-05-19 | Replaced hardcoded path with `t.TempDir()` + 2 synthesised fixture files. Bonus: same bug-pattern discovered in `git_test.go` (constant `helixLLMRoot` + 7 te… |
+| HXL-002 | HelixLLM `internal/gateway/middleware` TOON `WriteTOON` returns 500 | Bug | Fixed (→ Fixed.md) | 2026-05-19 | Root cause was vasic-digital/TOON's round-27 anti-bluff change (Marshal returns `ErrTOONEncodingNotImplemented` unconditionally) combined with `WriteTOON` tr… |
+| HXC-001 | CONST-052 rename programme: meta-repo directories still PascalCase | Task | Completed (→ Fixed.md) | 2026-05-15 | all owned-org submodule LEAF dirs renamed to lowercase snake_case (Phases 1–4: 1-A..1-D Upstreams; 2-A..2-D / 3 / 4 leaf dirs) + all 57 `Upstreams/`→`ups… |
+| HXC-002 | Round-74 residual LOGIC-class FAILs (CLOSED) | Bug | Fixed (→ Fixed.md) | 2026-05-19 | Round 74 surfaced 26 FAILs across submodules; rounds 82-87 closed 19; this Issue tracked the residual 7 across 3 submodules. All 3 components closed by round… |
+| HXA-001 | helix_agent handler tests surfaced after round-109 fix | Bug | Fixed (→ Fixed.md) | 2026-05-19 | Mid-run panic in `TestIsProviderAvailable_NotAvailable` aborted test binary; round 109's fix unblocked execution, surfacing 4 pre-existing FAILs: `TestFormat… |
+| HXA-002 | helix_agent debate/llmprovider sibling-submodule API drift | Bug | Fixed (→ Fixed.md) | 2026-05-19 | helix_agent commit (round-342 HXA-002 debate API drift) + meta-repo `.gitmodules` pointer-bump |
+| HXA-003 | venice `TestGetCapabilities` model-list drift (CONST-037) | Bug | Fixed (→ Fixed.md) | 2026-05-19 | helix_agent commit (round-190 venice CONST-037 model-list drift) + meta-repo pointer-bump |
+| HXC-004 | Recovery-batch under-verification (40% FAIL rate per round-193 audit) | Bug | Fixed (→ Fixed.md) | 2026-05-19 | Round-193 audit of 10 recovery-batch-landed packages (recovery commits `b7f8672` + `5c94696`) found 6 PASS / **4 FAIL**: |
+| HXC-003 | CONST-046 i18n migration backlog | Feature | Implemented (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Implemented (→ Fixed.md)) |
+| HXQ-001 | helix_qa intermittent TestPerformance flake (host-load-sensitive) | Bug | Fixed (→ Fixed.md) | 2026-05-19 | helix_qa `TestPerformance` (three perf tests in `pkg/vision/` — `TestPerformance_DHash64_Under5msPer1080pFrame`, `TestPerformance_PHash_Under25msPer1080pFr… |
+| HXC-005 | `cmd/performance_optimization_standalone/main.go` is a CONST-035 simulation bluff | Bug | Fixed (→ Fixed.md) | 2026-05-20 | `helix_code/cmd/performance_optimization_standalone/main.go` was a `package main` that printed "🚀 Starting HelixCode Production Performance Optimization" … |
+| PAN-001 | panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) | Bug | Fixed (→ Fixed.md) | 2026-05-19 | `panoptic/internal/executor/executor.go:120` — `buf = append(buf, byte(r))` in the `else` branch of `appendJSONString` casts a `rune` to a single byte. Mul… |
+| HXV-002 | LLMsVerifier `verification/` package 10 pre-existing test failures | Bug | Fixed (→ Fixed.md) | 2026-05-20 | `go test ./verification/...` in `submodules/llms_verifier/llm-verifier/` reported 10 failures; after round-348 fix `ok digital.vasic.llmsverifier/verificatio… |
+| HXC-006 | HelixCode Speed Programme | Feature | Implemented (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Implemented (→ Fixed.md)) |
+| HXC-007 | Constitution §11.4.68/70-74 cascade + meta-pointer bump | Task | Completed (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Completed (→ Fixed.md)) |
+| HXC-008 | CONST-055 G1 governance gaps surfaced by post-constitution-pull validation sweep | Bug | Fixed (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Fixed (→ Fixed.md)) |
+| HXC-009 | Owned-submodule GitHub ↔ GitLab mirror-divergence reconciliation | Task | Completed (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Completed (→ Fixed.md)) |
+| HXC-010 | End-to-end Kimi CLI + Qwen Code CodeGraph verification | Task | Completed (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Completed (→ Fixed.md)) |
+| HXC-013 | Adopt SQLite-backed single-source-of-truth for workable items (§11.4.93/95) | Feature | Implemented (→ Fixed.md) | 2026-05-28 | the constitution submodule's non-functional `workable-items` scaffold is now a FUNCTIONAL Go binary (built UPSTREAM per §11.4.74 in `constitution/scripts/wo… |
+| HXC-014 | Stress + chaos test coverage (§11.4.85) | Task | Completed (→ Fixed.md) | 2026-05-28 | the retroactive §11.4.85 sweep is complete across every package with a real resilience surface — 31 in-process packages (batches 1-11) + 5 real-infra pack… |
+| HXC-014b | Systemic unguarded i18n translator.go data-race + panic-crash (cross-package) | Bug | Fixed (→ Fixed.md) | 2026-05-28 | all 52 remaining unguarded `internal/*/translator.go` files fixed (3 parallel disjoint-group subagents, 18+17+17) to match the proven `internal/security` + `… |
+| HXC-028 | §11.4.99 latest-source documentation cross-reference (README) | Task | Completed (→ Fixed.md) | 2026-05-29 | applied §11.4.99 to the primary operator-facing doc `README.md` — cross-referenced its setup/build instructions against the latest official sources (WebFe… |
+| HXC-027 | §11.4.98 live-test full-automation compliance audit | Task | Completed (→ Fixed.md) | 2026-05-29 | audited HelixCode's `*_test.go` suite for §11.4.98 manual-action anti-patterns — RESULT: **COMPLIANT**. Scans: (a) stdin/manual-input dependency (`bufio.N… |
+| HXC-026 | workable-items md↔db sync gate (§11.4.93/95 follow-up) | Task | Completed (→ Fixed.md) | 2026-05-29 | `scripts/gates/workable_items_sync_gate.sh` (CM-WORKABLE-ITEMS-MD-DB-IN-SYNC) builds the constitution `workable-items` binary and asserts three invariants on… |
+| HXC-025 | Constitution §11.4.98/99/101 cascade (CONST-047/§3/§11.4.26) | Task | Completed (→ Fixed.md) | 2026-05-29 | the constitution submodule advanced with 3 new UNIVERSAL anchors — §11.4.98 (Full-Automation Anti-Bluff: live tests self-driving e2e), §11.4.99 (Latest-S… |
+| HXC-024 | internal/llm `-tags=integration` build broken (stale tests reference deleted providers) | Bug | Fixed (→ Fixed.md) | 2026-05-28 | `go test -tags=integration ./internal/llm/` now compiles + runs (`ok` 86s, real PG/Redis/Ollama). Fixes: (1) deduped `MockProvider` — renamed the integrati… |
+| HXC-015 | Cross-platform parity (§11.4.81) | Task | Completed (→ Fixed.md) | 2026-05-28 | supported-platforms manifest `docs/platforms/supported_platforms.yaml` (+README) declaring linux/macos/windows host-shell targets + ios/android/aurora_os/har… |
+| HXC-016 | §11.4.69–97 governance cascade into owned submodules (CONST-047/§3) | Task | Completed (→ Fixed.md) | 2026-05-28 | all 24 anchors (§11.4.69 + §11.4.75–97) cascaded into the 5 root govfiles (27929ae1) AND all ~68 owned-submodule CONSTITUTION/CLAUDE/AGENTS/QWEN files (b… |
+| HXC-017 | CodeGraph own-org submodule indexing + update automation (§11.4.79/80) | Task | Completed (→ Fixed.md) | 2026-05-28 | `.codegraph/config.json` blanket `dependencies/**` exclude replaced with 3 specific third-party excludes (LLama_CPP/Ollama/HuggingFace_Hub) so own-org `depen… |
+| HXC-018 | Obsolete status (§11.4.90) + summary-doc clarity (§11.4.91) tracker tooling | Task | Completed (→ Fixed.md) | 2026-05-28 | §11.4.90 — `docs/_progress-style.css` adds the `tr.cell-status-obsolete` rule (light-gray #E0E0E0 + strikethrough); `scripts/gates/obsolete_colorize.sh` t… |
+| HXC-019 | docs/qa/ end-user evidence tree (§11.4.83) | Task | Completed (→ Fixed.md) | 2026-05-28 | the tree + advisory scanner already existed; promoted `scripts/verify_qa_evidence.sh` to an ENFORCING release gate with `--enforce` + mandatory `--since <bas… |
+| HXC-022 | test_bank platform + integration packages do not compile (pre-existing) | Bug | Fixed (→ Fixed.md) | 2026-05-28 | all ~11 named `declared and not used` half-written stubs COMPLETED with real assertions (created-resource IDs → assert non-empty; metric values → assert … |
+| HXC-023 | `Assert(true,…)` / `AssertTrue(true,…)` literal-true bluffs across test_bank | Bug | Fixed (→ Fixed.md) | 2026-05-28 | ALL literal-true PASS-bluffs across the e2e test banks replaced with real assertions or honest skips — batch 1 (core/additional_tests.go, 41 fixed) + batch… |
+| HXC-029 | §11.4.98 full-automation compliance sweep of every live/integration/e2e/Challenge test (no human-in-the-loop) |  | Completed (→ Fixed.md) |  | §11.4.98 manual-intervention sweep COMPLETE — 0 remaining human-in-the-loop violations. Static audit (`docs/qa/HXC-029/compliance-ledger.md`) found exactl… |
+| HXC-030 | §11.4.99 forward: latest-source documentation cross-reference sweep across all operator-facing docs | Task | Completed (→ Fixed.md) | 2026-05-29 | §11.4.99 operator-instruction sweep COMPLETE — **38/38 (100%)** operator-facing instruction/guide/manual/setup/troubleshooting/tutorial docs now carry a W… |
+| HXC-032 | LLMOrchestrator submodule: committed merge-conflict markers break `helix_agent` build | Bug | Fixed (→ Fixed.md) | 2026-05-29 | all 26 conflict hunks across 5 LLMOrchestrator Go files resolved to the HEAD (i18n-migrated) side; `bundle.go` `BundleTranslator` gained an honest `TPlural`;… |
+| HXC-033 | codegraph 0.9.7 update: full index/sync crashes + own-org submodules dropped from the index (§11.4.79 regression) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE confirmed = codegraph 0.9.7 requires an explicit `codegraph init` before `index` (data-compat change; old DB incompatible) — exactly the operato… |
+| HXC-034 | Cascade constitution §11.4.102 into owned submodules + implement CM-COVENANT-114-102-PROPAGATION gate |  | Completed (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Completed (→ Fixed.md)) |
+| HXC-036 | Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID keys because boot-time translator wiring was never implemented |  | Fixed (→ Fixed.md) |  | the CONST-046 migration built 74 `SetTranslator` seams + bundles but never wired a real translator at boot (0 `.SetTranslator(` call sites module-wide). Fix:… |
+| HXC-035 | `POST /api/v1/auth/register` returns 400 `internal_auth_failed_create_user` on the live server (blocks all authenticated flows) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE (confirmed via direct psql INSERT → `ERROR: column "display_name" of relation "users" does not exist`): `createSchemaSQL`'s `CREATE TABLE users`… |
+| HXC-107 | Feature Status docs program (docs/features) — comprehensive per-feature inventory across all components/clients/submodules/ported-cli_agents, docs_chain-synced | Task | Operator-blocked |  | Feature Status docs program (docs/features) — comprehensive per-feature inventory across all components/clients/submodules/ported-cli_agents, docs_chain-synced |
+| HXC-108 | Video-QA program: record all clients x all features with strongest models + ensemble -> /Volumes/T7/Downloads/Recordings, analyze + fix | Task | Operator-blocked |  | Video-QA program: record all clients x all features with strongest models + ensemble -> /Volumes/T7/Downloads/Recordings, analyze + fix |
+| HXC-112 | Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript synthetic clicks — need cliclick/real-event automation to record LLM-chat in-GUI | Task | Operator-blocked |  | Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript synthetic clicks — need cliclick/real-event automation to record LLM-chat in-GUI |
 
-| Type | Status | Count |
-|---|---|---|
-| Bug | Fixed (→ Fixed.md) | 19 |
-| Feature | Implemented (→ Fixed.md) | 3 |
-| Task | Completed (→ Fixed.md) | 18 |
-| Task | Fixed (→ Fixed.md) | 1 |
-| Task | Operator-blocked | 3 |
-| **TOTAL** | | **44** |
+**Counts**: 44 tracked item-sections in `docs/Issues.md` — **3 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
-## Items
-
-| ATM ID | Type | Status | Severity | Description |
-|---|---|---|---|---|
-| HXA-001 | Bug | Fixed (→ Fixed.md) | — | helix_agent handler tests surfaced after round-109 fix |
-| HXA-002 | Bug | Fixed (→ Fixed.md) | — | helix_agent debate/llmprovider sibling-submodule API drift |
-| HXA-003 | Bug | Fixed (→ Fixed.md) | — | venice `TestGetCapabilities` model-list drift (CONST-037) |
-| HXC-001 | Task | Completed (→ Fixed.md) | — | CONST-052 rename programme: meta-repo directories still PascalCase — CLOSED (→ Fixed.md) |
-| HXC-002 | Bug | Fixed (→ Fixed.md) | — | Round-74 residual LOGIC-class FAILs (CLOSED) |
-| HXC-003 | Feature | Implemented (→ Fixed.md) | — | CONST-046 i18n migration backlog — CLOSED (migrated to docs/Fixed.md) |
-| HXC-004 | Bug | Fixed (→ Fixed.md) | — | Recovery-batch under-verification (40% FAIL rate per round-193 audit) |
-| HXC-005 | Bug | Fixed (→ Fixed.md) | — | `cmd/performance_optimization_standalone/main.go` is a CONST-035 simulation bluff |
-| HXC-006 | Feature | Implemented (→ Fixed.md) | — | HelixCode Speed Programme — CLOSED (migrated to docs/Fixed.md) |
-| HXC-007 | Task | Completed (→ Fixed.md) | — | Constitution §11.4.68/70-74 cascade + meta-pointer bump — CLOSED (migrated to docs/Fixed.md) |
-| HXC-008 | Bug | Fixed (→ Fixed.md) | — | CONST-055 G1 governance gaps surfaced by post-constitution-pull validation sweep — CLOSED (migrated to docs/Fixed.md) |
-| HXC-009 | Task | Completed (→ Fixed.md) | — | Owned-submodule GitHub ↔ GitLab mirror-divergence reconciliation — CLOSED (migrated to docs/Fixed.md) |
-| HXC-010 | Task | Completed (→ Fixed.md) | — | End-to-end Kimi CLI + Qwen Code CodeGraph verification — CLOSED (migrated to docs/Fixed.md) |
-| HXC-013 | Feature | Implemented (→ Fixed.md) | — | Adopt SQLite-backed single-source-of-truth for workable items (§11.4.93/95) |
-| HXC-014 | Task | Completed (→ Fixed.md) | — | Stress + chaos test coverage (§11.4.85) |
-| HXC-014b | Bug | Fixed (→ Fixed.md) | Medium (latent: requires SetTranslator() concurrent with tr(); existing -race tests pass because SetTranslator is boot-only in practice) | Systemic unguarded i18n translator.go data-race + panic-crash (cross-package) |
-| HXC-015 | Task | Completed (→ Fixed.md) | — | Cross-platform parity (§11.4.81) — **Closure (2026-05-28, subagent-driven §11. |
-| HXC-016 | Task | Completed (→ Fixed.md) | — | §11.4.69–97 governance cascade into owned submodules (CONST-047/§3) — CLOSED (→ Fixed.md) |
-| HXC-017 | Task | Completed (→ Fixed.md) | — | CodeGraph own-org submodule indexing + update automation (§11.4.79/80) — CLOSED (→ Fixed.md) |
-| HXC-018 | Task | Completed (→ Fixed.md) | — | Obsolete status (§11.4.90) + summary-doc clarity (§11.4.91) tracker tooling |
-| HXC-019 | Task | Completed (→ Fixed.md) | — | docs/qa/ end-user evidence tree (§11.4.83) |
-| HXC-022 | Bug | Fixed (→ Fixed.md) | — | test_bank platform + integration packages do not compile (pre-existing) — CLOSED (→ Fixed.md) |
-| HXC-023 | Bug | Fixed (→ Fixed.md) | — | `Assert(true,…)` / `AssertTrue(true,…)` literal-true bluffs across test_bank — CLOSED (→ Fixed.md) |
-| HXC-024 | Bug | Fixed (→ Fixed.md) | Medium (CONST-050(B): the llm integration suite cannot compile/run; masks integration regressions + blocks the new ollama integration stress/chaos tests from running via the normal path) | internal/llm `-tags=integration` build broken (stale tests reference deleted providers) |
-| HXC-025 | Task | Completed (→ Fixed.md) | — | Constitution §11.4.98/99/101 cascade (CONST-047/§3/§11.4.26) |
-| HXC-026 | Task | Completed (→ Fixed.md) | — | workable-items md↔db sync gate (§11.4.93/95 follow-up) |
-| HXC-027 | Task | Completed (→ Fixed.md) | — | §11.4.98 live-test full-automation compliance audit |
-| HXC-028 | Task | Completed (→ Fixed.md) | — | §11.4.99 latest-source documentation cross-reference (README) |
-| HXC-029 | Task | Completed (→ Fixed.md) | — | §11.4.98 full-automation compliance sweep of every live/integration/e2e/Challenge test (no human-in-the-loop) — CLOSED (→ Fixed.md) |
-| HXC-030 | Task | Completed (→ Fixed.md) | — | §11.4.99 forward: latest-source documentation cross-reference sweep across all operator-facing docs — CLOSED (→ Fixed.md) |
-| HXC-032 | Bug | Fixed (→ Fixed.md) | High (breaks `helix_agent` `go build ./...`; a §11.4 PASS-bluff at the build layer — tracked source does not compile) | LLMOrchestrator submodule: committed merge-conflict markers break `helix_agent` build — CLOSED (→ Fixed.md) |
-| HXC-033 | Bug | Fixed (→ Fixed.md) | High (§11.4.79 release-blocker — AI agents querying the code-graph get NO own-org submodule symbols; index also unbuildable) | codegraph 0.9.7 update: full index/sync crashes + own-org submodules dropped from the index (§11.4.79 regression) — CLOSED (→ Fixed.md) |
-| HXC-034 | Task | Completed (→ Fixed.md) | — | Cascade constitution §11.4.102 into owned submodules + implement CM-COVENANT-114-102-PROPAGATION gate — CLOSED (→ Fixed.md) |
-| HXC-035 | Bug | Fixed (→ Fixed.md) | High (no user can register → no JWT mintable → every authenticated API path is undrivable; blocks the positive-path coverage of all 4 HXC-029 API banks) | `POST /api/v1/auth/register` returns 400 `internal_auth_failed_create_user` on the live server (blocks all authenticated flows) — CLOSED (→ Fixed.md) |
-| HXC-036 | Task | Fixed (→ Fixed.md) | — | Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID keys because boot-time translator wiring was never implemented — CLOSED (→ Fixed.md) |
-| HXC-107 | Task | Operator-blocked | — | Feature Status docs program (docs/features) — comprehensive per-feature inventory across all components/clients/submodules/ported-cli_agents, docs_chain-synced |
-| HXC-108 | Task | Operator-blocked | — | Video-QA program: record all clients x all features with strongest models + ensemble -> /Volumes/T7/Downloads/Recordings, analyze + fix |
-| HXC-112 | Task | Operator-blocked | — | Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript synthetic clicks — need cliclick/real-event automation to record LLM-chat in-GUI |
-| HXL-001 | Bug | Fixed (→ Fixed.md) | — | HelixLLM `internal/agents/tools/analysis_test.go` hardcoded absolute path |
-| HXL-002 | Bug | Fixed (→ Fixed.md) | — | HelixLLM `internal/gateway/middleware` TOON `WriteTOON` returns 500 |
-| HXQ-001 | Bug | Fixed (→ Fixed.md) | — | helix_qa intermittent TestPerformance flake (host-load-sensitive) |
-| HXV-002 | Bug | Fixed (→ Fixed.md) | — | LLMsVerifier `verification/` package 10 pre-existing test failures |
-| PAN-001 | Bug | Fixed (→ Fixed.md) | — | panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
-| VEN-001 | Task | Completed (→ Fixed.md) | — | VisionEngine `helix-gitlab` remote repo missing (404) — CLOSED (→ Fixed.md) |
+*Last regenerated: 2026-06-24 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*

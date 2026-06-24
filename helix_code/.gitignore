@@ -229,3 +229,6 @@ docs/testing/Tests_Catalog.md
 
 # F12 workspace checkpoints runtime storage (regenerable per-workspace; never versioned — CONST-053/§11.4.77)
 .helix/
+
+# §11.4.53 — built e2e-challenges runner binary (go build cmd/runner)
+tests/e2e/challenges/runner

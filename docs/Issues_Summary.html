@@ -172,429 +172,302 @@
   </style>
 </head>
 <body>
-<h1 id="issues_summary">Issues_Summary</h1>
-<p>Open workable items (current_location = Issues), regenerated from the
-SQLite single-source-of-truth (§11.4.12).</p>
-<h2 id="counts-by-type-status">Counts by Type × Status</h2>
-<table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Status</th>
-<th>Count</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>19</td>
-</tr>
-<tr>
-<td>Feature</td>
-<td>Implemented (→ Fixed.md)</td>
-<td>3</td>
-</tr>
-<tr>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>18</td>
-</tr>
-<tr>
-<td>Task</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>1</td>
-</tr>
-<tr>
-<td>Task</td>
-<td>Operator-blocked</td>
-<td>3</td>
-</tr>
-<tr>
-<td><strong>TOTAL</strong></td>
-<td></td>
-<td><strong>44</strong></td>
-</tr>
-</tbody>
-</table>
-<h2 id="items">Items</h2>
-<table>
+<header id="title-block-header">
+<h1 class="title">Issues_Summary</h1>
+</header>
+<h1 id="helixcode-issues-summary">HelixCode — Issues Summary</h1>
+<blockquote>
+<p>Generated <strong>mechanically</strong> from
+<code>docs/Issues.md</code> by
+<code>scripts/generate_issues_summary.sh</code> per Constitution
+§11.4.91 (summary clarity) + §11.4.12 (CM-ISSUES-SUMMARY-SYNC). Do not
+hand-edit — re-run the generator. Title column carries each item’s H2
+heading (self-contained, ≥40 chars per §11.4.91); Notes is the first
+Closure/Evidence/Resolution line.</p>
+<p><strong>Prefix convention:</strong> IDs are scope-prefixed
+(<code>HXC</code>=root project; <code>HXA</code>=HelixAgent;
+<code>HXL</code>=HelixLLM; <code>HXQ</code>=HelixQA;
+<code>HXV</code>=LLMsVerifier; <code>VEN</code>=VisionEngine;
+<code>PAN</code>=panoptic; <code>OPS</code>=LLMOps). See
+<code>docs/Issues.md</code> “Prefix convention” for the legacy
+<code>ISSUE-NNN</code> mapping.</p>
+</blockquote>
+<table style="width:100%;">
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
 </colgroup>
 <thead>
 <tr>
-<th>ATM ID</th>
+<th>ID</th>
+<th>Title</th>
 <th>Type</th>
 <th>Status</th>
-<th>Severity</th>
-<th>Description</th>
+<th>Discovered</th>
+<th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>HXA-001</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>helix_agent handler tests surfaced after round-109 fix</td>
+<td>VEN-001</td>
+<td>VisionEngine <code>helix-gitlab</code> remote repo missing
+(404)</td>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>2026-05-19</td>
+<td>Closed — full closure record in docs/Fixed.md (Completed (→
+Fixed.md))</td>
 </tr>
 <tr>
-<td>HXA-002</td>
+<td>HXL-001</td>
+<td>HelixLLM <code>internal/agents/tools/analysis_test.go</code>
+hardcoded absolute path</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>helix_agent debate/llmprovider sibling-submodule API drift</td>
+<td>2026-05-19</td>
+<td>Replaced hardcoded path with <code>t.TempDir()</code> + 2
+synthesised fixture files. Bonus: same bug-pattern discovered in
+<code>git_test.go</code> (constant <code>helixLLMRoot</code> + 7
+te…</td>
 </tr>
 <tr>
-<td>HXA-003</td>
+<td>HXL-002</td>
+<td>HelixLLM <code>internal/gateway/middleware</code> TOON
+<code>WriteTOON</code> returns 500</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>venice <code>TestGetCapabilities</code> model-list drift
-(CONST-037)</td>
+<td>2026-05-19</td>
+<td>Root cause was vasic-digital/TOON’s round-27 anti-bluff change
+(Marshal returns <code>ErrTOONEncodingNotImplemented</code>
+unconditionally) combined with <code>WriteTOON</code> tr…</td>
 </tr>
 <tr>
 <td>HXC-001</td>
+<td>CONST-052 rename programme: meta-repo directories still
+PascalCase</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>CONST-052 rename programme: meta-repo directories still PascalCase —
-CLOSED (→ Fixed.md)</td>
+<td>2026-05-15</td>
+<td>all owned-org submodule LEAF dirs renamed to lowercase snake_case
+(Phases 1–4: 1-A..1-D Upstreams; 2-A..2-D / 3 / 4 leaf dirs) + all 57
+<code>Upstreams/</code>→<code>ups… | | HXC-002 | Round-74 residual LOGIC-class FAILs (CLOSED) | Bug | Fixed (→ Fixed.md) | 2026-05-19 | Round 74 surfaced 26 FAILs across submodules; rounds 82-87 closed 19; this Issue tracked the residual 7 across 3 submodules. All 3 components closed by round… | | HXA-001 | helix_agent handler tests surfaced after round-109 fix | Bug | Fixed (→ Fixed.md) | 2026-05-19 | Mid-run panic in</code>TestIsProviderAvailable_NotAvailable<code>aborted test binary; round 109's fix unblocked execution, surfacing 4 pre-existing FAILs:</code>TestFormat…</td>
 </tr>
 <tr>
-<td>HXC-002</td>
+<td>HXA-002</td>
+<td>helix_agent debate/llmprovider sibling-submodule API drift</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>Round-74 residual LOGIC-class FAILs (CLOSED)</td>
+<td>2026-05-19</td>
+<td>helix_agent commit (round-342 HXA-002 debate API drift) + meta-repo
+<code>.gitmodules</code> pointer-bump</td>
 </tr>
 <tr>
-<td>HXC-003</td>
-<td>Feature</td>
-<td>Implemented (→ Fixed.md)</td>
-<td>—</td>
-<td>CONST-046 i18n migration backlog — CLOSED (migrated to
-docs/Fixed.md)</td>
+<td>HXA-003</td>
+<td>venice <code>TestGetCapabilities</code> model-list drift
+(CONST-037)</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>2026-05-19</td>
+<td>helix_agent commit (round-190 venice CONST-037 model-list drift) +
+meta-repo pointer-bump</td>
 </tr>
 <tr>
 <td>HXC-004</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
 <td>Recovery-batch under-verification (40% FAIL rate per round-193
 audit)</td>
-</tr>
-<tr>
-<td>HXC-005</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td><code>cmd/performance_optimization_standalone/main.go</code> is a
-CONST-035 simulation bluff</td>
+<td>2026-05-19</td>
+<td>Round-193 audit of 10 recovery-batch-landed packages (recovery
+commits <code>b7f8672</code> + <code>5c94696</code>) found 6 PASS /
+<strong>4 FAIL</strong>:</td>
+</tr>
+<tr>
+<td>HXC-003</td>
+<td>CONST-046 i18n migration backlog</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td></td>
+<td>Closed — full closure record in docs/Fixed.md (Implemented (→
+Fixed.md))</td>
+</tr>
+<tr>
+<td>HXQ-001</td>
+<td>helix_qa intermittent TestPerformance flake
+(host-load-sensitive)</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>2026-05-19</td>
+<td>helix_qa <code>TestPerformance</code> (three perf tests in
+<code>pkg/vision/</code> —
+<code>TestPerformance_DHash64_Under5msPer1080pFrame</code>,
+<code>TestPerformance_PHash_Under25msPer1080pFr… | | HXC-005 |</code>cmd/performance_optimization_standalone/main.go<code>is a CONST-035 simulation bluff | Bug | Fixed (→ Fixed.md) | 2026-05-20 |</code>helix_code/cmd/performance_optimization_standalone/main.go<code>was a</code>package
+main<code>that printed "🚀 Starting HelixCode Production Performance Optimization" … | | PAN-001 | panoptic</code>appendJSONString<code>truncates multi-byte UTF-8 runes to bytes (</code>TestResult.MarshalJSON<code>corrupts non-ASCII) | Bug | Fixed (→ Fixed.md) | 2026-05-19 |</code>panoptic/internal/executor/executor.go:120<code>—</code>buf
+= append(buf,
+byte(r))<code>in the</code>else<code>branch of</code>appendJSONString<code>casts a</code>rune<code>to a single byte. Mul… | | HXV-002 | LLMsVerifier</code>verification/<code>package 10 pre-existing test failures | Bug | Fixed (→ Fixed.md) | 2026-05-20 |</code>go
+test
+./verification/…<code>in</code>submodules/llms_verifier/llm-verifier/<code>reported 10 failures; after round-348 fix</code>ok
+digital.vasic.llmsverifier/verificatio…</td>
 </tr>
 <tr>
 <td>HXC-006</td>
+<td>HelixCode Speed Programme</td>
 <td>Feature</td>
 <td>Implemented (→ Fixed.md)</td>
-<td>—</td>
-<td>HelixCode Speed Programme — CLOSED (migrated to docs/Fixed.md)</td>
+<td></td>
+<td>Closed — full closure record in docs/Fixed.md (Implemented (→
+Fixed.md))</td>
 </tr>
 <tr>
 <td>HXC-007</td>
+<td>Constitution §11.4.68/70-74 cascade + meta-pointer bump</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>Constitution §11.4.68/70-74 cascade + meta-pointer bump — CLOSED
-(migrated to docs/Fixed.md)</td>
+<td></td>
+<td>Closed — full closure record in docs/Fixed.md (Completed (→
+Fixed.md))</td>
 </tr>
 <tr>
 <td>HXC-008</td>
+<td>CONST-055 G1 governance gaps surfaced by post-constitution-pull
+validation sweep</td>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>CONST-055 G1 governance gaps surfaced by post-constitution-pull
-validation sweep — CLOSED (migrated to docs/Fixed.md)</td>
+<td></td>
+<td>Closed — full closure record in docs/Fixed.md (Fixed (→
+Fixed.md))</td>
 </tr>
 <tr>
 <td>HXC-009</td>
+<td>Owned-submodule GitHub ↔︎ GitLab mirror-divergence
+reconciliation</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>Owned-submodule GitHub ↔︎ GitLab mirror-divergence reconciliation —
-CLOSED (migrated to docs/Fixed.md)</td>
+<td></td>
+<td>Closed — full closure record in docs/Fixed.md (Completed (→
+Fixed.md))</td>
 </tr>
 <tr>
 <td>HXC-010</td>
+<td>End-to-end Kimi CLI + Qwen Code CodeGraph verification</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>End-to-end Kimi CLI + Qwen Code CodeGraph verification — CLOSED
-(migrated to docs/Fixed.md)</td>
+<td></td>
+<td>Closed — full closure record in docs/Fixed.md (Completed (→
+Fixed.md))</td>
 </tr>
 <tr>
 <td>HXC-013</td>
-<td>Feature</td>
-<td>Implemented (→ Fixed.md)</td>
-<td>—</td>
 <td>Adopt SQLite-backed single-source-of-truth for workable items
 (§11.4.93/95)</td>
-</tr>
-<tr>
-<td>HXC-014</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>Stress + chaos test coverage (§11.4.85)</td>
-</tr>
-<tr>
-<td>HXC-014b</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>Medium (latent: requires SetTranslator() concurrent with tr();
-existing -race tests pass because SetTranslator is boot-only in
-practice)</td>
-<td>Systemic unguarded i18n translator.go data-race + panic-crash
-(cross-package)</td>
-</tr>
-<tr>
-<td>HXC-015</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>Cross-platform parity (§11.4.81) — **Closure (2026-05-28,
-subagent-driven §11.</td>
-</tr>
-<tr>
-<td>HXC-016</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>§11.4.69–97 governance cascade into owned submodules (CONST-047/§3)
-— CLOSED (→ Fixed.md)</td>
-</tr>
-<tr>
-<td>HXC-017</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>CodeGraph own-org submodule indexing + update automation
-(§11.4.79/80) — CLOSED (→ Fixed.md)</td>
-</tr>
-<tr>
-<td>HXC-018</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>Obsolete status (§11.4.90) + summary-doc clarity (§11.4.91) tracker
-tooling</td>
-</tr>
-<tr>
-<td>HXC-019</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>docs/qa/ end-user evidence tree (§11.4.83)</td>
-</tr>
-<tr>
-<td>HXC-022</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>test_bank platform + integration packages do not compile
-(pre-existing) — CLOSED (→ Fixed.md)</td>
-</tr>
-<tr>
-<td>HXC-023</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td><code>Assert(true,…)</code> / <code>AssertTrue(true,…)</code>
-literal-true bluffs across test_bank — CLOSED (→ Fixed.md)</td>
-</tr>
-<tr>
-<td>HXC-024</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>Medium (CONST-050(B): the llm integration suite cannot compile/run;
-masks integration regressions + blocks the new ollama integration
-stress/chaos tests from running via the normal path)</td>
-<td>internal/llm <code>-tags=integration</code> build broken (stale
-tests reference deleted providers)</td>
-</tr>
-<tr>
-<td>HXC-025</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>Constitution §11.4.98/99/101 cascade (CONST-047/§3/§11.4.26)</td>
-</tr>
-<tr>
-<td>HXC-026</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>workable-items md↔︎db sync gate (§11.4.93/95 follow-up)</td>
-</tr>
-<tr>
-<td>HXC-027</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>§11.4.98 live-test full-automation compliance audit</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>2026-05-28</td>
+<td>the constitution submodule’s non-functional
+<code>workable-items</code> scaffold is now a FUNCTIONAL Go binary
+(built UPSTREAM per §11.4.74 in
+<code>constitution/scripts/wo… | | HXC-014 | Stress + chaos test coverage (§11.4.85) | Task | Completed (→ Fixed.md) | 2026-05-28 | the retroactive §11.4.85 sweep is complete across every package with a real resilience surface — 31 in-process packages (batches 1-11) + 5 real-infra pack… | | HXC-014b | Systemic unguarded i18n translator.go data-race + panic-crash (cross-package) | Bug | Fixed (→ Fixed.md) | 2026-05-28 | all 52 remaining unguarded</code>internal/*/translator.go<code>files fixed (3 parallel disjoint-group subagents, 18+17+17) to match the proven</code>internal/security<code>+</code>…</td>
 </tr>
 <tr>
 <td>HXC-028</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
 <td>§11.4.99 latest-source documentation cross-reference (README)</td>
-</tr>
-<tr>
-<td>HXC-029</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>§11.4.98 full-automation compliance sweep of every
-live/integration/e2e/Challenge test (no human-in-the-loop) — CLOSED (→
-Fixed.md)</td>
+<td>2026-05-29</td>
+<td>applied §11.4.99 to the primary operator-facing doc
+<code>README.md</code> — cross-referenced its setup/build instructions
+against the latest official sources (WebFe…</td>
 </tr>
 <tr>
-<td>HXC-030</td>
+<td>HXC-027</td>
+<td>§11.4.98 live-test full-automation compliance audit</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>§11.4.99 forward: latest-source documentation cross-reference sweep
-across all operator-facing docs — CLOSED (→ Fixed.md)</td>
+<td>2026-05-29</td>
+<td>audited HelixCode’s <code>*_test.go</code> suite for §11.4.98
+manual-action anti-patterns — RESULT: <strong>COMPLIANT</strong>. Scans:
+(a) stdin/manual-input dependency
+(<code>bufio.N… | | HXC-026 | workable-items md↔︎db sync gate (§11.4.93/95 follow-up) | Task | Completed (→ Fixed.md) | 2026-05-29 |</code>scripts/gates/workable_items_sync_gate.sh<code>(CM-WORKABLE-ITEMS-MD-DB-IN-SYNC) builds the constitution</code>workable-items<code>binary and asserts three invariants on… | | HXC-025 | Constitution §11.4.98/99/101 cascade (CONST-047/§3/§11.4.26) | Task | Completed (→ Fixed.md) | 2026-05-29 | the constitution submodule advanced with 3 new UNIVERSAL anchors — §11.4.98 (Full-Automation Anti-Bluff: live tests self-driving e2e), §11.4.99 (Latest-S… | | HXC-024 | internal/llm</code>-tags=integration<code>build broken (stale tests reference deleted providers) | Bug | Fixed (→ Fixed.md) | 2026-05-28 |</code>go
+test -tags=integration
+./internal/llm/<code>now compiles + runs (</code>ok<code>86s, real PG/Redis/Ollama). Fixes: (1) deduped</code>MockProvider<code>— renamed the integrati… | | HXC-015 | Cross-platform parity (§11.4.81) | Task | Completed (→ Fixed.md) | 2026-05-28 | supported-platforms manifest</code>docs/platforms/supported_platforms.yaml<code>(+README) declaring linux/macos/windows host-shell targets + ios/android/aurora_os/har… | | HXC-016 | §11.4.69–97 governance cascade into owned submodules (CONST-047/§3) | Task | Completed (→ Fixed.md) | 2026-05-28 | all 24 anchors (§11.4.69 + §11.4.75–97) cascaded into the 5 root govfiles (27929ae1) AND all ~68 owned-submodule CONSTITUTION/CLAUDE/AGENTS/QWEN files (b… | | HXC-017 | CodeGraph own-org submodule indexing + update automation (§11.4.79/80) | Task | Completed (→ Fixed.md) | 2026-05-28 |</code>.codegraph/config.json<code>blanket</code>dependencies/**<code>exclude replaced with 3 specific third-party excludes (LLama_CPP/Ollama/HuggingFace_Hub) so own-org</code>depen…</td>
 </tr>
 <tr>
-<td>HXC-032</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>High (breaks <code>helix_agent</code> <code>go build ./...</code>; a
-§11.4 PASS-bluff at the build layer — tracked source does not
-compile)</td>
-<td>LLMOrchestrator submodule: committed merge-conflict markers break
-<code>helix_agent</code> build — CLOSED (→ Fixed.md)</td>
-</tr>
-<tr>
-<td>HXC-033</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>High (§11.4.79 release-blocker — AI agents querying the code-graph
-get NO own-org submodule symbols; index also unbuildable)</td>
-<td>codegraph 0.9.7 update: full index/sync crashes + own-org submodules
-dropped from the index (§11.4.79 regression) — CLOSED (→ Fixed.md)</td>
-</tr>
-<tr>
-<td>HXC-034</td>
+<td>HXC-018</td>
+<td>Obsolete status (§11.4.90) + summary-doc clarity (§11.4.91) tracker
+tooling</td>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>Cascade constitution §11.4.102 into owned submodules + implement
-CM-COVENANT-114-102-PROPAGATION gate — CLOSED (→ Fixed.md)</td>
+<td>2026-05-28</td>
+<td>§11.4.90 — <code>docs/_progress-style.css</code> adds the
+<code>tr.cell-status-obsolete</code> rule (light-gray #E0E0E0 +
+strikethrough); <code>scripts/gates/obsolete_colorize.sh</code> t…</td>
 </tr>
 <tr>
-<td>HXC-035</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>High (no user can register → no JWT mintable → every authenticated
-API path is undrivable; blocks the positive-path coverage of all 4
-HXC-029 API banks)</td>
-<td><code>POST /api/v1/auth/register</code> returns 400
-<code>internal_auth_failed_create_user</code> on the live server (blocks
-all authenticated flows) — CLOSED (→ Fixed.md)</td>
-</tr>
-<tr>
-<td>HXC-036</td>
+<td>HXC-019</td>
+<td>docs/qa/ end-user evidence tree (§11.4.83)</td>
 <td>Task</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID
-keys because boot-time translator wiring was never implemented — CLOSED
-(→ Fixed.md)</td>
+<td>Completed (→ Fixed.md)</td>
+<td>2026-05-28</td>
+<td>the tree + advisory scanner already existed; promoted
+<code>scripts/verify_qa_evidence.sh</code> to an ENFORCING release gate
+with <code>--enforce</code> + mandatory
+<code>--since &lt;bas… | | HXC-022 | test_bank platform + integration packages do not compile (pre-existing) | Bug | Fixed (→ Fixed.md) | 2026-05-28 | all ~11 named</code>declared
+and not
+used<code>half-written stubs COMPLETED with real assertions (created-resource IDs → assert non-empty; metric values → assert … | | HXC-023 |</code>Assert(true,…)<code>/</code>AssertTrue(true,…)<code>literal-true bluffs across test_bank | Bug | Fixed (→ Fixed.md) | 2026-05-28 | ALL literal-true PASS-bluffs across the e2e test banks replaced with real assertions or honest skips — batch 1 (core/additional_tests.go, 41 fixed) + batch… | | HXC-029 | §11.4.98 full-automation compliance sweep of every live/integration/e2e/Challenge test (no human-in-the-loop) |  | Completed (→ Fixed.md) |  | §11.4.98 manual-intervention sweep COMPLETE — 0 remaining human-in-the-loop violations. Static audit (</code>docs/qa/HXC-029/compliance-ledger.md<code>) found exactl… | | HXC-030 | §11.4.99 forward: latest-source documentation cross-reference sweep across all operator-facing docs | Task | Completed (→ Fixed.md) | 2026-05-29 | §11.4.99 operator-instruction sweep COMPLETE — **38/38 (100%)** operator-facing instruction/guide/manual/setup/troubleshooting/tutorial docs now carry a W… | | HXC-032 | LLMOrchestrator submodule: committed merge-conflict markers break</code>helix_agent<code>build | Bug | Fixed (→ Fixed.md) | 2026-05-29 | all 26 conflict hunks across 5 LLMOrchestrator Go files resolved to the HEAD (i18n-migrated) side;</code>bundle.go<code></code>BundleTranslator<code>gained an honest</code>TPlural<code>;… | | HXC-033 | codegraph 0.9.7 update: full index/sync crashes + own-org submodules dropped from the index (§11.4.79 regression) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE confirmed = codegraph 0.9.7 requires an explicit</code>codegraph
+init<code>before</code>index<code>(data-compat change; old DB incompatible) — exactly the operato… | | HXC-034 | Cascade constitution §11.4.102 into owned submodules + implement CM-COVENANT-114-102-PROPAGATION gate |  | Completed (→ Fixed.md) |  | Closed — full closure record in docs/Fixed.md (Completed (→ Fixed.md)) | | HXC-036 | Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID keys because boot-time translator wiring was never implemented |  | Fixed (→ Fixed.md) |  | the CONST-046 migration built 74</code>SetTranslator<code>seams + bundles but never wired a real translator at boot (0</code>.SetTranslator(<code>call sites module-wide). Fix:… | | HXC-035 |</code>POST
+/api/v1/auth/register<code>returns 400</code>internal_auth_failed_create_user<code>on the live server (blocks all authenticated flows) | Bug | Fixed (→ Fixed.md) | 2026-05-29 | ROOT CAUSE (confirmed via direct psql INSERT →</code>ERROR:
+column “display_name” of relation “users” does not
+exist<code>):</code>createSchemaSQL<code>'s</code>CREATE TABLE
+users`…</td>
 </tr>
 <tr>
 <td>HXC-107</td>
+<td>Feature Status docs program (docs/features) — comprehensive
+per-feature inventory across all
+components/clients/submodules/ported-cli_agents, docs_chain-synced</td>
 <td>Task</td>
 <td>Operator-blocked</td>
-<td>—</td>
+<td></td>
 <td>Feature Status docs program (docs/features) — comprehensive
 per-feature inventory across all
 components/clients/submodules/ported-cli_agents, docs_chain-synced</td>
 </tr>
 <tr>
 <td>HXC-108</td>
+<td>Video-QA program: record all clients x all features with strongest
+models + ensemble -&gt; /Volumes/T7/Downloads/Recordings, analyze +
+fix</td>
 <td>Task</td>
 <td>Operator-blocked</td>
-<td>—</td>
+<td></td>
 <td>Video-QA program: record all clients x all features with strongest
 models + ensemble -&gt; /Volumes/T7/Downloads/Recordings, analyze +
 fix</td>
 </tr>
 <tr>
 <td>HXC-112</td>
+<td>Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript
+synthetic clicks — need cliclick/real-event automation to record
+LLM-chat in-GUI</td>
 <td>Task</td>
 <td>Operator-blocked</td>
-<td>—</td>
+<td></td>
 <td>Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript
 synthetic clicks — need cliclick/real-event automation to record
 LLM-chat in-GUI</td>
 </tr>
-<tr>
-<td>HXL-001</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>HelixLLM <code>internal/agents/tools/analysis_test.go</code>
-hardcoded absolute path</td>
-</tr>
-<tr>
-<td>HXL-002</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>HelixLLM <code>internal/gateway/middleware</code> TOON
-<code>WriteTOON</code> returns 500</td>
-</tr>
-<tr>
-<td>HXQ-001</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>helix_qa intermittent TestPerformance flake
-(host-load-sensitive)</td>
-</tr>
-<tr>
-<td>HXV-002</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>LLMsVerifier <code>verification/</code> package 10 pre-existing test
-failures</td>
-</tr>
-<tr>
-<td>PAN-001</td>
-<td>Bug</td>
-<td>Fixed (→ Fixed.md)</td>
-<td>—</td>
-<td>panoptic <code>appendJSONString</code> truncates multi-byte UTF-8
-runes to bytes (<code>TestResult.MarshalJSON</code> corrupts
-non-ASCII)</td>
-</tr>
-<tr>
-<td>VEN-001</td>
-<td>Task</td>
-<td>Completed (→ Fixed.md)</td>
-<td>—</td>
-<td>VisionEngine <code>helix-gitlab</code> remote repo missing (404) —
-CLOSED (→ Fixed.md)</td>
-</tr>
 </tbody>
 </table>
+<p><strong>Counts</strong>: 44 tracked item-sections in
+<code>docs/Issues.md</code> — <strong>3 open</strong> (non-terminal
+status) / <strong>41 closed</strong> (terminal <code>(→ Fixed.md)</code>
+status; retained as §11.4.19 migration tombstones).</p>
+<p><em>Last regenerated: 2026-06-24 by
+<code>scripts/generate_issues_summary.sh</code>. HTML/PDF exports via
+<code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
 </body>
 </html>

@@ -1,0 +1,16 @@
+--- PASS: TestDefaultModelResolution_PolaritySwitch (0.00s)
+--- PASS: TestDefaultModelResolution_Stream_PolaritySwitch (0.00s)
+--- PASS: TestResolveDefaultModel_ExtendAcrossProviders (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/deepseek_omitted (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/openai_omitted (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/mistral_omitted (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/groq_omitted (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/deepseek_explicit (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/openai_explicit (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/whitespace_treated_as_omitted (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/blank_name_falls_back_to_id (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/skips_blank_leading_entry (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/empty_catalog_left_empty (0.00s)
+    --- PASS: TestResolveDefaultModel_ExtendAcrossProviders/empty_catalog_explicit_kept (0.00s)
+PASS
+ok  	dev.helix.code/internal/server	0.467s

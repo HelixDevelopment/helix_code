@@ -1,0 +1,3 @@
+    llm_default_model_regression_test.go:125: RED reproduced: pre-fix resolution yields empty model "" (would 400 upstream)
+--- PASS: TestDefaultModelResolution_PolaritySwitch (0.00s)
+ok  	dev.helix.code/internal/server	0.427s
