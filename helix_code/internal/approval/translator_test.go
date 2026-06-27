@@ -60,8 +60,8 @@ func TestSetTranslator_Nil_ResetsToNoop(t *testing.T) {
 	}
 	SetTranslator(nil)
 	got = tr(context.Background(), "internal_approval_invalid_mode_empty", nil)
-	if got != "internal_approval_invalid_mode_empty" {
-		t.Fatalf("after SetTranslator(nil), expected loud message-ID echo, got %q", got)
+	if got == "internal_approval_invalid_mode_empty" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 

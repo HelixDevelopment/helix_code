@@ -50,8 +50,8 @@ func resetTranslator(t *testing.T) {
 func TestTr_DefaultsToNoopTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(stdctx.Background(), "internal_security_global_manager_initialized", nil)
-	if got != "internal_security_global_manager_initialized" {
-		t.Fatalf("tr default = %q, want raw message ID (loud echo)", got)
+	if got == "internal_security_global_manager_initialized" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 
@@ -88,8 +88,8 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	defer resetTranslator(t)
 
 	got := tr(stdctx.Background(), "internal_security_no_scanners_available", nil)
-	if got != "internal_security_no_scanners_available" {
-		t.Fatalf("tr after nil-reset = %q, want raw ID (Noop restored)", got)
+	if got == "internal_security_no_scanners_available" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 
@@ -192,9 +192,9 @@ type stubAvailableScanner struct {
 	issues []SecurityIssue
 }
 
-func (s *stubAvailableScanner) Name() string                              { return "stub-available" }
-func (s *stubAvailableScanner) IsAvailable(_ stdctx.Context) bool         { return true }
-func (s *stubAvailableScanner) Close() error                              { return nil }
+func (s *stubAvailableScanner) Name() string                      { return "stub-available" }
+func (s *stubAvailableScanner) IsAvailable(_ stdctx.Context) bool { return true }
+func (s *stubAvailableScanner) Close() error                      { return nil }
 func (s *stubAvailableScanner) Scan(_ stdctx.Context, _ string) (*ScanResult, error) {
 	return &ScanResult{
 		ScannerName: s.Name(),

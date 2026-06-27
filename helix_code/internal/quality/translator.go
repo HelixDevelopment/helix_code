@@ -20,6 +20,8 @@ package quality
 
 import (
 	stdctx "context"
+	"fmt"
+	"os"
 	"sync"
 
 	qualityi18n "dev.helix.code/internal/quality/i18n"
@@ -42,8 +44,34 @@ import (
 // `go test -race`), a §11.4.85(B) state-corruption defect.
 var (
 	translatorMu sync.RWMutex
-	translator   qualityi18n.Translator = qualityi18n.NoopTranslator{}
+	// defaultTranslator is the package default installed by init() — the
+	// real embedded-bundle translator (resolved prose) when the embed
+	// loads, or qualityi18n.NoopTranslator{} (loud message-ID echo) if it
+	// does not. SetTranslator(nil) restores THIS — "nil = restore default"
+	// means "restore correct prose", not "revert to raw-key echo".
+	defaultTranslator qualityi18n.Translator = qualityi18n.NoopTranslator{}
+	translator        qualityi18n.Translator = qualityi18n.NoopTranslator{}
 )
+
+// init installs the real embedded-bundle translator as the package
+// default so user-facing strings resolve to prose on every entry path,
+// not just the ones that reach i18nwiring.WireAll() (HXC-097 §11.4
+// anti-bluff, 2026-06-15: library code emits raw message-ID keys when
+// the package runs on NoopTranslator{} because WireAll only runs on the
+// interactive-CLI path). On embed-load failure it degrades loudly to the
+// NoopTranslator{} already assigned above and warns on stderr (never a
+// silent swallow / empty string — that would be a §11.4 PASS-bluff).
+func init() {
+	tr, err := qualityi18n.NewTranslator()
+	if err != nil {
+		fmt.Fprintf(os.Stderr,
+			"internal/quality i18n: embedded-bundle translator load failed; "+
+				"degrading to raw message-ID echo (NoopTranslator): %v\n", err)
+		return
+	}
+	defaultTranslator = tr
+	translator = tr
+}
 
 // SetTranslator wires a CONST-046-compliant Translator. Passing nil
 // resets to i18n.NoopTranslator{} (loud echo) — never silently
@@ -53,7 +81,7 @@ func SetTranslator(tr qualityi18n.Translator) {
 	translatorMu.Lock()
 	defer translatorMu.Unlock()
 	if tr == nil {
-		translator = qualityi18n.NoopTranslator{}
+		translator = defaultTranslator
 		return
 	}
 	translator = tr

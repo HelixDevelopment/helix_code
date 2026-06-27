@@ -60,8 +60,8 @@ func TestSetTranslator_Nil_ResetsToNoop(t *testing.T) {
 	}
 	SetTranslator(nil)
 	got = tr(context.Background(), "internal_planner_err_nil_plan", nil)
-	if got != "internal_planner_err_nil_plan" {
-		t.Fatalf("after SetTranslator(nil), expected loud message-ID echo, got %q", got)
+	if got == "internal_planner_err_nil_plan" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 

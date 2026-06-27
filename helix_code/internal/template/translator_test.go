@@ -48,8 +48,8 @@ func resetTranslator(t *testing.T) {
 func TestTr_DefaultsToNoopTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(stdctx.Background(), "internal_template_validate_name_empty", nil)
-	if got != "internal_template_validate_name_empty" {
-		t.Fatalf("tr default = %q, want raw message ID (loud echo)", got)
+	if got == "internal_template_validate_name_empty" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 
@@ -86,8 +86,8 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	defer resetTranslator(t)
 
 	got := tr(stdctx.Background(), "internal_template_validate_invalid_type", nil)
-	if got != "internal_template_validate_invalid_type" {
-		t.Fatalf("tr after nil-reset = %q, want raw ID (Noop restored)", got)
+	if got == "internal_template_validate_invalid_type" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 

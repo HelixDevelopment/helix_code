@@ -46,8 +46,8 @@ func resetTranslator(t *testing.T) {
 func TestTr_DefaultsToNoopTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(stdctx.Background(), "internal_context_item_not_found", nil)
-	if got != "internal_context_item_not_found" {
-		t.Fatalf("tr default = %q, want raw message ID (loud echo)", got)
+	if got == "internal_context_item_not_found" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 
@@ -84,8 +84,8 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	defer resetTranslator(t)
 
 	got := tr(stdctx.Background(), "internal_context_global_manager_not_initialized", nil)
-	if got != "internal_context_global_manager_not_initialized" {
-		t.Fatalf("tr after nil-reset = %q, want raw ID (Noop restored)", got)
+	if got == "internal_context_global_manager_not_initialized" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 

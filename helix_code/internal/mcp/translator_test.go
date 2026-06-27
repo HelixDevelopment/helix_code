@@ -72,8 +72,8 @@ func captureLog(t *testing.T) *bytes.Buffer {
 func TestTr_DefaultsToNoopTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(stdctx.Background(), "internal_mcp_server_tool_registered", nil)
-	if got != "internal_mcp_server_tool_registered" {
-		t.Fatalf("tr default = %q, want raw message ID (loud echo)", got)
+	if got == "internal_mcp_server_tool_registered" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 
@@ -110,8 +110,8 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	defer resetTranslator(t)
 
 	got := tr(stdctx.Background(), "internal_mcp_server_tool_registered", nil)
-	if got != "internal_mcp_server_tool_registered" {
-		t.Fatalf("tr after nil-reset = %q, want raw ID (Noop restored)", got)
+	if got == "internal_mcp_server_tool_registered" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 

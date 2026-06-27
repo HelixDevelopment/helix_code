@@ -48,8 +48,8 @@ func resetTranslator(t *testing.T) {
 func TestTr_DefaultsToNoopTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(context.Background(), "internal_clarification_clarifications_received_header", nil)
-	if got != "internal_clarification_clarifications_received_header" {
-		t.Fatalf("tr default = %q, want raw message ID (loud echo)", got)
+	if got == "internal_clarification_clarifications_received_header" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 
@@ -86,8 +86,8 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	defer resetTranslator(t)
 
 	got := tr(context.Background(), "internal_clarification_clarifications_received_header", nil)
-	if got != "internal_clarification_clarifications_received_header" {
-		t.Fatalf("tr after nil-reset = %q, want raw ID (Noop restored)", got)
+	if got == "internal_clarification_clarifications_received_header" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 
