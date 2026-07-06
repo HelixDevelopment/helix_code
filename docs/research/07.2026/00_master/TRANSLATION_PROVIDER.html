@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>TRANSLATION_PROVIDER</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">TRANSLATION_PROVIDER</h1>
+</header>
+<h1 id="helixllm-cpu-capable-translation-nmt-provider-design-spike-p3-t5-cpu-tier">HelixLLM
+CPU-Capable Translation (NMT) Provider — Design Spike (P3-T5 / CPU
+tier)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Status</strong></td>
+<td>DESIGN (spike before implementation, §11.4.6 — do not code the
+provider until this is agreed)</td>
+</tr>
+<tr>
+<td><strong>Scope</strong></td>
+<td>The <strong>CPU-only</strong> professional-translation capability —
+NO GPU, NO VRAM-broker dependency, so it ships <strong>before</strong>
+the P0/P1 GPU chain</td>
+</tr>
+<tr>
+<td><strong>Owns</strong></td>
+<td>The CPU slice of implementation-plan item <strong>P3-T5</strong>
+(<code>04_implementation_plan.md</code> line 83)</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-07-06 · Revision 1 · Track <code>(T1/main)</code> · Branch
+<code>feature/helixllm-full-extension</code></td>
+</tr>
+<tr>
+<td><strong>Grounding</strong></td>
+<td><code>submodules/helix_llm/docs/API_CONTRACT.md</code> §2/§4 ·
+<code>submodules/helix_llm/docs/VRAM_BROKER.md</code> §2 (CPU-only tier)
+· <code>docs/research/07.2026/00_master/04_implementation_plan.md</code>
+P3-T5 · sibling <code>EMBEDDINGS_PROVIDER.md</code> (structure
+mirror)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff (§11.4.6):</strong> every RAM/latency/quality
+figure in this document is an <strong>estimate to be measured</strong>
+(<code>(EST — measure)</code>). None is a captured benchmark; each MUST
+be replaced by on-host <code>RSS</code> + p50/p95/p99 wall-clock +
+measured chrF/COMET on the project’s own fixtures under
+<code>docs/qa/&lt;run-id&gt;/translation/</code> before any PASS. No
+fabricated benchmark appears below.</p>
+</blockquote>
+<h2 id="why-this-can-ship-before-the-gpu-tiers">0. Why this can ship
+before the GPU tiers</h2>
+<p>The programme’s critical path (<code>04_implementation_plan.md</code>
+§“Critical-path sequencing”) hard-serialises <strong>P0 host GPU
+foundation → P1 serving core + VRAM broker → P2 gateway</strong> before
+the P3 extended capabilities, because the coder fleet, VLM, image/video
+generators, and the GPU translation-quality tier all contend for the
+single <strong>RTX 5090 · 32 GB</strong> (<code>VRAM_BROKER.md</code>
+§1).</p>
+<p>The <strong>CPU translation provider designed here takes no GPU
+reservation.</strong> <code>VRAM_BROKER.md</code> §2 explicitly lists
+the CPU-only tier as <em>“Qdrant, HelixMemory, <strong>NLLB (CTranslate2
+int8 ~3.5 GB — can also be CPU)</strong>, Tesseract”</em> with <em>“no
+GPU reservation … 0 GB GPU”</em>. The broker’s admission
+<code>Class &quot;translate&quot;</code> (<code>VRAM_BROKER.md</code> §4, §47)
+resolves to a <strong>zero-byte VRAM lease</strong> for this CPU
+variant. It therefore does <strong>not</strong> depend on P0-T1 GPU
+passthrough, the P0-T3 sm_120 builds, or the P1-T4 residency broker
+being implemented — the CPU tier is admissible even when the whole card
+is committed to the coder fleet.</p>
+<blockquote>
+<p><strong>Honest boundary vs the plan (§11.4.6).</strong>
+<code>04_implementation_plan.md:83</code> specifies P3-T5 as
+<em>“<strong>NLLB-200-3.3B</strong> (CTranslate2 int8, warm) +
+<strong>TOWER+ 9B</strong> (vLLM, on-demand); LibreTranslate-compatible
+<code>/translate</code> + doc/glossary. Signature: COMET +
+back-translation metamorphic (guard COMET-gaming CX-05).”</em> The 3.3B
+NLLB + 9B TOWER+ are the GPU/warm-tier targets. This document honours
+the task directive to treat translation as <strong>CPU-capable</strong>
+by defining the CPU tier explicitly: the <strong>ship-first CPU model is
+NLLB-200-distilled-600M</strong> (with distilled-1.3B as the
+higher-quality CPU lane), behind the <strong>same LibreTranslate-
+compatible <code>/translate</code> route</strong> and the <strong>same
+CTranslate2 engine</strong> the GPU tier will use. The CPU→GPU migration
+is then a model-size + device change (600M CPU → 1.3B/3.3B GPU), not an
+engine or API change. This is a documentation reconciliation, flagged so
+a reviewer can confirm — not a contradiction.</p>
+</blockquote>
+<hr />
+<h2 id="engine-choice-evidence-based-comparison">1. Engine choice —
+evidence-based comparison</h2>
+<h3 id="the-candidates">1.1 The candidates</h3>
+<table>
+<colgroup>
+<col style="width: 2%" />
+<col style="width: 6%" />
+<col style="width: 43%" />
+<col style="width: 8%" />
+<col style="width: 18%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Engine</th>
+<th>Serves <code>/translate</code> (LibreTranslate-shape) natively?</th>
+<th>CPU-first?</th>
+<th>Auto-detect built in?</th>
+<th>New runtime to the tree?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td><strong>NLLB-200 via CTranslate2 int8</strong> (distilled-600M /
+1.3B)</td>
+<td>No — CT2 is a <strong>library</strong>; needs a thin
+LibreTranslate-shaped HTTP shim</td>
+<td><strong>Yes</strong> (int8 C++ CPU kernels)</td>
+<td>No — pair with a detector (fastText lid.176 / stanza)</td>
+<td>CT2 runtime + small shim container</td>
+</tr>
+<tr>
+<td>B</td>
+<td><strong>Marian / OPUS-MT via CTranslate2</strong> (Helsinki-NLP,
+per-pair)</td>
+<td>Via <strong>stock LibreTranslate</strong> (Argos Translate →
+OpenNMT-CTranslate2 backend)</td>
+<td><strong>Yes</strong> (fastest of the four)</td>
+<td><strong>Yes</strong> (LibreTranslate
+<code>source:&quot;auto&quot;</code>)</td>
+<td>Stock LibreTranslate container (no new engine — same CT2)</td>
+</tr>
+<tr>
+<td>C</td>
+<td><strong>TOWER-class LLM via llama.cpp</strong> (Tower+ 2B GGUF CPU /
+9B GPU)</td>
+<td>No — chat-framed; needs a <code>/translate</code>→chat adapter</td>
+<td>2B: marginal on CPU; 9B: GPU-preferred</td>
+<td>No — prompt-driven</td>
+<td>llama.cpp already in-tree; GGUF weights new</td>
+</tr>
+<tr>
+<td>D</td>
+<td><strong>Hosted-API fallback</strong> (DeepL / Google / OpenAI)</td>
+<td>No — bespoke adapter</td>
+<td>N/A (remote)</td>
+<td>Provider-side</td>
+<td>New remote dep + <strong>secret + egress</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="decision">1.2 Decision</h3>
+<p><strong>Primary engine: NLLB-200 via CTranslate2 int8</strong> —
+ship-first model <code>facebook/nllb-200-distilled-600M</code> converted
+to CT2 int8 (upgrade lane: <code>nllb-200-distilled-1.3B</code> int8),
+fronted by a <strong>thin LibreTranslate-compatible
+<code>/translate</code> HTTP shim</strong> wrapping
+<code>ctranslate2.Translator</code> + SentencePiece + a language
+detector.</p>
+<p><strong>Documented fallback lane: stock LibreTranslate</strong>
+(option B — Argos Translate’s OpenNMT-CTranslate2 + OPUS/Argos per-pair
+models), because it serves the <strong>identical <code>/translate</code>
+route</strong>, runs on the <strong>same CTranslate2 engine</strong> (no
+new runtime), and ships auto-detect + <code>/languages</code> +
+<code>/detect</code> <strong>out of the box</strong> — a genuine
+zero-new-API degraded path when a language pair or the NLLB weights are
+unavailable.</p>
+<h3 id="justification-cited-latest-upstream-docs-11.4.99-11.4.150">1.3
+Justification (cited, LATEST upstream docs — §11.4.99 / §11.4.150)</h3>
+<ol type="1">
+<li><strong>NLLB-200 CT2 int8 is exactly what the plan names, and it is
+genuinely CPU-capable.</strong> The pre-converted OpenNMT checkpoint
+documents <code>compute_type=int8</code> for <strong>CPU</strong>
+inference (<code>int8_float16</code> is the GPU variant), <em>“Speedup
+inference while reducing memory by 2x–4x using int8 inference in C++ on
+CPU or GPU”</em>, <code>ctranslate2&gt;=3.22.0</code>, FLORES-200
+language codes (<code>eng_Latn</code>, <code>spa_Latn</code>),
+SentencePiece tokenisation, converted with
+<code>quantization=&quot;int8&quot;</code>. NLLB covers <strong>200 languages in
+one model</strong> — a single resident CPU process serves every pair,
+unlike OPUS’s one-model-per-pair. Sources: <a href="https://huggingface.co/OpenNMT/nllb-200-distilled-1.3B-ct2-int8">OpenNMT/nllb-200-distilled-1.3B-ct2-int8
+(HF model card)</a> (accessed 2026-07-06); <a href="https://huggingface.co/OpenNMT/nllb-200-distilled-1.3B-ct2-int8/commit/70f572adafa4794890ce7826156a4209717855af">OpenNMT/nllb-200-distilled-1.3B-ct2-int8
+upload commit 70f572a</a> (accessed 2026-07-06); <a href="https://github.com/OpenNMT/CTranslate2">CTranslate2 (OpenNMT) —
+supports Transformer/M2M-100/NLLB/BART/mBART on CPU+GPU with int8
+quantisation</a> (accessed 2026-07-06).</li>
+<li><strong>CTranslate2 is the fastest, lowest-memory CPU inference
+engine of the set, and covers BOTH NLLB and OPUS-MT.</strong>
+Independent benchmarking reports CT2 <em>“outperformed other libraries
+like Marian and Transformers, generating more tokens per second while
+using less memory”</em> and that int8 quantisation makes models <em>“4×
+smaller and 4× faster without significantly sacrificing quality”</em> —
+the exact CPU-throughput lever the CPU tier needs. One engine serves the
+primary (NLLB) and the fallback (OPUS-MT) lane. Source: <a href="https://mprtmma.medium.com/ctranslate2-anti-internet-translation-69f0faea17d8">CTranslate2:
+Anti-Internet Translation — Naufal Pratama, May 2026 (benchmark)</a>
+(accessed 2026-07-06).</li>
+<li><strong>Stock LibreTranslate is a real, no-new-API fallback on the
+same engine.</strong> LibreTranslate is built on <strong>Argos
+Translate</strong>, whose <code>.argosmodel</code> packages contain
+<em>“an OpenNMT <strong>CTranslate2</strong> model, a SentencePiece
+tokenisation model, a Stanza tokenizer … and metadata”</em> — i.e. the
+fallback lane is the identical CT2 runtime with OPUS/Argos per-pair
+weights, and it already exposes the exact <code>/translate</code>
+contract the plan names (see §2), including <code>source:&quot;auto&quot;</code>
+auto-detect, <code>/detect</code>, <code>/languages</code>, and
+multi-language pivoting. Sources: <a href="https://docs.libretranslate.com/api/operations/translate/">LibreTranslate
+— Translate Text API operation</a> (accessed 2026-07-06); <a href="https://github.com/argosopentech/argos-translate">argos-translate
+README (CTranslate2 + SentencePiece + Stanza backend)</a> (accessed
+2026-07-06).</li>
+<li><strong>Why OPUS-MT is the fallback, not the primary.</strong>
+OPUS-MT (Marian, Helsinki-NLP) is the <strong>fastest</strong> option
+but the <strong>lowest quality</strong> — <em>“the Opus-MT translation
+result is not as good as NLLB and M2M … a trade-off … speed at the
+expense of quality”</em> — and needs a <strong>separate model per
+language pair</strong> (a packaging + coverage burden vs NLLB’s single
+200-language model). It is the ideal degraded lane (light, drop-in, same
+route) but not the professional- quality primary. Source: <a href="https://mprtmma.medium.com/ctranslate2-anti-internet-translation-69f0faea17d8">CTranslate2
+benchmark (Naufal Pratama, May 2026) — OPUS-MT fastest but lower BLEU
+than NLLB/M2M</a> (accessed 2026-07-06).</li>
+<li><strong>Why a TOWER-class LLM is a later upgrade, not the CPU
+primary.</strong> Unbabel’s <strong>Tower+</strong> open-weight family
+(2B/9B/72B) is genuinely SOTA for translation + instruction-following
+(glossary/formality obedience) and 2B <strong>GGUF exists for
+llama.cpp</strong> — but the 9B is the plan’s <strong>GPU
+on-demand</strong> tier, the 2B is only marginal on CPU for bulk work,
+and llama.cpp translation needs a <code>/translate</code>→chat adapter.
+Tower+ 2B GGUF (llama.cpp) is documented here as the <strong>CPU
+LLM-quality alternative</strong> that bridges to the plan’s existing
+Tower+ GPU tier (no new ecosystem), NOT the ship-first CPU default.
+Sources: <a href="https://huggingface.co/Unbabel/Tower-Plus-9B">Unbabel/Tower-Plus-9B
+(open-weight 2B/9B/72B)</a> (accessed 2026-07-06); <a href="https://arxiv.org/abs/2506.17080">Tower+ paper
+arXiv:2506.17080</a> (accessed 2026-07-06); <a href="https://huggingface.co/tensorblock/Unbabel_Tower-Plus-9B-GGUF">tensorblock/Unbabel_Tower-Plus-9B-GGUF
+(llama.cpp-compatible)</a> (accessed 2026-07-06).</li>
+<li><strong>Why the hosted-API lane (D) is explicitly rejected for the
+default path.</strong> A hosted translator (DeepL/Google/OpenAI)
+requires a committed API key (§CONST-042 / §11.4.10 secret-leak surface)
++ third-party data egress of user-supplied text, and defeats the
+offline/self-host posture that makes this the ship-before-GPU
+capability. It MAY be added later as an <strong>opt-in, config-injected,
+key-from-<code>.env</code></strong> provider descriptor, never the
+default.</li>
+</ol>
+<h3 id="cpu-model-selection-ship-first-measured-not-asserted">1.4 CPU
+model selection (ship-first) — measured, not asserted</h3>
+<p>Engine fixed; the <strong>model is a config value</strong> injected
+per §CONST-046 / §11.4.35, never hardcoded. Candidate CPU models, all
+CTranslate2-runnable:</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 16%" />
+<col style="width: 22%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Model</th>
+<th>Params</th>
+<th>Languages</th>
+<th>Quality</th>
+<th>License</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>facebook/nllb-200-distilled-600M</code> (CT2 int8)</td>
+<td>600M</td>
+<td>200 (single model)</td>
+<td>good</td>
+<td>CC-BY-NC-4.0</td>
+<td><strong>Default CPU model</strong> — best coverage/size trade</td>
+</tr>
+<tr>
+<td><code>facebook/nllb-200-distilled-1.3B</code> (CT2 int8)</td>
+<td>1.3B</td>
+<td>200 (single model)</td>
+<td>better</td>
+<td>CC-BY-NC-4.0</td>
+<td>Higher-quality CPU lane (heavier)</td>
+</tr>
+<tr>
+<td><code>Helsinki-NLP/opus-mt-&lt;src&gt;-&lt;tgt&gt;</code> (CT2)</td>
+<td>~75M/pair</td>
+<td>1 pair each</td>
+<td>lower, fastest</td>
+<td>mixed (mostly CC-BY / Apache)</td>
+<td>Fallback lane — light, per-pair, drop-in</td>
+</tr>
+<tr>
+<td><code>Unbabel/Tower-Plus-2B</code> (GGUF, llama.cpp)</td>
+<td>2B</td>
+<td>20+ pairs, instruction-following</td>
+<td>high</td>
+<td>see model card</td>
+<td>CPU LLM lane + bridge to GPU Tower+ tier</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>License note (§11.4.6, flag for review):</strong> NLLB
+weights are <strong>CC-BY-NC-4.0 (non-commercial)</strong>. If HelixLLM
+ships translation in a commercial context, the license MUST be
+reconciled (Open Question Q5) — the OPUS-MT fallback lane (mostly
+permissive) or a permissively-licensed model becomes load-bearing. This
+is a documentation flag, not a resolution.</p>
+</blockquote>
+<p><strong>Recommendation:</strong> default
+<code>nllb-200-distilled-600M</code> CT2 int8 — 200-language coverage in
+one resident CPU process, int8 CPU-comfortable, FLORES-200 codes; the
+1.3B is the drop-in quality lane (same engine, same route); OPUS-MT is
+the “fits anywhere / a pair NLLB handles badly” fallback; Tower+ 2B GGUF
+is the LLM-quality-follows-glossary lane that pre-stages the GPU Tower+
+tier.</p>
+<h3 id="cpu-ram-latency-quality-budget-estimates-to-be-measured-11.4.6">1.5
+CPU RAM / latency / quality budget — ESTIMATES to be measured
+(§11.4.6)</h3>
+<p>All figures <code>(EST — measure)</code>; replace with on-host
+<code>RSS</code> + p50/p95/p99 + measured chrF/COMET under
+<code>docs/qa/&lt;run-id&gt;/translation/</code> before any PASS:</p>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 14%" />
+<col style="width: 22%" />
+<col style="width: 24%" />
+<col style="width: 16%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>Model</th>
+<th>Weights (int8) <code>(EST)</code></th>
+<th>Resident RSS incl. runtime <code>(EST)</code></th>
+<th>Single short-sentence latency <code>(EST)</code></th>
+<th>Batched throughput <code>(EST)</code></th>
+<th>Quality vs GPU tier <code>(EST)</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OPUS-MT (per pair, ~75M)</td>
+<td>~80 MB</td>
+<td>~0.4–0.8 GB</td>
+<td>~15–60 ms</td>
+<td>high</td>
+<td>lower (fallback)</td>
+</tr>
+<tr>
+<td>NLLB-distilled-600M</td>
+<td>~600 MB–1 GB</td>
+<td>~1.5–2.5 GB</td>
+<td>~60–250 ms</td>
+<td>med</td>
+<td>good</td>
+</tr>
+<tr>
+<td>NLLB-distilled-1.3B</td>
+<td>~1.3–1.7 GB</td>
+<td>~2.5–3.8 GB (matches broker’s ~3.5 GB CPU note)</td>
+<td>~150–500 ms</td>
+<td>med-low</td>
+<td>better</td>
+</tr>
+<tr>
+<td>Tower+ 2B GGUF (llama.cpp Q4/Q5)</td>
+<td>~1.3–1.9 GB</td>
+<td>~2–3.5 GB</td>
+<td>~0.5–3 s (autoregressive)</td>
+<td>low</td>
+<td>high (glossary/formality)</td>
+</tr>
+</tbody>
+</table>
+<p>Host has <strong>64 cores / 251 GiB</strong> (<code>RESUME.md</code>
+live-state), so even the 1.3B CPU model is comfortably resident with
+room for CT2 batch buffers; the CPU tier never competes with the GPU
+coder fleet for the 32 GB card. Threads / <code>inter_threads</code> /
+<code>intra_threads</code> are the tuning + observer-effect bound
+(§11.4.128-adjacent hygiene). <strong>These numbers gate nothing until
+measured.</strong></p>
+<hr />
+<h2 id="api-contract-libretranslate-compatible-translate-helixllm-consistent-placement">2.
+API contract — LibreTranslate-compatible <code>/translate</code>,
+HelixLLM-consistent placement</h2>
+<p>The plan names a <strong>LibreTranslate-compatible
+<code>/translate</code></strong> contract
+(<code>04_implementation_plan.md:83</code>). HelixLLM today registers no
+such route (<code>API_CONTRACT.md</code> §2 route inventory) — this
+provider <strong>adds</strong> it. To stay consistent with the shipped
+gateway (<code>API_CONTRACT.md</code> §2/§3: <code>/v1</code> group with
+API-key middleware <code>router.go:63-64</code>, mandatory TLS 1.3 on
+<code>:8443</code>, OpenAI-error envelope), the route is registered
+<strong>under the gateway <code>/v1</code> group</strong> as
+<code>POST /v1/translate</code> with the <strong>LibreTranslate
+request/response body shape</strong> — the plan’s LibreTranslate
+payload, placed where every other authed HelixLLM capability lives, so
+it inherits API-key auth + rate-limit + security-headers uniformly.</p>
+<blockquote>
+<p><strong>Consistency note (§11.4.6):</strong> bare
+<code>/translate</code> (like <code>/ws</code>, <code>/metrics</code>)
+would be <strong>unauthenticated</strong> under the present wiring
+(<code>API_CONTRACT.md</code> §9 finding). Registering
+<code>/v1/translate</code> inside the gateway group is the reviewed
+choice so the route is API-key-authed. Whether to ALSO expose a bare
+<code>/translate</code> alias for drop-in LibreTranslate-client
+compatibility is Open Question Q1.</p>
+</blockquote>
+<h3 id="request-libretranslate-translate-body">2.1 Request —
+LibreTranslate <code>/translate</code> body</h3>
+<pre><code>POST /v1/translate
+Authorization: Bearer &lt;key&gt;            # gateway /v1 API-key middleware (router.go:63-64)
+Content-Type: application/json
+{
+  &quot;q&quot;: [&quot;The cat sat on the mat.&quot;, &quot;Quarterly revenue rose four percent.&quot;],
+  &quot;source&quot;: &quot;auto&quot;,                    # ISO code (e.g. &quot;en&quot;) OR &quot;auto&quot; → detect
+  &quot;target&quot;: &quot;es&quot;,
+  &quot;format&quot;: &quot;text&quot;,                    # &quot;text&quot; (default) | &quot;html&quot; (protects markup / DNT tags)
+  &quot;alternatives&quot;: 0,                   # OPTIONAL — N alternative translations
+  &quot;model&quot;: &quot;helix-translate&quot;           # OPTIONAL Helix alias → backing NLLB/OPUS model (CONST-036)
+}</code></pre>
+<ul>
+<li><code>q</code> — <code>string</code> or <code>[]string</code>
+(LibreTranslate batch shape).</li>
+<li><code>source</code> — an ISO-639 code, or
+<strong><code>&quot;auto&quot;</code></strong> to trigger language detection
+(§2.3). Internally mapped to FLORES-200
+(<code>en</code>→<code>eng_Latn</code>,
+<code>es</code>→<code>spa_Latn</code>) for the NLLB lane; passed through
+directly for the OPUS/LibreTranslate lane.</li>
+<li><code>target</code> — required ISO code → FLORES-200 for NLLB.</li>
+<li><code>format</code> — <code>&quot;text&quot;</code> | <code>&quot;html&quot;</code>;
+<code>&quot;html&quot;</code> protects markup and is the mechanism for
+<strong>do-not-translate spans</strong> (§5).</li>
+<li><code>model</code> — a <strong>Helix alias</strong>, not a raw HF id
+(CONST-036/037: models come from the provider layer / LLMsVerifier,
+never hardcoded).</li>
+</ul>
+<p>Source for the request/response contract: <a href="https://docs.libretranslate.com/api/operations/translate/">LibreTranslate
+— Translate Text API operation</a> (accessed 2026-07-06) and <a href="https://docs.libretranslate.com/guides/api_usage/">LibreTranslate
+API usage guide</a> (accessed 2026-07-06).</p>
+<h3 id="response-libretranslate-translate-body">2.2 Response —
+LibreTranslate <code>/translate</code> body</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;translatedText&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;El gato se sentó en la alfombra.&quot;</span><span class="ot">,</span> <span class="st">&quot;...&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;detectedLanguage&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;language&quot;</span><span class="fu">:</span> <span class="st">&quot;en&quot;</span><span class="fu">,</span> <span class="dt">&quot;confidence&quot;</span><span class="fu">:</span> <span class="fl">98.4</span><span class="fu">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;alternatives&quot;</span><span class="fu">:</span> <span class="ot">[]</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<ul>
+<li><code>translatedText</code> — <code>string</code> for a scalar
+<code>q</code>, <code>[]string</code> for an array <code>q</code>
+(mirrors the <code>q</code> shape).</li>
+<li><code>detectedLanguage</code> — present when
+<code>source:&quot;auto&quot;</code>; <code>{language, confidence}</code>
+(confidence 0–100 float), matching LibreTranslate exactly.</li>
+<li><code>alternatives</code> — present when
+<code>alternatives&gt;0</code>.</li>
+</ul>
+<h3 id="sourcetarget-language-handling-auto-detect">2.3 Source/target
+language handling + auto-detect</h3>
+<ul>
+<li><strong>Explicit source</strong> (<code>source:&quot;en&quot;</code>): the
+shim maps <code>en</code>→<code>eng_Latn</code>,
+<code>target</code>→FLORES-200, and calls
+<code>Translator.translate_batch</code> with the target language token
+as the decoder prefix (NLLB’s target-language mechanism).</li>
+<li><strong>Auto-detect</strong> (<code>source:&quot;auto&quot;</code>): a CPU
+language-ID pass runs FIRST (fastText <code>lid.176</code> or the
+LibreTranslate/stanza detector), the top language + confidence populate
+<code>detectedLanguage</code>, and its FLORES-200 code drives the NLLB
+call. On the fallback lane, LibreTranslate’s own
+<code>source:&quot;auto&quot;</code> handles this natively (its detector + Argos
+pivoting).</li>
+<li><strong><code>GET /v1/languages</code></strong> MUST advertise the
+supported language set (LibreTranslate <code>/languages</code> shape:
+<code>[{code, name, targets[]}]</code>) so clients and LLMsVerifier
+discover coverage (CONST-036).</li>
+<li><strong><code>POST /v1/detect</code></strong> (LibreTranslate
+<code>/detect</code> shape) MAY be exposed for detect-only clients (Open
+Question Q1).</li>
+</ul>
+<h3 id="model-aliasing-provider-registration">2.4 Model aliasing +
+provider registration</h3>
+<ul>
+<li>A config-driven <code>ProviderDescriptor</code> (mirrors P2-T4,
+<code>04_implementation_plan.md:73</code>) registers the CPU translation
+endpoint with LLMsVerifier so the <code>helix-translate</code> alias,
+its language coverage, and its <code>translation</code> capability flag
+are <strong>verifier-sourced, not hardcoded</strong>
+(CONST-036/037/040).</li>
+<li>Alias→backing-model map (<code>helix-translate</code> → NLLB-600M /
+1.3B / OPUS-pair / Tower+2B) lives in HelixLLM config (env / YAML),
+never a source literal (§CONST-046). Adding a model or a language pair =
+a config edit, no code change.</li>
+</ul>
+<h3 id="error-shape">2.5 Error shape</h3>
+<p>OpenAI-error envelope, consistent with the gateway
+(<code>API_CONTRACT.md</code> §3, <code>auth.go:58-64</code>):
+<code>{&quot;error&quot;:{&quot;message&quot;:…,&quot;type&quot;:&quot;invalid_request_error&quot;}}</code> for
+auth/validation (unsupported pair, empty <code>q</code>); a
+<strong><code>503</code></strong> with the same envelope when the
+backing container is not yet warm (honest “warming”,
+<strong>never</strong> an untranslated passthrough of <code>q</code> —
+that is the identity bluff §4 must kill).</p>
+<hr />
+<h2 id="containerization-rootless-podman-via-the-containers-submodule-no-gpu">3.
+Containerization — rootless podman via the <code>containers</code>
+submodule, NO GPU</h2>
+<p>Per §11.4.76 (containers-submodule mandate) + §11.4.161 (rootless
+runtime) the service boots <strong>through</strong>
+<code>vasic-digital/containers</code> (<code>pkg/boot</code> /
+<code>pkg/compose</code> / <code>pkg/health</code>), never a hand-run
+<code>podman</code>/<code>docker</code> command, and never rootful.</p>
+<h3 id="image-run-shape-illustrative-config-injected-no-hardcoded-host-const-045">3.1
+Image + run shape (illustrative — config-injected, no hardcoded host
+§CONST-045)</h3>
+<ul>
+<li><strong>Primary (NLLB CT2) image:</strong> a small image =
+<code>python:3.x-slim</code> + <code>ctranslate2</code>
+<ul>
+<li><code>sentencepiece</code> + a FastAPI LibreTranslate-shaped shim +
+a CPU language detector. Selected <code>linux/amd64</code> vs
+<code>linux/arm64</code> by <code>uname -m</code> (§11.4.81
+cross-platform parity), pinned by digest in production (§11.4.76 clause
+2).</li>
+</ul></li>
+<li><strong>Fallback image:</strong> the upstream
+<code>libretranslate/libretranslate</code> container (Argos/CTranslate2,
+CPU), booted via the same compose profile — zero-new-code degraded
+lane.</li>
+<li><strong>NO GPU:</strong> the run spec contains <strong>no</strong>
+<code>--device nvidia.com/gpu=all</code> and no GPU security flag
+(contrast the P0 GPU proof <code>04_implementation_plan.md:44</code>).
+This is the structural guarantee it needs no P0.
+<code>compute_type=int8</code> (CPU), never <code>int8_float16</code>
+(GPU).</li>
+<li><strong>Model source:</strong> <code>--model</code> points at a
+CT2-converted NLLB dir (or the OPUS/ Argos packages) on a persistent
+cache volume, OR a pre-fetched local model mounted read-only where
+<code>$MODELS_DIR</code> is <strong>injected</strong> (env), never a
+literal. Weights are a §11.4.77 re-obtain artefact (gitignored;
+<code>fetch_models.sh</code>-class script downloads from HF + runs the
+CT2 conversion — matches the P7-T1 <code>fetch_models.sh</code>; the CT2
+conversion command is the regeneration mechanism).</li>
+<li><strong>Port:</strong> a config-injected host port (distinct from
+the coder fleet’s <code>:18434</code> and the embeddings tier’s
+<code>:18435</code> in <code>RESUME.md</code>), reached by the HelixLLM
+gateway; <code>--network</code> per the containers-submodule compose
+spec.</li>
+<li><strong>Boot is part of the test entry point</strong> (§11.4.76
+on-demand-infra invariant): the HelixQA translation bank boots the
+container via the submodule, waits on <code>pkg/health</code>
+(LibreTranslate <code>/languages</code> or a shim <code>/health</code>),
+then drives the gateway route — a short-circuit fake that skips the boot
+is a §11.4 violation.</li>
+<li><strong>Broker interaction:</strong>
+<code>Acquire(ctx, &quot;translate&quot;)</code> (<code>VRAM_BROKER.md</code> §4)
+returns a <strong>0-byte lease</strong> for this CPU variant; the broker
+records the service as CPU-only tier and takes no GPU reservation, so it
+is admissible even with the whole card committed to the coder fleet. No
+broker code is required to ship the CPU provider (the broker is a P1
+component; the 0-VRAM class is its CPU-tier default).</li>
+<li><strong>Catalogue-Check (§11.4.74):</strong>
+<code>extend vasic-digital/containers@&lt;sha&gt;</code> — add a
+<code>translation</code> compose profile (NLLB-shim + LibreTranslate) to
+the containers submodule; never an in-project ad-hoc compose file.</li>
+</ul>
+<h3 id="cross-platform-resource-hygiene">3.2 Cross-platform + resource
+hygiene</h3>
+<ul>
+<li>ARM64 host → the <code>linux/arm64</code> image variant chosen by
+runtime <code>uname</code> dispatch (§11.4.81); CT2 supports aarch64
+CPU.</li>
+<li>Bounded CT2 threads
+(<code>inter_threads</code>/<code>intra_threads</code>) + a container
+memory limit (§12.3 container hygiene) so the translator never starves
+the developer host (§12.6); limits are config-injected and captured as
+evidence during acceptance.</li>
+</ul>
+<hr />
+<h2 id="anti-bluff-acceptance-the-one-machine-checkable-runtime-signature-11.4.108">4.
+Anti-bluff acceptance — the ONE machine-checkable runtime signature
+(§11.4.108)</h2>
+<p><strong>Definition of done for this provider:</strong> on a
+<strong>clean deploy</strong> (§11.4.108/§11.4.139 — container freshly
+booted via the containers submodule, gateway pointed at it), the
+following single machine-checkable signature verifies and is captured to
+<code>docs/qa/&lt;run-id&gt;/translation/</code>:</p>
+<blockquote>
+<p><strong>RUNTIME SIGNATURE (translation forward-quality +
+back-translation metamorphic).</strong> For each pair in a tiny
+<strong>golden reference set</strong> (e.g. <code>en→es</code>,
+<code>en→fr</code>, <code>en→de</code>, each a handful of source
+sentences with a human/golden reference translation), POST source
+<code>S</code> to <code>POST /v1/translate</code> and obtain forward
+translation <code>F</code>; then POST <code>F</code> back
+(<code>target→source</code>) to obtain back-translation <code>B</code>.
+Assert <strong>ALL</strong> of: 1. <strong>Not-identity /
+real-translation:</strong> <code>F ≠ S</code> (normalised) AND the
+detected language of <code>F</code> matches the requested
+<code>target</code> — kills the copy/passthrough and the
+1536-zero-vector-analogue “warming passthrough” bluff. 2.
+<strong>Forward adequacy vs golden:</strong>
+<code>chrF(F, golden_reference) ≥ floor</code> (chrF is deterministic,
+reference-based, language-agnostic; floor calibrated on the project’s
+own fixtures per §11.4.107(13)). 3. <strong>Back-translation
+metamorphic:</strong> semantic similarity
+<code>sim(B, S) ≥ margin</code> (chrF or embeddings-cosine via the CPU
+embeddings tier), the plan’s metamorphic relation. 4.
+<strong>Determinism:</strong> identical request → byte-identical
+<code>translatedText</code> across two calls (§11.4.50). The captured
+artefact is the raw <code>/v1/translate</code> JSON (forward + back) +
+the computed chrF/similarity table + PASS/FAIL verdict with its evidence
+path.</p>
+</blockquote>
+<p><strong>Guard against COMET-gaming / metamorphic-gaming (plan guard
+CX-05).</strong> Back-translation alone is gameable: an <strong>identity
+copy</strong> round-trips perfectly (<code>B==S</code> because
+<code>F==S</code>), so criterion 3 in isolation would PASS a translator
+that does nothing. Criterion 1 (<code>F≠S</code> + target-language
+match) defeats that; criterion 2 (forward chrF vs an independent golden
+reference) defeats a translator that emits <em>fluent-but-wrong</em>
+text that happens to round-trip. The <strong>three criteria
+together</strong> are the anti-gaming construction — no single one is
+trusted. Where the GPU tier later adds a COMET model (XLM-R,
+CPU-runnable but heavier), COMET is an <strong>additional</strong>
+forward-quality signal, never a replacement for the chrF + not-identity
++ metamorphic triple.</p>
+<h3 id="golden-good-golden-bad-self-validation-11.4.10710">4.1
+Golden-good / golden-bad self-validation (§11.4.107(10))</h3>
+<p>The chrF/metamorphic <strong>analyzer itself is
+mutation-proofed</strong> with a fixture set, wired into the
+meta-test:</p>
+<ul>
+<li><strong>golden-good fixture</strong> — a captured real
+<code>/v1/translate</code> response where a genuine
+<code>en→es→en</code> round-trip holds (F≠S, target=es, chrF≥floor,
+sim≥margin) → the analyzer MUST return <strong>PASS</strong>.</li>
+<li><strong>golden-bad fixtures</strong> (each MUST return
+<strong>FAIL</strong>, proving the analyzer cannot be fooled):
+<ol type="1">
+<li><strong>identity / passthrough</strong> response
+(<code>translatedText == q</code>, the “warming passthrough” shape) →
+fails criterion 1 (F==S).</li>
+<li><strong>wrong-language</strong> response (fluent text in the wrong
+target language) → fails the detected-target check +
+chrF-vs-golden.</li>
+<li><strong>garbage / shuffled</strong> response (tokens shuffled, or a
+fixed canned string) → fails chrF-vs-golden AND the back-translation
+<code>sim</code> margin.</li>
+<li><strong>empty</strong> <code>translatedText</code> → fails all
+forward criteria.</li>
+</ol></li>
+</ul>
+<p>Paired §1.1 mutation: strip the not-identity <strong>OR</strong> the
+chrF-vs-golden <strong>OR</strong> the metamorphic assertion from the
+analyzer → the identity/garbage golden-bad fixture PASSes → the gate
+FAILs. That mutation is the mechanical proof the acceptance test is not
+itself a bluff (and is the CX-05 anti-gaming guard made mechanical).</p>
+<h3 id="higher-order-resilience-proofs-compose-do-not-replace-4">4.2
+Higher-order + resilience proofs (compose, do not replace §4)</h3>
+<ul>
+<li><strong>Auto-detect correctness:</strong> POST
+<code>source:&quot;auto&quot;</code> for a known-language sentence →
+<code>detectedLanguage.language</code> matches truth with confidence
+above a fixture-calibrated floor.</li>
+<li><strong>Determinism / re-runnability</strong> (§11.4.50/§11.4.98):
+identical input → byte- identical output; the whole bank PASSes at
+<code>-count=3</code>.</li>
+<li><strong>Stress + chaos</strong> (§11.4.85): batch of N≥100 sentences
+(throughput + p50/p95/p99 captured), N≥10 concurrent callers (no
+deadlock/leak), boundary inputs (empty string, max-length doc, unicode,
+an all-punctuation string, a string already in the target language) each
+categorised; chaos = container SIGKILL mid-request → gateway returns an
+honest <code>503 warming</code>, <strong>never</strong> an untranslated
+passthrough.</li>
+<li><strong>Feature-class evidence (§11.4.69):</strong> the closed
+sink-side taxonomy has no <code>translation</code> class today; this
+provider <strong>adds one</strong> (taxonomy is <em>open to additions,
+never contraction</em>) — evidence shape = the captured forward-chrF +
+not-identity + back-translation-metamorphic artefact above. Flagged for
+the §11.4.69 taxonomy owner.</li>
+</ul>
+<h3 id="four-layer-verification-11.4.108">4.3 Four-layer verification
+(§11.4.108)</h3>
+<ol type="1">
+<li><strong>SOURCE</strong> — <code>/v1/translate</code> route + shim +
+provider descriptor committed; pre-build grep gate.</li>
+<li><strong>ARTIFACT</strong> — the NLLB CT2 int8 model dir present +
+the shim image pulled/ pinned by digest; <code>pkg/health</code>
+green.</li>
+<li><strong>RUNTIME-ON-CLEAN-TARGET</strong> — the §4 runtime signature
+verifies against a freshly-booted container (not a stale one) — the
+definition of done.</li>
+<li><strong>USER-VISIBLE</strong> — a client (HelixCode / any CLI agent
+/ a LibreTranslate client) POSTs <code>/v1/translate</code>, gets a real
+translation in the right language, and a downstream consumer
+(doc/glossary flow) uses it.</li>
+</ol>
+<hr />
+<h2 id="professional-translation-notes-design-considerations">5.
+Professional-translation notes (design considerations)</h2>
+<p>Professional translation is more than raw NMT; these are design
+considerations, not v1 blockers (each maps to a lane above):</p>
+<ul>
+<li><strong>Do-not-translate (DNT) spans + terminology
+protection.</strong> NLLB CT2 has no native glossary. Two mechanisms:
+(a) <strong><code>format:&quot;html&quot;</code></strong> — wrap DNT spans /
+product names / code in markup that LibreTranslate/the shim preserves
+untouched (LibreTranslate documents HTML-format tag preservation); (b)
+<strong>placeholder masking</strong> — replace terms with sentinel
+tokens (<code>⟦T0⟧</code>), translate, then restore. Both are
+pre/post-processing in the shim, deterministic, testable.</li>
+<li><strong>Glossary / terminology enforcement.</strong> For
+<em>enforced</em> target terminology (not just protection), the
+<strong>Tower+ 2B (llama.cpp) lane</strong> is load-bearing — Tower+
+follows glossary + instruction constraints natively (its instruction-
+following is the paper’s headline). The plan’s “doc/glossary” P3-T5
+scope maps to the Tower+ tier; the NLLB CPU default ships DNT-protection
+first, enforced glossary via the LLM lane.</li>
+<li><strong>Formality control.</strong> NLLB has no formality register
+control. Options: OPUS-MT formality-tuned variants where they exist, or
+the Tower+ instruction lane (“translate formally”). v1 CPU default:
+document the limitation honestly (§11.4.6) rather than fake a formality
+knob.</li>
+<li><strong>Document / segment handling.</strong> Sentence-boundary
+segmentation (stanza in the Argos lane; a splitter in the NLLB shim) so
+long documents translate segment-by- segment with context windows
+respected; re-assemble preserving whitespace/markup.</li>
+<li><strong>Quality gating for professional output.</strong> The §4 chrF
++ back-translation signature is the automated floor; a
+<code>cometkiwi</code>-style <strong>reference-free QE</strong> score
+(Unbabel) is the natural per-request confidence signal to surface to
+professional users when the GPU tier lands — flagged, not yet shipped.
+Source: <a href="https://github.com/Unbabel/COMET">Unbabel COMET —
+reference-based + reference-free QE metrics</a> (accessed
+2026-07-06).</li>
+</ul>
+<hr />
+<h2 id="open-questions-resolve-before-coding">6. Open questions (resolve
+before coding)</h2>
+<ul>
+<li><strong>Q1</strong> Register only <code>POST /v1/translate</code>
+(authed), or ALSO a bare <code>/translate</code>
+<ul>
+<li><code>/detect</code> + <code>/languages</code> alias for drop-in
+LibreTranslate-client compatibility? (Bare routes are unauthenticated
+under current wiring — <code>API_CONTRACT.md</code> §9.)</li>
+</ul></li>
+<li><strong>Q2</strong> Ship-first CPU model —
+<code>nllb-200-distilled-600M</code> (recommended) vs <code>1.3B</code>
+vs the stock-LibreTranslate/OPUS lane as the <em>default</em> rather
+than the fallback. Decide on measured chrF/COMET + latency, not the §1.5
+estimates.</li>
+<li><strong>Q3</strong> Does the <code>containers</code> submodule
+already have a translation / LibreTranslate compose profile, or is this
+a §11.4.74 <code>extend</code> PR? (Investigate before
+scaffolding.)</li>
+<li><strong>Q4</strong> Language detector for <code>source:&quot;auto&quot;</code>
+— fastText <code>lid.176</code> (fast, 176 langs) vs the
+LibreTranslate/stanza detector vs NLLB’s own LID head. Consistency
+across the primary + fallback lanes matters.</li>
+<li><strong>Q5</strong> <strong>License</strong> — NLLB is CC-BY-NC-4.0
+(non-commercial). Reconcile the ship license against HelixLLM’s
+distribution model, or make the permissively-licensed OPUS/Tower+ lane
+the commercial default. Blocking for any commercial ship.</li>
+<li><strong>Q6</strong> COMET model on CPU for the §4 signature — ship
+chrF-only first (light, deterministic) and add <code>cometkiwi</code> QE
+when the GPU tier lands, or run a small COMET on CPU now (heavier)?
+(Leaning: chrF + metamorphic now; COMET later.)</li>
+</ul>
+<hr />
+<h2 id="composition-footer-constitutional-anchors-touched">7.
+Composition footer — constitutional anchors touched</h2>
+<ul>
+<li><strong>§11.4.6</strong> (no-guessing) — every RAM/latency/quality
+figure flagged <code>(EST — measure)</code>; the VRAM_BROKER CPU-tier
+reconciliation, the NLLB license, and the plan’s 3.3B-vs-600M model
+choice all flagged, not asserted.</li>
+<li><strong>§11.4.74</strong> (extend-don’t-reimplement) — reuse
+CTranslate2 (the engine the plan already names) + LibreTranslate (the
+<code>/translate</code> contract the plan names) + extend the containers
+submodule; no bespoke NMT server or API.</li>
+<li><strong>§11.4.76 / §11.4.161</strong> (containers submodule /
+rootless) — boot via
+<code>pkg/boot</code>+<code>pkg/compose</code>+<code>pkg/health</code>,
+rootless podman, no GPU device.</li>
+<li><strong>§11.4.77</strong> (re-obtain mechanism) — model weights
+gitignored + <code>fetch_models.sh</code> (download + CT2-int8
+conversion = the regeneration mechanism).</li>
+<li><strong>§11.4.81</strong> (cross-platform parity) —
+<code>linux/amd64</code> vs <code>linux/arm64</code> chosen by runtime
+dispatch.</li>
+<li><strong>§11.4.99 / §11.4.150</strong> (latest-source + deep
+multi-angle research) — engine decision cited to LATEST upstream docs
+across ≥4 distinct angles (NLLB/CT2, LibreTranslate/Argos, OPUS-MT
+benchmark, Tower+, COMET).</li>
+<li><strong>§11.4.107(10)/(13)</strong> (self-validated analyzer +
+fixture-calibrated thresholds) — golden-good/golden-bad chrF+metamorphic
+analyzer, project-calibrated floor/margin; the CX-05 anti-gaming triple
+made mechanical.</li>
+<li><strong>§11.4.108 / §11.4.139</strong> (four-layer runtime-signature
+on a clean target) — the §4 acceptance signature is the definition of
+done.</li>
+<li><strong>§11.4.69</strong> (sink-side evidence taxonomy) — adds a
+<code>translation</code> feature class.</li>
+<li><strong>§11.4.85 / §11.4.98 / §11.4.50</strong> (stress+chaos /
+full-automation / determinism).</li>
+<li><strong>§11.4.135</strong> (standing regression guard) — the §4
+signature registers as a permanent guard.</li>
+<li><strong>CONST-036/037/040</strong> (LLMsVerifier single source of
+truth; capability flags verifier-sourced) — <code>helix-translate</code>
+alias + language coverage + <code>translation</code> capability from the
+verifier, never hardcoded.</li>
+<li><strong>CONST-042 / §11.4.10</strong> (no-secret-leak) — the
+hosted-API lane rejected as default precisely because it requires a
+committed key + third-party egress.</li>
+<li><strong>CONST-046</strong> (no hardcoded content) — model ids / host
+/ port / pair map config-injected.</li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Deep-research 2026-07-06: -
+https://huggingface.co/OpenNMT/nllb-200-distilled-1.3B-ct2-int8 -
+https://huggingface.co/OpenNMT/nllb-200-distilled-1.3B-ct2-int8/commit/70f572adafa4794890ce7826156a4209717855af
+- https://github.com/OpenNMT/CTranslate2 -
+https://docs.libretranslate.com/api/operations/translate/ -
+https://docs.libretranslate.com/guides/api_usage/ -
+https://github.com/argosopentech/argos-translate -
+https://mprtmma.medium.com/ctranslate2-anti-internet-translation-69f0faea17d8
+- https://huggingface.co/Unbabel/Tower-Plus-9B -
+https://arxiv.org/abs/2506.17080 -
+https://huggingface.co/tensorblock/Unbabel_Tower-Plus-9B-GGUF -
+https://github.com/Unbabel/COMET</p>
+<p>(Negative finding, §11.4.99(B): the canonical DeepL/Google/OpenAI
+translation-API reference pages were not fetched — the hosted-API lane
+is explicitly rejected as a default per CONST-042/§11.4.10, so its
+precise request shape is out of scope for this CPU-first design. The
+LibreTranslate <code>/translate</code> request/response shape in §2 is
+grounded in the LibreTranslate operations doc above, which is the
+authoritative contract THIS system targets per
+<code>04_implementation_plan.md:83</code>.)</p>
+</body>
+</html>
