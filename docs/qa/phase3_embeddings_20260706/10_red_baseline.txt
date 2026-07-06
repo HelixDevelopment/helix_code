@@ -1,0 +1,8 @@
+### RED baseline (§11.4.115): analyzer vs the dim-1536 zero-vector stub
+RED_MODE=1 — expect the analyzer to FAIL (exit 1) = defect reproduced
+[RUNTIME-SIGNATURE] FAIL dim=1536 |A|=0.0000 |A'|=0.0000 |U|=0.0000 cos(A,A')=NaN cos(A,U)=NaN margin=NaN
+    reason: expected dim 768, got 1536
+    reason: zero/near-zero norm A=0 A'=0 U=0
+    reason: cosine NaN (zero-norm or dim mismatch)
+analyzer_exit=1
+RED-OK: stub correctly FAILED the runtime signature
