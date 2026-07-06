@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>EMBEDDINGS_PROVIDER</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">EMBEDDINGS_PROVIDER</h1>
+</header>
+<h1 id="helixllm-cpu-capable-embeddings-provider-design-spike-p3-t6-cpu-tier">HelixLLM
+CPU-Capable Embeddings Provider — Design Spike (P3-T6 / CPU tier)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Status</strong></td>
+<td>DESIGN (spike before implementation, §11.4.6 — do not code the
+provider until this is agreed)</td>
+</tr>
+<tr>
+<td><strong>Scope</strong></td>
+<td>The <strong>CPU-only</strong> embeddings capability — NO GPU, NO
+VRAM-broker dependency, so it ships <strong>before</strong> the P0/P1
+GPU chain</td>
+</tr>
+<tr>
+<td><strong>Owns</strong></td>
+<td>The CPU slice of implementation-plan item <strong>P3-T6</strong>
+(<code>04_implementation_plan.md</code> line 84)</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-07-06 · Revision 1 · Track <code>(T1/main)</code> · Branch
+<code>feature/helixllm-full-extension</code></td>
+</tr>
+<tr>
+<td><strong>Grounding</strong></td>
+<td><code>submodules/helix_llm/docs/API_CONTRACT.md</code> §4.4 ·
+<code>submodules/helix_llm/docs/VRAM_BROKER.md</code> §2 (CPU-only tier)
+· <code>docs/research/07.2026/00_master/04_implementation_plan.md</code>
+P3-T6 ·
+<code>docs/research/07.2026/04_embeddings_rag/04_embeddings_rag.md</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff (§11.4.6):</strong> every RAM/latency figure in
+this document is an <strong>estimate to be measured</strong>
+(<code>nvidia-smi</code> is irrelevant here — this is a CPU-resident
+service; the budget MUST be replaced by on-host <code>RSS</code> +
+wall-clock latency deltas once the service runs). No benchmark below is
+a captured measurement; each is flagged
+<code>(EST — measure)</code>.</p>
+</blockquote>
+<h2 id="why-this-can-ship-before-the-gpu-tiers">0. Why this can ship
+before the GPU tiers</h2>
+<p>The programme’s critical path (<code>04_implementation_plan.md</code>
+§“Critical-path sequencing”) hard-serialises <strong>P0 host GPU
+foundation → P1 serving core + VRAM broker → P2 gateway</strong> before
+the P3 extended capabilities. That gating exists because the coder
+fleet, VLM, image/video generators, and the GPU embeddings tier all
+contend for the single <strong>RTX 5090 · 32 GB</strong>
+(<code>VRAM_BROKER.md</code> §1).</p>
+<p>The <strong>CPU embeddings provider designed here takes no GPU
+reservation</strong> — it is a member of the broker’s <strong>CPU-only
+tier</strong> (<code>VRAM_BROKER.md</code> §2: <em>“CPU-only … no GPU
+reservation … 0 GB GPU”</em>; the broker’s admission
+<code>Class &quot;embed&quot;</code> (<code>VRAM_BROKER.md</code> §4) resolves to
+a <strong>zero-byte VRAM lease</strong> for this variant). It therefore
+does <strong>not</strong> depend on P0-T1 GPU passthrough, the P0-T3
+sm_120 builds, or the P1-T4 residency broker being implemented. It only
+depends on the gateway route that <strong>already exists</strong> in the
+shipped HelixLLM binary (<code>API_CONTRACT.md</code> §4.4 —
+<code>POST /v1/embeddings</code> is registered TODAY at
+<code>internal/gateway/router.go:76</code>). This makes it the
+<strong>earliest-shippable P3 capability</strong> and a clean vertical
+slice to validate the P3 per-capability template (container → gateway
+route → verifier probe → HelixQA bank) with zero GPU risk.</p>
+<blockquote>
+<p><strong>Honest boundary vs the source docs (§11.4.6).</strong>
+<code>VRAM_BROKER.md</code> §2 lists the CPU-only tier members as
+<em>“Qdrant, HelixMemory, NLLB (CTranslate2 int8 … can also be CPU),
+Tesseract”</em> — it does <strong>not</strong> name “embeddings” in that
+row verbatim. What the broker <em>does</em> provide is an
+<code>embed</code> <strong>admission class</strong>
+(<code>VRAM_BROKER.md</code> §4) whose GPU cost, for this CPU variant,
+is zero. This document <strong>honours the task’s directive to treat
+embeddings as CPU-capable</strong> by defining the CPU tier explicitly
+and reconciling the broker table: the GPU P3-T6 model
+(<code>Qwen3-Embedding-4B</code>,
+<code>04_implementation_plan.md:84</code>) remains a
+<strong>warm-swappable GPU</strong> member for later; the CPU model
+defined here is the <strong>ship-first</strong> member with a 0-VRAM
+broker class. This is a documentation reconciliation, not a
+contradiction — flagged so a reviewer can confirm.</p>
+</blockquote>
+<hr />
+<h2 id="engine-choice-evidence-based-comparison">1. Engine choice —
+evidence-based comparison</h2>
+<h3 id="the-candidates">1.1 The candidates</h3>
+<table>
+<colgroup>
+<col style="width: 2%" />
+<col style="width: 6%" />
+<col style="width: 40%" />
+<col style="width: 8%" />
+<col style="width: 21%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Engine</th>
+<th>Serves an OpenAI <code>/v1/embeddings</code> route natively?</th>
+<th>CPU-first?</th>
+<th>Reranker in same toolkit?</th>
+<th>New engine to the tree?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td><strong>HF Text Embeddings Inference (TEI)</strong> — CPU image</td>
+<td><strong>Yes</strong> (<code>/v1/embeddings</code> under the
+<code>/v1</code> prefix)</td>
+<td><strong>Yes</strong> (dedicated <code>cpu-1.9</code> +
+<code>cpu-arm64-1.9</code> images)</td>
+<td><strong>Yes</strong> (<code>/rerank</code>, XLM-R/GTE/ModernBERT
+sequence-classification)</td>
+<td>Container only (no Go dep)</td>
+</tr>
+<tr>
+<td>B</td>
+<td><strong>llama.cpp
+<code>llama-server --embeddings</code></strong></td>
+<td><strong>Yes</strong> (<code>--embeddings</code> flag enables the
+OAI-compatible <code>/v1/embeddings</code>)</td>
+<td>Yes (CPU build)</td>
+<td>No (separate rerank path only)</td>
+<td><strong>Already in-tree</strong>
+(<code>dependencies/LLama_CPP</code>, router image)</td>
+</tr>
+<tr>
+<td>C</td>
+<td>CTranslate2 / sentence-transformers (Python)</td>
+<td><strong>No</strong> — a library, needs a custom FastAPI OpenAI
+shim</td>
+<td>Yes</td>
+<td>Partial (sbert CrossEncoder, still custom)</td>
+<td>New Python service + custom route</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Dedicated ONNX runtime (FastEmbed / Optimum-Intel)</td>
+<td><strong>No</strong> — client libraries, need a custom server
+shim</td>
+<td>Yes (ONNX INT8 on CPU)</td>
+<td>FastEmbed rerank exists, still a lib</td>
+<td>New Python service + custom route</td>
+</tr>
+</tbody>
+</table>
+<h3 id="decision">1.2 Decision</h3>
+<p><strong>Primary engine: HF Text Embeddings Inference (TEI), CPU image
+<code>ghcr.io/huggingface/text-embeddings-inference:cpu-1.9</code></strong>
+(x86_64) / <code>cpu-arm64-1.9</code> (aarch64). <strong>Documented
+fallback lane: llama.cpp <code>llama-server --embeddings</code></strong>
+(option B), because it is already incorporated in the tree and adds no
+new engine.</p>
+<h3 id="justification-cited">1.3 Justification (cited)</h3>
+<p><strong>TEI is the exact engine P3-T6 already commits to</strong> —
+<code>04_implementation_plan.md:84</code> reads <em>“Qwen3-Embedding-4B
+(+BGE-M3 sparse) + bge-reranker-v2-m3 <strong>via TEI</strong>”</em>.
+Choosing TEI for the CPU tier is therefore <strong>reuse, not a new
+decision</strong> (§11.4.74 extend-don’t-reimplement): the CPU variant
+simply pins the CPU image and a smaller model, and the later GPU variant
+swaps to a GPU image + a bigger model behind the <strong>same</strong>
+engine and the <strong>same</strong> gateway route.</p>
+<ol type="1">
+<li><strong>Native OpenAI <code>/v1/embeddings</code> on CPU, no custom
+glue.</strong> TEI ships dedicated CPU containers and exposes the
+OpenAI-compatible route under <code>/v1</code> —
+<code>curl http://localhost:8080/v1/embeddings</code> returns the OpenAI
+shape; CPU is a first-class target, and <strong>ARM64 is supported
+CPU-only</strong>. (Options C and D would each require us to hand-write
+an OpenAI route — new code = new §11.4/§107 bluff surface.) Sources: <a href="https://huggingface.co/docs/text-embeddings-inference/en/supported_models">TEI
+— Supported models &amp; hardware</a> (accessed 2026-07-06) lists the
+<code>cpu-1.9</code>/<code>cpu-arm64-1.9</code> images and <em>“can be
+used on CPU … ARM64 (aarch64) is supported for both CPU-only and
+CUDA”</em>; <a href="https://huggingface.co/docs/text-embeddings-inference/en/quick_tour">TEI
+— Quick Tour</a> and <a href="https://github.com/huggingface/text-embeddings-inference">TEI
+README</a> (accessed 2026-07-06) document
+<code>text-embeddings-router --model-id … --port 8080</code> and the
+<code>/v1/embeddings</code> OpenAI route.</li>
+<li><strong>The reranker P3-T6 also needs comes free in the same
+toolkit.</strong> TEI’s supported-rerankers table includes
+<code>BAAI/bge-reranker-base</code>/<code>-large</code> and
+<code>Alibaba-NLP/gte-reranker-modernbert-base</code> — one engine
+covers both the <code>embed</code> and <code>rerank</code> halves of
+P3-T6, on CPU. Source: <a href="https://huggingface.co/docs/text-embeddings-inference/en/supported_models">TEI
+— Supported models</a> (accessed 2026-07-06), “Supported re-rankers and
+sequence classification models”.</li>
+<li><strong>Token-based dynamic batching is the CPU throughput
+lever.</strong> TEI batches concurrent requests by token budget, which
+is what makes a CPU embedder useful for bulk RAG ingestion rather than
+one-doc-at-a-time. Options C/D would need us to build batching
+ourselves. Source: <a href="https://github.com/huggingface/text-embeddings-inference">TEI
+README</a> (accessed 2026-07-06), “token-based dynamic batching”.</li>
+<li><strong>The ONNX-CPU advantage of option D is already inside
+TEI.</strong> FastEmbed / Optimum-Intel win on CPU by running INT8 ONNX
+kernels; TEI’s CPU backend already uses optimized CPU inference
+(candle/ONNX-class kernels, Intel container variant available), so we
+get the ONNX-CPU speedup <strong>behind a real OpenAI server</strong>
+instead of a bespoke shim. Sources: <a href="https://github.com/qdrant/fastembed">Qdrant FastEmbed</a> and <a href="https://huggingface.co/blog/intel-fast-embedding">CPU-Optimized
+Embeddings with Optimum-Intel</a> (accessed 2026-07-06) establish the
+ONNX-INT8-on-CPU technique; <a href="https://huggingface.co/docs/text-embeddings-inference/en/intel_container">TEI
+— Intel container</a> (accessed 2026-07-06) shows TEI captures it.</li>
+</ol>
+<p><strong>Why not the fallback as primary:</strong> llama.cpp
+<code>--embeddings</code> (option B) is a genuinely strong,
+zero-new-engine choice — the OAI-compatible <code>/v1/embeddings</code>
+route is real (<code>llama-server … --embeddings</code> enables it) and
+GGUF quantisation is excellent on CPU. Sources: <a href="https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md">llama.cpp
+server README</a> and <a href="https://github.com/ggml-org/llama.cpp/discussions/7712">llama.cpp
+embeddings tutorial (Discussion #7712)</a> (accessed 2026-07-06). It is
+kept as the <strong>fallback lane</strong> rather than primary because:
+(a) it does <strong>not</strong> cover the reranker half of P3-T6
+through the same endpoint; (b) embedding-model coverage is limited to
+architectures with GGUF + llama.cpp support (nomic-bert, bge/e5 via the
+bert path) versus TEI’s broader current list; (c) pooling must be set by
+hand (<code>--pooling cls|mean</code>). Selecting TEI primary +
+llama.cpp fallback gives one clean primary and a no-new-dependency
+degraded path.</p>
+<h3 id="cpu-model-selection-ship-first-measured-not-asserted">1.4 CPU
+model selection (ship-first) — measured, not asserted</h3>
+<p>The engine is fixed; the <strong>model is a config value</strong>
+injected per §CONST-046 / §11.4.35, never hardcoded. Candidate CPU
+models, all TEI-supported and CPU-runnable, ranked by the quality/size
+trade the CPU tier cares about:</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 20%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 22%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr>
+<th>Model</th>
+<th>Params</th>
+<th>Dim</th>
+<th>Ctx</th>
+<th>License</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nomic-ai/nomic-embed-text-v1.5</code></td>
+<td>137M</td>
+<td>768 (Matryoshka→512/256)</td>
+<td>8192</td>
+<td>Apache-2.0</td>
+<td><strong>Default CPU model</strong> — best quality/size + long
+context</td>
+</tr>
+<tr>
+<td><code>BAAI/bge-small-en-v1.5</code></td>
+<td>33M</td>
+<td>384</td>
+<td>512</td>
+<td>MIT</td>
+<td>Ultra-light lane (lowest RAM/latency)</td>
+</tr>
+<tr>
+<td><code>Qwen/Qwen3-Embedding-0.6B</code></td>
+<td>509M</td>
+<td>up to 1024</td>
+<td>long</td>
+<td>Apache-2.0</td>
+<td>Higher-quality CPU lane (heavier); shares model family with the GPU
+P3-T6 <code>Qwen3-Embedding-4B</code></td>
+</tr>
+</tbody>
+</table>
+<p>Source for model IDs, sizes, MTEB ranks and CPU-viability: <a href="https://huggingface.co/docs/text-embeddings-inference/en/supported_models">TEI
+— Supported models</a> (accessed 2026-07-06); Nomic long-context +
+Matryoshka corroborated by <a href="https://huggingface.co/nomic-ai/nomic-embed-text-v1.5">nomic-ai/nomic-embed-text-v1.5</a>
+(accessed 2026-07-06).</p>
+<p><strong>Recommendation:</strong> default
+<code>nomic-ai/nomic-embed-text-v1.5</code> — Apache-2.0, 137M, 768-dim,
+8192-token context (long-doc RAG on CPU), Matryoshka truncation lets us
+trade dim for speed without a model swap. <code>bge-small</code> is the
+“fits anywhere” fallback; <code>Qwen3-Embedding-0.6B</code> is the “same
+family as the GPU tier” upgrade path so the CPU→GPU migration is a
+model-size change, not an ecosystem change.</p>
+<h3 id="cpu-ram-latency-budget-estimates-to-be-measured-11.4.6">1.5 CPU
+RAM / latency budget — ESTIMATES to be measured (§11.4.6)</h3>
+<p>All figures <code>(EST — measure)</code>; replace with on-host
+<code>RSS</code> + p50/p95/p99 wall-clock captured under
+<code>docs/qa/&lt;run-id&gt;/embeddings/</code> before any PASS:</p>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 24%" />
+<col style="width: 22%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>Model</th>
+<th>Weights (fp32) <code>(EST)</code></th>
+<th>Weights (INT8) <code>(EST)</code></th>
+<th>Resident RSS incl. runtime <code>(EST)</code></th>
+<th>Single short-doc latency <code>(EST)</code></th>
+<th>Batched throughput <code>(EST)</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bge-small (33M)</td>
+<td>~130 MB</td>
+<td>~35 MB</td>
+<td>~0.3–0.6 GB</td>
+<td>~5–20 ms</td>
+<td>high</td>
+</tr>
+<tr>
+<td>nomic-v1.5 (137M)</td>
+<td>~550 MB</td>
+<td>~140 MB</td>
+<td>~0.7–1.2 GB</td>
+<td>~10–40 ms</td>
+<td>med-high</td>
+</tr>
+<tr>
+<td>Qwen3-Emb-0.6B (509M)</td>
+<td>~2.0 GB</td>
+<td>~0.5 GB</td>
+<td>~2.5–3.5 GB</td>
+<td>~30–120 ms</td>
+<td>med</td>
+</tr>
+</tbody>
+</table>
+<p>Host has <strong>64 cores / 251 GiB</strong> (<code>RESUME.md</code>
+live-state), so even the largest CPU model is comfortably resident with
+room for TEI’s batch buffers; the CPU tier never competes with the GPU
+coder fleet for the 32 GB card. Thread count is a tuning knob
+(<code>--tokenization-workers</code> / OMP threads) to bound the
+observer-effect on the shared host (§11.4.128-adjacent hygiene).
+<strong>These numbers gate nothing until measured.</strong></p>
+<hr />
+<h2 id="api-contract-openai-compatible-v1embeddings-consistent-with-api_contract.md-4.4">2.
+API contract — OpenAI-compatible <code>/v1/embeddings</code> (consistent
+with API_CONTRACT.md §4.4)</h2>
+<p>The HelixLLM binary <strong>already registers</strong>
+<code>POST /v1/embeddings</code> (<code>API_CONTRACT.md</code> §2 table
+→ <code>internal/gateway/router.go:76</code>,
+<code>HandleEmbeddings</code>, <strong>API-key</strong> authed). This
+provider becomes the <strong>real backend</strong> for that route —
+replacing the current behaviour, which delegates to a knowledge-layer
+<code>Embedder</code> when present and otherwise <strong>returns a zero
+vector of dim 1536</strong> (<code>API_CONTRACT.md</code> §4.4,
+<code>internal/gateway/openai.go:641-661</code>). That zero-vector stub
+is exactly the bluff the acceptance test in §4 must kill.</p>
+<h3 id="request-must-match-api.embeddingrequest-pkgapiopenai.go142-145">2.1
+Request — MUST match <code>api.EmbeddingRequest</code>
+(<code>pkg/api/openai.go:142-145</code>)</h3>
+<p>Today’s struct is <code>{model, input(string|[]string)}</code>
+(<code>API_CONTRACT.md</code> §4.4). The provider keeps that shape and
+MAY extend it with OpenAI-superset optional fields; extending the struct
+is a <strong>flagged, reviewed change</strong> to
+<code>pkg/api/openai.go</code>, not an ambient assumption (§11.4.6):</p>
+<pre><code>POST /v1/embeddings
+Authorization: Bearer &lt;key&gt;            # API-key middleware, router.go:63-64
+Content-Type: application/json
+{
+  &quot;model&quot;: &quot;helix-embed&quot;,             # Helix alias → backing TEI model (see §2.3)
+  &quot;input&quot;: [&quot;The cat sat on the mat.&quot;, &quot;A feline rested on the rug.&quot;],
+  &quot;encoding_format&quot;: &quot;float&quot;,         # OPTIONAL superset — &quot;float&quot; (default) | &quot;base64&quot;
+  &quot;dimensions&quot;: 512                   # OPTIONAL superset — Matryoshka truncation (nomic/qwen3)
+}</code></pre>
+<ul>
+<li><code>model</code> — a <strong>Helix alias</strong>, not a raw HF id
+(CONST-036/037: models come from the provider layer). Empty
+<code>model</code> currently defaults to
+<code>text-embedding-ada-002</code> (<code>API_CONTRACT.md</code> §4.4,
+<code>openai.go:598-601</code>); the provider maps that legacy default →
+the configured CPU model so old clients keep working.</li>
+<li><code>input</code> — <code>string</code> or <code>[]string</code>
+(unchanged; matches the struct).</li>
+<li><code>encoding_format</code>, <code>dimensions</code> —
+<strong>additive</strong> OpenAI-superset fields; omitted-field
+behaviour is identical to today (float, native dim). Only added if
+<code>api.EmbeddingRequest</code> is extended in a reviewed diff; until
+then they are accepted-and-ignored, documented as
+<code>UNCONFIRMED</code> per §11.4.6.</li>
+</ul>
+<h3 id="response-must-match-api.embeddingresponse-pkgapiopenai.go147-158">2.2
+Response — MUST match <code>api.EmbeddingResponse</code>
+(<code>pkg/api/openai.go:147-158</code>)</h3>
+<p>Byte-shape identical to <code>API_CONTRACT.md</code> §4.4 —
+<code>{object:&quot;list&quot;, data:[{object:&quot;embedding&quot;, embedding:[]float64, index}], model, usage}</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;object&quot;</span><span class="fu">:</span> <span class="st">&quot;list&quot;</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;object&quot;</span><span class="fu">:</span> <span class="st">&quot;embedding&quot;</span><span class="fu">,</span> <span class="dt">&quot;index&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span> <span class="dt">&quot;embedding&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fl">0.0123</span><span class="ot">,</span> <span class="fl">-0.0456</span><span class="ot">,</span> <span class="st">&quot;…768 floats…&quot;</span><span class="ot">]</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;object&quot;</span><span class="fu">:</span> <span class="st">&quot;embedding&quot;</span><span class="fu">,</span> <span class="dt">&quot;index&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;embedding&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fl">0.0119</span><span class="ot">,</span> <span class="fl">-0.0448</span><span class="ot">,</span> <span class="st">&quot;…768 floats…&quot;</span><span class="ot">]</span><span class="fu">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;model&quot;</span><span class="fu">:</span> <span class="st">&quot;helix-embed&quot;</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;usage&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;prompt_tokens&quot;</span><span class="fu">:</span> <span class="dv">14</span><span class="fu">,</span> <span class="dt">&quot;total_tokens&quot;</span><span class="fu">:</span> <span class="dv">14</span><span class="fu">}</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>The gateway’s <code>HandleEmbeddings</code> translates the OpenAI
+response TEI emits into this exact struct (or passes it through, since
+TEI is already OpenAI-shaped). <code>GET /v1/models</code> MUST
+advertise <code>helix-embed</code> with <code>owned_by:&quot;helix&quot;</code>
+(<code>API_CONTRACT.md</code> §4.3) so LLMsVerifier and clients discover
+it (CONST-036).</p>
+<h3 id="model-aliasing-provider-registration">2.3 Model aliasing +
+provider registration</h3>
+<ul>
+<li>A config-driven <code>ProviderDescriptor</code> (mirrors P2-T4,
+<code>04_implementation_plan.md:73</code>) registers the CPU embeddings
+endpoint with LLMsVerifier so the <code>helix-embed</code> alias, its
+dimension, and its capability flag are <strong>verifier-sourced, not
+hardcoded</strong> (CONST-036/037/040).</li>
+<li>Alias→backing-model map lives in HelixLLM config (env / YAML), never
+a source literal (§CONST-046). Adding a model = a config edit, no code
+change.</li>
+</ul>
+<h3 id="error-shape">2.4 Error shape</h3>
+<p>Unchanged from the gateway: OpenAI-error JSON
+<code>{&quot;error&quot;:{&quot;message&quot;:…,&quot;type&quot;:&quot;invalid_request_error&quot;}}</code>
+(<code>API_CONTRACT.md</code> §3, <code>auth.go:58-64</code>) for
+auth/validation; a <code>503</code> with the same envelope when the
+backing container is not yet warm (honest “warming”, never a silent
+zero-vector — see §4).</p>
+<hr />
+<h2 id="containerization-rootless-podman-via-the-containers-submodule-no-gpu">3.
+Containerization — rootless podman via the <code>containers</code>
+submodule, NO GPU</h2>
+<p>Per §11.4.76 (containers-submodule mandate) + §11.4.161 (rootless
+runtime) the service is booted <strong>through</strong>
+<code>vasic-digital/containers</code> (<code>pkg/boot</code> /
+<code>pkg/compose</code> / <code>pkg/health</code>), never a hand-run
+<code>podman</code>/<code>docker</code> command, and never rootful.</p>
+<h3 id="image-run-shape-illustrative-config-injected-no-hardcoded-host-const-045">3.1
+Image + run shape (illustrative — config-injected, no hardcoded host
+§CONST-045)</h3>
+<ul>
+<li><strong>Image:</strong>
+<code>ghcr.io/huggingface/text-embeddings-inference:cpu-1.9</code>
+(x86_64) or <code>:cpu-arm64-1.9</code> (aarch64), selected by
+<code>uname -m</code> per §11.4.81 cross-platform parity. Pinned by
+digest in production (§11.4.76 clause 2).</li>
+<li><strong>NO GPU:</strong> the run spec contains <strong>no</strong>
+<code>--device nvidia.com/gpu=all</code> and <strong>no</strong>
+<code>--security-opt=label=disable</code> GPU flag (contrast the P0 GPU
+proof in <code>04_implementation_plan.md:44</code>). This is the
+structural guarantee it needs no P0.</li>
+<li><strong>Model source:</strong> <code>--model-id &lt;hf-id&gt;</code>
+with a persistent HF-cache volume
+(<code>-v helixllm-tei-cache:/data</code>), OR a pre-fetched local model
+mounted read-only (<code>-v $MODELS_DIR:/data:ro</code>) where
+<code>$MODELS_DIR</code> is <strong>injected</strong> (env), never a
+literal. The model weights are a §11.4.77 re-obtain artefact
+(gitignored; <code>fetch_models.sh</code>-class script downloads from HF
+— matches <code>04_implementation_plan.md</code> P7-T1
+<code>fetch_models.sh</code>).</li>
+<li><strong>Port:</strong> a config-injected host port
+(e.g. <code>:18435</code>, distinct from the coder fleet’s
+<code>:18434</code> in <code>RESUME.md</code>), reached by the HelixLLM
+gateway; <code>--network</code> per the containers-submodule compose
+spec, not a hand-set flag.</li>
+<li><strong>Boot is part of the test entry point</strong> (§11.4.76
+on-demand-infra invariant): the HelixQA embeddings bank boots the
+container via the submodule, waits on <code>pkg/health</code> (TEI
+<code>/health</code>), then drives the gateway route — a short-circuit
+fake that skips the boot is a §11.4 violation.</li>
+<li><strong>Broker interaction:</strong> the VRAM broker’s
+<code>Acquire(ctx, &quot;embed&quot;)</code> (<code>VRAM_BROKER.md</code> §4)
+returns a <strong>0-byte lease</strong> for this CPU variant — the
+broker records the service as CPU-only tier and takes no GPU
+reservation, so the service is admissible even with the whole card
+committed to the coder fleet. No broker code is required to ship the CPU
+provider (the broker is a P1 component; the 0-VRAM class is just its
+CPU-tier default).</li>
+<li><strong>Catalogue-Check (§11.4.74):</strong>
+<code>extend vasic-digital/containers@&lt;sha&gt;</code> — add a
+<code>tei-embeddings</code> compose profile to the containers submodule
+if one does not exist; never an in-project ad-hoc compose file.</li>
+</ul>
+<h3 id="cross-platform-resource-hygiene">3.2 Cross-platform + resource
+hygiene</h3>
+<ul>
+<li>ARM64 host → <code>cpu-arm64-1.9</code> image (TEI documents aarch64
+CPU support), chosen by runtime <code>uname</code> dispatch
+(§11.4.81).</li>
+<li>Bounded CPU threads + memory limit on the container (§12.3 container
+hygiene) so the embedder never starves the developer host (§12.6) — the
+limits are config-injected and captured as evidence during the
+acceptance run.</li>
+</ul>
+<hr />
+<h2 id="anti-bluff-acceptance-the-one-machine-checkable-runtime-signature-11.4.108">4.
+Anti-bluff acceptance — the ONE machine-checkable runtime signature
+(§11.4.108)</h2>
+<p><strong>Definition of done for this provider:</strong> on a
+<strong>clean deploy</strong> (§11.4.108/§11.4.139 — container freshly
+booted via the containers submodule, gateway pointed at it), the
+following single machine-checkable signature verifies and is captured to
+<code>docs/qa/&lt;run-id&gt;/embeddings/</code>:</p>
+<blockquote>
+<p><strong>RUNTIME SIGNATURE (embeddings semantic-order):</strong> POST
+a <strong>sentence triple</strong> to <code>POST /v1/embeddings</code> —
+<code>A</code> = <em>“The cat sat on the mat.”</em>, <code>A&#39;</code> =
+<em>“A feline rested on the rug.”</em> (paraphrase of A), <code>U</code>
+= <em>“Quarterly revenue rose four percent.”</em> (unrelated). Compute
+cosine similarity on the returned vectors and assert
+<strong><code>cos(A, A&#39;) − cos(A, U) ≥ margin</code></strong> (margin
+calibrated on the project’s own fixtures per §11.4.107(13), e.g. ≥
+0.15), AND every returned vector has the <strong>expected
+dimension</strong> and a <strong>non-zero L2 norm</strong>, AND the
+vectors are <strong>deterministic</strong> across two identical requests
+(§11.4.50). The captured artefact is the raw <code>/v1/embeddings</code>
+JSON + the computed cos-similarity matrix + PASS/FAIL verdict with its
+evidence path.</p>
+</blockquote>
+<p>This is a genuine end-to-end proof: it can only PASS if a real model
+produced meaning-bearing vectors through the real gateway route — it is
+impossible to satisfy with the current <strong>dim-1536 zero-vector
+stub</strong> (<code>openai.go:641-661</code>), which fails both the
+non-zero-norm check and the semantic-order margin.</p>
+<h3 id="golden-good-golden-bad-self-validation-11.4.10710">4.1
+Golden-good / golden-bad self-validation (§11.4.107(10))</h3>
+<p>The cosine-order <strong>analyzer itself is mutation-proofed</strong>
+with a fixture pair, wired into the meta-test:</p>
+<ul>
+<li><strong>golden-good fixture</strong> — a captured real
+<code>/v1/embeddings</code> response for the <code>A/A&#39;/U</code> triple
+where the margin genuinely holds → the analyzer MUST return
+<strong>PASS</strong>.</li>
+<li><strong>golden-bad fixtures</strong> (each MUST return
+<strong>FAIL</strong>, proving the analyzer cannot be fooled):
+<ol type="1">
+<li><strong>zero-vector / constant-vector</strong> response (the exact
+§4.4 stub shape) → fails non-zero-norm + margin.</li>
+<li><strong>shuffled-order</strong> response where
+<code>cos(A,U) &gt; cos(A,A&#39;)</code> → fails the semantic-order margin
+(catches a model that emits vectors but no meaning / a wrong-model
+mis-wire).</li>
+<li><strong>wrong-dimension</strong> response → fails the dimension
+check.</li>
+</ol></li>
+</ul>
+<p>Paired §1.1 mutation: strip the margin/non-zero-norm/determinism
+assertion from the analyzer → the zero-vector golden-bad fixture PASSes
+→ the gate FAILs. That mutation is the mechanical proof the acceptance
+test is not itself a bluff.</p>
+<h3 id="higher-order-resilience-proofs-compose-do-not-replace-4">4.2
+Higher-order + resilience proofs (compose, do not replace §4)</h3>
+<ul>
+<li><strong>Retrieval Recall@K on a fixture</strong> (the P3-T6
+signature, <code>04_implementation_plan.md:84</code>): embed a small
+labelled corpus + queries, assert Recall@K above a fixture-calibrated
+floor — the “does it actually power RAG” proof beyond pairwise
+cosine.</li>
+<li><strong>Determinism / re-runnability</strong> (§11.4.50/§11.4.98):
+identical input → byte- identical vectors; the whole bank PASSes at
+<code>-count=3</code>.</li>
+<li><strong>Stress + chaos</strong> (§11.4.85): batch of N≥100 inputs
+(throughput + p50/p95/p99 captured), N≥10 concurrent callers (no
+deadlock/leak), boundary inputs (empty string, max-context-length doc,
+unicode) each categorised; chaos = container SIGKILL mid-request →
+gateway returns an honest <code>503 warming</code>, never a silent
+zero-vector.</li>
+<li><strong>Feature-class evidence (§11.4.69):</strong> the closed
+sink-side taxonomy has no <code>embedding</code> class today; this
+provider <strong>adds one</strong> (taxonomy is <em>open to additions,
+never contraction</em> per §11.4.69) — evidence shape = the captured
+cosine-order + non-zero-norm artefact above. Flagged for the §11.4.69
+taxonomy owner.</li>
+</ul>
+<h3 id="four-layer-verification-11.4.108">4.3 Four-layer verification
+(§11.4.108)</h3>
+<ol type="1">
+<li><strong>SOURCE</strong> — provider + gateway wiring committed;
+pre-build grep gate.</li>
+<li><strong>ARTIFACT</strong> — the TEI CPU image pulled + pinned by
+digest; <code>pkg/health</code> green.</li>
+<li><strong>RUNTIME-ON-CLEAN-TARGET</strong> — the §4 runtime signature
+verifies against a freshly-booted container (not a stale one) — the
+definition of done.</li>
+<li><strong>USER-VISIBLE</strong> — an OpenAI-compatible client
+(HelixCode / any CLI agent) points at <code>/v1/embeddings</code>, gets
+real vectors, and a downstream RAG query returns the right chunk (the
+P3-T7 consumer).</li>
+</ol>
+<hr />
+<h2 id="open-questions-resolve-before-coding">5. Open questions (resolve
+before coding)</h2>
+<ul>
+<li><strong>Q1</strong> Extend <code>api.EmbeddingRequest</code> with
+<code>encoding_format</code> + <code>dimensions</code>, or keep the
+strict <code>{model,input}</code> struct and handle Matryoshka
+server-side only? (Leaning: additive fields, reviewed diff — many OpenAI
+clients send them.)</li>
+<li><strong>Q2</strong> Default CPU model —
+<code>nomic-embed-text-v1.5</code> (recommended) vs
+<code>Qwen3-Embedding-0.6B</code> (same family as the GPU tier). Decide
+on measured Recall@K + latency, not the estimates in §1.5.</li>
+<li><strong>Q3</strong> Does the <code>containers</code> submodule
+already have a TEI/embeddings compose profile, or is this a §11.4.74
+<code>extend</code> PR? (Investigate before scaffolding.)</li>
+<li><strong>Q4</strong> Reranker (<code>bge-reranker</code>, the other
+half of P3-T6) — same TEI CPU container with a <code>/rerank</code>
+route, or a second container? (TEI serves one model per process; likely
+a second CPU container in the same compose profile.)</li>
+</ul>
+<hr />
+<h2 id="composition-footer-constitutional-anchors-touched">6.
+Composition footer — constitutional anchors touched</h2>
+<ul>
+<li><strong>§11.4.6</strong> (no-guessing) — every RAM/latency figure
+flagged <code>(EST — measure)</code>; the VRAM_BROKER CPU-tier
+reconciliation flagged, not asserted.</li>
+<li><strong>§11.4.74</strong> (extend-don’t-reimplement) — reuse TEI
+(the engine P3-T6 already names) + extend the containers submodule; no
+bespoke embedding server.</li>
+<li><strong>§11.4.76 / §11.4.161</strong> (containers submodule /
+rootless) — boot via
+<code>pkg/boot</code>+<code>pkg/compose</code>+<code>pkg/health</code>,
+rootless podman, no GPU device.</li>
+<li><strong>§11.4.77</strong> (re-obtain mechanism) — model weights
+gitignored + <code>fetch_models.sh</code>.</li>
+<li><strong>§11.4.81</strong> (cross-platform parity) —
+<code>cpu-1.9</code> (x86_64) vs <code>cpu-arm64-1.9</code> (aarch64)
+chosen by runtime dispatch.</li>
+<li><strong>§11.4.99 / §11.4.150</strong> (latest-source + deep
+multi-angle research) — engine decision cited to LATEST upstream docs,
+≥2 distinct angles (TEI, llama.cpp, FastEmbed/Optimum,
+sentence-transformers).</li>
+<li><strong>§11.4.107(10)/(13)</strong> (self-validated analyzer +
+fixture-calibrated thresholds) — golden-good/golden-bad cosine-order
+analyzer, project-calibrated margin.</li>
+<li><strong>§11.4.108 / §11.4.139</strong> (four-layer runtime-signature
+on a clean target) — the §4 acceptance signature is the definition of
+done.</li>
+<li><strong>§11.4.69</strong> (sink-side evidence taxonomy) — adds an
+<code>embedding</code> feature class.</li>
+<li><strong>§11.4.85 / §11.4.98 / §11.4.50</strong> (stress+chaos /
+full-automation / determinism).</li>
+<li><strong>§11.4.135</strong> (standing regression guard) — the §4
+signature registers as a permanent guard.</li>
+<li><strong>CONST-036/037/040</strong> (LLMsVerifier single source of
+truth; capability flags verifier-sourced) — <code>helix-embed</code>
+alias + dimension + capability from the verifier, never hardcoded.</li>
+<li><strong>CONST-046</strong> (no hardcoded content) — model ids / host
+/ port config-injected.</li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Deep-research 2026-07-06: -
+https://huggingface.co/docs/text-embeddings-inference/en/supported_models
+- https://huggingface.co/docs/text-embeddings-inference/en/quick_tour -
+https://github.com/huggingface/text-embeddings-inference -
+https://huggingface.co/docs/text-embeddings-inference/en/intel_container
+-
+https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
+- https://github.com/ggml-org/llama.cpp/discussions/7712 -
+https://huggingface.co/nomic-ai/nomic-embed-text-v1.5 -
+https://github.com/qdrant/fastembed -
+https://huggingface.co/blog/intel-fast-embedding</p>
+<p>(Negative finding, §11.4.99(B): the canonical OpenAI
+<code>/v1/embeddings</code> reference page
+<code>platform.openai.com/docs/api-reference/embeddings/create</code>
+returned HTTP 403 to automated fetch on 2026-07-06; the request/response
+shape in §2 is instead grounded in the in-tree
+<code>API_CONTRACT.md</code> §4.4 source-verified struct citations + the
+TEI OpenAI-compatible route docs above, which is the authoritative shape
+for THIS system.)</p>
+</body>
+</html>
