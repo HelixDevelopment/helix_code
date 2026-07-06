@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RESUME</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">RESUME</h1>
+</header>
+<h1 id="resume-helixllm-full-extension-programme-session-resumption-file-11.4.131">RESUME
+— HelixLLM Full-Extension Programme (session-resumption file,
+§11.4.131)</h1>
+<blockquote>
+<p><strong>Fresh session? Paste the SHORT prompt below.</strong> This
+file is the single out-of-the-box entry point. Always current; re-read
+on every new session. Track <code>(T1/main)</code>.</p>
+</blockquote>
+<h2 id="short-resumption-prompt-paste-into-a-fresh-session">SHORT
+resumption prompt (paste into a fresh session)</h2>
+<blockquote>
+<p>Read <code>docs/research/07.2026/00_master/RESUME.md</code> +
+<code>.superpowers/sdd/progress.md</code> (the live SDD ledger), run
+<code>git fetch --all</code>, and continue the HelixLLM full-extension
+programme. Phase 0 (GPU) + Phase 1 (fleet + fixes) + Phase 2
+(HelixAgent→HelixLLM e2e) are PROVEN; the LLMsVerifier
+capability-verification chain (C1→C2→C4→C5→C3) is fully landed and under
+a final combined independent review. Next: land the review to GO, then
+the release-prep pass (pointer bumps + prefixed release tag §11.4.151
+via merge-onto-latest §11.4.113, NO force-push). Honor anti-bluff §11.4,
+subagent-driven §11.4.70, <code>(T1/&lt;branch&gt;)</code> labels
+§11.4.182, one canonical branch
+<code>feature/helixllm-full-extension</code> §11.4.181, §11.4.174
+shared-host process/tree ownership.</p>
+</blockquote>
+<h2 id="current-phase-immediate-next-action">Current phase + immediate
+next action</h2>
+<ul>
+<li><strong>Phase 0 (GPU foundation):</strong> ✅ COMPLETE — rootless
+CDI passthrough + sm_120 build + real 30B inference PROVEN.</li>
+<li><strong>Phase 1 (fleet + fixes):</strong> ✅ 30B coder live;
+Containerfile + claude_toolkit fixes landed, all re-reviewed
+<strong>GO</strong>.</li>
+<li><strong>Phase 2 (HelixAgent→HelixLLM e2e):</strong> ✅
+<strong>PROVEN + review GO</strong> — real generate + Postgres/Redis
+persistence (cognee/vector honest SKIP, OQ2).</li>
+<li><strong>LLMsVerifier chain:</strong> ✅ C1 C2 C4 C5 C3 all landed —
+<strong>under final combined C4+C5+C3 review</strong> (in flight).</li>
+<li><strong>Immediate next:</strong> land the combined review to GO (or
+one fix→re-review loop); then <strong>release-prep</strong> — refresh
+this file (done), bump meta-repo submodule pointers (careful of the
+§11.4.174 concurrent helix_agent go.mod track), then the prefixed
+release tag.</li>
+<li><strong>Terminal goal (this scope):</strong> a fully-validated,
+prefixed release tag (§11.4.151) published across main + all owned
+submodules; local HelixLLM on the RTX 5090 exposed via HelixAgent to
+HelixCode/CLI agents.</li>
+</ul>
+<h2 id="live-server-operator-testable-running-now">LIVE SERVER
+(operator-testable, running now)</h2>
+<p><strong>Qwen3-Coder-30B-A3B serving on
+<code>http://localhost:18434/v1</code></strong> (OpenAI-compatible) —
+container <code>helixllm-coder</code> (<code>podman ps</code>),
+<code>--network=host</code>, image
+<code>localhost/helixllm/llamacpp-router:cuda12.8-sm120</code>, 8
+parallel slots, 24k ctx, q8_0 KV, ~19.4 GB VRAM. PROVEN: single-stream
+~220 tok/s (coder_live_e2e log; RESUME’s older ~322 tok/s was a
+different –jinja/q8_0-KV run) + 8 concurrent agents <span class="citation" data-cites="85">@85</span>–96 tok/s; real coding output
+(<code>is_palindrome</code>, <code>func Add</code>). Restart:
+<code>podman start helixllm-coder</code>.</p>
+<blockquote>
+<p><strong>ENDPOINT GOTCHA (load-bearing, proven in Phase-2
+<code>docs/qa/phase2_e2e_20260706/12_endpoint_finding.txt</code>):</strong>
+raw <code>curl</code> uses
+<code>http://localhost:18434/v1/chat/completions</code>. A client/SDK
+that APPENDS <code>/v1/chat/completions</code> (incl. HelixAgent via
+<code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT</code>) MUST use the BASE
+<code>http://localhost:18434</code> (NO <code>/v1</code>) — else
+<code>.../v1</code> → double <code>/v1/v1</code> → <strong>HTTP
+404</strong>. (This SUPERSEDES the <code>:18434/v1</code> value in
+<code>10_llmsverifier_helixagent/PHASE2_BLOCKERS_INVESTIGATION.md</code>
+OQ1 — that doc line is pending a correction commit in the release-gate
+sweep.) NOTE: latest llama.cpp <code>-fa</code> takes a value
+(<code>-fa on</code>).</p>
+</blockquote>
+<h2 id="live-state-anchors-facts-11.4.6">Live-state anchors (facts,
+§11.4.6)</h2>
+<table>
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>Anchor</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Constitution HEAD followed</td>
+<td><code>0882b9e</code> (through §11.4.182)</td>
+</tr>
+<tr>
+<td>Host</td>
+<td>ALT Workstation 11.1; RTX 5090 32 GB; driver 570.169; CUDA 12.8;
+podman 5.7.1 rootless; 64 cores / 251 GiB</td>
+</tr>
+<tr>
+<td>Canonical branch (§11.4.181)</td>
+<td><code>feature/helixllm-full-extension</code> — ACTIVE (no upstream
+tracking configured yet)</td>
+</tr>
+<tr>
+<td>Router image (built+proven)</td>
+<td><code>localhost/helixllm/llamacpp-router:cuda12.8-sm120</code> —
+latest llama.cpp, sm_120, OpenSSL/curl (<code>-hf</code> HTTPS proven),
+ships <code>rpc-server</code></td>
+</tr>
+<tr>
+<td>Release prefix (§11.4.151)</td>
+<td><code>HELIX_RELEASE_PREFIX</code> else <code>helix_code</code></td>
+</tr>
+<tr>
+<td>Shared-host caution (§11.4.174)</td>
+<td>helix_agent checkout carries a CONCURRENT QA/dep track’s uncommitted
+go.mod/go.sum + <code>.qa_bak</code> — NOT ours; do not sweep on
+pointer-bump</td>
+</tr>
+</tbody>
+</table>
+<h2 id="done-so-far-this-session-real-evidence-backed-commits">Done so
+far this session (real, evidence-backed commits)</h2>
+<ul>
+<li>helix_llm <code>13d2d27</code> Containerfile: hard-fail
+<code>ggml-rpc-server</code> copy (§11.4.122) + OpenSSL/curl — re-review
+<strong>GO</strong>; <code>d8b3fa2</code> phase-1 QA evidence
+(<code>-hf</code> 469MB HTTPS download + live coder e2e);
+<code>3f85e3d5</code> OPERATOR_GUIDE.</li>
+<li>claude_toolkit <code>ef77b19</code> loud-fail resolution +
+discriminating test; <code>9d12347</code> C1 regression guard (37/0,
+§1.1 mutation-proven) — <strong>REVIEW-3 CLEAN</strong>.</li>
+<li>llms_verifier <code>09f9533c</code> C4 (RAG/Skills/Plugins probes) ·
+<code>28e6625a</code> C5 (Verify composes+persists VerificationResult) ·
+<code>ad18e91f</code> C3 (fail-closed resolver, seeds→unverified) —
+<strong>chain complete, under combined review</strong>.</li>
+<li>helix_agent <code>17f08ba9</code> Phase-2 live tests (provider e2e +
+redis) — pointer NOT yet bumped (§11.4.174).</li>
+<li>helix_code <code>cf26b813</code> embeddings design (TEI CPU) ·
+<code>9bf4c3da</code> Phase-2 stack design (Qdrant) ·
+<code>da0fabae</code> blockers investigation (OQ1/OQ2) ·
+<code>5223d10d</code> C3 handoff · <code>278df582</code> Phase-2 e2e
+evidence.</li>
+</ul>
+<h2 id="next-actions-in-order">Next actions (in order)</h2>
+<ol type="1">
+<li>Land the combined <strong>C4+C5+C3 review</strong> to GO (adjudicate
+<code>detector.go:61</code> no-probe self-cert).</li>
+<li>Correct <code>PHASE2_BLOCKERS_INVESTIGATION.md</code> OQ1 verdict →
+base <code>http://localhost:18434</code>.</li>
+<li>Release-prep: bump main-repo submodule pointers (helix_llm,
+claude_toolkit, llms_verifier; helix_agent carefully per §11.4.174) →
+§11.4.40 full-suite pre-tag sweep → prefixed tag (§11.4.151) → publish
+via merge-onto-latest (§11.4.113, NO force-push §2.1
+multi-upstream).</li>
+<li>Post-release follow-ups (tracked): P-OQ2-A wire
+<code>cognee_memory_repository</code> + P-OQ2-B re-verify cognee 1.2.2
+bug; <code>detector.go:61</code> no-probe self-cert; VRAM broker IMPL
+(design 5102607 done) to unlock GPU vision/image/video; Phase-3 CPU
+embeddings + translation NMT impl (designs done).</li>
+</ol>
+<h2 id="binding-constraints-do-not-violate">Binding constraints (do not
+violate)</h2>
+<p>Anti-bluff §11.4 (real captured proof, no metadata PASS) ·
+runtime-signature = done §11.4.108 · no-force-push merge-onto-latest
+§11.4.113 · rootless podman via containers submodule §11.4.76/§11.4.161
+· no CI §11.4.156 · no silent removal §11.4.122 /
+investigate-before-remove §11.4.124 · deep multi-angle research per
+change §11.4.150 · independent review to GO
+§11.4.125/§11.4.142/§11.4.134 · one canonical branch §11.4.181 ·
+<code>(T&lt;N&gt;/&lt;branch&gt;)</code> labels §11.4.182 · shared-host
+ownership §11.4.174.</p>
+</body>
+</html>
