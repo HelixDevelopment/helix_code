@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PHASE2_BLOCKERS_INVESTIGATION</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PHASE2_BLOCKERS_INVESTIGATION</h1>
+</header>
+<h1 id="phase-2-blockers-investigation-helixagenthelixllm-endpoint-oq1-cognee-memory-write-oq2">Phase-2
+Blockers Investigation — HelixAgent→HelixLLM endpoint (OQ1) + Cognee
+memory-write (OQ2)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-07-06 <strong>Maintainer:</strong> CLI-Agent Fusion programme
+(systematic-debugging investigation, §11.4.102)</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Scope</strong></td>
+<td>Root-cause investigation (read-only) of the two open blockers to the
+Phase-2 HelixAgent→HelixLLM end-to-end proof, per
+<code>docs/research/07.2026/00_master/PHASE2_SERVICE_STACK.md</code> §7
+(Q1, Q6).</td>
+</tr>
+<tr>
+<td><strong>Method</strong></td>
+<td>§11.4.102 systematic-debugging; FACTs only, cited to
+<code>file:line</code> + git commits + captured command output. No
+source flipped/edited (config flip + provider change are separate
+reviewed changes).</td>
+</tr>
+<tr>
+<td><strong>Branch</strong></td>
+<td><code>feature/helixllm-full-extension</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="oq1-helixagenthelixllm-endpoint-ambiguity">OQ1 —
+HelixAgent→HelixLLM endpoint ambiguity</h2>
+<h3 id="fact-findings">FACT findings</h3>
+<p><strong>F1 — resolveEndpoint precedence chain (cited).</strong>
+<code>submodules/helix_agent/internal/llm/providers/helixllm/provider.go:59-70</code>
+implements <code>resolveEndpoint(explicit string)</code> with 4-level
+precedence:</p>
+<ol type="1">
+<li><code>explicit</code> (caller / provider-registry baseURL) —
+<code>provider.go:60-62</code></li>
+<li><code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT</code>
+(<code>EnvLocalOpenAIEndpoint</code>, <code>provider.go:41</code>,
+<code>:63-65</code>) — the local plain-HTTP OpenAI-router seam</li>
+<li><code>HELIX_LLM_ENDPOINT</code> (<code>EnvEndpoint</code>,
+<code>provider.go:40</code>, <code>:66-68</code>) — general
+override</li>
+<li><code>DefaultEndpoint</code> = <code>&quot;https://localhost:8443&quot;</code>
+(<code>provider.go:29</code>, <code>:69</code>) — TLS gateway
+default</li>
+</ol>
+<p><code>NewProvider</code> applies it at construction:
+<code>cfg.Endpoint = resolveEndpoint(cfg.Endpoint)</code>
+(<code>provider.go:116</code>).</p>
+<p><strong>F2 — the three candidate endpoints classified
+(FACT).</strong> - <code>:8443</code> (TLS gateway) — the code default
+(<code>provider.go:29</code>) AND the <code>.env.example</code> default
+<code>HELIX_LLM_ENDPOINT=http://localhost:8443</code>
+(<code>submodules/helix_agent/.env.example:88</code>). Aspirational: it
+is the legacy default, not the proven-live server (per master §7-Q1 /
+<code>RESUME.md</code>). - <code>:18434/v1</code> (llama-server, plain
+HTTP) — the <strong>only proven-live</strong> server today
+(<code>helixllm-coder</code> container Up; master §7-Q1). Reached ONLY
+via an env var; not a code default. - <code>:8100/v1</code> (router) —
+planned (plan P6-T1); not yet serving. Aspirational.</p>
+<p><strong>F3 — which env var + value pins the proven-live coder (FACT,
+cited).</strong> Because <code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT</code>
+sits ABOVE <code>HELIX_LLM_ENDPOINT</code> in precedence
+(<code>provider.go:63-68</code>), setting
+<strong><code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT=http://localhost:18434/v1</code></strong>
+makes HelixAgent’s HelixLLM provider resolve to the proven-live coder
+regardless of the <code>.env.example</code> <code>:8443</code> default.
+<code>:8443</code> and <code>:8100</code> are aspirational (not serving
+today).</p>
+<h3 id="proof-captured-this-session">PROOF (captured this session)</h3>
+<p>Precedence-chain unit test
+(<code>internal/llm/providers/helixllm/provider_test.go:102-171</code>,
+added by commit
+<code>28ae35ea &quot;test(helixllm): cover full precedence chain of resolveEndpoint&quot;</code>):</p>
+<pre><code>$ go test -v -run &#39;TestResolveEndpoint_PrecedenceChain|TestNewProvider_DefaultEndpoint&#39; ./internal/llm/providers/helixllm/
+--- PASS: TestNewProvider_DefaultEndpoint (0.00s)
+--- PASS: TestResolveEndpoint_PrecedenceChain (0.00s)
+    --- PASS: .../explicit_endpoint_wins_over_everything
+    --- PASS: .../only_local_OpenAI_endpoint_set_is_used
+    --- PASS: .../only_general_endpoint_set_is_used
+    --- PASS: .../both_local_and_general_set:_local_OpenAI_endpoint_wins
+    --- PASS: .../nothing_set_falls_back_to_DefaultEndpoint
+ok      dev.helix.agent/internal/llm/providers/helixllm 0.004s</code></pre>
+<p>Targeted harness proving the EXACT <code>:18434/v1</code> resolution
+(temporary test file, run then removed — working tree left clean,
+read-only investigation preserved):</p>
+<pre><code>$ go test -v -run TestOQ1_Pin18434 ./internal/llm/providers/helixllm/
+    zz_oq1harness_test.go:7: resolved endpoint = &quot;http://localhost:18434/v1&quot; (DefaultEndpoint=&quot;https://localhost:8443&quot;)
+--- PASS: TestOQ1_Pin18434 (0.00s)
+ok      dev.helix.agent/internal/llm/providers/helixllm 0.003s</code></pre>
+<p>Harness set only
+<code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT=http://localhost:18434/v1</code>
+(general env unset) and asserted
+<code>resolveEndpoint(&quot;&quot;) == &quot;http://localhost:18434/v1&quot;</code>.
+Confirmed. (Full HelixAgent binary run against live infra was NOT
+attempted — unit-level resolveEndpoint proof is the correct evidence
+layer per §11.4.3; a live generate is a separate step once the endpoint
+is pinned.)</p>
+<h3 id="oq1-recommendation">OQ1 RECOMMENDATION</h3>
+<p>Pin, for the Phase-2 proof:</p>
+<pre><code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT=http://localhost:18434/v1</code></pre>
+<p>Rationale: it is the highest-precedence env seam
+(<code>provider.go:63-65</code>), overrides the aspirational
+<code>:8443</code> <code>.env.example</code> default without editing it,
+and points at the ONLY proven-live server. Do NOT rely on
+<code>HELIX_LLM_ENDPOINT</code> (it is lower precedence and its
+<code>.env.example</code> value is the non-serving <code>:8443</code>).
+<code>:8100</code> is not yet serving. Leave
+<code>HELIX_LLM_TLS_SKIP_VERIFY</code> irrelevant here (the coder is
+plain HTTP). This is a <code>.env</code>-only change — no provider-code
+edit required.</p>
+<hr />
+<h2 id="oq2-cognee-integration-disabled">OQ2 — Cognee integration
+disabled</h2>
+<h3 id="fact-findings-1">FACT findings</h3>
+<p><strong>F4 — <code>COGNEE_BUG.md</code> DOES exist (master §7-Q6
+correction).</strong> Master §7-Q6 states the referenced
+<code>COGNEE_BUG.md</code> was “not found in
+<code>submodules/helix_agent/</code>”. That is INCORRECT: the file is at
+<strong><code>submodules/helix_agent/docs/COGNEE_BUG.md</code></strong>
+(committed <code>51f7ee92</code>, 2026-01-30). §7-Q6 looked at the
+submodule root, not <code>docs/</code>.</p>
+<p><strong>F5 — WHEN/WHY it was disabled (git history,
+§11.4.124).</strong> - <code>configs/development.yaml:317</code>
+<code>cognee_integration: false</code> was introduced ALREADY-DISABLED
+on <strong>2025-12-14</strong> (commit <code>afd0865c</code>, which
+first added the <code>cognee:</code> block +
+<code>cognee_integration: false</code>). It was never enabled in
+development; the comment cites <code>COGNEE_BUG.md</code>. - The bug doc
+explaining WHY landed 6 weeks later (<code>51f7ee92</code>, 2026-01-30).
+- <code>configs/production.yaml:230</code> has
+<code>cognee_integration: true</code> (production differs from
+development).</p>
+<p><strong>F6 — the upstream bug is REAL (documented root
+cause).</strong> <code>docs/COGNEE_BUG.md</code> records:
+<code>AttributeError: &#39;str&#39; object has no attribute &#39;nodes&#39;</code> at
+<code>/app/cognee/tasks/memify/extract_subgraph_chunks.py:9</code>
+inside the Cognee CONTAINER — the <code>extract_subgraph_chunks</code>
+task receives a list of strings but expects subgraph objects with
+<code>.nodes</code>, so <code>/api/v1/search</code>,
+<code>/api/v1/add</code>, <code>/api/v1/memify</code> hang (~30 s
+timeout). Health + auth endpoints work. Tested against
+<code>ghcr.io/topoteretes/cognee:latest</code> (Jan 2026). Status in
+doc: <strong>BLOCKED — waiting for upstream fix.</strong> This is a
+genuine upstream-code bug, not a HelixAgent defect.</p>
+<p><strong>F7 — two distinct “memory-write” paths — do NOT conflate
+them.</strong> - <strong>(a) Cognee CONTAINER path (runtime write
+today):</strong>
+<code>internal/handlers/cognee_api_handler.go:116</code>
+<code>AddMemory</code> (<code>POST /cognee/memory</code>) →
+<code>services/cognee_service.go:616</code>
+<code>CogneeService.AddMemory</code> → container
+<code>/api/v1/add</code> (multipart, primary) with
+<code>/api/v1/memify</code> best-effort non-blocking fallback
+(<code>cognee_service.go:614-736</code>). Gated by
+<code>s.config.Enabled</code> (<code>cognee_service.go:617</code>). This
+path writes into the Cognee container’s own store — it does NOT write a
+<code>cognee_memories</code> Postgres row. It is config-disabled in
+development AND blocked by F6. - The two-phase
+add-primary/memify-fallback design (commit <code>e99e5e44</code>,
+2026-01-29) is one day OLDER than the bug doc — i.e. it was the
+attempted workaround, and the doc a day later still records
+<code>/api/v1/add</code> timing out. So “add is reliable” was
+aspirational against the buggy <code>:latest</code> image. - <strong>(b)
+Postgres <code>cognee_memories</code> row (the Phase-2 §11.4.108
+signature target):</strong>
+<code>internal/database/cognee_memory_repository.go</code> is a REAL,
+fully-implemented pgx repository (446 lines,
+<code>Create</code>→<code>INSERT INTO cognee_memories</code> at
+<code>:42-66</code>, plus 19 other real query methods — NOT stubbed, no
+TODO/simulate/placeholder). Schema exists
+(<code>sql/schema/cognee_memories.sql</code>,
+<code>internal/database/migrations/001_initial_schema.sql</code>).
+<strong>BUT it is UNWIRED:</strong>
+<code>NewCogneeMemoryRepository</code> is constructed ONLY in
+<code>_test.go</code> files — grep of all non-test <code>.go</code> for
+<code>CogneeMemoryRepository</code> returns only its own definition + a
+doc-comment mention (<code>internal/database/doc.go:43</code>). No
+service, handler, or server wiring instantiates it. So a real HelixAgent
+generate does NOT currently persist a <code>cognee_memories</code> row —
+nothing on the request path calls the repository.</p>
+<h3 id="fact-verdict-is-the-memory-write-path-a-usable-now-b-after-a-config-flip-c-blocked">FACT
+verdict — is the memory-write path (a) usable now / (b) after a config
+flip / (c) blocked?</h3>
+<p><strong>NEITHER a simple config flip NOR usable now.</strong> Two
+independent gaps stack: 1. <strong>Wiring gap (repository
+unwired):</strong> the Phase-2 signature target — a
+<code>cognee_memories</code> Postgres row written by a real generate —
+cannot occur today because <code>CogneeMemoryRepository</code> has zero
+production callers (F7b). A config flip does not wire it. 2.
+<strong>Upstream-bug gap (container path):</strong> flipping
+<code>cognee.enabled</code> / <code>cognee_integration: true</code>
+enables the CONTAINER path (F7a), whose write endpoints are blocked by
+the real upstream bug F6, verified only against
+<code>ghcr.io/topoteretes/cognee:latest</code> (Jan 2026). Whether the
+pinned <code>cognee/cognee:1.2.2</code> (2026-06-26, master §7-Q4) fixes
+the <code>extract_subgraph_chunks</code> AttributeError is
+<strong>UNVERIFIED</strong> — not tested this session, no live container
+exercised.</p>
+<h3 id="oq2-recommendation">OQ2 RECOMMENDATION</h3>
+<p>The Phase-2 §11.4.108 memory-write signature (“a real generate
+persisting a <code>cognee_memories</code> row”) <strong>MUST be an
+honest §11.4.3 SKIP with a tracked work item</strong> for the current
+Phase-2 proof — it is NOT provable today, and NOT unblocked by a config
+flip alone. Two prerequisites (both separate reviewed changes) must land
+first:</p>
+<ul>
+<li><strong>P-OQ2-A (wiring):</strong> wire
+<code>CogneeMemoryRepository</code> into the generate/memory request
+path so a real generate persists a <code>cognee_memories</code> row
+(currently the repo is dead-wired — investigate-before-remove per
+§11.4.124; it should be WIRED, not removed). This makes the Postgres-row
+signature reachable independently of the buggy container.</li>
+<li><strong>P-OQ2-B (upstream-bug re-verification):</strong> re-verify
+the F6 <code>extract_subgraph_chunks</code> bug against the
+digest-pinned <code>cognee/cognee:1.2.2</code> image (§7-Q4) with a real
+<code>/api/v1/add</code> + <code>/api/v1/memify</code> call capturing
+wire evidence, BEFORE re-enabling <code>cognee_integration</code>. Do
+NOT assume 1.2.2 fixes it (§11.4.6 no-guessing); the current evidence is
+a Jan-2026 <code>:latest</code> failure.</li>
+</ul>
+<p>Honest boundary: if P-OQ2-A lands, the <strong>Postgres-row</strong>
+signature becomes provable WITHOUT the container (the repository is real
+and the table exists) — that is the cheaper path to a genuine §11.4.108
+memory-write signature. The container graph-enrichment (search/memify)
+remains gated on P-OQ2-B. Recommend the Phase-2 memory-write signature
+target the wired Postgres-row path (P-OQ2-A), and track container
+enrichment (P-OQ2-B) as a separate item so the master §7-Q6 blocker is
+decomposed correctly.</p>
+<hr />
+<h2 id="summary">Summary</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Blocker</th>
+<th>Verdict</th>
+<th>Pin / action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OQ1</strong> endpoint</td>
+<td>RESOLVED (proven)</td>
+<td>Set
+<code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT=http://localhost:18434/v1</code>
+(highest-precedence env seam, <code>provider.go:63-65</code>; captured
+PASS). <code>:8443</code>/<code>:8100</code> aspirational.
+<code>.env</code>-only, no code edit.</td>
+</tr>
+<tr>
+<td><strong>OQ2</strong> cognee</td>
+<td>SKIP-with-tracked-item (real 2-part blocker)</td>
+<td>Postgres <code>cognee_memories</code> repo is real but UNWIRED
+(P-OQ2-A); container path is config-disabled + blocked by a real
+upstream <code>extract_subgraph_chunks</code> AttributeError (F6),
+re-verify vs <code>cognee/cognee:1.2.2</code> (P-OQ2-B). Not a config
+flip.</td>
+</tr>
+</tbody>
+</table>
+<p>Master §7 corrections captured: <strong>§7-Q6 was wrong</strong> —
+<code>COGNEE_BUG.md</code> exists at
+<code>submodules/helix_agent/docs/COGNEE_BUG.md</code>; the upstream bug
+is real and documented (not merely a missing file), and the blocker is
+two-part (wiring + upstream), not a single config toggle.</p>
+</body>
+</html>
