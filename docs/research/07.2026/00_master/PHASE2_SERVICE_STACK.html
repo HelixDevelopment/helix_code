@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PHASE2_SERVICE_STACK</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PHASE2_SERVICE_STACK</h1>
+</header>
+<h1 id="phase-2-backing-service-stack-design-helixagent-helixllm-end-to-end">Phase-2
+Backing-Service Stack — Design (HelixAgent → HelixLLM end-to-end)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Document</strong></td>
+<td>Phase-2 backing-service stack design (no code) — rootless-podman
+infra behind the HelixAgent→HelixLLM end-to-end flow</td>
+</tr>
+<tr>
+<td><strong>Revision</strong></td>
+<td>1 · <strong>Created</strong> 2026-07-06</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>DESIGN READY — pending build-phase pin verification (§11.4.6 open
+items in §7)</td>
+</tr>
+<tr>
+<td><strong>Track/branch</strong></td>
+<td><code>(T1/main)</code> →
+<code>feature/helixllm-full-extension</code></td>
+</tr>
+<tr>
+<td><strong>Constitution HEAD followed</strong></td>
+<td><code>0882b9e</code> (through §11.4.182)</td>
+</tr>
+<tr>
+<td><strong>Basis</strong></td>
+<td><code>04_implementation_plan.md</code> P1-T2 / P2 / P3-T7 ·
+<code>RESUME.md</code> live-state · <code>submodules/containers</code>
+(<code>digital.vasic.containers</code>) public API ·
+<code>submodules/helix_llm/docs/API_CONTRACT.md</code> · HelixAgent
+<code>.env.example</code> + compose files (real, source-verified)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Scope.</strong> This document designs ONLY the Phase-2
+<em>backing-service stack</em> — the rootless-podman infrastructure
+(PostgreSQL, Redis, Cognee, a vector DB, plus Cognee’s transitive graph
+store) that HelixAgent needs so a real generate request against the live
+HelixLLM persists a session, caches, and writes a memory. It does NOT
+design the LLM serving core (Phase 0/1, already proven live) nor the
+<code>/v1</code> gateway (Phase 2 P2-T1). It is a design (no new code);
+Go snippets below are <em>usage/call shapes</em> of the existing
+<code>digital.vasic.containers</code> API, not new implementation.</p>
+</blockquote>
+<hr />
+<h2 id="what-the-repo-already-gives-us-survey-11.4.74-reuse-dont-reimplement">0.
+What the repo already gives us (survey — §11.4.74
+reuse-don’t-reimplement)</h2>
+<p>The backing services are <strong>already wired</strong>,
+parameterised, and env-injected across three real compose files and
+HelixAgent’s <code>.env.example</code>. Phase-2’s job is to boot them
+<strong>through the <code>containers</code> submodule’s
+<code>pkg/boot</code>/<code>pkg/compose</code>/<code>pkg/health</code>
+primitives</strong> (§11.4.76 on-demand-infra invariant) rather than
+<code>podman-compose up</code>, pin the images (the in-tree files use
+forbidden <code>:latest</code> tags — §11.4.99), and prove the
+end-to-end runtime signature (§4).</p>
+<p>Source-verified evidence:</p>
+<ul>
+<li><strong><code>submodules/containers/pkg/compose/helix_project.go:89-312</code></strong>
+— <code>DefaultHelixServices()</code> already ships
+<code>postgres-primary</code> (<code>postgres:16-alpine</code>),
+<code>redis-master-*</code> (<code>redis:7-alpine</code>) with real
+health checks (<code>pg_isready</code>,
+<code>redis-cli ping</code>).</li>
+<li><strong><code>submodules/helix_agent/docker-compose.helixllm-infra.yml</code></strong>
+— HelixLLM app infra: <code>postgres:16-alpine</code> +
+<code>redis:7-alpine</code> + <code>qdrant/qdrant:latest</code> (+
+Kafka), all with <code>${VAR:-default}</code> env injection and
+<code>mem_limit</code>/<code>pids_limit</code>/
+<code>oom_score_adj</code> set (§12.3 hygiene).</li>
+<li><strong><code>submodules/helix_agent/docker-compose.memory-infra.yml</code></strong>
+— HelixMemory infra: <code>qdrant/qdrant:latest</code> +
+<code>neo4j:5-community</code> + <code>redis:7-alpine</code> +
+<code>pgvector/pgvector:pg16</code>.</li>
+<li><strong><code>submodules/helix_agent/docker-compose.memory.yml</code></strong>
+— Cognee (<code>ghcr.io/topoteretes/cognee:latest</code>) wired to
+<code>VECTOR_DB_PROVIDER=qdrant</code>,
+<code>GRAPH_DB_PROVIDER=neo4j</code>, <code>DATABASE_*</code> → Postgres
+(+ mem0, letta siblings).</li>
+<li><strong><code>submodules/helix_agent/.env.example</code></strong> —
+the confirmed env-var contract HelixAgent reads (§3):
+<code>HELIX_LLM_ENDPOINT</code>, <code>HELIX_LLM_DB_*</code>,
+<code>HELIX_LLM_REDIS_*</code>, <code>HELIX_LLM_VECTOR_DB=qdrant</code>,
+<code>HELIX_MEMORY_COGNEE_ENDPOINT</code>,
+<code>HELIX_MEMORY_QDRANT_ENDPOINT</code>,
+<code>HELIX_MEMORY_NEO4J_*</code>,
+<code>HELIX_MEMORY_REDIS_*</code>.</li>
+<li><strong><code>submodules/helix_agent/internal/database/cognee_memory_repository.go</code></strong>
++ <strong><code>internal/database/db.go:324-351</code></strong> —
+HelixAgent persists agent memory in a Postgres table
+<code>cognee_memories(session_id, dataset_name, content, vector_id, graph_nodes, search_key, …)</code>.
+<code>vector_id</code> ↔︎ Qdrant point, <code>graph_nodes</code> ↔︎ Neo4j.
+<strong>This table is the concrete sink for the §4 runtime
+signature.</strong></li>
+</ul>
+<hr />
+<h2 id="service-inventory">1. Service inventory</h2>
+<p>Ports below are the host-side ports the in-tree compose files already
+use; all are &gt; 1024, so <strong>rootless podman binds them without
+privilege</strong>. RAM figures are <code>(EST — measure)</code> per
+§11.4.6 (measure the real RSS at boot; do not ship the estimate as
+fact). None of these services touches the GPU — all are
+<strong>CPU-only</strong> (confirmed in
+<code>submodules/helix_llm/docs/VRAM_BROKER.md:29</code>: <em>“CPU-only
+| Qdrant, HelixMemory, … | no GPU reservation | 0 GB GPU”</em>), so they
+never contend with the RTX 5090 serving fleet.</p>
+<table>
+<colgroup>
+<col style="width: 2%" />
+<col style="width: 8%" />
+<col style="width: 22%" />
+<col style="width: 23%" />
+<col style="width: 12%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Service</th>
+<th>Purpose (in this stack)</th>
+<th>Recommended pinned image</th>
+<th>Host port(s)</th>
+<th>CPU/RAM budget <code>(EST — measure)</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>PostgreSQL</strong> (session/app store)</td>
+<td>HelixLLM session/app persistence — the durable record a generate
+call writes (<code>HELIX_LLM_DB_*</code>)</td>
+<td><code>docker.io/pgvector/pgvector:pg17</code> (postgres 17 +
+pgvector superset; one image serves both roles)</td>
+<td><code>5433→5432</code> (HelixLLM), <code>5434→5432</code>
+(memory)</td>
+<td>~0.5 vCPU idle; <strong>~256–512 MiB (EST)</strong>;
+<code>mem_limit 4g</code> cap already set</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Redis</strong> (cache)</td>
+<td>HelixLLM response/route cache + memory-service cache
+(<code>HELIX_LLM_REDIS_*</code>, <code>HELIX_MEMORY_REDIS_*</code>)</td>
+<td><code>docker.io/redis:7-alpine</code> (in-use pin; §7-Q2 re: redis
+8)</td>
+<td><code>6381→6379</code> (HelixLLM), <code>6380→6379</code>
+(memory)</td>
+<td>~0.1 vCPU idle; <strong>~32–128 MiB (EST)</strong>;
+<code>mem_limit 1–4g</code> cap set</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Cognee</strong> (AI memory / knowledge-graph engine)</td>
+<td>Ingest+query long-term agent memory; writes the vector + graph the
+§4 signature asserts (<code>HELIX_MEMORY_COGNEE_ENDPOINT</code>,
+<code>/api/v1/health</code>)</td>
+<td><code>docker.io/cognee/cognee:1.2.2</code> (API server —
+<strong>not</strong> <code>cognee-mcp</code>; §7-Q4 bloat)</td>
+<td><code>8000→8000</code></td>
+<td>~1–2 vCPU under load; <strong>~1.5–2 GiB (EST)</strong>;
+<code>mem_limit 2–4g</code> cap set</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Qdrant</strong> (vector DB — chosen; see §1.1)</td>
+<td>Vector store for Cognee/mem0/RAG embeddings; <code>vector_id</code>
+in <code>cognee_memories</code> resolves here
+(<code>HELIX_MEMORY_QDRANT_ENDPOINT</code>, <code>/healthz</code>)</td>
+<td><code>docker.io/qdrant/qdrant</code> <strong>pinned by
+digest</strong> (~<code>v1.18.x</code>; §7-Q3)</td>
+<td><code>6333→6333</code> (HTTP), <code>6334→6334</code> (gRPC)</td>
+<td>~0.25 vCPU idle; <strong>~200–500 MiB (EST)</strong>;
+<code>mem_limit 4g</code> cap set</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Neo4j</strong> (graph store — <em>transitive</em> Cognee
+dep)</td>
+<td>Cognee’s <code>GRAPH_DB_PROVIDER=neo4j</code> knowledge graph;
+<code>graph_nodes</code> in <code>cognee_memories</code> resolves here
+(<code>HELIX_MEMORY_NEO4J_*</code>)</td>
+<td><code>docker.io/neo4j:5-community</code> (§7-Q5 re: calendar
+versioning)</td>
+<td><code>7474→7474</code> (HTTP), <code>7687→7687</code> (Bolt)</td>
+<td>~1 vCPU under load; <strong>~1–2 GiB (EST)</strong> (JVM heap);
+<code>mem_limit 4g</code> cap set</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Why Neo4j is in the inventory though the brief named four
+services.</strong> The brief named PostgreSQL, Redis, Cognee, and a
+vector DB. Cognee is not self-contained: its own compose
+(<code>docker-compose.memory.yml</code>) hard-depends on a
+<strong>graph</strong> store (<code>GRAPH_DB_PROVIDER=neo4j</code>,
+<code>depends_on: [postgres, qdrant, neo4j]</code>). Omitting Neo4j
+would leave Cognee unable to write <code>graph_nodes</code>, so the §4
+memory-write signature could not pass. It is recorded here honestly
+(§11.4.6) as a transitive dependency, not silently added or silently
+dropped.</p>
+</blockquote>
+<h3 id="vector-db-decision-qdrant-not-chromadb">1.1 Vector DB decision —
+<strong>Qdrant</strong> (not ChromaDB)</h3>
+<p><strong>Decision: Qdrant.</strong> Rationale, cited:</p>
+<ol type="1">
+<li><strong>Reuse, not a new dependency (§11.4.74).</strong> Qdrant is
+already the vector store in <em>all three</em> in-tree composes and both
+memory engines — Cognee <code>VECTOR_DB_PROVIDER=qdrant</code>
+(<code>docker-compose.memory.yml</code>), mem0
+<code>VECTOR_STORE=qdrant</code>, and HelixAgent’s
+<code>HELIX_LLM_VECTOR_DB=qdrant</code> /
+<code>HELIX_MEMORY_QDRANT_ENDPOINT</code> (<code>.env.example</code>).
+Choosing ChromaDB would mean introducing a <em>new</em> backing service
+the catalogue does not use and rewiring Cognee/mem0 — the opposite of
+reuse.</li>
+<li><strong>CPU-only, zero GPU contention.</strong>
+<code>VRAM_BROKER.md:29</code> explicitly classes Qdrant CPU-only with a
+0 GB GPU reservation — it never competes with the coder fleet on the RTX
+5090.</li>
+<li><strong>Production posture.</strong> Qdrant is a single Rust binary
+exposing both REST (<code>:6333</code>) and gRPC (<code>:6334</code>),
+with payload filtering, quantization (TurboQuant/binary), and an
+unprivileged image variant — well-suited to rootless podman and
+concurrent multi-collection use. See Qdrant docs + releases (Sources,
+§8).</li>
+<li><strong>ChromaDB trade-off (honest).</strong> ChromaDB is an
+excellent embedded/Python-first store, but here it would be a second,
+less-hardened service for concurrent server workloads and would
+<em>not</em> be the store Cognee/mem0 speak to natively — so it adds
+integration surface for no reuse benefit. Qdrant wins on reuse +
+already-proven wiring, which is decisive under §11.4.74.</li>
+</ol>
+<p><em>Honest boundary (§11.4.6):</em> this is a reuse+fit decision for
+THIS repo’s existing wiring, not a universal “Qdrant beats Chroma”
+benchmark claim.</p>
+<h3 id="rootless-podman-notes-all-five-services">1.2 Rootless-podman
+notes (all five services)</h3>
+<ul>
+<li><strong>No privilege / no GPU device.</strong> Every image is
+CPU-only; none needs <code>--device nvidia.com/gpu</code> or
+<code>--privileged</code>. All host ports are &gt; 1024, so rootless
+podman maps them without
+<code>net.ipv4.ip_unprivileged_port_start</code> changes.</li>
+<li><strong>Registries.</strong> <code>docker.io</code>
+(postgres/pgvector, redis, qdrant, neo4j, cognee) pull fine rootless.
+Pin by <strong>digest</strong> at build time
+(<code>podman pull … &amp;&amp; podman image inspect --format &#39;{{.Digest}}&#39;</code>)
+so the tracked pin is reproducible (§11.4.99/§11.4.6) — the in-tree
+<code>:latest</code> tags (qdrant, cognee) are a drift hazard to
+fix.</li>
+<li><strong>SELinux (ALT-Linux host).</strong> Named-volume mounts may
+need <code>:Z</code>/<code>:z</code> relabel or
+<code>--security-opt label=disable</code> (the same flag Phase-0 GPU
+passthrough used). Prefer per-volume <code>:Z</code> over blanket
+<code>label=disable</code> for the data stores.</li>
+<li><strong>Volumes.</strong> Use the named volumes the composes already
+declare (<code>helixllm_postgres_data</code>,
+<code>helixllm_qdrant_data</code>, <code>neo4j-data</code>,
+<code>cognee-data</code>, …); under rootless podman they live in the
+user’s <code>$XDG_DATA_HOME/containers/storage</code>. Data volumes are
+gitignored; regeneration is “re-boot the stack + re-ingest”
+(§11.4.77).</li>
+<li><strong>Container-to-container DNS.</strong> Cognee reaches
+Postgres/Qdrant/Neo4j by <em>service name</em>
+(<code>DATABASE_HOST=postgres</code>,
+<code>VECTOR_DB_URL=http://qdrant:6333</code>,
+<code>GRAPH_DB_URL=bolt://neo4j:7687</code>), which requires all five on
+<strong>one shared podman network</strong> (the composes define
+<code>helixmemory</code>/ <code>helix</code>). HelixAgent (on the host)
+reaches them by <code>localhost:&lt;hostport&gt;</code>.</li>
+<li><strong>Resource caps (§12.3/§12.6).</strong> Keep the existing
+<code>mem_limit</code>/<code>memswap_limit</code>/
+<code>pids_limit</code>/<code>oom_score_adj</code> per service; the
+containers submodule’s <code>pkg/policy</code> is the Go counterpart if
+caps need to be applied programmatically.</li>
+</ul>
+<hr />
+<h2 id="how-the-stack-boots-via-the-containers-submodule-11.4.76">2. How
+the stack boots via the <code>containers</code> submodule
+(§11.4.76)</h2>
+<p><strong>Invariant:</strong> the stack is booted through
+<code>digital.vasic.containers</code> primitives, as part of the
+test/run entry point — never a hand-run <code>podman-compose up</code>
+(that bypasses the flow CONST-030/§11.4.76 exist to prevent). All
+configuration is <strong>env-injected</strong> (§11.4.28); the submodule
+stays project-agnostic (the consumer supplies values).</p>
+<h3 id="boot-path-the-pkgboot-pkghealth-shape">2.1 Boot path (the
+<code>pkg/boot</code> → <code>pkg/health</code> shape)</h3>
+<p>The canonical shape (from
+<code>submodules/containers/README.md</code> Quick Start +
+<code>pkg/boot/options.go</code> + <code>pkg/health/checker.go</code>):
+auto-detect the rootless runtime, declare one
+<code>endpoint.ServiceEndpoint</code> per service (host, port, health
+type, compose file, service name, required), construct a
+<code>BootManager</code>, and <code>BootAll</code>. Health is a real
+TCP/HTTP probe (<code>pkg/health</code> <code>HealthType</code> ∈
+<code>tcp|http|grpc|custom</code>), not a metadata check.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// USAGE SHAPE (not new code) — booting the Phase-2 stack via the containers submodule.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>rt<span class="op">,</span> _ <span class="op">:=</span> runtime<span class="op">.</span>AutoDetect<span class="op">(</span>ctx<span class="op">)</span>               <span class="co">// picks rootless podman on this host</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>endpoints <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>endpoint<span class="op">.</span>ServiceEndpoint<span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;helixllm-postgres&quot;</span><span class="op">:</span> endpoint<span class="op">.</span>NewEndpoint<span class="op">().</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        WithHost<span class="op">(</span>env<span class="op">(</span><span class="st">&quot;HELIX_LLM_DB_HOST&quot;</span><span class="op">,</span><span class="st">&quot;localhost&quot;</span><span class="op">)).</span>WithPort<span class="op">(</span>env<span class="op">(</span><span class="st">&quot;HELIX_LLM_DB_PORT&quot;</span><span class="op">,</span><span class="st">&quot;5433&quot;</span><span class="op">)).</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        WithHealthType<span class="op">(</span><span class="st">&quot;tcp&quot;</span><span class="op">).</span>WithRequired<span class="op">(</span><span class="ot">true</span><span class="op">).</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        WithComposeFile<span class="op">(</span><span class="st">&quot;submodules/helix_agent/docker-compose.helixllm-infra.yml&quot;</span><span class="op">).</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        WithServiceName<span class="op">(</span><span class="st">&quot;helixllm-postgres&quot;</span><span class="op">).</span>Build<span class="op">(),</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;helixllm-redis&quot;</span><span class="op">:</span>   <span class="co">/* tcp :6381 … WithServiceName(&quot;helixllm-redis&quot;) */</span><span class="op">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;qdrant&quot;</span><span class="op">:</span>           <span class="co">/* http :6333 /healthz … WithServiceName(&quot;helixllm-qdrant&quot;) */</span><span class="op">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;neo4j&quot;</span><span class="op">:</span>            <span class="co">/* tcp  :7687 … memory-infra … */</span><span class="op">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;cognee&quot;</span><span class="op">:</span>           <span class="co">/* http :8000 /api/v1/health … WithRequired(true) */</span><span class="op">,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>mgr <span class="op">:=</span> boot<span class="op">.</span>NewBootManager<span class="op">(</span>endpoints<span class="op">,</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    boot<span class="op">.</span>WithRuntime<span class="op">(</span>rt<span class="op">),</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    boot<span class="op">.</span>WithHealthChecker<span class="op">(</span>health<span class="op">.</span>NewDefaultChecker<span class="op">()),</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    boot<span class="op">.</span>WithOrchestrator<span class="op">(</span>composeOrch<span class="op">),</span>        <span class="co">// pkg/compose — compose up/down (local, rootless)</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    boot<span class="op">.</span>WithLogger<span class="op">(</span>logging<span class="op">.</span>NewSlogAdapter<span class="op">()),</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    boot<span class="op">.</span>WithProjectDir<span class="op">(</span>repoRoot<span class="op">),</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>summary<span class="op">,</span> err <span class="op">:=</span> mgr<span class="op">.</span>BootAll<span class="op">(</span>ctx<span class="op">)</span>               <span class="co">// starts + health-gates; required-fail ⇒ boot fails</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">// summary.Started / summary.Failed  →  captured to docs/qa/&lt;run&gt;/p2_boot_summary.txt</span></span></code></pre></div>
+<p>Alternative/complementary:
+<code>pkg/compose.NewHelixComposeProject(name, []HelixService{…})</code>
+(see <code>helix_project.go</code>) renders the stack as a typed
+<code>HelixComposeProject</code> with per-service
+<code>HelixHealthCheck</code> + <code>HelixResourceLimits</code>, so the
+compose definition itself can be generated from env-injected
+<code>HelixService</code> values instead of a checked-in YAML — the
+consumer builds the <code>[]HelixService</code> list (never hardcoded in
+the submodule, §11.4.28).</p>
+<h3 id="health-gating-the-on-demand-infra-proof">2.2 Health-gating (the
+on-demand-infra proof)</h3>
+<p><code>mgr.BootAll</code> runs each endpoint’s health probe with retry
+(<code>pkg/health</code> + <code>pkg/health/retry.go</code>); a
+<code>Required:true</code> service that never goes healthy fails the
+boot (returns non-nil <code>err</code>). The real probes already exist
+in the compose files and map 1:1 to <code>HealthType</code>:</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 57%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Service</th>
+<th>Probe (compose <code>healthcheck</code>)</th>
+<th><code>HealthType</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>postgres</td>
+<td><code>pg_isready -U … -d …</code></td>
+<td><code>tcp</code> :5433/:5434 (or <code>custom</code> exec)</td>
+</tr>
+<tr>
+<td>redis</td>
+<td><code>redis-cli … ping</code></td>
+<td><code>tcp</code> :6381/:6380</td>
+</tr>
+<tr>
+<td>qdrant</td>
+<td><code>GET /healthz</code></td>
+<td><code>http</code> :6333</td>
+</tr>
+<tr>
+<td>neo4j</td>
+<td><code>cypher-shell RETURN 1</code></td>
+<td><code>tcp</code> :7687 (or <code>custom</code>)</td>
+</tr>
+<tr>
+<td>cognee</td>
+<td><code>GET /api/v1/health</code></td>
+<td><code>http</code> :8000</td>
+</tr>
+</tbody>
+</table>
+<p>This turns “did the stack come up?” into positive captured evidence
+(§11.4.5/§11.4.69): the boot summary + each health verdict is written
+under <code>docs/qa/&lt;run&gt;/</code>.</p>
+<h3 id="on-demand-placement">2.3 On-demand + placement</h3>
+<p>Boot is lazy/on-demand (<code>pkg/lifecycle</code> LazyBooter) so the
+test entry point boots what it needs and idle-shuts-down after. All five
+run <strong>local</strong> on the RTX host (they are CPU-only companions
+to the GPU serving fleet), so remote distribution
+(<code>CONTAINERS_REMOTE_*</code> / <code>pkg/distribution</code>) is
+<strong>not</strong> engaged for this stack — but the same
+<code>endpoints</code> map would distribute unchanged if a future
+topology moves the memory tier to another host (§11.4.28).</p>
+<hr />
+<h2 id="helixagent-helixllm-end-to-end-wiring-env-injected-11.4.28">3.
+HelixAgent → HelixLLM end-to-end wiring (env-injected, §11.4.28)</h2>
+<p>Every value below is a <strong>real, source-verified</strong> key
+from HelixAgent <code>.env.example</code> /
+<code>configs/production.yaml</code> — not guessed (§11.4.6). Secrets
+stay in <code>.env</code> (gitignored, §11.4.10); nothing is
+hardcoded.</p>
+<h3 id="pointing-helixagent-at-the-live-helixllm">3.1 Pointing
+HelixAgent at the live HelixLLM</h3>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 22%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>Env var</th>
+<th>Value</th>
+<th>Source / note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_HELIX_LLM</code></td>
+<td><code>true</code></td>
+<td><code>.env.example</code></td>
+</tr>
+<tr>
+<td><code>HELIX_LLM_ENDPOINT</code></td>
+<td><code>http://localhost:8443</code> (default)</td>
+<td><code>.env.example</code>; <strong>but see §7-Q1</strong> — the
+<em>proven live</em> OpenAI-compatible server today is
+<code>http://localhost:18434/v1</code> (<code>RESUME.md</code>), and the
+Phase-2 gateway target is <code>:8100/v1</code>
+(<code>04_implementation_plan.md</code> P6-T1). Three candidate
+endpoints exist; the one HelixAgent uses for the Phase-2 end-to-end run
+must be chosen + pinned, not assumed.</td>
+</tr>
+<tr>
+<td><code>HELIX_LLM_API_KEY</code></td>
+<td>(from <code>.env</code>)</td>
+<td>API-key auth guards the 7 gateway <code>/v1</code> LLM routes
+(<code>API_CONTRACT.md §2</code>); the raw llama-server on
+<code>:18434</code> is unauthenticated.</td>
+</tr>
+<tr>
+<td><code>HELIX_LLM_TLS_SKIP_VERIFY</code></td>
+<td><code>true</code> (dev)</td>
+<td>HelixLLM gateway on <code>:8443</code> is <strong>TLS-mandatory, TLS
+1.3, HTTP/3+HTTP/2</strong> (<code>API_CONTRACT.md §1</code>); the
+<code>:18434</code> llama-server is plain HTTP.</td>
+</tr>
+</tbody>
+</table>
+<p>The HelixLLM endpoint HelixAgent calls is the OpenAI-compatible
+surface from <code>API_CONTRACT.md §2</code>:
+<code>POST /v1/chat/completions</code>,
+<code>POST /v1/completions</code>, <code>GET /v1/models</code>,
+<code>POST /v1/embeddings</code>, <code>POST /v1/messages</code>
+(Anthropic).</p>
+<h3 id="pointing-helixagent-at-each-backing-service">3.2 Pointing
+HelixAgent at each backing service</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 56%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Env vars (confirmed)</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixLLM session/app Postgres</td>
+<td><code>HELIX_LLM_DB_HOST</code>, <code>HELIX_LLM_DB_PORT</code>,
+<code>HELIX_LLM_DB_NAME</code>, <code>HELIX_LLM_DB_USER</code>,
+<code>HELIX_LLM_DB_PASSWORD</code></td>
+<td>service #1 (<code>:5433</code>)</td>
+</tr>
+<tr>
+<td>HelixLLM cache Redis</td>
+<td><code>HELIX_LLM_REDIS_HOST</code>,
+<code>HELIX_LLM_REDIS_PORT</code>,
+<code>HELIX_LLM_REDIS_PASSWORD</code></td>
+<td>service #2 (<code>:6381</code>)</td>
+</tr>
+<tr>
+<td>Vector store</td>
+<td><code>HELIX_LLM_VECTOR_DB=qdrant</code>,
+<code>HELIX_LLM_QDRANT_HTTP_PORT</code>,
+<code>HELIX_LLM_QDRANT_GRPC_PORT</code>; memory side
+<code>HELIX_MEMORY_QDRANT_ENDPOINT=http://localhost:6333</code></td>
+<td>service #4</td>
+</tr>
+<tr>
+<td>Cognee memory</td>
+<td><code>HELIX_MEMORY_COGNEE_ENDPOINT=http://localhost:8000</code>,
+<code>HELIX_MEMORY_COGNEE_API_KEY</code> (empty ⇒ local container
+path)</td>
+<td>service #3</td>
+</tr>
+<tr>
+<td>Graph store</td>
+<td><code>HELIX_MEMORY_NEO4J_ENDPOINT=bolt://localhost:7687</code>,
+<code>HELIX_MEMORY_NEO4J_USER</code>,
+<code>HELIX_MEMORY_NEO4J_PASSWORD</code></td>
+<td>service #5</td>
+</tr>
+<tr>
+<td>Memory-tier cache</td>
+<td><code>HELIX_MEMORY_REDIS_ENDPOINT=localhost:6380</code>,
+<code>HELIX_MEMORY_REDIS_PASSWORD</code></td>
+<td>service #2 (memory port)</td>
+</tr>
+<tr>
+<td>Service discovery/health (prod)</td>
+<td><code>SVC_COGNEE_HOST/PORT/REMOTE/DISCOVERY_*</code>
+(<code>configs/production.yaml:321-328</code>)</td>
+<td>wires Cognee through the containers-submodule discovery/health
+seam</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-end-to-end-path">3.3 The end-to-end path</h3>
+<pre><code>HelixAgent (host binary)
+  │  OpenAI-compatible request  →  HELIX_LLM_ENDPOINT  (HelixLLM /v1/chat/completions)
+  │                                     └─ real inference on RTX 5090 (Phase 0/1, proven)
+  ├─ session persist        →  HELIX_LLM_DB_*        (Postgres  #1)
+  ├─ cache put/get          →  HELIX_LLM_REDIS_*     (Redis     #2)
+  └─ memory remember        →  HELIX_MEMORY_COGNEE_ENDPOINT (Cognee #3)
+                                   ├─ vector upsert  →  Qdrant  #4   (cognee_memories.vector_id)
+                                   └─ graph write    →  Neo4j   #5   (cognee_memories.graph_nodes)
+                              row lands in Postgres table `cognee_memories`
+                              (internal/database/cognee_memory_repository.go)</code></pre>
+<hr />
+<h2 id="runtime-signature-phase-2-end-to-end-works">4. §11.4.108 runtime
+signature — “Phase-2 end-to-end works”</h2>
+<p><strong>Definition of done (single machine-checkable signature,
+verified on a clean boot):</strong></p>
+<blockquote>
+<p>One real HelixAgent generate request, driven through HelixAgent
+against the live HelixLLM, produces <strong>all four</strong> downstream
+side-effects, each asserted from the service’s own state (not from
+HelixAgent logs):</p>
+<p><strong>(S1) LLM</strong> — HelixLLM returns non-empty completion
+text for a fresh prompt AND <code>nvidia-smi</code> shows a VRAM delta
+during the call (real inference, not a stub). <strong>(S2) Postgres
+session</strong> — a new row exists in the HelixLLM session store
+<em>and</em> a new <code>cognee_memories</code> row (matching
+<code>session_id</code>) — proven by <code>psql … SELECT</code> count
+delta, not by an HTTP 200. <strong>(S3) Redis cache</strong> — a new key
+attributable to the request exists — proven by
+<code>redis-cli … DBSIZE</code>/<code>KEYS</code> delta. <strong>(S4)
+Memory write</strong> — the <code>cognee_memories</code> row’s
+<code>vector_id</code> resolves to a live <strong>Qdrant</strong> point
+(<code>GET /collections/&lt;c&gt;/points/&lt;id&gt;</code> → found) AND
+its <code>graph_nodes</code> resolve to a <strong>Neo4j</strong> node
+(<code>cypher-shell MATCH … RETURN count&gt;0</code>).</p>
+</blockquote>
+<p>Captured evidence for every sub-assertion goes to
+<code>docs/qa/&lt;run-id&gt;/p2_e2e/</code>:
+<code>llm_response.json</code>,
+<code>nvidia_smi_before_after.txt</code>,
+<code>pg_session_delta.txt</code>, <code>pg_cognee_row.txt</code>,
+<code>redis_dbsize_delta.txt</code>, <code>qdrant_point.json</code>,
+<code>neo4j_node.txt</code>. A PASS with any sub-assertion missing/empty
+is a §11.4/§11.4.1 PASS-bluff (metadata-only), not a pass. Feature-class
+tags per §11.4.69: <code>boot_service</code> (§2 health) +
+<code>storage_write</code> (S2/S4) + the LLM liveness of S1.</p>
+<h3 id="red-first-polarity-11.4.115-standing-guard-11.4.135">4.1
+RED-first polarity (§11.4.115) + standing guard (§11.4.135)</h3>
+<p>Author the check as a single <code>RED_MODE</code>-switched test:
+<code>RED_MODE=1</code> runs it against the stack with Cognee/memory
+<strong>disabled</strong> (or Qdrant unreachable) and asserts the
+memory-write <strong>absent</strong> (reproduces the “generate works but
+nothing persisted” defect on the pre-fix artifact);
+<code>RED_MODE=0</code> is the standing GREEN regression guard asserting
+all four side-effects <strong>present</strong>. Register it in the
+Phase-8 regression suite.</p>
+<h3 id="golden-good-golden-bad-self-validation-11.4.10710">4.2
+Golden-good / golden-bad self-validation (§11.4.107(10))</h3>
+<p>The assertion harness (the analyzer that decides S1–S4 pass) is
+itself validated by a fixture pair so it provably cannot bluff:</p>
+<ul>
+<li><strong>golden-good fixture</strong> — a captured bundle where the
+LLM text is non-empty, the Postgres/Qdrant/Neo4j deltas are all present
+→ the analyzer MUST return PASS.</li>
+<li><strong>golden-bad fixture</strong> — a bundle seeded with the exact
+failure the stack produces when memory is down: LLM text present but
+<code>cognee_memories</code> delta = 0, <code>vector_id</code> NULL /
+Qdrant point 404, Neo4j <code>count = 0</code> → the analyzer MUST
+return FAIL.</li>
+</ul>
+<p>Wire both into meta-test; a paired §1.1 mutation (e.g. weaken S4 to
+“row exists” without resolving the Qdrant point) MUST flip the
+golden-bad fixture to PASS → gate FAILs. An analyzer that passes its
+golden-bad fixture is the bluff this guards against.</p>
+<hr />
+<h2 id="bootverify-sequence-operator-agent-at-a-glance">5. Boot/verify
+sequence (operator + agent, at a glance)</h2>
+<ol type="1">
+<li><code>.env</code> present (gitignored, §11.4.10) with the §3 keys;
+images <strong>digest-pinned</strong> (§7).</li>
+<li>Agent boots the stack via <code>pkg/boot.BootManager.BootAll</code>
+(§2) — rootless podman, shared network, health-gated; capture
+<code>p2_boot_summary.txt</code>.</li>
+<li>Confirm each service healthy via <code>pkg/health</code> probes
+(§2.2) — captured.</li>
+<li>Point HelixAgent at HelixLLM + backing services via §3 env
+vars.</li>
+<li>Run the §4 signature (RED_MODE=0) on the clean boot; capture the 7
+artefacts.</li>
+<li>GREEN only when S1–S4 all hold with captured evidence; else re-enter
+systematic debugging (§11.4.102) — never mark done on build-success
+(§11.4.108).</li>
+</ol>
+<hr />
+<h2 id="composition-footer">6. Composition footer</h2>
+<p>Composes / is bound by: <strong>§11.4.76</strong>
+(containers-submodule on-demand infra — the boot path) ·
+<strong>§11.4.161</strong> (rootless container runtime) ·
+<strong>§11.4.74</strong> (reuse Qdrant/Cognee/ compose wiring, don’t
+reimplement) · <strong>§11.4.28 / CONST-045 / CONST-046 /
+CONST-051</strong> (env-injected, no hardcoded hosts/ports/content,
+submodule decoupled) · <strong>§11.4.99 / §11.4.150</strong>
+(latest-source pin verification; multi-angle image-tag research) ·
+<strong>§11.4.108</strong> (runtime-signature = done) ·
+<strong>§11.4.107(10)</strong> (golden-good/bad self-validated analyzer)
+· <strong>§11.4.115 / §11.4.135</strong> (RED-first polarity + standing
+regression guard) · <strong>§11.4.5 / §11.4.69</strong> (captured
+sink-side evidence;
+<code>boot_service</code>/<code>storage_write</code>) ·
+<strong>§11.4.83</strong> (<code>docs/qa/&lt;run-id&gt;/</code>
+evidence) · <strong>§11.4.6</strong> (facts + honest open questions, §7)
+· <strong>§11.4.10</strong> (secrets in <code>.env</code>) ·
+<strong>§12.3 / §12.6</strong> (per-container resource caps). Track
+<code>(T1/main)</code> on <code>feature/helixllm-full-extension</code>
+(§11.4.181 / §11.4.182).</p>
+<hr />
+<h2 id="open-questions-items-to-verify-at-build-time-11.4.6-do-not-invent">7.
+Open questions / items to verify at build time (§11.4.6 — do not
+invent)</h2>
+<ul>
+<li><strong>Q1 — Which HelixLLM endpoint does HelixAgent call for the
+Phase-2 run?</strong> <code>.env.example</code> defaults
+<code>HELIX_LLM_ENDPOINT=http://localhost:8443</code> (TLS gateway), the
+<em>proven live</em> server is <code>http://localhost:18434/v1</code>
+(llama-server, plain HTTP), and P6-T1 names
+<code>http://localhost:8100/v1</code> (planned router). Decide + pin one
+before the §4 run; today only <code>:18434</code> is proven live
+(<code>RESUME.md</code>).</li>
+<li><strong>Q2 — Redis pin.</strong> In-use is
+<code>redis:7-alpine</code>; upstream latest is Redis 8.x
+(<code>redis:8-alpine</code>). Recommend keeping <code>7-alpine</code>
+(matches in-use, avoids drift) unless a Redis-8 feature is needed;
+either way pin a digest.</li>
+<li><strong>Q3 — Qdrant exact latest.</strong> Web sources returned
+inconsistent dates (<code>v1.17.1</code> in one, <code>v1.18.2</code> in
+another with implausible “2024” dates). Do <strong>not</strong> ship a
+version string as fact — pin by
+<code>podman pull qdrant/qdrant &amp;&amp; … Digest</code> at build time
+and record the resolved digest.</li>
+<li><strong>Q4 — Cognee image + bloat.</strong> Use the API-server image
+<code>cognee/cognee:1.2.2</code> (latest stable, 2026-06-26),
+<strong>not</strong> <code>cognee/cognee-mcp</code> (Docker Hub reports
+~27.8 GB, issue #3691 — CUDA/torch bloat) — the memory tier here is
+CPU-only, so the smaller API image is correct (§11.4.77 disk budget).
+The in-tree compose uses <code>ghcr.io/topoteretes/cognee:latest</code>
+(a <code>:latest</code> drift hazard) — replace with the digest-pinned
+<code>cognee/cognee:1.2.2</code>.</li>
+<li><strong>Q5 — Neo4j version.</strong> In-use
+<code>neo4j:5-community</code>; Neo4j has since moved to calendar
+versioning (<code>2025.xx</code>). Keep <code>5-community</code> unless
+Cognee requires newer; verify Cognee 1.2.2’s supported Neo4j range at
+build.</li>
+<li><strong>Q6 — <code>cognee_integration</code> is DISABLED in
+<code>configs/development.yaml:317</code></strong> — comment:
+<em>“Disabled due to upstream Cognee bug (see COGNEE_BUG.md)”</em>. The
+referenced <code>COGNEE_BUG.md</code> was <strong>not found</strong> in
+<code>submodules/helix_agent/</code>. This is a real blocker to the §4
+memory-write signature: the upstream bug must be identified/re-verified
+against Cognee 1.2.2 (which may already fix it) before Phase-2
+memory-write can pass. Track as a workable item; do not assume it is
+resolved.</li>
+<li><strong>Q7 — <code>:latest</code> tag removal.</strong> Both
+<code>qdrant/qdrant:latest</code> and
+<code>ghcr.io/topoteretes/cognee:latest</code> in the in-tree composes
+violate §11.4.99 pin discipline; the Phase-2
+compose/<code>HelixService</code> definitions must carry digest
+pins.</li>
+</ul>
+<hr />
+<h2 id="sources-verified-2026-07-06">Sources verified 2026-07-06</h2>
+<ul>
+<li>PostgreSQL / pgvector images: <a href="https://hub.docker.com/_/postgres" class="uri">https://hub.docker.com/_/postgres</a> · <a href="https://hub.docker.com/r/pgvector/pgvector/tags" class="uri">https://hub.docker.com/r/pgvector/pgvector/tags</a> · <a href="https://github.com/pgvector/pgvector" class="uri">https://github.com/pgvector/pgvector</a></li>
+<li>Redis image (8.x latest, 7-alpine in-use): <a href="https://hub.docker.com/_/redis" class="uri">https://hub.docker.com/_/redis</a> · <a href="https://github.com/redis/redis/releases" class="uri">https://github.com/redis/redis/releases</a></li>
+<li>Qdrant releases (version to pin by digest — §7-Q3): <a href="https://github.com/qdrant/qdrant/releases" class="uri">https://github.com/qdrant/qdrant/releases</a> · <a href="https://hub.docker.com/r/qdrant/qdrant" class="uri">https://hub.docker.com/r/qdrant/qdrant</a> · <a href="https://qdrant.tech/documentation/installation/" class="uri">https://qdrant.tech/documentation/installation/</a></li>
+<li>Cognee releases (v1.2.2, 2026-06-26) + image bloat issue #3691: <a href="https://github.com/topoteretes/cognee/releases" class="uri">https://github.com/topoteretes/cognee/releases</a> · <a href="https://hub.docker.com/r/cognee/cognee" class="uri">https://hub.docker.com/r/cognee/cognee</a> · <a href="https://github.com/topoteretes/cognee/issues/3691" class="uri">https://github.com/topoteretes/cognee/issues/3691</a></li>
+<li>In-repo (source-verified, no URL):
+<code>submodules/containers/pkg/{boot,compose,health}</code> ·
+<code>submodules/helix_llm/docs/API_CONTRACT.md</code> ·
+<code>submodules/helix_llm/docs/VRAM_BROKER.md:29</code> ·
+<code>submodules/helix_agent/{.env.example, docker-compose.helixllm-infra.yml, docker-compose.memory-infra.yml, docker-compose.memory.yml, configs/production.yaml, configs/development.yaml, internal/database/cognee_memory_repository.go, internal/database/db.go}</code>
+·
+<code>docs/research/07.2026/00_master/{04_implementation_plan.md, RESUME.md}</code></li>
+</ul>
+<p><em>Deep-research 2026-07-06:
+https://github.com/qdrant/qdrant/releases ·
+https://github.com/topoteretes/cognee/releases ·
+https://github.com/topoteretes/cognee/issues/3691 ·
+https://hub.docker.com/<em>/postgres ·
+https://hub.docker.com/</em>/redis ·
+https://hub.docker.com/r/pgvector/pgvector/tags</em></p>
+</body>
+</html>
