@@ -19,10 +19,9 @@
 - **Phase 0 (GPU foundation):** ✅ COMPLETE — rootless CDI passthrough + sm_120 build + real 30B inference PROVEN.
 - **Phase 1 (fleet + fixes):** ✅ 30B coder live; Containerfile + claude_toolkit fixes landed, all re-reviewed **GO**.
 - **Phase 2 (HelixAgent→HelixLLM e2e):** ✅ **PROVEN + review GO** — real generate + Postgres/Redis persistence (cognee/vector honest SKIP, OQ2).
-- **LLMsVerifier chain:** ✅ C1 C2 C4 C5 C3 all landed — **under final combined C4+C5+C3 review** (in flight).
-- **Immediate next:** land the combined review to GO (or one fix→re-review loop); then **release-prep** —
-  refresh this file (done), bump meta-repo submodule pointers (careful of the §11.4.174 concurrent
-  helix_agent go.mod track), then the prefixed release tag.
+- **LLMsVerifier chain:** ✅ C1 C2 C4 C5 C3 + advisories all landed, combined review **GO** — release-ready.
+- **Phase-3:** ✅ embeddings IMPL **PROVEN** (55bdf9b6, real bge-small TEI, cos margin 0.3578) · ✅ VRAM broker CORE **GO** (a12df57c — unblocks GPU tiers) · ✅ designs done: embeddings (cf26b813), translation (c9ac8683), provider-coverage (1e6f3347, 0 new wire adapters).
+- **Immediate next (fresh session):** (a) the pending §11.4.142 reviews are DONE for broker; run reviews of the 3 design docs + embeddings if desired; (b) GPU tiers now unblocked — vision (VLM)/image/video gen via the broker; (c) provider config-rollout (13 providers, config-only); (d) translation IMPL (design c9ac8683); (e) cognee P-OQ2-A wire; (f) small follow-ups: OQ1 doc correction in PHASE2_BLOCKERS_INVESTIGATION.md, P3-EMB-1 golden-good dim-aware fixture, detector.go:61; (g) release-prep + prefixed tag when scope-complete.
 - **Terminal goal (this scope):** a fully-validated, prefixed release tag (§11.4.151) published across
   main + all owned submodules; local HelixLLM on the RTX 5090 exposed via HelixAgent to HelixCode/CLI agents.
 
@@ -57,9 +56,10 @@ coding output (`is_palindrome`, `func Add`). Restart: `podman start helixllm-cod
 
 - helix_llm `13d2d27` Containerfile: hard-fail `ggml-rpc-server` copy (§11.4.122) + OpenSSL/curl — re-review **GO**; `d8b3fa2` phase-1 QA evidence (`-hf` 469MB HTTPS download + live coder e2e); `3f85e3d5` OPERATOR_GUIDE.
 - claude_toolkit `ef77b19` loud-fail resolution + discriminating test; `9d12347` C1 regression guard (37/0, §1.1 mutation-proven) — **REVIEW-3 CLEAN**.
-- llms_verifier `09f9533c` C4 (RAG/Skills/Plugins probes) · `28e6625a` C5 (Verify composes+persists VerificationResult) · `ad18e91f` C3 (fail-closed resolver, seeds→unverified) — **chain complete, under combined review**.
+- llms_verifier `09f9533c` C4 · `28e6625a` C5 · `ad18e91f` C3 · `d1f04e5c` advisories (detector gate + sentinel oracle) — **chain + advisories complete, combined review GO**.
+- helix_llm `a12df57c` **VRAM broker CORE** (Budget/admission/single-owner, review GO — unblocks GPU tiers).
 - helix_agent `17f08ba9` Phase-2 live tests (provider e2e + redis) — pointer NOT yet bumped (§11.4.174).
-- helix_code `cf26b813` embeddings design (TEI CPU) · `9bf4c3da` Phase-2 stack design (Qdrant) · `da0fabae` blockers investigation (OQ1/OQ2) · `5223d10d` C3 handoff · `278df582` Phase-2 e2e evidence.
+- helix_code `cf26b813` embeddings design · `9bf4c3da` Phase-2 stack design · `da0fabae` blockers investigation · `5223d10d` C3 handoff · `278df582` Phase-2 e2e evidence · `c9ac8683` translation design · `1e6f3347` provider-coverage design · `55bdf9b6` **embeddings IMPL proven** (bge-small TEI, cos margin 0.3578).
 
 ## Next actions (in order)
 
