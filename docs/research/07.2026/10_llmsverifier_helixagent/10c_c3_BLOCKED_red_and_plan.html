@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>10c_c3_BLOCKED_red_and_plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">10c_c3_BLOCKED_red_and_plan</h1>
+</header>
+<h1 id="c-c3-registry-seed-only-fail-closed-resolver-blocked-handoff-red-test-implementation-plan">10c
+— C3 (registry seed-only / fail-closed resolver): BLOCKED handoff + RED
+test + implementation plan</h1>
+<p><strong>Date:</strong> 2026-07-06 <strong>Status:</strong>
+<strong>BLOCKED</strong> — C3’s acceptance criterion depends on unlanded
+infra (C4 + C5) and an under-specified resolver DB data-source. Per
+§11.4.6 (no-guessing) and §11.4.101, the fail-closed resolver is NOT
+implemented on a guess. This note carries the §11.4.115 RED
+reproduce-first test (with captured RED→GREEN evidence) + a precise
+file:line plan so a future executor lands C3 after C4/C5. <strong>Scope
+target:</strong>
+<code>submodules/llms_verifier/llm-verifier/capabilities/registry.go</code>
+(module <code>digital.vasic.llmsverifier</code>), branch
+<code>feature/helixllm-full-extension</code>. <strong>Spec:</strong>
+<code>docs/research/07.2026/10_llmsverifier_helixagent/10b_code_exact_change_spec.md</code>
+§3 C3 + §2.5 + §4.</p>
+<hr />
+<h2 id="why-c3-is-blocked-exact-ambiguity-infra-gap">1. Why C3 is
+BLOCKED (exact ambiguity + infra gap)</h2>
+<p>C3 = “demote <code>registry.go</code> static block: seed-only,
+probe-overridden, fail-closed” (10b §3 C3). It has 4 parts; its
+<strong>acceptance criterion</strong> is parts 2+3 — a resolver that
+<strong>prefers a fresh
+<code>database.VerificationResult</code></strong> (per model, within the
+CONST-037 24h / CONST-038 60s window using
+<code>VerificationResult.StartedAt/CompletedAt</code>) and
+<strong>fail-closes to <code>unverified</code></strong> when no probe
+exists. Two hard blockers:</p>
+<ol type="1">
+<li><strong>Depends on unlanded C4 + C5 (spec’s own ordering).</strong>
+10b §4.3 states verbatim: <em>“C4 before C3’s fail-closed resolver and
+before C5 — probes are the source of truth the resolver prefers and the
+service dispatches.”</em> Verified this session:
+<ul>
+<li><strong>C5 NOT landed</strong> —
+<code>verification/verification.go:62</code> still
+<code>return nil, ErrVerificationNotWired</code>.</li>
+<li><strong>C4 NOT landed</strong> — there is no per-capability probe
+path writing per-model <code>database.VerificationResult</code> rows
+through the capability surface (only C1’s downstream
+<code>testParallelToolUse</code> tool-call counting exists at
+<code>llmverifier/verifier.go:1112</code>). With no producer of fresh
+per-model <code>VerificationResult</code>s, the resolver’s
+<em>primary</em> branch (“prefer fresh probe”) is not exercisable
+end-to-end and would ship as an unwired path (§11.4.124 dead-code
+hazard) with a mock-only test — exactly why the spec orders C4/C5
+first.</li>
+</ul></li>
+<li><strong>Resolver DB data-source unspecified at file:line (§11.4.6
+guess forbidden).</strong> The existing accessors are
+<strong>provider-keyed and DB-handle-less</strong>:
+<ul>
+<li><code>GetProviderBaseCapabilities(provider string) *ProviderCapabilities</code>
+— <code>registry.go:1068</code></li>
+<li><code>GetProvidersWithCapability(capName string, capValue interface{}) []string</code>
+— <code>registry.go:1102</code> To “prefer a fresh
+<code>database.VerificationResult</code> <strong>(per model)</strong>”
+the resolver needs (a) a <code>*database.Database</code> handle, (b) a
+<strong>per-model</strong> identity (accessors are
+per-<strong>provider</strong>), and</li>
+</ul>
+<ol start="3" type="a">
+<li>a latest-per-model query. The spec does NOT pin how the accessors
+acquire the handle (global var? new resolver struct? added param
+breaking all callers?). Import direction is feasible
+(<code>database</code> does NOT import <code>capabilities</code>, so no
+cycle) — but the design choice is left open and MUST NOT be
+guessed.</li>
+</ol></li>
+</ol>
+<p><strong>Not-blocked facts (for the executor):</strong>
+<code>capabilities</code> package builds + tests green today; the only
+in-repo callers of <code>GetProviderBaseCapabilities</code> are 3
+in-package sites (<code>capabilities/detector.go:48,153,292</code>);
+<code>GetProvidersWithCapability</code> has no in-repo callers.
+<code>ProviderCapabilities.Verified</code> is the hand-authored
+self-certification literal (openai <code>registry.go:11</code>
+<code>Verified: true</code>).</p>
+<hr />
+<h2 id="red-reproduce-first-test-captured-evidence">2. §11.4.115 RED
+reproduce-first test (captured evidence)</h2>
+<p>The RED test below was created at
+<code>capabilities/registry_c3_failclosed_red_test.go</code>, run in
+both polarities, and then REMOVED (BLOCKED — not reddening the baseline;
+the source lives here as the handoff artefact). Oracle = the PUBLIC
+accessor’s returned <code>.Verified</code> absent any probe. Compiles on
+the current pre-C3 accessor signature (references only the existing
+<code>.Verified</code> field).</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> capabilities</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">// TestC3RegistrySeedNotSelfCertifiedVerified — §11.4.115 RED-baseline for C3</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">// (10b §3 C3, §2.5). Gap: GetProviderBaseCapabilities(&quot;openai&quot;) returns a seed</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">// self-certified .Verified==true (registry.go:11) with NO probe backing.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Post-C3, absent a fresh probe the accessor MUST report unverified/fail-closed.</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestC3RegistrySeedNotSelfCertifiedVerified<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    redMode <span class="op">:=</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;RED_MODE&quot;</span><span class="op">)</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> redMode <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        redMode <span class="op">=</span> <span class="st">&quot;0&quot;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    caps <span class="op">:=</span> GetProviderBaseCapabilities<span class="op">(</span><span class="st">&quot;openai&quot;</span><span class="op">)</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> caps <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;GetProviderBaseCapabilities(</span><span class="ch">\&quot;</span><span class="st">openai</span><span class="ch">\&quot;</span><span class="st">) returned nil; expected a seed entry&quot;</span><span class="op">)</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    selfCertifiedVerified <span class="op">:=</span> caps<span class="op">.</span>Verified <span class="co">// no probe supplied</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> redMode <span class="op">{</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;1&quot;</span><span class="op">:</span> <span class="co">// reproduce: PASSes on broken (current) artifact</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">!</span>selfCertifiedVerified <span class="op">{</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;RED_MODE=1: expected seed self-certified Verified==true absent a probe, got %v&quot;</span><span class="op">,</span> caps<span class="op">.</span>Verified<span class="op">)</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Logf<span class="op">(</span><span class="st">&quot;RED_MODE=1 PASS: defect reproduced — unbacked seed self-certified Verified==true (§2.5).&quot;</span><span class="op">)</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;0&quot;</span><span class="op">:</span> <span class="co">// guard: FAILs on broken, PASSes once fail-closed C3 lands</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> selfCertifiedVerified <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>            t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;RED_MODE=0: fail-closed C3 not implemented — unbacked seed self-certified Verified==true; &quot;</span> <span class="op">+</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;absent a fresh probe the accessor MUST report unverified/fail-closed (10b §3 C3 part 3).&quot;</span><span class="op">)</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Logf<span class="op">(</span><span class="st">&quot;RED_MODE=0 PASS: accessor reports unverified/fail-closed absent a probe.&quot;</span><span class="op">)</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;unknown RED_MODE=%q (expected 0 or 1)&quot;</span><span class="op">,</span> redMode<span class="op">)</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Captured evidence (this session,
+<code>cd llm-verifier</code>):</strong></p>
+<pre><code>===== RED_MODE=0 (would-be-fixed guard) — FAIL (RED proof: C3 gap is real) =====
+--- FAIL: TestC3RegistrySeedNotSelfCertifiedVerified (0.00s)
+    registry_c3_failclosed_red_test.go:58: RED_MODE=0: fail-closed C3 not implemented —
+    GetProviderBaseCapabilities(&quot;openai&quot;) returns an unbacked seed self-certified Verified==true;
+    absent a fresh probe the accessor MUST report unverified/fail-closed (10b spec §3 C3 part 3).
+FAIL    digital.vasic.llmsverifier/capabilities 0.004s   EXIT=1
+
+===== RED_MODE=1 (reproduce defect) — PASS (defect reproduced) =====
+--- PASS: TestC3RegistrySeedNotSelfCertifiedVerified (0.00s)
+    RED_MODE=1 PASS: defect reproduced — GetProviderBaseCapabilities(&quot;openai&quot;) returns a
+    hand-authored seed self-certified Verified==true with NO probe backing (§2.5).
+ok      digital.vasic.llmsverifier/capabilities 0.003s   EXIT=0</code></pre>
+<p>RED_MODE=0 FAILs on the current artifact → the C3 gap is genuinely
+present and unfixed. Baseline restored after capture:
+<code>go build ./...</code> EXIT=0,
+<code>go test ./capabilities/...</code> = ok, working tree clean.</p>
+<hr />
+<h2 id="precise-fileline-implementation-plan-execute-after-c4-c5">3.
+Precise file:line implementation plan (execute AFTER C4 + C5)</h2>
+<ol type="1">
+<li><strong>Rename + demote the seed map</strong> —
+<code>registry.go:8</code> <code>var providerCapabilities</code> →
+<code>var providerCapabilitySeeds</code>, with a doc-comment:
+“hand-authored bootstrap defaults; NOT verified — MUST be overridden by
+a live probe / DB <code>VerificationResult</code> before being shown to
+any user, per CONST-036/037/040.” Update the 4 internal references
+(<code>registry.go:1069,1086,1105</code> and the
+<code>GetAllProviders</code> loop). Set every seed’s
+<code>Verified</code> literal to <code>false</code> (a seed is
+unverified by construction — this alone flips the RED_MODE=0 guard GREEN
+and satisfies §2.5 part 1).</li>
+<li><strong>Add a resolver</strong> (new
+<code>registry_resolve.go</code>, same package) with an explicit
+contract — decide the DB data-source WITH the operator or as part of
+C5’s wiring (do NOT guess): e.g.
+<code>func ResolveModelCapability(db *database.Database, provider, model, capName string) (value bool, verified bool, err error)</code>
+that
+<ol type="a">
+<li>loads the latest <code>database.VerificationResult</code> for
+<code>model</code>; (b) if fresh (StartedAt/CompletedAt within CONST-037
+24h / CONST-038 60s) returns the probed value +
+<code>verified=true</code>; (c) else if a seed exists returns the seed
+value + <code>verified=false</code>; (d) else fail-closed
+<code>(false, false, nil)</code> → unverified, NEVER a silent
+hand-authored literal. <code>database</code> is safe to import (no
+cycle).</li>
+</ol></li>
+<li><strong>Route accessors</strong>
+<code>GetProviderBaseCapabilities:1068</code> /
+<code>GetProvidersWithCapability:1101</code> through the resolver
+(reconcile the 3 <code>capabilities/detector.go</code> callers +
+signatures per §11.4.120).</li>
+<li><strong>Demote static literals</strong> (e.g. anthropic
+<code>FunctionCalling:false</code> <code>registry.go:102</code>) to
+seeds; the C4 probe is the source of truth.</li>
+<li><strong>Re-land the RED test</strong> from §2 into
+<code>capabilities/</code>, flip default polarity to the standing GREEN
+guard (<code>RED_MODE=0</code>), register it in the §11.4.135
+regression-guard suite. Add per-capability fail-closed cases (§11.4.146
+STEP 3 extend).</li>
+</ol>
+<p><strong>Dependency order (10b §4):</strong> C4 → C5 → C3. Do NOT land
+the resolver’s “prefer fresh probe” branch before C4/C5 produce real
+per-model <code>VerificationResult</code>s, or it ships unwired
+(§11.4.124).</p>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li>Code read directly this session (2026-07-06) from
+<code>submodules/llms_verifier/llm-verifier/…</code>:
+<code>capabilities/registry.go:8,1068,1102</code>,
+<code>capabilities/detector.go:48,153,292</code>,
+<code>verification/verification.go:62,69</code>,
+<code>llmverifier/verifier.go:1112</code>.</li>
+<li>Spec: <code>10b_code_exact_change_spec.md</code> §2.5, §3 C3,
+§4.</li>
+<li>RED evidence captured this session (temp test run + removed).</li>
+</ul>
+</body>
+</html>
