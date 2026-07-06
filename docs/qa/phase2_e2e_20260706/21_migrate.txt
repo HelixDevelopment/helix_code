@@ -1,0 +1,57 @@
+=== apply migration 001 to phase2 postgres ===
+CREATE EXTENSION
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+COMMENT
+COMMENT
+COMMENT
+COMMENT
+COMMENT
+COMMENT
+APPLY_EXIT=0
+=== user_sessions table present? ===
+                                 Table "public.user_sessions"
+    Column     |           Type           | Collation | Nullable |           Default           
+---------------+--------------------------+-----------+----------+-----------------------------
+ id            | uuid                     |           | not null | uuid_generate_v4()
+ user_id       | uuid                     |           |          | 
+ session_token | character varying(255)   |           | not null | 
+ context       | jsonb                    |           |          | '{}'::jsonb
+ memory_id     | uuid                     |           |          | 
+ status        | character varying(50)    |           |          | 'active'::character varying
+ request_count | integer                  |           |          | 0
+ last_activity | timestamp with time zone |           |          | now()
+ expires_at    | timestamp with time zone |           | not null | 
+ created_at    | timestamp with time zone |           |          | now()
+Indexes:
+    "user_sessions_pkey" PRIMARY KEY, btree (id)
+    "idx_user_sessions_expires_at" btree (expires_at)
+    "idx_user_sessions_session_token" btree (session_token)
+    "idx_user_sessions_user_id" btree (user_id)
+    "user_sessions_session_token_key" UNIQUE CONSTRAINT, btree (session_token)
+Foreign-key constraints:
+    "user_sessions_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+Referenced by:
+    TABLE "cognee_memories" CONSTRAINT "cognee_memories_session_id_fkey" FOREIGN KEY (session_id) REFERENCES user_sessions(id) ON DELETE CASCADE
+    TABLE "llm_requests" CONSTRAINT "llm_requests_session_id_fkey" FOREIGN KEY (session_id) REFERENCES user_sessions(id) ON DELETE CASCADE
+

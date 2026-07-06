@@ -1,0 +1,292 @@
+### live Postgres session_repository test (real infra, no mock)
+=== RUN   TestCogneeMemoryRepository_GetBySessionID
+--- PASS: TestCogneeMemoryRepository_GetBySessionID (0.02s)
+=== RUN   TestCogneeMemoryRepository_DeleteBySessionID
+--- PASS: TestCogneeMemoryRepository_DeleteBySessionID (0.02s)
+=== RUN   TestNewDebateSessionRepository_NilLogger
+--- PASS: TestNewDebateSessionRepository_NilLogger (0.00s)
+=== RUN   TestNewDebateSessionRepository_ValidLogger
+--- PASS: TestNewDebateSessionRepository_ValidLogger (0.00s)
+=== RUN   TestDebateSessionEntry_Fields
+--- PASS: TestDebateSessionEntry_Fields (0.00s)
+=== RUN   TestDebateSessionEntry_NullableFields
+=== RUN   TestDebateSessionEntry_NullableFields/NilCompletedAt
+=== RUN   TestDebateSessionEntry_NullableFields/NilFinalConsensusScore
+=== RUN   TestDebateSessionEntry_NullableFields/BothNilFields
+=== RUN   TestDebateSessionEntry_NullableFields/NilFieldsWithPopulatedOptionalStrings
+--- PASS: TestDebateSessionEntry_NullableFields (0.00s)
+    --- PASS: TestDebateSessionEntry_NullableFields/NilCompletedAt (0.00s)
+    --- PASS: TestDebateSessionEntry_NullableFields/NilFinalConsensusScore (0.00s)
+    --- PASS: TestDebateSessionEntry_NullableFields/BothNilFields (0.00s)
+    --- PASS: TestDebateSessionEntry_NullableFields/NilFieldsWithPopulatedOptionalStrings (0.00s)
+=== RUN   TestDebateSessionEntry_JsonTags
+=== RUN   TestDebateSessionEntry_JsonTags/MarshalFullEntry
+=== RUN   TestDebateSessionEntry_JsonTags/MarshalAndUnmarshalRoundTrip
+=== RUN   TestDebateSessionEntry_JsonTags/OmitemptyFields
+--- PASS: TestDebateSessionEntry_JsonTags (0.00s)
+    --- PASS: TestDebateSessionEntry_JsonTags/MarshalFullEntry (0.00s)
+    --- PASS: TestDebateSessionEntry_JsonTags/MarshalAndUnmarshalRoundTrip (0.00s)
+    --- PASS: TestDebateSessionEntry_JsonTags/OmitemptyFields (0.00s)
+=== RUN   TestDebateSessionRepository_CreateTable_NilPool
+--- PASS: TestDebateSessionRepository_CreateTable_NilPool (0.00s)
+=== RUN   TestDebateSessionRepository_Insert_NilPool
+--- PASS: TestDebateSessionRepository_Insert_NilPool (0.00s)
+=== RUN   TestDebateSessionRepository_GetByID_NilPool
+--- PASS: TestDebateSessionRepository_GetByID_NilPool (0.00s)
+=== RUN   TestRequestRepository_GetBySessionID_NilPool
+--- PASS: TestRequestRepository_GetBySessionID_NilPool (0.00s)
+=== RUN   TestSessionRepository_Update_NilPool
+--- PASS: TestSessionRepository_Update_NilPool (0.00s)
+=== RUN   TestSessionRepository_UpdateContext_NilPool
+--- PASS: TestSessionRepository_UpdateContext_NilPool (0.00s)
+=== RUN   TestSessionRepository_Update_MarshalError
+--- PASS: TestSessionRepository_Update_MarshalError (0.00s)
+=== RUN   TestSessionRepository_UpdateContext_MarshalError
+--- PASS: TestSessionRepository_UpdateContext_MarshalError (0.00s)
+=== RUN   TestSessionRepository_DeleteExpired_NilPool
+--- PASS: TestSessionRepository_DeleteExpired_NilPool (0.00s)
+=== RUN   TestSessionRepository_DeleteByUserID_NilPool
+--- PASS: TestSessionRepository_DeleteByUserID_NilPool (0.00s)
+=== RUN   TestSessionRepository_IsValid_NilPool
+--- PASS: TestSessionRepository_IsValid_NilPool (0.00s)
+=== RUN   TestCogneeMemoryRepository_DeleteBySessionID_NilPool
+--- PASS: TestCogneeMemoryRepository_DeleteBySessionID_NilPool (0.00s)
+=== RUN   TestUserSession_JSONSerialization_Extended
+--- PASS: TestUserSession_JSONSerialization_Extended (0.00s)
+=== RUN   TestUserSession_StatusValues_Extended
+--- PASS: TestUserSession_StatusValues_Extended (0.00s)
+=== RUN   TestUserSession_ContextTypes_Extended
+=== RUN   TestUserSession_ContextTypes_Extended/EmptyContext
+=== RUN   TestUserSession_ContextTypes_Extended/SimpleContext
+=== RUN   TestUserSession_ContextTypes_Extended/NestedContext
+--- PASS: TestUserSession_ContextTypes_Extended (0.00s)
+    --- PASS: TestUserSession_ContextTypes_Extended/EmptyContext (0.00s)
+    --- PASS: TestUserSession_ContextTypes_Extended/SimpleContext (0.00s)
+    --- PASS: TestUserSession_ContextTypes_Extended/NestedContext (0.00s)
+=== RUN   TestNewSessionRepository_Extended
+=== RUN   TestNewSessionRepository_Extended/WithNilPool
+--- PASS: TestNewSessionRepository_Extended (0.00s)
+    --- PASS: TestNewSessionRepository_Extended/WithNilPool (0.00s)
+=== RUN   TestUserSession_NilMemoryID
+--- PASS: TestUserSession_NilMemoryID (0.00s)
+=== RUN   TestUserSession_ZeroRequestCount
+--- PASS: TestUserSession_ZeroRequestCount (0.00s)
+=== RUN   TestUserSession_HighRequestCount
+--- PASS: TestUserSession_HighRequestCount (0.00s)
+=== RUN   TestUserSession_JSONRoundTrip_Extended
+--- PASS: TestUserSession_JSONRoundTrip_Extended (0.00s)
+=== RUN   TestUserSession_JSONTags
+--- PASS: TestUserSession_JSONTags (0.00s)
+=== RUN   TestRequestRepository_GetBySessionID
+=== RUN   TestRequestRepository_GetBySessionID/Success
+    request_repository_test.go:198: Skipping: requires valid session record due to foreign key constraint
+=== RUN   TestRequestRepository_GetBySessionID/Pagination
+    request_repository_test.go:202: Skipping: requires valid session record due to foreign key constraint
+--- PASS: TestRequestRepository_GetBySessionID (0.00s)
+    --- SKIP: TestRequestRepository_GetBySessionID/Success (0.00s)
+    --- SKIP: TestRequestRepository_GetBySessionID/Pagination (0.00s)
+=== RUN   TestSessionRepository_Create
+=== RUN   TestSessionRepository_Create/Success
+=== RUN   TestSessionRepository_Create/WithNilMemoryID
+=== RUN   TestSessionRepository_Create/WithNilContext
+=== NAME  TestSessionRepository_Create
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_Create (0.02s)
+    --- PASS: TestSessionRepository_Create/Success (0.00s)
+    --- PASS: TestSessionRepository_Create/WithNilMemoryID (0.00s)
+    --- PASS: TestSessionRepository_Create/WithNilContext (0.00s)
+=== RUN   TestSessionRepository_GetByID
+=== RUN   TestSessionRepository_GetByID/Success
+=== RUN   TestSessionRepository_GetByID/NotFound
+=== NAME  TestSessionRepository_GetByID
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_GetByID (0.01s)
+    --- PASS: TestSessionRepository_GetByID/Success (0.00s)
+    --- PASS: TestSessionRepository_GetByID/NotFound (0.00s)
+=== RUN   TestSessionRepository_GetByToken
+=== RUN   TestSessionRepository_GetByToken/Success
+=== RUN   TestSessionRepository_GetByToken/NotFound
+=== NAME  TestSessionRepository_GetByToken
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_GetByToken (0.01s)
+    --- PASS: TestSessionRepository_GetByToken/Success (0.00s)
+    --- PASS: TestSessionRepository_GetByToken/NotFound (0.00s)
+=== RUN   TestSessionRepository_GetByUserID
+=== RUN   TestSessionRepository_GetByUserID/Success
+=== RUN   TestSessionRepository_GetByUserID/EmptyResult
+=== NAME  TestSessionRepository_GetByUserID
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_GetByUserID (0.02s)
+    --- PASS: TestSessionRepository_GetByUserID/Success (0.01s)
+    --- PASS: TestSessionRepository_GetByUserID/EmptyResult (0.00s)
+=== RUN   TestSessionRepository_GetActiveSessions
+=== RUN   TestSessionRepository_GetActiveSessions/Success
+=== NAME  TestSessionRepository_GetActiveSessions
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_GetActiveSessions (0.02s)
+    --- PASS: TestSessionRepository_GetActiveSessions/Success (0.01s)
+=== RUN   TestSessionRepository_Update
+=== RUN   TestSessionRepository_Update/Success
+=== RUN   TestSessionRepository_Update/NotFound
+=== NAME  TestSessionRepository_Update
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_Update (0.02s)
+    --- PASS: TestSessionRepository_Update/Success (0.00s)
+    --- PASS: TestSessionRepository_Update/NotFound (0.00s)
+=== RUN   TestSessionRepository_UpdateActivity
+=== RUN   TestSessionRepository_UpdateActivity/Success
+=== RUN   TestSessionRepository_UpdateActivity/NotFound
+=== NAME  TestSessionRepository_UpdateActivity
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_UpdateActivity (0.02s)
+    --- PASS: TestSessionRepository_UpdateActivity/Success (0.00s)
+    --- PASS: TestSessionRepository_UpdateActivity/NotFound (0.00s)
+=== RUN   TestSessionRepository_UpdateContext
+=== RUN   TestSessionRepository_UpdateContext/Success
+=== RUN   TestSessionRepository_UpdateContext/NotFound
+=== NAME  TestSessionRepository_UpdateContext
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_UpdateContext (0.02s)
+    --- PASS: TestSessionRepository_UpdateContext/Success (0.00s)
+    --- PASS: TestSessionRepository_UpdateContext/NotFound (0.00s)
+=== RUN   TestSessionRepository_Terminate
+=== RUN   TestSessionRepository_Terminate/Success
+=== RUN   TestSessionRepository_Terminate/NotFound
+=== NAME  TestSessionRepository_Terminate
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_Terminate (0.01s)
+    --- PASS: TestSessionRepository_Terminate/Success (0.00s)
+    --- PASS: TestSessionRepository_Terminate/NotFound (0.00s)
+=== RUN   TestSessionRepository_Delete
+=== RUN   TestSessionRepository_Delete/Success
+=== RUN   TestSessionRepository_Delete/NotFound
+=== NAME  TestSessionRepository_Delete
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_Delete (0.02s)
+    --- PASS: TestSessionRepository_Delete/Success (0.01s)
+    --- PASS: TestSessionRepository_Delete/NotFound (0.00s)
+=== RUN   TestSessionRepository_DeleteExpired
+=== RUN   TestSessionRepository_DeleteExpired/Success
+=== NAME  TestSessionRepository_DeleteExpired
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_DeleteExpired (0.02s)
+    --- PASS: TestSessionRepository_DeleteExpired/Success (0.01s)
+=== RUN   TestSessionRepository_DeleteByUserID
+=== RUN   TestSessionRepository_DeleteByUserID/Success
+=== RUN   TestSessionRepository_DeleteByUserID/NoMatches
+=== NAME  TestSessionRepository_DeleteByUserID
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_DeleteByUserID (0.02s)
+    --- PASS: TestSessionRepository_DeleteByUserID/Success (0.01s)
+    --- PASS: TestSessionRepository_DeleteByUserID/NoMatches (0.00s)
+=== RUN   TestSessionRepository_IsValid
+=== RUN   TestSessionRepository_IsValid/ValidSession
+=== RUN   TestSessionRepository_IsValid/ExpiredSession
+=== RUN   TestSessionRepository_IsValid/TerminatedSession
+=== RUN   TestSessionRepository_IsValid/NonExistentToken
+=== NAME  TestSessionRepository_IsValid
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_IsValid (0.02s)
+    --- PASS: TestSessionRepository_IsValid/ValidSession (0.00s)
+    --- PASS: TestSessionRepository_IsValid/ExpiredSession (0.00s)
+    --- PASS: TestSessionRepository_IsValid/TerminatedSession (0.00s)
+    --- PASS: TestSessionRepository_IsValid/NonExistentToken (0.00s)
+=== RUN   TestSessionRepository_ExtendExpiration
+=== RUN   TestSessionRepository_ExtendExpiration/Success
+=== RUN   TestSessionRepository_ExtendExpiration/NotFound
+=== NAME  TestSessionRepository_ExtendExpiration
+    session_repository_test.go:90: Warning: Failed to cleanup user_sessions: closed pool
+    session_repository_test.go:95: Warning: Failed to cleanup users: closed pool
+--- PASS: TestSessionRepository_ExtendExpiration (0.01s)
+    --- PASS: TestSessionRepository_ExtendExpiration/Success (0.00s)
+    --- PASS: TestSessionRepository_ExtendExpiration/NotFound (0.00s)
+=== RUN   TestNewSessionRepository
+=== RUN   TestNewSessionRepository/CreatesRepositoryWithNilPool
+=== RUN   TestNewSessionRepository/CreatesRepositoryWithNilLogger
+--- PASS: TestNewSessionRepository (0.00s)
+    --- PASS: TestNewSessionRepository/CreatesRepositoryWithNilPool (0.00s)
+    --- PASS: TestNewSessionRepository/CreatesRepositoryWithNilLogger (0.00s)
+=== RUN   TestUserSession_JSONSerialization
+=== RUN   TestUserSession_JSONSerialization/SerializesFullSession
+=== RUN   TestUserSession_JSONSerialization/SerializesMinimalSession
+--- PASS: TestUserSession_JSONSerialization (0.00s)
+    --- PASS: TestUserSession_JSONSerialization/SerializesFullSession (0.00s)
+    --- PASS: TestUserSession_JSONSerialization/SerializesMinimalSession (0.00s)
+=== RUN   TestUserSession_Fields
+=== RUN   TestUserSession_Fields/AllFieldsSet
+=== RUN   TestUserSession_Fields/DefaultValues
+=== RUN   TestUserSession_Fields/NilPointerFields
+--- PASS: TestUserSession_Fields (0.00s)
+    --- PASS: TestUserSession_Fields/AllFieldsSet (0.00s)
+    --- PASS: TestUserSession_Fields/DefaultValues (0.00s)
+    --- PASS: TestUserSession_Fields/NilPointerFields (0.00s)
+=== RUN   TestUserSession_StatusValues
+=== RUN   TestUserSession_StatusValues/Status_active
+=== RUN   TestUserSession_StatusValues/Status_suspended
+=== RUN   TestUserSession_StatusValues/Status_terminated
+=== RUN   TestUserSession_StatusValues/Status_expired
+=== RUN   TestUserSession_StatusValues/Status_
+--- PASS: TestUserSession_StatusValues (0.00s)
+    --- PASS: TestUserSession_StatusValues/Status_active (0.00s)
+    --- PASS: TestUserSession_StatusValues/Status_suspended (0.00s)
+    --- PASS: TestUserSession_StatusValues/Status_terminated (0.00s)
+    --- PASS: TestUserSession_StatusValues/Status_expired (0.00s)
+    --- PASS: TestUserSession_StatusValues/Status_ (0.00s)
+=== RUN   TestUserSession_ContextFormats
+=== RUN   TestUserSession_ContextFormats/EmptyContext
+=== RUN   TestUserSession_ContextFormats/StandardContext
+=== RUN   TestUserSession_ContextFormats/ComplexContext
+--- PASS: TestUserSession_ContextFormats (0.00s)
+    --- PASS: TestUserSession_ContextFormats/EmptyContext (0.00s)
+    --- PASS: TestUserSession_ContextFormats/StandardContext (0.00s)
+    --- PASS: TestUserSession_ContextFormats/ComplexContext (0.00s)
+=== RUN   TestUserSession_JSONRoundTrip
+=== RUN   TestUserSession_JSONRoundTrip/FullRoundTrip
+--- PASS: TestUserSession_JSONRoundTrip (0.00s)
+    --- PASS: TestUserSession_JSONRoundTrip/FullRoundTrip (0.00s)
+=== RUN   TestUserSession_EdgeCases
+=== RUN   TestUserSession_EdgeCases/VeryLongToken
+=== RUN   TestUserSession_EdgeCases/SpecialCharactersInUserID
+=== RUN   TestUserSession_EdgeCases/ZeroRequestCount
+=== RUN   TestUserSession_EdgeCases/LargeRequestCount
+=== RUN   TestUserSession_EdgeCases/PastExpiresAt
+=== RUN   TestUserSession_EdgeCases/FutureExpiresAt
+--- PASS: TestUserSession_EdgeCases (0.00s)
+    --- PASS: TestUserSession_EdgeCases/VeryLongToken (0.00s)
+    --- PASS: TestUserSession_EdgeCases/SpecialCharactersInUserID (0.00s)
+    --- PASS: TestUserSession_EdgeCases/ZeroRequestCount (0.00s)
+    --- PASS: TestUserSession_EdgeCases/LargeRequestCount (0.00s)
+    --- PASS: TestUserSession_EdgeCases/PastExpiresAt (0.00s)
+    --- PASS: TestUserSession_EdgeCases/FutureExpiresAt (0.00s)
+=== RUN   TestUserSession_JSONKeys
+--- PASS: TestUserSession_JSONKeys (0.00s)
+=== RUN   TestCreateTestUserSession_Helper
+=== RUN   TestCreateTestUserSession_Helper/HasRequiredFields
+=== RUN   TestCreateTestUserSession_Helper/HasOptionalFields
+=== RUN   TestCreateTestUserSession_Helper/HasDefaultValues
+--- PASS: TestCreateTestUserSession_Helper (0.00s)
+    --- PASS: TestCreateTestUserSession_Helper/HasRequiredFields (0.00s)
+    --- PASS: TestCreateTestUserSession_Helper/HasOptionalFields (0.00s)
+    --- PASS: TestCreateTestUserSession_Helper/HasDefaultValues (0.00s)
+=== RUN   TestUserSession_TimeFields
+=== RUN   TestUserSession_TimeFields/AllTimeFieldsSet
+=== RUN   TestUserSession_TimeFields/ZeroTimeFields
+--- PASS: TestUserSession_TimeFields (0.00s)
+    --- PASS: TestUserSession_TimeFields/AllTimeFieldsSet (0.00s)
+    --- PASS: TestUserSession_TimeFields/ZeroTimeFields (0.00s)
+PASS
+ok  	dev.helix.agent/internal/database	0.272s
+SESSION_TEST_EXIT=0

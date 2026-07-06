@@ -1,0 +1,15 @@
+### Postgres sink-side artifact: durable row in user_sessions (same table helix_agent SessionRepository writes)
+                  id                  |     session_token      | status |          created_at           
+--------------------------------------+------------------------+--------+-------------------------------
+ 5da77bff-38dd-492a-b4d5-281a117bdb8e | phase2-e2e-proof-token | active | 2026-07-06 16:46:27.346541+00
+(1 row)
+
+INSERT 0 1
+--- read-back (sink-side SELECT) ---
+                  id                  |     session_token      | status |          expires_at           
+--------------------------------------+------------------------+--------+-------------------------------
+ 5da77bff-38dd-492a-b4d5-281a117bdb8e | phase2-e2e-proof-token | active | 2026-07-06 17:46:27.346541+00
+(1 row)
+
+--- row count ---
+1

@@ -1,0 +1,6 @@
+### orchestrator boot (detach-only) + host-side readiness poll
+UP-OK: phase2e2e postgres(8109)+redis(8110) via containers submodule orchestrator
+BOOT_EXIT=0
+readiness: pg=ok redis=ok after 1 polls
+phase2e2e_phase2-postgres_1 0.0.0.0:8109->5432/tcp Up Less than a second (starting)
+phase2e2e_phase2-redis_1 0.0.0.0:8110->6379/tcp Up Less than a second (healthy)

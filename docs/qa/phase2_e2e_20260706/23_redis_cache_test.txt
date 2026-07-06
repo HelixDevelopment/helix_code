@@ -1,0 +1,10 @@
+### live Redis cache persistence via HelixAgent RedisClient (real Redis:8110)
+=== RUN   TestE2E_RedisClient_LivePersist
+    redis_live_e2e_test.go:54: LIVE CACHE PROOF: addr=localhost:8110 key="phase2:e2e:cache:proof" value="helixagent-phase2-cache-value" round-trip OK
+--- PASS: TestE2E_RedisClient_LivePersist (0.00s)
+PASS
+ok  	dev.helix.agent/internal/cache	0.006s
+REDIS_TEST_EXIT=0
+=== sink-side verify: key physically present in live Redis (redis-cli) ===
+"helixagent-phase2-cache-value"
+300

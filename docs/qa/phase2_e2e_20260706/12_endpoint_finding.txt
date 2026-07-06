@@ -1,0 +1,6 @@
+=== confirm double-/v1 404 vs correct base ===
+-- WRONG (base .../v1 -> provider appends /v1/chat/completions):
+404
+-- CORRECT (base with no /v1 -> /v1/chat/completions):
+200
+FINDING: effective HELIX_LLM_LOCAL_OPENAI_ENDPOINT must be http://localhost:18434 (base, no /v1) because provider appends /v1/chat/completions

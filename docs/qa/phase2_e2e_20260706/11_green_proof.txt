@@ -1,0 +1,13 @@
+### GREEN proof (RED_MODE=0) — live HelixAgent->HelixLLM real generate (base endpoint, no /v1)
+=== RUN   TestE2E_HelixAgent_To_LiveHelixLLM
+    provider_e2e_live_test.go:108: endpoint=http://localhost:18434 elapsed=108.335063ms tokens_used=53 model=/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf
+    provider_e2e_live_test.go:110: === REAL MODEL RESPONSE (57 bytes) ===
+        ```go
+        func Add(a int, b int) int {
+            return a + b
+        }
+        ```
+--- PASS: TestE2E_HelixAgent_To_LiveHelixLLM (0.11s)
+PASS
+ok  	dev.helix.agent/internal/llm/providers/helixllm	0.113s
+GREEN_TEST_EXIT=0

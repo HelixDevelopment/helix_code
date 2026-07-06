@@ -1,0 +1,7 @@
+### teardown via containers-submodule orchestrator (single-owner cleanup §11.4.119)
+DOWN-OK: phase2e2e torn down (volumes removed)
+DOWN_EXIT=0
+--- remaining phase2 containers (must be none) ---
+none
+--- coder still up (must NOT be touched) ---
+helixllm-coder Up 3 hours
