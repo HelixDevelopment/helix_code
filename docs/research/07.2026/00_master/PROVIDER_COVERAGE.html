@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PROVIDER_COVERAGE</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PROVIDER_COVERAGE</h1>
+</header>
+<h1 id="helixllm-extended-provider-coverage-design-mapping-p4-provider-adapters">HelixLLM
+Extended Provider Coverage — Design Mapping (P4 provider adapters)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Status</strong></td>
+<td>DESIGN (spike before implementation, §11.4.6 — do not scaffold an
+adapter until its API row here is confirmed)</td>
+</tr>
+<tr>
+<td><strong>Scope</strong></td>
+<td>The <strong>extended LLM provider set</strong> from the programme
+request, mapped into the existing LLMsVerifier provider registry
+(verification) + HelixLLM/HelixAgent provider layer (serving). NOT the
+already-integrated CONST-039 set except where an operator decision
+routes a new model onto it.</td>
+</tr>
+<tr>
+<td><strong>Owns</strong></td>
+<td>Implementation-plan <strong>P4-T1 / P4-T2 / P4-T3</strong>
+(<code>04_implementation_plan.md:88-92</code>) — the provider-adapter +
+protocol phase (parallel after P2)</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-07-06 · Revision 1 · Track <code>(T1/main)</code> · Branch
+<code>feature/helixllm-full-extension</code></td>
+</tr>
+<tr>
+<td><strong>Grounding</strong></td>
+<td><code>submodules/helix_llm/docs/API_CONTRACT.md</code> §2 (route
+inventory) §4 (OpenAI-compat) §5 (Anthropic-compat) ·
+<code>submodules/llms_verifier/llm-verifier/providers/model_provider_service.go</code>
+(<code>ProviderClient{Name,BaseURL,APIKey}</code>) ·
+<code>docs/research/07.2026/00_master/03_open_clarifications.md</code>
+(operator resolutions C1–C4 + resolved-without-operator) ·
+<code>docs/research/07.2026/00_master/04_implementation_plan.md</code>
+P2-T1/P2-T4/P4-T1..3</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff (§11.4.6 / §11.4.99 / §11.4.150).</strong> Every
+base URL, auth model, and OpenAI-compat verdict below was verified
+against the provider’s <strong>LATEST live documentation on
+2026-07-06</strong> (WebFetch/WebSearch — never memory); each row cites
+the URL it was read from. Where a base URL could <strong>not</strong> be
+confirmed from a fetched authoritative page in this pass it is recorded
+<code>UNVERIFIED — &lt;reason&gt;</code> (§11.4.6) and <strong>no
+endpoint is invented</strong>. The operator decisions in
+<code>03_open_clarifications.md</code> (C1–C4) are honoured
+<strong>verbatim</strong> and cited, not re-litigated.</p>
+</blockquote>
+<hr />
+<h2 id="the-unit-of-work-why-almost-all-of-this-is-config-not-code">0.
+The unit of work — why almost all of this is config, not code</h2>
+<p>HelixLLM’s gateway is <strong>already OpenAI-compatible AND
+Anthropic-compatible</strong> on the wire:
+<code>POST /v1/chat/completions</code> (<code>API_CONTRACT.md</code> §2
+→ <code>internal/gateway/router.go:72</code>),
+<code>GET /v1/models</code> (<code>router.go:74</code>, returns the
+provider layer’s models — <strong>not a hardcoded list</strong>,
+aligning CONST-036 per <code>API_CONTRACT.md</code> §4.3), and
+<code>POST /v1/messages</code> Anthropic surface
+(<code>router.go:84</code>). The LLMsVerifier provider model is a
+<strong>data record</strong> —
+<code>ProviderClient{ Name, BaseURL, APIKey }</code>
+(<code>providers/model_provider_service.go:45-49</code>) — whose model
+set is discovered by querying the provider’s own
+<code>/v1/models</code>, never enumerated in source (CONST-036).</p>
+<p>The programme’s own plan states the consequence: P4-T1 adapters land
+in <strong>HelixAgent <code>internal/llm/providers/</code> + an
+LLMsVerifier registration</strong>
+(<code>04_implementation_plan.md:90</code>), and P2-T1 already extends
+“HelixAgent’s OpenAI/Anthropic REST server as the unified
+<code>/v1</code> gateway … <strong>reuse not reimplement
+§11.4.74</strong>” (<code>04_implementation_plan.md:70</code>).
+Therefore <strong>an OpenAI-compatible provider is a config row, not an
+adapter</strong>: same request struct, same response struct, only
+<code>{Name, BaseURL, APIKey-from-env}</code> differ (§11.4.28
+decoupling / §CONST-045 no-hardcoded-host / §CONST-046 no-hardcoded
+content). A <strong>new adapter</strong> is only warranted when a
+provider’s wire shape is NOT OpenAI-compatible (none of the confirmed
+extended providers below are in that class — see §2).</p>
+<hr />
+<h2 id="per-provider-coverage-table-latest-doc-verified-2026-07-06">1.
+Per-provider coverage table (LATEST-doc-verified 2026-07-06)</h2>
+<p>Auth model is <strong>Bearer API key from an env var</strong>
+(<code>Authorization: Bearer $&lt;PROVIDER&gt;_API_KEY</code>) for
+<strong>every</strong> hosted row — the single-source-of-truth
+credential rule (§11.4.10, never hardcoded/logged); the column is elided
+as uniform and noted only where a provider adds a second surface.</p>
+<h3 id="confirmed-hosted-providers-openai-compatible-drop-into-the-existing-adapter-config-only">1.1
+Confirmed hosted providers — OpenAI-compatible, drop into the existing
+adapter (config-only)</h3>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 6%" />
+<col style="width: 35%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Base URL (verified)</th>
+<th>OpenAI-compat? → reuse</th>
+<th>Status</th>
+<th>Verified LATEST doc URL (accessed 2026-07-06)</th>
+<th>CONST-039/040 notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Poe</strong></td>
+<td><code>https://api.poe.com/v1</code></td>
+<td><strong>Yes — reuse</strong> (chat/completions + responses)</td>
+<td><strong>GA</strong></td>
+<td>https://creator.poe.com/docs/external-applications/openai-compatible-api</td>
+<td>Aggregator → hundreds of bots behind one OAI endpoint; capability
+flags (CONST-040) resolve per underlying model via
+<code>/v1/models</code>, not per-Poe</td>
+</tr>
+<tr>
+<td><strong>Perplexity (Sonar)</strong></td>
+<td><code>https://api.perplexity.ai</code></td>
+<td><strong>Yes — reuse</strong> (<code>/chat/completions</code>,
+Bearer)</td>
+<td><strong>GA</strong></td>
+<td>https://docs.perplexity.ai/getting-started/overview</td>
+<td>Search-grounded Sonar models; current docs foreground a Search API +
+Agent API alongside chat/completions — the chat surface is
+OpenAI-shaped. <strong>UNCONFIRMED (§11.4.6):</strong> whether
+tool-calling on Sonar matches the CONST-040 canonical JSON-Schema —
+probe at build (P2-T3)</td>
+</tr>
+<tr>
+<td><strong>Sakana Fugu</strong></td>
+<td><code>https://api.sakana.ai/v1</code></td>
+<td><strong>Yes — reuse</strong> (Chat Completions, Responses,
+Models)</td>
+<td><strong>GA</strong></td>
+<td>https://console.sakana.ai/get-started ·
+https://console.sakana.ai/models</td>
+<td>Models <code>fugu</code>, <code>fugu-ultra-20260615</code>;
+Responses API recommended for tool-use — reuse still lands on
+<code>/chat/completions</code>. Base URL corroborated by console +
+multiple integration guides</td>
+</tr>
+<tr>
+<td><strong>Xiaomi MiMo</strong></td>
+<td><code>https://api.xiaomimimo.com/v1</code></td>
+<td><strong>Yes — reuse</strong> (OpenAI <strong>and</strong> Anthropic
+surfaces)</td>
+<td><strong>GA</strong></td>
+<td>https://platform.xiaomimimo.com/docs/en-US/api/chat/openai-api</td>
+<td><code>mimo-v2-pro</code> (1M ctx), <code>-flash</code>,
+<code>-omni</code>, <code>-tts</code>; second (Anthropic) surface can
+also ride <code>/v1/messages</code> if ever preferred</td>
+</tr>
+<tr>
+<td><strong>Tencent Hunyuan</strong> (Yuanbao = consumer app → API
+target Hunyuan)</td>
+<td><code>https://api.hunyuan.cloud.tencent.com/v1</code></td>
+<td><strong>Yes — reuse</strong> (drop-in OpenAI SDK)</td>
+<td><strong>GA</strong></td>
+<td>https://cloud.tencent.com/document/product/1729/111007</td>
+<td><code>hunyuan-t1</code>, <code>hunyuan-t1-vision</code>; default
+5-concurrent quota — set client concurrency in config. Yuanbao mapping
+is per operator-transparency note
+(<code>03_open_clarifications.md</code>)</td>
+</tr>
+<tr>
+<td><strong>xAI Grok</strong></td>
+<td><code>https://api.x.ai/v1</code></td>
+<td><strong>Yes — reuse</strong> (OpenAI client; xAI also documents an
+Anthropic surface)</td>
+<td><strong>GA</strong></td>
+<td>https://docs.x.ai/docs/overview</td>
+<td>Grok family; Anthropic-compat surface <strong>UNCONFIRMED on the
+fetched page</strong> — reuse the OpenAI path (confirmed)</td>
+</tr>
+<tr>
+<td><strong>Moonshot / Kimi</strong></td>
+<td><code>https://api.moonshot.ai/v1</code></td>
+<td><strong>Yes — reuse</strong></td>
+<td><strong>GA</strong></td>
+<td>https://platform.kimi.ai/docs/api/chat (301 from
+platform.moonshot.ai)</td>
+<td>Kimi models; Anthropic-compat <strong>UNCONFIRMED on fetched
+page</strong> — reuse OpenAI path</td>
+</tr>
+<tr>
+<td><strong>Zhipu / Z.ai GLM</strong></td>
+<td><code>https://api.z.ai/api/paas/v4/</code></td>
+<td><strong>Yes — reuse</strong> (OpenAI Python/Node SDK)</td>
+<td><strong>GA</strong></td>
+<td>https://docs.z.ai/guides/overview/quick-start</td>
+<td>GLM family; note the non-standard <code>/api/paas/v4/</code> path
+segment — a config value, not a code assumption</td>
+</tr>
+<tr>
+<td><strong>Fireworks AI</strong></td>
+<td><code>https://api.fireworks.ai/inference/v1</code></td>
+<td><strong>Yes — reuse</strong></td>
+<td><strong>GA</strong></td>
+<td>https://docs.fireworks.ai/tools-sdks/openai-compatibility</td>
+<td>Open-model host; models discovered via live <code>/models</code>
+(CONST-036)</td>
+</tr>
+<tr>
+<td><strong>DeepInfra</strong></td>
+<td><code>https://api.deepinfra.com/v1/openai</code></td>
+<td><strong>Yes — reuse</strong></td>
+<td><strong>GA</strong></td>
+<td>https://docs.deepinfra.com/chat/overview</td>
+<td>Open-model host; token passed as <code>api_key</code></td>
+</tr>
+<tr>
+<td><strong>Novita</strong></td>
+<td><code>https://api.novita.ai/v3/openai</code></td>
+<td><strong>Yes — reuse</strong> (ChatCompletion + Completion)</td>
+<td><strong>GA</strong></td>
+<td>https://novita.ai/docs/guides/llm-api</td>
+<td>200+ open models; <code>GET /v3/openai/models</code> feeds CONST-036
+discovery</td>
+</tr>
+<tr>
+<td><strong>AI21 (Jamba)</strong></td>
+<td><code>https://api.ai21.com/studio/v1</code></td>
+<td><strong>Yes — reuse, with caveat</strong> (OpenAI-shaped
+<code>/chat/completions</code> + AI21 superset field
+<code>documents</code>)</td>
+<td><strong>GA</strong></td>
+<td>https://docs.ai21.com/reference/jamba-1-6-api-ref</td>
+<td><code>jamba-large</code>, <code>jamba-mini</code>; the additive
+<code>documents</code> field is accepted-and-ignored by a plain OpenAI
+client — <strong>flag</strong> if RAG-doc grounding is wanted (reviewed
+struct extension, not ambient)</td>
+</tr>
+<tr>
+<td><strong>Reka</strong></td>
+<td><code>https://api.reka.ai/v1</code></td>
+<td><strong>Yes — reuse</strong>
+(<code>OpenAI(base_url=&quot;https://api.reka.ai/v1&quot;)</code>)</td>
+<td><strong>GA</strong></td>
+<td>https://docs.reka.ai/chat/overview</td>
+<td>Multimodal chat; fully <code>/chat/completions</code>-compatible
+incl. streaming + JSON</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Confirmed OpenAI-compatible hosted adapters (config-only
+reuse): 13.</strong></p>
+<h3 id="base-url-unverified-this-pass-verify-at-build-before-scaffolding-11.4.6">1.2
+Base-URL-unverified this pass — verify-at-build before scaffolding
+(§11.4.6)</h3>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 33%" />
+<col style="width: 12%" />
+<col style="width: 25%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Best-known base URL</th>
+<th>Status</th>
+<th>Why UNVERIFIED</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hyperbolic</strong></td>
+<td><em>(commonly <code>https://api.hyperbolic.xyz/v1</code>)</em></td>
+<td>GA (believed)</td>
+<td><strong>UNVERIFIED — not fetched from an authoritative page in this
+pass.</strong> <code>04_implementation_plan.md:90</code> already says
+“verify Hyperbolic/Baseten base URLs at build”</td>
+<td>Fetch the live Hyperbolic API-reference page at build; if it
+confirms <code>/v1</code> OpenAI-compat → Class A reuse row; until then
+<strong>no PASS</strong></td>
+</tr>
+<tr>
+<td><strong>Baseten</strong></td>
+<td><em>(per-deployment Model API host, not one global base)</em></td>
+<td>GA</td>
+<td><strong>UNVERIFIED — Baseten exposes per-model/per-deployment
+endpoints</strong>, so there is no single global base URL to hardcode;
+its Model APIs are OpenAI-compatible per deployment</td>
+<td>Treat base URL as a <strong>per-deployment config value</strong>
+(§CONST-045); reuse the OpenAI adapter once a concrete deployment URL is
+injected</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator-decided-mappings-honoured-verbatim-03_open_clarifications.md-c1c4">1.3
+Operator-decided mappings — honoured verbatim
+(<code>03_open_clarifications.md</code> C1–C4)</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 51%" />
+<col style="width: 8%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item (as given)</th>
+<th>Operator resolution (2026-07-06) — cited</th>
+<th>Layer</th>
+<th>Adapter action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GPT-Sol</strong> (C1)</td>
+<td>✅ <strong>OpenAI GPT-5.6 “Sol”</strong> — “NO new adapter; add
+model IDs to the existing OpenAI provider when it reaches GA (track as
+preview-pending).”</td>
+<td>Provider (existing OpenAI adapter)</td>
+<td><strong>No new adapter</strong> (P4-T2). Add the
+<code>gpt-5.6-sol</code> model IDs to the existing OpenAI
+<code>ProviderDescriptor</code> <strong>at GA</strong>; carry a
+<code>preview-pending</code> flag until then</td>
+</tr>
+<tr>
+<td><strong>Google OKF</strong> (C2)</td>
+<td>✅ <strong>RAG/Skills knowledge format via MCP resources</strong> —
+“implement OKF as the on-disk knowledge format served through an MCP
+<code>resources</code> server (context layer, not provider layer).”</td>
+<td><strong>Context / MCP resources — NOT a provider</strong></td>
+<td><strong>Out of provider-coverage scope.</strong> No LLM adapter.
+Belongs to P3-T7 RAG + the MCP <code>resources</code> server (stream
+05). Recorded here so it is not mistaken for a missing provider</td>
+</tr>
+<tr>
+<td><strong>ACP</strong> (C3)</td>
+<td>✅ <strong>Google A2A (Agent-to-Agent)</strong> — “implement A2A
+interop, NOT Zed ACP.”</td>
+<td><strong>Protocol (agent↔︎agent) — NOT a provider</strong></td>
+<td><strong>Out of provider-coverage scope.</strong> A2A interop is a
+protocol surface (P4 protocols), served alongside
+<code>/v1/models</code> + MCP <code>server/discover</code>; not a model
+endpoint</td>
+</tr>
+<tr>
+<td><strong>Subquadratic (SubQ)</strong> (C4)</td>
+<td>✅ <strong>BLOCKED-until-GA</strong> — “no public base URL/auth … no
+adapter work possible until a public API (or operator-supplied beta
+credentials) exists.”</td>
+<td>Provider (deferred)</td>
+<td><strong>BLOCKED-until-GA.</strong>
+<code>UNVERIFIED — private beta, no public base URL/auth (operator C4)</code>.
+Tracked deferred item; <strong>no endpoint invented</strong>, no
+acceptance test until GA</td>
+</tr>
+</tbody>
+</table>
+<h3 id="self-host-mappings-reuse-the-existing-local-path-no-hosted-adapter-03_open_clarifications.md-p4-t3">1.4
+Self-host mappings — reuse the existing local path, no hosted adapter
+(<code>03_open_clarifications.md</code> + P4-T3)</h3>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 47%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Resolution (cited)</th>
+<th>Adapter action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Qwythos 9B</strong></td>
+<td><code>empero-ai/Qwythos-9B-…</code> (Qwen3.5-9B, 1M ctx, Apache-2.0)
+— <strong>self-host via the existing local/Ollama/HF path, no new hosted
+adapter</strong> (<code>03_open_clarifications.md</code>; P4-T3)</td>
+<td>Served through the <strong>already-integrated Ollama / Llama.cpp /
+local HF path</strong> (CONST-039). A model-config addition, not a
+provider adapter</td>
+</tr>
+<tr>
+<td><strong>GOT (GOT-OCR2.0)</strong></td>
+<td><strong>An OCR model, not a chat LLM</strong> — “belongs to the OCR
+capability (stream 07), self-host”
+(<code>03_open_clarifications.md</code>; P4-T3)</td>
+<td><strong>Out of provider-coverage scope</strong> — it is an OCR
+engine option under P3-T8 (<code>/v1/ocr</code>), verified by the OCR
+conf-floor + ROI signature, not a chat round-trip</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note on “GOT/GPT-Sol” in the request phrasing
+(§11.4.6):</strong> these are <strong>two distinct items</strong>, not
+one — <strong>GPT-Sol</strong> is the OpenAI GPT-5.6 “Sol” model (C1,
+existing OpenAI adapter), while <strong>GOT</strong> is GOT-OCR2.0 (an
+OCR engine, P3-T8). They are separated here so neither is silently
+dropped.</p>
+</blockquote>
+<hr />
+<h2 id="integration-approach-reuse-vs-new-adapter-and-where-each-is-wired">2.
+Integration approach — reuse vs new adapter, and where each is
+wired</h2>
+<h3 id="reuse-the-existing-openai-compatible-adapter-config-only-the-default">2.1
+Reuse the existing OpenAI-compatible adapter (config-only) — the
+default</h3>
+<p>All <strong>13 confirmed hosted providers (§1.1)</strong> and
+<strong>GPT-Sol on the existing OpenAI adapter (§1.3)</strong> are
+integrated with <strong>zero new adapter code</strong>. Each is a
+<code>ProviderDescriptor</code> row supplying
+<code>{Name, BaseURL, APIKey-env-var}</code> and an optional
+per-provider header/quota tweak (Hunyuan’s 5-concurrent default; Z.ai’s
+<code>/api/paas/v4/</code> path). The wire request/response is the
+existing <code>api.ChatCompletionRequest</code> /
+<code>api.ChatCompletionResponse</code> (<code>API_CONTRACT.md</code>
+§4.1). This is the §11.4.74 extend-don’t-reimplement + §11.4.28
+decoupling posture: a provider is <strong>data</strong>, not a
+class.</p>
+<ul>
+<li><strong>AI21 caveat:</strong> OpenAI-shaped but carries a superset
+<code>documents</code> field. Reuse the adapter as-is (the extra field
+is inert to a plain client); <em>only if</em> RAG-doc grounding through
+AI21 is wanted does <code>api.ChatCompletionRequest</code> gain an
+additive, <strong>reviewed</strong> field (§11.4.6 — a flagged diff,
+never ambient).</li>
+</ul>
+<h3 id="new-adapter-needed-count-0-among-confirmed-extended-providers">2.2
+New adapter needed — count: <strong>0</strong> among confirmed extended
+providers</h3>
+<p>None of the confirmed extended chat providers require a bespoke wire
+adapter — every one exposes an OpenAI <code>/chat/completions</code>
+surface. (Several — Xiaomi, Zhipu, xAI, Moonshot — <em>additionally</em>
+expose an Anthropic surface that could ride the existing
+<code>/v1/messages</code> path, but that is a bonus, not a requirement.)
+The only genuinely non-OpenAI mappings (<strong>OKF</strong>,
+<strong>A2A</strong>) are <strong>not provider-layer at all</strong> and
+are explicitly out of scope per the operator decisions.</p>
+<h3 id="where-each-is-wired-two-registries-one-per-concern">2.3 Where
+each is wired — two registries, one per concern</h3>
+<ol type="1">
+<li><strong>LLMsVerifier provider registry (verification side).</strong>
+Each provider is registered as a
+<code>ProviderClient{Name, BaseURL, APIKey}</code>
+(<code>providers/model_provider_service.go:45-49</code>) so LLMsVerifier
+can probe it, discover its model set from the live
+<code>/v1/models</code> (CONST-036 — <strong>no hardcoded model
+list</strong>), and set each CONST-040 capability flag from ONE real
+probe with a captured wire artefact (P2-T3 fail-closed;
+<code>04_implementation_plan.md:72</code>). Freshness/staleness
+(CONST-037 24h re-queue, CONST-038 ≤60s poll) binds on the existing
+<code>event_stream</code> seam (P2-T4;
+<code>04_implementation_plan.md:73</code>).</li>
+<li><strong>HelixLLM / HelixAgent provider layer (serving
+side).</strong> The adapter row lands in HelixAgent
+<code>internal/llm/providers/</code> and is surfaced through the unified
+<code>/v1</code> gateway (P2-T1) so <code>/v1/models</code> advertises
+it and <code>/v1/chat/completions</code> routes to it. Capability flags
+surfaced to clients come <strong>from the verifier</strong> on the three
+CONST-040 channels (<code>/v1/models[].capabilities</code>, MCP
+<code>server/discover</code>, A2A <code>initialize</code>) per
+<code>03_open_clarifications.md</code>.</li>
+</ol>
+<p>Model IDs, base URLs, keys, and capability flags are therefore
+<strong>all config/verifier-sourced</strong> — CONST-036/037/040 +
+§CONST-045/046 hold by construction; adding a provider is a config +
+verifier-registration change, no model literal in source.</p>
+<hr />
+<h2 id="acceptance-the-machine-checkable-proof-per-provider-class">3.
+§11.4.108 acceptance — the machine-checkable proof per provider
+class</h2>
+<p>“Registered” ≠ “reachable” ≠ “a model really answered.” Each class
+below declares ONE machine-checkable <strong>runtime signature</strong>
+on a clean target (§11.4.108/§11.4.139), captured to
+<code>docs/qa/&lt;run-id&gt;/provider_coverage/</code>.
+Credential-absent and BLOCKED-until-GA providers are an <strong>honest
+SKIP-with-reason (§11.4.3), never a faked PASS</strong> — the P4-T1 plan
+already binds “live round-trip proof (§11.4.69)” per adapter
+(<code>04_implementation_plan.md:90</code>).</p>
+<h3 id="class-a-confirmed-openai-compatible-hosted-1.1-gpt-sol-at-ga">Class
+A — confirmed OpenAI-compatible hosted (§1.1) + GPT-Sol-at-GA</h3>
+<blockquote>
+<p><strong>RUNTIME SIGNATURE (real generate round-trip):</strong> with
+the provider’s key present, POST an <strong>unforgeable
+challenge</strong> to <code>POST /v1/chat/completions</code> against the
+live base URL — a prompt whose correct answer the harness computes
+independently (e.g. a fresh arithmetic pair, or “echo this nonce
+<code>&lt;uuid&gt;</code>”) — and assert <strong>all</strong> of: (1)
+HTTP 200 + OpenAI-shaped body; (2)
+<code>choices[0].message.content</code> is <strong>non-empty and
+contains the expected answer/nonce</strong> (kills a
+stubbed/echoing/empty response — the §4.4-class bluff); (3) the
+<code>model</code> field echoes a model that also appears in the
+<strong>live <code>GET /v1/models</code></strong> (proves discovery is
+not hardcoded — CONST-036); (4) the verifier recorded the CONST-040
+capability flags from this same wire artefact. Captured artefact = the
+raw request+response JSON + the live <code>/v1/models</code> list +
+PASS/FAIL verdict with its evidence path. <strong>Credential absent
+→</strong> <code>ab_skip_with_reason … feature_disabled_by_config</code>
+(§11.4.3/§11.4.69), never PASS. Re-runnable at <code>-count=3</code>
+(§11.4.50/§11.4.98). <strong>Self-validation (§11.4.107(10)):</strong>
+golden-good = a captured real answer → analyzer PASS; golden-bad =
+empty-content / wrong-nonce /
+hardcoded-model-not-in-<code>/v1/models</code> responses → analyzer MUST
+FAIL. Paired §1.1 mutation: strip the nonce-match/non-empty assertion →
+the empty-content golden-bad PASSes → gate FAILs.</p>
+</blockquote>
+<h3 id="class-b-operator-mapped-onto-the-existing-openai-adapter-gpt-sol-c1">Class
+B — operator-mapped onto the existing OpenAI adapter (GPT-Sol, C1)</h3>
+<blockquote>
+<p>Same Class-A signature, <strong>but</strong> gated on GA. Until
+GPT-5.6 “Sol” is GA the row is <code>preview-pending</code> and the test
+<strong>SKIPs with reason <code>feature_disabled_by_config</code> /
+not-yet-GA</strong> (§11.4.3). At GA the signature adds one assertion:
+the <code>gpt-5.6-sol</code> id appears in the live OpenAI
+<code>/v1/models</code> <strong>and</strong> completes the round-trip —
+proving the model-ID addition actually reached the deployed adapter
+(§11.4.108 SOURCE→ARTIFACT→RUNTIME).</p>
+</blockquote>
+<h3 id="class-c-self-host-via-the-existing-local-path-qwythos-9b-got-ocr2.0">Class
+C — self-host via the existing local path (Qwythos 9B; GOT-OCR2.0)</h3>
+<blockquote>
+<p>Qwythos: the Class-A round-trip signature but against the
+<strong>local Ollama/ Llama.cpp/HF endpoint</strong> (no hosted key).
+GOT-OCR2.0 is <strong>not chat</strong> — its acceptance is the
+<strong>P3-T8 OCR signature</strong> (per-word confidence floor + ROI on
+a fixture, feeding §11.4.117/§11.4.137), not a chat round-trip. Both
+reuse the already-integrated CONST-039 local path, so “credential
+absent” is not a SKIP reason here — the model file being fetched
+(§11.4.77) is.</p>
+</blockquote>
+<h3 id="class-d-blocked-until-ga-subquadratic-c4">Class D —
+BLOCKED-until-GA (Subquadratic, C4)</h3>
+<blockquote>
+<p><strong>No acceptance test is authorable</strong> — there is no
+public base URL/auth to round-trip against. The item is
+<code>OPERATOR-BLOCKED</code> (§11.4.21) with the honest reason “no
+public API (operator C4)”. It is <strong>not</strong> a
+SKIP-reported-as-PASS and <strong>not</strong> a fabricated endpoint
+(§11.4.6). Unblock choices: <strong>[A]</strong> operator supplies beta
+credentials + base URL → promote to Class A; <strong>[B]</strong> wait
+for public GA; <strong>[C]</strong> drop from scope if the beta closes.
+No adapter, no test, until [A] or [B].</p>
+</blockquote>
+<h3 id="class-e-not-provider-layer-okf-via-mcp-resources-c2-a2a-c3">Class E
+— not provider-layer (OKF via MCP resources, C2; A2A, C3)</h3>
+<blockquote>
+<p><strong>Out of provider-coverage acceptance.</strong> OKF’s proof is
+an MCP <code>resources</code> round-trip (a knowledge doc served +
+retrieved — P3-T7/stream 05); A2A’s proof is an agent↔︎agent
+<code>initialize</code> + task hand-off (P4 protocols). Neither is a
+<code>/v1/chat/completions</code> signature. Listed so a reviewer
+confirms they are <strong>deliberately</strong> absent from the
+chat-provider acceptance matrix, not forgotten.</p>
+</blockquote>
+<h3 id="class-f-base-url-unverified-hyperbolic-baseten-1.2">Class F —
+base-URL-unverified (Hyperbolic, Baseten §1.2)</h3>
+<blockquote>
+<p><strong>No PASS until the base URL is verified from a live
+authoritative page at build</strong> (§11.4.6). Once confirmed
+OpenAI-compat → they become Class A. Baseten additionally needs a
+concrete per-deployment URL injected before any round-trip. Until then
+the row carries no green result.</p>
+</blockquote>
+<hr />
+<h2 id="prioritized-rollout-order-cheapest-real-value-first">4.
+Prioritized rollout order (cheapest-real-value first)</h2>
+<p>Ordering rule: <strong>OpenAI-compatible config-only reuse before
+anything needing new code or new decisions</strong>; within reuse,
+most-load-bearing / operator-named first; blocked and out-of-scope last.
+This is the §11.4.82 iteration-speedup + §11.4.42 priority-first posture
+applied to provider onboarding.</p>
+<ol type="1">
+<li><strong>Wave 1 — confirmed reuse, operator-named extended
+providers</strong> (config rows, Class-A signature): <strong>Poe,
+Perplexity, Sakana Fugu, Xiaomi MiMo, Tencent Hunyuan, xAI
+Grok</strong>. Highest programme salience, zero adapter code, all base
+URLs verified. (§1.1)</li>
+<li><strong>Wave 2 — confirmed reuse, high-value additions</strong>
+(P4-T1 remainder): <strong>Moonshot/Kimi, Zhipu/Z.ai GLM, Fireworks,
+DeepInfra, Novita, Reka</strong>, then <strong>AI21</strong> (last in
+wave for its <code>documents</code> superset caveat). All Class-A.
+(§1.1)</li>
+<li><strong>Wave 3 — operator-mapped onto existing adapter:</strong>
+<strong>GPT-Sol</strong> model-ID addition to the OpenAI provider,
+shipped <code>preview-pending</code>, flips to Class-A PASS at GA (P4-T2
+/ C1). No adapter. (§1.3)</li>
+<li><strong>Wave 4 — self-host reuse:</strong> <strong>Qwythos
+9B</strong> on the local path; <strong>GOT-OCR2.0</strong> scheduled
+under P3-T8 OCR (Class C). (§1.4)</li>
+<li><strong>Wave 5 — verify-then-reuse:</strong> <strong>Hyperbolic,
+Baseten</strong> — fetch/confirm base URL at build, then fold into
+Wave-2-style reuse (Class F → A). (§1.2)</li>
+<li><strong>Deferred / not-provider-layer (no rollout slot until
+unblocked):</strong> <strong>Subquadratic</strong> (BLOCKED-until-GA,
+Class D); <strong>OKF</strong> (MCP resources) and <strong>A2A</strong>
+(protocol) tracked under their own streams (Class E).</li>
+</ol>
+<p><strong>OpenAI-compat reuse vs custom adapters: 13 confirmed hosted
+providers reuse the existing adapter config-only + GPT-Sol on the
+existing OpenAI adapter + 2 self-host on the existing local path; 0
+net-new custom wire adapters</strong> among the confirmed extended set
+(OKF/A2A are non-provider protocol/context work; SubQ is blocked).</p>
+<hr />
+<h2 id="composition-footer-constitutional-anchors-touched">5.
+Composition footer — constitutional anchors touched</h2>
+<ul>
+<li><strong>§11.4.6</strong> (no-guessing) — every unverified base URL
+flagged <code>UNVERIFIED</code>; Perplexity tool-schema + xAI/Moonshot
+Anthropic-surface marked <code>UNCONFIRMED</code>; no endpoint invented
+(SubQ, Hyperbolic, Baseten).</li>
+<li><strong>§11.4.28 / §CONST-045 / §CONST-046</strong> (decoupling /
+no-hardcoded-host / no-hardcoded-content) — a provider is a
+<code>{Name,BaseURL,APIKey-env}</code> config row, never a source
+literal.</li>
+<li><strong>§11.4.74</strong> (extend-don’t-reimplement) — reuse the
+existing OpenAI/Anthropic gateway + verifier
+<code>ProviderClient</code>; 0 net-new adapters.</li>
+<li><strong>§11.4.99 / §11.4.150</strong> (latest-source + deep
+multi-angle research) — every row cites the LATEST live doc read on
+2026-07-06, ≥2 angles for the search-verified rows (official docs +
+integration guides/LiteLLM).</li>
+<li><strong>§11.4.108 / §11.4.139</strong> (four-layer runtime signature
+on a clean target) — the Class-A real-generate round-trip is the
+definition of done per provider.</li>
+<li><strong>§11.4.107(10)</strong> (self-validated analyzer) —
+golden-good/golden-bad content-match analyzer, mutation-proofed.</li>
+<li><strong>§11.4.3 / §11.4.69</strong> (honest SKIP / sink-side
+evidence) — credential-absent → SKIP-with-reason; every PASS carries a
+captured wire artefact.</li>
+<li><strong>§11.4.21</strong> (operator-blocked) — SubQ is
+OPERATOR-BLOCKED with enumerated unblock choices, not a faked PASS.</li>
+<li><strong>§11.4.50 / §11.4.98</strong> (determinism / full-automation)
+— Class-A re-runnable at <code>-count=3</code>, no manual step.</li>
+<li><strong>§11.4.42 / §11.4.82</strong> (priority-first /
+iteration-speedup) — cheapest-reuse-first rollout order.</li>
+<li><strong>CONST-036/037/038/039/040</strong> — models from live
+<code>/v1/models</code> (no hardcoded list); freshness re-queue/poll;
+the CONST-039 already-integrated set is the reuse substrate; capability
+flags verifier-sourced.</li>
+<li><strong>CONST-039 gap-fill honesty</strong> — GPT-Sol rides the
+existing OpenAI adapter (C1); Qwythos rides the existing local path —
+neither is a new provider.</li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Deep-research 2026-07-06: -
+https://creator.poe.com/docs/external-applications/openai-compatible-api
+- https://docs.perplexity.ai/getting-started/overview -
+https://console.sakana.ai/get-started - https://console.sakana.ai/models
+- https://platform.xiaomimimo.com/docs/en-US/api/chat/openai-api -
+https://cloud.tencent.com/document/product/1729/111007 -
+https://docs.x.ai/docs/overview - https://platform.kimi.ai/docs/api/chat
+- https://docs.z.ai/guides/overview/quick-start -
+https://docs.fireworks.ai/tools-sdks/openai-compatibility -
+https://docs.deepinfra.com/chat/overview -
+https://novita.ai/docs/guides/llm-api -
+https://docs.ai21.com/reference/jamba-1-6-api-ref -
+https://docs.reka.ai/chat/overview</p>
+<p>In-tree source verified 2026-07-06: -
+<code>submodules/helix_llm/docs/API_CONTRACT.md</code> §2/§4/§5 (route
+inventory + OpenAI/Anthropic compat) -
+<code>submodules/llms_verifier/llm-verifier/providers/model_provider_service.go:45-49</code>
+(<code>ProviderClient{Name,BaseURL,APIKey}</code>) -
+<code>docs/research/07.2026/00_master/03_open_clarifications.md</code>
+(operator C1–C4 + resolved-without-operator) -
+<code>docs/research/07.2026/00_master/04_implementation_plan.md</code>
+P2-T1/P2-T4/P4-T1/P4-T2/P4-T3</p>
+<p>Negative findings (§11.4.99(B)): - <strong>Hyperbolic</strong> and
+<strong>Baseten</strong> base URLs were NOT fetched from an
+authoritative page in this pass — recorded <code>UNVERIFIED</code>
+(§1.2), verify-at-build per <code>04_implementation_plan.md:90</code>;
+no endpoint asserted. - <strong>Subquadratic</strong> has no public API
+doc to fetch — <code>BLOCKED-until-GA</code> per operator C4; no
+endpoint invented. - <strong>xAI / Moonshot</strong> Anthropic-compat
+surfaces and <strong>Perplexity</strong> Sonar tool-calling schema were
+not confirmable on the fetched pages — marked <code>UNCONFIRMED</code>,
+to be probed at build (P2-T3); the OpenAI path each exposes IS confirmed
+and is the reuse target.</p>
+</body>
+</html>
