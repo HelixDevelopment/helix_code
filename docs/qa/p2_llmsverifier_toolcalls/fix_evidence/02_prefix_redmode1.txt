@@ -1,0 +1,6 @@
+=== RED_MODE=1 on PRE-FIX artifact (expect PASS) ===
+=== RUN   TestMessageToolCallsRoundTrip
+    llm_client_toolcalls_test.go:107: RED_MODE=1 PASS: defect reproduced — tool_calls dropped by parse. Round-tripped message = {"role":"assistant","content":""}
+--- PASS: TestMessageToolCallsRoundTrip (0.00s)
+PASS
+EXIT=0

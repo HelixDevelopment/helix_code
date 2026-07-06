@@ -1,0 +1,1 @@
+=== Step A: checkout PRE-FIX llm_client.go + verifier.go, keep FIXED test ===

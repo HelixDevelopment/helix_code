@@ -1,0 +1,6 @@
+=== RED_MODE=0 on PRE-FIX artifact (expect FAIL) ===
+=== RUN   TestMessageToolCallsRoundTrip
+    llm_client_toolcalls_test.go:112: RED_MODE=0: expected tool_calls to SURVIVE the round-trip (fixed) but they were dropped: {"role":"assistant","content":""}
+--- FAIL: TestMessageToolCallsRoundTrip (0.00s)
+FAIL
+EXIT=1

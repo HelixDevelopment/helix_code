@@ -1,0 +1,2 @@
+=== compile test binary against FIXED artifact ===
+COMPILE_EXIT=0
