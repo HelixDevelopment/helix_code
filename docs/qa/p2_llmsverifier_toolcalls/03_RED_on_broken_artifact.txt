@@ -1,0 +1,17 @@
+=== RED capture on BROKEN artifact (pre-fix) ===
+--- RED_MODE=1 (expect PASS: defect reproduced) ---
+=== RUN   TestMessageToolCallsRoundTrip
+    llm_client_toolcalls_test.go:103: RED_MODE=1 PASS: defect reproduced — tool_calls dropped by parse. Round-tripped message = {"role":"assistant","content":""}
+--- PASS: TestMessageToolCallsRoundTrip (0.00s)
+PASS
+ok  	digital.vasic.llmsverifier/llmverifier	0.005s
+RED_MODE=1 exit: 0
+
+--- RED_MODE=0 (expect FAIL: field missing, drop detected) ---
+=== RUN   TestMessageToolCallsRoundTrip
+    llm_client_toolcalls_test.go:108: RED_MODE=0: expected tool_calls to SURVIVE the round-trip (fixed) but they were dropped: {"role":"assistant","content":""}
+--- FAIL: TestMessageToolCallsRoundTrip (0.00s)
+FAIL
+FAIL	digital.vasic.llmsverifier/llmverifier	0.006s
+FAIL
+RED_MODE=0 exit: 1

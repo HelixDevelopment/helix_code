@@ -1,0 +1,5 @@
+ok  	digital.vasic.llmsverifier/capabilities	0.005s
+ok  	digital.vasic.llmsverifier/database	0.799s
+ok  	digital.vasic.llmsverifier/llmverifier	3.391s
+ok  	digital.vasic.llmsverifier/llmverifier/recipes	0.006s
+ok  	digital.vasic.llmsverifier/verification	0.146s

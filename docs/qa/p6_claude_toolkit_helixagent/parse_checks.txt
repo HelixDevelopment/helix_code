@@ -1,0 +1,3 @@
+--- bash -n parse checks ---
+claude-providers.sh: OK
+verify_helixagent_test.sh: OK

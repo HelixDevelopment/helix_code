@@ -1,0 +1,587 @@
+{
+  "engine": "tesseract-5.3.0",
+  "config": "--oem 1 --psm 6",
+  "lang": "eng",
+  "min_conf": 60.0,
+  "words": [],
+  "words_all": [
+    {
+      "text": "ei",
+      "conf": 12.0,
+      "bbox": [
+        0,
+        0,
+        27,
+        11
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "ag",
+      "conf": 32.0,
+      "bbox": [
+        33,
+        0,
+        30,
+        12
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "pg",
+      "conf": 31.0,
+      "bbox": [
+        67,
+        2,
+        5,
+        4
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "Saat",
+      "conf": 0.0,
+      "bbox": [
+        87,
+        0,
+        88,
+        12
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "fiat",
+      "conf": 10.0,
+      "bbox": [
+        129,
+        0,
+        16,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "ager",
+      "conf": 17.0,
+      "bbox": [
+        147,
+        0,
+        17,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "or",
+      "conf": 11.0,
+      "bbox": [
+        181,
+        0,
+        8,
+        9
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "agree",
+      "conf": 2.0,
+      "bbox": [
+        193,
+        0,
+        115,
+        12
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "teeny",
+      "conf": 15.0,
+      "bbox": [
+        250,
+        0,
+        20,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "SRR",
+      "conf": 27.0,
+      "bbox": [
+        275,
+        0,
+        18,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "anne",
+      "conf": 0.0,
+      "bbox": [
+        299,
+        0,
+        24,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "ge",
+      "conf": 21.0,
+      "bbox": [
+        321,
+        0,
+        29,
+        11
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "aA",
+      "conf": 27.0,
+      "bbox": [
+        359,
+        0,
+        16,
+        11
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "age",
+      "conf": 18.0,
+      "bbox": [
+        379,
+        0,
+        15,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "cat",
+      "conf": 2.0,
+      "bbox": [
+        397,
+        0,
+        15,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "ele",
+      "conf": 24.0,
+      "bbox": [
+        416,
+        0,
+        10,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "oe",
+      "conf": 5.0,
+      "bbox": [
+        432,
+        2,
+        4,
+        8
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "chao",
+      "conf": 5.0,
+      "bbox": [
+        442,
+        0,
+        15,
+        8
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "Aen)",
+      "conf": 0.0,
+      "bbox": [
+        462,
+        0,
+        40,
+        9
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "Oe",
+      "conf": 18.0,
+      "bbox": [
+        495,
+        0,
+        11,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "eae",
+      "conf": 17.0,
+      "bbox": [
+        511,
+        0,
+        78,
+        10
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "Car",
+      "conf": 25.0,
+      "bbox": [
+        547,
+        0,
+        12,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "a",
+      "conf": 6.0,
+      "bbox": [
+        566,
+        0,
+        9,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "eR",
+      "conf": 34.0,
+      "bbox": [
+        584,
+        0,
+        20,
+        19
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "ed",
+      "conf": 6.0,
+      "bbox": [
+        626,
+        0,
+        14,
+        8
+      ],
+      "line": 1,
+      "block": 1
+    },
+    {
+      "text": "oe",
+      "conf": 6.0,
+      "bbox": [
+        0,
+        34,
+        392,
+        31
+      ],
+      "line": 2,
+      "block": 1
+    },
+    {
+      "text": "De",
+      "conf": 3.0,
+      "bbox": [
+        0,
+        54,
+        140,
+        18
+      ],
+      "line": 3,
+      "block": 1
+    },
+    {
+      "text": "ee",
+      "conf": 29.0,
+      "bbox": [
+        399,
+        50,
+        240,
+        20
+      ],
+      "line": 3,
+      "block": 1
+    },
+    {
+      "text": "TES",
+      "conf": 26.0,
+      "bbox": [
+        0,
+        84,
+        41,
+        7
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "Se",
+      "conf": 4.0,
+      "bbox": [
+        45,
+        82,
+        67,
+        12
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "ae",
+      "conf": 20.0,
+      "bbox": [
+        108,
+        74,
+        9,
+        26
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "ee",
+      "conf": 34.0,
+      "bbox": [
+        129,
+        82,
+        24,
+        12
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "eR",
+      "conf": 4.0,
+      "bbox": [
+        177,
+        81,
+        34,
+        13
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "ate",
+      "conf": 12.0,
+      "bbox": [
+        221,
+        82,
+        58,
+        11
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "eve",
+      "conf": 10.0,
+      "bbox": [
+        290,
+        80,
+        28,
+        14
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "tS",
+      "conf": 31.0,
+      "bbox": [
+        340,
+        81,
+        49,
+        12
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "a",
+      "conf": 25.0,
+      "bbox": [
+        394,
+        79,
+        30,
+        13
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "SO",
+      "conf": 0.0,
+      "bbox": [
+        482,
+        79,
+        54,
+        14
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "cena",
+      "conf": 15.0,
+      "bbox": [
+        555,
+        79,
+        84,
+        14
+      ],
+      "line": 4,
+      "block": 1
+    },
+    {
+      "text": "oe",
+      "conf": 0.0,
+      "bbox": [
+        0,
+        81,
+        510,
+        34
+      ],
+      "line": 5,
+      "block": 1
+    },
+    {
+      "text": "ee",
+      "conf": 23.0,
+      "bbox": [
+        2,
+        104,
+        483,
+        21
+      ],
+      "line": 6,
+      "block": 1
+    },
+    {
+      "text": "ee",
+      "conf": 23.0,
+      "bbox": [
+        541,
+        105,
+        84,
+        17
+      ],
+      "line": 6,
+      "block": 1
+    },
+    {
+      "text": "ee",
+      "conf": 25.0,
+      "bbox": [
+        1,
+        138,
+        255,
+        20
+      ],
+      "line": 7,
+      "block": 1
+    },
+    {
+      "text": "ee",
+      "conf": 26.0,
+      "bbox": [
+        281,
+        137,
+        58,
+        19
+      ],
+      "line": 7,
+      "block": 1
+    },
+    {
+      "text": "es",
+      "conf": 16.0,
+      "bbox": [
+        338,
+        136,
+        168,
+        19
+      ],
+      "line": 7,
+      "block": 1
+    },
+    {
+      "text": "Ss",
+      "conf": 4.0,
+      "bbox": [
+        457,
+        132,
+        47,
+        31
+      ],
+      "line": 7,
+      "block": 1
+    },
+    {
+      "text": "ee",
+      "conf": 29.0,
+      "bbox": [
+        509,
+        137,
+        36,
+        18
+      ],
+      "line": 7,
+      "block": 1
+    },
+    {
+      "text": "ee",
+      "conf": 12.0,
+      "bbox": [
+        548,
+        136,
+        92,
+        19
+      ],
+      "line": 7,
+      "block": 1
+    }
+  ],
+  "full_text": "",
+  "mean_conf": 0.0
+}

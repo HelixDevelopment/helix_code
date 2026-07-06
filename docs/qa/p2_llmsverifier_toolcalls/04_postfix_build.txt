@@ -1,0 +1,5 @@
+=== go build ./... (post-fix) ===
+build exit: 0
+
+=== go vet target pkg ===
+vet exit: 0

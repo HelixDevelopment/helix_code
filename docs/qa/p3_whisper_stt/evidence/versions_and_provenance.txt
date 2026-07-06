@@ -1,0 +1,22 @@
+=== host ===
+uid: 1000 (rootless)
+podman version 5.7.1
+podman_rootless: true
+espeak-ng: eSpeak NG text-to-speech: 1.52.0  Data at: /usr/share/espeak-ng-data
+ffmpeg: ffmpeg version 8.1.2-alt1 Copyright (c) 2000-2026 the FFmpeg developers
+=== container image ===
+localhost/helix-stt:cpu id=5283bf16dfd7 size=1.01 GB
+=== versions inside container ===
+faster_whisper 1.1.1
+ctranslate2 4.8.1
+onnxruntime 1.27.0
+=== model provenance (downloaded to gitignored volume) ===
+models--Systran--faster-whisper-base
+models--Systran--faster-whisper-base
+model.bin sha256: d01c3014881c9c6f3133c182f3d2887eb6ca1c789a7538c5c007196857a0a6a9
+model.bin size: 4.0K
+=== fixtures ===
+fixtures/golden_bad_noise.wav  sha256=223b3153b9075f0bd0478c8f9308e4eddfd7b18ab6e09299a4569ef0725c8bf0
+fixtures/golden_bad_silence.wav  sha256=45ec296d121c4f9d30789aecabf462fd1336664eb3169f181d998c99a8e7ad2d
+fixtures/golden_good.wav  sha256=57674f8a88479cf3d29f0362c2143b5035f05cce44fea1e95448fc7ffc81709d
+known_text: The helix code test number forty two

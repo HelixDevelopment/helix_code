@@ -1,0 +1,2 @@
+=== go build ./... (started 2026-07-06T11:59:50Z) ===
+=== go build EXIT=0 (finished 2026-07-06T12:00:07Z) ===

@@ -1,0 +1,16 @@
+########## RUN 1/3 ##########
+  [PASS] golden-good text='The helix code test number 42' max_no_speech=0.0337
+  [PASS] golden_bad_silence returned no known text (text='')
+  [PASS] golden_bad_noise returned no known text (text='')
+########## RUN 2/3 ##########
+  [PASS] golden-good text='The helix code test number 42' max_no_speech=0.0337
+  [PASS] golden_bad_silence returned no known text (text='')
+  [PASS] golden_bad_noise returned no known text (text='')
+########## RUN 3/3 ##########
+  [PASS] golden-good text='The helix code test number 42' max_no_speech=0.0337
+  [PASS] golden_bad_silence returned no known text (text='')
+  [PASS] golden_bad_noise returned no known text (text='')
+==================================
+golden-good distinct transcripts across runs: 1 (1 == deterministic)
+PASS=9 FAIL=0
+RESULT: GOLDEN SELF-VALIDATION PASS (deterministic)

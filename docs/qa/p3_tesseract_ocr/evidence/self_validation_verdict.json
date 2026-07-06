@@ -1,0 +1,28 @@
+{
+  "conf_floor": 80.0,
+  "golden_good": {
+    "full_text": "HELIX OCR TEST 42",
+    "mean_conf": 95.5,
+    "tokens_expected": [
+      "HELIX",
+      "OCR",
+      "TEST",
+      "42"
+    ],
+    "tokens_found": [
+      "HELIX",
+      "OCR",
+      "TEST",
+      "42"
+    ],
+    "assert_all_tokens_present": true,
+    "assert_mean_conf_above_floor": true
+  },
+  "golden_bad": {
+    "full_text": "",
+    "mean_conf": 0.0,
+    "tokens_leaked": [],
+    "assert_no_known_tokens": true
+  },
+  "PASS": true
+}

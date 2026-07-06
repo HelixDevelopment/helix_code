@@ -1,0 +1,2 @@
+=== go build ./... ===
+build exit: 0

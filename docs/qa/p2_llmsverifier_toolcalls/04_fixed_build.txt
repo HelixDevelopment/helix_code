@@ -1,0 +1,5 @@
+=== go build ./... (fixed) ===
+build exit: 0
+
+=== go vet llmverifier ===
+vet exit: 0

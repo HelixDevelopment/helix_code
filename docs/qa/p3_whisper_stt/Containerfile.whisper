@@ -1,0 +1,35 @@
+# Local faster-whisper STT service — rootless podman, CPU-only (int8).
+# §11.4.161 rootless container runtime; §11.4.76 containerization.
+# CPU device is deliberate: the GPU is reserved for the main-stream fleet-model
+# proof. Model weights download at first run (or mount ./models offline).
+FROM python:3.11-slim
+
+# ffmpeg is required by faster-whisper for audio decoding.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# CPU-only wheels. faster-whisper pulls ctranslate2 + onnxruntime (for Silero VAD).
+RUN pip install --no-cache-dir \
+      "faster-whisper==1.1.1" \
+      "huggingface-hub==0.28.1" \
+      "requests==2.32.3" \
+      "fastapi==0.115.6" \
+      "uvicorn==0.34.0" \
+      "python-multipart==0.0.20"
+
+ENV WHISPER_MODEL=base \
+    WHISPER_DEVICE=cpu \
+    WHISPER_COMPUTE_TYPE=int8 \
+    WHISPER_NO_SPEECH_THRESHOLD=0.6 \
+    HF_HOME=/models/hf \
+    OMP_NUM_THREADS=4
+
+WORKDIR /app
+COPY app/app.py /app/app.py
+
+EXPOSE 8000
+HEALTHCHECK --interval=15s --timeout=5s --retries=10 \
+  CMD curl -fsS http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

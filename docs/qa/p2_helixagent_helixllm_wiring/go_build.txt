@@ -1,0 +1,1 @@
+cli_agents/continue/core/autocomplete/context/root-path-context/test/files/file1.go:4:2: package core/autocomplete/context/root-path-context/test/files/models is not in std (/usr/lib/golang/src/core/autocomplete/context/root-path-context/test/files/models)

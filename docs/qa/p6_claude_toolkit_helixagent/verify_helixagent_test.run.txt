@@ -1,0 +1,46 @@
+
+  • CASE A: sync with helixagent on PATH + live server
+    [32m[PASS][0m sync exits cleanly (0)
+    [32m[PASS][0m helixagent env file created (PATH-detected): /tmp/.private/milos/cma-test.iK9neR/.local/share/claude-multi-account/providers/helixagent.env
+
+  • CASE A: env file carries router transport + live base_url + enumerated models
+    [32m[PASS][0m transport=router (OpenAI-compat -> ccr) (0)
+    [32m[PASS][0m base_url = live endpoint (0)
+    [32m[PASS][0m strong model = helix-debate (from live /v1/models) (0)
+    [32m[PASS][0m fast model = helix-llm (from live /v1/models) (0)
+    [32m[PASS][0m key-var NAME recorded (secret never stored) (0)
+
+  • CASE A: NO secret value leaked into the env file
+    [32m[PASS][0m secret value absent from helixagent.env: 'dummy-helix-key-never-real' absent from helixagent.env
+
+  • CASE A: shell alias registered -> cma_run_provider helixagent
+    [32m[PASS][0m helixagent alias line present (0)
+
+  • CASE A: verification status persisted (unverified under --no-verify)
+    [32m[PASS][0m helixagent status persisted (unverified)
+
+  • CASE A: exactly ONE helixagent.env (no duplicate registration)
+    [32m[PASS][0m exactly one helixagent.env (1)
+
+  • CASE A: detector emits a well-formed resolved record with live models
+    [32m[PASS][0m record status=resolved (resolved)
+    [32m[PASS][0m provider_id=helixagent (helixagent)
+    [32m[PASS][0m transport=router (router)
+    [32m[PASS][0m strong=helix-debate (helix-debate)
+    [32m[PASS][0m fast=helix-llm (helix-llm)
+    [32m[PASS][0m context_limit=128000 (128000)
+
+  • CASE B: no helixagent binary on PATH -> detector emits empty array
+    [32m[PASS][0m empty record when binary absent ([])
+
+  • CASE B: a fresh sandbox with NO helixagent gets NO helixagent alias
+    [32m[PASS][0m no helixagent.env when binary off PATH (0)
+
+  • CASE C: helixagent present but server down -> alias STILL created off pins
+    [32m[PASS][0m helixagent.env created even with server down: /tmp/.private/milos/cma-test.iK9neR/.local/share/claude-multi-account/providers/helixagent.env
+    [32m[PASS][0m strong model falls back to configured pin (helix-debate) (0)
+    [32m[PASS][0m fast model falls back to configured pin (helix-llm) (0)
+    [32m[PASS][0m honest unverified when unreachable (unverified)
+
+[32m✓ 23 passed, 0 failed[0m
+test exit: 0

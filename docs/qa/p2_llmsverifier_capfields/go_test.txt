@@ -1,0 +1,2394 @@
+=== go test -short change-site pkgs (started 2026-07-06T12:01:55Z) ===
+ok  	digital.vasic.llmsverifier/capabilities	0.005s
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Test migration
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 1
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Test migration
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Rolling back migration 1: Test migration
+2026/07/06 17:01:56 Successfully rolled back migration 1
+2026/07/06 17:01:56 No migrations to roll back
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Test migration 1
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Test migration 2
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+--- FAIL: TestSetupDefaultMigrations (0.00s)
+    migrations_test.go:294: 
+        	Error Trace:	/home/milos/Factory/projects/tools_and_research/helix_code/submodules/llms_verifier/llm-verifier/database/migrations_test.go:294
+        	Error:      	"[{1 Initial schema with providers, models, and verification_results tables 0x6754c0 0x6754e0} {2 Add performance indexes for common queries 0x675700 0x6759a0} {3 Add composite indexes for complex query optimization 0x675c40 0x675e60} {4 Add notifications table for system notifications 0x676080 0x6763c0} {5 Add Brotli compression support field to verification_results table 0x676700 0x6768c0} {6 Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040) 0x676940 0x676d00}]" should have 5 item(s), but has 6
+        	Test:       	TestSetupDefaultMigrations
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Failing migration
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Test migration
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Rolling back migration 1: Test migration
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Analyzing model query performance...
+2026/07/06 17:01:56 Query ListModels performed well: 12.028µs
+2026/07/06 17:01:56 Query GetModelByProvider performed well: 7.711µs
+2026/07/06 17:01:56 Query SearchModels performed well: 10.596µs
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Table models: 0 rows
+2026/07/06 17:01:56 Table models: 7 indexes
+2026/07/06 17:01:56 Table verification_results: 0 rows
+2026/07/06 17:01:56 Table verification_results: 6 indexes
+2026/07/06 17:01:56 Table providers: 0 rows
+2026/07/06 17:01:56 Table providers: 4 indexes
+2026/07/06 17:01:56 Table events: 0 rows
+2026/07/06 17:01:56 Table events: 3 indexes
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Failed to analyze indexes for table models: near "?": syntax error
+2026/07/06 17:01:56 Failed to analyze indexes for table verification_results: near "?": syntax error
+2026/07/06 17:01:56 Failed to analyze indexes for table providers: near "?": syntax error
+2026/07/06 17:01:56 Failed to analyze indexes for table events: near "?": syntax error
+2026/07/06 17:01:56 Failed to analyze indexes for table issues: near "?": syntax error
+2026/07/06 17:01:56 Failed to analyze indexes for table pricing: near "?": syntax error
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Created optimization index: CREATE INDEX IF NOT EXISTS idx_models_name_search ...
+2026/07/06 17:01:56 Created optimization index: CREATE INDEX IF NOT EXISTS idx_providers_name_sear...
+2026/07/06 17:01:56 Created optimization index: CREATE INDEX IF NOT EXISTS idx_verification_result...
+2026/07/06 17:01:56 Failed to create optimization index: no such column: timestamp
+2026/07/06 17:01:56 Created optimization index: CREATE INDEX IF NOT EXISTS idx_issues_severity_sta...
+2026/07/06 17:01:56 Failed to create optimization index: no such column: provider_id
+2026/07/06 17:01:56 Failed to create optimization index: no such column: provider_id
+2026/07/06 17:01:56 Created optimization index: CREATE INDEX IF NOT EXISTS idx_models_active ON mo...
+2026/07/06 17:01:56 Created optimization index: CREATE INDEX IF NOT EXISTS idx_issues_unresolved O...
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Analyzing indexes for potential cleanup...
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Starting database vacuum and optimization...
+2026/07/06 17:01:56 Database vacuum and optimization completed
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:56 Current database version: 0
+2026/07/06 17:01:56 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:56 Successfully applied migration 1
+2026/07/06 17:01:56 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:56 Successfully applied migration 2
+2026/07/06 17:01:56 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:56 Successfully applied migration 3
+2026/07/06 17:01:56 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:56 Successfully applied migration 4
+2026/07/06 17:01:56 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:56 Successfully applied migration 5
+2026/07/06 17:01:56 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:56 Successfully applied migration 6
+2026/07/06 17:01:56 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+2026/07/06 17:01:57 Current database version: 0
+2026/07/06 17:01:57 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 17:01:57 Successfully applied migration 1
+2026/07/06 17:01:57 Applying migration 2: Add performance indexes for common queries
+2026/07/06 17:01:57 Successfully applied migration 2
+2026/07/06 17:01:57 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 17:01:57 Successfully applied migration 3
+2026/07/06 17:01:57 Applying migration 4: Add notifications table for system notifications
+2026/07/06 17:01:57 Successfully applied migration 4
+2026/07/06 17:01:57 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 17:01:57 Successfully applied migration 5
+2026/07/06 17:01:57 Applying migration 6: Add supports_rag, supports_skills, supports_plugins columns to verification_results (CONST-040)
+2026/07/06 17:01:57 Successfully applied migration 6
+2026/07/06 17:01:57 All migrations applied successfully
+FAIL
+FAIL	digital.vasic.llmsverifier/database	0.930s
+ok  	digital.vasic.llmsverifier/llmverifier	3.546s
+ok  	digital.vasic.llmsverifier/llmverifier/recipes	0.005s
+ok  	digital.vasic.llmsverifier/verification	0.146s
+FAIL
+=== change-site EXIT=1 ===

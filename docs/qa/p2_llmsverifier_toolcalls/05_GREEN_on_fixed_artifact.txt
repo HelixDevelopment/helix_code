@@ -1,0 +1,17 @@
+=== GREEN capture on FIXED artifact (post-fix) ===
+--- RED_MODE=0 (expect PASS: field carries, standing guard) ---
+=== RUN   TestMessageToolCallsRoundTrip
+    llm_client_toolcalls_test.go:127: RED_MODE=0 PASS: Message.ToolCalls populated with 2 real tool calls (get_current_weather, get_stock_price). Round-tripped message = {"role":"assistant","content":"","tool_calls":[{"id":"call_weather_001","type":"function","function":{"name":"get_current_weather","arguments":"{\"location\":\"New York\"}"}},{"id":"call_stock_002","type":"function","function":{"name":"get_stock_price","arguments":"{\"symbol\":\"AAPL\"}"}}]}
+--- PASS: TestMessageToolCallsRoundTrip (0.00s)
+PASS
+ok  	digital.vasic.llmsverifier/llmverifier	0.056s
+RED_MODE=0 exit: 0
+
+--- RED_MODE=1 (expect FAIL now: defect absent = correct polarity) ---
+=== RUN   TestMessageToolCallsRoundTrip
+    llm_client_toolcalls_test.go:100: RED_MODE=1: expected tool_calls to be DROPPED (defect present) but they survived the round-trip: {"role":"assistant","content":"","tool_calls":[{"id":"call_weather_001","type":"function","function":{"name":"get_current_weather","arguments":"{\"location\":\"New York\"}"}},{"id":"call_stock_002","type":"function","function":{"name":"get_stock_price","arguments":"{\"symbol\":\"AAPL\"}"}}]}
+--- FAIL: TestMessageToolCallsRoundTrip (0.00s)
+FAIL
+FAIL	digital.vasic.llmsverifier/llmverifier	0.005s
+FAIL
+RED_MODE=1 exit: 1

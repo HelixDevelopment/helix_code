@@ -1,0 +1,4 @@
+# faster-whisper model weights — re-obtained via scripts/fetch_whisper_models.sh (§11.4.77)
+models/
+# raw curl temp
+*.tmp

@@ -1,0 +1,15 @@
+
+===== golden_good : vad_filter=False (raw decoder, no VAD) =====
+  seg text=' The helix code test number 42' no_speech_prob=0.0337 avg_logprob=-0.5273 -> KEPT
+  lang=en lang_prob=0.8383
+  asserted-text-after-guard='The helix code test number 42'
+
+===== silence : vad_filter=False (raw decoder, no VAD) =====
+  seg text=' You' no_speech_prob=0.7441 avg_logprob=-0.7962 -> NULLED by guard
+  lang=en lang_prob=0.3441
+  asserted-text-after-guard=''
+
+===== noise : vad_filter=False (raw decoder, no VAD) =====
+  (no segments emitted)
+  lang=nn lang_prob=0.4178
+  asserted-text-after-guard=''

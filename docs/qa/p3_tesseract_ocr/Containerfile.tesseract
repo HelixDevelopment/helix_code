@@ -1,0 +1,40 @@
+# Containerfile.tesseract — rootless-podman Tesseract 5.x OCR service (§11.4.161 / §11.4.76 / §11.4.117 / §11.4.137)
+# Bookworm-backports carries Tesseract 5.5.x (bookworm main ships 5.3.x); we install
+# from backports to satisfy the stream-07 report's "Tesseract 5.5, OEM 1 LSTM" target.
+# CPU-only by design — the GPU is reserved for the main-stream fleet-model proof.
+FROM docker.io/library/python:3.12-slim-bookworm
+
+# --- system deps: Tesseract 5.5 (LSTM/OEM 1) from bookworm-backports + tessdata_best eng ---
+RUN set -eux; \
+    echo 'deb http://deb.debian.org/debian bookworm-backports main' > /etc/apt/sources.list.d/backports.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends -t bookworm-backports \
+        tesseract-ocr \
+        tesseract-ocr-eng \
+        libtesseract5; \
+    apt-get install -y --no-install-recommends libgl1 libglib2.0-0; \
+    rm -rf /var/lib/apt/lists/*
+
+# --- python OCR stack: pytesseract (image_to_data), Pillow, FastAPI, uvicorn, numpy ---
+RUN pip install --no-cache-dir \
+        pytesseract==0.3.13 \
+        Pillow==11.0.0 \
+        fastapi==0.115.6 \
+        "uvicorn[standard]==0.34.0" \
+        numpy==2.2.1 \
+        python-multipart==0.0.20
+
+# tessdata location (bookworm installs to /usr/share/tesseract-ocr/5/tessdata)
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
+ENV OCR_MIN_CONF=60
+
+WORKDIR /app
+COPY ocr_service.py /app/ocr_service.py
+
+# non-root user (rootless-inside-rootless; the container's own UID is unprivileged)
+RUN useradd -m -u 10001 ocr
+USER ocr
+
+EXPOSE 8080
+# unified /v1/ocr contract per the stream-07 report §2.3
+CMD ["uvicorn", "ocr_service:app", "--host", "0.0.0.0", "--port", "8080"]

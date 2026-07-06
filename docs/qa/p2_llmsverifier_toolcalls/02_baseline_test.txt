@@ -1,0 +1,265 @@
+=== go test -short ./... (baseline) ===
+ok  	digital.vasic.llmsverifier	(cached)
+ok  	digital.vasic.llmsverifier/ai	(cached)
+ok  	digital.vasic.llmsverifier/analytics	(cached)
+ok  	digital.vasic.llmsverifier/api	0.163s
+?   	digital.vasic.llmsverifier/api/docs	[no test files]
+?   	digital.vasic.llmsverifier/api_keys	[no test files]
+ok  	digital.vasic.llmsverifier/auth	(cached)
+ok  	digital.vasic.llmsverifier/bigdata/lakehouse	(cached)
+ok  	digital.vasic.llmsverifier/bigdata/storage	(cached)
+ok  	digital.vasic.llmsverifier/bigdata/streaming	(cached)
+ok  	digital.vasic.llmsverifier/bigdata/vectordb	(cached)
+ok  	digital.vasic.llmsverifier/capabilities	(cached)
+ok  	digital.vasic.llmsverifier/challenges	(cached)
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/crush_config_converter	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/provider_models_discovery	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_model_real_simple	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_model_verification	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_model_verification_clean	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_model_verification_real	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_provider_challenge	[no test files]
+ok  	digital.vasic.llmsverifier/client	(cached)
+ok  	digital.vasic.llmsverifier/cmd	(cached)
+ok  	digital.vasic.llmsverifier/cmd/code-verification	(cached)
+ok  	digital.vasic.llmsverifier/cmd/crush-config-converter	(cached)
+?   	digital.vasic.llmsverifier/cmd/fixed-ultimate-challenge	[no test files]
+?   	digital.vasic.llmsverifier/cmd/full-verify	[no test files]
+ok  	digital.vasic.llmsverifier/cmd/model-verification	(cached)
+ok  	digital.vasic.llmsverifier/cmd/partners	(cached)
+?   	digital.vasic.llmsverifier/cmd/quick-verify	[no test files]
+ok  	digital.vasic.llmsverifier/cmd/semantic-code-visibility	0.010s
+?   	digital.vasic.llmsverifier/cmd/test-direct	[no test files]
+?   	digital.vasic.llmsverifier/cmd/test-models-live	[no test files]
+ok  	digital.vasic.llmsverifier/cmd/testsuite	(cached)
+?   	digital.vasic.llmsverifier/cmd/tui	[no test files]
+?   	digital.vasic.llmsverifier/cmd/ultimate-challenge	[no test files]
+ok  	digital.vasic.llmsverifier/config	(cached)
+ok  	digital.vasic.llmsverifier/database	(cached)
+ok  	digital.vasic.llmsverifier/enhanced	(cached)
+ok  	digital.vasic.llmsverifier/enhanced/adapters	(cached)
+ok  	digital.vasic.llmsverifier/enhanced/analytics	(cached)
+ok  	digital.vasic.llmsverifier/enhanced/checkpointing	(cached)
+ok  	digital.vasic.llmsverifier/enhanced/context	(cached)
+ok  	digital.vasic.llmsverifier/enhanced/enterprise	(cached)
+ok  	digital.vasic.llmsverifier/enhanced/supervisor	(cached)
+ok  	digital.vasic.llmsverifier/enhanced/validation	(cached)
+ok  	digital.vasic.llmsverifier/enhanced/vector	(cached)
+ok  	digital.vasic.llmsverifier/events	(cached)
+ok  	digital.vasic.llmsverifier/failover	(cached)
+ok  	digital.vasic.llmsverifier/llmverifier	(cached)
+ok  	digital.vasic.llmsverifier/llmverifier/recipes	(cached)
+ok  	digital.vasic.llmsverifier/logging	1.880s
+ok  	digital.vasic.llmsverifier/messaging	(cached)
+ok  	digital.vasic.llmsverifier/monitoring	(cached)
+ok  	digital.vasic.llmsverifier/multimodal	(cached)
+ok  	digital.vasic.llmsverifier/notifications	(cached)
+?   	digital.vasic.llmsverifier/partners	[no test files]
+ok  	digital.vasic.llmsverifier/performance	(cached)
+?   	digital.vasic.llmsverifier/pkg/api	[no test files]
+ok  	digital.vasic.llmsverifier/pkg/cliagents	(cached)
+ok  	digital.vasic.llmsverifier/pkg/crush/config	(cached)
+ok  	digital.vasic.llmsverifier/pkg/crush/verifier	(cached)
+?   	digital.vasic.llmsverifier/pkg/helixqa	[no test files]
+ok  	digital.vasic.llmsverifier/pkg/i18n	(cached)
+ok  	digital.vasic.llmsverifier/pkg/opencode/config	(cached)
+ok  	digital.vasic.llmsverifier/pkg/opencode/verifier	(cached)
+ok  	digital.vasic.llmsverifier/providers	(cached)
+ok  	digital.vasic.llmsverifier/scheduler	(cached)
+ok  	digital.vasic.llmsverifier/scoring	(cached)
+ok  	digital.vasic.llmsverifier/sdk/go	(cached)
+ok  	digital.vasic.llmsverifier/security	(cached)
+ok  	digital.vasic.llmsverifier/seed	(cached)
+?   	digital.vasic.llmsverifier/suffix	[no test files]
+--- FAIL: TestCommandFlagValidation (1.42s)
+    --- FAIL: TestCommandFlagValidation/models_list_with_valid_flags (0.31s)
+        automation_test.go:249: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 16:36:39 Failed to fetch models: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestCommandFlagValidation/providers_list_with_filter (0.14s)
+        automation_test.go:249: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 16:36:39 Failed to fetch providers: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+--- FAIL: TestOutputFormats (0.85s)
+    --- FAIL: TestOutputFormats/models_list_format_json (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 16:36:39 Failed to fetch models: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/models_list_format_table (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 16:36:40 Failed to fetch models: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/providers_list_format_json (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 16:36:40 Failed to fetch providers: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/providers_list_format_table (0.15s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 16:36:40 Failed to fetch providers: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/results_list_format_json (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 16:36:40 Failed to fetch verification results: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/results_list_format_table (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 16:36:40 Failed to fetch verification results: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+2026/07/06 16:36:40 Current database version: 0
+2026/07/06 16:36:40 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:40 Successfully applied migration 1
+2026/07/06 16:36:40 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:40 Successfully applied migration 2
+2026/07/06 16:36:40 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:40 Successfully applied migration 3
+2026/07/06 16:36:40 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:40 Successfully applied migration 4
+2026/07/06 16:36:40 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:40 Successfully applied migration 5
+2026/07/06 16:36:40 All migrations applied successfully
+2026/07/06 16:36:40 Current database version: 0
+2026/07/06 16:36:40 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:40 Successfully applied migration 1
+2026/07/06 16:36:40 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:40 Successfully applied migration 2
+2026/07/06 16:36:40 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:40 Successfully applied migration 3
+2026/07/06 16:36:40 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:40 Successfully applied migration 4
+2026/07/06 16:36:40 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:40 Successfully applied migration 5
+2026/07/06 16:36:40 All migrations applied successfully
+2026/07/06 16:36:40 Current database version: 0
+2026/07/06 16:36:40 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:40 Successfully applied migration 1
+2026/07/06 16:36:40 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:40 Successfully applied migration 2
+2026/07/06 16:36:40 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:40 Successfully applied migration 3
+2026/07/06 16:36:40 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:40 Successfully applied migration 4
+2026/07/06 16:36:40 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:40 Successfully applied migration 5
+2026/07/06 16:36:40 All migrations applied successfully
+2026/07/06 16:36:40 Current database version: 0
+2026/07/06 16:36:40 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:40 Successfully applied migration 1
+2026/07/06 16:36:40 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:40 Successfully applied migration 2
+2026/07/06 16:36:40 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:40 Successfully applied migration 3
+2026/07/06 16:36:40 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:40 Successfully applied migration 4
+2026/07/06 16:36:40 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:40 Successfully applied migration 5
+2026/07/06 16:36:40 All migrations applied successfully
+2026/07/06 16:36:40 Current database version: 0
+2026/07/06 16:36:40 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:40 Successfully applied migration 1
+2026/07/06 16:36:40 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:40 Successfully applied migration 2
+2026/07/06 16:36:40 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:40 Successfully applied migration 3
+2026/07/06 16:36:40 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:40 Successfully applied migration 4
+2026/07/06 16:36:40 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:40 Successfully applied migration 5
+2026/07/06 16:36:40 All migrations applied successfully
+2026/07/06 16:36:40 Current database version: 0
+2026/07/06 16:36:40 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:40 Successfully applied migration 1
+2026/07/06 16:36:40 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:40 Successfully applied migration 2
+2026/07/06 16:36:40 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:40 Successfully applied migration 3
+2026/07/06 16:36:40 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:40 Successfully applied migration 4
+2026/07/06 16:36:40 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:40 Successfully applied migration 5
+2026/07/06 16:36:40 All migrations applied successfully
+2026/07/06 16:36:41 Current database version: 0
+2026/07/06 16:36:41 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:41 Successfully applied migration 1
+2026/07/06 16:36:41 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:41 Successfully applied migration 2
+2026/07/06 16:36:41 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:41 Successfully applied migration 3
+2026/07/06 16:36:41 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:41 Successfully applied migration 4
+2026/07/06 16:36:41 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:41 Successfully applied migration 5
+2026/07/06 16:36:41 All migrations applied successfully
+2026/07/06 16:36:41 Current database version: 5
+2026/07/06 16:36:41 All migrations applied successfully
+2026/07/06 16:36:41 Current database version: 0
+2026/07/06 16:36:41 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:41 Successfully applied migration 1
+2026/07/06 16:36:41 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:41 Successfully applied migration 2
+2026/07/06 16:36:41 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:41 Successfully applied migration 3
+2026/07/06 16:36:41 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:41 Successfully applied migration 4
+2026/07/06 16:36:41 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:41 Successfully applied migration 5
+2026/07/06 16:36:41 All migrations applied successfully
+2026/07/06 16:36:41 Current database version: 0
+2026/07/06 16:36:41 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:41 Successfully applied migration 1
+2026/07/06 16:36:41 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:41 Successfully applied migration 2
+2026/07/06 16:36:41 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:41 Successfully applied migration 3
+2026/07/06 16:36:41 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:41 Successfully applied migration 4
+2026/07/06 16:36:41 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:41 Successfully applied migration 5
+2026/07/06 16:36:41 All migrations applied successfully
+2026/07/06 16:36:41 Current database version: 0
+2026/07/06 16:36:41 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:41 Successfully applied migration 1
+2026/07/06 16:36:41 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:41 Successfully applied migration 2
+2026/07/06 16:36:41 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:41 Successfully applied migration 3
+2026/07/06 16:36:41 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:41 Successfully applied migration 4
+2026/07/06 16:36:41 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:41 Successfully applied migration 5
+2026/07/06 16:36:41 All migrations applied successfully
+2026/07/06 16:36:41 Current database version: 5
+2026/07/06 16:36:41 All migrations applied successfully
+2026/07/06 16:36:41 Current database version: 0
+2026/07/06 16:36:41 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:41 Successfully applied migration 1
+2026/07/06 16:36:41 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:41 Successfully applied migration 2
+2026/07/06 16:36:41 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:41 Successfully applied migration 3
+2026/07/06 16:36:41 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:41 Successfully applied migration 4
+2026/07/06 16:36:41 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:41 Successfully applied migration 5
+2026/07/06 16:36:41 All migrations applied successfully
+2026/07/06 16:36:41 Current database version: 0
+2026/07/06 16:36:41 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 16:36:41 Successfully applied migration 1
+2026/07/06 16:36:41 Applying migration 2: Add performance indexes for common queries
+2026/07/06 16:36:41 Successfully applied migration 2
+2026/07/06 16:36:41 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 16:36:41 Successfully applied migration 3
+2026/07/06 16:36:41 Applying migration 4: Add notifications table for system notifications
+2026/07/06 16:36:41 Successfully applied migration 4
+2026/07/06 16:36:41 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 16:36:41 Successfully applied migration 5
+2026/07/06 16:36:41 All migrations applied successfully
+FAIL
+FAIL	digital.vasic.llmsverifier/tests	4.782s
+ok  	digital.vasic.llmsverifier/tests/integration	(cached)
+ok  	digital.vasic.llmsverifier/tests/unit	(cached)
+ok  	digital.vasic.llmsverifier/testsuite	(cached)
+ok  	digital.vasic.llmsverifier/tui	(cached)
+ok  	digital.vasic.llmsverifier/tui/screens	(cached)
+ok  	digital.vasic.llmsverifier/verification	0.303s
+FAIL
+test exit: 1

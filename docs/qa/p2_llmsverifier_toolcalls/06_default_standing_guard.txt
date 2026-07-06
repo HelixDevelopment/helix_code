@@ -1,0 +1,7 @@
+=== default RED_MODE unset -> standing GREEN guard ===
+=== RUN   TestMessageToolCallsRoundTrip
+    llm_client_toolcalls_test.go:131: RED_MODE=0 PASS: Message.ToolCalls populated with 2 real tool calls (get_current_weather, get_stock_price). Round-tripped message = {"role":"assistant","content":"","tool_calls":[{"id":"call_weather_001","type":"function","function":{"name":"get_current_weather","arguments":"{\"location\":\"New York\"}"}},{"id":"call_stock_002","type":"function","function":{"name":"get_stock_price","arguments":"{\"symbol\":\"AAPL\"}"}}]}
+--- PASS: TestMessageToolCallsRoundTrip (0.00s)
+PASS
+ok  	digital.vasic.llmsverifier/llmverifier	0.004s
+default exit: 0
