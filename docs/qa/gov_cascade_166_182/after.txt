@@ -1,0 +1,83 @@
+=== AFTER (per-file literal presence 166-182; dup check; conflict-marker scan) 2026-07-06T11:55:30Z ===
+--- CLAUDE.md ---
+highest: 11.4.182
+missing(166-182 required): NONE
+dup-heading-count(should each be 1):
+  §11.4.166 heading x1
+  §11.4.167 heading x1
+  §11.4.168 heading x1
+  §11.4.169 heading x1
+  §11.4.170 heading x1
+  §11.4.171 heading x1
+  §11.4.172 heading x1
+  §11.4.173 heading x1
+  §11.4.174 heading x1
+  §11.4.176 heading x1
+  §11.4.177 heading x1
+  §11.4.178 heading x1
+  §11.4.179 heading x1
+  §11.4.180 heading x1
+  §11.4.181 heading x1
+  §11.4.182 heading x1
+--- AGENTS.md ---
+highest: 11.4.182
+missing(166-182 required): NONE
+dup-heading-count(should each be 1):
+  §11.4.166 heading x1
+  §11.4.167 heading x1
+  §11.4.168 heading x1
+  §11.4.169 heading x1
+  §11.4.170 heading x1
+  §11.4.171 heading x1
+  §11.4.172 heading x1
+  §11.4.173 heading x1
+  §11.4.174 heading x1
+  §11.4.176 heading x1
+  §11.4.177 heading x1
+  §11.4.178 heading x1
+  §11.4.179 heading x1
+  §11.4.180 heading x1
+  §11.4.181 heading x1
+  §11.4.182 heading x1
+--- QWEN.md ---
+highest: 11.4.182
+missing(166-182 required): NONE
+dup-heading-count(should each be 1):
+  §11.4.166 heading x1
+  §11.4.167 heading x1
+  §11.4.168 heading x1
+  §11.4.169 heading x1
+  §11.4.170 heading x1
+  §11.4.171 heading x1
+  §11.4.172 heading x1
+  §11.4.173 heading x1
+  §11.4.174 heading x1
+  §11.4.176 heading x1
+  §11.4.177 heading x1
+  §11.4.178 heading x1
+  §11.4.179 heading x1
+  §11.4.180 heading x1
+  §11.4.181 heading x1
+  §11.4.182 heading x1
+--- GEMINI.md ---
+highest: 11.4.182
+missing(166-182 required): NONE
+dup-heading-count(should each be 1):
+  §11.4.166 heading x1
+  §11.4.167 heading x1
+  §11.4.168 heading x1
+  §11.4.169 heading x1
+  §11.4.170 heading x1
+  §11.4.171 heading x1
+  §11.4.172 heading x1
+  §11.4.173 heading x1
+  §11.4.174 heading x1
+  §11.4.176 heading x1
+  §11.4.177 heading x1
+  §11.4.178 heading x1
+  §11.4.179 heading x1
+  §11.4.180 heading x1
+  §11.4.181 heading x1
+  §11.4.182 heading x1
+=== merge-conflict-marker scan (must be empty) ===
+no conflict markers
