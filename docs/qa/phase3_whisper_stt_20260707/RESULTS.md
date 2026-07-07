@@ -196,3 +196,21 @@ ownership verified before touching anything).
   host (no primary/reproducible harness found for that specific pairing); the decision rests on
   reuse-of-proven-artifact (§11.4.74) rather than a fresh head-to-head CPU benchmark, which is an
   honestly-stated limitation of this proof.
+
+## Review follow-ups (independent review §11.4.142 — VERDICT GO)
+
+Independent adversarial review returned **GO** (0 blocking findings). Two Minor
+findings, disclosed here per §11.4.6:
+
+1. **silence/noise responses byte-identical (honest note).** `silence_response.json`
+   and `noise_response.json` are byte-for-byte identical (incl. `language_probability`
+   ≈ 0.5679) despite two distinct HTTP calls on different WAVs. This is genuine
+   faster-whisper behaviour on non-speech input: both WAVs contain no speech, so the
+   VAD yields an empty transcript and the language-ID head falls back to a similar
+   default-English confidence on degenerate input. It does NOT affect correctness —
+   the analyzer inspects only `text`, which is independently `""` for both, so both
+   golden-bad fixtures correctly FAIL.
+2. **Analyzer is recall-only** (requires all expected words present; no ceiling on
+   extra/hallucinated content). Not exploitable for the tested fixtures (they share no
+   expected words); recorded as a design limitation for future overlapping-vocabulary
+   fixtures.
