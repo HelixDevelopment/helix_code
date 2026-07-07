@@ -1,0 +1,7 @@
+# Build artifact (§11.4.30 / CONST-053) — regenerate via `go build` in run_proof.sh.
+*.bin
+go.sum
+# Synthesized audio fixtures (§11.4.77 re-obtain: regenerate via `synth`/
+# `synth-silence`/`synth-noise` subcommands, deterministic espeak-ng/ffmpeg
+# renders of literal known text — never hand-authored, never user content).
+*.wav

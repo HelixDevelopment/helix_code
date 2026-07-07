@@ -1,0 +1,8 @@
+### post-teardown state (retry after transient host-fork resource error, captured evidence)
+date_utc=2026-07-07T11:13:11Z
+helixllm-stt containers (expect none):
+  (none — removed)
+coder still running (untouched):
+helixllm-coder Up 21 hours
+target port 18437 (expect free):
+  (free)

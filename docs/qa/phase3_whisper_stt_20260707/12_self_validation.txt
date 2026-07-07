@@ -1,0 +1,16 @@
+### analyzer self-validation (§11.4.107(10)): 2 real golden-good + real silence + real noise + in-memory wrong-content/empty
+[GOLDEN-GOOD-0(fox, expect PASS)] PASS transcript="The quick brown fox dumps over the lazy dog." normalized="the quick brown fox dumps over the lazy dog" missing=[]
+[GOLDEN-GOOD-1(helloworld, expect PASS)] PASS transcript="Hello World 1, 2, 3!" normalized="hello world 1 2 3" missing=[]
+[GOLDEN-BAD-SILENCE(expect FAIL)] FAIL transcript="" normalized="" missing=[quick brown fox lazy dog]
+    reason: empty/blank transcript
+    reason: missing expected words: [quick brown fox lazy dog]
+[GOLDEN-BAD-NOISE(expect FAIL)] FAIL transcript="" normalized="" missing=[quick brown fox lazy dog]
+    reason: empty/blank transcript
+    reason: missing expected words: [quick brown fox lazy dog]
+[GOLDEN-BAD-WRONGCONTENT(expect FAIL)] FAIL transcript="Hello World 1, 2, 3!" normalized="hello world 1 2 3" missing=[quick brown fox lazy dog]
+    reason: missing expected words: [quick brown fox lazy dog]
+[GOLDEN-BAD-EMPTY(expect FAIL)] FAIL transcript="" normalized="" missing=[quick brown fox lazy dog]
+    reason: empty/blank transcript
+    reason: missing expected words: [quick brown fox lazy dog]
+[SELF-VALIDATION] PASS: analyzer PASSes both golden-good fixtures and FAILs every golden-bad variant
+selfvalidate_exit=0

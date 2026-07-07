@@ -1,0 +1,4 @@
+### GREEN runtime signature (§11.4.108) fixture=fox
+[RUNTIME-SIGNATURE(fox)] PASS transcript="The quick brown fox dumps over the lazy dog." normalized="the quick brown fox dumps over the lazy dog" missing=[]
+signature_exit=0
+GREEN-OK(fox)

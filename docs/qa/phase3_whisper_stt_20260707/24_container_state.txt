@@ -1,0 +1,2 @@
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 21 hours 8080/tcp, 50052/tcp
+phase3whisperstt_cpu_helixllm-stt_1 localhost/helixllm-stt:cpu Up 3 seconds 0.0.0.0:18437->8000/tcp

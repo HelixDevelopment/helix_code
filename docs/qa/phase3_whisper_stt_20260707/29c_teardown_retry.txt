@@ -1,0 +1,2 @@
+### teardown retry note ###
+First teardown attempt in the run_proof.sh 11:12 run hit a transient host resource-exhaustion error (BlockingIOError: [Errno 11] Resource temporarily unavailable during podman-compose's asyncio subprocess fork -- this host was concurrently running other parallel §11.4.103 tracks at the time). Retried boot-down 3s later: DOWN-OK. Container fully removed, coder untouched, port free. §11.4.174: verified process/port ownership before and after -- only phase3whisperstt_cpu_* was targeted.
