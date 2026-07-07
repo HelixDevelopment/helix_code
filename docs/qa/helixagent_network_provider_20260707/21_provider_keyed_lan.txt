@@ -1,0 +1,7 @@
+=== RUN   TestE2E_HelixAgent_To_LiveHelixLLM_ViaHostPort
+    provider_e2e_hostport_test.go:74: LAN endpoint=http://10.6.100.221:18439 elapsed=722.922µs tokens_used=24 model=ephemeral-mock
+    provider_e2e_hostport_test.go:75: === REAL MODEL RESPONSE OVER LAN (39 bytes) ===
+        func Add(a, b int) int { return a + b }
+--- PASS: TestE2E_HelixAgent_To_LiveHelixLLM_ViaHostPort (0.00s)
+PASS
+ok  	dev.helix.agent/internal/llm/providers/helixllm	0.005s

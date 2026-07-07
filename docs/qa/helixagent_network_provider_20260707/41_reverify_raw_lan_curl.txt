@@ -1,0 +1,9 @@
+### RE-VERIFY raw LAN curl 2026-07-07T16:25:44Z — real coder, real prompt, LAN IP (NOT localhost)
+### POST http://10.6.100.221:18434/v1/chat/completions
+{"choices":[{"finish_reason":"stop","index":0,"message":{"role":"assistant","content":"LANPROOF-OK"}}],"created":1783441544,"model":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","system_fingerprint":"b1-3b4fca1","object":"chat.completion","usage":{"completion_tokens":6,"prompt_tokens":22,"total_tokens":28,"prompt_tokens_details":{"cached_tokens":6}},"id":"chatcmpl-2ulnkXW9kqSAj7TuQa4UG4jrDEw0QK93","timings":{"cache_n":6,"prompt_n":16,"prompt_ms":19.704,"prompt_per_token_ms":1.2315,"prompt_per_second":812.0178643930166,"predicted_n":6,"predicted_ms":24.537,"predicted_per_token_ms":4.0895,"predicted_per_second":244.5286709866732}}
+@@HTTP 200 remote=10.6.100.221:18434 time=0.065367s
+
+### model field + content extracted:
+model= /models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf
+content= 'LANPROOF-OK'
+tokens= {'completion_tokens': 6, 'prompt_tokens': 22, 'total_tokens': 28, 'prompt_tokens_details': {'cached_tokens': 6}}

@@ -1,0 +1,9 @@
+################ AUTH MATRIX — ephemeral --api-key server @ 10.6.100.221:18439 (§11.4.5) ################
+--- [B1] NO key  -> expect 401 ---
+HTTP 401
+--- [B2] WRONG key -> expect 401 ---
+HTTP 401
+--- [B3] CORRECT key -> expect 200 + body ---
+{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"func Add(a, b int) int { return a + b }","role":"assistant"}}],"id":"chatcmpl-ephemeral","model":"ephemeral-mock","object":"chat.completion","usage":{"completion_tokens":13,"prompt_tokens":11,"total_tokens":24}}
+
+HTTP 200

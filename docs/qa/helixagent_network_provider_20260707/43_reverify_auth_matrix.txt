@@ -1,0 +1,17 @@
+### RE-VERIFY auth 401/200 matrix (clean re-run) 2026-07-07T16:27:28Z
+### ephemeral --api-key server on 0.0.0.0:18439 (PID=2361033, ours). Live coder :18434 UNTOUCHED (§11.4.122).
+### key=<redacted, len=25>  (llama.cpp --api-key Bearer byte-for-byte contract)
+
+B1 no Authorization header : HTTP 401 remote=10.6.100.221:18439  (expect 401)
+B2 wrong key               : HTTP 401 remote=10.6.100.221:18439  (expect 401)
+B3 correct key             : HTTP 200 remote=10.6.100.221:18439  (expect 200)
+B3 body content            : 'func Add(a, b int) int { return a + b }' total_tokens= 26
+
+B4 REAL provider.Complete over LAN via HELIX_LLM_HOST/PORT + correct API key -> expect 200 + func Add
+=== RUN   TestE2E_HelixAgent_To_LiveHelixLLM_ViaHostPort
+    provider_e2e_hostport_test.go:74: LAN endpoint=http://10.6.100.221:18439 elapsed=713.809µs tokens_used=26 model=ephemeral-coder
+    provider_e2e_hostport_test.go:75: === REAL MODEL RESPONSE OVER LAN (39 bytes) ===
+        func Add(a, b int) int { return a + b }
+--- PASS: TestE2E_HelixAgent_To_LiveHelixLLM_ViaHostPort (0.00s)
+PASS
+ok  	dev.helix.agent/internal/llm/providers/helixllm	0.005s

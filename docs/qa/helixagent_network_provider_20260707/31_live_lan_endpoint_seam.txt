@@ -1,0 +1,11 @@
+=== RUN   TestE2E_HelixAgent_To_LiveHelixLLM
+    provider_e2e_live_test.go:112: endpoint=http://10.6.100.221:18434 elapsed=86.255102ms tokens_used=53 model=/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf
+    provider_e2e_live_test.go:114: === REAL MODEL RESPONSE (57 bytes) ===
+        ```go
+        func Add(a int, b int) int {
+            return a + b
+        }
+        ```
+--- PASS: TestE2E_HelixAgent_To_LiveHelixLLM (0.09s)
+PASS
+ok  	dev.helix.agent/internal/llm/providers/helixllm	0.091s

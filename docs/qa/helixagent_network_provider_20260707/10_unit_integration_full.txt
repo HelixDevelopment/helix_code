@@ -1,0 +1,104 @@
+=== RUN   TestIntegration_HelixLLM_AuthMatrix
+--- PASS: TestIntegration_HelixLLM_AuthMatrix (0.00s)
+=== RUN   TestIntegration_HelixLLM_NoDoubleV1_BaseWithV1Suffix
+--- PASS: TestIntegration_HelixLLM_NoDoubleV1_BaseWithV1Suffix (0.00s)
+=== RUN   TestIntegration_HelixLLM_HostPortEnvDrivesRequest
+--- PASS: TestIntegration_HelixLLM_HostPortEnvDrivesRequest (0.00s)
+=== RUN   TestNormalizeBase_NoDoubleV1
+--- PASS: TestNormalizeBase_NoDoubleV1 (0.00s)
+=== RUN   TestResolveEndpoint_HostPort_LANOverride
+--- PASS: TestResolveEndpoint_HostPort_LANOverride (0.00s)
+=== RUN   TestResolveEndpoint_HostPort_LocalhostDefault
+--- PASS: TestResolveEndpoint_HostPort_LocalhostDefault (0.00s)
+=== RUN   TestResolveEndpoint_HostPort_Both
+--- PASS: TestResolveEndpoint_HostPort_Both (0.00s)
+=== RUN   TestResolveEndpoint_HostPort_BindAllMappedToLocalhost
+--- PASS: TestResolveEndpoint_HostPort_BindAllMappedToLocalhost (0.00s)
+=== RUN   TestResolveEndpoint_ExplicitOverridesHostPort
+--- PASS: TestResolveEndpoint_ExplicitOverridesHostPort (0.00s)
+=== RUN   TestResolveEndpoint_ExplicitEndpointSeamsWinOverHostPort
+=== RUN   TestResolveEndpoint_ExplicitEndpointSeamsWinOverHostPort/local_openai_seam_wins
+=== RUN   TestResolveEndpoint_ExplicitEndpointSeamsWinOverHostPort/general_endpoint_wins
+--- PASS: TestResolveEndpoint_ExplicitEndpointSeamsWinOverHostPort (0.00s)
+    --- PASS: TestResolveEndpoint_ExplicitEndpointSeamsWinOverHostPort/local_openai_seam_wins (0.00s)
+    --- PASS: TestResolveEndpoint_ExplicitEndpointSeamsWinOverHostPort/general_endpoint_wins (0.00s)
+=== RUN   TestResolveEndpoint_NoDoubleV1Invariant
+=== RUN   TestResolveEndpoint_NoDoubleV1Invariant/local_openai_seam_with_v1_suffix
+=== RUN   TestResolveEndpoint_NoDoubleV1Invariant/host_port_composition
+--- PASS: TestResolveEndpoint_NoDoubleV1Invariant (0.00s)
+    --- PASS: TestResolveEndpoint_NoDoubleV1Invariant/local_openai_seam_with_v1_suffix (0.00s)
+    --- PASS: TestResolveEndpoint_NoDoubleV1Invariant/host_port_composition (0.00s)
+=== RUN   TestResolveEndpoint_NothingSetIsLegacyDefault
+--- PASS: TestResolveEndpoint_NothingSetIsLegacyDefault (0.00s)
+=== RUN   TestNewProvider_HostPortComposition
+--- PASS: TestNewProvider_HostPortComposition (0.00s)
+=== RUN   TestNewProvider_APIKeyWired
+--- PASS: TestNewProvider_APIKeyWired (0.00s)
+=== RUN   TestNewProvider_TLSSecureByDefault
+--- PASS: TestNewProvider_TLSSecureByDefault (0.00s)
+=== RUN   TestNewProvider_TLSSkipVerifyExplicitOptIn
+--- PASS: TestNewProvider_TLSSkipVerifyExplicitOptIn (0.00s)
+=== RUN   TestNewProvider_TLSSkipVerifyViaEnvVar
+--- PASS: TestNewProvider_TLSSkipVerifyViaEnvVar (0.00s)
+=== RUN   TestNewProvider_TLSEnvVarFalseKeepsVerification
+--- PASS: TestNewProvider_TLSEnvVarFalseKeepsVerification (0.00s)
+=== RUN   TestNewProvider_DefaultEndpoint
+--- PASS: TestNewProvider_DefaultEndpoint (0.00s)
+=== RUN   TestResolveEndpoint_PrecedenceChain
+=== RUN   TestResolveEndpoint_PrecedenceChain/explicit_endpoint_wins_over_everything
+=== RUN   TestResolveEndpoint_PrecedenceChain/only_local_OpenAI_endpoint_set_is_used
+=== RUN   TestResolveEndpoint_PrecedenceChain/only_general_endpoint_set_is_used
+=== RUN   TestResolveEndpoint_PrecedenceChain/both_local_and_general_set:_local_OpenAI_endpoint_wins
+=== RUN   TestResolveEndpoint_PrecedenceChain/nothing_set_falls_back_to_DefaultEndpoint
+--- PASS: TestResolveEndpoint_PrecedenceChain (0.00s)
+    --- PASS: TestResolveEndpoint_PrecedenceChain/explicit_endpoint_wins_over_everything (0.00s)
+    --- PASS: TestResolveEndpoint_PrecedenceChain/only_local_OpenAI_endpoint_set_is_used (0.00s)
+    --- PASS: TestResolveEndpoint_PrecedenceChain/only_general_endpoint_set_is_used (0.00s)
+    --- PASS: TestResolveEndpoint_PrecedenceChain/both_local_and_general_set:_local_OpenAI_endpoint_wins (0.00s)
+    --- PASS: TestResolveEndpoint_PrecedenceChain/nothing_set_falls_back_to_DefaultEndpoint (0.00s)
+=== RUN   TestNewProvider_CustomEndpoint
+--- PASS: TestNewProvider_CustomEndpoint (0.00s)
+=== RUN   TestNewProvider_DefaultModel
+--- PASS: TestNewProvider_DefaultModel (0.00s)
+=== RUN   TestNewProvider_DefaultTimeout
+--- PASS: TestNewProvider_DefaultTimeout (0.00s)
+=== RUN   TestNewProvider_CustomTimeout
+--- PASS: TestNewProvider_CustomTimeout (0.00s)
+=== RUN   TestNewProviderFromEnv
+--- PASS: TestNewProviderFromEnv (0.00s)
+=== RUN   TestProvider_GetCapabilities
+--- PASS: TestProvider_GetCapabilities (0.00s)
+=== RUN   TestProvider_ValidateConfig
+=== RUN   TestProvider_ValidateConfig/nil_config_is_valid
+=== RUN   TestProvider_ValidateConfig/empty_config_is_valid
+=== RUN   TestProvider_ValidateConfig/config_with_empty_endpoint_is_invalid
+=== RUN   TestProvider_ValidateConfig/config_with_valid_endpoint_is_valid
+--- PASS: TestProvider_ValidateConfig (0.00s)
+    --- PASS: TestProvider_ValidateConfig/nil_config_is_valid (0.00s)
+    --- PASS: TestProvider_ValidateConfig/empty_config_is_valid (0.00s)
+    --- PASS: TestProvider_ValidateConfig/config_with_empty_endpoint_is_invalid (0.00s)
+    --- PASS: TestProvider_ValidateConfig/config_with_valid_endpoint_is_valid (0.00s)
+=== RUN   TestGetEnv
+--- PASS: TestGetEnv (0.00s)
+=== RUN   TestGetEnvBool
+=== RUN   TestGetEnvBool/unset_returns_default_true
+=== RUN   TestGetEnvBool/unset_returns_default_false
+=== RUN   TestGetEnvBool/true_string
+=== RUN   TestGetEnvBool/1_string
+=== RUN   TestGetEnvBool/yes_string
+=== RUN   TestGetEnvBool/false_string
+=== RUN   TestGetEnvBool/0_string
+=== RUN   TestGetEnvBool/no_string
+--- PASS: TestGetEnvBool (0.00s)
+    --- PASS: TestGetEnvBool/unset_returns_default_true (0.00s)
+    --- PASS: TestGetEnvBool/unset_returns_default_false (0.00s)
+    --- PASS: TestGetEnvBool/true_string (0.00s)
+    --- PASS: TestGetEnvBool/1_string (0.00s)
+    --- PASS: TestGetEnvBool/yes_string (0.00s)
+    --- PASS: TestGetEnvBool/false_string (0.00s)
+    --- PASS: TestGetEnvBool/0_string (0.00s)
+    --- PASS: TestGetEnvBool/no_string (0.00s)
+=== RUN   TestNewProvider_TLSConfigNotNil
+--- PASS: TestNewProvider_TLSConfigNotNil (0.00s)
+PASS
+ok  	dev.helix.agent/internal/llm/providers/helixllm	0.007s

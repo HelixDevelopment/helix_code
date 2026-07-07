@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HelixAgent HelixLLM LAN/VPN provider proof</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HelixAgent HelixLLM LAN/VPN provider proof</h1>
+</header>
+<h1
+id="helixagent-helixllm-provider-lanvpn-provider-alias-proof">HelixAgent
+HelixLLM provider — LAN/VPN provider-alias proof</h1>
+<p><strong>Revision:</strong> 2 <strong>Last modified:</strong>
+2026-07-07 <strong>Maintainer:</strong> CLI-Agent Fusion programme (T1 /
+feature/helixllm-full-extension) <strong>Scope:</strong> Prove the
+HelixAgent <code>helixllm.Provider</code> works as an OpenAI-compatible
+provider alias over the LAN/VPN (not just localhost), env-var
+parameterized, with API-key auth — all with real captured evidence
+(§11.4 / §11.4.5 / §11.4.69 / §11.4.108 / §11.4.98).</p>
+<h2 id="verdict-done">Verdict: DONE</h2>
+<p>Every part (A env-var parameterization, B auth 401/200, C live LAN, D
+docs, E tests, F deep research) is landed with captured runtime
+evidence. No metadata- only PASS. The live coder
+(<code>helixllm-coder</code>, <code>0.0.0.0:18434</code>) was never
+restarted/reconfigured (§11.4.122); the auth server was a fresh
+ephemeral process on <code>:18439</code>, torn down after use
+(§11.4.119).</p>
+<h2
+id="resume-re-verification-post-crash-11.4.147-respawn-2026-07-07t16251627z">Resume
+re-verification (post-crash, §11.4.147 respawn —
+2026-07-07T16:25–16:27Z)</h2>
+<p>The prior attempt crashed on a shared session-limit right before
+commit. On resume, every unfakeable piece was RE-RUN on the CURRENT
+working tree (§11.4.6 — stale evidence is not trusted) and re-confirmed
+GREEN; fresh evidence:</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 21%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>Re-verify</th>
+<th>File</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit + integration full suite (34 tests) on current tree +
+<code>go vet</code></td>
+<td><code>40_reverify_unit_integration.txt</code></td>
+<td><code>ok … 0.007s</code>, <code>EXIT=0</code>, 0 failures</td>
+</tr>
+<tr>
+<td>Raw LAN curl → real coder</td>
+<td><code>41_reverify_raw_lan_curl.txt</code></td>
+<td><code>HTTP 200 remote=10.6.100.221:18434</code>,
+<code>content='LANPROOF-OK'</code>, Qwen3-Coder-30B</td>
+</tr>
+<tr>
+<td>Live LAN <code>provider.Complete()</code> via
+<code>HELIX_LLM_HOST/PORT</code></td>
+<td><code>42_reverify_live_lan_provider.txt</code></td>
+<td>PASS — endpoint <code>http://10.6.100.221:18434</code>, real
+<code>func Add(a int, b int) int</code>, 53 tok</td>
+</tr>
+<tr>
+<td>Auth 401/200 matrix (ephemeral <code>:18439</code>) + real keyed
+provider</td>
+<td><code>43_reverify_auth_matrix.txt</code></td>
+<td>B1 401, B2 401, B3 200+<code>func Add</code>, B4 real provider
+200+<code>func Add</code></td>
+</tr>
+</tbody>
+</table>
+<p>The build + all tests pass with the CURRENT <code>go.mod</code> (the
+foreign version-bump is NOT needed — see the §11.4.174 ownership note
+below).</p>
+<h2
+id="live-lan-runtime-signature-11.4.108-the-unfakeable-core">Live-LAN
+runtime signature (§11.4.108 — the unfakeable core)</h2>
+<pre><code>HELIX_LLM_HOST=10.6.100.221 HELIX_LLM_PORT=18434
+  → provider.Endpoint() = &quot;http://10.6.100.221:18434&quot;   (composed, no /v1)
+  → provider.Complete()  → HTTP 200, remote=10.6.100.221:18434
+  → REAL coder output (Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf, tokens_used=53):
+        func Add(a int, b int) int { return a + b }</code></pre>
+<p>Raw wire cross-check (<code>01_raw_lan_curl.txt</code>):
+<code>curl POST http://10.6.100.221:18434/v1/chat/completions</code> →
+<code>HTTP 200 remote=10.6.100.221:18434</code>,
+<code>content:"LANPROOF-OK"</code>. The
+<code>remote=10.6.100.221:18434</code> (curl <code>%{remote_ip}</code>)
+proves the request traversed the <strong>LAN interface (eno1)</strong>,
+not the loopback.</p>
+<h2
+id="a.-env-var-resolution-unit-proven-10_unit_integration_full.txt">A.
+Env-var resolution (unit-proven —
+<code>10_unit_integration_full.txt</code>)</h2>
+<p>New client-target vars on <code>helixllm.Provider</code>:
+<code>HELIX_LLM_HOST</code> (default <code>localhost</code>),
+<code>HELIX_LLM_PORT</code> (default <code>18434</code>),
+<code>HELIX_LLM_API_KEY</code> (optional). Precedence (first non-empty
+wins), each run through <code>normalizeBase</code>:</p>
+<table>
+<colgroup>
+<col style="width: 2%" />
+<col style="width: 16%" />
+<col style="width: 35%" />
+<col style="width: 35%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Source</th>
+<th>Example input</th>
+<th>Resolved base</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>explicit <code>cfg.Endpoint</code></td>
+<td><code>https://custom:9443</code></td>
+<td><code>https://custom:9443</code></td>
+<td><code>TestResolveEndpoint_ExplicitOverridesHostPort</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT</code></td>
+<td><code>http://seam:8080</code></td>
+<td><code>http://seam:8080</code></td>
+<td><code>…ExplicitEndpointSeamsWinOverHostPort</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>HELIX_LLM_ENDPOINT</code></td>
+<td><code>https://gen:8443</code></td>
+<td><code>https://gen:8443</code></td>
+<td><code>…ExplicitEndpointSeamsWinOverHostPort</code></td>
+</tr>
+<tr>
+<td>4a</td>
+<td><code>HELIX_LLM_HOST</code> (LAN, port default)</td>
+<td><code>10.6.100.221</code></td>
+<td><code>http://10.6.100.221:18434</code></td>
+<td><code>TestResolveEndpoint_HostPort_LANOverride</code></td>
+</tr>
+<tr>
+<td>4b</td>
+<td><code>HELIX_LLM_PORT</code> only (host default)</td>
+<td><code>18434</code></td>
+<td><code>http://localhost:18434</code></td>
+<td><code>TestResolveEndpoint_HostPort_LocalhostDefault</code></td>
+</tr>
+<tr>
+<td>4c</td>
+<td>bind-all host mapped to localhost</td>
+<td><code>0.0.0.0</code> / <code>::</code> / <code>[::]</code></td>
+<td><code>http://localhost:18434</code></td>
+<td><code>TestResolveEndpoint_HostPort_BindAllMappedToLocalhost</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>nothing set (legacy)</td>
+<td>—</td>
+<td><code>https://localhost:8443</code></td>
+<td><code>TestResolveEndpoint_NothingSetIsLegacyDefault</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>No-double-<code>/v1</code> invariant</strong>
+(<code>TestNormalizeBase_NoDoubleV1</code>,
+<code>TestResolveEndpoint_NoDoubleV1Invariant</code>): a base written
+either as <code>http://h:18434</code> OR <code>http://h:18434/v1</code>
+both compose to a single <code>http://h:18434/v1/chat/completions</code>
+— never <code>/v1/v1</code> (the 404 gotcha).</p>
+<h2
+id="b.-auth-401-200-matrix-20_auth_matrix_ephemeral.txt-21_provider_keyed_lan.txt">B.
+Auth 401 / 200 matrix (<code>20_auth_matrix_ephemeral.txt</code>,
+<code>21_provider_keyed_lan.txt</code>)</h2>
+<p>Ephemeral OpenAI server with a Bearer key on
+<code>0.0.0.0:18439</code> (the llama.cpp <code>--api-key</code>
+contract — byte-for-byte Bearer compare):</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 30%" />
+<col style="width: 17%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Case</th>
+<th>Request</th>
+<th>HTTP</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1</td>
+<td>no <code>Authorization</code> header</td>
+<td><strong>401</strong></td>
+<td><code>20_auth_matrix_ephemeral.txt</code></td>
+</tr>
+<tr>
+<td>B2</td>
+<td><code>Authorization: Bearer WRONG-KEY</code></td>
+<td><strong>401</strong></td>
+<td><code>20_auth_matrix_ephemeral.txt</code></td>
+</tr>
+<tr>
+<td>B3</td>
+<td><code>Authorization: Bearer &lt;correct&gt;</code></td>
+<td><strong>200</strong> + real completion</td>
+<td><code>20_auth_matrix_ephemeral.txt</code></td>
+</tr>
+<tr>
+<td>B4</td>
+<td><strong>real provider</strong>
+<code>HELIX_LLM_HOST=10.6.100.221 HELIX_LLM_PORT=18439 HELIX_LLM_API_KEY=&lt;correct&gt;</code>
+→ keyed server over LAN</td>
+<td><strong>200</strong> + <code>func Add…</code></td>
+<td><code>21_provider_keyed_lan.txt</code></td>
+</tr>
+</tbody>
+</table>
+<p>Provider-side auth is additionally proven end-to-end (no-key → 401,
+wrong-key → 401, correct-key → 200,
+<code>gotAuth == "Bearer &lt;key&gt;"</code>) by the integration test
+<code>TestIntegration_HelixLLM_AuthMatrix</code> against a real httptest
+server.</p>
+<h2 id="c.-live-lan-proofs">C. Live LAN proofs</h2>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 42%" />
+<col style="width: 18%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th>Proof</th>
+<th>Command driver</th>
+<th>Result</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1</td>
+<td><code>HELIX_LLM_HOST=10.6.100.221</code> (new composition) →
+<code>Complete()</code></td>
+<td>real <code>func Add</code>, 53 tok</td>
+<td><code>30_live_lan_hostport.txt</code></td>
+</tr>
+<tr>
+<td>C2</td>
+<td><code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT=http://10.6.100.221:18434</code>
+(base seam) → <code>Complete()</code></td>
+<td>real <code>func Add</code>, 53 tok</td>
+<td><code>31_live_lan_endpoint_seam.txt</code></td>
+</tr>
+<tr>
+<td>C3 (RED)</td>
+<td><code>RED_MODE=1</code>, no pin → TLS <code>:8443</code>
+default</td>
+<td><code>connection refused</code> (defect reproduced §11.4.115)</td>
+<td><code>32_red_baseline.txt</code></td>
+</tr>
+<tr>
+<td>raw</td>
+<td><code>curl http://10.6.100.221:18434/...</code></td>
+<td><code>HTTP 200 remote=10.6.100.221:18434</code></td>
+<td><code>01_raw_lan_curl.txt</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="e.-tests-all-green">E. Tests (all GREEN)</h2>
+<ul>
+<li>Unit + integration full suite:
+<code>10_unit_integration_full.txt</code> — <code>ok … 0.007s</code>, 0
+failures, existing suite unregressed.</li>
+<li>Re-runnability at <code>-count=3</code> (§11.4.98):
+<code>12_rerunnability_count3.txt</code> — <code>ok</code>.</li>
+<li>Files (helix_agent submodule,
+<code>internal/llm/providers/helixllm/</code>): <code>provider.go</code>
+(env vars + <code>normalizeBase</code> + composition),
+<code>provider_network_test.go</code> (unit resolution),
+<code>provider_network_integration_test.go</code> (real-HTTP auth matrix
++ no-double-/v1 + HOST/PORT wiring),
+<code>provider_e2e_hostport_test.go</code> (live LAN),
+<code>provider_e2e_live_test.go</code> (reconciled assertion
+§11.4.120).</li>
+</ul>
+<h2 id="reproduce">Reproduce</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/helix_agent</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># unit + integration (no infra, deterministic):</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-v</span> ./internal/llm/providers/helixllm/</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># live LAN via HOST/PORT composition (coder must listen on 0.0.0.0:18434):</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_LLM_HOST</span><span class="op">=</span>10.6.100.221 <span class="va">HELIX_LLM_PORT</span><span class="op">=</span>18434 <span class="dt">\</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>helixllm_e2e <span class="at">-run</span> TestE2E_HelixAgent_To_LiveHelixLLM_ViaHostPort <span class="at">-v</span> <span class="dt">\</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  ./internal/llm/providers/helixllm/</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># auth matrix: run an OpenAI server with a key on :18439, then</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   curl -o/dev/null -w &#39;%{http_code}\n&#39; -XPOST http://&lt;HOST&gt;:18439/v1/chat/completions        # 401</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   curl … -H &#39;Authorization: Bearer WRONG&#39; …                                                    # 401</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   curl … -H &#39;Authorization: Bearer &lt;correct&gt;&#39; …                                                # 200</span></span></code></pre></div>
+<h2 id="d.-docs">D. Docs</h2>
+<ul>
+<li><code>submodules/helix_llm/docs/OPERATOR_GUIDE.md</code> §7 — new
+<strong>HelixAgent over the LAN / VPN</strong> subsection (env-var
+table, precedence, host-IP examples, the <code>/v1</code> base gotcha,
+API-key auth, <code>api_keys.sh</code>/<code>.env</code>),
+<code>.html</code>+<code>.pdf</code> siblings synced (§11.4.75).</li>
+<li><code>submodules/helix_agent/.env.example</code> — client-connection
+block (precedence + the <code>HELIX_LLM_HOST</code> name-collision
+caveat with the server-bind block).</li>
+<li><code>submodules/helix_agent/api_keys.sh.example</code> +
+<code>.gitignore</code> guard (<code>api_keys.sh</code> ignored,
+<code>.example</code> tracked — CONST-042/053/§11.4.10).</li>
+</ul>
+<h2 id="f.-deep-research-11.4.150-2-angles">F. Deep research (§11.4.150
+— 2 angles)</h2>
+<ul>
+<li>Official llama.cpp server docs — <code>--api-key</code> (Bearer
+auth, HTTP 401 on missing/wrong), <code>--host</code> default
+<code>127.0.0.1</code>, <code>0.0.0.0</code> binds all interfaces
+(LAN-reachable), <code>--port</code> default 8080: <a
+href="https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md"
+class="uri">https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md</a>
+(verified 2026-07-07).</li>
+<li>Community/issue corroboration —
+<code>Authorization: Bearer &lt;key&gt;</code> byte-for-byte compare →
+401 on any mismatch (extra space/newline included): <a
+href="https://markaicode.com/errors/llamacpp-api-key-invalid-fix-production/"
+class="uri">https://markaicode.com/errors/llamacpp-api-key-invalid-fix-production/</a>
+(verified 2026-07-07); <a
+href="https://github.com/ggml-org/llama.cpp/issues/22474"
+class="uri">https://github.com/ggml-org/llama.cpp/issues/22474</a>
+(verified 2026-07-07).</li>
+</ul>
+<h2 id="honesty-notes-11.4.6">Honesty notes (§11.4.6)</h2>
+<ul>
+<li>The <code>:18434</code> coder fleet (raw llama-server) does
+<strong>not</strong> enforce auth — any/no key is accepted. The 401/200
+auth matrix was therefore proven against (a) an ephemeral key-checking
+server on <code>:18439</code> and (b) a real httptest server in the
+integration test; both mirror the llama.cpp <code>--api-key</code>
+Bearer contract. The provider’s own header emission
+(<code>Authorization: Bearer &lt;key&gt;</code>) is proven real.</li>
+<li>The ephemeral auth server + the httptest servers are OpenAI-endpoint
+stand-ins, not provider mocks — the <code>helixllm.Provider</code> code
+path is 100% real (CONST-050). The live coder proofs (C1/C2,
+<code>01_raw_lan_curl.txt</code>) use the real model.</li>
+<li><code>HELIX_LLM_HOST</code>/<code>HELIX_LLM_PORT</code> names are
+reused from the existing <code>.env.example</code> “Server Settings”
+(server bind). The client composition sits BELOW the endpoint seams in
+precedence, so a default deployment (<code>HELIX_LLM_ENDPOINT</code>
+set) is unaffected; a leaked bind-all <code>0.0.0.0</code> maps to
+<code>localhost</code>. Documented explicitly in
+<code>.env.example</code>.</li>
+<li>Not verified here: the full <code>:8443</code> HelixLLM Go gateway
+live-serving (its contract is documented in
+<code>API_CONTRACT.md</code>, not exercised in this session).</li>
+<li><strong>§11.4.174 ownership honesty note (foreign working-tree
+files).</strong> The <code>submodules/helix_agent</code> working tree
+also carries CONCURRENT-track changes that are <strong>NOT part of this
+feature and were NOT staged/committed/reverted by this work</strong>:
+<code>go.mod</code> + <code>go.sum</code> (an 18-line
+<code>go.opentelemetry.io/otel</code> + <code>golang.org/x/*</code>
+version bump) and their <code>go.mod.qa_bak</code> +
+<code>go.sum.qa_bak</code> backups. This provider work adds <strong>NO
+new external import</strong> (<code>provider.go</code> uses only stdlib
+<code>net/http</code>/<code>os</code>/<code>strings</code>/… + the
+existing <code>dev.helix.agent/internal/{llm,models}</code>; the tests
+use <code>net/http/httptest</code> + <code>testify</code>), so it
+<strong>builds and all 34 tests pass against the CURRENT unmodified
+<code>go.mod</code></strong> — proven by
+<code>40_reverify_unit_integration.txt</code> (<code>go vet</code>
+clean, <code>ok … EXIT=0</code>). Those four files were left untouched;
+only the eight files owned by this feature were committed.</li>
+</ul>
+<h2 id="sources-verified-2026-07-07">Sources verified 2026-07-07</h2>
+<ul>
+<li><a
+href="https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md"
+class="uri">https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md</a></li>
+<li><a
+href="https://markaicode.com/errors/llamacpp-api-key-invalid-fix-production/"
+class="uri">https://markaicode.com/errors/llamacpp-api-key-invalid-fix-production/</a></li>
+<li><a href="https://github.com/ggml-org/llama.cpp/issues/22474"
+class="uri">https://github.com/ggml-org/llama.cpp/issues/22474</a></li>
+</ul>
+</body>
+</html>

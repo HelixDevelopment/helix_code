@@ -1,0 +1,5 @@
+# Raw LAN wire proof — curl to the live coder at the host LAN IP (NOT localhost)
+# host iface eno1 = 10.6.100.221 ; coder llama-server binds 0.0.0.0:18434
+$ curl -sS -X POST http://10.6.100.221:18434/v1/chat/completions -d '{...LANPROOF...}'
+{"choices":[{"finish_reason":"stop","index":0,"message":{"role":"assistant","content":"LANPROOF-OK"}}],"created":1783424164,"model":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","system_fingerprint":"b1-3b4fca1","object":"chat.completion","usage":{"completion_tokens":6,"prompt_tokens":17,"total_tokens":23,"prompt_tokens_details":{"cached_tokens":16}},"id":"chatcmpl-ICzh2lSxoH6V6wt6wEkA2p41M1wwKnJg","timings":{"cache_n":16,"prompt_n":1,"prompt_ms":6.053,"prompt_per_token_ms":6.053,"prompt_per_second":165.20733520568314,"predicted_n":6,"predicted_ms":20.894,"predicted_per_token_ms":3.482333333333333,"predicted_per_second":287.1637790753326}}
+[HTTP 200 time=0.048645s remote=10.6.100.221:18434]
