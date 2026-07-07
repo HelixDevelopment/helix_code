@@ -741,5 +741,52 @@ surfaces and <strong>Perplexity</strong> Sonar tool-calling schema were
 not confirmable on the fetched pages — marked <code>UNCONFIRMED</code>,
 to be probed at build (P2-T3); the OpenAI path each exposes IS confirmed
 and is the reuse target.</p>
+<hr />
+<h2 id="honesty-correction-provider-coverage-claim-in-tag-helix-code-1.0.0-dev-0.0.1">§11.4.138
+honesty correction — provider-coverage claim in tag
+<code>helix-code-1.0.0-dev-0.0.1</code></h2>
+<p><strong>Correction (§11.4.138, filed 2026-07-08).</strong> An
+independent post-tag honesty audit found that the release <strong>commit
+message</strong> (<code>10c40c85</code>) and <strong>tag
+annotation</strong> for <code>helix-code-1.0.0-dev-0.0.1</code> list
+<em>“broad provider coverage”</em> undifferentiated alongside
+capabilities that DO carry live captured evidence
+(<code>docs/qa/&lt;run-id&gt;/RESULTS.md</code>) — embeddings,
+translation-NLLB, Whisper STT, Tesseract OCR, RAG, ACP→A2A,
+network-provider. This summary-layer phrasing was imprecise. (The
+substantive docs — this file, <code>RESUME.md</code>, and
+<code>06_providers_coverage/06_providers_coverage.md</code> — were
+audited <strong>HONEST</strong>: each correctly scopes provider coverage
+as design/research/operator-gated. The over-claim is confined to the
+immutable commit-message + tag-annotation summary.)</p>
+<p>Commit messages and tag annotations are immutable history — under
+§11.4.113 (absolute no-force-push / no history rewrite) they CANNOT be
+amended. This forward-correction record is therefore the honest
+mechanism (§11.4.6).</p>
+<p><strong>Precise scope of “broad provider coverage” as of this
+tag:</strong> it refers ONLY to (a) the pre-existing ~45-adapter roster
+in <code>helix_agent/internal/llm/providers/*</code> (unit-tested with
+mocked HTTP servers — NOT live), and (b) the extended-provider
+<strong>design mapping</strong> in this document (13 candidate providers
+researched + scoped as config-only reuse; <strong>zero adapter code
+landed this session</strong>). It should have carried the same
+<strong>“(design)”</strong> qualifier that “local vision (design)”
+correctly received in the same commit message.</p>
+<p><strong>No CONST-039 core-provider (OpenAI, Anthropic, Gemini,
+DeepSeek, Groq, Mistral, xAI, OpenRouter, Ollama, Llama.cpp)
+<em>live-proof harness</em> shipped in this tag</strong> — only a narrow
+ensemble probe + HelixLLM’s own local live test existed. Per
+<code>RESUME.md</code> (§11.4.131, same commit), “broad-provider live
+proofs” are explicit NEXT / operator-gated work pending API keys
+(§11.4.10).</p>
+<p><strong>Tracked follow-up (in progress this session):</strong> a real
+per-provider CONST-039 live-proof harness — honest per-provider
+<code>SKIP: no-key</code> when keys are absent (§11.4.3),
+nonce-challenged real-call assertion when present, evidence under
+<code>docs/qa/&lt;run-id&gt;/provider_coverage/</code> — is being
+implemented as the immediate follow-up. No future claim of “provider
+coverage: reviewed GO” will be made without an accompanying
+<code>docs/qa/&lt;run-id&gt;/provider_coverage/RESULTS.md</code>
+evidence directory.</p>
 </body>
 </html>

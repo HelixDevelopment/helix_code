@@ -320,3 +320,44 @@ Negative findings (§11.4.99(B)):
   tool-calling schema were not confirmable on the fetched pages — marked
   `UNCONFIRMED`, to be probed at build (P2-T3); the OpenAI path each exposes IS
   confirmed and is the reuse target.
+
+---
+
+## §11.4.138 honesty correction — provider-coverage claim in tag `helix-code-1.0.0-dev-0.0.1`
+
+**Correction (§11.4.138, filed 2026-07-08).** An independent post-tag honesty
+audit found that the release **commit message** (`10c40c85`) and **tag
+annotation** for `helix-code-1.0.0-dev-0.0.1` list *"broad provider coverage"*
+undifferentiated alongside capabilities that DO carry live captured evidence
+(`docs/qa/<run-id>/RESULTS.md`) — embeddings, translation-NLLB, Whisper STT,
+Tesseract OCR, RAG, ACP→A2A, network-provider. This summary-layer phrasing was
+imprecise. (The substantive docs — this file, `RESUME.md`, and
+`06_providers_coverage/06_providers_coverage.md` — were audited **HONEST**: each
+correctly scopes provider coverage as design/research/operator-gated. The
+over-claim is confined to the immutable commit-message + tag-annotation summary.)
+
+Commit messages and tag annotations are immutable history — under §11.4.113
+(absolute no-force-push / no history rewrite) they CANNOT be amended. This
+forward-correction record is therefore the honest mechanism (§11.4.6).
+
+**Precise scope of "broad provider coverage" as of this tag:** it refers ONLY to
+(a) the pre-existing ~45-adapter roster in `helix_agent/internal/llm/providers/*`
+(unit-tested with mocked HTTP servers — NOT live), and (b) the extended-provider
+**design mapping** in this document (13 candidate providers researched + scoped
+as config-only reuse; **zero adapter code landed this session**). It should have
+carried the same **"(design)"** qualifier that "local vision (design)" correctly
+received in the same commit message.
+
+**No CONST-039 core-provider (OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral,
+xAI, OpenRouter, Ollama, Llama.cpp) *live-proof harness* shipped in this tag** —
+only a narrow ensemble probe + HelixLLM's own local live test existed. Per
+`RESUME.md` (§11.4.131, same commit), "broad-provider live proofs" are explicit
+NEXT / operator-gated work pending API keys (§11.4.10).
+
+**Tracked follow-up (in progress this session):** a real per-provider CONST-039
+live-proof harness — honest per-provider `SKIP: no-key` when keys are absent
+(§11.4.3), nonce-challenged real-call assertion when present, evidence under
+`docs/qa/<run-id>/provider_coverage/` — is being implemented as the immediate
+follow-up. No future claim of "provider coverage: reviewed GO" will be made
+without an accompanying `docs/qa/<run-id>/provider_coverage/RESULTS.md` evidence
+directory.
