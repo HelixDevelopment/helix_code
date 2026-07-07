@@ -1,0 +1,2 @@
+### overall verdict
+ALL-GREEN: anti-gaming triple + determinism + self-validation PASS

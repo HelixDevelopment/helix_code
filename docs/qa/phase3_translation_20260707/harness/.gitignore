@@ -1,0 +1,3 @@
+# Build artifact (§11.4.30 / CONST-053) — regenerate via `go build` in run_proof.sh.
+*.bin
+go.sum

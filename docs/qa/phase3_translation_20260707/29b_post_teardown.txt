@@ -1,0 +1,5 @@
+### post-teardown state
+libretranslate containers (expect none):
+  (none — removed)
+coder still running (untouched):
+helixllm-coder Up 17 hours

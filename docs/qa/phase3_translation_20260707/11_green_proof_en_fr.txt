@@ -1,0 +1,6 @@
+### GREEN runtime signature (§11.4.108) pair=en_fr floor=0.30 margin=0.40
+[RUNTIME-SIGNATURE(en->fr)] PASS notIdentity=true targetMatch=true fwdChrF=1.0000(floor 0.30) backChrF=1.0000(margin 0.40)
+signature_exit=0
+[DETERMINISM] PASS: forward+back byte-identical across two identical requests (en->fr)
+determinism_exit=0
+GREEN-OK (en_fr)

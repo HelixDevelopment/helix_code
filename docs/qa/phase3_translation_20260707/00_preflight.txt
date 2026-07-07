@@ -1,0 +1,11 @@
+### pre-flight (§11.4.119 single-owner, coder untouched)
+date_utc=2026-07-07T07:05:03Z
+uname_m=x86_64  podman=podman version 5.7.1
+lane=LibreTranslate (stock, Argos/OPUS-MT on CTranslate2, CPU) image=docker.io/libretranslate/libretranslate:latest
+load_only=en,fr,de  host_port=18436  chrf_floor=0.30  back_margin=0.40
+coder container (MUST remain running, untouched):
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 17 hours
+target host port 18436 listeners (expect none):
+  (free)
+LibreTranslate image present?
+docker.io/libretranslate/libretranslate:latest 615 MB

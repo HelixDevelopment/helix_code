@@ -1,0 +1,10 @@
+PROBE-OK en->de wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_translation_20260707/green_record_en_de_1.json
+    source   = "The book is on the table."
+    forward  = "Das Buch liegt auf dem Tisch." (detected=de conf=100.0)
+    back     = "The book is on the table."
+    golden   = "Das Buch ist auf dem Tisch."
+PROBE-OK en->de wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_translation_20260707/green_record_en_de_2.json
+    source   = "The book is on the table."
+    forward  = "Das Buch liegt auf dem Tisch." (detected=de conf=100.0)
+    back     = "The book is on the table."
+    golden   = "Das Buch ist auf dem Tisch."

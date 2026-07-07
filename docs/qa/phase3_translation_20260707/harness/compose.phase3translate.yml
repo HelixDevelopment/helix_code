@@ -1,0 +1,42 @@
+# Phase-3 CPU translation service — stock LibreTranslate (Argos/OPUS-MT on
+# CTranslate2), CPU-only. Booted THROUGH the containers submodule
+# compose.Orchestrator (§11.4.76), rootless podman (§11.4.161). NO GPU device
+# (contrast the P0 GPU proof) — the structural guarantee this ships before the
+# P0/P1 GPU chain. This is the design's DOCUMENTED FALLBACK lane
+# (TRANSLATION_PROVIDER.md §1.2 / §3.1): the identical LibreTranslate `/translate`
+# route on the same CTranslate2 engine the NLLB-CT2 primary would use, chosen
+# here for reliable zero-new-shim CPU boot (honest §11.4.6 substitution recorded
+# in 23_substitution.txt).
+#
+# No hardcoded model / host port / language set (§CONST-045 / §CONST-046): every
+# value is injected from the environment by run_proof.sh; the compose file
+# carries no literal. `${VAR}` are always set by the harness before boot.
+services:
+  libretranslate:
+    image: ${LT_IMAGE}
+    environment:
+      # Restrict to the language set actually exercised so cold-boot only fetches
+      # the en/fr/de Argos packages (fast + reliable) rather than all 100+.
+      LT_LOAD_ONLY: "${LT_LOAD_ONLY}"
+      LT_HOST: "0.0.0.0"
+      LT_PORT: "5000"
+    ports:
+      - "${LT_HOST_PORT}:5000"
+    volumes:
+      # Persistent Argos-model cache (design §3.1) — an EXTERNAL named volume so
+      # the en/fr/de packages are fetched from the Argos index once and then
+      # reused. This is a §11.4.77 re-obtainable artefact (re-downloads if the
+      # volume is dropped); persisting it makes boots reliable + fast and avoids
+      # re-exposing transient download flakiness on every run. The container/pod
+      # is still torn down each run (single-owner cleanup §11.4.119); only this
+      # cache survives.
+      - helixllm-libretranslate-cache:/home/libretranslate/.local
+    # §12.3 container hygiene — bounded so the translator never starves the
+    # developer host (§12.6). Config-injected, captured as evidence.
+    mem_limit: "${LT_MEM_LIMIT}"
+    cpus: ${LT_CPUS}
+    restart: "no"
+volumes:
+  helixllm-libretranslate-cache:
+    external: true
+    name: helixllm-libretranslate-cache

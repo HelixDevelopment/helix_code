@@ -1,0 +1,11 @@
+{
+  "pair": "en->fr",
+  "source": "The book is on the table.",
+  "source_lang": "en",
+  "target": "fr",
+  "golden": "Le livre est sur la table.",
+  "forward": "The book is on the table.",
+  "forward_detected": "en",
+  "forward_detected_confidence": 99.0,
+  "back": "The book is on the table."
+}
