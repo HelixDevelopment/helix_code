@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RESULTS</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="helixllm-phase-3-cpu-translation-nmt-end-to-end-proof-11.4.108">HelixLLM
+Phase-3 CPU Translation (NMT) — END-TO-END PROOF (§11.4.108)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Status</strong></td>
+<td><strong>COMPLETE — ALL-GREEN.</strong> Real CPU translation service
+booted via the containers submodule, anti-gaming triple + determinism +
+analyzer self-validation all PASS, torn down single-owner, coder
+untouched.</td>
+</tr>
+<tr>
+<td><strong>Run-id</strong></td>
+<td><code>phase3_translation_20260707</code></td>
+</tr>
+<tr>
+<td><strong>Date</strong></td>
+<td>2026-07-07T07:05:03Z → 07:05:59Z (UTC), host <code>x86_64</code>,
+podman 5.7.1, rootless</td>
+</tr>
+<tr>
+<td><strong>Branch / Track</strong></td>
+<td><code>feature/helixllm-full-extension</code> ·
+<code>(T1/main)</code></td>
+</tr>
+<tr>
+<td><strong>Design</strong></td>
+<td><code>docs/research/07.2026/00_master/TRANSLATION_PROVIDER.md</code>
+(commit <code>c9ac8683</code>) §4 acceptance signature</td>
+</tr>
+<tr>
+<td><strong>Pattern mirrored</strong></td>
+<td><code>docs/qa/phase3_embeddings_20260706/harness/</code> (embeddings
+proof, commit <code>e46df52c</code>)</td>
+</tr>
+<tr>
+<td><strong>Lane</strong></td>
+<td><strong>stock LibreTranslate</strong> (Argos/OPUS-MT on CTranslate2,
+CPU) — the design’s DOCUMENTED FALLBACK lane. Honest §11.4.6
+substitution recorded in <code>23_substitution.txt</code> + §“Lane
+decision” below.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="lane-decision-honest-substitution-11.4.6">1. Lane decision —
+honest substitution (§11.4.6)</h2>
+<ul>
+<li><strong>Design PRIMARY (deferred):</strong> NLLB-200-distilled-600M
+CT2 int8 behind a bespoke LibreTranslate-shaped <code>/translate</code>
+FastAPI shim (<code>TRANSLATION_PROVIDER.md</code> §1.2). That lane
+needs a custom image build (python + ctranslate2 + sentencepiece +
+FastAPI + a language detector) <strong>plus</strong> an offline
+HF→CT2-int8 model conversion — a substantial artefact deferred as its
+own work item.</li>
+<li><strong>Lane PROVEN here:</strong> stock
+<strong>LibreTranslate</strong> — the design’s own §1.2/§3.1
+<strong>documented fallback lane</strong>: the <em>identical</em>
+LibreTranslate <code>/translate</code> contract on the <em>same</em>
+CTranslate2 engine the primary would use, delivered as a single
+pre-built CPU image (615 MB), so it boots reliably with zero new shim
+code. The task explicitly sanctions this as “the simplest reliable CPU
+lane.”</li>
+<li><strong>This is a REAL NMT service</strong> (real Argos/CTranslate2
+translation). The anti-gaming triple below proves genuine translation —
+<strong>not</strong> an identity / passthrough bluff. A
+faked/identity-copy PASS is impossible here (proven by the RED baseline
+and the golden-bad self-validation).</li>
+</ul>
+<hr />
+<h2 id="what-was-booted-and-how-11.4.76-11.4.161-no-gpu">2. What was
+booted, and how (§11.4.76 / §11.4.161, NO GPU)</h2>
+<ul>
+<li>Booted <strong>through the containers-submodule
+<code>compose.Orchestrator</code></strong>
+(<code>digital.vasic.containers/pkg/compose</code>) — NOT ad-hoc
+<code>podman</code>/<code>docker</code>. Rootless podman. Compose file
+<code>harness/compose.phase3translate.yml</code> carries <strong>no
+literal</strong> host/port/model/ language value (§CONST-045/046); every
+value is env-injected by <code>run_proof.sh</code>.</li>
+<li><strong>NO GPU</strong> in the run spec (no
+<code>--device nvidia.com/gpu</code>, no GPU flag) — the structural
+guarantee this ships before the P0/P1 GPU chain.
+<code>compute_type</code> stays CPU (Argos/CT2 CPU kernels).</li>
+<li>Image <code>docker.io/libretranslate/libretranslate:latest</code>
+(615 MB), host port <strong>18436</strong> (distinct from coder
+<code>:18434</code>, embeddings <code>:18435</code>), container port
+5000.</li>
+<li><code>LT_LOAD_ONLY=en,fr,de</code> → <code>/languages</code> served
+exactly <code>[en, fr, de]</code> (<code>25_languages.json</code>), so
+cold boot fetched only the en/fr/de Argos packages.</li>
+<li>Persistent external Argos-model cache volume
+<code>helixllm-libretranslate-cache</code> (§11.4.77 re-obtainable;
+survives teardown so re-runs skip the download).</li>
+<li><strong>Boot lessons reused from the embeddings proof:</strong> no
+<code>WithForceRecreate</code> (leaves the pod unstarted on this host’s
+podman-compose shim); unique per-run project name + pre-clean
+<code>boot-down</code> for a genuinely fresh clean-target; health poll
+fast-fails <strong>only</strong> on container <code>state=exited</code>
+(created/missing keep polling); persistent external model-cache volume.
+Boot became healthy (<code>/languages</code> → 200) after <strong>11
+polls</strong> (<code>21_health.txt</code>).</li>
+</ul>
+<hr />
+<h2 id="runtime-signature-the-cx-05-anti-gaming-triple-green">3.
+§11.4.108 RUNTIME SIGNATURE — the CX-05 anti-gaming triple (GREEN)</h2>
+<p>For each pair, the harness drove the REAL service: forward
+<code>POST /translate</code>, <code>POST /detect</code> on the forward
+text, then a back <code>POST /translate</code>, and asserted <strong>all
+three</strong> criteria (no single one trusted — the CX-05 anti-gaming
+construction):</p>
+<ol type="1">
+<li><strong>Not-identity + detected-target-language</strong> —
+<code>forward ≠ source</code> AND
+<code>/detect(forward) == target</code>.</li>
+<li><strong>Forward adequacy</strong> —
+<code>chrF(forward, independent golden reference) ≥ 0.30</code>.</li>
+<li><strong>Back-translation metamorphic</strong> —
+<code>chrF(back, source) ≥ 0.40</code>.</li>
+</ol>
+<p>chrF = sacrebleu-style character-n-gram F-score (char_order=6, β=2,
+whitespace-stripped); deterministic, reference-based, language-agnostic.
+Thresholds calibrated on this project’s own fixtures (§11.4.107(13)) —
+real output clears them with wide margin, every golden-bad falls far
+below.</p>
+<h3 id="captured-results-real-translate-detect-responses">Captured
+results (real <code>/translate</code> + <code>/detect</code>
+responses)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 6%" />
+<col style="width: 24%" />
+<col style="width: 8%" />
+<col style="width: 5%" />
+<col style="width: 19%" />
+<col style="width: 21%" />
+<col style="width: 7%" />
+</colgroup>
+<thead>
+<tr>
+<th>Pair</th>
+<th>source</th>
+<th>forward (real Argos output)</th>
+<th>detected</th>
+<th>back</th>
+<th style="text-align: right;">fwd chrF (floor 0.30)</th>
+<th style="text-align: right;">back chrF (margin 0.40)</th>
+<th>verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>en→fr</strong></td>
+<td>“The book is on the table.”</td>
+<td>“Le livre est sur la table.”</td>
+<td><code>fr</code> (conf 100)</td>
+<td>“The book is on the table.”</td>
+<td style="text-align: right;"><strong>1.0000</strong></td>
+<td style="text-align: right;"><strong>1.0000</strong></td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td><strong>en→de</strong></td>
+<td>“The book is on the table.”</td>
+<td>“Das Buch liegt auf dem Tisch.”</td>
+<td><code>de</code> (conf 100)</td>
+<td>“The book is on the table.”</td>
+<td style="text-align: right;"><strong>0.7519</strong></td>
+<td style="text-align: right;"><strong>1.0000</strong></td>
+<td><strong>PASS</strong></td>
+</tr>
+</tbody>
+</table>
+<p><code>notIdentity=true</code>, <code>targetMatch=true</code> for
+both. Evidence: <code>11_green_proof_en_fr.txt</code>,
+<code>11_green_proof_en_de.txt</code>, raw records
+<code>green_record_en_{fr,de}_1.json</code>.</p>
+<blockquote>
+<p>The en→de forward “Das Buch <strong>liegt</strong> auf dem Tisch.”
+(“lies”) differs from the golden “Das Buch <strong>ist</strong> auf dem
+Tisch.” (“is”) — both are correct German; chrF 0.7519 correctly scores
+it well above floor. This is genuine calibrated adequacy, not a
+tuned-to-match golden.</p>
+</blockquote>
+<h2 id="determinism-11.4.50-green">4. Determinism (§11.4.50) —
+GREEN</h2>
+<p>Two byte-for-byte identical requests per pair produced
+<strong>byte-identical</strong> forward + back text: -
+<code>[DETERMINISM] PASS ... (en-&gt;fr)</code> —
+<code>11_green_proof_en_fr.txt</code> -
+<code>[DETERMINISM] PASS ... (en-&gt;de)</code> —
+<code>11_green_proof_en_de.txt</code></p>
+<h2
+id="red-baseline-11.4.115-defect-reproduced-analyzer-is-not-a-bluff-gate">5.
+RED baseline (§11.4.115) — defect reproduced, analyzer is not a bluff
+gate</h2>
+<p><code>10_red_baseline.txt</code>: the identity-passthrough “warming”
+bluff (gateway echoes <code>q</code> untranslated — the exact defect
+design §2.5 forbids) was fed to the analyzer with
+<code>RED_MODE=1</code> and correctly <strong>FAILED</strong> (exit
+1):</p>
+<pre><code>[RUNTIME-SIGNATURE(en-&gt;fr)] FAIL notIdentity=false targetMatch=false fwdChrF=0.2242(floor 0.30) backChrF=1.0000
+    reason: identity/passthrough: forward &quot;The book is on the table.&quot; == source &quot;...&quot;
+    reason: detected language &quot;en&quot; != requested target &quot;fr&quot;
+    reason: forward chrF 0.2242 &lt; floor 0.3000</code></pre>
+<p>Note: back-translation alone (chrF 1.0000) would PASS the identity
+copy — criteria 1 and 2 are what defeat it. This is the CX-05
+anti-gaming guarantee in action.</p>
+<h2
+id="golden-good-golden-bad-analyzer-self-validation-11.4.10710-green">6.
+Golden-good / golden-bad analyzer self-validation (§11.4.107(10)) —
+GREEN</h2>
+<p><code>12_self_validation.txt</code> — golden-good = the REAL captured
+en→fr record; every golden-bad variant MUST FAIL (proves the analyzer
+itself cannot be fooled):</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 21%" />
+<col style="width: 23%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th>Fixture</th>
+<th>expect</th>
+<th style="text-align: right;">fwd chrF</th>
+<th style="text-align: right;">back chrF</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GOLDEN-GOOD (real en→fr)</td>
+<td>PASS</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">1.0000</td>
+<td><strong>PASS</strong> ✓</td>
+</tr>
+<tr>
+<td>BAD identity/passthrough</td>
+<td>FAIL</td>
+<td style="text-align: right;">0.2242</td>
+<td style="text-align: right;">1.0000</td>
+<td><strong>FAIL</strong> ✓ (crit 1+2)</td>
+</tr>
+<tr>
+<td>BAD wrong-language (de for fr)</td>
+<td>FAIL</td>
+<td style="text-align: right;">0.0873</td>
+<td style="text-align: right;">0.1859</td>
+<td><strong>FAIL</strong> ✓ (crit 1+2+3)</td>
+</tr>
+<tr>
+<td>BAD garbage (<strong>with faked</strong> target-match)</td>
+<td>FAIL</td>
+<td style="text-align: right;">0.0500</td>
+<td style="text-align: right;">0.0269</td>
+<td><strong>FAIL</strong> ✓ (crit 2+3 catch it despite faked crit
+1)</td>
+</tr>
+<tr>
+<td>BAD empty</td>
+<td>FAIL</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td><strong>FAIL</strong> ✓ (all)</td>
+</tr>
+</tbody>
+</table>
+<p>The garbage fixture deliberately <strong>fakes</strong>
+<code>targetMatch=true</code> to prove the forward- chrF +
+back-metamorphic criteria independently catch it — no single criterion
+is trusted (the §4.1 paired-mutation guarantee). Floor 0.30 cleanly
+separates real (0.75–1.00) from every bad fixture (0.00–0.22).</p>
+<h2 id="single-owner-teardown-coder-untouched-11.4.119">7. Single-owner
+teardown + coder untouched (§11.4.119)</h2>
+<p><code>29_teardown.txt</code> / <code>29b_post_teardown.txt</code>: -
+<code>DOWN-OK</code> via the containers-submodule orchestrator;
+<code>phase3translate_lt</code> containers removed
+(<code>(none — removed)</code>). - <strong><code>helixllm-coder</code> —
+<code>Up 17 hours</code> before, during, and after</strong> — never
+touched. - A concurrent, unrelated helixllm work-stream container
+(<code>llamacpp-router</code> VLM model-download) was observed on the
+host and left untouched (§11.4.174 — ownership verified before any
+action; never mine to stop).</p>
+<h2 id="four-layer-verification-map-11.4.108">8. Four-layer verification
+map (§11.4.108)</h2>
+<ol type="1">
+<li><strong>SOURCE</strong> —
+<code>harness/{main.go,compose.phase3translate.yml,run_proof.sh}</code>
+committed (route/contract driven).</li>
+<li><strong>ARTIFACT</strong> — <code>01_image_pull.txt</code> (615 MB
+image pulled by digest tag); <code>/languages</code> =
+<code>[en,fr,de]</code>.</li>
+<li><strong>RUNTIME-ON-CLEAN-TARGET</strong> — pre-clean
+<code>boot-down</code> + unique project name ⇒ fresh container; the §3
+triple verified against it. <strong>This is the definition of
+done.</strong></li>
+<li><strong>USER-VISIBLE</strong> — a real client POST to
+<code>/translate</code> returns a correct, right-language translation
+(<code>Le livre est sur la table.</code> /
+<code>Das Buch liegt auf dem Tisch.</code>); <code>/detect</code>
+confirms the target language; the round-trip recovers the source.</li>
+</ol>
+<h2 id="honest-boundary-11.4.6">9. Honest boundary (§11.4.6)</h2>
+<ul>
+<li>This proves a <strong>real CPU translation service</strong> passing
+the anti-gaming triple + self-validation for <strong>two</strong> pairs
+(en→fr, en→de). It does <strong>not</strong> prove the design PRIMARY
+(NLLB-200-CT2 shim) — that lane is deferred (see §1).</li>
+<li>chrF is a character-n-gram adequacy proxy vs a golden reference; it
+is the deterministic automated floor the design §4 mandates (COMET/QE is
+a later additive signal, never a replacement).</li>
+<li>Two independent human golden references were authored
+<strong>before</strong> observing model output; en→fr happened to match
+exactly (chrF 1.0), en→de scored 0.75 against a
+correct-but-differently-phrased reference — i.e. the floor is a genuine
+adequacy separator, not a tuned-to-model artefact.</li>
+</ul>
+<h2 id="reproduce">10. Reproduce</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> docs/qa/phase3_translation_20260707/harness</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_proof.sh</span>          <span class="co"># builds harness, pulls image, boots via containers</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># submodule, proves, tears down single-owner. Regenerates</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># every evidence file in the parent dir.</span></span></code></pre></div>
+<p>Config knobs (env, all default-injected): <code>LT_HOST_PORT</code>
+(18436), <code>LT_LOAD_ONLY</code> (en,fr,de), <code>CHRF_FLOOR</code>
+(0.30), <code>BACK_MARGIN</code> (0.40), <code>LT_MEM_LIMIT</code>,
+<code>LT_CPUS</code>.</p>
+<h2 id="evidence-index">11. Evidence index</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>00_preflight.txt</code></td>
+<td>host, coder-untouched, free port, config</td>
+</tr>
+<tr>
+<td><code>01_image_pull.txt</code></td>
+<td>image pull (ARTIFACT layer)</td>
+</tr>
+<tr>
+<td><code>10_red_baseline.txt</code></td>
+<td>§11.4.115 RED — identity passthrough FAILs</td>
+</tr>
+<tr>
+<td><code>11_green_proof_en_fr.txt</code> / <code>_en_de.txt</code></td>
+<td>§11.4.108 triple + determinism per pair</td>
+</tr>
+<tr>
+<td><code>12_self_validation.txt</code></td>
+<td>§11.4.107(10) golden-good/bad analyzer self-validation</td>
+</tr>
+<tr>
+<td><code>13_verdict.txt</code></td>
+<td>ALL-GREEN</td>
+</tr>
+<tr>
+<td><code>20_boot.txt</code> / <code>21_health.txt</code></td>
+<td>boot via orchestrator + health OK (11 polls)</td>
+</tr>
+<tr>
+<td><code>23_substitution.txt</code></td>
+<td>honest lane substitution note (§11.4.6)</td>
+</tr>
+<tr>
+<td><code>24_container_state.txt</code> /
+<code>25_languages.json</code></td>
+<td>running container + served languages</td>
+</tr>
+<tr>
+<td><code>29_teardown.txt</code> /
+<code>29b_post_teardown.txt</code></td>
+<td>single-owner teardown + coder untouched</td>
+</tr>
+<tr>
+<td><code>30_probe_en_{fr,de}.txt</code></td>
+<td>raw probe transcripts (source→forward→detect→back)</td>
+</tr>
+<tr>
+<td><code>green_record_en_{fr,de}_{1,2}.json</code></td>
+<td>raw <code>/translate</code>+<code>/detect</code> responses
+(determinism pair)</td>
+</tr>
+<tr>
+<td><code>red_identity_record.json</code></td>
+<td>the RED identity-passthrough fixture</td>
+</tr>
+<tr>
+<td><code>harness/</code></td>
+<td><code>main.go</code> (analyzer+client),
+<code>compose.phase3translate.yml</code>, <code>run_proof.sh</code>,
+<code>go.mod</code>, <code>.gitignore</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

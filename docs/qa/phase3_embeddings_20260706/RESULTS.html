@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RESULTS</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="phase-3-cpu-embeddings-end-to-end-proof-11.4.108-11.4.5-11.4.69">Phase-3
+CPU Embeddings — end-to-end proof (§11.4.108 / §11.4.5 / §11.4.69)</h1>
+<p><strong>Date:</strong> 2026-07-06 · Track
+<code>(T1/feature/helixllm-full-extension)</code> · Design:
+<code>docs/research/07.2026/00_master/EMBEDDINGS_PROVIDER.md</code></p>
+<h2 id="verdict-honest-11.4.6">Verdict (honest, §11.4.6)</h2>
+<p><strong>CAPABILITY PROVEN.</strong> A real CPU embeddings service
+booted via the <strong>containers submodule orchestrator</strong>
+(§11.4.76, rootless podman §11.4.161, NO GPU) served real,
+deterministic, semantically-ordered embeddings. The §11.4.108 runtime
+signature is <strong>GREEN-OK</strong>:</p>
+<pre><code>[RUNTIME-SIGNATURE] PASS  dim=384  |A|=1.0000 |A&#39;|=1.0000 |U|=1.0000
+                   cos(A,A&#39;)=0.7509   cos(A,U)=0.3931   margin=0.3578  (required ≥ 0.15)
+[DETERMINISM]      PASS  3 vectors byte-identical across two identical requests
+GREEN-OK</code></pre>
+<p>(<code>A</code> vs <code>A'</code> = related/paraphrase pair;
+<code>A</code> vs <code>U</code> = unrelated pair. Related similarity ≫
+unrelated, margin 0.3578 ≫ the 0.15 floor. Real HTTP 200, non-zero norm,
+evidence <code>11_green_proof.txt</code>, <code>30_embed_1.txt</code>,
+<code>green_response_{1,2}.json</code>.)</p>
+<h2 id="lane-honest-substitution-11.4.6-23_substitution.txt">Lane
+(honest substitution, §11.4.6 — <code>23_substitution.txt</code>)</h2>
+<ul>
+<li><strong>Primary (design default)
+<code>nomic-ai/nomic-embed-text-v1.5</code> FAILED to boot</strong> —
+TEI <code>cpu-1.9</code> rejects its <code>config.json</code>:
+<em>“duplicate field <code>max_position_embeddings</code>”</em>
+(container exit 1, <code>22_teilogs_primary.txt</code>). Known nomic/TEI
+parser incompatibility.</li>
+<li><strong>Fell back to <code>BAAI/bge-small-en-v1.5</code> (dim 384) —
+TEI-native, healthy, served the proof.</strong> Both lanes are in the
+design; the fallback is the ship-now CPU lane. Follow-up: pin a
+TEI-<code>cpu-1.9</code>-parseable nomic revision or upgrade TEI if
+768-dim nomic is wanted.</li>
+</ul>
+<h2 id="analyzer-is-non-bluff-11.4.10710-11.4.115">Analyzer is non-bluff
+(§11.4.107(10) / §11.4.115)</h2>
+<p>Proven to genuinely discriminate — it does NOT rubber-stamp: -
+<strong>RED baseline</strong> (<code>10_red_baseline.txt</code>): the
+dim-1536 zero-vector gateway stub → correctly <strong>FAIL</strong>
+(zero-norm, NaN cosine). Defect reproduced (§11.4.115). -
+<strong>Golden-BAD fixtures</strong> all correctly
+<strong>FAIL</strong>: zero-vector, shuffled-order (margin −0.3578),
+wrong-dim. The analyzer rejects every degraded input. - <strong>Real
+GREEN input</strong> correctly <strong>PASS</strong> (above).</p>
+<h2 id="full-self-validation-green-p3-emb-1-resolved-2026-07-07">Full
+self-validation GREEN (P3-EMB-1 RESOLVED, 2026-07-07)</h2>
+<p>The complete §11.4.107(10) self-validation now PASSES on the served
+lane — <code>40_verify_improved_harness.log</code>:</p>
+<pre><code>[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit=0</code></pre>
+<p>An earlier run FALSE-NEG’d golden-good because the fixture dim was
+baked to the nomic primary lane (768) while the served fallback lane is
+bge-small (384). The harness now makes the golden-good lane-dim-aware,
+AND fixes the boot root cause (removed <code>WithForceRecreate</code>,
+which on this host’s podman-compose shim left the pod unstarted → the
+earlier empty <code>21_health_primary.txt</code>; freshness is now a
+unique per-lane project name + pre-clean boot-down, §11.4.108/§11.4.139)
++ an exited-only fast-fail poll + a persistent HF cache volume. Boot is
+now reliable (<code>health OK after 2 polls</code>), runtime signature
+GREEN-OK, self-validation GREEN. P3-EMB-1 CLOSED.</p>
+<h2 id="reproduce">Reproduce</h2>
+<p><code>cd harness &amp;&amp; ./run_proof.sh</code> (boots TEI via the
+containers submodule, POSTs the sentence triple, asserts the cosine
+signature + determinism + self-validation, tears the container down
+single-owner §11.4.119, leaves <code>helixllm-coder</code> untouched).
+<code>HEALTH_TIMEOUT</code> env tunes the per-lane health wait. The
+<code>harness/phase3embed.bin</code> is a build artifact (gitignored
+§11.4.30; rebuild via <code>go build</code>).</p>
+<h2 id="composition">Composition</h2>
+<p>§11.4.76 (containers submodule) · §11.4.161 (rootless) · §11.4.108
+(runtime signature) · §11.4.107(10) (self-validated analyzer) ·
+§11.4.115 (RED-first) · §11.4.119 (single-owner teardown) · §11.4.6
+(honest substitution + honest limitation) · §11.4.147 (conductor
+completion of the stopped subagent’s proof).</p>
+</body>
+</html>
