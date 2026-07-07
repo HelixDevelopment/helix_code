@@ -85,6 +85,29 @@ reviewed changes).</td>
 <hr />
 <h2 id="oq1-helixagenthelixllm-endpoint-ambiguity">OQ1 —
 HelixAgent→HelixLLM endpoint ambiguity</h2>
+<blockquote>
+<p><strong>⚠️ CORRECTION (2026-07-07, post Phase-2 e2e proof —
+supersedes the <code>:18434/v1</code> value below).</strong> This
+investigation asserted the pin
+<code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT=http://localhost:18434/v1</code>.
+The Phase-2 e2e proof
+(<code>docs/qa/phase2_e2e_20260706/12_endpoint_finding.txt</code>,
+commit <code>278df582</code>) then PROVED this is <strong>wrong for the
+effective request</strong>: the provider <strong>hardcodes</strong> the
+<code>/v1/chat/completions</code> suffix (<code>provider.go:45</code>
+<code>chatEndpoint</code>, appended at <code>:195</code>), so a
+<code>.../v1</code> base yields a double
+<code>/v1/v1/chat/completions</code> → <strong>HTTP 404</strong>. The
+correct pin is the <strong>BASE</strong>
+<code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT=http://localhost:18434</code>
+(<strong>no <code>/v1</code></strong>). The <code>resolveEndpoint</code>
+precedence finding below stays valid (it returns the env value
+verbatim); only the value to set is corrected. Raw <code>curl</code>
+still uses <code>http://localhost:18434/v1/chat/completions</code>
+directly. Authoritative current value: <code>RESUME.md</code>
+LIVE-SERVER gotcha +
+<code>submodules/helix_llm/docs/OPERATOR_GUIDE.md</code>.</p>
+</blockquote>
 <h3 id="fact-findings">FACT findings</h3>
 <p><strong>F1 — resolveEndpoint precedence chain (cited).</strong>
 <code>submodules/helix_agent/internal/llm/providers/helixllm/provider.go:59-70</code>

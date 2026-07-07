@@ -14,6 +14,17 @@
 
 ## OQ1 — HelixAgent→HelixLLM endpoint ambiguity
 
+> **⚠️ CORRECTION (2026-07-07, post Phase-2 e2e proof — supersedes the `:18434/v1` value below).**
+> This investigation asserted the pin `HELIX_LLM_LOCAL_OPENAI_ENDPOINT=http://localhost:18434/v1`.
+> The Phase-2 e2e proof (`docs/qa/phase2_e2e_20260706/12_endpoint_finding.txt`, commit `278df582`)
+> then PROVED this is **wrong for the effective request**: the provider **hardcodes** the
+> `/v1/chat/completions` suffix (`provider.go:45` `chatEndpoint`, appended at `:195`), so a `.../v1`
+> base yields a double `/v1/v1/chat/completions` → **HTTP 404**. The correct pin is the **BASE**
+> `HELIX_LLM_LOCAL_OPENAI_ENDPOINT=http://localhost:18434` (**no `/v1`**). The `resolveEndpoint`
+> precedence finding below stays valid (it returns the env value verbatim); only the value to set is
+> corrected. Raw `curl` still uses `http://localhost:18434/v1/chat/completions` directly. Authoritative
+> current value: `RESUME.md` LIVE-SERVER gotcha + `submodules/helix_llm/docs/OPERATOR_GUIDE.md`.
+
 ### FACT findings
 
 **F1 — resolveEndpoint precedence chain (cited).**
