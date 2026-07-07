@@ -1,0 +1,5 @@
+=== GREEN: discover against real A2A server :18441 ===
+DISCOVER-OK: status=200 bytes=881 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_a2a_20260707/11_green_discover.json
+--- analyze-card (expect PASS) ---
+[AGENT-CARD] PASS
+exit=0

@@ -1,0 +1,23 @@
+=== RED-BASELINE: discover against broken stub :18442 ===
+DISCOVER-OK: status=200 bytes=127 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_a2a_20260707/10_red_discover.json
+--- analyze-card (expect FAIL) ---
+[AGENT-CARD] FAIL
+    reason: missing/empty required string field "name"
+    reason: missing/empty required string field "description"
+    reason: missing/empty required string field "version"
+    reason: missing/empty required string field "url"
+    reason: skills[] must be a non-empty array
+    reason: capabilities.streaming is missing
+    reason: capabilities.pushNotifications is missing
+    reason: capabilities.extendedAgentCard is missing
+    reason: defaultInputModes[] must be a non-empty array
+    reason: defaultOutputModes[] must be a non-empty array
+exit=1
+
+=== RED-BASELINE: send against broken stub :18442 ===
+SEND-OK: status=200 bytes=128 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_a2a_20260707/10_red_send.json
+--- analyze-completed (expect FAIL) ---
+[TASK-COMPLETED] FAIL
+    reason: task state = "working", want "completed" (non-terminal or wrong state)
+    reason: artifacts[] is missing/empty
+exit=1

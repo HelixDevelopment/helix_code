@@ -1,0 +1,3 @@
+=== TEARDOWN ===
+killed a2a-server pid=2360446, stub-serve pid=2361788 (ours only)
+coder (llama-server pid=2394426) left untouched and confirmed reachable post-teardown

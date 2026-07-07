@@ -1,0 +1,8 @@
+=== GOLDEN-BAD (real server): malformed JSON-RPC (valid bearer) ===
+SEND-MALFORMED-OK: status=400 bytes=146 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_a2a_20260707/14_malformed_send.json
+{
+  "http_status": 400,
+  "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":{\"code\":-32600,\"message\":\"invalid request: jsonrpc/method/id must all be present and jsonrpc must equal \\\"2.0\\\"\"}}"
+}--- analyze-rejected (expect PASS = correctly rejected) ---
+[CORRECTLY-REJECTED] PASS
+exit=0

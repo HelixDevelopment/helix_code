@@ -1,0 +1,4 @@
+{
+  "http_status": 200,
+  "raw": "{\"id\":1783441664550481000,\"jsonrpc\":\"2.0\",\"result\":{\"artifacts\":[],\"id\":\"stuck-task-red-baseline\",\"status\":{\"state\":\"working\"}}}"
+}

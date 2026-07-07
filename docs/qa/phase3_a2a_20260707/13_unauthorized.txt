@@ -1,0 +1,8 @@
+=== GOLDEN-BAD (real server): unauthorized message/send (no bearer) ===
+SEND-OK: status=401 bytes=119 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_a2a_20260707/13_unauth_send.json
+{
+  "http_status": 401,
+  "raw": "{\"error\":{\"message\":\"missing or invalid Authorization header\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":null}}"
+}--- analyze-rejected (expect PASS = correctly rejected) ---
+[CORRECTLY-REJECTED] PASS
+exit=0

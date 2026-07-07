@@ -1,0 +1,4 @@
+{
+  "http_status": 400,
+  "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":{\"code\":-32600,\"message\":\"invalid request: jsonrpc/method/id must all be present and jsonrpc must equal \\\"2.0\\\"\"}}"
+}

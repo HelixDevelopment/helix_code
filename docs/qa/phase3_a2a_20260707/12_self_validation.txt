@@ -1,0 +1,16 @@
+[GOLDEN-GOOD-CARD(expect PASS)] PASS
+[GOLDEN-BAD-CARD-EMPTY-SKILLS(expect FAIL)] FAIL
+    reason: skills[] must be a non-empty array
+[GOLDEN-GOOD-TASK(expect PASS)] PASS
+[GOLDEN-BAD-NONTERMINAL(expect FAIL)] FAIL
+    reason: task state = "working", want "completed" (non-terminal or wrong state)
+    reason: artifacts[] is missing/empty
+[GOLDEN-BAD-EMPTY-ARTIFACT(expect FAIL)] FAIL
+    reason: artifacts[] is missing/empty
+[GOLDEN-BAD-PLACEHOLDER-ARTIFACT(expect FAIL)] FAIL
+    reason: artifact text does not contain required token "func"
+    reason: artifact text does not contain required token "fibonacci"
+[GOLDEN-GOOD-REJECTED(expect PASS)] PASS
+[GOLDEN-BAD-WRONGLY-PROCESSED(expect FAIL)] FAIL
+    reason: request was PROCESSED to a completed Task (http_status=200) — should have been rejected
+[SELF-VALIDATION] PASS: analyzer PASSes every golden-good fixture and FAILs every golden-bad fixture
