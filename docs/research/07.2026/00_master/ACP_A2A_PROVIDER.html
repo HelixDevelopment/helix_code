@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ACP_A2A_PROVIDER</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ACP_A2A_PROVIDER</h1>
+</header>
+<h1 id="helixagent-acp-via-google-a2a-agent2agent-design-spike-p4-t4">HelixAgent
+ACP via Google A2A (Agent2Agent) — Design Spike (P4-T4)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Status</strong></td>
+<td>DESIGN (spike before implementation, §11.4.6 — do not code the A2A
+surface until this is agreed)</td>
+</tr>
+<tr>
+<td><strong>Scope</strong></td>
+<td>The <strong>ACP → Google A2A</strong> interop capability: HelixAgent
+exposes an A2A <strong>server</strong> (other agents/CLI tools reach
+HelixAgent, incl. the local HelixLLM) + an A2A <strong>client</strong>
+(HelixAgent calls out to other A2A agents)</td>
+</tr>
+<tr>
+<td><strong>Owns</strong></td>
+<td>Implementation-plan item <strong>P4-T4</strong>
+(<code>04_implementation_plan.md:93</code>, <code>:132</code>)</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-07-07 · Revision 2 · Track <code>(T1/main)</code> · Branch
+<code>feature/helixllm-full-extension</code></td>
+</tr>
+<tr>
+<td><strong>Revision 2 (2026-07-07)</strong></td>
+<td>All A2A protocol facts INDEPENDENTLY re-fetched + verified against
+the LATEST spec (a2a-protocol.org <code>/latest/</code> +
+<code>/v0.3.0/</code> + <code>a2aproject/A2A</code> GitHub, 2026-07-07);
+§2.1 corrected to source-verified evidence — the pre-existing
+proprietary <code>/api/v1/acp/{execute,broadcast,status}</code> routes
+are canned-response STUBS (<code>cmd/api/main.go:211-215</code>,
+<code>:370-418</code>), honestly distinguished from the Google A2A wire
+(§11.4.124); no-<code>/v1</code> base-URL gotcha made explicit (§2.2);
+proto-vs-JSON dual-surface tightened (§1.1); Q6 (operator-gated stub
+fate, §11.4.122) added</td>
+</tr>
+<tr>
+<td><strong>Operator decision (binding)</strong></td>
+<td><strong><code>03_open_clarifications.md</code> C3 (2026-07-06): “✅
+Google A2A (Agent-to-Agent) — implement A2A interop, NOT Zed
+ACP.”</strong> This document HONOURS that decision; it does NOT
+re-decide the protocol (§11.4.6 / §11.4.66).</td>
+</tr>
+<tr>
+<td><strong>Grounding</strong></td>
+<td><code>docs/research/07.2026/00_master/03_open_clarifications.md</code>
+C3 · <code>04_implementation_plan.md</code> P4-T4 ·
+<code>submodules/helix_llm/docs/API_CONTRACT.md</code> (TLS/auth/route
+posture) · <code>submodules/helix_agent/cmd/api/main.go</code>
+(<code>:140-144</code> <code>acp-agent-communication</code> template;
+<code>:162</code> <code>UnifiedProtocolManager</code>;
+<code>:211-215</code>+<code>:370-418</code> the pre-existing proprietary
+<code>/api/v1/acp/{execute,broadcast,status}</code> STUB
+routes/handlers) ·
+<code>submodules/helix_agent/internal/router/router.go</code> (gin route
+surface) · <code>submodules/helix_agent/internal/mcp/</code> (MCP
+host/bridge, the agent↔︎tool boundary) · LATEST A2A spec (§11.4.99 —
+fetched, cited below)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff (§11.4.6):</strong> every latency/throughput
+figure below is flagged <code>(EST — measure)</code> — no benchmark here
+is a captured measurement. Protocol facts are cited to the LATEST
+official A2A spec fetched 2026-07-07; nothing is taken from model memory
+(§11.4.99). Where the spec’s proto-first v1.0 surface and its JSON-RPC
+binding differ in naming, the tension is stated honestly (§0.1) rather
+than papered over.</p>
+</blockquote>
+<hr />
+<h2 id="operator-decision-why-a2a-over-the-other-acp-candidates">0.
+Operator decision + why A2A over the other ACP candidates</h2>
+<h3 id="what-acp-resolved-to-verbatim-operator-quote">0.1 What “ACP”
+resolved to (verbatim operator quote)</h3>
+<p><code>03_open_clarifications.md</code> C3 recorded three live
+meanings of the acronym “ACP” and the operator’s resolution:</p>
+<blockquote>
+<p><strong>C3 “ACP”</strong> — research finding: <em>“Zed Agent Client
+Protocol (editor↔︎agent) vs IBM/BeeAI ACP vs Google A2A
+(agent↔︎agent).”</em> <strong>OPERATOR RESOLUTION (2026-07-06):</strong>
+<em>“✅ Google A2A (Agent-to-Agent) — implement A2A interop, NOT Zed
+ACP. (Note: A2A is agent↔︎agent, so ‘editor auto-recognition’ is served
+separately via the <code>/v1/models</code> + MCP
+<code>server/discover</code> capability surface; A2A adds cross-agent
+interop.)”</em></p>
+</blockquote>
+<p>The operator’s parenthetical is the load-bearing design constraint:
+<strong>A2A is the agent↔︎agent lane; editor/tool auto-recognition is a
+DIFFERENT lane</strong> already served by <code>/v1/models</code>
+(HelixCode) + MCP <code>server/discover</code> (Claude Code) + the
+capability surface (CONST-040). A2A does not replace those — it adds a
+peer-to-peer interop surface so HelixAgent can (a) be reached BY other
+A2A agents and (b) reach OUT to other A2A agents.</p>
+<p><strong>Why A2A over the two rejected candidates</strong> (recorded
+for transparency, not to re-decide): - <strong>Zed ACP</strong> (Agent
+Client Protocol) is an <em>editor↔︎agent</em> JSON-RPC-over-stdio
+protocol — it solves “an editor drives one local agent process”, which
+HelixCode already covers through the <code>/v1/models</code> + MCP
+surface. It is NOT an agent-to-agent interop standard. - <strong>IBM /
+BeeAI ACP</strong> is a competing agent-communication spec; the operator
+chose the Google/Linux-Foundation-governed A2A instead (broader
+multi-vendor backing, an official Go SDK — §1.6). - <strong>Google
+A2A</strong> is a vendor-neutral, Linux-Foundation-governed open
+standard for opaque-agent interoperability with a published Go SDK,
+whose transport reuses HTTP + JSON-RPC 2.0 + SSE — the exact primitives
+HelixAgent’s gin server already speaks (§2). That reuse (§11.4.74
+extend-don’t-reimplement) is why it fits cleanly on the existing stack
+with no new transport.</p>
+<hr />
+<h2 id="what-a2a-is-grounded-in-the-latest-official-spec">1. What A2A is
+(grounded in the LATEST official spec)</h2>
+<p><strong>A2A (Agent2Agent)</strong> is an open protocol for
+communication and interoperability between independent, potentially
+<strong>opaque</strong> AI-agent systems — an agent can expose and
+consume capabilities across vendor/framework boundaries without
+revealing its internal implementation, memory, or tools.</p>
+<p>Sources (fetched 2026-07-07 via WebFetch; §11.4.99 latest-source): <a href="https://a2a-protocol.org/latest/specification/">A2A spec —
+latest</a> · <a href="https://a2a-protocol.org/v0.3.0/specification/">A2A spec — v0.3.0
+(JSON-RPC binding detail)</a> · <a href="https://github.com/a2aproject/A2A">a2aproject/A2A GitHub</a>.</p>
+<h3 id="governance-version-cited">1.1 Governance + version (cited)</h3>
+<ul>
+<li><strong>Governance:</strong> the GitHub project page states verbatim
+<em>“The A2A Protocol is an open source project under the Linux
+Foundation, contributed by Google.”</em> (<a href="https://github.com/a2aproject/A2A">github.com/a2aproject/A2A</a>,
+accessed 2026-07-07).</li>
+<li><strong>Latest released spec:</strong> <strong>v1.0.x</strong> — the
+<code>a2aproject/A2A</code> releases page shows <strong>v1.0.1 (released
+2026-05-28)</strong> as the latest, and the
+<code>/latest/specification/</code> page self-identifies its released
+version as <strong><code>1.0.0</code></strong> (accessed 2026-07-07).
+For this document, “the spec” = the v1.0 line; the JSON-RPC binding
+method-name strings in §2 are cross-checked against the
+<code>v0.3.0</code> spec (which the v1.0 line is backward-compatible
+with on the JSON-RPC wire).</li>
+</ul>
+<blockquote>
+<p><strong>Honest version note (§11.4.6).</strong> The v1.0 spec is
+<strong>proto-first</strong>: it states <em>“the file
+<code>spec/a2a.proto</code> is the single authoritative normative
+definition of all protocol data objects and request/response
+messages”</em>, and its section headings use proto-style names — the
+<code>TaskState</code> enum members are
+<code>TASK_STATE_SUBMITTED … TASK_STATE_UNSPECIFIED</code> (verified
+2026-07-07 on <code>/latest/</code>), the <code>Message.role</code> enum
+is <code>ROLE_USER</code>/<code>ROLE_AGENT</code>, and the
+<code>Part</code> oneof is
+<code>text</code>/<code>raw</code>/<code>url</code>/<code>data</code>.
+The <strong>JSON-RPC 2.0 binding</strong> maps those onto the wire
+STRINGS shown in §2: method names (<code>&quot;message/send&quot;</code>),
+task-state values (<code>&quot;submitted&quot;</code>, and the proto
+<code>TASK_STATE_UNSPECIFIED</code> catch-all binds to JSON
+<code>&quot;unknown&quot;</code>), and Part <code>kind</code> values
+(<code>&quot;text&quot;</code>, <code>&quot;file&quot;</code>, <code>&quot;data&quot;</code> — the
+proto <code>raw</code>/<code>url</code> collapse into one JSON
+<code>FilePart</code> carrying
+<code>FileWithBytes | FileWithUri</code>). Both surfaces are the SAME
+protocol; §2 documents the JSON-RPC-over-HTTP(S) binding because that is
+the transport HelixAgent will implement (§3). This dual-surface is a
+spec fact I verified on both the <code>/latest/</code> (proto) and
+<code>/v0.3.0/</code> (JSON-RPC-binding) pages (2026-07-07), flagged so
+a reviewer can reconcile it — not an inconsistency in this design.</p>
+</blockquote>
+<h3 id="agent-card-discovery">1.2 Agent Card (discovery)</h3>
+<p>An <strong>Agent Card</strong> is a public JSON document — an agent’s
+technical manifest — served (recommended) at the well-known URI
+<strong><code>/.well-known/agent-card.json</code></strong> (RFC 8615
+well-known URI discovery). Cited fields (spec §4.4.1 AgentCard /
+<code>v0.3.0</code> binding, accessed 2026-07-07):</p>
+<ul>
+<li><code>name</code>, <code>description</code>, <code>version</code> —
+identity;</li>
+<li><code>url</code> — the service endpoint an A2A client POSTs to;</li>
+<li><code>capabilities</code> — boolean flags
+incl. <code>streaming</code>, <code>pushNotifications</code>,
+<code>extendedAgentCard</code>;</li>
+<li><code>defaultInputModes</code> / <code>defaultOutputModes</code> —
+accepted media-type arrays;</li>
+<li><code>skills</code> — an array of <code>AgentSkill</code> objects
+(id, name, description, tags, examples) advertising WHAT the agent can
+do;</li>
+<li><code>securitySchemes</code> + <code>security</code> — declared auth
+(§1.7);</li>
+<li><code>preferredTransport</code> / <code>interfaces</code> — which
+binding(s) the agent speaks.</li>
+</ul>
+<p>Discovery is: a client GETs the well-known Agent Card, reads the
+skills + transport + security, then sends work to <code>url</code>.</p>
+<h3 id="task-lifecycle">1.3 Task lifecycle</h3>
+<p>A unit of work is a <strong>Task</strong> with a server-assigned
+<code>id</code> and a <code>status.state</code>. The
+<code>TaskState</code> JSON string values (cited, <code>v0.3.0</code>
+binding + v1.0 <code>TaskState</code> enum, accessed 2026-07-07):</p>
+<p><code>&quot;submitted&quot;</code> → <code>&quot;working&quot;</code> →
+(<code>&quot;input-required&quot;</code> ↔︎ back to <code>&quot;working&quot;</code>) →
+terminal one of <code>&quot;completed&quot;</code> / <code>&quot;canceled&quot;</code> /
+<code>&quot;failed&quot;</code> / <code>&quot;rejected&quot;</code> /
+<code>&quot;auth-required&quot;</code> (<code>&quot;unknown&quot;</code> is the catch-all).
+A Task carries a <code>history</code> of messages and produces
+<code>artifacts</code> (§1.4). Long-running tasks are first-class (the
+protocol is “async-first”).</p>
+<h3 id="message-part-artifact-types">1.4 Message / Part / Artifact
+types</h3>
+<ul>
+<li>A <strong>Message</strong> has a <code>role</code>
+(<code>&quot;user&quot;</code> | <code>&quot;agent&quot;</code>) and a <code>parts</code>
+array.</li>
+<li>A <strong>Part</strong> is discriminated by <code>kind</code> (cited
+JSON values, accessed 2026-07-07):
+<ul>
+<li><code>&quot;text&quot;</code> — <code>TextPart</code> (a <code>text</code>
+string);</li>
+<li><code>&quot;file&quot;</code> — <code>FilePart</code> (bytes/base64 OR a
+<code>url</code> reference, + <code>mediaType</code>,
+<code>filename</code>);</li>
+<li><code>&quot;data&quot;</code> — <code>DataPart</code> (arbitrary structured
+JSON).</li>
+</ul></li>
+<li>An <strong>Artifact</strong> is a task OUTPUT composed of
+<code>Part</code> objects (the generated code, file, or structured
+result the client collects when the Task completes).</li>
+</ul>
+<h3 id="transport-json-rpc-2.0-over-https-grpc-httpjsonrest">1.5
+Transport — JSON-RPC 2.0 over HTTPS (+ gRPC, HTTP+JSON/REST)</h3>
+<p>The spec declares <strong>three normative bindings</strong> (v1.0
+§§9–11): <strong>JSON-RPC 2.0 over HTTPS</strong> (the most common),
+<strong>gRPC</strong>, and <strong>HTTP+JSON/REST</strong>. All
+requests/responses adhere to JSON-RPC 2.0. The JSON-RPC method-name
+STRINGS (cited verbatim from the <code>v0.3.0</code> binding, accessed
+2026-07-07):</p>
+<table>
+<colgroup>
+<col style="width: 75%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th>Method (JSON-RPC <code>method</code>)</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&quot;message/send&quot;</code></td>
+<td>send a message → create/continue a Task (non-streaming)</td>
+</tr>
+<tr>
+<td><code>&quot;message/stream&quot;</code></td>
+<td>send a message with an SSE stream of updates</td>
+</tr>
+<tr>
+<td><code>&quot;tasks/get&quot;</code></td>
+<td>fetch a Task’s current state + artifacts</td>
+</tr>
+<tr>
+<td><code>&quot;tasks/cancel&quot;</code></td>
+<td>cancel an in-flight Task</td>
+</tr>
+<tr>
+<td><code>&quot;tasks/resubscribe&quot;</code></td>
+<td>re-attach an SSE stream to an existing Task</td>
+</tr>
+<tr>
+<td><code>&quot;tasks/pushNotificationConfig/set&quot;</code> / <code>/get</code>
+/ <code>/list</code> / <code>/delete</code></td>
+<td>manage webhook push-notification configs</td>
+</tr>
+<tr>
+<td><code>&quot;agent/getAuthenticatedExtendedCard&quot;</code></td>
+<td>fetch the authenticated (fuller) Agent Card</td>
+</tr>
+</tbody>
+</table>
+<p>HelixAgent implements the <strong>JSON-RPC 2.0 over HTTPS</strong>
+binding (§3) because it maps 1:1 onto the existing gin + TLS server
+(§11.4.74 reuse); gRPC/REST bindings are a documented future extension,
+not shipped in P4-T4.</p>
+<h3 id="official-go-sdk">1.6 Official Go SDK</h3>
+<p>The GitHub project lists an <strong>official Go SDK</strong>: <em>“🐿️
+A2A Go SDK (github.com/a2aproject/a2a-go) —
+<code>go get github.com/a2aproject/a2a-go</code>”</em> (<a href="https://github.com/a2aproject/A2A">github.com/a2aproject/A2A</a>,
+accessed 2026-07-07). P4-T4 SHOULD consume this SDK for the wire types +
+JSON-RPC dispatch rather than hand-rolling the envelope (§11.4.74) —
+provided a build-time check confirms it targets Go <code>1.26</code> and
+the v1.0 wire (verify at implementation, flagged
+<code>UNCONFIRMED</code> until pinned).</p>
+<h3 id="authentication">1.7 Authentication</h3>
+<p>Auth is <strong>declared in the Agent Card</strong>
+(<code>securitySchemes</code> + <code>security</code>) and carried in
+transport headers — the protocol itself is credential-agnostic. Cited
+scheme types (v1.0 §4.5, accessed 2026-07-07):
+<code>APIKeySecurityScheme</code>, <code>HTTPAuthSecurityScheme</code>
+(e.g. Bearer), <code>OAuth2SecurityScheme</code>,
+<code>OpenIdConnectSecurityScheme</code>,
+<code>MutualTlsSecurityScheme</code>. HelixAgent’s A2A server advertises
+<strong><code>HTTPAuthSecurityScheme</code> (Bearer)</strong> to match
+the existing gateway posture (<code>API_CONTRACT.md</code> §3 —
+<code>Authorization: Bearer &lt;token&gt;</code>), so one credential
+model spans the <code>/v1</code> gateway and the A2A surface (§3.4).</p>
+<hr />
+<h2 id="integration-surface-where-helixagent-exposes-a2a-server-client">2.
+Integration surface — where HelixAgent exposes A2A server + client</h2>
+<h3 id="the-seam-already-exists-but-the-current-acp-surface-is-a-stub-source-verified">2.1
+The seam already exists — but the current <code>acp</code> surface is a
+stub (source-verified)</h3>
+<p>Two source-verified facts (HelixAgent <code>@17f08ba9</code>, read
+2026-07-07):</p>
+<p><strong>(a) The <code>acp</code> protocol template</strong> —
+<code>cmd/api/main.go:124-146</code> registers a protocol-integration
+template, and <code>NewAPIServer</code> (<code>main.go:156-170</code>)
+backs the <code>APIServer</code> with
+<code>services.UnifiedProtocolManager</code>
+(<code>main.go:162</code>):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">:</span>          <span class="st">&quot;acp-agent-communication&quot;</span><span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">:</span>        <span class="st">&quot;ACP Agent Communication&quot;</span><span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Protocol<span class="op">:</span>    <span class="st">&quot;acp&quot;</span><span class="op">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    Description<span class="op">:</span> <span class="st">&quot;ACP agent-to-agent communication&quot;</span><span class="op">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    Protocols<span class="op">:</span>   <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;acp&quot;</span><span class="op">},</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">},</span></span></code></pre></div>
+<p><strong>(b) A proprietary <code>/api/v1/acp</code> route surface
+ALREADY EXISTS but its handlers are canned-response STUBS</strong> —
+<code>cmd/api/main.go:211-215</code> wires three routes whose handlers
+(<code>main.go:370-418</code>) return static success payloads, NOT real
+agent-to-agent work:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>acp <span class="op">:=</span> api<span class="op">.</span>Group<span class="op">(</span><span class="st">&quot;/acp&quot;</span><span class="op">)</span>            <span class="co">// → /api/v1/acp</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    acp<span class="op">.</span>POST<span class="op">(</span><span class="st">&quot;/execute&quot;</span><span class="op">,</span>   s<span class="op">.</span>handleACPExecute<span class="op">)</span>   <span class="co">// returns {&quot;result&quot;:&quot;Action executed successfully&quot;, …}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    acp<span class="op">.</span>POST<span class="op">(</span><span class="st">&quot;/broadcast&quot;</span><span class="op">,</span> s<span class="op">.</span>handleACPBroadcast<span class="op">)</span> <span class="co">// returns a synthetic broadcast-id; delivers nothing</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    acp<span class="op">.</span>GET <span class="op">(</span><span class="st">&quot;/status&quot;</span><span class="op">,</span>    s<span class="op">.</span>handleACPStatus<span class="op">)</span>    <span class="co">// returns hardcoded status:&quot;active&quot; + a HARDCODED capabilities list</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>handleACPExecute</code> (<code>main.go:370-388</code>) echoes
+the request with a literal <code>&quot;Action executed successfully&quot;</code>;
+<code>handleACPBroadcast</code> (<code>:390-406</code>) fabricates a
+<code>broadcast_id</code> and reports
+<code>delivered_to: len(targets)</code> without delivering;
+<code>handleACPStatus</code> (<code>:408-418</code>) returns a
+<strong>hardcoded</strong>
+<code>capabilities: [&quot;execute_action&quot;,&quot;broadcast&quot;,&quot;status&quot;]</code>. This
+is BLUFF-001/BLUFF-002-class placeholder code (CLAUDE.md §3.3): a
+print-and-return surface + a hardcoded capability list (a CONST-040
+violation the A2A Agent Card MUST NOT reproduce — §2.2 sources
+<code>skills[]</code> from the verifier registry, never a literal).</p>
+<p><strong>Honest reconciliation (§11.4.124
+investigate-before-wire).</strong> The existing
+<code>/api/v1/acp/{execute,broadcast,status}</code> is a
+<strong>HelixAgent-proprietary ACP shape</strong>
+(execute/broadcast/status verbs), NOT the Google A2A wire — A2A speaks
+JSON-RPC-2.0 <code>message/send</code>/<code>tasks/*</code> against an
+Agent Card (§1), a DIFFERENT protocol. P4-T4 therefore does two honest
+things, neither a silent removal (§11.4.122): (1) it adds the
+<strong>standards-compliant A2A surface</strong> (§2.2 — Agent Card +
+JSON-RPC) as the real agent↔︎agent lane, and (2) it treats the three
+proprietary stubs as <strong>investigate-before-remove
+candidates</strong> — they are the declared-but-hollow <code>acp</code>
+wiring point, so the real A2A dispatcher SHOULD back their intent rather
+than leave a parallel dead surface; whether the proprietary verbs are
+retired, redirected onto the A2A dispatcher, or kept as an internal
+convenience API is an operator-gated decision (Q6, §5) because removing
+a shipped route is §11.4.122-gated. (<code>Catalogue-Check</code> per
+§11.4.74: <code>extend HelixDevelopment/helix_agent@17f08ba9</code> —
+the A2A surface is a new <code>internal/a2a</code> package inside
+HelixAgent, not a duplicate of an existing submodule; the wire types
+come from <code>a2aproject/a2a-go</code> per §1.6.)</p>
+<h3 id="a2a-server-helixagent-is-reachable-by-other-agents">2.2 A2A
+<strong>server</strong> — HelixAgent is reachable BY other agents</h3>
+<p>HelixAgent exposes an A2A server so any A2A-speaking peer (another
+HelixAgent, a Claude/Gemini/OpenAI agent runtime, a CLI tool) can invoke
+HelixAgent’s capabilities — <strong>including generation routed to the
+local HelixLLM at <code>:18434</code></strong> (the coder-fleet serving
+port, per <code>03_open_clarifications.md</code> / RESUME.md; the public
+HelixLLM contract is <code>https://0.0.0.0:8443</code> per
+<code>API_CONTRACT.md</code> §1).</p>
+<blockquote>
+<p><strong>Load-bearing base-URL gotcha (RESUME.md “ENDPOINT GOTCHA”,
+proven Phase-2
+<code>docs/qa/phase2_e2e_20260706/12_endpoint_finding.txt</code>).</strong>
+When HelixAgent’s LLM path calls the local coder fleet, the endpoint
+depends on who appends <code>/v1</code>: a raw <code>curl</code> uses
+<code>http://localhost:18434/v1/chat/completions</code>, but an
+SDK/client that APPENDS <code>/v1/chat/completions</code> itself
+(incl. HelixAgent via <code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT</code>) MUST
+be configured with the BASE <code>http://localhost:18434</code>
+(<strong>NO <code>/v1</code></strong>) — a base of <code>…/v1</code>
+yields a double <code>/v1/v1/chat/completions</code> → <strong>HTTP
+404</strong>. The A2A <code>message/send</code> handler (below) inherits
+this: its downstream call reuses HelixAgent’s existing config-injected
+LLM base URL (§11.4.28), so the no-<code>/v1</code> base is a
+configuration fact the design honours, not a new endpoint it invents
+(§11.4.6).</p>
+</blockquote>
+<p>Registered on the existing gin router
+(<code>internal/router/router.go</code> — same server that already hosts
+<code>/health</code>, <code>/v1/health</code>,
+<code>/v1/features</code>, <code>/metrics</code>), two new routes, all
+config-injected (§11.4.28 / CONST-045/046 — no hardcoded host/port):</p>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 20%" />
+<col style="width: 31%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/.well-known/agent-card.json</code></td>
+<td>serve the Agent Card (public, unauth — discovery)</td>
+<td>none (public manifest)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/a2a</code> (config-injectable base,
+e.g. <code>/v1/a2a</code>)</td>
+<td>JSON-RPC 2.0 dispatch (<code>message/send</code>,
+<code>message/stream</code>, <code>tasks/get</code>,
+<code>tasks/cancel</code>, <code>tasks/resubscribe</code>,
+<code>tasks/pushNotificationConfig/*</code>)</td>
+<td><strong>Bearer</strong> (§1.7 / <code>API_CONTRACT.md</code>
+§3)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>The <strong>Agent Card</strong> is composed programmatically from
+the capability surface — <code>skills[]</code> sourced from the same
+registry that feeds <code>/v1/models</code> + MCP
+<code>server/discover</code> + CONST-040 verifier capability flags
+(<strong>NO hardcoded skill list</strong> — CONST-036/040; §11.4.6). One
+example skill: <code>generate-code</code> → advertises that HelixAgent
+accepts a text Task and returns a code artifact.</li>
+<li><strong><code>message/send</code> routing:</strong> the JSON-RPC
+handler parses the A2A <code>Message</code>, extracts the text/data
+Parts, and routes to the capability the skill names. For a
+code/text-generation Task it calls HelixAgent’s existing LLM path which
+fronts the local HelixLLM (<code>POST /v1/chat/completions</code> on the
+HelixLLM binary, <code>API_CONTRACT.md</code> §4.1), then wraps the real
+model output as an A2A <strong>Artifact</strong> and transitions the
+Task <code>submitted → working → completed</code>. <strong>Real HTTP
+call to the real model — NEVER a simulated response</strong> (BLUFF-001
+guard, CLAUDE.md §3.3).</li>
+<li><strong><code>message/stream</code>:</strong> reuses the existing
+SSE writer pattern (HelixLLM’s own streaming path is
+<code>text/event-stream</code> with <code>data: {json}</code> frames,
+<code>API_CONTRACT.md</code> §4.1 / <code>streaming.go</code>); the A2A
+binding wraps each JSON-RPC Response object in an SSE <code>data:</code>
+field (Content-Type <code>text/event-stream</code>, cited §1.5). No
+reinvented transport — the QUIC/HTTP3 stack
+(<code>internal/transport</code>) and gin SSE already exist.</li>
+</ul>
+<h3 id="a2a-client-helixagent-reaches-out-to-other-agents">2.3 A2A
+<strong>client</strong> — HelixAgent reaches OUT to other agents</h3>
+<p>HelixAgent also ships an A2A client so it can delegate to external
+A2A agents (the peer-to-peer half). Lives beside the existing MCP
+host/bridge (<code>internal/mcp/</code>) as
+<code>internal/a2a/client</code> (new package, config-driven peer
+list):</p>
+<ol type="1">
+<li>GET a peer’s <code>/.well-known/agent-card.json</code>, parse
+<code>skills</code> + <code>url</code> + <code>security</code>;</li>
+<li>select the peer whose skill matches the sub-task;</li>
+<li><code>message/send</code> (or <code>message/stream</code>) a Task,
+poll <code>tasks/get</code> (or read the SSE), collect the returned
+Artifact;</li>
+<li>surface the result back into HelixAgent’s own orchestration
+(<code>internal/agents/registry.go</code>, <code>subagent</code>,
+<code>swarm</code>).</li>
+</ol>
+<p>Peer endpoints + credentials are <strong>config-injected</strong>
+(<code>.env</code> / config file, §11.4.10 never logged, §11.4.28
+decoupled) — never a hardcoded reach into a parent tree (CONST-045).</p>
+<h3 id="reuse-posture-no-reinvented-transport-11.4.74">2.4 Reuse posture
+(no reinvented transport, §11.4.74)</h3>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 81%" />
+</colgroup>
+<thead>
+<tr>
+<th>A2A need</th>
+<th>Existing HelixAgent/HelixLLM asset reused</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP/TLS listener</td>
+<td>gin server + TLS-1.3/HTTP3 stack (<code>API_CONTRACT.md</code> §1;
+<code>internal/transport/http3.go</code>)</td>
+</tr>
+<tr>
+<td>Bearer auth</td>
+<td>gateway <code>APIKeyAuth</code>/Bearer middleware
+(<code>API_CONTRACT.md</code> §3)</td>
+</tr>
+<tr>
+<td>SSE streaming</td>
+<td>OpenAI SSE writer pattern (<code>API_CONTRACT.md</code> §4.1 /
+<code>streaming.go</code>)</td>
+</tr>
+<tr>
+<td>JSON-RPC + wire types</td>
+<td><code>github.com/a2aproject/a2a-go</code> official SDK (§1.6)</td>
+</tr>
+<tr>
+<td>capability/skill source</td>
+<td><code>/v1/models</code> + MCP <code>server/discover</code> +
+CONST-040 verifier flags</td>
+</tr>
+<tr>
+<td>downstream model</td>
+<td>local HelixLLM <code>POST /v1/chat/completions</code>
+(<code>API_CONTRACT.md</code> §4.1)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="how-a2a-relates-to-the-already-integrated-mcp-the-boundary">3.
+How A2A relates to the already-integrated MCP (the boundary)</h2>
+<p>A2A and MCP are <strong>orthogonal lanes</strong> and MUST NOT
+re-implement each other:</p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 50%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Axis</th>
+<th><strong>MCP</strong> (already integrated)</th>
+<th><strong>A2A</strong> (this design)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Relationship</td>
+<td>agent <strong>↔︎ tool</strong> (host consumes a tool/resource
+server)</td>
+<td>agent <strong>↔︎ agent</strong> (peer delegates a Task to a
+peer)</td>
+</tr>
+<tr>
+<td>HelixAgent role</td>
+<td>MCP <strong>host</strong> consuming CodeGraph + OpenDesign tool
+servers (<code>internal/mcp/</code>, <code>.mcp.json</code>); AND MCP
+<strong>server</strong> exposing Helix tools</td>
+<td>A2A <strong>server</strong> (peers reach Helix capabilities) + A2A
+<strong>client</strong> (Helix reaches peers)</td>
+</tr>
+<tr>
+<td>Unit of interaction</td>
+<td>a tool call (<code>tools/call</code>) / resource read — synchronous,
+structured</td>
+<td>a <strong>Task</strong> — first-class, stateful, async, streams
+status, yields Artifacts</td>
+</tr>
+<tr>
+<td>Discovery</td>
+<td>MCP <code>server/discover</code> / capability list</td>
+<td>Agent Card at <code>/.well-known/agent-card.json</code></td>
+</tr>
+<tr>
+<td>Canonical use</td>
+<td>“call CodeGraph’s <code>codegraph_explore</code>” (a TOOL)</td>
+<td>“ask another AGENT to complete a coding Task and return the
+result”</td>
+</tr>
+</tbody>
+</table>
+<p><strong>No overlap-reimplementation:</strong> the MCP surface
+(<code>internal/mcp/bridge</code>, CodeGraph/OpenDesign wiring in P5)
+stays the tool lane; A2A is added as the peer-agent lane.
+HelixLLM/HelixAgent capabilities are exposed to <em>tools/editors</em>
+via MCP <code>server/discover</code> and to <em>peer agents</em> via the
+A2A Agent Card — the SAME underlying capability registry (CONST-040)
+feeds both advertisements, so a capability is declared once and surfaced
+on each channel without duplication. (The operator’s C3 note made this
+split explicit: editor auto-recognition = the
+MCP/<code>/v1/models</code> lane; A2A = the cross-agent lane.)</p>
+<hr />
+<h2 id="runtime-signature-the-one-machine-checkable-proof">4. §11.4.108
+runtime signature — the ONE machine-checkable proof</h2>
+<p><strong>Definition of done for P4-T4:</strong> on a <strong>clean
+deploy</strong> (§11.4.108 / §11.4.139 — HelixAgent’s A2A server freshly
+booted, pointed at a live local HelixLLM at <code>:18434</code>), the
+following single machine-checkable signature verifies and is captured to
+<code>docs/qa/&lt;run-id&gt;/a2a/</code>:</p>
+<blockquote>
+<p><strong>RUNTIME SIGNATURE (A2A end-to-end code generation):</strong>
+a <strong>real A2A client</strong> (the
+<code>internal/a2a/client</code>, or a <code>curl</code> JSON-RPC
+driver) performs the full peer flow against the running HelixAgent A2A
+server: 1. <code>GET /.well-known/agent-card.json</code> → returns a
+valid Agent Card whose <code>skills[]</code> advertises a
+<code>generate-code</code>-class skill and whose <code>url</code> +
+<code>securitySchemes</code> (Bearer) are present; 2.
+<code>POST /a2a</code> JSON-RPC <code>&quot;message/send&quot;</code> with a real
+prompt Part (e.g. <em>“Write a Go function that returns the nth
+Fibonacci number.”</em>) and a valid Bearer token; 3. HelixAgent routes
+the Task to the <strong>live local HelixLLM</strong>
+(<code>:18434</code> → <code>POST /v1/chat/completions</code>) and
+returns a <strong>real completed Task</strong> — <code>state</code>
+transitions to <code>&quot;completed&quot;</code> and an <strong>Artifact</strong>
+carries the real generated Go source; 4. assert: the Task
+<code>state == &quot;completed&quot;</code>, the Artifact text contains
+<strong>compilable/plausible Go</strong> for the asked function (a
+content oracle — a <code>func</code> declaration + a
+<code>return</code>, not an empty/placeholder body), the returned Task
+<code>id</code> round-trips through <code>&quot;tasks/get&quot;</code>, and the
+response is a well-formed JSON-RPC 2.0 result.</p>
+<p>The captured artefact is the <strong>real JSON-RPC request + response
+bodies</strong> + the <strong>real generated code</strong> + the
+PASS/FAIL verdict with its evidence path.</p>
+</blockquote>
+<p>This is a genuine end-to-end proof: it can only PASS if a real A2A
+client reached a real HelixAgent Agent Card, sent a real Task,
+HelixAgent made a real HTTP call to a real model, and returned real
+generated content — impossible to satisfy with a simulated/placeholder
+handler (BLUFF-001; §11.4 / §107). Feature-class: this adds an
+<code>agent_interop</code> entry to the §11.4.69 sink-side taxonomy
+(open to additions), evidence shape = the captured JSON-RPC transcript +
+generated artifact above.</p>
+<h3 id="golden-good-golden-bad-self-validation-11.4.10710">4.1
+Golden-good / golden-bad self-validation (§11.4.107(10))</h3>
+<p>The A2A acceptance analyzer is <strong>mutation-proofed</strong> with
+a fixture pair, wired into the meta-test:</p>
+<ul>
+<li><strong>golden-good fixture</strong> — a captured real transcript
+where a valid Bearer <code>message/send</code> yields a
+<code>completed</code> Task with a real code Artifact → analyzer MUST
+return <strong>PASS</strong>.</li>
+<li><strong>golden-bad fixtures</strong> (each MUST return
+<strong>FAIL</strong> — the analyzer cannot be fooled):
+<ol type="1">
+<li><strong>unauthorized Task</strong> — a <code>message/send</code>
+with a MISSING/invalid Bearer token → the server MUST reject (JSON-RPC
+error / HTTP 401 per <code>API_CONTRACT.md</code> §3 error envelope),
+NOT silently accept and process; analyzer FAILs if the transcript shows
+a processed Task for an unauthenticated caller.</li>
+<li><strong>malformed JSON-RPC</strong> — a body missing
+<code>&quot;jsonrpc&quot;:&quot;2.0&quot;</code> / <code>method</code> / <code>id</code> →
+the server MUST return a JSON-RPC parse/invalid-request error, never a
+<code>completed</code> Task.</li>
+<li><strong>placeholder-artifact</strong> — a Task that returns
+<code>state:&quot;completed&quot;</code> but whose Artifact is empty / a simulated
+stub string → FAILs the content oracle (no
+<code>func</code>/<code>return</code>), catching a regressed handler
+that fakes success.</li>
+</ol></li>
+</ul>
+<p>Paired §1.1 mutation: strip the auth-check OR the content-oracle
+assertion from the analyzer → a golden-bad fixture (unauthorized Task,
+or placeholder artifact) PASSes → the gate FAILs. That mutation is the
+mechanical proof the acceptance test is not itself a bluff (§11.4.120 —
+the gate + mutation stay a valid pair).</p>
+<h3 id="four-layer-verification-11.4.108-honest-skip-boundary">4.2
+Four-layer verification (§11.4.108) + honest SKIP boundary</h3>
+<ol type="1">
+<li><strong>SOURCE</strong> — the
+<code>internal/a2a/{server,client}</code> packages + the Agent Card
+composer + the two gin routes committed; pre-build grep gate confirms
+the <code>acp</code> template now resolves to a real A2A handler (no
+<code>simulate</code>/placeholder — BLUFF-001 scan).</li>
+<li><strong>ARTIFACT</strong> — the HelixAgent binary builds with the
+A2A routes registered (<code>go build ./...</code> exit 0); the Agent
+Card endpoint responds on a booted binary.</li>
+<li><strong>RUNTIME-ON-CLEAN-TARGET</strong> — the §4 signature verifies
+against a freshly-booted HelixAgent A2A server + a live local HelixLLM —
+the definition of done.</li>
+<li><strong>USER-VISIBLE</strong> — an external A2A agent / CLI tool
+discovers HelixAgent’s card and delegates a real coding Task, getting
+real generated code back.</li>
+</ol>
+<blockquote>
+<p><strong>Honest §11.4.3 SKIP boundary (§11.4.6 / §11.4.123).</strong>
+Layer 3 REQUIRES a <strong>live local HelixLLM on
+<code>:18434</code></strong>, which itself depends on the P0→P1 GPU
+foundation (<code>04_implementation_plan.md</code> critical path — P0
+GPU passthrough → P1 serving core). If that infra is not up when P4-T4
+is validated, the runtime signature MUST be recorded as
+<strong><code>SKIP-with-reason: hardware_not_present</code></strong>
+(§11.4.69 closed reason set) + a tracked migration item — <strong>NEVER
+a metadata-only / “routes registered” PASS</strong> (that is the §11.4
+bluff this rule forbids). A <strong>partial</strong> proof IS still
+capturable without a GPU: the Agent-Card discovery (step 1), the auth
+golden-bad (unauthorized-rejected), and the malformed-JSON-RPC
+golden-bad can all run against the A2A server with the downstream model
+stubbed <strong>at the HelixLLM boundary only</strong> (the No-Brain dev
+fallback, <code>API_CONTRACT.md</code> §4.1) — but a PASS on the FULL
+end-to-end signature (real generated code) requires the real model and
+is honestly SKIP’d until the serving core exists. The design does not
+claim the full signature is green today; it specifies exactly what
+proves it and what blocks it.</p>
+</blockquote>
+<hr />
+<h2 id="open-questions-resolve-before-coding">5. Open questions (resolve
+before coding)</h2>
+<ul>
+<li><strong>Q1</strong> Pin <code>github.com/a2aproject/a2a-go</code> at
+a build-verified version targeting Go 1.26 + the v1.0 wire, OR hand-roll
+the JSON-RPC envelope from the cited method-name strings? (Leaning: use
+the official SDK per §11.4.74; verify compatibility at build — flagged
+<code>UNCONFIRMED</code> until pinned.)</li>
+<li><strong>Q2</strong> A2A base path — <code>/a2a</code> vs
+<code>/v1/a2a</code> (does it sit inside the existing <code>/v1</code>
+Bearer group, or its own group)? Config-injected either way
+(§11.4.28).</li>
+<li><strong>Q3</strong> Which capabilities does the Agent Card advertise
+as <code>skills[]</code> at launch — only <code>generate-code</code>, or
+the full CONST-040 capability set (generate, embed, translate, vision…)?
+(Sourced from the verifier registry, never hardcoded.)</li>
+<li><strong>Q4</strong> Push-notification (webhook) config support
+(<code>tasks/pushNotificationConfig/*</code>) — ship in P4-T4 or defer?
+(Async long-task callbacks are optional per the Agent Card
+<code>capabilities.pushNotifications</code> flag.)</li>
+<li><strong>Q5</strong> gRPC / HTTP+JSON bindings — documented future
+extension; confirm JSON-RPC-only is acceptable for the first
+release.</li>
+<li><strong>Q6</strong> (operator-gated, §11.4.122) Fate of the existing
+proprietary <code>/api/v1/acp/{execute,broadcast,status}</code> stubs
+(§2.1b): retire them, redirect them onto the real A2A dispatcher, or
+keep them as an internal convenience API? Removing a shipped route is
+§11.4.122-gated — the operator decides; the design does NOT silently
+drop them.</li>
+</ul>
+<hr />
+<h2 id="composition-footer-constitutional-anchors-touched">6.
+Composition footer — constitutional anchors touched</h2>
+<ul>
+<li><strong>§11.4.6</strong> (no-guessing) — protocol facts cited to the
+LATEST fetched spec; every latency figure <code>(EST — measure)</code>;
+the v1.0-proto-vs-JSON-RPC-binding tension flagged (§0.1), not hidden;
+the missing-GPU SKIP boundary stated (§4.2).</li>
+<li><strong>§11.4.66 / §11.4.105</strong> (operator decision honoured) —
+C3 “Google A2A” adopted verbatim; the protocol is NOT re-decided.</li>
+<li><strong>§11.4.74</strong> (extend-don’t-reimplement) — reuse the
+existing gin/TLS/SSE stack + the official <code>a2aproject/a2a-go</code>
+SDK + the existing <code>acp</code> protocol template; no reinvented
+transport.</li>
+<li><strong>§11.4.124</strong> (investigate-before-wire) — the
+<code>acp-agent-communication</code> template is the intended wiring
+point, filled in rather than duplicated.</li>
+<li><strong>§11.4.28 / CONST-045 / CONST-046</strong> (decoupled,
+config-injected) — peer endpoints, ports, base path, credentials all
+config-injected; never hardcoded.</li>
+<li><strong>CONST-036 / CONST-040</strong> (verifier single source of
+truth) — Agent Card <code>skills[]</code> + capability flags sourced
+from the verifier registry, never a hardcoded list.</li>
+<li><strong>§11.4.99 / §11.4.150</strong> (latest-source + deep
+multi-angle) — A2A facts from the LATEST official spec (a2a-protocol.org
+latest + v0.3.0) + the GitHub project (governance + Go SDK), ≥ 2
+distinct angles, cited with access date.</li>
+<li><strong>§11.4.107(10)</strong> (self-validated analyzer) —
+golden-good + three golden-bad fixtures (unauthorized, malformed,
+placeholder-artifact).</li>
+<li><strong>§11.4.108 / §11.4.139</strong> (four-layer runtime-signature
+on a clean target) — the §4 A2A end-to-end code-generation signature is
+the definition of done.</li>
+<li><strong>§11.4.69</strong> (sink-side evidence taxonomy) — adds an
+<code>agent_interop</code> feature class; evidence = captured JSON-RPC
+transcript + real generated artifact.</li>
+<li><strong>§11.4.3 / §11.4.123</strong> (honest SKIP, never a metadata
+PASS) — full signature SKIP’d <code>hardware_not_present</code> until
+the P1 serving core is live; partial proofs enumerated.</li>
+<li><strong>BLUFF-001</strong> (CLAUDE.md §3.3) —
+<code>message/send</code> makes a REAL model call; never a simulated
+response.</li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Deep-research 2026-07-07: -
+https://a2a-protocol.org/latest/specification/ -
+https://a2a-protocol.org/v0.3.0/specification/ -
+https://github.com/a2aproject/A2A</p>
+<p>(Negative finding, §11.4.99(B), all three URLs re-fetched +
+independently verified 2026-07-07: the
+<code>/latest/specification/</code> page self-identifies its released
+version as <code>1.0.0</code>, is <strong>proto-first</strong>
+(<code>spec/a2a.proto</code> authoritative), and exposes ONLY the
+proto-style names — the <code>TaskState</code> enum
+(<code>TASK_STATE_SUBMITTED … TASK_STATE_UNSPECIFIED</code>),
+<code>Message.role</code> (<code>ROLE_USER/ROLE_AGENT</code>), the
+<code>Part</code> oneof (<code>text/raw/url/data</code>), the three
+transport bindings (§§9–11), and the five <code>*SecurityScheme</code>
+types. It does NOT carry the well-known-URI path, the JSON-RPC
+method-name STRINGS, the TaskState JSON wire values, or the SSE detail —
+so those four were verified verbatim on the
+<code>/v0.3.0/specification/</code> JSON-RPC-binding page, which states
+the Agent Card location
+<code>https://{server_domain}/.well-known/agent-card.json</code>,
+enumerates
+<code>&quot;message/send&quot;</code>/<code>&quot;message/stream&quot;</code>/<code>&quot;tasks/get&quot;</code>/<code>&quot;tasks/cancel&quot;</code>/
+<code>&quot;tasks/resubscribe&quot;</code>/<code>&quot;tasks/pushNotificationConfig/{set,get,list,delete}&quot;</code>/
+<code>&quot;agent/getAuthenticatedExtendedCard&quot;</code>, the TaskState JSON
+values incl. the <code>&quot;unknown&quot;</code> catch-all, and streaming as
+<code>Content-Type: text/event-stream</code> where each SSE
+<code>data</code> field is a complete JSON-RPC 2.0 Response. The GitHub
+project page confirms verbatim <em>“an open source project under the
+Linux Foundation, contributed by Google”</em>, latest release
+<strong>v1.0.1 (2026-05-28)</strong>, and the Go SDK
+<code>go get github.com/a2aproject/a2a-go</code>. Internal HelixAgent
+facts are source-verified against
+<code>submodules/helix_agent@17f08ba9</code>: the
+<code>acp-agent-communication</code> template
+(<code>cmd/api/main.go:140-144</code>), the
+<code>UnifiedProtocolManager</code> (<code>main.go:162</code>), and —
+corrected in §2.1 vs the first draft — the <strong>pre-existing
+proprietary <code>/api/v1/acp/{execute,broadcast,status}</code>
+routes</strong> (<code>main.go:211-215</code>) whose handlers are
+canned-response STUBS (<code>main.go:370-418</code>, incl. a hardcoded
+capability list at <code>:416</code>). The HelixLLM TLS/auth/route
+posture + the no-<code>/v1</code> base-URL gotcha are source-verified
+against <code>submodules/helix_llm/docs/API_CONTRACT.md</code>
+§1/§3/§4.1 + RESUME.md.)</p>
+</body>
+</html>
