@@ -1,0 +1,77 @@
+=== CodeGraph pre-sync capture — 2026-07-07T10:31:03Z ===
+codegraph --version: 1.2.0
+binary: /home/milos/.local/bin/codegraph
+repo HEAD: 15e0503347de40842559d12f12dc4ff9a2c64e1b  branch: feature/helixllm-full-extension
+daemon procs (ours):
+1740561 /home/milos/.codegraph/versions/v1.2.0/node --liftoff-only /home/milos/.codegraph/versions/v1.2.0/lib/dist/bin/codegraph.js serve --mcp
+
+--- codegraph status (pre) ---
+[1m
+CodeGraph Status
+[0m
+[36mProject:[0m /home/milos/Factory/projects/tools_and_research/helix_code
+
+[1mIndex Statistics:[0m
+  Files:     102,657
+  Nodes:     1,785,099
+  Edges:     1,918,696
+  DB Size:   6330.68 MB
+  Backend:   [32mnode:sqlite — built-in (full WAL)[0m
+  Journal:   [32mwal[0m
+
+[1mNodes by Kind:[0m
+  import          558,710
+  function        358,385
+  method          312,351
+  property        99,926
+  file            98,605
+  constant        77,815
+  variable        49,150
+  type_alias      46,662
+  class           43,189
+  enum_member     39,664
+  struct          39,334
+  interface       36,221
+  enum            7,885
+  field           6,247
+  namespace       4,258
+  route           4,056
+  component       1,779
+  trait           858
+  module          3
+  protocol        1
+
+[1mFiles by Language:[0m
+  typescript      34,097
+  python          18,547
+  go              13,928
+  rust            11,002
+  tsx             10,983
+  yaml            3,928
+  csharp          2,808
+  javascript      2,406
+  cpp             2,247
+  kotlin          1,088
+  java            588
+  c               295
+  xml             254
+  astro           137
+  properties      122
+  scala           59
+  liquid          49
+  dart            35
+  objc            25
+  swift           18
+  jsx             17
+  ruby            12
+  php             5
+  lua             3
+  vue             2
+  r               1
+  svelte          1
+
+[32m✓[0m Index is up to date
+
+[33m⚠[0m Index was built by an earlier version; re-index to pick up this engine's improvements.
+[34mℹ[0m Run "codegraph index" (full rebuild) or "codegraph sync"
+

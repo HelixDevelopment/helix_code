@@ -1,0 +1,28 @@
+=== DB integrity + own-org resolution AFTER aborted full-index attempts — 2026-07-07T10:38:01Z ===
+(the from-scratch 'codegraph index' fork-failed on host process saturation before writing; verifying the v1.2.0 sync'd index is intact)
+
+--- codegraph status (index intact?) ---
+[1m
+CodeGraph Status
+[0m
+[36mProject:[0m /home/milos/Factory/projects/tools_and_research/helix_code
+
+[1mIndex Statistics:[0m
+  Files:     102,657
+  Nodes:     1,785,100
+  Edges:     1,918,963
+  DB Size:   6330.93 MB
+  Backend:   [32mnode:sqlite — built-in (full WAL)[0m
+  Journal:   [32mwal[0m
+
+
+--- own-org symbol still resolves (admit @ HelixDevelopment/HelixLLM) ---
+[36mfunction    [0m[37madmit[0m
+[2m  submodules/helix_llm/internal/vrambroker/broker.go:178[0m
+[2m  (free, needBytes, headroom int64) bool[0m
+
+--- own-org symbol still resolves (ResolveModelCapability @ vasic-digital/llms_verifier) ---
+[2m  submodules/llms_verifier/llm-verifier/capabilities/registry_resolve.go:62[0m
+[2m  (db *database.Database, modelID int64, capName string) (value bool, verified bool, err error)[0m
+
+--

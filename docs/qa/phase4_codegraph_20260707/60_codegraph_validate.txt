@@ -1,0 +1,52 @@
+=== CodeGraph Validation ===
+Project root: /home/milos/Factory/projects/tools_and_research/helix_code
+
+--- Check: codegraph installed ---
+  ✅ codegraph found at /home/milos/.local/bin/codegraph
+
+--- Check: config.json ---
+  ✅ config.json exists
+  ✅ config.json is valid JSON
+
+--- Check: codegraph.db ---
+  ✅ codegraph.db exists (6330 MB)
+
+--- Check: own-org submodules included ---
+  ✅ constitution is not excluded
+  ✅ submodules/challenges is not excluded
+  ✅ submodules/containers is not excluded
+  ✅ submodules/helix_qa is not excluded
+  ✅ submodules/security is not excluded
+
+--- Check: third-party excluded ---
+  ✅ cli_agents/** is excluded
+  ✅ cli_agents_resources/** is excluded
+  ✅ dependencies/LLama_CPP/** is excluded
+  ✅ dependencies/Ollama/** is excluded
+
+--- Check: credentials excluded ---
+  ✅ **/.env is excluded
+  ✅ **/.env.* is excluded
+  ✅ **/*.key is excluded
+  ✅ **/*.pem is excluded
+  ✅ **/secrets/** is excluded
+
+--- Check: LIVE index audit (authoritative — excluded paths MUST be absent from the DB) ---
+  ❌ live DB: 36089 files under cli_agents ARE indexed (exclusion NOT effective — fix root .gitignore + 'codegraph index'; config.json is INERT per §11.4.78)
+  ❌ live DB: 519 files under cli_agents_resources ARE indexed (exclusion NOT effective — fix root .gitignore + 'codegraph index'; config.json is INERT per §11.4.78)
+  ❌ live DB: 9 files under github_pages_website ARE indexed (exclusion NOT effective — fix root .gitignore + 'codegraph index'; config.json is INERT per §11.4.78)
+  ✅ live DB: 0 indexed files under dependencies/LLama_CPP
+  ✅ live DB: 0 indexed files under dependencies/Ollama
+  ✅ live DB: own-org submodules/helix_qa indexed (28333 files, §11.4.79)
+  ✅ live DB: own-org submodules/llm_provider indexed (151 files, §11.4.79)
+  ✅ live DB: own-org constitution indexed (84 files, §11.4.79)
+  ✅ live DB: 0 indexed files matching %.env (§11.4.10)
+  ✅ live DB: 0 indexed files matching %.pem (§11.4.10)
+  ✅ live DB: 0 indexed files matching %.key (§11.4.10)
+
+=== Validation Summary ===
+  PASS: 26
+  FAIL: 3
+  SKIP: 0
+
+❌ VALIDATION FAILED

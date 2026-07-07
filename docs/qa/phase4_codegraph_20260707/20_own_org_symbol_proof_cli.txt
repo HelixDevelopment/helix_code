@@ -1,0 +1,129 @@
+=== §11.4.79 OWN-ORG SYMBOL RESOLUTION PROOF via codegraph CLI — 2026-07-07T10:31:37Z ===
+codegraph --version: 1.2.0
+
+### Probe 1: unexported func 'admit' — lives ONLY inside HelixDevelopment/HelixLLM own-org submodule
+$ codegraph node admit
+---
+**3 definitions named "admit"**
+Returning 3 in full — pick the one you need (no Read required).
+
+**admit** (method)
+
+**Location:** submodules/helix_agent/cli_agents/kilo-code/packages/kilo-vscode/src/services/notebook/bridge.ts:181
+**Signature:** `(request: NotebookRequest, directory: string): Promise<void>`
+
+```typescript
+181	  private async admit(request: NotebookRequest, directory: string): Promise<void> {
+182	    const root = await this.allowed(directory)
+183	    if (this.disposed || this.settled.has(request.id)) return
+184	    if (!root) {
+185	      const accepted = await this.reject(request.id, directory, {
+186	        code: "invalid_path",
+187	        message: "Notebook request directory is not an active VS Code workspace",
+188	      })
+189	      if (accepted) this.remember(this.settled, request.id)
+190	      return
+191	    }
+192	    const origin = { directory, root, sessionID: request.sessionID }
+193	    this.rememberOrigin(request.id, origin)
+194	    this.start(request, origin)
+195	  }
+```
+
+---
+
+**admit** (constant)
+
+**Location:** submodules/helix_agent/cli_agents/opencode-cli/packages/core/src/session/input.ts:41
+**Signature:** `= Effect.fn("SessionInput.admit")(function* (
+  db: DatabaseService,
+  events: EventV2.Interface,
+  in...`
+
+```typescript
+41	export const admit = Effect.fn("SessionInput.admit")(function* (
+42	  db: DatabaseService,
+43	  events: EventV2.Interface,
+44	  input: {
+45	    readonly id: SessionMessage.ID
+46	    readonly sessionID: SessionSchema.ID
+47	    readonly prompt: Prompt
+48	    readonly delivery: Delivery
+49	  },
+50	) {
+51	  const existing = yield* find(db, input.id)
+52	  if (existing !== undefined) return existing
+53	  const timestamp = yield* DateTime.now
+54	  return yield* events
+55	    .publish(SessionEvent.PromptAdmitted, {
+56	      messageID: input.id,
+57	      sessionID: input.sessionID,
+58	      timestamp,
+59	      prompt: input.prompt,
+60	      delivery: input.delivery,
+61	    })
+62	    .pipe(
+63	      Effect.flatMap((event) =>
+64	        event.durable === undefined
+65	          ? Effect.die("Prompt admission event is missing aggregate sequence")
+66	          : Effect.succeed(
+67	              Admitted.make({
+68	                admittedSeq: event.durable.seq,
+69	                id: input.id,
+70	                sessionID: input.sessionID,
+71	                prompt: input.prompt,
+72	                delivery: input.delivery,
+73	                timeCreated: timestamp,
+74	              }),
+75	            ),
+76	      ),
+77	      Effect.catchDefect((defect) =>
+78	        find(db, input.id).pipe(Effect.flatMap((stored) => (stored ? Effect.succeed(stored) : Effect.die(defect)))),
+79	      ),
+80	    )
+81	})
+```
+
+---
+
+**admit** (function)
+
+**Location:** submodules/helix_llm/internal/vrambroker/broker.go:178
+**Signature:** `(free, needBytes, headroom int64) bool`
+
+```go
+178	func admit(free, needBytes, headroom int64) bool {
+179		if needBytes < 0 {
+180			return false
+181		}
+182		return free >= needBytes+headroom
+183	}
+```
+**Trail — codegraph_node any of these to follow it (no Read needed)**
+**Called by ←** Acquire (submodules/helix_llm/internal/vrambroker/broker.go:134), TestAdmit_TruthTable (submodules/helix_llm/internal/vrambroker/broker_test.go:22), Example_admissionMath (submodules/helix_llm/internal/vrambroker/broker_test.go:214), TestAdmit_PairedMutation (submodules/helix_llm/internal/vrambroker/mutation_test.go:15)
+
+### Probe 2: ResolveModelCapability — vasic-digital (digital.vasic.llmsverifier) own-org submodule
+$ codegraph query ResolveModelCapability
+---
+[1m
+Search Results for "ResolveModelCapability":
+[0m
+[36mfunction    [0m[37mResolveModelCapability[0m
+[2m  submodules/llms_verifier/llm-verifier/capabilities/registry_resolve.go:62[0m
+[2m  (db *database.Database, modelID int64, capName string) (value bool, verified bool, err error)[0m
+
+[36mconstant    [0m[37mverificationFreshnessWindow[0m
+[2m  submodules/llms_verifier/llm-verifier/capabilities/registry_resolve.go:40[0m
+[2m  = 24 * time.Hour[0m
+
+[36mfunction    [0m[37mGetProviderBaseCapabilities[0m
+[2m  submodules/llms_verifier/llm-verifier/capabilities/registry.go:1082[0m
+[2m  (provider string) *ProviderCapabilities[0m
+
+[36mvariable    [0m[37mproviderCapabilitySeeds[0m
+[2m  submodules/llms_verifier/llm-verifier/capabilities/registry.go:15[0m
+[2m  = map[string]*ProviderCapabilities{
+	"openai": {
+		Provider: "openai",
+		Verified: false, // seed: unv...[0m
+

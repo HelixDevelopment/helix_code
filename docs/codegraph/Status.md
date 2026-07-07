@@ -1,17 +1,17 @@
 # CodeGraph — Status
 
-**Revision:** 1
-**Last modified:** 2026-05-28T12:03:15Z
+**Revision:** 2
+**Last modified:** 2026-07-07T10:40:00Z
 
 | Field | Value |
 |---|---|
-| Revision | 1 |
+| Revision | 2 |
 | Created | 2026-05-28 |
-| Last modified | 2026-05-28T12:03:15Z |
+| Last modified | 2026-07-07T10:40:00Z |
 | Status | active |
-| Status summary | Append-only ledger of every CodeGraph-related event for HelixCode (config changes, index regenerations, sync runs, validation probes). Per §11.4.78 (CodeGraph parent), §11.4.79 (own-org submodule inclusion), §11.4.80 (regular-update + sync automation), §11.4.45 / §11.4.56 (Status-doc shape). The weekly update + sync automation is INHERITED BY REFERENCE from the constitution submodule — invoke `constitution/scripts/codegraph_update.sh` and `constitution/scripts/codegraph_sync.sh` (never copied). |
-| Issues | none |
-| Issues summary | — |
+| Status summary | Append-only ledger of every CodeGraph-related event for HelixCode (config changes, index regenerations, sync runs, validation probes). Per §11.4.78 (CodeGraph parent), §11.4.79 (own-org submodule inclusion), §11.4.80 (regular-update + sync automation), §11.4.45 / §11.4.56 (Status-doc shape). The weekly update + sync automation is INHERITED BY REFERENCE from the constitution submodule — invoke `constitution/scripts/codegraph_update.sh` and `constitution/scripts/codegraph_sync.sh` (never copied). Latest: 2026-07-07 Phase-4 reindex on codegraph 1.2.0 — sync GREEN, own-org symbol resolution PROVEN (MCP+CLI); third-party stale-entry purge (cli_agents) blocked on host process saturation. |
+| Issues | HXC-041 (third-party cli_agents stale-index entries not purged — full `codegraph index` blocked on host process saturation) |
+| Issues summary | HXC-041: live index still holds 36,089 cli_agents + 519 cli_agents_resources + 9 github_pages_website third-party files (config.json exclude is INERT in codegraph 1.2.0 — exclusion is `.gitignore`-driven); purge needs a from-scratch `codegraph index` which fork-failed on host at 4069/4096 user processes (§11.4.174 non-ours workloads). §11.4.10 credentials CLEAN (0 real .env/.pem/.key indexed). |
 | Fixed | HXC-017 (own-org submodule inclusion in index) |
 | Continuation | sibling `Status_Summary.md` carries the operator-readable digest per §11.4.56. |
 
@@ -142,3 +142,18 @@ the exclude list additionally pins `**/.env`, `**/.env.*`, `**/*.key`,
 **Status.md hygiene fix:** this ledger had bloated to 3.66 MB — a single 3,007,584-char line of raw ANSI progress-spinner output that `constitution/scripts/codegraph_sync.sh` dumped verbatim on its earlier FAIL. Stripped to 8 KB (all 7 real ledger entries preserved). FOLLOW-UP: `codegraph_sync.sh` should strip ANSI / not dump raw spinner logs into Status.md (constitution-submodule fix per §11.4.26).
 
 **Operational follow-up:** the agent-facing codegraph **MCP server** (`tools/codegraph/...serve --mcp`, a separate install) holds the pre-wipe DB inode — it must be **restarted** to serve the fresh index to AI agents; the CLI `query` already reflects it.
+
+## 2026-07-07 — codegraph 1.2.0 Phase-4 reindex + §11.4.79 own-org symbol proof (deferred item completed; HXC-041 opened)
+
+**Event**: completed the deferred CodeGraph reindex + own-org symbol-resolution proof (RESUME.md #5 — deferred to avoid a stale-v1.1.1-daemon DB conflict). Host now runs codegraph **1.2.0** (matches §11.4.80 update expectation); the serving `serve --mcp` daemon and the DB backend are both 1.2.0, so the stale-v1.1.1-daemon blocker is resolved.
+
+**§11.4.80 reindex/sync — GREEN.** `codegraph sync` synced 8 changed files in 5.6 s (exit 0). Index intact at 1.2.0: **Files 102,657 / Nodes 1,785,100 / Edges 1,918,963 / DB 6.33 GB / node:sqlite full-WAL**. Evidence: `docs/qa/phase4_codegraph_20260707/{00_pre_sync_status,10_sync_run,11_post_sync_status}.txt`.
+
+**§11.4.79 own-org symbol resolution — PROVEN (MCP + CLI, unforgeable).** Resolved symbols that live ONLY inside own-org submodules:
+- `admit` — an **unexported** Go function — → `submodules/helix_llm/internal/vrambroker/broker.go:178` (module `github.com/HelixDevelopment/HelixLLM`), with verbatim source + blast-radius (callers `Acquire`, `TestAdmit_TruthTable`, `TestAdmit_PairedMutation`).
+- `ResolveModelCapability` → `submodules/llms_verifier/llm-verifier/capabilities/registry_resolve.go:62` (module `digital.vasic.llmsverifier`).
+Both via the `mcp__codegraph__codegraph_explore` MCP tool AND the `codegraph query`/`codegraph node` CLI. `scripts/codegraph_validate.sh` independently confirms own-org inclusion (helix_qa 28,333 / llm_provider 151 / constitution 84 / challenges / containers / security all indexed) — 26 PASS. Evidence: `docs/qa/phase4_codegraph_20260707/{20_own_org_symbol_proof_cli,21_own_org_symbol_proof_mcp,60_codegraph_validate}.txt`.
+
+**§11.4.10 credentials — CLEAN.** Live-DB audit: **0** indexed `.env` / `.pem` / `.key` files. (The `**/secrets/**` + `**/.env.*` glob would match some third-party *source* files like `.env.d.ts` and `secrets/` React dirs, but no real credential file types are indexed; the DB is gitignored per §11.4.77, so nothing reaches git.)
+
+**§11.4.79 third-party exclusion — PARTIAL FAIL → HXC-041 (BLOCKED on host resources, honest, no bluff).** `scripts/codegraph_validate.sh` reports 3 FAIL: live index still holds **36,089** `cli_agents` + **519** `cli_agents_resources` + **9** `github_pages_website` third-party files. Root cause (FACT, §11.4.102): (1) `.codegraph/config.json` `exclude` is **INERT** in codegraph 1.2.0 — exclusion is `.gitignore`-driven per §11.4.78, and these are *tracked* reference dirs not in `.gitignore`; (2) the `.codegraph/config.json` exclude list was recently expanded (git diff: added `tools/opensource/**`, `submodules/helix_agent/cli_agents/**`, `external/**`) but the from-scratch `codegraph index` to apply it was deferred — `codegraph sync` is incremental and does not purge now-excluded files (`indexed_at`: cli_agents 1783289990159 / Jul-5 vs helix_llm 1783420230150 / Jul-7). **Remediation blocked**: a from-scratch `codegraph index` fork-failed (`errno=11`, `runtime: failed to create new OS thread`) — host at **4069/4096** user processes (`ulimit -u`), saturation dominated by ~14+ non-ours 75-thread processes that §11.4.174 forbids killing. The aborted index fork-failed **before writing** — the 1.2.0 sync'd index is verified INTACT + still resolves own-org symbols (`docs/qa/phase4_codegraph_20260707/50_post_abort_integrity.txt`). HXC-041 is deferred to a low-host-load window; it does NOT affect own-org reachability (proven above). Evidence: `docs/qa/phase4_codegraph_20260707/{30_stale_index_rootcause,40_full_index_run,50_post_abort_integrity}.txt`.

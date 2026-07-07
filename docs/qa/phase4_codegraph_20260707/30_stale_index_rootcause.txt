@@ -1,0 +1,46 @@
+=== §11.4.79/§11.4.10 STALE-INDEX ROOT-CAUSE ANALYSIS (§11.4.102) — 2026-07-07T10:34:23Z ===
+
+FINDING: live index (built Jul 5) still contains third-party + credential-path files
+that the CURRENT .codegraph/config.json exclude list marks EXCLUDED.
+
+--- excluded-path file counts in stale index (pre-rebuild) ---
+  cli_agents/%                 36089
+  %/cli_agents/%               14322
+  %/tools/opensource/%         27354
+  cli_agents_resources/%       519
+  %/secrets/%                  33
+  %.env.%                      1
+
+--- own-org submodule file counts (correctly INCLUDED) ---
+  submodules/helix_llm/%             356
+  submodules/llms_verifier/%         793
+  submodules/helix_agent/internal/%  1688
+  submodules/helix_qa/%              28333
+
+ROOT CAUSE (FACT): exclude list expanded in config.json (git diff below); full reindex deferred.
+'codegraph sync' is incremental — does NOT purge now-excluded files. indexed_at proves staleness:
+  cli_agents newest indexed_at = 1783289990159 (Jul 5)
+  helix_llm  newest indexed_at = 1783420230150 (Jul 7)
+
+NOTE (§11.4.10): the 'secrets/'+'.env' hits are third-party cli_agents SOURCE files
+(e.g. cli_agents/codex/codex-rs/secrets/src/lib.rs), NOT real credential files; the
+codegraph.db is gitignored (§11.4.77) so nothing is committed to git.
+
+REMEDY: full 'codegraph index' rebuild applies current excludes -> purges stale third-party + creds.
+
+--- git diff .codegraph/config.json (exclude expansion) ---
+diff --git a/.codegraph/config.json b/.codegraph/config.json
+index 74a38dde..49702e0c 100644
+--- a/.codegraph/config.json
++++ b/.codegraph/config.json
+@@ -144,6 +144,10 @@
+     "github_pages_website/**",
+     "Github-Pages-website/**",
+     "awesome-ai-memory/**",
++    "submodules/**/tools/opensource/**",
++    "**/tools/opensource/**",
++    "submodules/helix_agent/cli_agents/**",
++    "submodules/helix_agent/external/**",
+     "**/.codegraph/**",
+     "**/.env",
+     "**/.env.*",

@@ -2,58 +2,187 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Status_Summary</title>
+  <title>CodeGraph Status_Summary</title>
   <style>
-
-span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-
-ul.task-list[class]{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-font-size: inherit;
-width: 0.8em;
-margin: 0 0.8em 0.2em -1.6em;
-vertical-align: middle;
-}
-.display.math{display: block; text-align: center; margin: 0.5rem auto;}
-</style>
-  <style type="text/css">
-table {
-border-collapse: collapse;
-}
-table td,
-table th {
-border: 1px solid #cccccc;
-padding: 4px 8px;
-vertical-align: top;
-}
-
-tr.cell-status-obsolete > td {
-background-color: #E0E0E0;
-}
-
-tr.cell-status-obsolete > td:nth-child(2),
-tr.cell-status-obsolete > td:last-child {
-text-decoration: line-through;
-}
-</style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Status_Summary</h1>
+<h1 class="title">CodeGraph Status_Summary</h1>
 </header>
-<h1 id="codegraph-status-summary">CodeGraph — Status Summary</h1>
-<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
-2026-05-28T12:03:15Z</p>
+<h1 id="codegraph--status-summary">CodeGraph — Status Summary</h1>
+<p><strong>Revision:</strong> 2 <strong>Last modified:</strong>
+2026-07-07T10:40:00Z</p>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Field</th>
@@ -63,7 +192,7 @@ text-decoration: line-through;
 <tbody>
 <tr>
 <td>Revision</td>
-<td>1</td>
+<td>2</td>
 </tr>
 <tr>
 <td>Created</td>
@@ -71,7 +200,7 @@ text-decoration: line-through;
 </tr>
 <tr>
 <td>Last modified</td>
-<td>2026-05-28T12:03:15Z</td>
+<td>2026-07-07T10:40:00Z</td>
 </tr>
 <tr>
 <td>Status</td>
@@ -81,14 +210,54 @@ text-decoration: line-through;
 <td>Status summary</td>
 <td>Two-audience digest of <code>Status.md</code> per §11.4.56. Page 1 =
 non-developer; Page 2 = software engineer. Tracks the HXC-017 CodeGraph
-index-configuration fix and the §11.4.80 update/sync automation.</td>
+index-configuration fix and the §11.4.80 update/sync automation.
+2026-07-07: Phase-4 reindex on codegraph 1.2.0 — index refresh (sync)
+GREEN and our own-org code libraries proven reachable by the AI agents;
+one clean-up (removing stale third-party entries) is paused because the
+shared host had no spare process capacity.</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="page-1-for-the-team-non-developer">Page 1 — For the team
+<h2 id="2026-07-07--phase-4-reindex-codegraph-120">2026-07-07 — Phase-4
+reindex (codegraph 1.2.0)</h2>
+<p><strong>For the team (non-developer).</strong> The code "map" the AI
+agents use is current and healthy on the latest CodeGraph (version
+1.2.0): about 102,657 files and 1.78 million code symbols. We proved
+that the AI agents can genuinely look up symbols that exist ONLY inside
+our own reusable libraries (the <code>HelixLLM</code> and
+<code>LLMsVerifier</code> submodules we build under HelixDevelopment and
+vasic-digital) — so the map really reaches our own code, not just the
+top-level app. No secrets (passwords, keys, <code>.env</code> files) are
+in the map. One tidy-up remains: the map still contains some third-party
+reference projects it should skip; removing them needs a full rebuild,
+which we paused because the shared workstation was temporarily out of
+spare capacity (other work was running on it). Tracked as HXC-041 for a
+quieter moment; it does not affect our own code being reachable.</p>
+<p><strong>For the engineer.</strong> codegraph 1.2.0;
+<code>codegraph sync</code> GREEN (8 files, 5.6 s, exit 0). Own-org
+resolution PROVEN via MCP (<code>codegraph_explore</code>) + CLI
+(<code>codegraph query</code>/<code>node</code>): <code>admit</code>
+(unexported) →
+<code>submodules/helix_llm/internal/vrambroker/broker.go:178</code>,
+<code>ResolveModelCapability</code> →
+<code>submodules/llms_verifier/llm-verifier/capabilities/registry_resolve.go:62</code>.
+<code>scripts/codegraph_validate.sh</code>: 26 PASS, 3 FAIL. §11.4.10
+credential audit CLEAN (0
+<code>.env</code>/<code>.pem</code>/<code>.key</code>). The 3 FAIL =
+stale third-party entries (<code>cli_agents</code> 36,089 /
+<code>cli_agents_resources</code> 519 /
+<code>github_pages_website</code> 9): config.json <code>exclude</code>
+is INERT in 1.2.0 (exclusion is <code>.gitignore</code>-driven per
+§11.4.78) and these are tracked dirs; the from-scratch
+<code>codegraph index</code> to purge them fork-failed on host process
+saturation (4069/4096 <code>ulimit -u</code>, non-ours workloads per
+§11.4.174). Index verified intact after the aborted rebuild. Full detail
++ evidence in <code>Status.md</code> (2026-07-07 entry) and
+<code>docs/qa/phase4_codegraph_20260707/</code>.</p>
+<h2 id="page-1--for-the-team-non-developer">Page 1 — For the team
 (non-developer)</h2>
-<p><strong>What this is.</strong> CodeGraph is a local “map” of all the
+<p><strong>What this is.</strong> CodeGraph is a local "map" of all the
 source code in HelixCode. The AI coding agents use it to instantly find
 where any function, type, or file lives — much faster and more accurate
 than searching text.</p>
@@ -111,13 +280,13 @@ value in mapping code we do not maintain.</li>
 <li>We also made doubly sure that no passwords, keys, or secrets can
 ever end up in the map.</li>
 </ul>
-<p><strong>What’s pending.</strong> A full rebuild of the map was
+<p><strong>What's pending.</strong> A full rebuild of the map was
 started so the newly included libraries actually appear. Its completion
 status is recorded on the engineer page and in the event ledger.</p>
 <p><strong>Team actions.</strong> None required. The update/sync runs on
 a weekly cadence using shared automation.</p>
 <hr />
-<h2 id="page-2-for-software-engineers">Page 2 — For software
+<h2 id="page-2--for-software-engineers">Page 2 — For software
 engineers</h2>
 <p><strong>Change (HXC-017, §11.4.79).</strong>
 <code>.codegraph/config.json</code> <code>exclude</code> list: removed
@@ -136,14 +305,14 @@ exclude).</li>
 <code>**/secrets/**</code>.</li>
 </ul>
 <p><strong>Ownership classification source.</strong>
-<code>git config -f .gitmodules --get-regexp &#39;submodule\..*\.url&#39;</code>
+<code>git config -f .gitmodules --get-regexp 'submodule\..*\.url'</code>
 — each <code>dependencies/&lt;X&gt;</code> classified by URL org. Only
 three top-level <code>dependencies/&lt;X&gt;</code> entries are
 non-own-org (llama.cpp, ollama, huggingface_hub); the rest live under
 <code>dependencies/vasic-digital/</code> or
 <code>dependencies/HelixDevelopment/</code>.</p>
 <p><strong>Validation.</strong> Config JSON valid
-(<code>python3 -c &quot;import json;json.load(open(&#39;.codegraph/config.json&#39;))&quot;</code>).
+(<code>python3 -c "import json;json.load(open('.codegraph/config.json'))"</code>).
 Index status BEFORE: Files 39,024 / Nodes 624,103 / Edges 1,643,200.
 AFTER + own-org-symbol probe (§11.4.79 anti-bluff): recorded in the
 <code>Status.md</code> event ledger.</p>

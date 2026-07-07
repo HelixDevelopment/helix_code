@@ -1,17 +1,47 @@
 # CodeGraph — Status Summary
 
-**Revision:** 1
-**Last modified:** 2026-05-28T12:03:15Z
+**Revision:** 2
+**Last modified:** 2026-07-07T10:40:00Z
 
 | Field | Value |
 |---|---|
-| Revision | 1 |
+| Revision | 2 |
 | Created | 2026-05-28 |
-| Last modified | 2026-05-28T12:03:15Z |
+| Last modified | 2026-07-07T10:40:00Z |
 | Status | active |
-| Status summary | Two-audience digest of `Status.md` per §11.4.56. Page 1 = non-developer; Page 2 = software engineer. Tracks the HXC-017 CodeGraph index-configuration fix and the §11.4.80 update/sync automation. |
+| Status summary | Two-audience digest of `Status.md` per §11.4.56. Page 1 = non-developer; Page 2 = software engineer. Tracks the HXC-017 CodeGraph index-configuration fix and the §11.4.80 update/sync automation. 2026-07-07: Phase-4 reindex on codegraph 1.2.0 — index refresh (sync) GREEN and our own-org code libraries proven reachable by the AI agents; one clean-up (removing stale third-party entries) is paused because the shared host had no spare process capacity. |
 
 ---
+
+## 2026-07-07 — Phase-4 reindex (codegraph 1.2.0)
+
+**For the team (non-developer).** The code "map" the AI agents use is current
+and healthy on the latest CodeGraph (version 1.2.0): about 102,657 files and
+1.78 million code symbols. We proved that the AI agents can genuinely look up
+symbols that exist ONLY inside our own reusable libraries (the `HelixLLM` and
+`LLMsVerifier` submodules we build under HelixDevelopment and vasic-digital) —
+so the map really reaches our own code, not just the top-level app. No secrets
+(passwords, keys, `.env` files) are in the map. One tidy-up remains: the map
+still contains some third-party reference projects it should skip; removing
+them needs a full rebuild, which we paused because the shared workstation was
+temporarily out of spare capacity (other work was running on it). Tracked as
+HXC-041 for a quieter moment; it does not affect our own code being reachable.
+
+**For the engineer.** codegraph 1.2.0; `codegraph sync` GREEN (8 files, 5.6 s,
+exit 0). Own-org resolution PROVEN via MCP (`codegraph_explore`) + CLI
+(`codegraph query`/`node`): `admit` (unexported) →
+`submodules/helix_llm/internal/vrambroker/broker.go:178`,
+`ResolveModelCapability` →
+`submodules/llms_verifier/llm-verifier/capabilities/registry_resolve.go:62`.
+`scripts/codegraph_validate.sh`: 26 PASS, 3 FAIL. §11.4.10 credential audit
+CLEAN (0 `.env`/`.pem`/`.key`). The 3 FAIL = stale third-party entries
+(`cli_agents` 36,089 / `cli_agents_resources` 519 / `github_pages_website` 9):
+config.json `exclude` is INERT in 1.2.0 (exclusion is `.gitignore`-driven per
+§11.4.78) and these are tracked dirs; the from-scratch `codegraph index` to
+purge them fork-failed on host process saturation (4069/4096 `ulimit -u`,
+non-ours workloads per §11.4.174). Index verified intact after the aborted
+rebuild. Full detail + evidence in `Status.md` (2026-07-07 entry) and
+`docs/qa/phase4_codegraph_20260707/`.
 
 ## Page 1 — For the team (non-developer)
 
