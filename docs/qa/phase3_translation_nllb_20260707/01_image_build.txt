@@ -1,0 +1,20 @@
+STEP 1/6: FROM docker.io/library/python:3.11-slim
+STEP 2/6: RUN pip install --no-cache-dir --root-user-action=ignore       ctranslate2       transformers       sentencepiece       protobuf       huggingface_hub
+--> Using cache db34929c9bf94a324e3ffc718df5725bc02781120d942f90b27e294f2663f6c6
+--> db34929c9bf9
+STEP 3/6: WORKDIR /app
+--> Using cache 6422f626e36444f93d2e83562fe5a3976a6c802f66bcc5aba71a0d5bb8d0da75
+--> 6422f626e364
+STEP 4/6: COPY server.py /app/server.py
+--> Using cache 128f2889dea37f274e85022c8ce9ce78c91dd9c75c8b9821a16a0b4aa7b84a95
+--> 128f2889dea3
+STEP 5/6: EXPOSE 8000
+--> Using cache 4006a456b48d17a143b075be40485413347c9ea4a21eae011847269932e56040
+--> 4006a456b48d
+STEP 6/6: ENTRYPOINT ["python", "/app/server.py"]
+--> Using cache 893346f5f9fba5e44670a86eac8a7db8100aa31965f9e0675674102de8fd20bd
+COMMIT localhost/helixllm-nllb-shim:latest
+--> 893346f5f9fb
+Successfully tagged localhost/helixllm-nllb-shim:latest
+893346f5f9fba5e44670a86eac8a7db8100aa31965f9e0675674102de8fd20bd
+BUILD-OK localhost/helixllm-nllb-shim:latest

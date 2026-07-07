@@ -1,0 +1,6 @@
+PROBE-OK en->fr wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_translation_nllb_20260707/green_record_en_fr_1.json
+    source  = "The cat sleeps."
+    forward = "Le chat dort."
+PROBE-OK en->fr wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_translation_nllb_20260707/green_record_en_fr_2.json
+    source  = "The cat sleeps."
+    forward = "Le chat dort."

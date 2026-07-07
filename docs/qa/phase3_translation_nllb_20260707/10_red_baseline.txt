@@ -1,0 +1,15 @@
+### RED baseline (§11.4.115): analyzer vs an echo-stub that returns q unchanged
+RED_MODE=1 — expect the analyzer to FAIL (exit 1) = defect reproduced, for BOTH pairs
+--- en->de ---
+[RUNTIME-SIGNATURE(en->de)] FAIL notIdentity=false allKeywordsOK=false anyKeywordOK=false
+    reason: identity/passthrough: forward "The house is blue." == source "The house is blue." (or empty)
+    reason: missing required keyword(s) [haus] in forward "The house is blue."
+    reason: none of the alternative keyword(s) [blau blaues blaue] present in forward "The house is blue."
+analyzer_exit(en->de)=1
+--- en->fr ---
+[RUNTIME-SIGNATURE(en->fr)] FAIL notIdentity=false allKeywordsOK=false anyKeywordOK=false
+    reason: identity/passthrough: forward "The cat sleeps." == source "The cat sleeps." (or empty)
+    reason: missing required keyword(s) [chat] in forward "The cat sleeps."
+    reason: none of the alternative keyword(s) [dort dormir] present in forward "The cat sleeps."
+analyzer_exit(en->fr)=1
+RED-OK: echo-stub correctly FAILED the runtime signature for both pairs

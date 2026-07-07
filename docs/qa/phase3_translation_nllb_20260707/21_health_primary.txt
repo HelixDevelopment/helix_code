@@ -1,0 +1,3 @@
+./run_proof.sh: fork: retry: Resource temporarily unavailable
+[11:25:34] still polling (n=15, code=000) ... container state=created
+[11:38:13] health OK after 2 polls: {"status": "ok", "model": "entai2965/nllb-200-distilled-600M-ctranslate2"}

@@ -1,0 +1,6 @@
+### GREEN runtime signature (§11.4.108) pair=en->de repo=entai2965/nllb-200-distilled-600M-ctranslate2
+[RUNTIME-SIGNATURE(en->de)] PASS notIdentity=true allKeywordsOK=true anyKeywordOK=true
+signature_exit=0
+[DETERMINISM] PASS: forward byte-identical across two identical requests (en->de) = "Das Haus ist blau."
+determinism_exit=0
+GREEN-OK (en->de)

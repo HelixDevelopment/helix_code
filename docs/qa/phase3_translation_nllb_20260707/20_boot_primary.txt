@@ -1,0 +1,8 @@
+ERROR: compose up: docker compose -f compose.phase3translatenllb.yml --project-name phase3translatenllb_primary up -d --remove-orphans nllb-shim failed: exit status 125
+stderr: Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+[4m>>>> Executing external compose provider "/usr/bin/podman-compose". Please see podman-compose(1) for how to disable this message. <<<<
+
+[0mError: unable to start container "833dfedeb5e63fee2074747942af7729fb007e24b5ae89b83a1e366190199b07": rootlessport fork/exec /proc/self/exe: resource temporarily unavailable
+Error: executing /usr/bin/podman-compose -f compose.phase3translatenllb.yml --project-name phase3translatenllb_primary up -d --remove-orphans nllb-shim: exit status 125
+
+UP-OK: phase3translatenllb_primary nllb-shim via containers submodule orchestrator

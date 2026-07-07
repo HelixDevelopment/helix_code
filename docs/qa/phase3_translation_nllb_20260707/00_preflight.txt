@@ -1,0 +1,9 @@
+### pre-flight (§11.4.119 single-owner, coder untouched)
+date_utc=2026-07-07T11:38:08Z
+uname_m=x86_64  podman=podman version 5.7.1
+lane=NLLB-200-distilled-600M via CTranslate2 (PRIMARY design-default lane), CPU, shim=localhost/helixllm-nllb-shim:latest
+primary_repo=entai2965/nllb-200-distilled-600M-ctranslate2  fallback_repo=JustFrederik/nllb-200-distilled-600M-ct2-int8  host_port=18436
+coder container (MUST remain running, untouched):
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 22 hours
+target host port 18436 listeners (expect none):
+  (free)

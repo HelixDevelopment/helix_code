@@ -1,0 +1,2 @@
+# Build artifact (§11.4.30) — rebuild via `go build`.
+phase3translatenllb.bin

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RESULTS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">RESULTS</h1>
+</header>
+<h1 id="helixllm-phase-3-cpu-translation-nllb-200-ctranslate2-primary-lane-end-to-end-proof-11.4.108">HelixLLM
+Phase-3 CPU Translation — NLLB-200-CTranslate2 PRIMARY LANE — END-TO-END
+PROOF (§11.4.108)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Status</strong></td>
+<td><strong>COMPLETE — ALL-GREEN on the design-default PRIMARY
+lane.</strong> No substitution needed in the final run (an earlier
+attempt hit a transient host-load fault, root-caused and fixed — see
+§3).</td>
+</tr>
+<tr>
+<td><strong>Run-id</strong></td>
+<td><code>phase3_translation_nllb_20260707</code></td>
+</tr>
+<tr>
+<td><strong>Date</strong></td>
+<td>2026-07-07T11:38:04Z → 11:38:25Z (UTC), host <code>x86_64</code>,
+podman 5.7.1, rootless</td>
+</tr>
+<tr>
+<td><strong>Branch / Track</strong></td>
+<td><code>feature/helixllm-full-extension</code> ·
+<code>(T1/feature/helixllm-full-extension)</code></td>
+</tr>
+<tr>
+<td><strong>Design</strong></td>
+<td><code>docs/research/07.2026/00_master/TRANSLATION_PROVIDER.md</code>
+§1.2/§3/§4</td>
+</tr>
+<tr>
+<td><strong>Extends</strong></td>
+<td><code>docs/qa/phase3_translation_20260707/</code> — the
+LibreTranslate <strong>FALLBACK</strong> lane, already shipped + proven.
+This run proves the design’s <strong>PRIMARY</strong> lane:
+NLLB-200-distilled-600M via <strong>CTranslate2</strong>.</td>
+</tr>
+<tr>
+<td><strong>Pattern mirrored</strong></td>
+<td><code>docs/qa/phase3_embeddings_20260706/harness/</code> (embeddings
+proof)</td>
+</tr>
+<tr>
+<td><strong>Lane PROVEN here</strong></td>
+<td><strong>NLLB-200-distilled-600M via CTranslate2 (CPU)</strong>,
+behind a thin bespoke HTTP shim
+(<code>harness/shim/{Dockerfile,server.py}</code>) — the design’s
+documented default (<code>TRANSLATION_PROVIDER.md</code> §1.2)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="deep-multi-angle-research-before-implementation">1. §11.4.150
+deep multi-angle research (before implementation)</h2>
+<p>Angles covered (dated 2026-07-07, this session):</p>
+<ol type="1">
+<li><p><strong>CTranslate2 + NLLB-200 CPU serving / community
+precedent</strong> — confirmed active usage
+(<code>entai2965/nllb-200-distilled-600M-ctranslate2</code>,
+<code>JustFrederik/nllb-200-distilled-600M-ct2-int8</code>,
+<code>winstxnhdw/nllb-api</code>, <code>any35/ctranslate2-server</code>)
+and the canonical conversion command
+<code>ct2-transformers-converter --model facebook/nllb-200-distilled-600M --output_dir &lt;dir&gt;</code>
+(requires <code>transformers&gt;=4.21.0</code>).</p></li>
+<li><p><strong>CTranslate2 + transformers tokenizer flow</strong> (the
+exact code path this shim uses) — confirmed from <strong>two independent
+sources</strong> (§11.4.150(B)): the OpenNMT canonical docs
+(<code>opennmt.net/CTranslate2/guides/transformers.html</code>) AND the
+<code>entai2965</code> model card, cross-checked and found
+identical:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>translator <span class="op">=</span> ctranslate2.Translator(model_dir, device<span class="op">=</span><span class="st">&quot;cpu&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>tokenizer  <span class="op">=</span> transformers.AutoTokenizer.from_pretrained(model_dir, src_lang<span class="op">=</span>src_lang)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>source     <span class="op">=</span> tokenizer.convert_ids_to_tokens(tokenizer.encode(text))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>results    <span class="op">=</span> translator.translate_batch([source], target_prefix<span class="op">=</span>[[tgt_lang]])</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>target     <span class="op">=</span> results[<span class="dv">0</span>].hypotheses[<span class="dv">0</span>][<span class="dv">1</span>:]           <span class="co"># drop the leading lang token</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>out_text   <span class="op">=</span> tokenizer.decode(tokenizer.convert_tokens_to_ids(target))</span></code></pre></div>
+<p>This is exactly the code path implemented in
+<code>harness/shim/server.py::translate_one()</code>.</p></li>
+<li><p><strong>FLORES-200 language-code format</strong> — confirmed
+<code>eng_Latn</code> / <code>deu_Latn</code> / <code>fra_Latn</code>
+(ISO-639-3 + ISO-15924 script tag), the format NLLB’s tokenizer requires
+for <code>src_lang</code> / <code>target_prefix</code>.</p></li>
+<li><p><strong>Pre-converted-model file-listing verification</strong>
+(avoids an in-container HF→CT2 conversion step, which needs
+<code>torch</code> + roughly doubles the image/RAM footprint) — fetched
+<code>entai2965/nllb-200-distilled-600M-ctranslate2</code>’s file tree
+directly BEFORE choosing it: <code>model.bin</code> (2.46 GB),
+<code>sentencepiece.bpe.model</code>,
+<code>shared_vocabulary.json</code>, <code>tokenizer.json</code>,
+<code>tokenizer_config.json</code>,
+<code>special_tokens_map.json</code>, <code>config.json</code>,
+<code>LICENSE.model.md</code> — a fully self-contained CT2+tokenizer
+repo (no missing-file boot risk). This verification is exactly why the
+primary lane booted cleanly once the thread-limit issue (§3) was fixed —
+no missing-tokenizer surprises.</p></li>
+<li><p><strong>License note</strong> (re-verified from the design doc) —
+NLLB weights are <strong>CC-BY-NC-4.0 (non-commercial)</strong>;
+flagged, not resolved, here (design doc Open Question Q5 — unchanged by
+this proof).</p></li>
+</ol>
+<h3 id="sources-verified-11.4.9911.4.150-accessed-2026-07-07">Sources
+verified (§11.4.99/§11.4.150, accessed 2026-07-07)</h3>
+<ul>
+<li>https://huggingface.co/entai2965/nllb-200-distilled-600M-ctranslate2</li>
+<li>https://huggingface.co/entai2965/nllb-200-distilled-600M-ctranslate2/tree/main</li>
+<li>https://opennmt.net/CTranslate2/guides/transformers.html</li>
+<li>https://github.com/OpenNMT/CTranslate2/blob/master/docs/guides/transformers.md</li>
+<li>https://huggingface.co/JustFrederik/nllb-200-distilled-600M-ct2-int8
+(documented fallback candidate, not needed in the final run)</li>
+<li>https://huggingface.co/OpenNMT/nllb-200-distilled-1.3B-ct2-int8</li>
+<li>https://forum.opennmt.net/t/nllb-200-with-ctranslate2/5090</li>
+<li>https://github.com/winstxnhdw/nllb-api</li>
+<li>(carried from the design spike, re-affirmed)
+https://github.com/argosopentech/argos-translate ;
+https://docs.libretranslate.com/api/operations/translate/</li>
+</ul>
+<hr />
+<h2 id="what-was-built">2. What was built</h2>
+<ul>
+<li><strong><code>harness/shim/{Dockerfile,server.py}</code></strong> —
+a minimal <code>python:3.11-slim</code> image (<code>ctranslate2</code>,
+<code>transformers</code>, <code>sentencepiece</code>,
+<code>protobuf</code>, <code>huggingface_hub</code> — <strong>no
+torch</strong>, since only the tokenizer, not a conversion, is needed at
+runtime) exposing <code>GET /health</code> and
+<code>POST /translate {&quot;q&quot;,&quot;source&quot;,&quot;target&quot;} -&gt; {&quot;translatedText&quot;}</code>.
+Model load runs in a background thread so <code>/health</code> can
+report <code>503 loading</code> immediately, <code>200 ok</code> once
+ready, <code>500</code> with the captured error on load failure (never a
+silent hang).</li>
+<li><strong><code>harness/compose.phase3translatenllb.yml</code></strong>
+— booted via the <strong>containers submodule</strong>
+<code>compose.Orchestrator</code> (§11.4.76), rootless podman
+(§11.4.161), <strong>NO GPU</strong> device anywhere in the spec. Host
+port <strong>18436</strong> (coder <code>:18434</code> and the
+embeddings tier’s <code>:18435</code> untouched). Persistent external
+HF-model cache volume <code>helixllm-nllb-cache</code> (§11.4.77).</li>
+<li><strong><code>harness/main.go</code> +
+<code>run_proof.sh</code></strong> — the Go proof harness (boot/probe/
+analyze/determinism/selfvalidate subcommands) + the orchestrating shell
+script, mirroring the proven embeddings/LibreTranslate harness
+shape.</li>
+</ul>
+<hr />
+<h2 id="root-cause-investigation-fixes-11.4.10211.4.146-reproduce-first-then-fix">3.
+Root-cause investigation + fixes (§11.4.102/§11.4.146 — reproduce-first,
+then fix)</h2>
+<p>The <strong>first</strong> attempt at this proof did
+<strong>not</strong> reach ALL-GREEN on the first try. Per the Iron Law
+(§11.4.102: no fixes without root-cause investigation first), each
+defect was root-caused from captured evidence before any fix — none of
+this was guessed (§11.4.6). All investigation evidence is preserved
+under <code>investigation_first_attempt/</code>.</p>
+<ol type="1">
+<li><strong>PRIMARY lane container crashed during model load</strong> —
+<code>investigation_first_attempt/22_shimlogs_primary.txt</code>
+captured the exact traceback:
+<code>OpenBLAS blas_thread_init: pthread_create failed for thread 52 of 64: Resource temporarily unavailable ... RLIMIT_NPROC 4096 current, 5120 max</code>.
+<strong>Root cause</strong>: OpenBLAS (used internally by
+<code>ctranslate2</code>) tries to spin up one thread <strong>per
+detected host CPU</strong> (64 on this host) at
+<code>ctranslate2.Translator()</code> construction time — independent of
+the <code>intra_threads</code> parameter passed to CT2 itself — and this
+exhausted the container’s process/thread ulimit under real, concurrent
+host load (see point 3). <strong>Fix</strong>:
+<code>shim/server.py</code> now sets <code>OPENBLAS_NUM_THREADS</code> /
+<code>OMP_NUM_THREADS</code> / <code>MKL_NUM_THREADS</code> explicitly
+(env-injected via the compose file, <code>NLLB_BLAS_THREADS</code>,
+default 4) <strong>before</strong> any BLAS-using library is
+imported.</li>
+<li><strong>A “fallback” run reported healthy in ~8 seconds —
+implausible for a 600 MB+ model — investigated and found to be a real
+bug</strong>: the shim’s original <code>load_model()</code> checked only
+<code>os.path.exists(MODEL_DIR/model.bin)</code> to decide whether to
+(re)download, sharing <strong>one</strong> cache directory across every
+<code>MODEL_REPO</code> lane on the same persistent volume. When the
+PRIMARY lane’s download completed (2.46 GB, confirmed present on-disk by
+direct inspection of the podman volume mountpoint) but the process then
+crashed (point 1) <strong>after</strong> the download, a
+<strong>subsequent</strong> container booted with a
+<strong>different</strong> <code>MODEL_REPO</code> (the fallback) found
+<code>model.bin</code> already present and silently served the
+<strong>wrong</strong> (primary lane’s) model under the fallback’s name
+— a stale-shadow bluff (§11.4.108/§11.4.139). <strong>Fix</strong>: the
+shim now keys its actual working directory by the repo id
+(<code>MODEL_DIR/&lt;repo&gt;.replace(&quot;/&quot;,&quot;__&quot;)</code>), making
+cross-lane cache collision structurally impossible;
+<code>run_proof.sh</code> additionally cross-checks the
+<code>/health</code> response’s reported <code>model</code> field
+against the requested repo before accepting a lane as served
+(<code>21b_served_model_primary.txt</code> captures this check passing
+in the final run).</li>
+<li><strong>Host-level
+<code>rootlessport fork/exec: resource temporarily unavailable</code> at
+<code>podman-compose up</code> time itself</strong> (container-runtime
+level, not fixable from inside the container) — investigated via
+<code>/proc/loadavg</code> (<code>3/5012</code> total scheduled
+entities) and <code>ulimit -u</code> (4096 for this user), plus direct
+observation of concurrent sibling work-stream tracks on the same
+host/repo (Tesseract-OCR and Whisper-STT Phase-3 proofs, per
+§11.4.174/§11.4.176 — confirmed via a co-running, unrelated
+<code>git diff</code> process enumerating those tracks’ paths). This is
+a genuine, transient, host-load fault — not a model/CT2 incompatibility,
+since it fails at container-start, before any model code runs.
+<strong>Fix</strong>: <code>run_proof.sh</code>’s <code>run_lane</code>
+now retries <code>run_lane_once</code> up to 4 times with linear backoff
+(10s·k), and <code>poll_health</code> fast-fails after 10 consecutive
+polls stuck in container state <code>created</code> (≈40s) instead of
+burning the full timeout on a container that will never start.</li>
+<li><strong>Two bash bugs in <code>run_proof.sh</code> itself, caught
+because the buggy first run produced an impossible verdict</strong>
+(“ALL-GREEN” with no green-record files on disk): (a)
+<code>PAIRS=(en-&gt;de en-&gt;fr)</code> — unquoted, the literal
+<code>&gt;</code> is parsed by bash as an output-redirection operator
+<strong>anywhere</strong> it appears in an unquoted word, which was a
+silent syntax error that skipped the entire probe loop; (b)
+<code>{ block; } | tee file</code> runs the <strong>left side of a pipe
+in a subshell</strong> in bash — verified empirically (<code>X=0</code>
+assigned inside such a block was lost in the parent shell after the
+pipe) — so <code>GREEN_ALL=0</code> assigned inside such a block on a
+genuine failure was silently lost, and the script printed “ALL-GREEN”
+anyway. <strong>Fix</strong>: array elements quoted; the state-carrying
+blocks now redirect straight to a file (no pipe, no subshell) and are
+<code>cat</code>’d afterward for the same console visibility.</li>
+</ol>
+<p>None of these four issues were a genuine NLLB-200/CTranslate2
+<strong>incompatibility</strong> — all four were fixable at the
+shim/harness layer. After the fixes, the <strong>PRIMARY lane</strong>
+(<code>entai2965/nllb-200-distilled-600M-ctranslate2</code>) booted and
+passed cleanly on the <strong>first attempt</strong> of the corrected
+run (<code>health OK after 2 polls</code> — fast because the model was
+already fully downloaded from the earlier attempt and reused via the
+persistent cache, §11.4.77).</p>
+<hr />
+<h2 id="verdict-runtime-signature-honest-11.4.6">4. Verdict — RUNTIME
+SIGNATURE (honest, §11.4.6)</h2>
+<p><strong>CAPABILITY PROVEN — PRIMARY lane, no
+substitution.</strong></p>
+<pre><code>[RUNTIME-SIGNATURE(en-&gt;de)] PASS notIdentity=true allKeywordsOK=true anyKeywordOK=true
+[DETERMINISM]               PASS forward byte-identical across two identical requests (en-&gt;de)
+[RUNTIME-SIGNATURE(en-&gt;fr)] PASS notIdentity=true allKeywordsOK=true anyKeywordOK=true
+[DETERMINISM]               PASS forward byte-identical across two identical requests (en-&gt;fr)
+[SELF-VALIDATION]           PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+served-model cross-check:   requested=entai2965/nllb-200-distilled-600M-ctranslate2
+                             reported=entai2965/nllb-200-distilled-600M-ctranslate2
+ALL-GREEN: runtime signature + determinism + self-validation PASS (lane=entai2965/nllb-200-distilled-600M-ctranslate2)</code></pre>
+<h3 id="captured-real-translations-green_record_.json">Captured real
+translations (<code>green_record_*.json</code>)</h3>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 41%" />
+<col style="width: 27%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Pair</th>
+<th>source</th>
+<th>forward (real NLLB-CT2 output)</th>
+<th>required keywords</th>
+<th>verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>en→de</strong></td>
+<td>“The house is blue.”</td>
+<td><strong>“Das Haus ist blau.”</strong></td>
+<td>ALL of <code>haus</code> ✓; ANY of <code>blau/blaues/blaue</code> ✓
+(<code>blau</code> present)</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td><strong>en→fr</strong></td>
+<td>“The cat sleeps.”</td>
+<td><strong>“Le chat dort.”</strong></td>
+<td>ALL of <code>chat</code> ✓; ANY of <code>dort/dormir</code> ✓
+(<code>dort</code> present)</td>
+<td><strong>PASS</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Both forward outputs are genuinely different from their source
+strings (not-identity ✓) and are real, fluent, grammatically-correct
+translations — not a copy, not garbage, not the wrong language.</p>
+<h3 id="determinism-11.4.50">Determinism (§11.4.50)</h3>
+<p>Two identical <code>POST /translate</code> requests per pair produced
+<strong>byte-identical</strong> <code>translatedText</code>: - en→de:
+<code>&quot;Das Haus ist blau.&quot;</code> == <code>&quot;Das Haus ist blau.&quot;</code>
+(<code>green_record_en_de_1.json</code> / <code>_2.json</code>) - en→fr:
+<code>&quot;Le chat dort.&quot;</code> == <code>&quot;Le chat dort.&quot;</code>
+(<code>green_record_en_fr_1.json</code> / <code>_2.json</code>)</p>
+<p>(CTranslate2 <code>beam_size=1</code>, i.e. greedy decoding —
+deterministic by construction, no sampling.)</p>
+<hr />
+<h2 id="analyzer-is-non-bluff-11.4.10710-11.4.115">5. Analyzer is
+non-bluff (§11.4.107(10) / §11.4.115)</h2>
+<p><code>10_red_baseline.txt</code> — the exact untranslated-passthrough
+“warming” bluff (an echo-stub that returns <code>q</code> unchanged) fed
+to the analyzer for <strong>both</strong> pairs, <strong>before</strong>
+the real lane was asked to PASS:</p>
+<pre><code>[RUNTIME-SIGNATURE(en-&gt;de)] FAIL notIdentity=false allKeywordsOK=false anyKeywordOK=false
+    reason: identity/passthrough: forward &quot;The house is blue.&quot; == source &quot;The house is blue.&quot; (or empty)
+    reason: missing required keyword(s) [haus] in forward &quot;The house is blue.&quot;
+    reason: none of the alternative keyword(s) [blau blaues blaue] present in forward &quot;The house is blue.&quot;
+[RUNTIME-SIGNATURE(en-&gt;fr)] FAIL notIdentity=false allKeywordsOK=false anyKeywordOK=false
+    reason: identity/passthrough: forward &quot;The cat sleeps.&quot; == source &quot;The cat sleeps.&quot; (or empty)
+    reason: missing required keyword(s) [chat] in forward &quot;The cat sleeps.&quot;
+    reason: none of the alternative keyword(s) [dort dormir] present in forward &quot;The cat sleeps.&quot;
+RED-OK: echo-stub correctly FAILED the runtime signature for both pairs</code></pre>
+<p><code>12_self_validation.txt</code> — golden-good = the REAL captured
+en→de record; every golden-bad variant correctly FAILS:</p>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 20%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Fixture</th>
+<th>expect</th>
+<th style="text-align: center;">notIdentity</th>
+<th style="text-align: center;">allKeywordsOK</th>
+<th style="text-align: center;">anyKeywordOK</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GOLDEN-GOOD (real “Das Haus ist blau.”)</td>
+<td>PASS</td>
+<td style="text-align: center;">true</td>
+<td style="text-align: center;">true</td>
+<td style="text-align: center;">true</td>
+<td><strong>PASS</strong> ✓</td>
+</tr>
+<tr>
+<td>BAD identity/echo (forward == source)</td>
+<td>FAIL</td>
+<td style="text-align: center;">false</td>
+<td style="text-align: center;">false</td>
+<td style="text-align: center;">false</td>
+<td><strong>FAIL</strong> ✓</td>
+</tr>
+<tr>
+<td>BAD empty (forward == ““)</td>
+<td>FAIL</td>
+<td style="text-align: center;">false</td>
+<td style="text-align: center;">false</td>
+<td style="text-align: center;">false</td>
+<td><strong>FAIL</strong> ✓</td>
+</tr>
+<tr>
+<td>BAD wrong-language (real en→fr output “Le chat dort.” substituted
+in)</td>
+<td>FAIL</td>
+<td style="text-align: center;">true</td>
+<td style="text-align: center;">false</td>
+<td style="text-align: center;">false</td>
+<td><strong>FAIL</strong> ✓</td>
+</tr>
+</tbody>
+</table>
+<p>The wrong-language fixture is deliberately a <strong>genuine, fluent,
+correct</strong> translation — just for the <em>other</em> request —
+proving the analyzer rejects “a real translation, just not the one asked
+for,” not merely garbage (mirrors the CX-05 anti-gaming construction
+used by the sibling LibreTranslate proof).</p>
+<hr />
+<h2 id="containerization-11.4.76-11.4.161-no-gpu">6. Containerization
+(§11.4.76 / §11.4.161, NO GPU)</h2>
+<ul>
+<li>Booted via
+<code>digital.vasic.containers/pkg/compose.NewDefaultOrchestrator</code>
+(<code>harness/main.go</code>), <strong>not</strong> ad-hoc
+<code>podman</code>/<code>docker</code> — rootless podman.</li>
+<li><code>compose.phase3translatenllb.yml</code> carries <strong>no
+literal</strong> host/port/model/ thread value (§CONST-045/046) — all
+injected by <code>run_proof.sh</code> env vars.</li>
+<li><strong>NO GPU</strong>: no <code>--device nvidia.com/gpu</code>, no
+GPU flag anywhere; the shim always constructs
+<code>ctranslate2.Translator(..., device=&quot;cpu&quot;)</code>.</li>
+<li>Image <code>localhost/helixllm-nllb-shim:latest</code>, built via
+<code>podman build</code> from <code>harness/shim/</code> (the same
+auxiliary-podman-command precedent as the prior harnesses’
+<code>podman pull</code>/<code>podman volume create</code> steps — the
+actual service UP/DOWN lifecycle still goes exclusively through the
+containers-submodule orchestrator).</li>
+<li>Host port <strong>18436</strong> (coder <code>:18434</code>,
+embeddings <code>:18435</code> untouched and verified free pre-boot,
+<code>00_preflight.txt</code>).</li>
+<li>Persistent external cache volume <code>helixllm-nllb-cache</code>
+(§11.4.77 re-obtainable — re-downloads from <code>MODEL_REPO</code> if
+dropped), now keyed per-repo internally (§3, point 2).</li>
+</ul>
+<h3 id="single-owner-teardown-coder-untouched-11.4.119">Single-owner
+teardown + coder untouched (§11.4.119)</h3>
+<p><code>29_teardown.txt</code> /
+<code>29b_post_teardown.txt</code>:</p>
+<pre><code>DOWN-OK: phase3translatenllb_primary nllb-shim (volumes removed) via containers submodule orchestrator
+nllb-shim containers (expect none):
+  (none — removed)
+coder still running (untouched):
+helixllm-coder Up 22 hours</code></pre>
+<p><code>24_container_state.txt</code> confirms both containers
+coexisted correctly during the run
+(<code>helixllm-coder ... Up 22 hours</code> +
+<code>phase3translatenllb_primary_nllb-shim_1 ... Up 4 seconds</code>).</p>
+<hr />
+<h2 id="four-layer-verification-map-11.4.108">7. Four-layer verification
+map (§11.4.108)</h2>
+<ol type="1">
+<li><strong>SOURCE</strong> —
+<code>harness/{main.go,shim/server.py,compose.phase3translatenllb.yml,run_proof.sh}</code>
+committed.</li>
+<li><strong>ARTIFACT</strong> — shim image built
+(<code>01_image_build.txt</code>); model weights present at the
+repo-keyed cache path (verified by direct filesystem inspection, 2.46 GB
+<code>model.bin</code> + tokenizer files); <code>/health</code>
+green.</li>
+<li><strong>RUNTIME-ON-CLEAN-TARGET</strong> — unique per-run project
+name + pre-clean <code>boot-down</code> before boot ⇒ a genuinely fresh
+container; the §4 (task-spec) runtime signature verified against it,
+including the served-model cross-check
+(<code>21b_served_model_primary.txt</code>) proving the <em>running</em>
+artifact matches the <em>requested</em> one. <strong>This is the
+definition of done.</strong></li>
+<li><strong>USER-VISIBLE</strong> — a real client
+<code>POST /translate</code> for “The house is blue.” returns “Das Haus
+ist blau.” (and “The cat sleeps.” → “Le chat dort.”) — correct, fluent,
+right-language translations a downstream doc/glossary flow could
+consume.</li>
+</ol>
+<hr />
+<h2 id="honest-boundary-11.4.6">8. Honest boundary (§11.4.6)</h2>
+<ul>
+<li>This proves the design’s <strong>PRIMARY</strong> lane
+(NLLB-200-distilled-600M via CTranslate2, CPU) for <strong>two</strong>
+language pairs (en→de, en→fr) via a <strong>proof harness shim</strong>
+— it does <strong>not</strong> implement the full HelixLLM gateway
+<code>/v1/translate</code> route, auto-detect, <code>/languages</code>,
+HTML-format DNT protection, or glossary/formality control (design doc
+§2/§5 — future work, same non-scope as the already-shipped
+LibreTranslate fallback proof).</li>
+<li><strong>License</strong>: NLLB weights are CC-BY-NC-4.0
+(non-commercial) — unresolved, flagged per design doc Open Question
+Q5.</li>
+<li><strong>Model file provenance</strong>:
+<code>entai2965/nllb-200-distilled-600M-ctranslate2</code> is a
+<strong>community</strong> CT2 conversion of
+<code>facebook/nllb-200-distilled-600M</code>, not an official
+OpenNMT-published int8 checkpoint for the 600M size (OpenNMT publishes
+official int8 checkpoints for the 1.3B/3.3B sizes only, per research
+§1). Quantization of this specific repo’s <code>model.bin</code> was not
+explicitly confirmed by its model card (file size ~2.46 GB is consistent
+with float32, not int8) — this proof establishes that the
+<strong>PRIMARY NLLB-200-distilled-600M-via-CTranslate2 lane genuinely
+works end-to-end</strong>; it does not additionally establish int8
+quantization was in effect. A follow-up could pin an int8-confirmed
+conversion (e.g.
+<code>JustFrederik/nllb-200-distilled-600M-ct2-int8</code>, held in
+reserve as the documented fallback and NOT exercised in this final run)
+for a smaller memory/latency footprint.</li>
+<li>Two language pairs only (task spec); the design’s full acceptance
+signature (§4 of <code>TRANSLATION_PROVIDER.md</code>) additionally
+calls for chrF-vs-golden + back-translation metamorphic scoring (as the
+sibling LibreTranslate proof implements) — this proof uses the task’s
+specified keyword-substring + not-identity signature instead, which is a
+stricter, simpler, equally unfakeable check for exactly these two
+fixtures, but does not produce a continuous adequacy score. Both
+signatures are legitimate per-design; extending this harness with the
+chrF/back-translation triple is straightforward future work reusing the
+sibling harness’s <code>chrF()</code> implementation.</li>
+</ul>
+<hr />
+<h2 id="reproduce">9. Reproduce</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> docs/qa/phase3_translation_nllb_20260707/harness</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_proof.sh</span></span></code></pre></div>
+<p>Boots the NLLB-CT2 shim via the containers submodule orchestrator,
+runs the RED baseline, probes both pairs twice (determinism), analyzes
+the runtime signature, self-validates the analyzer, tears the container
+down (single-owner, <code>helixllm-coder</code> untouched), and
+regenerates every evidence file in this directory.
+<code>NLLB_HOST_PORT</code> / <code>NLLB_BLAS_THREADS</code> /
+<code>HEALTH_TIMEOUT</code> etc. are all env-tunable (see the script
+header). The <code>harness/phase3translatenllb.bin</code> build artifact
+and the persistent <code>helixllm-nllb-cache</code> podman volume are
+gitignored / external (§11.4.30 / §11.4.77) — the first run on a clean
+host downloads ~2.46 GB from Hugging Face into the cache; subsequent
+runs reuse it.</p>
+<p>Investigation evidence for the root-cause narrative in §3 is
+preserved under <code>investigation_first_attempt/</code> (the OpenBLAS
+crash traceback, the stale-shadow fallback boot, and the resulting stale
+substitution note from the pre-fix run — kept for audit, not part of the
+final canonical proof sequence).</p>
+<hr />
+<h2 id="composition-footer-constitutional-anchors-touched">10.
+Composition footer — constitutional anchors touched</h2>
+<p>§11.4.6 (honest substitution — none was ultimately needed; honestly
+documents why an earlier attempt needed one) · §11.4.28/§11.4.35
+(decoupled, project- supplies-its-own-harness) · §11.4.50 (determinism)
+· §11.4.74 (extend/reuse CTranslate2 + transformers, no bespoke NMT
+engine) · §11.4.76/§11.4.161 (containers submodule, rootless) · §11.4.77
+(re-obtainable model cache) · §11.4.99/§11.4.150 (latest-source,
+multi-angle research, cited) · §11.4.102/§11.4.146 (reproduce-first,
+root-cause-before-fix, RED→fix→GREEN) · §11.4.107(10)/(15)
+(self-validated analyzer, RED polarity) · §11.4.108/§11.4.139
+(four-layer verification on a clean, cross-checked artifact) · §11.4.119
+(single-owner teardown, coder untouched) · §11.4.174 (shared-host
+process- ownership verification before diagnosing/acting) · §11.4.84 (no
+<code>git add -A</code>, scoped commit).</p>
+</body>
+</html>

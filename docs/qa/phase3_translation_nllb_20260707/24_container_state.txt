@@ -1,0 +1,2 @@
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 22 hours 8080/tcp, 50052/tcp
+phase3translatenllb_primary_nllb-shim_1 localhost/helixllm-nllb-shim:latest Up 4 seconds 0.0.0.0:18436->8000/tcp

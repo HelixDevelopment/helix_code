@@ -1,0 +1,1 @@
+[11:15:20] health OK after 2 polls: {"status": "ok", "model": "JustFrederik/nllb-200-distilled-600M-ct2-int8"}

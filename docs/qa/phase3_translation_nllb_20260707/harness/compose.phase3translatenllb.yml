@@ -1,0 +1,45 @@
+# Phase-3 CPU translation NLLB-200-distilled-600M CTranslate2 PRIMARY lane
+# (design default per TRANSLATION_PROVIDER.md §1.2), CPU-only. Booted THROUGH
+# the containers submodule compose.Orchestrator (§11.4.76), rootless podman
+# (§11.4.161). NO GPU device (no --device nvidia.com/gpu, no GPU flag; the
+# shim always loads ctranslate2.Translator(..., device="cpu")).
+#
+# No hardcoded model/host/port literal (§CONST-045/046): every value is
+# injected from the environment by run_proof.sh; the compose file carries no
+# literal. `${VAR}` are always set by the harness before boot.
+services:
+  nllb-shim:
+    image: ${NLLB_SHIM_IMAGE}
+    environment:
+      MODEL_REPO: "${NLLB_MODEL_REPO}"
+      MODEL_DIR: "/data/model"
+      SHIM_HOST: "0.0.0.0"
+      SHIM_PORT: "8000"
+      CT2_INTER_THREADS: "${NLLB_INTER_THREADS}"
+      CT2_INTRA_THREADS: "${NLLB_INTRA_THREADS}"
+      CT2_BEAM_SIZE: "${NLLB_BEAM_SIZE}"
+      # Explicit BLAS/OpenMP thread caps (root-cause fix, §11.4.102 — see
+      # shim/server.py header comment): OpenBLAS otherwise tries to spin up
+      # one thread PER HOST CPU regardless of CT2_INTRA_THREADS, which can
+      # exhaust RLIMIT_NPROC on a shared/loaded host (§11.4.174).
+      OPENBLAS_NUM_THREADS: "${NLLB_BLAS_THREADS}"
+      OMP_NUM_THREADS: "${NLLB_BLAS_THREADS}"
+      MKL_NUM_THREADS: "${NLLB_BLAS_THREADS}"
+    ports:
+      - "${NLLB_HOST_PORT}:8000"
+    volumes:
+      # Persistent HF-model cache (§11.4.77 re-obtainable — re-downloads from
+      # MODEL_REPO if dropped) — an EXTERNAL named volume shared across runs
+      # so weights are fetched once and reused. The container/pod is still
+      # torn down each run (single-owner cleanup §11.4.119); only this cache
+      # survives.
+      - helixllm-nllb-cache:/data/model
+    # §12.3 container hygiene — bounded so the translator never starves the
+    # developer host (§12.6). Config-injected, captured as evidence.
+    mem_limit: "${NLLB_MEM_LIMIT}"
+    cpus: ${NLLB_CPUS}
+    restart: "no"
+volumes:
+  helixllm-nllb-cache:
+    external: true
+    name: helixllm-nllb-cache

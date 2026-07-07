@@ -1,0 +1,2 @@
+### overall verdict
+ALL-GREEN: runtime signature + determinism + self-validation PASS (lane=entai2965/nllb-200-distilled-600M-ctranslate2)

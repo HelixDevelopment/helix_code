@@ -1,0 +1,5 @@
+### post-teardown state
+nllb-shim containers (expect none):
+  (none — removed)
+coder still running (untouched):
+helixllm-coder Up 22 hours

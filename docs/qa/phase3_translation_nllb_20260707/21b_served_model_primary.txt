@@ -1,0 +1,1 @@
+served-model cross-check: requested=entai2965/nllb-200-distilled-600M-ctranslate2 reported=entai2965/nllb-200-distilled-600M-ctranslate2

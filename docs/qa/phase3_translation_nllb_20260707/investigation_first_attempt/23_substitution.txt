@@ -1,0 +1,1 @@
+SUBSTITUTION (§11.4.6): primary repo entai2965/nllb-200-distilled-600M-ctranslate2 did not become healthy (see 22_shimlogs_primary.txt / 22_health_body_primary.json); fell back to JustFrederik/nllb-200-distilled-600M-ct2-int8 (an alternative CT2 conversion of the SAME facebook/nllb-200-distilled-600M model)

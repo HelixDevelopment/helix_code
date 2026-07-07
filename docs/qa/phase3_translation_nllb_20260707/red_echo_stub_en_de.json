@@ -1,0 +1,7 @@
+{
+  "pair": "en->de",
+  "source": "The house is blue.",
+  "source_lang": "eng_Latn",
+  "target": "deu_Latn",
+  "forward": "The house is blue."
+}

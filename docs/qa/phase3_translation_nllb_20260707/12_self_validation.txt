@@ -1,0 +1,15 @@
+### analyzer self-validation (§11.4.107(10)) golden-good = real captured en->de record
+[GOLDEN-GOOD(expect PASS)] PASS notIdentity=true allKeywordsOK=true anyKeywordOK=true
+[GOLDEN-BAD-IDENTITY/ECHO(expect FAIL)] FAIL notIdentity=false allKeywordsOK=false anyKeywordOK=false
+    reason: identity/passthrough: forward "The house is blue." == source "The house is blue." (or empty)
+    reason: missing required keyword(s) [haus] in forward "The house is blue."
+    reason: none of the alternative keyword(s) [blau blaues blaue] present in forward "The house is blue."
+[GOLDEN-BAD-EMPTY(expect FAIL)] FAIL notIdentity=false allKeywordsOK=false anyKeywordOK=false
+    reason: identity/passthrough: forward "" == source "The house is blue." (or empty)
+    reason: missing required keyword(s) [haus] in forward ""
+    reason: none of the alternative keyword(s) [blau blaues blaue] present in forward ""
+[GOLDEN-BAD-WRONGLANG(expect FAIL)] FAIL notIdentity=true allKeywordsOK=false anyKeywordOK=false
+    reason: missing required keyword(s) [haus] in forward "Le chat dort."
+    reason: none of the alternative keyword(s) [blau blaues blaue] present in forward "Le chat dort."
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit=0
