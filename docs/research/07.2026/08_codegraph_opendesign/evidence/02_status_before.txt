@@ -1,0 +1,12 @@
+### codegraph CURRENT (BEFORE) index status — 2026-07-05T22:07:46Z
+### host: Linux the-factory 6.12.41-6.12-alt1 #1 SMP PREEMPT_DYNAMIC Fri Aug  1 16:25:14 UTC 2025 x86_64 GNU/Linux
+
+$ ls -la .codegraph/codegraph.db
+-rw-r--r-- 1 milos milos 6383669248 Jul  5 23:18 .codegraph/codegraph.db
+$ du -h .codegraph/codegraph.db
+6.0G	.codegraph/codegraph.db
+
+$ codegraph status --json
+{"initialized":true,"version":"1.1.1","projectPath":"/home/milos/Factory/projects/tools_and_research/helix_code","indexPath":"/home/milos/Factory/projects/tools_and_research/helix_code/.codegraph","lastIndexed":"2026-07-05T13:44:12.130Z","fileCount":102708,"nodeCount":1784872,"edgeCount":6755511,"dbSizeBytes":6383669248,"backend":"node-sqlite","journalMode":"wal","nodesByKind":{"class":43651,"component":1779,"constant":77792,"enum":7881,"enum_member":39656,"field":6247,"file":98658,"function":358486,"import":558493,"interface":36220,"method":311906,"module":3,"namespace":4258,"property":99914,"protocol":1,"route":4056,"struct":39298,"trait":858,"type_alias":46616,"variable":49099},"languages":["astro","c","cpp","csharp","dart","go","java","javascript","jsx","kotlin","liquid","lua","objc","php","properties","python","r","ruby","rust","scala","svelte","swift","tsx","typescript","vue","xml","yaml"],"pendingChanges":{"added":0,"modified":0,"removed":0},"worktreeMismatch":null,"index":{"builtWithVersion":"1.1.1","builtWithExtractionVersion":24,"currentExtractionVersion":24,"reindexRecommended":false}}
+
+--- exit: 0 ---

@@ -1,0 +1,46 @@
+# Captured 2026-07-05T22:11:23Z on host the-factory
+## git log -20 (author + ISO date + subject)
+31cde9a1|Milos Vasic <i@mvasic.ru>|2026-07-05 13:35:03 +0500|Auto-commit
+ada44c74|Milos Vasic <i@mvasic.ru>|2026-07-05 13:33:41 +0500|Auto-commit
+4d25f404|Milos Vasic <i@mvasic.ru>|2026-07-05 13:31:02 +0500|Auto-commit
+06f85ba7|Milos Vasic <i@mvasic.ru>|2026-07-02 02:30:16 +0500|sync(submodules): bump helix_agent -> 725c3f4a (openhands gitlink restored)
+49ff34da|Milos Vasic <i@mvasic.ru>|2026-07-02 02:15:26 +0500|feat(submodules): interruption-safe init + latest-branch tracking for all submodules
+7704a4a0|Milos Vasic <i@mvasic.ru>|2026-07-02 00:50:28 +0500|sync(submodules): record 44 submodule pointer bumps to pushed upstream HEADs
+3c74d6d6|Test User <test@example.com>|2026-06-28 09:25:53 +0300|sync: submodule cleanup 20260628
+6ca06945|Test User <test@example.com>|2026-06-28 02:25:15 +0300|sync: post-rsync submodule update 20260628
+1254e0a6|Test User <test@example.com>|2026-06-28 00:30:08 +0300|sync: auto-commit before cross-host sync 20260628
+535485ba|Test User <test@example.com>|2026-06-24 15:34:56 +0300|docs(continuation): Rev 13 — release helixcode-v1.1.0 cut + published (§13.1)
+ea40bc91|Test User <test@example.com>|2026-06-24 15:08:24 +0300|docs(readme): sync to helixcode-v1.1.0 + add §CONST-064 metadata table (§CONST-062 always-sync)
+57435241|Test User <test@example.com>|2026-06-24 14:08:21 +0300|docs(continuation): Rev 12 amend — submodule-integration COMPLETE (challenges/security/helix_qa) per §13.1
+4f2c221a|Test User <test@example.com>|2026-06-24 14:06:56 +0300|chore(submodules): bump helix_qa gitlink → 9f94c53 (advanced main + honest bank-reclassification)
+294659f4|Test User <test@example.com>|2026-06-24 13:51:24 +0300|chore(submodules): bump security gitlink → b69c7d9 (adopt advanced main, gitlink-only)
+4b0eab2d|Test User <test@example.com>|2026-06-24 13:49:40 +0300|chore(submodules): bump challenges gitlink → a9601d9 (adopt advanced main + SKIP-OK skip-fix)
+9820be2e|Test User <test@example.com>|2026-06-24 13:41:56 +0300|docs(continuation): Rev 12 — full commit→push→rebuild→boot→V&V→fix cycle (§13.1)
+66f9c21e|Test User <test@example.com>|2026-06-24 13:39:44 +0300|fix(server): advertise streaming_enabled + plugins_enabled in /server/info; wire plugin registry
+c9bad26a|Test User <test@example.com>|2026-06-24 13:33:54 +0300|fix(mcp): move blocking I/O out of toolMux critical section (lock-hold O(N^2) → snapshot-then-act)
+820fc521|Test User <test@example.com>|2026-06-24 13:09:27 +0300|docs(qa): commit V&V-cycle evidence artifacts + §11.4.65 siblings (§11.4.83 physical evidence)
+365b85ad|Test User <test@example.com>|2026-06-24 12:56:49 +0300|fix(tests/e2e/challenges): plumb orchestrator -timeout into the LLM client (remove hardcoded 120s cap)
+
+## Auto-commit total count
+181
+
+## remotes
+github	git@github.com:HelixDevelopment/Helix-CLI.git (fetch)
+github	git@github.com:HelixDevelopment/Helix-CLI.git (push)
+gitlab	git@gitlab.com:helixdevelopment1/HelixCode.git (fetch)
+gitlab	git@gitlab.com:helixdevelopment1/HelixCode.git (push)
+origin	git@github.com:HelixDevelopment/HelixCode.git (fetch)
+origin	git@github.com:HelixDevelopment/Helix-CLI.git (push)
+origin	git@gitlab.com:helixdevelopment1/HelixCode.git (push)
+upstream	git@github.com:HelixDevelopment/Helix-CLI.git (fetch)
+upstream	git@github.com:HelixDevelopment/Helix-CLI.git (push)
+
+## current branch + identity
+main
+Milos Vasic
+i@mvasic.ru
+
+## active hooks (non-sample)
+total 8
+drwxr-xr-x 2 milos milos 4096 Jul  5 03:24 .
+drwxr-xr-x 8 milos milos 4096 Jul  6 03:10 ..

@@ -1,0 +1,360 @@
+=== INNER MODULE digital.vasic.llmsverifier ===
+=== cd llm-verifier && go build ./... (started 2026-07-05T22:11:04Z) ===
+go: downloading github.com/swaggo/swag v1.16.6
+go: downloading github.com/minio/minio-go/v7 v7.0.98
+go: downloading github.com/charmbracelet/bubbletea v1.1.0
+go: downloading github.com/spf13/cobra v1.10.2
+go: downloading cloud.google.com/go/storage v1.58.0
+go: downloading github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.3
+go: downloading cloud.google.com/go v0.123.0
+go: downloading github.com/aws/aws-sdk-go-v2 v1.41.0
+go: downloading github.com/aws/aws-sdk-go-v2/config v1.32.6
+go: downloading github.com/aws/aws-sdk-go-v2/credentials v1.19.6
+go: downloading github.com/aws/aws-sdk-go-v2/service/s3 v1.94.0
+go: downloading google.golang.org/api v0.256.0
+go: downloading golang.org/x/time v0.14.0
+go: downloading github.com/charmbracelet/lipgloss v0.13.0
+go: downloading github.com/KyleBanks/depth v1.2.1
+go: downloading github.com/go-openapi/spec v0.20.4
+go: downloading golang.org/x/tools v0.45.0
+go: downloading github.com/dustin/go-humanize v1.0.1
+go: downloading github.com/klauspost/crc32 v1.3.0
+go: downloading github.com/minio/crc64nvme v1.1.1
+go: downloading github.com/minio/md5-simd v1.1.2
+go: downloading github.com/go-ini/ini v1.67.0
+go: downloading github.com/charmbracelet/x/ansi v0.10.1
+go: downloading github.com/charmbracelet/x/term v0.2.1
+go: downloading github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6
+go: downloading github.com/muesli/cancelreader v0.2.2
+go: downloading golang.org/x/sync v0.21.0
+go: downloading cloud.google.com/go/auth v0.17.0
+go: downloading cloud.google.com/go/compute/metadata v0.9.0
+go: downloading cloud.google.com/go/iam v1.5.3
+go: downloading github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.54.0
+go: downloading github.com/googleapis/gax-go/v2 v2.15.0
+go: downloading go.opentelemetry.io/contrib/detectors/gcp v1.39.0
+go: downloading go.opentelemetry.io/otel v1.44.0
+go: downloading go.opentelemetry.io/otel/sdk/metric v1.44.0
+go: downloading go.opentelemetry.io/otel/sdk v1.44.0
+go: downloading go.opentelemetry.io/otel/trace v1.44.0
+go: downloading google.golang.org/genproto v0.0.0-20250922171735-9219d122eba9
+go: downloading github.com/Azure/azure-sdk-for-go/sdk/azcore v1.19.1
+go: downloading github.com/aws/smithy-go v1.24.0
+go: downloading github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.16
+go: downloading github.com/aws/aws-sdk-go-v2/internal/ini v1.8.4
+go: downloading github.com/aws/aws-sdk-go-v2/service/signin v1.0.4
+go: downloading github.com/aws/aws-sdk-go-v2/service/sso v1.30.8
+go: downloading github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.12
+go: downloading github.com/aws/aws-sdk-go-v2/service/sts v1.41.5
+go: downloading github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.4
+go: downloading github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.16
+go: downloading github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.16
+go: downloading github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.4
+go: downloading github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.7
+go: downloading github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.16
+go: downloading github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.16
+go: downloading github.com/muesli/termenv v0.16.0
+go: downloading github.com/rivo/uniseg v0.4.7
+go: downloading github.com/go-openapi/jsonpointer v0.19.5
+go: downloading github.com/go-openapi/jsonreference v0.19.6
+go: downloading github.com/go-openapi/swag v0.19.15
+go: downloading github.com/klauspost/cpuid/v2 v2.3.0
+go: downloading github.com/rs/xid v1.6.0
+go: downloading github.com/tinylib/msgp v1.6.1
+go: downloading github.com/lucasb-eyer/go-colorful v1.2.0
+go: downloading github.com/mattn/go-runewidth v0.0.16
+go: downloading google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217
+go: downloading cloud.google.com/go/monitoring v1.24.2
+go: downloading github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.54.0
+go: downloading golang.org/x/oauth2 v0.34.0
+go: downloading github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.30.0
+go: downloading go.opentelemetry.io/otel/metric v1.44.0
+go: downloading cloud.google.com/go/auth/oauth2adapt v0.2.8
+go: downloading go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0
+go: downloading github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2
+go: downloading github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.16
+go: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1
+go: downloading github.com/PuerkitoBio/purell v1.1.1
+go: downloading golang.org/x/mod v0.36.0
+go: downloading github.com/mailru/easyjson v0.7.6
+go: downloading gopkg.in/yaml.v2 v2.4.0
+go: downloading github.com/philhofer/fwd v1.2.0
+go: downloading go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0
+go: downloading github.com/google/s2a-go v0.1.9
+go: downloading github.com/googleapis/enterprise-certificate-proxy v0.3.7
+go: downloading github.com/envoyproxy/go-control-plane/envoy v1.36.0
+go: downloading github.com/felixge/httpsnoop v1.0.4
+go: downloading github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
+go: downloading github.com/josharian/intern v1.0.0
+go: downloading github.com/spiffe/go-spiffe/v2 v2.6.0
+go: downloading github.com/cncf/xds/go v0.0.0-20251210132809-ee656c7534f5
+go: downloading github.com/envoyproxy/protoc-gen-validate v1.3.0
+go: downloading github.com/go-jose/go-jose/v4 v4.1.4
+go: downloading cel.dev/expr v0.25.1
+=== inner go build EXIT=0 ===
+
+=== cd llm-verifier && go test -short ./... (started 2026-07-05T22:12:20Z) ===
+ok  	digital.vasic.llmsverifier	0.006s
+ok  	digital.vasic.llmsverifier/ai	0.002s
+ok  	digital.vasic.llmsverifier/analytics	0.004s
+ok  	digital.vasic.llmsverifier/api	0.165s
+?   	digital.vasic.llmsverifier/api/docs	[no test files]
+?   	digital.vasic.llmsverifier/api_keys	[no test files]
+ok  	digital.vasic.llmsverifier/auth	2.024s
+ok  	digital.vasic.llmsverifier/bigdata/lakehouse	0.005s
+ok  	digital.vasic.llmsverifier/bigdata/storage	0.005s
+ok  	digital.vasic.llmsverifier/bigdata/streaming	0.004s
+ok  	digital.vasic.llmsverifier/bigdata/vectordb	0.004s
+ok  	digital.vasic.llmsverifier/capabilities	0.005s
+ok  	digital.vasic.llmsverifier/challenges	0.004s
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/crush_config_converter	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/provider_models_discovery	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_model_real_simple	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_model_verification	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_model_verification_clean	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_model_verification_real	[no test files]
+?   	digital.vasic.llmsverifier/challenges/codebase/go_files/run_provider_challenge	[no test files]
+ok  	digital.vasic.llmsverifier/client	0.063s
+ok  	digital.vasic.llmsverifier/cmd	0.008s
+ok  	digital.vasic.llmsverifier/cmd/code-verification	0.020s
+ok  	digital.vasic.llmsverifier/cmd/crush-config-converter	0.002s
+?   	digital.vasic.llmsverifier/cmd/fixed-ultimate-challenge	[no test files]
+?   	digital.vasic.llmsverifier/cmd/full-verify	[no test files]
+ok  	digital.vasic.llmsverifier/cmd/model-verification	0.006s
+ok  	digital.vasic.llmsverifier/cmd/partners	0.005s
+?   	digital.vasic.llmsverifier/cmd/quick-verify	[no test files]
+ok  	digital.vasic.llmsverifier/cmd/semantic-code-visibility	0.008s
+?   	digital.vasic.llmsverifier/cmd/test-direct	[no test files]
+?   	digital.vasic.llmsverifier/cmd/test-models-live	[no test files]
+ok  	digital.vasic.llmsverifier/cmd/testsuite	0.007s
+?   	digital.vasic.llmsverifier/cmd/tui	[no test files]
+?   	digital.vasic.llmsverifier/cmd/ultimate-challenge	[no test files]
+ok  	digital.vasic.llmsverifier/config	0.007s
+ok  	digital.vasic.llmsverifier/database	0.779s
+ok  	digital.vasic.llmsverifier/enhanced	2.474s
+ok  	digital.vasic.llmsverifier/enhanced/adapters	0.005s
+ok  	digital.vasic.llmsverifier/enhanced/analytics	0.006s
+ok  	digital.vasic.llmsverifier/enhanced/checkpointing	0.070s
+ok  	digital.vasic.llmsverifier/enhanced/context	0.112s
+ok  	digital.vasic.llmsverifier/enhanced/enterprise	0.014s
+ok  	digital.vasic.llmsverifier/enhanced/supervisor	0.107s
+ok  	digital.vasic.llmsverifier/enhanced/validation	0.007s
+ok  	digital.vasic.llmsverifier/enhanced/vector	0.011s
+ok  	digital.vasic.llmsverifier/events	1.712s
+ok  	digital.vasic.llmsverifier/failover	7.047s
+ok  	digital.vasic.llmsverifier/llmverifier	4.089s
+ok  	digital.vasic.llmsverifier/llmverifier/recipes	0.032s
+ok  	digital.vasic.llmsverifier/logging	1.885s
+ok  	digital.vasic.llmsverifier/messaging	0.008s
+ok  	digital.vasic.llmsverifier/monitoring	0.541s
+ok  	digital.vasic.llmsverifier/multimodal	0.031s
+ok  	digital.vasic.llmsverifier/notifications	0.059s
+?   	digital.vasic.llmsverifier/partners	[no test files]
+ok  	digital.vasic.llmsverifier/performance	1.722s
+?   	digital.vasic.llmsverifier/pkg/api	[no test files]
+ok  	digital.vasic.llmsverifier/pkg/cliagents	0.011s
+ok  	digital.vasic.llmsverifier/pkg/crush/config	0.005s
+ok  	digital.vasic.llmsverifier/pkg/crush/verifier	0.013s
+?   	digital.vasic.llmsverifier/pkg/helixqa	[no test files]
+ok  	digital.vasic.llmsverifier/pkg/i18n	0.002s
+ok  	digital.vasic.llmsverifier/pkg/opencode/config	0.006s
+ok  	digital.vasic.llmsverifier/pkg/opencode/verifier	0.016s
+ok  	digital.vasic.llmsverifier/providers	8.991s
+ok  	digital.vasic.llmsverifier/scheduler	0.010s
+ok  	digital.vasic.llmsverifier/scoring	0.093s
+ok  	digital.vasic.llmsverifier/sdk/go	0.008s
+ok  	digital.vasic.llmsverifier/security	1.112s
+ok  	digital.vasic.llmsverifier/seed	0.012s
+?   	digital.vasic.llmsverifier/suffix	[no test files]
+--- FAIL: TestCommandFlagValidation (0.79s)
+    --- FAIL: TestCommandFlagValidation/models_list_with_valid_flags (0.15s)
+        automation_test.go:249: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 03:13:05 Failed to fetch models: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestCommandFlagValidation/providers_list_with_filter (0.13s)
+        automation_test.go:249: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 03:13:05 Failed to fetch providers: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+--- FAIL: TestOutputFormats (0.86s)
+    --- FAIL: TestOutputFormats/models_list_format_json (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 03:13:05 Failed to fetch models: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/models_list_format_table (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 03:13:05 Failed to fetch models: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/providers_list_format_json (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 03:13:05 Failed to fetch providers: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/providers_list_format_table (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 03:13:06 Failed to fetch providers: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/results_list_format_json (0.14s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 03:13:06 Failed to fetch verification results: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+    --- FAIL: TestOutputFormats/results_list_format_table (0.15s)
+        automation_test.go:285: Command failed unexpectedly: exit status 1
+            Output: 2026/07/06 03:13:06 Failed to fetch verification results: request failed: Get "https://localhost:8080": tls: failed to verify certificate: x509: certificate is not valid for any names, but wanted to match localhost
+            exit status 1
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+2026/07/06 03:13:06 Current database version: 0
+2026/07/06 03:13:06 Applying migration 1: Initial schema with providers, models, and verification_results tables
+2026/07/06 03:13:06 Successfully applied migration 1
+2026/07/06 03:13:06 Applying migration 2: Add performance indexes for common queries
+2026/07/06 03:13:06 Successfully applied migration 2
+2026/07/06 03:13:06 Applying migration 3: Add composite indexes for complex query optimization
+2026/07/06 03:13:06 Successfully applied migration 3
+2026/07/06 03:13:06 Applying migration 4: Add notifications table for system notifications
+2026/07/06 03:13:06 Successfully applied migration 4
+2026/07/06 03:13:06 Applying migration 5: Add Brotli compression support field to verification_results table
+2026/07/06 03:13:06 Successfully applied migration 5
+2026/07/06 03:13:06 All migrations applied successfully
+FAIL
+FAIL	digital.vasic.llmsverifier/tests	4.610s
+ok  	digital.vasic.llmsverifier/tests/integration	0.007s
+ok  	digital.vasic.llmsverifier/tests/unit	0.006s
+ok  	digital.vasic.llmsverifier/testsuite	0.007s
+ok  	digital.vasic.llmsverifier/tui	0.016s
+ok  	digital.vasic.llmsverifier/tui/screens	0.012s
+ok  	digital.vasic.llmsverifier/verification	0.143s
+FAIL
+=== inner go test EXIT=1 (finished 2026-07-05T22:13:10Z) ===

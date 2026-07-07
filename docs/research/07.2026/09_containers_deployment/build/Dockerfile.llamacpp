@@ -1,0 +1,49 @@
+# Build llama.cpp for Blackwell sm_120 (P0-T3). Multi-stage: compile in the CUDA devel
+# base, ship a slim CUDA runtime image with just the server binaries.
+#
+# Build context MUST be the vendored llama.cpp source tree:
+#   podman build -f Dockerfile.llamacpp \
+#     --build-arg CUDA_BASE=helixllm/cuda-base:12.8.1 \
+#     -t helixllm/llamacpp:cuda12.8-sm120 \
+#     <repo>/dependencies/LLama_CPP
+#
+# NOTE: compiling CUDA code needs nvcc (in the base) but NOT a GPU — this image builds
+# before the nvidia-container-toolkit install. Only RUNNING it needs GPU passthrough.
+ARG CUDA_BASE=helixllm/cuda-base:12.8.1
+FROM ${CUDA_BASE} AS build
+WORKDIR /src
+COPY . /src
+# GGML_CUDA=ON + CMAKE_CUDA_ARCHITECTURES=120 → real Blackwell kernels (ADR-0001 Decision 1).
+# LLAMA_CURL=ON → llama-server can pull GGUFs directly.
+RUN cmake -S . -B build \
+        -DGGML_CUDA=ON \
+        -DCMAKE_CUDA_ARCHITECTURES=120 \
+        -DLLAMA_CURL=ON \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath-link,/usr/local/cuda/lib64/stubs" \
+        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-rpath-link,/usr/local/cuda/lib64/stubs" \
+ && cmake --build build --config Release -j"$(nproc)" \
+        --target llama-server llama-cli \
+ # BUILD-LAYER proof: binary linked & present. Do NOT run it here — it dlopens
+ # libcuda.so.1 which is driver-provided (absent without GPU); the RUN proof is the
+ # GPU verify stage (§11.4.108). Running --version here would false-fail the build.
+ && test -x /src/build/bin/llama-server && test -x /src/build/bin/llama-cli \
+ && echo "BUILD OK: llama-server + llama-cli linked for sm_120" | tee /src/build/.build-ok.txt
+
+FROM docker.io/nvidia/cuda:12.8.1-runtime-ubuntu22.04 AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libcurl4-openssl-dev libgomp1 ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+# Ship the WHOLE build/bin (executables + their shared libs: libllama-server-impl.so,
+# libggml-cuda.so, libggml*.so, libllama.so, libmtmd.so, …). Recent llama.cpp links these
+# dynamically; copying only the executables leaves them unable to load (§11.4.108).
+COPY --from=build /src/build/bin/ /opt/llamacpp/
+ENV PATH=/opt/llamacpp:${PATH} \
+    LD_LIBRARY_PATH=/opt/llamacpp
+# The real libcuda.so.1 (driver) is injected at RUNTIME by CDI (`--device nvidia.com/gpu=all`).
+# Model weights are NOT baked in — mounted as a gitignored volume (§11.4.77 re-obtain).
+EXPOSE 8080
+ENTRYPOINT ["/opt/llamacpp/llama-server"]
+LABEL org.helix.programme="helixllm-full-extension" \
+      org.helix.component="llamacpp-server" \
+      org.helix.arch="sm_120-blackwell"

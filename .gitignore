@@ -194,3 +194,6 @@ tools/codegraph/package-lock.json
 .docs_chain/state.json
 *.docs_chain.tmp
 .playwright-mcp/
+
+# transient PID files (§11.4.30)
+*.pid

@@ -1,0 +1,39 @@
+### CONFIG DIFFS (before -> after) — 2026-07-05T22:11:13Z
+
+======== .mcp.json (codegraph entry: macOS host path -> portable) ========
+--- docs/research/07.2026/08_codegraph_opendesign/evidence/04_mcp.json.BEFORE	2026-07-06 03:10:35.117906897 +0500
++++ docs/research/07.2026/08_codegraph_opendesign/evidence/04_mcp.json.AFTER	2026-07-06 03:11:13.213364697 +0500
+@@ -2,12 +2,10 @@
+   "mcpServers": {
+     "codegraph": {
+       "type": "stdio",
+-      "command": "/Users/milosvasic/.local/bin/codegraph",
++      "command": "codegraph",
+       "args": [
+         "serve",
+-        "--mcp",
+-        "--path",
+-        "/Volumes/T7/Projects/helix_code"
++        "--mcp"
+       ]
+     },
+     "media-validator": {
+
+======== .codegraph/config.json (add third-party excludes) ========
+--- docs/research/07.2026/08_codegraph_opendesign/evidence/05_codegraph_config.json.BEFORE	2026-07-06 03:10:35.119906921 +0500
++++ docs/research/07.2026/08_codegraph_opendesign/evidence/05_codegraph_config.json.AFTER	2026-07-06 03:11:13.215364721 +0500
+@@ -144,6 +144,10 @@
+     "github_pages_website/**",
+     "Github-Pages-website/**",
+     "awesome-ai-memory/**",
++    "submodules/**/tools/opensource/**",
++    "**/tools/opensource/**",
++    "submodules/helix_agent/cli_agents/**",
++    "submodules/helix_agent/external/**",
+     "**/.codegraph/**",
+     "**/.env",
+     "**/.env.*",
+
+### JSON validity check (python) ###
+.mcp.json: VALID JSON
+.codegraph/config.json: VALID JSON

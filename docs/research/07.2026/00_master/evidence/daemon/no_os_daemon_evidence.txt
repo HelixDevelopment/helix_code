@@ -1,0 +1,23 @@
+# Captured 2026-07-05T22:11:23Z
+## crontab
+no crontab for milos
+
+## systemd --user timers
+NEXT                          LEFT LAST                              PASSED UNIT                         ACTIVATES
+Mon 2026-07-06 03:20:10 +05   8min Sun 2026-07-05 03:20:10 +05      23h ago systemd-tmpfiles-clean.timer systemd-tmpfiles-clean.service
+Mon 2026-07-13 00:06:38 +05 6 days Mon 2026-07-06 00:43:27 +05 2h 27min ago gocryptfs-fsck.timer         gocryptfs-fsck.service
+
+2 timers listed.
+
+## systemd system timers (git/commit/sync filter)
+(none)
+
+## at queue
+no files in queue.
+
+## file-watchers (watchexec/inotifywait/entr/fswatch)
+(none)
+
+## SUBMODULES_HOME / SESSION
+SUBMODULES_HOME=/home/milos/Factory/project_toolkit
+SESSION=[]

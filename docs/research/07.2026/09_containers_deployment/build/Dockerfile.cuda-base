@@ -1,0 +1,29 @@
+# Pinned CUDA 12.8 base for RTX 5090 / Blackwell sm_120 builds (ADR-0001 Decision 1).
+# Base tag CONFIRMED pulled 2026-07-06: docker.io/nvidia/cuda:12.8.1-devel-ubuntu22.04 (9.35 GB).
+# Building FROM this needs nvcc (present in -devel) but NOT a GPU, so it runs before the
+# nvidia-container-toolkit install. GPU is required only to RUN images built on top of it.
+FROM docker.io/nvidia/cuda:12.8.1-devel-ubuntu22.04
+
+# Toolchain for llama.cpp / native CUDA builds.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake git ca-certificates pkg-config \
+        libcurl4-openssl-dev libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# CUDA driver STUB for BUILD-time linking of driver-API code. ggml-cuda uses the CUDA
+# driver VMM API (cuMemCreate/cuMemMap/cuMemAddressReserve/…), so the final link needs
+# to resolve the `libcuda.so.1` SONAME. The -devel image ships only a stub `libcuda.so`
+# (real libcuda.so.1 comes from the GPU DRIVER at RUNTIME via CDI). Symlink the stub to
+# its SONAME and put the stubs dir on the linker search path (verified path 2026-07-06:
+# /usr/local/cuda/lib64/stubs/libcuda.so).
+RUN ln -sf /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1
+
+# Blackwell sm_120 arch pin + link-time stub search path — every downstream build honors these (ADR-0001).
+ENV TORCH_CUDA_ARCH_LIST=12.0 \
+    CMAKE_CUDA_ARCHITECTURES=120 \
+    LIBRARY_PATH=/usr/local/cuda/lib64/stubs
+
+LABEL org.helix.programme="helixllm-full-extension" \
+      org.helix.cuda="12.8.1" \
+      org.helix.arch="sm_120-blackwell" \
+      org.helix.base="nvidia/cuda:12.8.1-devel-ubuntu22.04"

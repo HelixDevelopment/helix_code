@@ -7,24 +7,66 @@
 
 > Read `docs/research/07.2026/00_master/RESUME.md` + `.superpowers/sdd/progress.md` (the live
 > SDD ledger), run `git fetch --all`, and continue the HelixLLM full-extension programme.
-> Phase 0 (GPU) + Phase 1 (fleet + fixes) + Phase 2 (HelixAgent→HelixLLM e2e) are PROVEN; the
-> LLMsVerifier capability-verification chain (C1→C2→C4→C5→C3) is fully landed and under a final
-> combined independent review. Next: land the review to GO, then the release-prep pass
-> (pointer bumps + prefixed release tag §11.4.151 via merge-onto-latest §11.4.113, NO force-push).
+> The branch `feature/helixllm-full-extension` (HEAD `4d58464c`, 34 commits over merge-base
+> `31cde9a1`) is **RELEASE-READY**: Phase 0 (GPU) + Phase 1 (fleet) + Phase 2 (HelixAgent→HelixLLM
+> e2e) + Phase 3 (embeddings/vision/translation-NLLB/Whisper/Tesseract/RAG/A2A/network-provider/
+> VRAM-broker/LLMsVerifier chain) all PROVEN + individually review-GO; the whole-branch SDD
+> end-gate returned **GO across all 3 independent lenses** (anti-bluff, security/§11.4.174,
+> integration/release-readiness). §11.4.40 pre-tag sweep RUN (`qa-results/pretag_verify_*.log`):
+> branch is regression-clean — QA-evidence 0 warnings; the only sweep FAILs are PRE-EXISTING
+> governance debt on submodules my branch never touched (G1 streaming/watcher inheritance pointers
+> + doc_processor/llm_orchestrator/llm_provider/vision_engine anti-bluff anchors, from refactor
+> `1422f7da`, not this branch) + third-party vendored Continue.dev `.skip()` (vendor-exempt §11.4.29).
+> **RELEASE PUBLISH IN PROGRESS (operator-authorized 2026-07-07).** Decisions resolved:
+> prefix = `helix-code` (operator: form `helix-code-1.0.0-dev-0.0.1`; supersedes old `helixcode-vN`;
+> encoded in gitignored `.env` + `.env.example`); tag on feature-branch HEAD (NO trunk merge, §11.4.167);
+> push authorized to all upstreams. DONE this pass: all 7 owned submodules published on
+> `feature/helixllm-full-extension` — helix_llm, doc_processor(b918111), llm_provider(4db6c49),
+> llm_orchestrator(ee229a7, CONSTITUTION merge-onto-latest), vision_engine(a97df79),
+> llms_verifier(new branch), helix_agent(cfa94f2f, foreign go.mod/.qa_bak never staged §11.4.174).
+> **NEXT** = main-repo release commit (6 pointer bumps + docs/research/07.2026 + .env.example) →
+> push main feature branch → create+push tag `helix-code-1.0.0-dev-0.0.1` across main + all 7 owned
+> submodules (§11.4.151 identical prefix). Post-tag scopes the operator UNLOCKED (all 3): GPU gen
+> (FLUX-NVFP4/WAN/LTX — quant footprints RESOLVED; GPU-gen SCAFFOLD-COMPLETE + reviewed GO: image-gen
+> helix_llm `0f07559` port 18442 + video-gen `9145505` port 18443, both local-no-push, broker-fail-closed,
+> RED-first self-validated analyzers; RUNTIME PROOF PENDING operator coder-pause §11.4.122 — run each
+> `docs/qa/phase4_*/harness/run_proof.sh admit-check` then boot+generate in an authorized window),
+> broad-provider live proofs (needs API keys §11.4.10), HelixMemory/cognee wire (design DONE
+> `scratchpad/design_helixmemory_cognee.md` — P-OQ2-A Postgres-row persistence is container-independent +
+> lands first; IMPL BLOCKED by §11.4.174 until the concurrent QA track's foreign helix_agent go.mod/.qa_bak clears).
 > Honor anti-bluff §11.4, subagent-driven §11.4.70, `(T1/<branch>)` labels §11.4.182, one canonical
-> branch `feature/helixllm-full-extension` §11.4.181, §11.4.174 shared-host process/tree ownership.
+> branch §11.4.181, no-force-push §11.4.113, §11.4.174 shared-host ownership (helix_agent go.mod/.qa_bak
+> FOREIGN — never stage), coder container live at 18434 (never restart §11.4.122).
 
 ## Current phase + immediate next action
 
-- **Phase 0 (GPU foundation):** ✅ COMPLETE — rootless CDI passthrough + sm_120 build + real 30B inference PROVEN.
-- **Phase 1 (fleet + fixes):** ✅ 30B coder live; Containerfile + claude_toolkit fixes landed, all re-reviewed **GO**.
-- **Phase 2 (HelixAgent→HelixLLM e2e):** ✅ **PROVEN + review GO** — real generate + Postgres/Redis persistence (cognee/vector honest SKIP, OQ2).
-- **LLMsVerifier chain:** ✅ C1 C2 C4 C5 C3 + advisories all landed, combined review **GO** — release-ready.
-- **Phase-3:** ✅ embeddings IMPL **PROVEN** (55bdf9b6, real bge-small TEI, cos margin 0.3578) · ✅ VRAM broker CORE **GO** (a12df57c — unblocks GPU tiers) · ✅ designs done: embeddings (cf26b813), translation (c9ac8683), provider-coverage (1e6f3347, 0 new wire adapters).
-- **Phase-3 IN-FLIGHT (2026-07-07, 3 parallel streams §11.4.183):** translation NLLB-CT2 primary (port 18436) · Whisper STT CPU (18437) · Tesseract OCR CPU (18438) — each containers-submodule boot, RED-first self-validated analyzer, synthesized-known-content proof, commit-in-helix_llm no-push. Ledger: `.superpowers/sdd/progress.md` round-13. Coder stays live at 18434.
-- **Governance:** constitution synced `0882b9e..5074d606` (0a469883, §11.4.183 cascaded); §11.4.32 sweep debt: G12 CLOSED (3fdbfd40 Fixed_Summary regen); G7 (4 pre-2026-06-24 main commits lack docs/qa) + G1 (streaming/watcher inheritance pointer → their HelixPlay chain) honest-tracked (fabrication would be a bluff / §11.4.28 coupling).
-- **Immediate next (fresh session):** (a) the pending §11.4.142 reviews are DONE for broker; run reviews of the 3 design docs + embeddings if desired; (b) GPU tiers now unblocked — vision (VLM)/image/video gen via the broker; (c) provider config-rollout (13 providers, config-only); (d) translation IMPL (design c9ac8683); (e) cognee P-OQ2-A wire; (f) small follow-ups: OQ1 doc correction in PHASE2_BLOCKERS_INVESTIGATION.md, P3-EMB-1 golden-good dim-aware fixture, detector.go:61; (g) release-prep + prefixed tag when scope-complete.
-- **Terminal goal (this scope):** a fully-validated, prefixed release tag (§11.4.151) published across
+- **BRANCH STATUS: RELEASE-READY.** HEAD `4d58464c`, 34 commits over merge-base `31cde9a1`. Whole-branch
+  SDD end-gate returned **GO across all 3 independent lenses** (anti-bluff · security/§11.4.174 · integration/
+  release-readiness — the last NO-GO'd on 3 missing sibling exports, fixed in `4d58464c`, re-reviewed GO).
+- **Phase 0 (GPU):** ✅ rootless CDI passthrough + sm_120 build + real 30B inference PROVEN.
+- **Phase 1 (fleet):** ✅ 30B coder live; Containerfile + claude_toolkit fixes, all re-reviewed **GO**.
+- **Phase 2 (HelixAgent→HelixLLM e2e):** ✅ **PROVEN + GO** — real generate + Postgres/Redis persistence.
+- **LLMsVerifier chain:** ✅ C1 C2 C4 C5 C3 + advisories landed, combined review **GO**.
+- **Phase-3:** ✅ embeddings IMPL PROVEN (55bdf9b6) · VRAM broker CORE GO (a12df57c) · translation NLLB-CT2
+  (18436) · Whisper STT (18437) · Tesseract OCR (18438) · RAG-TEI (18440) · ACP→A2A (18441) · network-provider
+  LAN/VPN — all landed + individually review-GO, QA siblings complete (9/9 RESULTS.md have .html+.pdf).
+- **§11.4.40 PRE-TAG SWEEP RUN** (`qa-results/pretag_verify_20260707_222458.log`, exit-captured):
+  QA-evidence §11.4.83 = 0 warnings (PASS). The 3 sweep FAILs are ALL PRE-EXISTING, regression-isolated
+  (`git diff 31cde9a1..HEAD` on those paths = EMPTY): G1 (streaming/watcher inheritance pointers) +
+  doc_processor/llm_orchestrator/llm_provider/vision_engine anti-bluff anchors (added by refactor `1422f7da`,
+  not this branch) + third-party vendored Continue.dev `.skip()` (§11.4.29 vendor-exempt). None block THIS
+  branch's tag; all are honest-tracked cross-cutting governance debt (own separate work stream).
+- **Governance:** constitution `5074d606` (through §11.4.183). Quant-footprint UNCONFIRMED → RESOLVED
+  (a93140b1): ≤10.4 GiB co-resident FLUX exists but MUST be NVFP4 on the 5090 (Blackwell cc10.x → fp4, not int4).
+- **IMMEDIATE NEXT = finish release publish (operator-authorized 2026-07-07, decisions resolved).**
+  All 7 owned submodules pushed on `feature/helixllm-full-extension`. Remaining serial: main-repo commit
+  (6 pointer bumps + docs/research/07.2026 corpus + `.env.example` prefix) → push main feature branch to
+  github+gitlab → create+push tag `helix-code-1.0.0-dev-0.0.1` on main + all 7 owned submodule HEADs
+  (§11.4.151 identical prefix, §11.4.113 ff-only). Anti-bluff anchors added+pushed to doc_processor/
+  llm_provider/llm_orchestrator/vision_engine (closes the pre-existing anti-bluff-cascade debt). Post-tag:
+  vision local-serving impl (Qwen2.5-VL-7B co-resident, design in scratch), GPU gen runtime proofs
+  (operator coder-pause), provider live proofs (API keys), per §11.4.103 parallel streams.
+- **Terminal goal (§11.4.126):** a fully-validated, prefixed release tag (§11.4.151) published across
   main + all owned submodules; local HelixLLM on the RTX 5090 exposed via HelixAgent to HelixCode/CLI agents.
 
 ## LIVE SERVER (operator-testable, running now)
@@ -51,7 +93,7 @@ coding output (`is_palindrome`, `func Add`). Restart: `podman start helixllm-cod
 | Host | ALT Workstation 11.1; RTX 5090 32 GB; driver 570.169; CUDA 12.8; podman 5.7.1 rootless; 64 cores / 251 GiB |
 | Canonical branch (§11.4.181) | `feature/helixllm-full-extension` — ACTIVE (no upstream tracking configured yet) |
 | Router image (built+proven) | `localhost/helixllm/llamacpp-router:cuda12.8-sm120` — latest llama.cpp, sm_120, OpenSSL/curl (`-hf` HTTPS proven), ships `rpc-server` |
-| Release prefix (§11.4.151) | `HELIX_RELEASE_PREFIX` else `helix_code` |
+| Release prefix (§11.4.151) | `helix-code` (operator decision 2026-07-07; `.env` `HELIX_RELEASE_PREFIX=helix-code`; form `helix-code-1.0.0-dev-0.0.1`, supersedes old `helixcode-vN`) |
 | Shared-host caution (§11.4.174) | helix_agent checkout carries a CONCURRENT QA/dep track's uncommitted go.mod/go.sum + `.qa_bak` — NOT ours; do not sweep on pointer-bump |
 
 ## Done so far this session (real, evidence-backed commits)

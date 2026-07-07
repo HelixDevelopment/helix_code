@@ -1,0 +1,8 @@
+# HelixLLM  go build ./...  evidence
+# Source-verified from code 2026-07-06
+# HEAD: e035599d4664dcc781b5f7e54f13220d3aee7993
+$ go version
+go version go1.26.4-X:nodwarf5 linux/amd64
+
+$ go build ./...   (from submodules/helix_llm)
+BUILD_EXIT_CODE=0

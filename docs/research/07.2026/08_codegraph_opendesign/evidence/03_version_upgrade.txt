@@ -1,0 +1,41 @@
+### codegraph version-reconcile (§11.4.80) — upgrade self-managed install — 2026-07-05T22:08:12Z
+### NO sudo — writes to user-writable ~/.codegraph/versions
+
+$ codegraph upgrade --help
+Usage: codegraph upgrade [options] [version]
+
+Update CodeGraph to the latest release (or a specific version)
+
+Options:
+  --check      Check whether an update is available without installing
+  -f, --force  Reinstall even if already on the target version
+  -h, --help   display help for command
+
+$ codegraph upgrade
+[1mCodeGraph[0m  current [36mv1.1.1[0m  latest [36mv1.2.0[0m
+[2mRunning the installer (curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh)…[0m
+Installing CodeGraph v1.2.0 (linux-x64)...
+Installed to /home/milos/.codegraph/versions/v1.2.0
+Linked     /home/milos/.local/bin/codegraph
+Removed    1 older version(s)
+
+Done. Run: codegraph --help
+
+[32m✓ Upgrade complete.[0m[2m Open a new terminal if the version looks unchanged (PATH cache).[0m
+[2mYour existing project indexes keep working, but were built by the previous version.[0m
+[2mTo pick up this version’s extraction improvements, refresh each project:[0m
+  [36mcodegraph sync[0m        [2m# incremental, fast[0m
+  [36mcodegraph index -f[0m    [2m# full rebuild[0m
+[2m(`codegraph status` flags any index that predates the engine you’re running.)[0m
+--- upgrade exit: 0 ---
+
+$ codegraph --version  # after upgrade
+1.2.0
+
+$ ls -la /home/milos/.local/bin/codegraph
+lrwxrwxrwx 1 milos milos 52 Jul  6 03:08 /home/milos/.local/bin/codegraph -> /home/milos/.codegraph/versions/v1.2.0/bin/codegraph
+$ ls -la /home/milos/.codegraph/versions/
+total 12
+drwxr-xr-x 3 milos milos 4096 Jul  6 03:08 .
+drwxr-xr-x 4 milos milos 4096 Jul  6 03:08 ..
+drwxr-xr-x 4 milos milos 4096 Jul  6 03:08 v1.2.0

@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+    "codegraph": {
+      "type": "stdio",
+      "command": "/Users/milosvasic/.local/bin/codegraph",
+      "args": [
+        "serve",
+        "--mcp",
+        "--path",
+        "/Volumes/T7/Projects/helix_code"
+      ]
+    },
+    "media-validator": {
+      "description": "Validate media files (MP4, PNG, TXT) via OCR/metadata/pattern matching for PASS/FAIL with evidence (§11.4.164)",
+      "type": "command",
+      "command": "bash",
+      "args": [
+        "constitution/skills/media-validator/media-validator.sh"
+      ],
+      "env": {
+        "MEDIA_VALIDATOR_EVIDENCE_DIR": "qa-results/media-validator"
+      },
+      "disabled": false,
+      "autoApprove": []
+    },
+    "open-design": {
+      "description": "OpenDesign MCP server for UI design system (§11.4.162). Requires OD daemon running on localhost:7456.",
+      "command": "npx",
+      "args": ["-y", "open-design-mcp"],
+      "env": {
+        "OD_DAEMON_URL": "http://localhost:7456"
+      },
+      "disabled": true,
+      "autoApprove": []
+    }
+  }
+}

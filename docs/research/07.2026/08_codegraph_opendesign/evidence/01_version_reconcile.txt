@@ -1,0 +1,29 @@
+### codegraph version-reconcile evidence — 2026-07-05T22:07:26Z
+
+$ which codegraph
+/home/milos/.local/bin/codegraph
+
+$ codegraph --version
+1.1.1
+
+$ npm ls -g @colbymchenry/codegraph
+/home/milos/.nvm/versions/node/v24.18.0/lib
+└── @colbymchenry/codegraph@1.2.0
+
+
+$ npm view @colbymchenry/codegraph version  # latest on registry
+1.2.0
+
+$ npm config get prefix  # user-writable prefix (NO sudo)
+/home/milos/.nvm/versions/node/v24.18.0
+
+$ ls -la /home/milos/.local/bin/codegraph
+lrwxrwxrwx 1 milos milos 52 Jun 27 02:02 /home/milos/.local/bin/codegraph -> /home/milos/.codegraph/versions/v1.1.1/bin/codegraph
+
+$ head -c 200 /home/milos/.local/bin/codegraph  # is it a shim?
+#!/bin/sh
+# Resolve symlinks (e.g. the ~/.local/bin/codegraph link install.sh creates) so
+# we find the real bundle dir, not the symlink's location.
+SELF="$0"
+while [ -L "$SELF" ]; do
+  target="$(read

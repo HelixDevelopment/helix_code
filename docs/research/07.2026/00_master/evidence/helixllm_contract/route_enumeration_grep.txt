@@ -1,0 +1,41 @@
+# HelixLLM route-enumeration evidence
+# Source-verified from code 2026-07-06
+# Repo: submodules/helix_llm  HEAD: e035599d4664dcc781b5f7e54f13220d3aee7993  (govern(cascade): backfill 11.4.142-165 anchor band per CONST-047 cascade)
+# Module: github.com/HelixDevelopment/HelixLLM   go go1.26.4
+
+## grep: all gin route registrations (verbs + Group) under internal/ pkg/ cmd/
+$ grep -rnE "\.(GET|POST|PUT|DELETE|PATCH|Handle|Any)\(|\.Group\(" internal pkg cmd --include=*.go | grep -v _test
+-----------------------------------------------------------------------
+internal/agents/api.go:102:	v1 := r.Group("/v1/agents")
+internal/agents/api.go:103:	v1.POST("/chat", agentChatHandler(agent, convCtx, kvCache))
+internal/agents/api.go:104:	v1.GET("/tools", agentToolsHandler(agent))
+internal/agents/api.go:105:	v1.POST("/tools/execute", toolExecuteHandler(agent))
+internal/agents/api.go:106:	v1.POST("/coordinate", coordinateHandler(coordinator))
+internal/agents/api.go:107:	v1.POST("/plan", planHandler(planner))
+internal/agents/api.go:108:	v1.POST("/memory/remember", memoryRememberHandler(memMgr))
+internal/agents/api.go:109:	v1.POST("/memory/recall", memoryRecallHandler(memMgr))
+internal/agents/api.go:112:	cacheGroup := r.Group("/v1")
+internal/agents/api.go:113:	cacheGroup.GET("/cache/stats", cacheStatsHandler(kvCache))
+internal/control/api.go:112:	g := r.Group("/internal/cluster")
+internal/control/api.go:113:	g.GET("/status", cp.handleStatus)
+internal/control/api.go:114:	g.POST("/probe", cp.handleProbe)
+internal/control/api.go:115:	g.POST("/deploy", cp.handleDeploy)
+internal/control/api.go:116:	g.POST("/rebalance", cp.handleRebalance)
+internal/gateway/router.go:58:	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+internal/gateway/router.go:63:	v1 := r.Group("/v1")
+internal/gateway/router.go:72:	v1.POST("/chat/completions", HandleChatCompletions(opts.Brain, opts.ToolManager, opts.RAGHook))
+internal/gateway/router.go:73:	v1.POST("/completions", HandleCompletions(opts.Brain))
+internal/gateway/router.go:74:	v1.GET("/models", HandleListModels(opts.ModelBrain))
+internal/gateway/router.go:75:	v1.GET("/models/:id", HandleGetModel(opts.ModelBrain))
+internal/gateway/router.go:76:	v1.POST("/embeddings", HandleEmbeddings(opts.ModelBrain, opts.Embedder))
+internal/gateway/router.go:79:	v1.GET("/hardware", func(c *gin.Context) {
+internal/gateway/router.go:84:	v1.POST("/messages", HandleMessages(opts.Brain))
+internal/gateway/router.go:87:	r.GET("/ws", HandleWebSocket(opts.Brain))
+internal/knowledge/api.go:20:	g := r.Group("/internal/knowledge")
+internal/knowledge/api.go:21:	g.POST("/ingest", handleIngest(pipeline))
+internal/knowledge/api.go:22:	g.POST("/query", handleQuery(pipeline))
+internal/knowledge/api.go:23:	g.GET("/collections", handleCollections(pipeline))
+internal/knowledge/api.go:24:	g.GET("/stats", handleStats(pipeline))
+internal/server/server.go:167:	s.engine.GET("/internal/health", healthHandler(s.opts.Checker))
+internal/server/server.go:173:		s.engine.GET("/internal/metrics", gin.WrapH(h))
+internal/server/server.go:175:		s.engine.GET("/internal/metrics", gin.WrapH(promhttp.Handler()))

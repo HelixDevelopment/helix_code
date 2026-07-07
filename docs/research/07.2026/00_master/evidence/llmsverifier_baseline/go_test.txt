@@ -1,0 +1,56 @@
+=== go test ./... (short, started 2026-07-05T22:08:18Z) ===
+go: downloading github.com/stretchr/testify v1.11.1
+go: downloading github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
+go: downloading github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
+go: downloading github.com/spf13/viper v1.21.0
+go: downloading github.com/mattn/go-sqlite3 v1.14.32
+go: downloading golang.org/x/crypto v0.53.0
+go: downloading github.com/go-ldap/ldap/v3 v3.4.12
+go: downloading github.com/golang-jwt/jwt/v5 v5.3.0
+go: downloading github.com/andybalholm/brotli v1.2.0
+go: downloading github.com/gin-gonic/gin v1.11.0
+go: downloading github.com/quic-go/quic-go v0.57.0
+go: downloading github.com/fsnotify/fsnotify v1.9.0
+go: downloading github.com/go-viper/mapstructure/v2 v2.4.0
+go: downloading github.com/sagikazarmark/locafero v0.11.0
+go: downloading github.com/spf13/afero v1.15.0
+go: downloading github.com/spf13/cast v1.10.0
+go: downloading github.com/spf13/pflag v1.0.10
+go: downloading github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358
+go: downloading github.com/go-asn1-ber/asn1-ber v1.5.8-0.20250403174932-29230038a667
+go: downloading golang.org/x/net v0.56.0
+go: downloading github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8
+go: downloading github.com/subosito/gotenv v1.6.0
+go: downloading go.yaml.in/yaml/v3 v3.0.4
+go: downloading google.golang.org/grpc v1.79.3
+go: downloading github.com/go-playground/validator/v10 v10.27.0
+go: downloading github.com/goccy/go-yaml v1.18.0
+go: downloading github.com/ugorji/go/codec v1.3.0
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217
+go: downloading github.com/gabriel-vasile/mimetype v1.4.8
+# github.com/mattn/go-sqlite3
+sqlite3-binding.c: In function ‘sqlite3ShadowTableName’:
+sqlite3-binding.c:125566:9: warning: assignment discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+125566 |   zTail = strrchr(zName, '_');
+       |         ^
+sqlite3-binding.c: In function ‘unistrFunc’:
+sqlite3-binding.c:131584:15: warning: initialization discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+131584 |     char *z = strchr(&zIn[i],'\\');
+       |               ^~~~~~
+ok  	llmsverifier	0.005s [no tests to run]
+?   	llmsverifier/challenges/runner	[no test files]
+ok  	llmsverifier/internal/benchmark	12.369s
+ok  	llmsverifier/internal/llmops	2.574s
+ok  	llmsverifier/internal/messaging	0.131s
+ok  	llmsverifier/internal/messaging/factory	0.104s
+ok  	llmsverifier/internal/messaging/inmemory	1.380s
+ok  	llmsverifier/internal/messaging/kafka	0.009s
+ok  	llmsverifier/internal/messaging/rabbitmq	0.005s
+ok  	llmsverifier/internal/rag	0.006s
+ok  	llmsverifier/internal/selfimprove	0.006s
+ok  	llmsverifier/tests/e2e	0.006s
+ok  	llmsverifier/tests/integration	0.005s
+ok  	llmsverifier/tests/performance	0.004s
+ok  	llmsverifier/tests/security	4.027s
+ok  	llmsverifier/tests/unit	0.012s
+=== go test EXIT=0 (finished 2026-07-05T22:09:56Z) ===
