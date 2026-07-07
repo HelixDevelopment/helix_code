@@ -17,4 +17,4 @@
 
 - HXC-044: internal/cognee — AMD-GPU rocm-smi JSON parser returns -1 sentinel instead of parsed GPU-use value
 
-*Last regenerated: 2026-07-07 by `scripts/generate_fixed_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
+*Last regenerated: 2026-07-08 by `scripts/generate_fixed_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*

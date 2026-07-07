@@ -95,3 +95,17 @@ HELIX_BIN_DIR=/custom/bin ./install_helix_path.sh
   placed at the HelixCode repo root by the conductor/operator — NOT placed
   automatically by this design subagent, per the "write only to scratch"
   constraint)
+
+## Sources verified
+
+Sources verified 2026-07-08: this is an internal HelixCode design document
+describing a repo-internal PATH-install script for HelixCode's own build
+outputs. Its factual claims (Makefile targets, binary output paths, build-dir
+layout) are verified directly against this repository's own Makefiles — see
+the "Investigation findings" table above, which cites the exact `file:line`
+for every claim (`helix_code/Makefile`, `submodules/helix_agent/Makefile`,
+`submodules/helix_llm/Makefile`, `submodules/llms_verifier/Makefile`). No
+third-party service, library, SDK, or public API is documented in this file,
+so there is no external online source to cross-reference per §11.4.99; the
+repository itself (via CodeGraph/grep-verified file:line citations) is the
+authoritative source for every instruction here.
