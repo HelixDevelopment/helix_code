@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>IMAGE_GEN_PROVIDER</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">IMAGE_GEN_PROVIDER</h1>
+</header>
+<h1 id="helixllm-image-generation-provider-design-spike-p3-t2-gpu-burst-tier">HelixLLM
+Image-Generation Provider — Design Spike (P3-T2 / GPU BURST tier)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Status</strong></td>
+<td>DESIGN (spike before implementation, §11.4.6 — do NOT code the
+provider until this is agreed AND a burst window is scheduled; see
+§0)</td>
+</tr>
+<tr>
+<td><strong>Scope</strong></td>
+<td>The <strong>GPU image-generation</strong> capability — a
+<strong>Burst-tier</strong> (single-owner §11.4.119) workload on the
+single RTX 5090 · 32 GB. Unlike the CPU embeddings/translation spikes,
+image models mostly do NOT co-reside with the resident coder fleet</td>
+</tr>
+<tr>
+<td><strong>Owns</strong></td>
+<td>Implementation-plan item <strong>P3-T2</strong>
+(<code>04_implementation_plan.md:80</code>)</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-07-07 · Revision 1 · Track <code>(T1/main)</code> · Branch
+<code>feature/helixllm-full-extension</code></td>
+</tr>
+<tr>
+<td><strong>Grounding</strong></td>
+<td><code>submodules/helix_llm/docs/VRAM_BROKER.md</code> §2 (Burst
+tier) + <code>internal/vrambroker/broker.go</code> (the a12df57 broker
+CORE that now EXISTS:
+<code>Acquire</code>/<code>Release</code>/<code>Budget</code>,
+<code>ClassImage</code>, single-owner + fail-closed over-budget refusal)
+· <code>submodules/helix_llm/docs/API_CONTRACT.md</code> §2/§4 (gateway
+<code>/v1</code> group) ·
+<code>docs/research/07.2026/00_master/04_implementation_plan.md</code>
+P3-T2 · sibling <code>EMBEDDINGS_PROVIDER.md</code> +
+<code>TRANSLATION_PROVIDER.md</code> (structure mirror)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff (§11.4.6):</strong> every VRAM / latency /
+step-count figure in this document that is not a directly-quoted
+upstream value is an <strong>estimate to be measured</strong>
+(<code>(EST — measure)</code>). <code>nvidia-smi</code> deltas +
+wall-clock captured under <code>docs/qa/&lt;run-id&gt;/image_gen/</code>
+are the real budget; no benchmark below is a captured measurement. Every
+co-reside-vs-burst verdict MUST be re-confirmed against a live
+<code>Budget().free</code> read before any PASS.</p>
+</blockquote>
+<h2 id="why-this-is-design-only-and-why-it-is-a-burst-workload-honest-11.4.6">0.
+Why this is DESIGN-only, and why it is a BURST workload (honest
+§11.4.6)</h2>
+<p>The embeddings (P3-T6) and translation (P3-T5) CPU spikes ship
+<strong>before</strong> the P0/P1 GPU chain because they take a
+<strong>zero-byte VRAM lease</strong> (<code>VRAM_BROKER.md</code> §2
+CPU-only tier). Image generation is the <strong>opposite case</strong> —
+it is the canonical <strong>Burst tier</strong> member
+(<code>VRAM_BROKER.md</code> §2: <em>“Burst (single-owner §11.4.119) …
+FLUX image-gen, WAN/LTX video-gen … started per-job, never co-resident
+with another burst; may require pausing warm tier”</em>).</p>
+<p><strong>The live-state constraint (the reason this is DESIGN, not
+impl):</strong> the RTX 5090 (32 GB) currently holds the resident coder
+fleet — <strong>~19.4 GB used, ~12.7 GB free</strong>
+(<code>VRAM_BROKER.md</code> §2 resident tier ≈ 18 GB weights + 10–12 GB
+KV). The flagship image models do NOT fit that free residual:</p>
+<ul>
+<li><strong>FLUX.1-dev / schnell at full bf16</strong> needs <strong>~50
+GB of RAM/VRAM to load all modelling components</strong> (HF diffusers
+memory doc, §1) — it does not fit the 32 GB card at all without CPU
+offload, let alone the free 12.7 GB.</li>
+<li><strong>FLUX fp8</strong> (ComfyUI / <code>optimum-quanto</code>)
+drops the transformer to ~12 GB but, with the T5-XXL text encoder + CLIP
++ VAE + working set resident, peaks at <strong>~16–20 GB
+<code>(EST)</code></strong> — still <strong>over</strong> the free 12.7
+GB.</li>
+</ul>
+<p>So the flagship path requires a <strong>full GPU burst</strong> —
+pausing the warm/coder tier to free the card — which is an
+<strong>operator-gated</strong> decision (<code>VRAM_BROKER.md</code>
+§2: <em>“may require pausing warm tier”</em>). We will
+<strong>not</strong> take that decision now; this document is the
+<strong>exact, ready-to-implement spec</strong> so that when a burst
+window is scheduled, implementation is a mechanical follow-through, not
+a fresh design.</p>
+<p>A <strong>smaller, heavily-quantised fallback DOES co-reside</strong>
+in the free ~12.7 GB (§1.5) — that lane makes image-gen available even
+when no burst window is scheduled, and is the recommended first thing to
+actually build.</p>
+<blockquote>
+<p><strong>Honest boundary vs the plan (§11.4.6).</strong>
+<code>04_implementation_plan.md:80</code> specifies P3-T2 as
+<em>“FLUX.1-dev/schnell via ComfyUI; <code>/v1/images/generations</code>
+bridge. Signature: real image, not stub (dimensions + non-trivial
+content check).”</em> This document (a) keeps ComfyUI + FLUX as the
+reuse choice (§11.4.74), (b) <strong>strengthens</strong> the
+“non-trivial content check” signature into a CLIP-text-image-similarity
+semantic oracle with a golden-bad self-validation (§5, per §11.4.107(10)
+— a “dimensions + not-all-black” check is a §11.4 bluff: a random-noise
+or wrong-prompt image passes it), and (c) adds the explicit Burst-tier
+broker integration the plan line does not spell out. Flagged, not a
+contradiction.</p>
+</blockquote>
+<hr />
+<h2 id="engine-choice-evidence-based-comparison">1. Engine choice —
+evidence-based comparison</h2>
+<h3 id="the-candidates">1.1 The candidates</h3>
+<table>
+<colgroup>
+<col style="width: 2%" />
+<col style="width: 7%" />
+<col style="width: 21%" />
+<col style="width: 31%" />
+<col style="width: 14%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Engine</th>
+<th>Serves image-gen how?</th>
+<th>Fits free ~12.7 GB (co-reside)?</th>
+<th>Model coverage</th>
+<th>New engine to the tree?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td><strong>ComfyUI</strong> (graph server: <code>POST /prompt</code> +
+<code>/ws</code> + <code>/history/{id}</code> + <code>/view</code>)</td>
+<td>Programmatic workflow-graph API; the gateway bridges OpenAI-images →
+a ComfyUI graph</td>
+<td><strong>No</strong> for FLUX fp8 (~16–20 GB peak) — needs a
+<strong>burst</strong>; SDXL co-resides</td>
+<td>FLUX.1-dev/schnell, SDXL/SD3.5, LoRA, ControlNet — broadest</td>
+<td>Container only (no Go dep); the plan already names it</td>
+</tr>
+<tr>
+<td>B</td>
+<td><strong>stable-diffusion.cpp</strong>
+(<code>leejet/stable-diffusion.cpp</code>) + a thin FastAPI shim</td>
+<td>GGUF/quantised inference; needs a LibreTranslate-style OpenAI shim
+(like the NLLB lane)</td>
+<td><strong>Yes</strong> for FLUX-schnell q4 + SDXL (T5 on CPU) — the
+<strong>co-reside</strong> lane</td>
+<td>FLUX.1-dev/schnell, SDXL/SDXL-Turbo, SD3/SD3.5; GGUF q4/q8;
+CPU(AVX/AVX2/AVX512)+CUDA</td>
+<td>New shim container (same family as the NLLB shim)</td>
+</tr>
+<tr>
+<td>C</td>
+<td><strong>🧨 diffusers</strong> (Python <code>FluxPipeline</code> + a
+FastAPI shim)</td>
+<td>Python lib; needs a custom OpenAI-images shim</td>
+<td>fp8 (<code>optimum-quanto</code>) <code>&lt;16 GB</code> but peak
+still <code>&gt;12.7</code>; needs a burst</td>
+<td>FLUX, SDXL, SD3, every HF pipeline; every offload/quant knob</td>
+<td>New Python shim + heavier deps</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Hosted API (OpenAI <code>gpt-image</code>, others)</td>
+<td>Native — but a bespoke remote adapter</td>
+<td>N/A (remote)</td>
+<td>remote</td>
+<td>New remote dep + <strong>secret + egress</strong> — rejected as
+default</td>
+</tr>
+</tbody>
+</table>
+<h3 id="decision">1.2 Decision</h3>
+<p><strong>Primary engine: ComfyUI serving FLUX.1-schnell (flagship), on
+a full GPU burst (operator-gated).</strong> ComfyUI is the reuse choice
+the plan already names (§11.4.74), exposes a real programmatic API
+(<code>POST /prompt</code> → <code>/ws</code> progress →
+<code>/history/{id}</code> → <code>/view</code>), and covers
+FLUX.1-schnell (Apache-2.0), FLUX.1-dev (higher quality,
+non-commercial), SDXL, LoRA, and ControlNet behind ONE backend and the
+SAME <code>/v1/images/generations</code> gateway route.
+<strong>FLUX.1-schnell is the default flagship model</strong>
+(Apache-2.0 + 1–4 steps ⇒ the shortest possible burst);
+<strong>FLUX.1-dev is the higher-quality lane</strong> behind the same
+engine + route (heavier, non-commercial licence — §1.4).</p>
+<p><strong>Documented smaller-fits-more-often fallback:
+stable-diffusion.cpp (GGUF) via a thin OpenAI-images shim, serving
+FLUX.1-schnell-q4 (T5 encoder on CPU) OR SDXL — which CO-RESIDES in the
+free ~12.7 GB, no coder pause.</strong> This is the lane that makes
+image-gen available <strong>without</strong> a scheduled burst window,
+and — being a GGUF/CPU-capable engine in the same family as the NLLB
+CTranslate2 shim — reuses a pattern already in the tree.
+<strong>Recommendation: build the co-reside sd.cpp fallback
+FIRST</strong> (available today, no operator gate), and land the
+ComfyUI+FLUX flagship burst path when a burst window is scheduled.</p>
+<h3 id="justification-cited-latest-upstream-docs-11.4.99-11.4.150">1.3
+Justification (cited, LATEST upstream docs — §11.4.99 / §11.4.150)</h3>
+<ol type="1">
+<li><strong>FLUX.1-schnell is the right flagship for a BURST: permissive
+licence + fewest steps.</strong> It is <em>“a 12 billion parameter
+rectified flow transformer”</em>, <em>“Released under the
+<code>apache-2.0</code> licence, the model can be used for personal,
+scientific, and commercial purposes”</em>, and <em>“can generate
+high-quality images in only 1 to 4 steps”</em> (trained with <em>“latent
+adversarial diffusion distillation”</em>, <code>guidance_scale=0</code>,
+<code>max_sequence_length=256</code>). Fewest steps = the shortest
+GPU-burst occupancy = the least time the coder tier is paused. Sources:
+<a href="https://huggingface.co/black-forest-labs/FLUX.1-schnell">black-forest-labs/FLUX.1-schnell
+(HF model card)</a> (accessed 2026-07-07); <a href="https://huggingface.co/docs/diffusers/en/api/pipelines/flux">diffusers
+— FLUX pipeline / memory</a> (accessed 2026-07-07).</li>
+<li><strong>FLUX.1-dev is the higher-quality lane, but non-commercial +
+heavier.</strong> Also <em>“a 12 billion parameter rectified flow
+transformer”</em>, governed by the <em>“FLUX.1 [dev] Non-Commercial
+License”</em>, and the reference implementation runs
+<em>“num_inference_steps=50”</em> with <code>guidance_scale=3.5</code> —
+~12× the schnell step count and a licence that blocks commercial ship.
+It is the same engine + same route (a config model-swap), so the
+CPU→GPU-quality migration is a model-id change, not an ecosystem change.
+Sources: <a href="https://huggingface.co/black-forest-labs/FLUX.1-dev">black-forest-labs/FLUX.1-dev
+(HF model card)</a> (accessed 2026-07-07); <a href="https://huggingface.co/docs/diffusers/en/api/pipelines/flux">diffusers
+— FLUX pipeline</a> (accessed 2026-07-07).</li>
+<li><strong>The full-FLUX memory wall is why this is a burst, quantified
+from upstream.</strong> diffusers states <em>“Flux is a very large model
+and requires ~50GB of RAM/VRAM to load all the modeling
+components.”</em> The documented sub-16 GB paths —
+<code>optimum-quanto</code> fp8 (<em>“&lt; 16GB VRAM”</em>),
+bitsandbytes 8-bit, and <code>enable_sequential_cpu_offload()</code>
+(<em>“For Low VRAM: 4-32GB”</em>) + <code>vae.enable_slicing()</code>
+<ul>
+<li><code>vae.enable_tiling()</code> — all trade throughput for
+footprint and still peak <strong>above the free 12.7 GB</strong> with
+the T5 encoder resident (§1.5). This is the evidence base for “flagship
+FLUX ⇒ full burst, coder paused.” Source: <a href="https://huggingface.co/docs/diffusers/en/api/pipelines/flux">diffusers
+— FLUX memory optimisation</a> (accessed 2026-07-07).</li>
+</ul></li>
+<li><strong>stable-diffusion.cpp is the genuine co-reside fallback: GGUF
++ CPU text encoding.</strong> Its feature list explicitly supports
+<em>“FLUX.1-dev/FLUX.1-schnell”</em>, <em>“SDXL, SDXL-Turbo”</em>,
+<em>“SD3/SD3.5”</em>, the <em>“GGUF (.gguf)”</em> weight format, and
+both <em>“CPU (AVX, AVX2 and AVX512 support for x86 architectures)”</em>
+and <em>“CUDA”</em> backends. Running the FLUX transformer at GGUF
+<strong>q4</strong> on the GPU while keeping the T5-XXL text encoder on
+<strong>CPU</strong> drops the resident GPU footprint to ~7–9 GB
+<code>(EST)</code> — which fits the free 12.7 GB with the broker’s 2 GB
+headroom (§1.5). Being GGUF + CPU-capable, it is the direct image
+analogue of the NLLB CTranslate2-int8 CPU shim
+(<code>TRANSLATION_PROVIDER.md</code> §1) — a family already in the
+tree. Source: <a href="https://github.com/leejet/stable-diffusion.cpp">leejet/stable-diffusion.cpp
+(README)</a> (accessed 2026-07-07).</li>
+<li><strong>ComfyUI is a real programmatic backend, not just a
+UI.</strong> It exposes <code>POST /prompt</code> (<em>“submit a prompt
+to the queue”</em> → <code>prompt_id</code>), a <code>/ws</code>
+WebSocket (<code>execution_start</code> / <code>executing</code> /
+<code>progress</code> / <code>executed</code>),
+<code>GET /history/{prompt_id}</code> (<em>“retrieve the queue history …
+containing execution results”</em>), and <code>GET /view</code>
+(<em>“view an image”</em>) — the four routes the gateway bridges an
+OpenAI-images request onto (§3). ComfyUI’s own tutorial documents the
+FLUX fp8 lane (<em>“fp8 checkpoint version reduces VRAM needs”</em>;
+<code>t5xxl_fp8_e4m3fn.safetensors</code> <em>“when your VRAM is
+low”</em> vs <code>t5xxl_fp16</code> <em>“recommended for &gt;32GB
+VRAM”</em>; required files <code>clip_l.safetensors</code>,
+<code>t5xxl_*.safetensors</code>, <code>ae.safetensors</code>). Sources:
+<a href="https://docs.comfy.org/development/comfyui-server/comms_routes">ComfyUI
+— server API routes</a> (accessed 2026-07-07); <a href="https://docs.comfy.org/tutorials/flux/flux-1-text-to-image">ComfyUI
+— FLUX.1 text-to-image tutorial</a> (accessed 2026-07-07).</li>
+<li><strong>SDXL is the safe-licence, comfortably-co-resident fallback
+model.</strong> SDXL base is a base+refiner <em>“ensemble of experts
+pipeline”</em> under the <em>“CreativeML Open RAIL++-M License”</em>
+(permissive) with <code>pipe.enable_model_cpu_offload()</code> for
+VRAM-limited hosts. Its ~2.6 B-param UNet at fp16 (~5–6 GB) + text
+encoders
+<ul>
+<li>VAE + working set peaks at ~7–9 GB <code>(EST)</code> — the most
+reliable co-reside candidate, and the fallback-of-the-fallback when a
+FLUX pair is unavailable. Source: <a href="https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0">stabilityai/stable-diffusion-xl-base-1.0
+(HF model card)</a> (accessed 2026-07-07).</li>
+</ul></li>
+<li><strong>Why the hosted-API lane (D) is rejected as default.</strong>
+A hosted image API requires a committed key (§CONST-042 / §11.4.10
+secret-leak surface) + third- party egress of user prompts, and defeats
+the offline/self-host posture. It MAY be added later as an opt-in,
+config-injected, key-from-<code>.env</code> provider descriptor — never
+the default (mirrors <code>TRANSLATION_PROVIDER.md</code> §1.3(6)).</li>
+</ol>
+<h3 id="model-selection-config-value-never-hardcoded-const-046-11.4.35">1.4
+Model selection (config value, never hardcoded — §CONST-046 /
+§11.4.35)</h3>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 13%" />
+<col style="width: 12%" />
+<col style="width: 15%" />
+<col style="width: 36%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>Model</th>
+<th>Params</th>
+<th>Steps</th>
+<th>Licence</th>
+<th>Fits free ~12.7 GB?</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>black-forest-labs/FLUX.1-schnell</code> (fp8, ComfyUI)</td>
+<td>12B</td>
+<td>1–4</td>
+<td>Apache-2.0</td>
+<td><strong>No</strong> (~16–20 GB peak <code>(EST)</code>) →
+<strong>full burst</strong></td>
+<td><strong>Default flagship</strong> — permissive + fewest-step
+burst</td>
+</tr>
+<tr>
+<td><code>black-forest-labs/FLUX.1-dev</code> (fp8, ComfyUI)</td>
+<td>12B</td>
+<td>~50</td>
+<td><strong>Non-commercial</strong></td>
+<td>No (~16–20 GB peak <code>(EST)</code>) → full burst</td>
+<td>Higher-quality lane (heavier, licence-gated Q5)</td>
+</tr>
+<tr>
+<td><code>FLUX.1-schnell-Q4</code> (GGUF, stable-diffusion.cpp, T5 on
+CPU)</td>
+<td>12B→q4</td>
+<td>1–4</td>
+<td>Apache-2.0</td>
+<td><strong>Yes</strong> (~7–9 GB <code>(EST)</code>) →
+<strong>co-reside</strong></td>
+<td><strong>Co-reside fallback</strong> — image-gen with no coder
+pause</td>
+</tr>
+<tr>
+<td><code>stabilityai/stable-diffusion-xl-base-1.0</code> (fp16)</td>
+<td>~2.6B UNet</td>
+<td>25–40</td>
+<td>CreativeML OpenRAIL++-M</td>
+<td><strong>Yes</strong> (~7–9 GB <code>(EST)</code>) → co-reside</td>
+<td>Fallback model — safe licence, reliably co-resident</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Licence note (§11.4.6, flag for review — Q5):</strong>
+FLUX.1-<strong>dev</strong> is <strong>non-commercial</strong>. If
+HelixLLM ships image-gen commercially, the dev lane is blocked and the
+<strong>Apache-2.0 FLUX.1-schnell</strong> + <strong>OpenRAIL++
+SDXL</strong> lanes are load-bearing. Documentation flag, not a
+resolution.</p>
+</blockquote>
+<p><strong>Recommendation:</strong> default flagship
+<code>FLUX.1-schnell</code> fp8 via ComfyUI (burst); default co-reside
+fallback <code>SDXL</code> (safe licence, reliably fits) OR
+<code>FLUX.1-schnell-Q4</code> GGUF via sd.cpp (higher quality, tighter
+fit) — chosen on measured <code>Budget().free</code> at admission time
+(§2), never a static guess.</p>
+<h3 id="vram-budget-estimates-to-be-measured-11.4.6-fit-vs-burst-verdict">1.5
+VRAM budget — ESTIMATES to be measured (§11.4.6), fit-vs-burst
+verdict</h3>
+<p>All figures <code>(EST — measure)</code>; replace with on-card
+<code>nvidia-smi</code> deltas + p50/p95/p99 wall-clock captured under
+<code>docs/qa/&lt;run-id&gt;/image_gen/</code> before any PASS.
+Free-VRAM baseline: coder resident ⇒ <strong>~12.7 GB free</strong>
+(§0). Broker headroom = <strong>2 GiB</strong>
+(<code>broker.go:13</code> <code>HeadroomBytes</code>), so a co-reside
+model must fit <code>need + 2 GiB ≤ 12.7 GiB</code> ⇒
+<code>need ≲ 10.7 GiB</code>.</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 18%" />
+<col style="width: 21%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>Config</th>
+<th>Transformer/UNet <code>(EST)</code></th>
+<th>Text enc (T5 / CLIP) <code>(EST)</code></th>
+<th>VAE + working <code>(EST)</code></th>
+<th>Peak resident <code>(EST)</code></th>
+<th>Verdict vs free 12.7 GB</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FLUX.1-dev/schnell <strong>bf16 full</strong></td>
+<td>~24 GB</td>
+<td>~9.5 GB (T5 bf16)</td>
+<td>~2 GB</td>
+<td><strong>~50 GB</strong> (diffusers: <em>“~50GB … to load all …
+components”</em>)</td>
+<td><strong>Full burst + CPU offload</strong> — exceeds 32 GB card</td>
+</tr>
+<tr>
+<td>FLUX.1-schnell/dev <strong>fp8</strong> (ComfyUI)</td>
+<td>~12 GB</td>
+<td>~4.7 GB (T5 fp8, resident)</td>
+<td>~2 GB</td>
+<td><strong>~16–20 GB</strong></td>
+<td><strong>Full burst (coder paused)</strong> — over 12.7 GB free</td>
+</tr>
+<tr>
+<td>FLUX.1-schnell <strong>q4 GGUF</strong> (sd.cpp, <strong>T5 on
+CPU</strong>)</td>
+<td>~7 GB</td>
+<td>~0.25 GB (CLIP only on GPU)</td>
+<td>~1.7 GB</td>
+<td><strong>~7–9 GB</strong></td>
+<td><strong>Co-reside</strong> ✓ (<code>need+2 ≤ 12.7</code>)</td>
+</tr>
+<tr>
+<td><strong>SDXL</strong> fp16 (sd.cpp / ComfyUI)</td>
+<td>~5.5 GB</td>
+<td>~1.4 GB</td>
+<td>~1.7 GB</td>
+<td><strong>~7–9 GB</strong></td>
+<td><strong>Co-reside</strong> ✓</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Latency <code>(EST)</code>:</strong> FLUX-schnell 4-step
+burst ~2–8 s per 1024² image on the 5090; FLUX-dev 50-step ~20–60 s;
+SDXL 30-step ~3–10 s; sd.cpp q4 with CPU T5 slower on the text-encode
+leg. <strong>These numbers gate nothing until measured.</strong></p>
+<hr />
+<h2 id="vram-broker-integration-the-burst-lease-11.4.119">2. VRAM-broker
+integration — the burst lease (§11.4.119)</h2>
+<p>The broker CORE <strong>already exists</strong> —
+<code>internal/vrambroker/broker.go</code> (commit <code>a12df57</code>,
+verified 2026-07-07). Image-gen is class
+<strong><code>ClassImage</code></strong> (<code>broker.go:21</code>
+<code>ClassImage Class = &quot;image&quot; // burst tier — single-owner (§11.4.119)</code>),
+and <code>Class.IsBurst()</code> is true for it
+(<code>broker.go:29</code>). The provider acquires a burst lease around
+every generation job:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pseudo-flow in the image-gen provider / gateway handler</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>lease<span class="op">,</span> err <span class="op">:=</span> broker<span class="op">.</span>Acquire<span class="op">(</span>ctx<span class="op">,</span> vrambroker<span class="op">.</span>ClassImage<span class="op">,</span> needBytes<span class="op">)</span> <span class="co">// needBytes = measured model footprint</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ErrBurstInUse  → another image/video burst is live → 429/queue (§2.2)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ErrBudgetExceeded → over budget while coder resident → the operator-gated</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">//                     &quot;pause warm tier&quot; decision (§2.3), NOT an OOM (fail-closed)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ErrThermalUnsafe / ErrBudgetUnavailable → 503, honest (§11.4.133)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mapBrokerErrorToHTTP<span class="op">(</span>err<span class="op">)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">defer</span> lease<span class="op">.</span>Release<span class="op">()</span> <span class="co">// idempotent (broker.go:47) — frees the single-owner slot</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>img <span class="op">:=</span> backend<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> req<span class="op">)</span>   <span class="co">// ComfyUI /prompt … or sd.cpp shim</span></span></code></pre></div>
+<h3 id="what-the-existing-broker-already-enforces-reuse-dont-reimplement-11.4.74">2.1
+What the existing broker already enforces (reuse, don’t reimplement
+§11.4.74)</h3>
+<ul>
+<li><strong>Single-owner burst (§11.4.119).</strong>
+<code>Acquire</code> refuses a second burst lease with
+<code>ErrBurstInUse</code> <strong>before</strong> the budget read —
+<em>“Single-owner enforcement for burst classes … no second burst lease
+may be live while one is. Checked BEFORE the budget read so a contended
+burst is rejected deterministically.”</em>
+(<code>broker.go:147-149</code>). Image and video
+<strong>cannot</strong> run concurrently — exactly the §11.4.119
+partitioning the plan requires.</li>
+<li><strong>Fail-closed over-budget refusal (NEVER an OOM).</strong>
+Admission is
+<code>admit(free, needBytes, headroom) = free &gt;= needBytes + headroom</code>
+on the <strong>measured</strong> <code>nvidia-smi</code> free
+(<code>broker.go:161-183</code>, <code>budget.go:readNvidiaSMI</code>);
+an unreadable budget returns <code>ErrBudgetUnavailable</code> (fails
+closed, <code>broker.go:157-160</code>); an over-budget request returns
+<code>ErrBudgetExceeded</code> (<code>broker.go:161-163</code>). This is
+the anti-bluff core the §1.1 mutation disables
+(<code>mutation_test.go</code>).</li>
+<li><strong>Thermal/power safety gate (§11.4.133).</strong>
+<code>WithThermalGuard</code> injects a temperature/power probe
+consulted before admission (<code>broker.go:82,151-154</code>); refusing
+returns <code>ErrThermalUnsafe</code>. Image-gen is a heavy,
+sustained-power workload — this gate is load-bearing for a burst.</li>
+<li><strong>Idempotent release.</strong> <code>Lease.Release()</code>
+frees the single-owner slot exactly once (<code>broker.go:47-55</code>)
+— a <code>defer lease.Release()</code> around the job hands the card
+back deterministically.</li>
+</ul>
+<h3 id="co-reside-small-model-no-coder-pause-needed">2.2 Co-reside
+(small model) — no coder pause needed</h3>
+<p>For the <strong>co-reside fallback</strong> (SDXL / FLUX-schnell-q4,
+<code>needBytes ≈ 8 GiB</code>),
+<code>Acquire(ctx, ClassImage, 8 GiB)</code> <strong>succeeds while the
+coder stays resident</strong>: <code>8 + 2 ≤ 12.7</code> ⇒
+<code>admit</code> returns true. It is still a
+<strong>single-owner</strong> burst (no concurrent image/video), but it
+does <strong>not</strong> require pausing the coder — the job runs in
+the free residual and <code>Release</code> hands it back. This is the
+lane that ships first (no operator gate).</p>
+<h3 id="pause-warm-tier-large-model-operator-gated-design-only">2.3
+Pause-warm-tier (large model) — operator-gated, DESIGN-only</h3>
+<p>For the <strong>flagship</strong> (FLUX fp8,
+<code>needBytes ≈ 18 GiB</code>),
+<code>Acquire(ctx, ClassImage, 18 GiB)</code> <strong>fails closed with
+<code>ErrBudgetExceeded</code></strong> while the coder is resident
+(<code>18 + 2 &gt; 12.7</code>). The design intent
+(<code>VRAM_BROKER.md</code> §2/§4: <em>“may require pausing warm tier …
+pause the warm tier, run, and the warm tier resumes”</em>) is to
+evict/park the warm+coder tier to free the card, run the burst, then
+resume.</p>
+<blockquote>
+<p><strong>Honest boundary (§11.4.6): the broker does NOT yet implement
+eviction.</strong> The shipped <code>Acquire</code>
+<strong>refuses</strong> over-budget rather than pausing the coder
+(<code>broker.go</code> has no <code>sleep(coder)</code> /
+vLLM-Sleep-Mode / <code>keep_alive:0</code> call — confirmed by reading
+the file). Pausing the resident coder fleet to free ~18 GB is a
+<strong>high-blast-radius, operator-gated decision</strong> (it stalls
+every live agent), so it is <strong>deferred to the P1-T4
+residency-scheduler implementation + an explicit operator go</strong>,
+per §0. Until then, the flagship-FLUX path is <strong>admissible only
+during a scheduled burst window</strong> where the coder tier is already
+parked; the co-reside fallback (§2.2) covers the everyday case. This is
+the §11.4.101 block-only-when rule: pausing the coder is
+irreversible-for-the- session + high-blast-radius, so it blocks on the
+operator rather than being decided autonomously.</p>
+</blockquote>
+<h3 id="async-job-model-composes-the-broker-queue">2.4 Async job model
+(composes the broker queue)</h3>
+<p>Because a flagship burst may <strong>wait</strong> (for a scheduled
+window, or behind a live burst), the gateway route (§3) supports an
+<strong>async job</strong> shape (submit → poll) in addition to the sync
+path — mirroring P3-T3 video (<code>04_implementation_plan.md:81</code>
+<em>“async job endpoint”</em>). A queued job surfaces honestly
+(<code>202 Accepted</code> + a job id, or <code>429</code> with
+<code>Retry-After</code> on <code>ErrBurstInUse</code>), never a silent
+hang (<code>VRAM_BROKER.md</code> §5 starvation guard).</p>
+<hr />
+<h2 id="api-contract-openai-images-v1imagesgenerations-consistent-with-api_contract.md">3.
+API contract — OpenAI-images <code>/v1/images/generations</code>
+(consistent with API_CONTRACT.md)</h2>
+<p>HelixLLM registers <strong>no</strong> image route today —
+<code>grep -rn &quot;images/generations&quot; submodules/helix_llm/internal</code>
+returns <strong>empty</strong> (verified 2026-07-07). This provider
+<strong>adds</strong> <code>POST /v1/images/generations</code> under the
+gateway <code>/v1</code> group so it inherits the API-key middleware +
+rate-limit + security-headers uniformly (<code>API_CONTRACT.md</code>
+§2/§3, <code>router.go:63-68</code>) — the same reviewed placement the
+translation spike chose for <code>/v1/translate</code>
+(<code>TRANSLATION_PROVIDER.md</code> §2).</p>
+<h3 id="request-openai-images-shape">3.1 Request — OpenAI images
+shape</h3>
+<pre><code>POST /v1/images/generations
+Authorization: Bearer &lt;key&gt;            # gateway /v1 API-key middleware (router.go:63-64)
+Content-Type: application/json
+{
+  &quot;model&quot;: &quot;helix-image&quot;,              # Helix alias → backing FLUX/SDXL model (CONST-036)
+  &quot;prompt&quot;: &quot;a red fox reading a book under an oak tree, watercolor&quot;,
+  &quot;n&quot;: 1,                              # OPTIONAL — number of images
+  &quot;size&quot;: &quot;1024x1024&quot;,                # OPTIONAL — e.g. 1024x1024, 1536x1024
+  &quot;quality&quot;: &quot;auto&quot;,                  # OPTIONAL — low|medium|high|auto (maps to steps/model)
+  &quot;response_format&quot;: &quot;b64_json&quot;       # OPTIONAL — &quot;b64_json&quot; (DEFAULT here) | &quot;url&quot;
+}</code></pre>
+<ul>
+<li><code>model</code> — a <strong>Helix alias</strong>, not a raw HF id
+(CONST-036/037: models come from the provider layer / LLMsVerifier,
+never hardcoded). Alias→backing-model map (<code>helix-image</code> →
+FLUX.1-schnell / FLUX.1-dev / SDXL) lives in HelixLLM config (env/YAML),
+never a source literal (§CONST-046) — adding a model = a config edit, no
+code change.</li>
+<li><code>quality</code> — maps to a step-count/model policy in the shim
+(<code>low</code>→schnell 1-step, <code>high</code>→dev 50-step), never
+exposed as a raw step int to the client.</li>
+<li><code>response_format</code> — <strong>defaults to
+<code>b64_json</code></strong> (self-contained; no object store required
+in-tree). <code>url</code> requires a configured static-asset host (Open
+Q3).</li>
+</ul>
+<p>Source for the request/response field names: <a href="https://developers.openai.com/api/docs/guides/image-generation">OpenAI
+— image-generation guide (developers.openai.com)</a> (accessed
+2026-07-07). (Negative finding §11.4.99(B): the canonical
+<code>platform.openai.com/docs/api-reference/images/create</code>
+returned <strong>HTTP 403</strong> to automated fetch on 2026-07-07 —
+the field list is instead grounded in the developers-guide mirror above
++ the in-tree <code>API_CONTRACT.md</code> gateway placement, which is
+the authoritative shape for THIS system.)</p>
+<h3 id="response-openai-images-shape">3.2 Response — OpenAI images
+shape</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;created&quot;</span><span class="fu">:</span> <span class="dv">1751840000</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span> <span class="dt">&quot;b64_json&quot;</span><span class="fu">:</span> <span class="st">&quot;iVBORw0KGgoAAAANSUhEUgAA…(PNG bytes, base64)…&quot;</span> <span class="fu">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<ul>
+<li><code>data[]</code> — one entry per generated image;
+<code>{b64_json}</code> (default) or <code>{url}</code>.</li>
+<li><code>GET /v1/models</code> MUST advertise <code>helix-image</code>
+with <code>owned_by:&quot;helix&quot;</code> and an <code>image</code> capability
+flag so LLMsVerifier + clients discover it (CONST-036/040) — the
+capability flag is verifier-sourced, never hardcoded (<code>P2-T3</code>
+seam).</li>
+</ul>
+<h3 id="backend-bridge-comfyui-primary-sd.cpp-shim-fallback">3.3 Backend
+bridge — ComfyUI (primary) / sd.cpp shim (fallback)</h3>
+<ul>
+<li><strong>ComfyUI backend:</strong> the handler builds a FLUX/SDXL
+<strong>workflow graph</strong> from
+<code>{prompt, size, quality}</code> → <code>POST /prompt</code> (→
+<code>prompt_id</code>) → waits on the <code>/ws</code>
+<code>executed</code> event (or polls
+<code>GET /history/{prompt_id}</code>) → fetches the PNG via
+<code>GET /view</code> → returns it <code>b64_json</code>. (ComfyUI
+routes verified — §1.3(5).)</li>
+<li><strong>sd.cpp fallback backend:</strong> a thin FastAPI/Go shim
+(the image analogue of the NLLB CTranslate2 shim,
+<code>TRANSLATION_PROVIDER.md</code> §3) wraps the <code>sd</code>
+binary / library, taking
+<code>--diffusion-model &lt;gguf&gt; --clip_l … --t5xxl … --vae … -p &lt;prompt&gt; --steps N</code>
+and returning the PNG.</li>
+</ul>
+<h3 id="error-shape">3.4 Error shape</h3>
+<p>OpenAI-error envelope, consistent with the gateway
+(<code>API_CONTRACT.md</code> §3, <code>auth.go:58-64</code>):
+<code>{&quot;error&quot;:{&quot;message&quot;:…,&quot;type&quot;:&quot;invalid_request_error&quot;}}</code> for
+auth/validation; <strong><code>429</code> +
+<code>Retry-After</code></strong> when <code>broker.Acquire</code>
+returns <code>ErrBurstInUse</code> (another burst live);
+<strong><code>503</code></strong>
+(<code>{&quot;…&quot;,&quot;type&quot;:&quot;server_error&quot;}</code>) when the backend container is
+not warm OR <code>ErrBudgetExceeded</code>/<code>ErrThermalUnsafe</code>
+(honest “card busy / warming / thermally throttled”) —
+<strong>never</strong> a returned stub image (the bluff §5 kills).</p>
+<hr />
+<h2 id="containerization-rootless-podman-via-the-containers-submodule-with-gpu">4.
+Containerization — rootless podman via the <code>containers</code>
+submodule, WITH GPU</h2>
+<p>Per §11.4.76 (containers-submodule mandate) + §11.4.161 (rootless
+runtime) the service boots <strong>through</strong>
+<code>vasic-digital/containers</code> (<code>pkg/boot</code> /
+<code>pkg/compose</code> / <code>pkg/health</code>), never a hand-run
+<code>podman</code>/<code>docker</code> command, and never rootful.
+<strong>Unlike the CPU spikes, this container claims the
+GPU.</strong></p>
+<h3 id="image-run-shape-illustrative-config-injected-no-hardcoded-host-const-045">4.1
+Image + run shape (illustrative — config-injected, no hardcoded host
+§CONST-045)</h3>
+<ul>
+<li><strong>Primary (ComfyUI) image:</strong> a CUDA-12.8 / sm_120 base
+(the P0-T2 pinned <code>nvidia/cuda:12.8.x</code> base,
+<code>04_implementation_plan.md:46</code>) + ComfyUI + FLUX/SDXL
+weights. Pinned by digest in production (§11.4.76 clause 2).</li>
+<li><strong>Fallback (sd.cpp) image:</strong> the P0-T2 CUDA base + the
+<code>stable-diffusion.cpp</code> build (sm_120) + the GGUF weights +
+the OpenAI-images shim. Also runs CPU-only (AVX/AVX2/AVX512) as a
+degraded lane.</li>
+<li><strong>GPU passthrough (the structural difference from the CPU
+spikes):</strong> the run spec <strong>DOES</strong> include
+<code>--device nvidia.com/gpu=all --security-opt=label=disable</code> —
+the exact P0 GPU-passthrough proof
+(<code>04_implementation_plan.md:44</code>). This is the structural
+reason it depends on <strong>P0</strong> (host GPU foundation) and
+<strong>P1</strong> (the broker), whereas the embeddings/translation CPU
+spikes do not.</li>
+<li><strong>Model source:</strong> weights are a §11.4.77 re-obtain
+artefact (gitignored; <code>fetch_weights.sh</code>-class script
+downloads from HF — matches <code>04_implementation_plan.md</code> P7-T1
+<code>fetch_weights.sh</code>). <code>$MODELS_DIR</code> is
+<strong>injected</strong> (env), never a literal; mounted read-only
+(<code>-v $MODELS_DIR:/models:ro</code>).</li>
+<li><strong>Port:</strong> a config-injected host port (ComfyUI default
+<code>:8188</code>, distinct from the coder fleet’s
+<code>:18434</code>), reached by the HelixLLM gateway;
+<code>--network</code> per the containers-submodule compose spec.</li>
+<li><strong>Boot is part of the test entry point</strong> (§11.4.76
+on-demand-infra invariant): the HelixQA image bank boots the container
+via the submodule, waits on <code>pkg/health</code> (ComfyUI
+<code>/system_stats</code> or a shim <code>/health</code>), acquires the
+broker burst lease, then drives the gateway route — a short-circuit fake
+that skips the boot is a §11.4 violation.</li>
+<li><strong>Broker interaction:</strong> boot/generation is gated by
+<code>broker.Acquire(ctx, ClassImage, needBytes)</code> (§2) — the
+container is only started/loaded when a burst lease is granted; on
+<code>Release</code> the container may be stopped (flagship, to free the
+card) or kept warm (co-reside).</li>
+<li><strong>Catalogue-Check (§11.4.74):</strong>
+<code>extend vasic-digital/containers@&lt;sha&gt;</code> — add an
+<code>image-gen</code> (ComfyUI + sd.cpp) compose profile to the
+containers submodule if one does not exist; never an in-project ad-hoc
+compose file.</li>
+</ul>
+<h3 id="cross-platform-resourcehost-safety-hygiene">4.2 Cross-platform +
+resource/host-safety hygiene</h3>
+<ul>
+<li>GPU passthrough is Linux/NVIDIA-specific; on a host without the 5090
+the bank SKIPs-with-reason (<code>hardware_not_present</code>, §11.4.69)
+— never a faked PASS.</li>
+<li>Container VRAM/compute bounded by the broker lease (§2) +
+<code>pkg/health</code>; §12.6 host-memory + §11.4.133 thermal safety
+apply — a burst must not starve the developer host nor thermally
+endanger the card (the broker’s <code>ThermalGuard</code>).</li>
+</ul>
+<hr />
+<h2 id="anti-bluff-acceptance-the-one-machine-checkable-runtime-signature-11.4.108">5.
+Anti-bluff acceptance — the ONE machine-checkable runtime signature
+(§11.4.108)</h2>
+<p><strong>Definition of done for this provider:</strong> on a
+<strong>clean deploy</strong> (§11.4.108/§11.4.139 — container freshly
+booted via the containers submodule, broker burst lease granted, gateway
+pointed at it), the following single machine-checkable signature
+verifies and is captured to
+<code>docs/qa/&lt;run-id&gt;/image_gen/</code>:</p>
+<blockquote>
+<p><strong>RUNTIME SIGNATURE (image-gen semantic text→image
+correspondence).</strong> POST a <strong>prompt pair</strong> to
+<code>POST /v1/images/generations</code> — a <strong>matched</strong>
+prompt <code>P</code> = <em>“a red fox reading a book under an oak tree,
+watercolor”</em> and an <strong>unrelated control</strong> prompt
+<code>U</code> = <em>“a bowl of ramen on a wooden table”</em>. Decode
+each returned <code>b64_json</code> PNG. Compute the <strong>CLIP (or
+SigLIP) text-image similarity</strong>
+<code>CLIPScore(image, caption)</code> and assert <strong>ALL</strong>
+of: 1. <strong>Real image, not a stub:</strong> the PNG decodes, has the
+requested dimensions, and is <strong>non-trivial</strong> — luminance
+variance / edge-density / distinct-colour count above a fixture floor
+(kills the all-black / solid-colour / returned- stub image; the plan’s
+“dimensions + non-trivial content” made mechanical). 2.
+<strong>Prompt-image correspondence:</strong>
+<code>CLIPScore(img_P, P) ≥ floor</code> — the generated image genuinely
+depicts its prompt (floor calibrated on the project’s own fixtures per
+§11.4.107(13)). 3. <strong>Semantic-order margin (the anti-noise-image
+guard):</strong>
+<code>CLIPScore(img_P, P) − CLIPScore(img_P, U) ≥ margin</code> — the
+image matches its OWN prompt more than an unrelated caption (a
+random-noise or wrong-prompt image fails this even if it passes the
+trivial-content check). The captured artefact is the raw
+<code>/v1/images/generations</code> JSON + the decoded PNGs + the
+CLIPScore matrix + PASS/FAIL verdict with its evidence path (feature
+class <code>gpu_render</code>/<code>image_gen</code>, §11.4.69).</p>
+</blockquote>
+<p>CLIPScore is <em>“a metric based on a modified cosine similarity
+between representations for the input image and the caption”</em>,
+computed as <code>w × max(cos(c, v), 0)</code> with <code>w = 2.5</code>
+(range <code>[0, 2.5]</code>), <strong>reference-free</strong>, and
+<em>“achieving high correlations with human judgments”</em> — the right
+oracle for “does this image depict this text” with no golden image
+required. Source: <a href="https://arxiv.org/abs/2104.08718">CLIPScore —
+reference-free image-text similarity (torchmetrics / Hessel et
+al. survey)</a> (accessed 2026-07-07). This is a genuine end-to-end
+proof: it can only PASS if a real diffusion model produced a
+prompt-faithful image through the real gateway route + a live broker
+burst lease — impossible to satisfy with a returned stub, a solid-colour
+image, or a wrong-prompt/noise image.</p>
+<h3 id="golden-good-golden-bad-self-validation-11.4.10710">5.1
+Golden-good / golden-bad self-validation (§11.4.107(10))</h3>
+<p>The CLIPScore <strong>analyzer itself is mutation-proofed</strong>
+with a fixture set, wired into the meta-test:</p>
+<ul>
+<li><strong>golden-good fixture</strong> — a captured real
+prompt-faithful image + its prompt where the margin genuinely holds →
+the analyzer MUST return <strong>PASS</strong>.</li>
+<li><strong>golden-bad fixtures</strong> (each MUST return
+<strong>FAIL</strong>, proving the analyzer cannot be fooled):
+<ol type="1">
+<li><strong>solid-colour / all-black</strong> PNG (the stub shape) →
+fails the non-trivial- content check (criterion 1).</li>
+<li><strong>random-noise</strong> PNG → passes trivial-content but fails
+the prompt- correspondence floor + the semantic-order margin (criteria
+2+3).</li>
+<li><strong>wrong-prompt</strong> image (a real photo of ramen returned
+for the fox prompt) → fails the semantic-order margin
+<code>CLIPScore(img, P) &lt; CLIPScore(img, U)</code> (catches a
+mis-wired backend / a cached-from-a-different-request image).</li>
+<li><strong>wrong-dimensions</strong> PNG → fails criterion 1’s size
+check.</li>
+</ol></li>
+</ul>
+<p>Paired §1.1 mutation: strip the semantic-order-margin (or the
+non-trivial-content) assertion from the analyzer → the
+random-noise/solid-colour golden-bad fixture PASSes → the gate FAILs.
+That mutation is the mechanical proof the acceptance test is not itself
+a bluff.</p>
+<h3 id="higher-order-resilience-proofs-compose-do-not-replace-5">5.2
+Higher-order + resilience proofs (compose, do not replace §5)</h3>
+<ul>
+<li><strong>Metamorphic seed determinism (§11.4.50):</strong> same
+prompt + same seed → byte-identical (or CLIPScore-identical within
+tolerance) image across two calls; different seeds → different images
+with both matching the prompt.</li>
+<li><strong>Re-runnability (§11.4.98):</strong> the whole bank PASSes at
+<code>-count=3</code> with self-cleaning state (broker lease released
+between runs).</li>
+<li><strong>Stress + chaos (§11.4.85):</strong> N≥10 sequential jobs
+(the burst queue serialises them — throughput + p50/p95/p99 captured); a
+<strong>second concurrent</strong> image/video request MUST hit
+<code>ErrBurstInUse</code> → <code>429</code> (the §11.4.119
+single-owner proof); chaos = container SIGKILL mid-generation → broker
+lease auto-releases (or the P1-T4 lease-TTL reaps it), gateway returns
+an honest <code>503</code>, the card is not leaked; boundary prompts
+(empty, max-length, unicode, adversarial) each categorised.</li>
+<li><strong>Broker-refusal negative case (composes
+<code>VRAM_BROKER.md</code> §6):</strong> a scripted over-budget
+flagship <code>Acquire</code> returns <code>ErrBudgetExceeded</code> and
+the gateway returns <code>503</code> — it does <strong>NOT</strong> OOM
+the card (fail-closed); paired §1.1 mutation (disable
+<code>admit</code>) → the over-commit would be granted → the broker gate
+FAILs.</li>
+<li><strong>Feature-class evidence (§11.4.69):</strong> the closed
+sink-side taxonomy has a <code>gpu_render</code> class; this provider
+maps to it (an <code>image_gen</code> sub-class is a candidate addition
+— taxonomy is <em>open to additions, never contraction</em>). Evidence
+shape = the captured CLIPScore + non-trivial-content artefact
+above.</li>
+</ul>
+<h3 id="four-layer-verification-11.4.108">5.3 Four-layer verification
+(§11.4.108)</h3>
+<ol type="1">
+<li><strong>SOURCE</strong> — <code>/v1/images/generations</code> route
++ backend bridge + <code>ClassImage</code>
+<code>Acquire</code>/<code>Release</code> wiring + provider descriptor
+committed; pre-build grep gate.</li>
+<li><strong>ARTIFACT</strong> — the ComfyUI/sd.cpp image pulled + pinned
+by digest; the FLUX/SDXL weights present
+(<code>fetch_weights.sh</code>); <code>pkg/health</code> green; the
+sm_120 GPU build present (P0-T3).</li>
+<li><strong>RUNTIME-ON-CLEAN-TARGET</strong> — the §5 signature verifies
+against a freshly-booted container <strong>with a live broker burst
+lease</strong> (not a stale one) — the definition of done.
+<strong>Ready-to-run the moment a burst window is scheduled</strong>
+(the operator go of §0/§2.3), or immediately for the co-reside fallback
+(§2.2).</li>
+<li><strong>USER-VISIBLE</strong> — an OpenAI-images client (HelixCode /
+any CLI agent / a DALL·E- compatible client) POSTs
+<code>/v1/images/generations</code>, gets a real prompt-faithful image
+back, and a downstream consumer renders it.</li>
+</ol>
+<hr />
+<h2 id="open-questions-resolve-before-coding">6. Open questions (resolve
+before coding)</h2>
+<ul>
+<li><strong>Q1</strong> Build order — ship the <strong>co-reside sd.cpp
+fallback FIRST</strong> (available today, no operator gate, §2.2) and
+defer the ComfyUI+FLUX flagship burst to a scheduled window? (Leaning:
+yes — a real, usable image-gen lane now beats a blocked flagship.)</li>
+<li><strong>Q2</strong> Sync vs async route shape — sync
+<code>/v1/images/generations</code> for the fast co-reside path + an
+async job endpoint (submit→poll) for the flagship burst (§2.4)? Or
+async-only for uniformity with P3-T3 video?</li>
+<li><strong>Q3</strong> <code>response_format:&quot;url&quot;</code> — requires a
+configured static-asset host to serve the PNG; <code>b64_json</code>
+(default) needs none. Add the URL lane only when an asset host is
+configured (§CONST-045 injected, never hardcoded).</li>
+<li><strong>Q4</strong> Does the <code>containers</code> submodule
+already have an image-gen (ComfyUI / sd.cpp) compose profile, or is this
+a §11.4.74 <code>extend</code> PR? (Investigate before
+scaffolding.)</li>
+<li><strong>Q5</strong> <strong>Licence</strong> —
+FLUX.1-<strong>dev</strong> is non-commercial. Reconcile against
+HelixLLM’s distribution model, or make the Apache-2.0 FLUX.1-schnell +
+OpenRAIL++ SDXL lanes the commercial default. Blocking for any
+commercial ship.</li>
+<li><strong>Q6</strong> Broker eviction (§2.3) — the shipped broker
+<strong>refuses</strong> over-budget rather than pausing the coder. When
+P1-T4 implements the residency scheduler (vLLM Sleep Mode /
+<code>keep_alive:0</code>), the flagship-burst “pause warm tier → run →
+resume” path becomes autonomous within a scheduled window; until then it
+is operator-gated.</li>
+<li><strong>Q7</strong> CLIP vs SigLIP for the §5 analyzer — CLIP
+ViT-L/14 (CLIPScore canonical) vs SigLIP (stronger zero-shot). Decide on
+measured golden-good/bad separation on the project’s own fixtures
+(§11.4.107(13)), not the estimates here.</li>
+</ul>
+<hr />
+<h2 id="composition-footer-constitutional-anchors-touched">7.
+Composition footer — constitutional anchors touched</h2>
+<ul>
+<li><strong>§11.4.6</strong> (no-guessing) — every VRAM/latency/step
+figure flagged <code>(EST — measure)</code>; the licence, the
+broker-does-not-yet-evict boundary, and the co-reside-vs-burst verdicts
+all flagged, not asserted.</li>
+<li><strong>§11.4.74</strong> (extend-don’t-reimplement) — reuse ComfyUI
++ FLUX (the engine/model the plan names) + stable-diffusion.cpp (GGUF,
+the co-reside lane) + the EXISTING <code>internal/vrambroker</code> core
++ extend the containers submodule; no bespoke image server, no
+re-implemented admission gate.</li>
+<li><strong>§11.4.76 / §11.4.161</strong> (containers submodule /
+rootless) — boot via
+<code>pkg/boot</code>+<code>pkg/compose</code>+<code>pkg/health</code>,
+rootless podman, WITH the GPU device.</li>
+<li><strong>§11.4.77</strong> (re-obtain mechanism) — model weights
+gitignored + <code>fetch_weights.sh</code>.</li>
+<li><strong>§11.4.81</strong> (cross-platform parity) — GPU passthrough
+Linux/NVIDIA-specific; no-GPU host ⇒ honest
+<code>hardware_not_present</code> SKIP; sd.cpp CPU lane as the degraded
+cross-platform path.</li>
+<li><strong>§11.4.99 / §11.4.150</strong> (latest-source + deep
+multi-angle research) — engine decision cited to LATEST upstream docs
+across ≥4 distinct angles (FLUX schnell/dev model cards, diffusers
+memory doc, ComfyUI, stable-diffusion.cpp, SDXL, CLIPScore).</li>
+<li><strong>§11.4.107(10)/(13)</strong> (self-validated analyzer +
+fixture-calibrated thresholds) — golden-good/golden-bad CLIPScore
+analyzer with a solid-colour + random-noise + wrong-prompt golden-bad
+set; project-calibrated floor/margin.</li>
+<li><strong>§11.4.108 / §11.4.139</strong> (four-layer runtime-signature
+on a clean target) — the §5 acceptance signature is the definition of
+done, ready-to-run on a scheduled burst window.</li>
+<li><strong>§11.4.119</strong> (single-resource-owner burst) — image-gen
+is a <code>ClassImage</code> single-owner burst; concurrent image/video
+refused with <code>ErrBurstInUse</code>.</li>
+<li><strong>§11.4.133</strong> (thermal/power safety gates admission) —
+the broker’s <code>ThermalGuard</code> is load-bearing for a
+sustained-power image burst.</li>
+<li><strong>§11.4.85 / §11.4.98 / §11.4.50</strong> (stress+chaos /
+full-automation / determinism).</li>
+<li><strong>§11.4.135</strong> (standing regression guard) — the §5
+signature registers as a permanent guard.</li>
+<li><strong>§11.4.69</strong> (sink-side evidence taxonomy) — maps to
+<code>gpu_render</code> (candidate <code>image_gen</code>
+sub-class).</li>
+<li><strong>CONST-036/037/040</strong> (LLMsVerifier single source of
+truth; capability flags verifier-sourced) — <code>helix-image</code>
+alias + <code>image</code> capability from the verifier, never
+hardcoded.</li>
+<li><strong>CONST-042 / §11.4.10</strong> (no-secret-leak) — the
+hosted-API lane rejected as default precisely because it requires a
+committed key + third-party egress.</li>
+<li><strong>CONST-046</strong> (no hardcoded content) — model ids / host
+/ port / alias map config-injected.</li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Deep-research 2026-07-07: -
+https://huggingface.co/black-forest-labs/FLUX.1-schnell -
+https://huggingface.co/black-forest-labs/FLUX.1-dev -
+https://huggingface.co/docs/diffusers/en/api/pipelines/flux -
+https://docs.comfy.org/tutorials/flux/flux-1-text-to-image -
+https://docs.comfy.org/development/comfyui-server/comms_routes -
+https://github.com/leejet/stable-diffusion.cpp -
+https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0 -
+https://developers.openai.com/api/docs/guides/image-generation -
+https://arxiv.org/abs/2104.08718 (CLIPScore — reference-free image-text
+similarity)</p>
+<p>(Negative finding, §11.4.99(B):
+<code>platform.openai.com/docs/api-reference/images/create</code> and
+<code>lightning.ai/docs/torchmetrics/.../clip_score.html</code> both
+returned HTTP 403 to automated fetch on 2026-07-07; the
+<code>/v1/images/generations</code> field list is grounded in the
+developers.openai.com guide mirror + the in-tree
+<code>API_CONTRACT.md</code> gateway placement, and the CLIPScore
+definition in the arXiv source + the torchmetrics description surfaced
+via web search — the authoritative shapes for THIS system.)</p>
+</body>
+</html>
