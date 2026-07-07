@@ -21,6 +21,8 @@
 - **Phase 2 (HelixAgent→HelixLLM e2e):** ✅ **PROVEN + review GO** — real generate + Postgres/Redis persistence (cognee/vector honest SKIP, OQ2).
 - **LLMsVerifier chain:** ✅ C1 C2 C4 C5 C3 + advisories all landed, combined review **GO** — release-ready.
 - **Phase-3:** ✅ embeddings IMPL **PROVEN** (55bdf9b6, real bge-small TEI, cos margin 0.3578) · ✅ VRAM broker CORE **GO** (a12df57c — unblocks GPU tiers) · ✅ designs done: embeddings (cf26b813), translation (c9ac8683), provider-coverage (1e6f3347, 0 new wire adapters).
+- **Phase-3 IN-FLIGHT (2026-07-07, 3 parallel streams §11.4.183):** translation NLLB-CT2 primary (port 18436) · Whisper STT CPU (18437) · Tesseract OCR CPU (18438) — each containers-submodule boot, RED-first self-validated analyzer, synthesized-known-content proof, commit-in-helix_llm no-push. Ledger: `.superpowers/sdd/progress.md` round-13. Coder stays live at 18434.
+- **Governance:** constitution synced `0882b9e..5074d606` (0a469883, §11.4.183 cascaded); §11.4.32 sweep debt: G12 CLOSED (3fdbfd40 Fixed_Summary regen); G7 (4 pre-2026-06-24 main commits lack docs/qa) + G1 (streaming/watcher inheritance pointer → their HelixPlay chain) honest-tracked (fabrication would be a bluff / §11.4.28 coupling).
 - **Immediate next (fresh session):** (a) the pending §11.4.142 reviews are DONE for broker; run reviews of the 3 design docs + embeddings if desired; (b) GPU tiers now unblocked — vision (VLM)/image/video gen via the broker; (c) provider config-rollout (13 providers, config-only); (d) translation IMPL (design c9ac8683); (e) cognee P-OQ2-A wire; (f) small follow-ups: OQ1 doc correction in PHASE2_BLOCKERS_INVESTIGATION.md, P3-EMB-1 golden-good dim-aware fixture, detector.go:61; (g) release-prep + prefixed tag when scope-complete.
 - **Terminal goal (this scope):** a fully-validated, prefixed release tag (§11.4.151) published across
   main + all owned submodules; local HelixLLM on the RTX 5090 exposed via HelixAgent to HelixCode/CLI agents.
@@ -45,7 +47,7 @@ coding output (`is_palindrome`, `func Add`). Restart: `podman start helixllm-cod
 
 | Anchor | Value |
 |--------|-------|
-| Constitution HEAD followed | `0882b9e` (through §11.4.182) |
+| Constitution HEAD followed | `5074d606` (through §11.4.183 — maximal multi-agent + full-constitution + zero-bluff, cascaded to CLAUDE/AGENTS/QWEN/GEMINI; pointer bumped commit 0a469883) |
 | Host | ALT Workstation 11.1; RTX 5090 32 GB; driver 570.169; CUDA 12.8; podman 5.7.1 rootless; 64 cores / 251 GiB |
 | Canonical branch (§11.4.181) | `feature/helixllm-full-extension` — ACTIVE (no upstream tracking configured yet) |
 | Router image (built+proven) | `localhost/helixllm/llamacpp-router:cuda12.8-sm120` — latest llama.cpp, sm_120, OpenSSL/curl (`-hf` HTTPS proven), ships `rpc-server` |
