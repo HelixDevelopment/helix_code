@@ -1,0 +1,3 @@
+### deep-research note (§11.4.150) — minimal RAG pipeline pattern
+Pattern: embed corpus -> cosine top-k retrieve -> stuff retrieved context into the
+generation prompt -> call the LLM ("stuff"/"grounded QA" pattern). Sources cited in RESULTS.md.

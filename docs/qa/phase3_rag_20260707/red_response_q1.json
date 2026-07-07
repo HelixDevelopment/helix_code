@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "I don't have any information about a 2027 HelixCode release or its internal codename, as this appears to be fictional or hypothetical."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-AkdaCdQU7kqay4dnmAd3w1GQza4L582P"
+}

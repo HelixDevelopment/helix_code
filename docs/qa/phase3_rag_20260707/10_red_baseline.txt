@@ -1,0 +1,10 @@
+### RED baseline (§11.4.115): coder asked the SAME questions with NO retrieved context
+RED_MODE=1 — expect the coder to NOT know either invented fact (defect reproduced)
+--- qkey=q1 ---
+RED answer (qkey=q1, no context): "I don't have any information about a 2027 HelixCode release or its internal codename, as this appears to be fictional or hypothetical."
+[RED] RED-OK: qkey=q1 coder did NOT know "Borealis-9" without context (defect correctly reproduced — it has no way to answer)
+red_exit_q1=0
+--- qkey=q2 ---
+RED answer (qkey=q2, no context): "The internal service-mesh sidecar used for HelixLLM routing is called \"HelixProxy\"."
+[RED] RED-OK: qkey=q2 coder did NOT know "Quillfeather-7" without context (defect correctly reproduced — it has no way to answer)
+red_exit_q2=0

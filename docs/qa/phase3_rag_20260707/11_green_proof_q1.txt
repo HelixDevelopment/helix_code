@@ -1,0 +1,17 @@
+### qkey=q1 pipeline
+EMBED-QUERY-OK: qkey=q1 model=BAAI/bge-small-en-v1.5 dim=384 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_rag_20260707/query_embedding_q1.json
+RETRIEVE-OK: qkey=q1 top1=doc_codename score=0.8852 (of 6 docs) wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_rag_20260707/retrieval_q1.json
+  rank1 id=doc_codename score=0.8852
+  rank2 id=doc_ci score=0.7166
+  rank3 id=doc_sidecar score=0.6766
+  rank4 id=doc_coffee score=0.4577
+  rank5 id=doc_revenue score=0.3922
+  rank6 id=doc_cat score=0.3029
+[RETRIEVAL-CHECK] PASS: qkey=q1 real-cosine top1=doc_codename (score=0.8852) == expected doc_codename
+checkretrieval_exit_q1=0
+GREEN answer (qkey=q1, grounded on top-2 retrieved docs): "The internal codename for the 2027 HelixCode release is Borealis-9."
+[GREEN] GREEN-OK: qkey=q1 grounded answer contains invented token "Borealis-9"
+green_exit_q1=0
+[RAG-RUNTIME-SIGNATURE] PASS top1=doc_codename(score=0.8852, ok=true) tokenFound=true answer="The internal codename for the 2027 HelixCode release is Borealis-9."
+analyze_exit_q1=0
+qkey=q1: GREEN-OK (RAG runtime signature PASS)

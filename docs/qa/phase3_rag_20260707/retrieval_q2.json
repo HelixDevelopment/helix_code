@@ -1,0 +1,36 @@
+{
+  "query": "What is the name of the internal service-mesh sidecar used for HelixLLM routing?",
+  "qkey": "q2",
+  "ranked": [
+    {
+      "id": "doc_sidecar",
+      "text": "The internal service-mesh sidecar used internally for HelixLLM routing is called Quillfeather-7.",
+      "score": 0.885509526710884
+    },
+    {
+      "id": "doc_codename",
+      "text": "The internal codename for the 2027 HelixCode release is Borealis-9.",
+      "score": 0.6819100931391842
+    },
+    {
+      "id": "doc_ci",
+      "text": "The HelixCode continuous integration pipeline runs unit tests before every merge to main.",
+      "score": 0.6335768554403256
+    },
+    {
+      "id": "doc_coffee",
+      "text": "Coffee brewing techniques improve flavor extraction using controlled water temperature.",
+      "score": 0.4618679678097032
+    },
+    {
+      "id": "doc_revenue",
+      "text": "Quarterly revenue rose four percent.",
+      "score": 0.41135394285561183
+    },
+    {
+      "id": "doc_cat",
+      "text": "The cat sat on the mat.",
+      "score": 0.34773968341545813
+    }
+  ]
+}

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RESULTS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">RESULTS</h1>
+</header>
+<h1 id="phase-3-rag-retrieval-augmented-generation-end-to-end-proof-11.4.108-11.4.5-11.4.69-11.4.147">Phase-3
+RAG (Retrieval-Augmented Generation) — end-to-end proof (§11.4.108 /
+§11.4.5 / §11.4.69 / §11.4.147)</h1>
+<p><strong>Date:</strong> 2026-07-07 · Track
+<code>(T1/feature/helixllm-full-extension)</code> · Resumed crashed
+§11.4.147 stream (prior session died mid-work, at “confirmed the
+off-by-one, fixing it” — a shared-session-limit crash, not a defect in
+this proof)</p>
+<h2 id="verdict-honest-11.4.6">Verdict (honest, §11.4.6)</h2>
+<p><strong>CAPABILITY PROVEN.</strong> A real, minimal RAG (embed →
+real-cosine top-k retrieve → grounded prompt → generate) pipeline was
+proven end-to-end against the <strong>live coder LLM</strong>
+(<code>helixllm-coder</code>, <code>http://localhost:18434</code>,
+read-only, never restarted/stopped — §11.4.122/§11.4.119) composed with
+a dedicated CPU embeddings service (HF TEI <code>cpu-1.9</code>,
+<code>BAAI/bge-small-en-v1.5</code>, dim 384) booted on its own port
+<strong>18440</strong> via the <strong>containers submodule
+orchestrator</strong> (§11.4.76, rootless podman §11.4.161). The
+§11.4.108 runtime signature is <strong>GREEN-OK for both invented-fact
+queries</strong>:</p>
+<pre><code>[RAG-RUNTIME-SIGNATURE] PASS top1=doc_codename(score=0.8852, ok=true) tokenFound=true
+    answer=&quot;The internal codename for the 2027 HelixCode release is Borealis-9.&quot;
+[RAG-RUNTIME-SIGNATURE] PASS top1=doc_sidecar(score=0.8855, ok=true) tokenFound=true
+    answer=&quot;The internal service-mesh sidecar used internally for HelixLLM routing is called Quillfeather-7.&quot;</code></pre>
+<h2 id="red-green-runtime-signature-11.4.115-polarity-both-queries">RED
+→ GREEN runtime signature (§11.4.115 polarity, both queries)</h2>
+<p>Two facts invented for this proof (the coder cannot know them from
+training):</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 75%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>qkey</th>
+<th>invented fact</th>
+<th>fact-bearing doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>q1</td>
+<td>“The internal codename for the 2027 HelixCode release is
+<strong>Borealis-9</strong>.”</td>
+<td><code>doc_codename</code></td>
+</tr>
+<tr>
+<td>q2</td>
+<td>“The internal service-mesh sidecar used internally for HelixLLM
+routing is called <strong>Quillfeather-7</strong>.”</td>
+<td><code>doc_sidecar</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>RED (<code>RED_MODE=1</code>, no retrieval context,
+<code>10_red_baseline.txt</code>)</strong> — the live coder is asked the
+bare question with NO retrieved context: - q1: <em>“I don’t have any
+information about a 2027 HelixCode release or its internal codename, as
+this appears to be fictional or hypothetical.”</em> → does
+<strong>NOT</strong> contain <code>Borealis-9</code>.
+<strong>RED-OK</strong> (defect genuinely reproduced — the coder has no
+way to answer). - q2: <em>“The internal service-mesh sidecar used for
+HelixLLM routing is called &quot;HelixProxy&quot;.”</em> → the coder
+<strong>hallucinates a wrong, different name</strong>
+(<code>HelixProxy</code> ≠ <code>Quillfeather-7</code>) → does
+<strong>NOT</strong> contain the invented token.
+<strong>RED-OK.</strong></p>
+<p><strong>GREEN (<code>11_green_proof_{q1,q2}.txt</code>)</strong> —
+full pipeline (embed corpus on real TEI vectors → real cosine top-2
+retrieve → grounded system+user prompt, “answer ONLY from context” →
+generate on the SAME live coder): - q1 answer: <em>“The internal
+codename for the 2027 HelixCode release is Borealis-9.”</em> →
+<strong>contains</strong> <code>Borealis-9</code>.
+<strong>GREEN-OK.</strong> - q2 answer: <em>“The internal service-mesh
+sidecar used internally for HelixLLM routing is called
+Quillfeather-7.”</em> → <strong>contains</strong>
+<code>Quillfeather-7</code>. <strong>GREEN-OK.</strong></p>
+<p>RED-fail then GREEN-pass on the identical question, identical live
+model, is the unfakeable proof that generation is genuinely
+<em>grounded</em> in retrieval, not recalled from training or
+hardcoded.</p>
+<h2 id="retrieval-top-1-evidence-real-cosine-over-real-tei-embeddings-retrieval_q1q2.json">Retrieval
+top-1 evidence (real cosine over real TEI embeddings,
+<code>retrieval_{q1,q2}.json</code>)</h2>
+<p>6-document corpus (2 fact-bearing + 4 topic-adjacent/unrelated
+distractors, so retrieval must genuinely discriminate —
+<code>doc_cat</code>, <code>doc_revenue</code>, <code>doc_coffee</code>,
+<code>doc_ci</code>). Full ranking, both queries:</p>
+<pre><code>qkey=q1  rank1=doc_codename(0.8852) rank2=doc_ci(0.7166) rank3=doc_sidecar(0.6766)
+         rank4=doc_coffee(0.4577)   rank5=doc_revenue(0.3922) rank6=doc_cat(0.3029)
+[RETRIEVAL-CHECK] PASS: real-cosine top1=doc_codename == expected doc_codename
+
+qkey=q2  rank1=doc_sidecar(0.8855) rank2=doc_codename(0.6819) rank3=doc_ci(0.6336)
+         rank4=doc_coffee(0.4619)  rank5=doc_revenue(0.4114) rank6=doc_cat(0.3477)
+[RETRIEVAL-CHECK] PASS: real-cosine top1=doc_sidecar == expected doc_sidecar</code></pre>
+<p>Ranking is a pure <code>sort.Slice</code> over real cosine
+similarities computed from real TEI-served vectors
+(<code>main.go:cmdRetrieve</code>) — never a hardcoded pick; both
+fact-bearing documents rank strictly above every distractor with a wide
+margin (≥0.16 over the runner-up).</p>
+<h2 id="self-validation-the-analyzer-is-non-bluff-11.4.10710-12_self_validation_q1q2.txt">Self-validation
+— the analyzer is non-bluff (§11.4.107(10),
+<code>12_self_validation_{q1,q2}.txt</code>)</h2>
+<p>For each query, the SAME analyzer (<code>analyze()</code> in
+<code>main.go</code>) is run against one golden-good fixture (the real
+captured retrieval + generation above) and three deliberately-degraded
+golden-bad fixtures:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>fixture</th>
+<th>q1 verdict</th>
+<th>q2 verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>golden-good (real captured RAG output)</td>
+<td><strong>PASS</strong></td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>golden-bad: no-fact answer (“I don’t know…”)</td>
+<td><strong>FAIL</strong> (correctly)</td>
+<td><strong>FAIL</strong> (correctly)</td>
+</tr>
+<tr>
+<td>golden-bad: wrong document retrieved (top-1 swapped to a
+distractor)</td>
+<td><strong>FAIL</strong> (correctly)</td>
+<td><strong>FAIL</strong> (correctly)</td>
+</tr>
+<tr>
+<td>golden-bad: empty answer</td>
+<td><strong>FAIL</strong> (correctly)</td>
+<td><strong>FAIL</strong> (correctly)</td>
+</tr>
+</tbody>
+</table>
+<p><code>[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures</code>
+for both qkeys — an analyzer that PASSed any golden-bad fixture would
+itself be a bluff gate (§11.4.107(10)); it does not.</p>
+<h2 id="container-lifecycle-11.4.119-single-resource-owner-11.4.122-coder-untouched">Container
+lifecycle (§11.4.119 single-resource-owner, §11.4.122 coder
+untouched)</h2>
+<ul>
+<li>Booted <code>phase3rag_tei-rag_1</code> (HF TEI
+<code>cpu-1.9</code>, <code>BAAI/bge-small-en-v1.5</code>) on its
+<strong>own</strong> port <strong>18440</strong> via
+<code>digital.vasic.containers</code> compose orchestrator (rootless
+podman, <code>20_boot.txt</code>, <code>21_health.txt</code> — health OK
+after 2 polls, <code>24_container_state.txt</code>).</li>
+<li><code>helixllm-coder</code> (the live coder at :18434) verified
+running before and after, <strong>never</strong> restarted/stopped
+(<code>00_preflight.txt</code>,
+<code>29b_post_teardown.txt</code>).</li>
+<li>Sibling Phase-3 lanes on ports 18435–18439 verified free/untouched
+throughout (<code>00_preflight.txt</code>,
+<code>29b_post_teardown.txt</code>).</li>
+<li>Torn down single-owner (<code>29_teardown.txt</code>:
+<code>DOWN-OK</code>); post-teardown confirms zero
+<code>phase3rag_*</code> containers, coder still up, sibling ports still
+free (<code>29b_post_teardown.txt</code>).</li>
+<li>An unrelated <code>migrate-it-shared</code> (postgres) container was
+observed running on the same shared host during this run (another
+project’s work, §11.4.174) — read-only observation only, never
+touched.</li>
+</ul>
+<h2 id="honesty-notes-11.4.6-11.4.147-11.4.102">Honesty notes (§11.4.6 /
+§11.4.147 / §11.4.102)</h2>
+<ol type="1">
+<li><strong>Resumed a crashed §11.4.147 stream, not started
+fresh.</strong> The preserved partial state
+(<code>docs/qa/phase3_rag_20260707/*.txt</code>/<code>*.json</code> +
+the harness at
+<code>submodules/helix_llm/docs/qa/phase3_rag_20260707/harness/</code>)
+already showed a complete prior successful run
+(RED-OK/GREEN-OK/self-validation-PASS for both queries, clean teardown)
+dated ~11:42 UTC. <code>main.go</code> was inspected end-to-end for the
+“off-by-one” the crashed session referenced (<code>cmdRetrieve</code>
+top-1 indexing, <code>cmdGreen</code> top-2 context-stuffing loop
+bounds, golden-bad-wrong- retrieval index-0 substitution) — no
+off-by-one is present in the delivered code; the retrieval ranking,
+top-N context stuffing, and self-validation index handling are all
+correct. Rather than relying on evidence from before this session
+started, <strong>the full pipeline was re-run in THIS session (§11.4.98
+re-runnability proof)</strong> to obtain first-hand, freshly-witnessed
+evidence — the files under <code>docs/qa/phase3_rag_20260707/</code> now
+reflect the 2026-07-07T16:30Z run captured by this agent, superseding
+the earlier 11:42Z run byte-for-byte (same code, same result).</li>
+<li><strong>Transient host-resource hiccup on the first re-run attempt,
+investigated (§11.4.102) not guessed.</strong> The first attempt in this
+session hit
+<code>rootlessport fork/exec /proc/self/exe: resource temporarily unavailable</code>
+during <code>podman-compose up</code> (evidence:
+<code>22_teilogs.txt</code> (empty — container never started),
+<code>28_teardown_failed.txt</code>, <code>90_blocked.txt</code>, all
+preserved as honest transient- failure evidence, not deleted). Before
+retrying, host state was verified FACT-checked, not assumed transient:
+load average 3.86 (moderate), 251 GiB RAM with 226 GiB available,
+threads-max headroom 4502/2,056,076, only 3 network namespaces, 543 GB
+disk free, zero leaked <code>phase3rag_*</code> containers or
+rootlessport processes from this project. All resources healthy → retry
+was the safe, bounded, evidence-backed decision (§11.4.101), not a blind
+hope-it-passes loop. The retry succeeded cleanly end-to-end
+(<code>20_boot.txt</code> → <code>29b_post_teardown.txt</code> this
+run).</li>
+<li><strong>No off-by-one bug survives in the shipped harness.</strong>
+Reviewed <code>cmdRetrieve</code> (sorts by real cosine descending,
+<code>ranked[0]</code> is top-1 — no off-by-one), <code>cmdGreen</code>
+(<code>for i := 0; i &lt; topN; i++</code> stuffs exactly the
+top-<code>topN</code> docs, numbered <code>i+1</code> for the
+human-readable context list — correct), and
+<code>cmdSelfValidate</code>’s golden-bad-wrong-retrieval mutation
+(<code>wrongRF.Ranked[0]</code> — correctly targets the top-1 slot). All
+indices are 0-based and consistent throughout.</li>
+<li>Both the empty-corpus/off-by-one investigation and the
+transient-resource investigation are captured findings, not silent
+assumptions.</li>
+</ol>
+<h2 id="reproduce">Reproduce</h2>
+<pre><code>cd submodules/helix_llm/docs/qa/phase3_rag_20260707/harness &amp;&amp; ./run_proof.sh</code></pre>
+<p>Builds the harness (containers-submodule <code>replace</code>
+directive), boots its OWN TEI lane on port 18440 (config-injected —
+<code>TEI_HOST_PORT</code>/<code>TEI_MEM_LIMIT</code>/<code>TEI_CPUS</code>/<code>TEI_MODEL_ID</code>/<code>HEALTH_TIMEOUT</code>
+env- tunable), asks the live coder the RED baseline, embeds the 6-doc
+corpus + both queries, retrieves + checks top-1 + grounds + generates +
+analyzes for both qkeys, self-validates the analyzer, tears down
+single-owner, and leaves <code>helixllm-coder</code> + sibling ports
+18435-18439 untouched. <code>harness/phase3rag.bin</code> is a build
+artefact (gitignored §11.4.30; regenerate via <code>go build .</code> or
+by re-running the script).</p>
+<h2 id="composition">Composition</h2>
+<p>§11.4.76 (containers submodule) · §11.4.161 (rootless) · §11.4.108
+(runtime signature) · §11.4.107(10) (self-validated analyzer) ·
+§11.4.115 (RED-first polarity) · §11.4.119 (single-owner teardown) ·
+§11.4.122 (coder untouched) · §11.4.6 (honest transient-failure
+investigation, no off-by-one guessed away) · §11.4.98 (re-runnability
+proof) · §11.4.147 (conductor completion of the crashed subagent’s
+stream — no work lost, partial state investigated + superseded with
+fresh evidence, never blindly discarded or blindly trusted) · §11.4.150
+(deep-research note, <code>01_research_note.txt</code>) · §11.4.174
+(unrelated <code>migrate-it-shared</code> host-mate observed, never
+touched).</p>
+<h2 id="sources-verified-11.4.99">Sources verified (§11.4.99)</h2>
+<ul>
+<li>HuggingFace Text Embeddings Inference (TEI)
+<code>/v1/embeddings</code> OpenAI-compatible endpoint — reused, proven
+lane from the sibling Phase-3 embeddings proof
+(<code>docs/qa/phase3_embeddings_20260706/RESULTS.md</code>,
+2026-07-06/07).</li>
+<li>Retrieval-augmented generation “stuff”/“grounded QA” pattern (embed
+→ top-k cosine retrieve → stuff context into prompt → generate) —
+standard RAG architecture pattern, no external doc fetch required for
+this minimal-harness proof;
+<code>NO external solution found — original work</code> for the harness
+implementation itself (§11.4.8).</li>
+</ul>
+</body>
+</html>

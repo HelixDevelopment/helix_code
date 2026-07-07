@@ -1,0 +1,1 @@
+EMBED-CORPUS-OK: model=BAAI/bge-small-en-v1.5 dim=384 docs=6 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_rag_20260707/corpus_embeddings.json
