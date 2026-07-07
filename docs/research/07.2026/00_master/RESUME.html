@@ -80,23 +80,22 @@ streaming/watcher inheritance pointers +
 doc_processor/llm_orchestrator/llm_provider/vision_engine anti-bluff
 anchors, from refactor <code>1422f7da</code>, not this branch) +
 third-party vendored Continue.dev <code>.skip()</code> (vendor-exempt
-§11.4.29). <strong>RELEASE PUBLISH IN PROGRESS (operator-authorized
-2026-07-07).</strong> Decisions resolved: prefix =
-<code>helix-code</code> (operator: form
-<code>helix-code-1.0.0-dev-0.0.1</code>; supersedes old
-<code>helixcode-vN</code>; encoded in gitignored <code>.env</code> +
-<code>.env.example</code>); tag on feature-branch HEAD (NO trunk merge,
-§11.4.167); push authorized to all upstreams. DONE this pass: all 7
-owned submodules published on
-<code>feature/helixllm-full-extension</code> — helix_llm,
-doc_processor(b918111), llm_provider(4db6c49), llm_orchestrator(ee229a7,
-CONSTITUTION merge-onto-latest), vision_engine(a97df79),
-llms_verifier(new branch), helix_agent(cfa94f2f, foreign go.mod/.qa_bak
-never staged §11.4.174). <strong>NEXT</strong> = main-repo release
-commit (6 pointer bumps + docs/research/07.2026 + .env.example) → push
-main feature branch → create+push tag
-<code>helix-code-1.0.0-dev-0.0.1</code> across main + all 7 owned
-submodules (§11.4.151 identical prefix). Post-tag scopes the operator
+§11.4.29). <strong>RELEASE PUBLISHED ✅ (operator-authorized 2026-07-07,
+completed 2026-07-08).</strong> Tag
+<code>helix-code-1.0.0-dev-0.0.1</code> (§11.4.151 prefix
+<code>helix-code</code>, kebab; supersedes old
+<code>helixcode-vN</code>) created + pushed across main-repo HEAD
+<code>10c40c85</code> (tag object <code>b7e78c3a</code>, on github
+Helix-CLI + gitlab HelixCode) AND all 7 owned submodule HEADs at their
+published SHAs — helix_llm(071c1223), doc_processor(b918111),
+llm_provider(4db6c49), llm_orchestrator(ee229a7, CONSTITUTION
+merge-onto-latest), llms_verifier(c696c5db), vision_engine(a97df79),
+helix_agent(cfa94f2f, foreign go.mod/.qa_bak never staged §11.4.174).
+Feature branch pushed (NO trunk merge, §11.4.167). Pre-tag §11.4.40
+sweep GREEN on owned scope: governance-cascade 0 failures, anti-bluff
+anchor present in all 18 files across 13 repos; residual no-silent-skips
+confined to vendored Continue.dev (§11.4.29 exempt). <strong>NEXT
+(post-tag scope, endless loop §11.4.126 continues)</strong> — operator
 UNLOCKED (all 3): GPU gen (FLUX-NVFP4/WAN/LTX — quant footprints
 RESOLVED; GPU-gen SCAFFOLD-COMPLETE + reviewed GO: image-gen helix_llm
 <code>0f07559</code> port 18442 + video-gen <code>9145505</code> port
@@ -154,19 +153,23 @@ cross-cutting governance debt (own separate work stream).</li>
 (through §11.4.183). Quant-footprint UNCONFIRMED → RESOLVED (a93140b1):
 ≤10.4 GiB co-resident FLUX exists but MUST be NVFP4 on the 5090
 (Blackwell cc10.x → fp4, not int4).</li>
-<li><strong>IMMEDIATE NEXT = finish release publish (operator-authorized
-2026-07-07, decisions resolved).</strong> All 7 owned submodules pushed
-on <code>feature/helixllm-full-extension</code>. Remaining serial:
-main-repo commit (6 pointer bumps + docs/research/07.2026 corpus +
-<code>.env.example</code> prefix) → push main feature branch to
-github+gitlab → create+push tag <code>helix-code-1.0.0-dev-0.0.1</code>
-on main + all 7 owned submodule HEADs (§11.4.151 identical prefix,
-§11.4.113 ff-only). Anti-bluff anchors added+pushed to doc_processor/
-llm_provider/llm_orchestrator/vision_engine (closes the pre-existing
-anti-bluff-cascade debt). Post-tag: vision local-serving impl
-(Qwen2.5-VL-7B co-resident, design in scratch), GPU gen runtime proofs
-(operator coder-pause), provider live proofs (API keys), per §11.4.103
-parallel streams.</li>
+<li><strong>RELEASE PUBLISHED ✅ (2026-07-08).</strong>
+<code>helix-code-1.0.0-dev-0.0.1</code> on main-repo HEAD
+<code>10c40c85</code> (tag object <code>b7e78c3a</code>, github
+Helix-CLI + gitlab HelixCode) + all 7 owned submodule HEADs. Main
+feature branch pushed (github+gitlab, NO trunk merge §11.4.167). Pre-tag
+§11.4.40 sweep GREEN on owned scope (governance-cascade 0 failures;
+anti-bluff anchor in all 18 files/13 repos).</li>
+<li><strong>IMMEDIATE NEXT = next-tag scope (endless loop §11.4.126
+continues past release).</strong> Non-blocked: vision local-serving impl
+(Qwen2.5-VL-7B co-resident, design
+<code>scratchpad/design_vision_local_serving.md</code>, §11.4.167 own
+feature work-stream), Stream-C <code>install_helix_path.sh</code> review
+(§11.4.142 + verify against §11.4.177
+no-project-tooling-on-shared-PATH). OPERATOR-GATED (honest blocks, not
+autonomously takeable): GPU gen runtime proofs (need coder-pause
+§11.4.122), provider live proofs (need API keys §11.4.10). Keep ≥3
+parallel streams on non-blocked work per §11.4.103.</li>
 <li><strong>Terminal goal (§11.4.126):</strong> a fully-validated,
 prefixed release tag (§11.4.151) published across main + all owned
 submodules; local HelixLLM on the RTX 5090 exposed via HelixAgent to
