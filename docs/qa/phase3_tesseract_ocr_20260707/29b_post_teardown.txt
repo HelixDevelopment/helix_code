@@ -1,0 +1,7 @@
+### post-teardown state
+ocr containers (expect none):
+  (none — removed)
+coder still running (untouched):
+helixllm-coder Up 21 hours
+sibling Phase-3 containers (untouched — none of THESE were started/stopped by this run):
+  (none currently present)

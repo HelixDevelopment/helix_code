@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RESULTS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">RESULTS</h1>
+</header>
+<h1 id="phase-3-cpu-ocr-tesseract-end-to-end-proof-11.4.108-11.4.5-11.4.69">Phase-3
+CPU OCR (Tesseract) — end-to-end proof (§11.4.108 / §11.4.5 /
+§11.4.69)</h1>
+<p><strong>Date:</strong> 2026-07-07 · Track
+<code>(T1/feature/helixllm-full-extension)</code> · One of 3 parallel
+Phase-3 extended-capability streams
+(<code>docs/research/07.2026/00_master/RESUME.md</code>): translation
+(<code>:18436</code>), Whisper STT (<code>:18437</code>),
+<strong>Tesseract OCR (<code>:18438</code>, this doc)</strong>.</p>
+<h2 id="verdict-honest-11.4.6">Verdict (honest, §11.4.6)</h2>
+<p><strong>CAPABILITY PROVEN.</strong> A real CPU OCR service —
+Tesseract 5 (OEM 1 / LSTM) behind a minimal Go HTTP shim
+(<code>submodules/helix_llm/services/ocr/</code>) — was booted via the
+<strong>containers submodule orchestrator</strong> (§11.4.76, rootless
+podman §11.4.161, NO GPU), rendered two independent KNOWN-text fixtures
+<strong>inside its own container</strong> (so no host font/version could
+ever fake the result), OCR’d them, and the extracted text matched the
+known ground truth at high confidence. The §11.4.108 runtime signature
+is <strong>GREEN-OK</strong> for both strings:</p>
+<pre><code>[RUNTIME-SIGNATURE] PASS mean_conf=95.99 found=[HELIX OCR 2026 QUICK BROWN FOX] missing=[]
+                     full_text=&quot;HELIX OCR 2026 quick brown fox&quot;
+[RUNTIME-SIGNATURE] PASS mean_conf=94.77 found=[PHASE THREE TESSERACT PROOF SEVEN] missing=[]
+                     full_text=&quot;PHASE THREE TESSERACT PROOF SEVEN&quot;
+[DETERMINISM]       PASS identical full_text/mean_conf/word-count across two identical requests
+[SELF-VALIDATION]   PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures</code></pre>
+<p>Unfakeable by construction: the harness rendered the known text
+itself (via the service’s own <code>/v1/render</code>, from a raw string
+literal it controls), then recovered it via a <em>separate</em>
+<code>/v1/ocr</code> call — the only way this passes is if Tesseract
+genuinely read pixels it was never told the answer to.</p>
+<h2 id="runtime-signature-block-confidence-floor-rationale-11.4.6-11.4.10713">Runtime-signature
+block + confidence-floor rationale (§11.4.6 / §11.4.107(13))</h2>
+<p><code>CONF_FLOOR=60</code>, calibrated <strong>from this run’s own
+observed data</strong>, never from literature:</p>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 40%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Fixture</th>
+<th style="text-align: right;">mean_conf observed</th>
+<th>Expected-token check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>golden-good #1 “HELIX OCR 2026 quick brown fox”</td>
+<td style="text-align: right;"><strong>95.99</strong></td>
+<td>all 6 tokens found</td>
+</tr>
+<tr>
+<td>golden-good #2 “PHASE THREE TESSERACT PROOF SEVEN”</td>
+<td style="text-align: right;"><strong>94.77</strong></td>
+<td>all 5 tokens found</td>
+</tr>
+<tr>
+<td>golden-bad blank (pure white, no text)</td>
+<td style="text-align: right;"><strong>0.00</strong></td>
+<td>0/6 found</td>
+</tr>
+<tr>
+<td>golden-bad noise (<code>+noise Random</code> canvas)</td>
+<td style="text-align: right;"><strong>10.58 – 11.97</strong> (varies
+per random draw)</td>
+<td>0/6 found</td>
+</tr>
+<tr>
+<td>golden-bad wrong-content (“BANANA SPACESHIP GALAXY EIGHT”)</td>
+<td style="text-align: right;"><strong>95.98</strong></td>
+<td>0/6 found</td>
+</tr>
+</tbody>
+</table>
+<p>60 sits comfortably below the observed good cluster (~95-96) and
+decisively above the highest observed bad-fixture confidence (~12) — the
+same separation the pre-existing local prototype
+(<code>docs/qa/p3_tesseract_ocr/README.md</code>, a prior, non-compliant
+ad-hoc <code>podman run</code>/<code>podman build</code> exploration,
+superseded by this deliverable) found with its own floor of 80 on the
+same class of rendered label text (94-96 good cluster) — independent
+cross-validation that this confidence range is a real, repeatable
+Tesseract behaviour on clean rendered UI-style text, not a fluke of this
+run.</p>
+<p><strong>The wrong-content fixture is the load-bearing anti-bluff
+case</strong>: it scores a <em>high</em> mean_conf (95.98,
+correctly-recognized real text) yet still <strong>FAILs</strong>,
+because confidence alone cannot detect “the right pixels, wrong
+content.” Only the <strong>expected-token-set</strong> check catches it
+— proving the analyzer needs both criteria, not confidence alone
+(<code>13_self_validation.txt</code>).</p>
+<h2 id="analyzer-is-non-bluff-11.4.10710-11.4.115">Analyzer is non-bluff
+(§11.4.107(10) / §11.4.115)</h2>
+<ul>
+<li><strong>RED baseline</strong> (<code>10_red_baseline.txt</code>): a
+stub response (<code>full_text:&quot;&quot;</code>, <code>mean_conf:0</code>,
+<code>words:[]</code> — the shape a dead/broken OCR engine would return)
+was fed to the analyzer with <code>RED_MODE=1</code> semantics and
+correctly <strong>FAILed</strong> (exit 1) <em>before</em> the real
+container was even booted — defect-shape reproduced first.</li>
+<li><strong>Golden-BAD fixtures</strong> all correctly
+<strong>FAIL</strong> (<code>13_self_validation.txt</code>): blank (zero
+recognized text), noise (mean_conf ~11, zero token overlap despite
+Tesseract hallucinating a few low-confidence glyphs from random pixels),
+wrong-content (high confidence but zero token overlap).</li>
+<li><strong>Real GREEN input</strong> correctly <strong>PASSes</strong>,
+for <em>two independently rendered strings</em> (not a one-image
+fluke).</li>
+</ul>
+<h2 id="honest-substitution-11.4.6">Honest substitution (§11.4.6)</h2>
+<p>The Containerfile was originally two-stage: a
+<code>golang:1.25-bookworm</code> build stage compiling
+<code>ocr-shim</code>, copied into a <code>debian:bookworm-slim</code>
+runtime stage. That build <strong>reproducibly FAILED</strong> on this
+host — <code>podman-compose build</code> aborted unpacking the golang
+base image’s layers with:</p>
+<pre><code>runtime/cgo: pthread_create failed: Resource temporarily unavailable
+SIGABRT: abort</code></pre>
+<p>and, on the very next attempt (smaller
+<code>debian:bookworm-slim</code>-only pull), the
+<code>apt-get install</code> <code>RUN</code> step <em>itself</em>
+failed the same way:</p>
+<pre><code>error running container: reading container state from /usr/bin/crun (got output: &quot;&quot;):
+fork/exec /usr/bin/crun: resource temporarily unavailable</code></pre>
+<p><strong>Root-caused (§11.4.102), not guessed:</strong>
+<code>ulimit -u</code> (this UID’s soft <code>RLIMIT_NPROC</code>) is
+<strong>4096</strong>; <code>pids.current</code> for this session’s
+cgroup was <strong>3904</strong> (~95% consumed), dominated by many
+long-running, unrelated <code>node .../mongodb-mcp-server</code>
+processes (75 threads each) accumulated from other sessions on this
+shared host — <strong>not</strong> anything this build did, and not a
+process this task is authorized to inspect ownership of or kill
+(§11.4.174 — a live MCP server in another session is out of scope for
+autonomous action). The fix, self-scoped only: 1.
+<code>ulimit -u &quot;$(ulimit -Hu)&quot;</code> at the top of
+<code>run_proof.sh</code> — raises <strong>only this script’s own
+process tree’s</strong> soft limit to its hard cap (5120), touching no
+other process. 2. The Containerfile was changed to
+<strong>single-stage</strong>: <code>ocr-shim</code> is now compiled
+<em>outside</em> the container
+(<code>CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build</code>, static, by
+<code>run_proof.sh</code> itself before every boot — a §11.4.77
+regeneration mechanism, see
+<code>submodules/helix_llm/services/ocr/README.md</code> “Build the shim
+binary”) and simply <code>COPY</code>ed in, eliminating the heavyweight
+golang-toolchain image pull/unpack entirely. This is a substantially
+lighter build (one small Debian base + five apt packages) that succeeded
+where the two-stage build did not — evidence in <code>20_boot.txt</code>
+(<code>UP-OK</code>) and <code>24_container_state.txt</code>.</p>
+<p>Both changes are captured in the Containerfile’s own comments and
+<code>submodules/helix_llm/services/ocr/README.md</code>. Nothing was
+faked to route around the failure; the exact errors are quoted above
+verbatim from the actual failed runs.</p>
+<h2 id="compliance">§11.4.76 / §11.4.161 / §11.4.119 compliance</h2>
+<ul>
+<li>Booted via
+<code>digital.vasic.containers/pkg/compose.Orchestrator</code>
+(<code>Up(..., WithBuildFirst(true))</code> → the orchestrator’s
+detected compose command runs the build, never an ad-hoc
+<code>podman build</code>/<code>podman run</code>). Rootless podman
+throughout.</li>
+<li>Host port <strong>18438</strong> — distinct from coder
+<code>:18434</code>, embeddings <code>:18435</code>, translation
+<code>:18436</code>, Whisper <code>:18437</code> (verified free before
+boot, <code>00_preflight.txt</code>).</li>
+<li>Unique per-run compose project name <code>phase3ocr</code>;
+pre-clean <code>boot-down</code> before boot for clean-target integrity
+(§11.4.108/§11.4.139).</li>
+<li>Single-owner teardown (<code>29_teardown.txt</code>):
+<code>DOWN-OK</code>, container removed
+(<code>29b_post_teardown.txt</code>). <code>helixllm-coder</code>
+confirmed <strong><code>Up 21 hours</code></strong> before, during, and
+after this run — never touched. No sibling Phase-3 capability containers
+were present or affected (<code>00_preflight.txt</code>,
+<code>29b_post_teardown.txt</code>).</li>
+</ul>
+<h2 id="reproduce">Reproduce</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> docs/qa/phase3_tesseract_ocr_20260707/harness</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_proof.sh</span></span></code></pre></div>
+<p>Builds the harness + the <code>ocr-shim</code> static binary, boots
+the container via the containers submodule orchestrator
+(<code>--build</code>), renders + OCRs both known-text fixtures plus the
+three golden-bad fixtures, asserts the runtime signature + determinism +
+self-validation, tears the container down single-owner, and leaves
+<code>helixllm-coder</code> untouched. Config knobs (env, all
+default-injected — §CONST-045/046): <code>OCR_HOST_PORT</code> (18438),
+<code>OCR_MEM_LIMIT</code> (2g), <code>OCR_CPUS</code> (4),
+<code>HEALTH_TIMEOUT</code> (300s), <code>CONF_FLOOR</code> (60).
+<code>harness/phase3ocr.bin</code> and
+<code>submodules/helix_llm/services/ocr/ocr-shim</code> are gitignored
+build artifacts (§11.4.30), regenerated automatically by
+<code>run_proof.sh</code>.</p>
+<h2 id="deep-multi-angle-research-11.4.150-sources-verified-2026-07-07">Deep
+multi-angle research (§11.4.150) — sources verified 2026-07-07</h2>
+<ol type="1">
+<li><strong>Debian package tracker</strong> — <code>tesseract-ocr</code>
+in <code>bookworm</code> resolves to <strong>5.3.0-2</strong> (Tesseract
+5.x line; OEM 1/LSTM is the compiled-in default) —
+https://packages.debian.org/bookworm/tesseract-ocr (accessed
+2026-07-07). No backports repo needed for OEM-1/LSTM behaviour; only the
+<em>patch</em> version (5.3 vs upstream-latest 5.5.x) differs, which
+does not affect the <code>tsv</code>/<code>image_to_data</code> contract
+this service relies on.</li>
+<li><strong>tessdoc Command-Line-Usage</strong> — confirms the exact CLI
+invocation
+(<code>tesseract &lt;image&gt; &lt;outputbase&gt; --oem 1 --psm &lt;n&gt; tsv</code>,
+<code>-</code> as outputbase → stdout) and the TSV column layout
+(<code>level page_num block_num par_num line_num word_num left top width height conf text</code>)
+— https://tesseract-ocr.github.io/tessdoc/Command-Line-Usage.html
+(accessed 2026-07-07).</li>
+<li><strong>TSV <code>conf</code> column semantics</strong> — word-level
+(<code>level==5</code>) rows carry <code>conf</code> 0-100; all other
+levels carry <code>conf==-1</code> (layout-only, no confidence) —
+cross-confirmed by https://tomrochette.com/tesseract-tsv-format/ and
+https://github.com/tesseract-ocr/tesseract/issues/2746 (both accessed
+2026-07-07). This is exactly the parsing rule implemented in
+<code>submodules/helix_llm/services/ocr/main.go</code>’s
+<code>parseTSV</code>.</li>
+<li><strong>Prior local empirical corroboration</strong> (this repo,
+<code>docs/qa/p3_tesseract_ocr/</code>, dated shortly before this run) —
+an earlier, non-compliant (ad-hoc
+<code>podman build</code>/<code>podman run</code>, not the
+containers-submodule orchestrator) exploration of the <em>same</em>
+Tesseract-in-container approach independently observed mean confidence
+<strong>94-96</strong> on a similarly-rendered “HELIX OCR TEST 42” label
+and confirmed Debian <code>tesseract-ocr</code> resolves to
+<strong>5.3.0</strong>, not the upstream-latest 5.5.x — cross-validating
+both this run’s confidence cluster and the package-version finding from
+angle 1. This directory is prior art / research corroboration only; it
+is <strong>not</strong> part of this deliverable (different boot
+mechanism, different port, superseded).</li>
+<li><strong>Confirm-no-bigger-problem (§11.4.150(C))</strong>: the two
+independent failures during this run (golang-image unpack, then plain
+<code>apt-get install</code>) both carried the identical
+<code>resource temporarily unavailable</code> /
+<code>pthread_create failed</code> signature, which — cross-checked
+against <code>ulimit -u</code> / cgroup <code>pids.current</code> on
+this host (§11.4.102 investigation above) — confirms a single root cause
+(host-wide per-UID process-count pressure from unrelated long-lived
+processes), not two unrelated defects and not a defect in the OCR
+service’s own design.</li>
+</ol>
+<p>No external solution was needed beyond the above — the fix
+(self-scoped <code>ulimit</code> bump + single-stage build) is original
+engineering for this specific host constraint, cited here per §11.4.8’s
+“NO external solution found for the exact remediation — original work”
+clause (the <em>facts</em> about Tesseract/Debian/TSV that informed the
+design are all externally sourced above).</p>
+<h2 id="composition">Composition</h2>
+<p>§11.4.76 (containers submodule) · §11.4.161 (rootless) · §11.4.108
+(runtime signature) · §11.4.107(10) (self-validated analyzer) ·
+§11.4.115 (RED-first) · §11.4.119 (single-owner teardown) · §11.4.174
+(process-ownership verified — no other process touched) · §11.4.102
+(systematic-debugging root-cause before fix) · §11.4.6 (honest
+substitution + honest limitation) · §11.4.150 (deep multi-angle
+research, cited above).</p>
+<h2 id="honest-boundary-11.4.6">Honest boundary (§11.4.6)</h2>
+<p>This proves a <strong>real CPU OCR service</strong> genuinely reading
+known text back out of rendered pixels it was never told, with a
+non-bluffable golden-bad battery (blank / noise / wrong-content) and a
+RED-first empty-stub baseline. It does <strong>not</strong> prove
+multi-language OCR, layout/table extraction, handwriting, the
+PaddleOCR/Surya ML-fallback tier, or the VLM last-resort tier described
+in the broader design doc
+(<code>docs/research/07.2026/07_stt_ocr_whisper_tesseract/07_stt_ocr_whisper_tesseract.md</code>
+§2.3) — only the Tier-1 Tesseract default lane, end-to-end,
+containerized, non-bluff.</p>
+</body>
+</html>

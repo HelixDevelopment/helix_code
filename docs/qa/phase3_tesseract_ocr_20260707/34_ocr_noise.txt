@@ -1,0 +1,1 @@
+OCR-OK: status=200 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_tesseract_ocr_20260707/bad_response_noise.json (4251 bytes)

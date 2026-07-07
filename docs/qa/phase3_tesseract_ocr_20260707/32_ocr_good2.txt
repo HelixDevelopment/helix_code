@@ -1,0 +1,1 @@
+OCR-OK: status=200 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_tesseract_ocr_20260707/green_response_good2.json (624 bytes)

@@ -1,0 +1,1 @@
+RENDER-OK: mode=noise wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_tesseract_ocr_20260707/fixture_noise.png (769629 bytes)

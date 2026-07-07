@@ -1,0 +1,6 @@
+### GREEN runtime signature #1 (§11.4.108) text="HELIX OCR 2026 quick brown fox"
+[RUNTIME-SIGNATURE] PASS mean_conf=95.99 found=[HELIX OCR 2026 QUICK BROWN FOX] missing=[] full_text="HELIX OCR 2026 quick brown fox"
+signature_exit=0
+[DETERMINISM] PASS: identical full_text (30 chars), mean_conf=95.99, 6 words across two identical requests
+determinism_exit=0
+GREEN-OK-1

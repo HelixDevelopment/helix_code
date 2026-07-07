@@ -1,0 +1,22 @@
+# Phase-3 CPU OCR service — Tesseract 5 (OEM 1 / LSTM) behind the minimal Go
+# HTTP shim in submodules/helix_llm/services/ocr/. Booted THROUGH the
+# containers submodule compose.Orchestrator (§11.4.76), rootless podman
+# (§11.4.161). NO GPU device — Tesseract is CPU-bound by design, the
+# structural guarantee this ships before the P0/P1 GPU chain.
+#
+# No hardcoded host port / resource limit (§CONST-045 / §CONST-046): every
+# value is injected from the environment by run_proof.sh; the compose file
+# carries no literal for those. The build context path is a structural
+# reference to this repo's own tree (not a secret/host/credential literal).
+services:
+  ocr:
+    build:
+      context: ../../../../submodules/helix_llm/services/ocr
+      dockerfile: Containerfile
+    ports:
+      - "${OCR_HOST_PORT}:8080"
+    # §12.3 container hygiene — bounded so the OCR service never starves the
+    # developer host (§12.6). Config-injected, captured as evidence.
+    mem_limit: "${OCR_MEM_LIMIT}"
+    cpus: ${OCR_CPUS}
+    restart: "no"

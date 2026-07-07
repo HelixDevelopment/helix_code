@@ -1,0 +1,1 @@
+RENDER-OK: mode=label wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase3_tesseract_ocr_20260707/fixture_good2.png (4780 bytes)
