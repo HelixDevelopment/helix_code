@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RESULTS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">RESULTS</h1>
+</header>
+<h1 id="helixllm-phase-4-vision-vlm-boot-harness-end-to-end-proof-11.4.108">HelixLLM
+Phase-4 Vision (VLM) Boot Harness — END-TO-END PROOF (§11.4.108)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Status</strong></td>
+<td><strong>COMPLETE — ALL-GREEN.</strong> Real Qwen2.5-VL-3B multimodal
+server booted via the containers submodule, RED/GREEN §11.4.115 polarity
+pair both PASS (each re-run twice), coder untouched throughout.</td>
+</tr>
+<tr>
+<td><strong>Run-id</strong></td>
+<td><code>helixllm_vision_boot_20260707T215007Z</code></td>
+</tr>
+<tr>
+<td><strong>Date</strong></td>
+<td>2026-07-07 (UTC), host <code>x86_64</code>, RTX 5090 (32607 MiB
+total VRAM), rootless podman</td>
+</tr>
+<tr>
+<td><strong>Branch / Track</strong></td>
+<td><code>feature/helixllm-full-extension</code></td>
+</tr>
+<tr>
+<td><strong>Component</strong></td>
+<td><code>submodules/helix_llm/cmd/visiongen-boot/</code> (admit-check /
+boot / down / status)</td>
+</tr>
+<tr>
+<td><strong>Sibling lane</strong></td>
+<td><code>docs/qa/helixllm_imagegen_*</code> /
+<code>helixllm_videogen_*</code> (image-gen / video-gen GPU BURST lanes)
+— vision is the WARM co-resident lane
+(<code>vrambroker.ClassVLM</code>), stays up after boot instead of
+tearing down.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="what-was-booted-and-how-11.4.76-11.4.161">1. What was booted,
+and how (§11.4.76 / §11.4.161)</h2>
+<ul>
+<li>Booted <strong>through the containers-submodule
+<code>compose.Orchestrator</code></strong> — NOT ad-hoc
+<code>podman</code>/<code>docker</code> commands. Rootless podman,
+NVIDIA CDI GPU device injection (<code>nvidia.com/gpu=all</code>).</li>
+<li>Image <code>localhost/helixllm/llamacpp-router:cuda12.8-sm120</code>
+— the ALREADY-BUILT router image (no rebuild, §11.4.74
+reuse-don’t-reimplement), run as a multimodal <code>llama-server</code>
+(GGUF weights + libmtmd mmproj projector).</li>
+<li>Model: <code>Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf</code> +
+<code>mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf</code>, env-injected model
+directory (§CONST-045/§11.4.28 — no hardcoded host path in
+<code>compose.vision.yml</code> itself).</li>
+<li>Own port <code>:18439</code>, distinct from the live coder
+(<code>:18434</code>) and every sibling capability lane
+(<code>:18435</code>–<code>:18443</code>) per §11.4.119
+single-resource-owner.</li>
+</ul>
+<h2 id="admission-gate-broker-first-fail-closed-11.4.6">2. Admission
+gate (broker-first, fail-closed §11.4.6)</h2>
+<p><code>admit_check.txt</code>:</p>
+<pre><code>VRAM budget (nvidia-smi): total=32607MiB used=19436MiB free=12685MiB need=5120MiB headroom=2048MiB
+ADMIT-OK: VLM footprint admitted co-resident (coder stays live) — warm tier
+admit-check exit=0</code></pre>
+<p>The VLM footprint (5 GiB placeholder, phase3-measured ~4.1 GiB actual
+peak + margin) was admitted against MEASURED free VRAM (12685 MiB free
+at the time) BEFORE any container boot — never a raw VRAM grab.</p>
+<h2 id="root-cause-fix-caught-mid-run-11.4.102">3. Root-cause-fix caught
+mid-run (§11.4.102)</h2>
+<p>The FIRST boot attempt (<code>boot.txt</code>) admitted fine, brought
+the container UP, but timed out on <code>/health</code> after 100 polls
+(5 minutes):</p>
+<pre><code>UP-OK: helixllm_visiongen visiongen via containers submodule orchestrator (:18439)
+HEALTH-TIMEOUT: visiongen /health did not answer within 5m0s (100 polls)
+BLOCKED: visiongen service never became healthy on :18439
+exit status 4</code></pre>
+<p><code>visiongen_container_log_1.txt</code> captured the actual
+failure inside the container:
+<code>error: invalid argument: llama-server</code> — the router image’s
+<code>ENTRYPOINT</code> is already <code>[&quot;llama-server&quot;]</code>
+(confirmed via <code>router_image_entrypoint.txt</code>,
+<code>podman inspect .Config.Entrypoint</code>), so the compose
+<code>command:</code> list must NOT re-add <code>llama-server</code> as
+its own first argv token — doing so duplicates the binary name as
+<code>argv[1]</code> and <code>llama-server</code> rejects it.
+<code>compose.vision.yml</code> was corrected to drop that leading token
+(documented in the file’s own header comment as a permanent guard
+against regression), and the retry succeeded:</p>
+<p><code>boot_retry1.txt</code>:</p>
+<pre><code>VRAM budget (nvidia-smi): total=32607MiB used=19436MiB free=12685MiB need=5120MiB headroom=2048MiB
+ADMIT-OK: VLM footprint admitted co-resident (coder stays live) — warm tier
+UP-OK: helixllm_visiongen visiongen via containers submodule orchestrator (:18439)
+HEALTH-OK: visiongen /health after 2 polls (status=200)
+BOOT-HEALTH-OK: visiongen /health answered. VLM stays UP (warm tier, coder untouched).
+Run `visiongen-boot down &lt;compose-file&gt; &lt;project&gt;` for single-owner teardown.
+boot exit=0</code></pre>
+<h2 id="redgreen-polarity-pair-both-re-run-twice">4. §11.4.115 RED/GREEN
+polarity pair — both re-run twice</h2>
+<p>The single test source <code>vision_boot_test.sh</code> toggles on
+<code>RED_MODE</code>:</p>
+<p><strong>RED (<code>RED_MODE=1</code>, reproduce-the-defect on the
+torn-down artifact):</strong></p>
+<pre><code>test_red_mode1.txt:        PASS: defect reproduced: :18439 unreachable after teardown; coder untouched (Up)
+test_red_mode1_rerun2.txt: PASS: defect reproduced: :18439 unreachable after teardown; coder untouched (Up)</code></pre>
+<p><strong>GREEN (<code>RED_MODE=0</code>, standing regression guard —
+boot + REAL multimodal inference):</strong></p>
+<pre><code>test_green_mode0.txt:        PASS: vision endpoint served a real multimodal completion
+                              (coder untouched, was up before, Up after):
+                              &quot;A red square is displayed on a black background.&quot;
+test_green_mode0_rerun2.txt: PASS: vision endpoint served a real multimodal completion
+                              (coder untouched, was up before, Up after):
+                              &quot;The image shows a red square on a black background.&quot;</code></pre>
+<p>The two GREEN runs produced <strong>two different sentences</strong>
+describing the SAME generated test image (a 128×128 black PNG with a red
+rectangle drawn at 10,10–60,60 via ImageMagick,
+<code>test_image.png</code>) — direct evidence this is a live model
+sampling a real answer each call, not a cached/canned string
+(§11.4.2/§11.4.5 anti-bluff).</p>
+<h2 id="raw-inference-evidence-11.4.69-sink-side-not-health-200-only">5.
+Raw inference evidence (§11.4.69 sink-side, not health-200-only)</h2>
+<p><code>inference_response.json</code> (captured during a manual
+confirmation call, same harness/image/model):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span><span class="dt">&quot;choices&quot;</span><span class="fu">:</span><span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;finish_reason&quot;</span><span class="fu">:</span><span class="st">&quot;stop&quot;</span><span class="fu">,</span><span class="dt">&quot;index&quot;</span><span class="fu">:</span><span class="dv">0</span><span class="fu">,</span><span class="dt">&quot;message&quot;</span><span class="fu">:{</span><span class="dt">&quot;role&quot;</span><span class="fu">:</span><span class="st">&quot;assistant&quot;</span><span class="fu">,</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&quot;content&quot;</span><span class="fu">:</span><span class="st">&quot;The image shows a red square and a green circle on a black background.&quot;</span><span class="fu">}}</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&quot;model&quot;</span><span class="fu">:</span><span class="st">&quot;/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf&quot;</span><span class="fu">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&quot;system_fingerprint&quot;</span><span class="fu">:</span><span class="st">&quot;b1-3b4fca1&quot;</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&quot;usage&quot;</span><span class="fu">:{</span><span class="dt">&quot;completion_tokens&quot;</span><span class="fu">:</span><span class="dv">16</span><span class="fu">,</span><span class="dt">&quot;prompt_tokens&quot;</span><span class="fu">:</span><span class="dv">109</span><span class="fu">,</span><span class="dt">&quot;total_tokens&quot;</span><span class="fu">:</span><span class="dv">125</span><span class="fu">},</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="dt">&quot;timings&quot;</span><span class="fu">:{</span><span class="dt">&quot;prompt_ms&quot;</span><span class="fu">:</span><span class="fl">109.965</span><span class="fu">,</span><span class="dt">&quot;predicted_ms&quot;</span><span class="fu">:</span><span class="fl">43.118</span><span class="fu">,</span><span class="dt">&quot;predicted_per_second&quot;</span><span class="fu">:</span><span class="fl">371.07</span><span class="fu">}}</span></span></code></pre></div>
+<p>Real llama.cpp server timing/token telemetry, real model path on
+disk, real <code>system_fingerprint</code> — this is a genuine
+multimodal completion, not a metadata-only or config-only pass.</p>
+<h2 id="coder-untouched-throughout-11.4.122-single-owner">6. Coder
+untouched throughout (§11.4.122 single-owner)</h2>
+<pre><code>coder_before.txt:       helixllm-coder Up 32 hours 8080/tcp, 50052/tcp
+coder_after_final.txt:  helixllm-coder Up 32 hours 8080/tcp, 50052/tcp
+                        helixllm_visiongen_visiongen_1 Up 9 seconds 0.0.0.0:18439-&gt;18439/tcp, 8080/tcp, 50052/tcp</code></pre>
+<p>The coder container’s uptime (32 hours) is IDENTICAL before and after
+every boot/teardown/inference cycle in this run — it was never stopped,
+restarted, or paused by this harness, confirming the “this harness DOES
+NOT pause the live coder autonomously” design invariant (main.go header
+comment).</p>
+<h2 id="evidence-manifest">7. Evidence manifest</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>What it proves</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>admit_check.txt</code></td>
+<td>Broker VRAM admission gate, fail-closed</td>
+</tr>
+<tr>
+<td><code>boot.txt</code></td>
+<td>First boot attempt — health-timeout (pre-fix)</td>
+</tr>
+<tr>
+<td><code>visiongen_container_log_1.txt</code></td>
+<td>Root cause: duplicated <code>llama-server</code> argv token</td>
+</tr>
+<tr>
+<td><code>router_image_entrypoint.txt</code></td>
+<td><code>podman inspect</code> confirming the image’s own
+ENTRYPOINT</td>
+</tr>
+<tr>
+<td><code>boot_retry1.txt</code></td>
+<td>Post-fix boot — healthy after 2 polls</td>
+</tr>
+<tr>
+<td><code>test_red_mode1.txt</code> / <code>_rerun2</code></td>
+<td>RED — defect reproduced on torn-down artifact (x2)</td>
+</tr>
+<tr>
+<td><code>test_green_mode0.txt</code> / <code>_rerun2</code></td>
+<td>GREEN — real inference, non-identical real completions (x2)</td>
+</tr>
+<tr>
+<td><code>inference_request.json</code> /
+<code>inference_response.json</code></td>
+<td>Raw multimodal request/response with real llama.cpp telemetry</td>
+</tr>
+<tr>
+<td><code>test_image.png</code></td>
+<td>The generated test fixture (red rectangle on black)</td>
+</tr>
+<tr>
+<td><code>coder_before.txt</code> /
+<code>coder_after_final.txt</code></td>
+<td>Coder uptime unchanged — single-owner cleanup respected</td>
+</tr>
+<tr>
+<td><code>podman_ps_after_boot.txt</code> /
+<code>podman_ps_after_boot_timeout.txt</code></td>
+<td>Raw container state snapshots at each phase</td>
+</tr>
+<tr>
+<td><code>inference_curl_stderr.txt</code></td>
+<td>curl transport diagnostics for the inference call</td>
+</tr>
+<tr>
+<td><code>magick.log</code></td>
+<td>ImageMagick test-fixture generation log (empty = clean exit)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="honest-boundary-11.4.6">8. Honest boundary (§11.4.6)</h2>
+<p>This proof covers the boot/admit/teardown/inference lifecycle of the
+DEFAULT-provisioned 3B model on ONE host/GPU. It does NOT prove: the 7B
+model variant (documented env-override path, not exercised here),
+behaviour under concurrent burst-lane (image/video) contention
+(§11.4.119 partitioning is enforced by the broker’s
+<code>ErrBurstInUse</code> path but not exercised in this run), or
+multi-request concurrent-load characteristics (§11.4.85 stress — tracked
+as a separate follow-up, not claimed here).</p>
+</body>
+</html>

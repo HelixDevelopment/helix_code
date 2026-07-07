@@ -1,0 +1,5 @@
+provider_live_proof verdict
+run_id: provider_live_proof_20260707T215206Z
+timestamp_utc: 2026-07-07T21:52:23Z
+verdict: SKIP
+detail: unreachable: GET http://localhost:8080/models failed (no local server listening; set LLAMACPP_BASE_URL to override the base URL)

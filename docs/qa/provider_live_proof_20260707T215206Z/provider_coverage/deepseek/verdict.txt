@@ -1,0 +1,5 @@
+provider_live_proof verdict
+run_id: provider_live_proof_20260707T215206Z
+timestamp_utc: 2026-07-07T21:52:08Z
+verdict: FAIL
+detail: key present but real Generate() call errored: DeepSeek request failed: DeepSeek API returned status 402: {"error":{"message":"Insufficient Balance","type":"unknown_error","param":null,"code":"invalid_request_error"}}

@@ -1,0 +1,9 @@
+{
+  "provider": "deepseek",
+  "provider_type": "deepseek",
+  "model": "deepseek-v4-flash",
+  "model_source": "catalogue:cheap-match",
+  "nonce": "LIVEPROOF-feb11815c3f1",
+  "prompt": "This is an automated liveness probe. Reply with EXACTLY this token and nothing else: LIVEPROOF-feb11815c3f1",
+  "requested_at_utc": "2026-07-07T21:52:07.818925511Z"
+}

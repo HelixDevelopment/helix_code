@@ -1,0 +1,3 @@
+RED_MODE=1: reproducing pre-boot defect (no live vision endpoint on :18439)
+PASS: defect reproduced: :18439 unreachable after teardown; coder untouched (Up)
+exit=0

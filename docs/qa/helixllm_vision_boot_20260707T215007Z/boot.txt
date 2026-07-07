@@ -1,0 +1,7 @@
+VRAM budget (nvidia-smi): total=32607MiB used=19436MiB free=12685MiB need=5120MiB headroom=2048MiB
+ADMIT-OK: VLM footprint admitted co-resident (coder stays live) — warm tier
+UP-OK: helixllm_visiongen visiongen via containers submodule orchestrator (:18439)
+HEALTH-TIMEOUT: visiongen /health did not answer within 5m0s (100 polls)
+BLOCKED: visiongen service never became healthy on :18439
+exit status 4
+boot exit=1

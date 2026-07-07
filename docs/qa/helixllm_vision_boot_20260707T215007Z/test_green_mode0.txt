@@ -1,0 +1,3 @@
+RED_MODE=0: standing GREEN guard — booting + real multimodal inference
+PASS: vision endpoint served a real multimodal completion (coder untouched, was up before, Up after): A red square is displayed on a black background.
+GREEN test exit=0

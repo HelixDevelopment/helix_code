@@ -1,0 +1,5 @@
+deploy_caddy_1 Exited (0) 3 days ago 0.0.0.0:52080->80/tcp, 0.0.0.0:52443->443/tcp, 0.0.0.0:52443->443/udp, 2019/tcp
+helix_sonarqube_db Exited (0) 3 days ago 5432/tcp
+helix_sonarqube Exited (130) 3 days ago 0.0.0.0:9000->9000/tcp
+helixllm-coder Up 32 hours 8080/tcp, 50052/tcp
+helixllm_visiongen_visiongen_1 Exited (1) 5 minutes ago 0.0.0.0:18439->18439/tcp, 8080/tcp, 50052/tcp

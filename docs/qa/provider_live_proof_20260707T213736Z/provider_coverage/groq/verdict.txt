@@ -1,0 +1,5 @@
+provider_live_proof verdict
+run_id: provider_live_proof_20260707T213736Z
+timestamp_utc: 2026-07-07T21:37:36Z
+verdict: SKIP
+detail: no-key: none of the recognised env-var aliases for groq are set to a non-placeholder value
