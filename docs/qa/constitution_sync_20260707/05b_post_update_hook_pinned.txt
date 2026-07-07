@@ -1,0 +1,13 @@
+
+[0;36m=================================================[0m
+[0;36m  Constitution Post-Update Auto-Propagation[0m
+[0;36m=================================================[0m
+
+[0;32m[INFO][0m  Constitution dir:  /home/milos/Factory/projects/tools_and_research/helix_code/constitution
+[0;32m[INFO][0m  Project root:      /home/milos/Factory/projects/tools_and_research/helix_code
+[0;32m[INFO][0m  Script dir:        /home/milos/Factory/projects/tools_and_research/helix_code/constitution/scripts
+
+[0;36m== STEP 1: Detecting changes in constitution submodule ==[0m
+0882b9e0008060049fa962cccbdc98a094e5db25
+[0;32m[INFO][0m  Detected: 0 skill(s), 0 MCP config(s), 0 hook(s), 0 script(s) changed.
+[0;32m[INFO][0m  No relevant changes detected. Nothing to propagate.

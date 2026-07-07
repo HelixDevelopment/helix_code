@@ -1,0 +1,155 @@
+========== 5074d60 Милош Васић 2026-07-07
+fix(workable-items §11.4.28): genericize shape-2 heading regex to project-agnostic
+
+atmShape2HeadingRe + atmShape2CodeRe were still hardcoded to `ATM-\d+`
+specifically (a residual §11.4.28 decoupling leak alongside the already-fixed
+atmBracketIDRe in 86f39ad). A consuming project registering a bare `##
+[XYZ-NNN] <title>` shape-2 heading (no shape-1 `. ` suffix, no shape-3 `§`
+prefix) would silently fail isATMCandidateHeading's shape-2 test and never be
+recognised as a workable item — the exact phantom-sync-divergence class 86f39ad
+closed for the bracket-anywhere-in-heading case.
+
+Broadened both regexes from `ATM-\d+` to `[A-Z]{2,}-\d+` (strict superset —
+ATM/SPK/BOB still match identically, proven by the full existing test suite
+staying green). Added parse_shape2_decoupling_test.go: 3 new tests proving a
+brand-new prefix (XYZ, never seen by this tool before) is recognised end-to-end
+via parseIssues, isATMCandidateHeading, and parseATMHeading directly, plus a
+negative case (prefix < 2 chars, lowercase prefix) proving the boundary holds.
+go test ./... GREEN (all pre-existing + 3 new tests); linux binary rebuilt to
+match source (§11.4.108).
+
+Classification: universal (§11.4.17) — restores project-decoupling for the
+constitution's shared workable-items tool per §11.4.28(B) (owned submodules /
+shared tooling MUST NOT hardcode a consuming project's ticket-prefix asset
+names). Composes §11.4.124 (investigated via git history/blame before
+changing — confirmed both regexes were the residual half of the 86f39ad fix,
+not independently-motivated ATM-specific logic) + §11.4.84 (working-tree
+quiescence — committed via explicit pathspec, leaving a concurrent agent's
+already-staged Constitution.md untouched in the shared index).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+
+========== e584ab0 Милош Васић 2026-07-07
+feat(§11.4.183): add maximal multi-agent utilization per work-stream mandate
+
+Operator mandate (2026-07-07, verbatim): "Every Track MUST USE and
+maximize multi-agents working approaches (subagent-driven, independent
+agents for various reviewing, and other forms of agents use)! We MUST
+maximize use of agents so every track produces as much as possible
+completed work with highest possible quality for the least spent time!
+Every Track MUST apply everything from the constitution — all rules,
+mandatory constraints, guides and technology derived! Nothing can be
+ignored, skipped, avoided or considered less relevant! There MUST
+NEVER BE false or faulty results, untested and unverified work or
+bluff of any kind anywhere!"
+
+Adds §11.4.183, consolidating + strengthening existing anchors
+(§11.4.20/.70 subagent-driven, §11.4.58/.103 parallel streams,
+§11.4.94/.97 zero-idle/max-use, §11.4.125/.142/.165/.134 independent
+review agents, §11.4 anti-bluff covenant) into one explicit per-track
+mandate: maximize multi-agent utilization, apply the entire
+constitution with nothing skipped, and zero false/untested/bluff
+results anywhere. Full text in Constitution.md; compact mirror
+appended to CLAUDE.md/AGENTS.md/QWEN.md/GEMINI.md following the
+established §11.4.177-182 mirror pattern.
+
+Classification: universal (§11.4.17) — platform-neutral working-
+methodology rule reusable by any project running parallel tracks.
+
+Propagation gate CM-COVENANT-114-183-PROPAGATION (literal `11.4.183`)
++ recommended gate CM-MAX-AGENTS-PER-TRACK + paired §1.1 mutation
+(gate-code = separate work item, per the established pattern for
+recent anchors).
+
+Staged only the 5 governance files (Constitution.md + CLAUDE.md +
+AGENTS.md + QWEN.md + GEMINI.md) — a concurrent parallel-track edit
+to Constitution.md (§11.4.184 SonarQube anchor, still in progress)
+was isolated via `git stash` before this commit and restored
+immediately after, per §11.4.84 working-tree quiescence.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+
+========== 86f39ad Милош Васић 2026-07-07
+fix(workable-items §11.4.28): genericize bracket-ID regex to project-agnostic
+
+The universal constitution workable-items tool was hardcoding ATMOSphere ticket prefixes (ATM|BOB|SPK) — a §11.4.28 decoupling violation (a shared submodule must carry NO consuming-project asset names). Now matches any [A-Z]{2,}-NNN, so any project's [XYZ-NNN] heading id is recognised without a code change.
+
+Backward-compatible (ATM/SPK/BOB still match); go test GREEN; linux binary rebuilt to match source (§11.4.108). Reverses the project-specific SPK hardcode added earlier this session. Classification: universal (§11.4.17) — restores project-decoupling.
+
+========== f211fd9 Милош Васић 2026-07-07
+feat(llm-alias-health): PWU-3 alias-health util + workable-items SPK-NNN parse fix (§11.4.26).
+
+llm-alias-health: Go util (config/probe/health/events/evidence) that execs the LLMsVerifier claude-alias-probe bridge (exec-decoupled per §11.4.28(C) — never imports LLMsVerifier as a Go dep, bridge path from YAML). 33 util tests PASS (stress 100-iter p50=1.9ms/p95=2.5ms + 10-way concurrency no deadlock; chaos corrupt/empty/missing/hung/unwritable all degrade to 'unknown', zero false-'ok') + 2 real claude -p integration probes PASS. Native-alias live probing intentionally deferred (§11.4.119 parallel-session CLAUDE_CONFIG_DIR contention). §11.4.30 binary+runtime gitignored.
+
+workable-items SPK-NNN fix: bracket-ID regex now recognizes SPK-NNN (was misparsing 3 correct headings as ghost IDs -> 3 of 28 md/db divergences). TestParseATM_BracketedID_SPK RED->GREEN, full suite green, 2 Linux binaries rebuilt. No bluff.
+
+========== c1b9e17 Милош Васић 2026-07-06
+feat(RB-06): subscription/route balance + reuse selector + monitor drop-hook
+
+RB-06: mt_balance_select (native-FIRST, then least-loaded-provider) +
+per-route inflight registry (mark_spawn/done/fail/ok) + operability probe
+(mt_provider_operability_probe via ccr /v1/messages, curl-absent-honest).
+Monitor drop-hook (--route) on headless rate-limit sig fires mt_balance_mark_fail.
+Pure function: deterministic given same registry+operable set (§11.4.50).
+Interface contract per rb06_report.md; BALANCE SET = 6 providers
+{opencode,nvidia,chutes,siliconflow,zai-coding-plan,kilo}.
+Companion test at scripts/multitrack/test_multitrack_balance_reuse.sh (parent repo).
+
+Signed-off-by: milos85vasic <milos@vasic.digital>
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+========== 8a748a6 Милош Васић 2026-07-06
+feat(multitrack RB-05): headless per-track worker spawn primitive multitrack_sessions.sh
+
+New project-agnostic constitution-layer primitive (spawn/drive/resume/status/stop):
+- spawn: sources the RB-02 host-safety budget guard and REFUSES on non-zero (no
+  --force); resolves the worker cwd via the RB-01 resolver; `unset
+  ANTHROPIC_API_KEY` in the child (the -p-mode precedence trap); applies the
+  alias/config SELECTOR (MT_WORKER_ALIAS + MT_WORKER_CONFIG_DIR / --alias /
+  --config-dir — a first-class param for RB-06's balancer, NO hardcoded alias);
+  launches `claude -p --output-format stream-json --verbose`; captures
+  session_id from the first system/init event; reads SUCCESS from the terminal
+  result.is_error (NOT the process exit code); persists {alias,session_id,cwd,
+  pid,status} to events.jsonl + an atomically-renamed per-track snapshot (§11.4.116).
+- resume: recovers the spawn cwd+config-dir from the snapshot and re-invokes
+  `claude --resume <session_id>` in the SAME cwd (the storage-collision gotcha).
+
+Mock-validated end-to-end (device-AND-account-independent): GREEN 22/0, RED 7/0,
+3/3 deterministic; success-from-result.is_error proven in both directions; RB-02
+budget refuse-at-cap proven (mock never invoked); §11.4.107(10) golden-good/
+golden-bad analyzer self-validation. No real claude/token/network/worker.
+POSIX sh, sh -n/bash -n clean (§11.4.67).
+
+Classification: universal (§11.4.17) — the spawn primitive is reusable by any
+multi-track consumer; the auth selector is orthogonal to the track↔cwd axis so
+no project-specific assumption is baked in.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+========== ac83aaf Милош Васић 2026-07-06
+feat(multitrack RB-01+RB-02): consumer-config self-location + host-safety spawn budget
+
+RB-01 (§11.4.111/§11.4.35): mt_repo_root() self-locates the consumer config
+from ANY cwd — (a) MT_REPO_ROOT pin, (b) base/config/multitrack standalone,
+(c) git superproject-working-tree when embedded as a submodule, (d) base
+fallback. Companion resolver fix: source config.sh before pinning MT_REPO_ROOT
+so the engine's self-located root is honoured (twin-bug). Fixes the standalone
+`map` "config load failed" from cwd / while keeping the-factory `map` GREEN
+(/mnt/track{2,3,4}/atmosphere, never the track-qualified basename).
+
+RB-02 (§12.6/§11.4.133): new multitrack_host_budget.sh — mt_host_budget_can_spawn
+pool cap (MT_MAX_WORKERS=4) + refuse-during-heavy-build pgrep guard + aggregate
+projected-RSS check via the existing host_safe_parallel_jobs(); honest refuse
+(exit 4) when the host-safety lib is unavailable; zero --force/--no-cap escape.
+Marker-delimited MT_MAX_WORKERS_CLAMP / MT_BUILD_PGREP_GUARD regions for the
+paired §1.1 mutations.
+
+Both project-agnostic (the consumer injects config via config/multitrack/*.yaml).
+Runtime-verified GREEN (§11.4.108/§11.4.115); gate+mutation polarity proven in
+the consuming project's pre_build_verification.sh + meta_test_false_positive_proof.sh.
+
+Classification: universal (§11.4.17) — the multi-track spawn/resolve substrate is
+reusable by any consumer; no project-specific assumptions in these scripts.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+

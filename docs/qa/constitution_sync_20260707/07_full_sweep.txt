@@ -1,0 +1,82 @@
+
+=== G1 — Governance cascade (§11.9 + CONST-047..059) ===
+  FAIL (G1): cascade verifier reported failures (see /tmp/g1-cascade.out)
+    Canonical fix: inspect output; add missing anchor(s) and re-run
+
+=== G2 — CONST-035 anti-bluff smoke (production code) ===
+  PASS: zero production bluff markers in helix_code/{internal,cmd}
+
+=== G3 — CONST-050(A) mock-from-production audit ===
+  PASS: no production code imports internal/mocks
+
+=== G4 — CONST-051(C) nested-own-org submodule chains ===
+  PASS: no nested own-org submodule chains in any owned submodule
+
+=== G5 — CONST-053 .gitignore + sensitive-file audit ===
+  PASS: every owned submodule has .gitignore + no sensitive files tracked at owned-paths
+
+=== G6 — CONST-052 case-conformance (soft — phased per task #252) ===
+  PASS: 7 unprotected rename candidates (0 protected from rename)
+
+=== G7 — §11.4.83 docs/qa/ end-user evidence (HXC-019) ===
+  FAIL (G7): feature commit(s) lack docs/qa/<run-id>/ evidence (see /tmp/g7-qa.out)
+    Canonical fix:  materials under docs/qa/<run-id>/ (see docs/qa/README.md). Either
+ add the evidence directory, or — for a non-feature change that
+ tripped the heuristic — annotate the commit with [no-qa-evidence].
+===========================================================================
+ RESULT: FAIL (enforcing — 4 violation(s)).
+
+=== G8 — §11.4.90 Obsolete-Details (HXC-018) ===
+  PASS: every Obsolete-status item carries a valid Obsolete-Details line
+
+=== G9 — §11.4.91 summary-doc clarity (HXC-018) ===
+  PASS: every summary one-liner is self-contained (no anti-pattern rows)
+
+=== G10 — §11.4.81 cross-platform parity (HXC-015) ===
+  PASS: no multi-platform script drops a manifest platform without honest-gap citation
+
+=== G11 — §11.4.93/95 workable-items md↔db sync (HXC-026) ===
+  PASS: PASS — committed DB validates + md⟷db byte-identical in sync
+
+=== G12 — §11.4.12/91 summary-doc freshness (CM-{ISSUES,FIXED}-SUMMARY-SYNC) ===
+  FAIL (G12): summary docs stale vs Issues.md/Fixed.md — re-run scripts/generate_{issues,fixed}_summary.sh (see /tmp/g12-summary.out)
+    Canonical fix: @@ -17,4 +17,4 @@
+ 
+ - HXC-044: internal/cognee — AMD-GPU rocm-smi JSON parser returns -1 sentinel instead of parsed GPU-use value
+ 
+-*Last regenerated: 2026-07-07 by `scripts/generate_fixed_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
++*Last regenerated: 2026-06-24 by `scripts/generate_fixed_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
+
+=== G13 — §11.4.99 Sources-verified footers (CM-SOURCES-VERIFIED; HXC-030) ===
+  PASS: 72/72 operator-facing docs footered (100%)
+
+=== G14 — §11.4.106 docs_chain verify (CM-COVENANT-114-106-PROPAGATION) ===
+  SKIP (G14): docs_chain engine absent — §11.4.106 cannot be mechanically enforced until engine is installed. SKIP-OK: §11.4.3
+
+=== G15 — §11.4.153/§11.4.86 feature video-evidence durability (CM-FEATURE-STATUS-VIDEO-CONFIRMED) ===
+  PASS: 8 cited durable evidence paths all exist; no rotatable-corpus citation; fingerprint matches (0d8e196645b3da9efc48a65860ac768226dc8db1bef3cc298f3b0dc3b708ba36)
+
+=== G16 — §11.4.135 challenge-matrix runner contract (CM-REGRESSION-GUARD; HXC-108/112) ===
+  PASS: RESULT: 9 passed, 0 failed — run-challenge-matrix dispatch/preflight contract pinned
+
+=== verify-all-constitution-rules.sh summary ===
+Gates run: 16
+Failures:  3
+  G1  FAIL  cascade verifier reported failures (see /tmp/g1-cascade.out)
+  G2  PASS  zero production bluff markers in helix_code/{internal,cmd}
+  G3  PASS  no production code imports internal/mocks
+  G4  PASS  no nested own-org submodule chains in any owned submodule
+  G5  PASS  every owned submodule has .gitignore + no sensitive files tracked at owned-paths
+  G6  PASS  7 unprotected rename candidates (0 protected from rename)
+  G7  FAIL  feature commit(s) lack docs/qa/<run-id>/ evidence (see /tmp/g7-qa.out)
+  G8  PASS  every Obsolete-status item carries a valid Obsolete-Details line
+  G9  PASS  every summary one-liner is self-contained (no anti-pattern rows)
+  G10  PASS  no multi-platform script drops a manifest platform without honest-gap citation
+  G11  PASS  PASS — committed DB validates + md⟷db byte-identical in sync
+  G12  FAIL  summary docs stale vs Issues.md/Fixed.md — re-run scripts/generate_{issues,fixed}_summary.sh (see /tmp/g12-summary.out)
+  G13  PASS  72/72 operator-facing docs footered (100%)
+  G14  SKIP  docs_chain engine absent (not on PATH, no sibling ../docs_chain, no .docs_chain/bin/docs_chain) — SKIP-OK: install engine to enforce §11.4.106
+  G15  PASS  8 cited durable evidence paths all exist; no rotatable-corpus citation; fingerprint matches (0d8e196645b3da9efc48a65860ac768226dc8db1bef3cc298f3b0dc3b708ba36)
+  G16  PASS  RESULT: 9 passed, 0 failed — run-challenge-matrix dispatch/preflight contract pinned
+
+FAIL: 3 gate(s) violate the constitution

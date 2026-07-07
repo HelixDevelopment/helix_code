@@ -1,0 +1,63 @@
+From github.com:HelixDevelopment/HelixConstitution
+ * branch            main       -> FETCH_HEAD
+Updating 0882b9e..5074d60
+Fast-forward
+ AGENTS.md                                          |   2 +
+ CLAUDE.md                                          |   2 +
+ Constitution.md                                    |   2 +
+ GEMINI.md                                          |   2 +
+ QWEN.md                                            |   2 +
+ scripts/llm-alias-health/.gitignore                |  15 +
+ scripts/llm-alias-health/README.md                 |  87 ++++
+ .../cmd/llm-alias-health/config.go                 | 135 +++++++
+ .../cmd/llm-alias-health/config_test.go            | 212 ++++++++++
+ .../cmd/llm-alias-health/events.go                 |  49 +++
+ .../cmd/llm-alias-health/evidence.go               |  48 +++
+ .../cmd/llm-alias-health/health.go                 | 112 ++++++
+ .../cmd/llm-alias-health/health_test.go            | 127 ++++++
+ .../llm-alias-health/cmd/llm-alias-health/main.go  | 161 ++++++++
+ .../cmd/llm-alias-health/main_test.go              |  96 +++++
+ .../llm-alias-health/cmd/llm-alias-health/probe.go | 131 ++++++
+ .../cmd/llm-alias-health/probe_chaos_test.go       | 220 +++++++++++
+ .../cmd/llm-alias-health/probe_integration_test.go | 142 +++++++
+ .../cmd/llm-alias-health/probe_stress_test.go      | 158 ++++++++
+ .../cmd/llm-alias-health/probe_unit_test.go        | 176 +++++++++
+ .../cmd/llm-alias-health/stub_helper_test.go       |  61 +++
+ .../llm-alias-health/testdata/stubbridge/main.go   |  62 +++
+ scripts/llm-alias-health/go.mod                    |   5 +
+ scripts/llm-alias-health/go.sum                    |   4 +
+ scripts/multitrack/multitrack_balance.sh           | 422 ++++++++++++++++++++
+ scripts/multitrack/multitrack_config.sh            |  24 +-
+ scripts/multitrack/multitrack_fallback_monitor.sh  | 114 +++++-
+ scripts/multitrack/multitrack_host_budget.sh       | 273 +++++++++++++
+ scripts/multitrack/multitrack_resolve_worktree.sh  |  35 +-
+ scripts/multitrack/multitrack_sessions.sh          | 437 +++++++++++++++++++++
+ scripts/workable-items/bin/workable-items-linux    | Bin 7623528 -> 8931096 bytes
+ .../cmd/workable-items/atmosphere_test.go          |  52 +++
+ scripts/workable-items/cmd/workable-items/parse.go |  58 +--
+ .../workable-items/parse_shape2_decoupling_test.go |  75 ++++
+ 34 files changed, 3465 insertions(+), 36 deletions(-)
+ create mode 100644 scripts/llm-alias-health/.gitignore
+ create mode 100644 scripts/llm-alias-health/README.md
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/config.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/config_test.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/events.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/evidence.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/health.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/health_test.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/main.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/main_test.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/probe.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/probe_chaos_test.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/probe_integration_test.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/probe_stress_test.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/probe_unit_test.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/stub_helper_test.go
+ create mode 100644 scripts/llm-alias-health/cmd/llm-alias-health/testdata/stubbridge/main.go
+ create mode 100644 scripts/llm-alias-health/go.mod
+ create mode 100644 scripts/llm-alias-health/go.sum
+ create mode 100644 scripts/multitrack/multitrack_balance.sh
+ create mode 100755 scripts/multitrack/multitrack_host_budget.sh
+ create mode 100755 scripts/multitrack/multitrack_sessions.sh
+ create mode 100644 scripts/workable-items/cmd/workable-items/parse_shape2_decoupling_test.go
+5074d606cd7f6cc046d4a11e42c6dc36fb20696a

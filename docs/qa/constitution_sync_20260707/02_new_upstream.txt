@@ -1,0 +1,15 @@
+5074d60 fix(workable-items §11.4.28): genericize shape-2 heading regex to project-agnostic
+e584ab0 feat(§11.4.183): add maximal multi-agent utilization per work-stream mandate
+86f39ad fix(workable-items §11.4.28): genericize bracket-ID regex to project-agnostic
+f211fd9 feat(llm-alias-health): PWU-3 alias-health util + workable-items SPK-NNN parse fix (§11.4.26).
+c1b9e17 feat(RB-06): subscription/route balance + reuse selector + monitor drop-hook
+8a748a6 feat(multitrack RB-05): headless per-track worker spawn primitive multitrack_sessions.sh
+ac83aaf feat(multitrack RB-01+RB-02): consumer-config self-location + host-safety spawn budget
+origin/main:           5074d606cd7f6cc046d4a11e42c6dc36fb20696a
+github/main:           5074d606cd7f6cc046d4a11e42c6dc36fb20696a
+gitlab/main:           5074d606cd7f6cc046d4a11e42c6dc36fb20696a
+gitverse/main:         5074d606cd7f6cc046d4a11e42c6dc36fb20696a
+gitflic/main:          5074d606cd7f6cc046d4a11e42c6dc36fb20696a
+upstream/main:         5074d606cd7f6cc046d4a11e42c6dc36fb20696a
+vasicdigitalgithub/main: 5074d606cd7f6cc046d4a11e42c6dc36fb20696a
+vasicdigitalgitlab/main: 5074d606cd7f6cc046d4a11e42c6dc36fb20696a
