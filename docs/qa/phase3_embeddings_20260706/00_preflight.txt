@@ -1,8 +1,8 @@
 ### pre-flight (§11.4.119 single-owner, coder untouched)
-date_utc=2026-07-06T17:28:35Z
+date_utc=2026-07-07T06:49:08Z
 uname_m=x86_64  podman=podman version 5.7.1
 coder container (MUST remain running, untouched):
-helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 3 hours
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 17 hours
 target host port 18435 listeners (expect none):
   (free)
 TEI image:

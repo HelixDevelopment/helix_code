@@ -19,11 +19,20 @@ services:
     ports:
       - "${TEI_HOST_PORT}:80"
     volumes:
-      - phase3embed-tei-cache:/data
+      # Persistent HF-model cache (design §3.1) — an EXTERNAL named volume shared
+      # across lane projects so model weights are fetched from HF once and then
+      # reused. This is a §11.4.77 re-obtainable artefact (the weights re-download
+      # if the volume is dropped); persisting it makes boots reliable + fast and
+      # avoids re-exposing transient HF-download flakiness on every run. The
+      # container/pod is still torn down each run (single-owner cleanup §11.4.119);
+      # only this cache survives.
+      - helixllm-tei-cache:/data
     # §12.3 container hygiene — bounded so the embedder never starves the
     # developer host (§12.6). Config-injected, captured as evidence.
     mem_limit: "${TEI_MEM_LIMIT}"
     cpus: ${TEI_CPUS}
     restart: "no"
 volumes:
-  phase3embed-tei-cache:
+  helixllm-tei-cache:
+    external: true
+    name: helixllm-tei-cache

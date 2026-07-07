@@ -1,0 +1,11 @@
+### analyzer self-validation (§11.4.107(10)) golden-good = real captured response (dim=384)
+[GOLDEN-GOOD(expect PASS)] PASS dim=384 |A|=1.0000 |A'|=1.0000 |U|=1.0000 cos(A,A')=0.7509 cos(A,U)=0.3931 margin=0.3578
+[GOLDEN-BAD-ZEROVEC(expect FAIL)] FAIL dim=1536 |A|=0.0000 |A'|=0.0000 |U|=0.0000 cos(A,A')=NaN cos(A,U)=NaN margin=NaN
+    reason: zero/near-zero norm A=0 A'=0 U=0
+    reason: cosine NaN (zero-norm or dim mismatch)
+[GOLDEN-BAD-SHUFFLED(expect FAIL)] FAIL dim=384 |A|=1.0000 |A'|=1.0000 |U|=1.0000 cos(A,A')=0.3931 cos(A,U)=0.7509 margin=-0.3578
+    reason: semantic-order margin -0.3578 < required 0.1500
+[GOLDEN-BAD-WRONGDIM(expect FAIL)] FAIL dim=383 |A|=0.9951 |A'|=0.9971 |U|=0.9988 cos(A,A')=0.7492 cos(A,U)=0.3907 margin=0.3584
+    reason: expected dim 384, got 383
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit=0

@@ -64,11 +64,13 @@ poll_health() {
       log "health OK after $n polls"
       return 0
     fi
-    # Fast-fail: if the container has already exited (e.g. a model TEI cannot
+    # Fast-fail: if the container has already EXITED (e.g. a model TEI cannot
     # load), stop polling immediately instead of burning the whole timeout.
-    st=$(podman inspect "$CURRENT_CONTAINER" --format '{{.State.Status}}' 2>/dev/null || echo missing)
-    if [ "$st" = "exited" ] || [ "$st" = "missing" ]; then
-      log "container state=$st before healthy — abort poll (n=$n)"
+    # Only "exited" aborts — "created"/"missing" can appear transiently while
+    # the pod/container is still starting, so they keep polling.
+    st=$(podman inspect "$CURRENT_CONTAINER" --format '{{.State.Status}}' 2>/dev/null || echo starting)
+    if [ "$st" = "exited" ]; then
+      log "container state=exited before healthy — abort poll (n=$n)"
       return 1
     fi
     sleep 3
@@ -91,6 +93,10 @@ build_harness
 for tag in primary fallback; do
   "$BIN" boot-down "$COMPOSE" "${PROJECT}_${tag}" >/dev/null 2>&1 || true
 done
+# Persistent external HF-model cache (design §3.1). Created once; survives
+# teardown (external volumes are exempt from `compose down -v`). First cold run
+# downloads weights into it; subsequent runs load from cache (no network).
+podman volume create helixllm-tei-cache >/dev/null 2>&1 || true
 
 # ---------- PRE-FLIGHT ----------
 {
@@ -141,9 +147,22 @@ run_lane() {
   return 1
 }
 
+# run_lane_retry retries a lane up to N times, to ride out TRANSIENT HF
+# weight-download flakiness ("error decoding response body") on a cold cache.
+# A deterministic failure (e.g. nomic's config-parse error) still fails every
+# attempt — retries only help genuine transient network faults (§11.4.6).
+run_lane_retry() {
+  local model="$1" tag="$2" tries="${3:-3}" k
+  for k in $(seq 1 "$tries"); do
+    log "lane $tag attempt $k/$tries"
+    if run_lane "$model" "$tag"; then return 0; fi
+  done
+  return 1
+}
+
 if run_lane "$PRIMARY_MODEL" "primary"; then
   :
-elif run_lane "$FALLBACK_MODEL" "fallback"; then
+elif run_lane_retry "$FALLBACK_MODEL" "fallback" 3; then
   echo "SUBSTITUTION (§11.4.6): primary lane $PRIMARY_MODEL did not become healthy (TEI cpu-1.9 rejects its config.json — 'duplicate field max_position_embeddings'); fell back to $FALLBACK_MODEL (a design-listed TEI CPU model)" | tee "$EVID/23_substitution.txt"
 else
   echo "BLOCKED: neither TEI lane became healthy — see 22_teilogs_*.txt" | tee "$EVID/90_blocked.txt"

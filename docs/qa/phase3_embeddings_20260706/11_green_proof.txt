@@ -1,0 +1,6 @@
+### GREEN runtime signature (§11.4.108) served_model=BAAI/bge-small-en-v1.5 served_dim=384 margin=0.15
+[RUNTIME-SIGNATURE] PASS dim=384 |A|=1.0000 |A'|=1.0000 |U|=1.0000 cos(A,A')=0.7509 cos(A,U)=0.3931 margin=0.3578
+signature_exit=0
+[DETERMINISM] PASS: 3 vectors byte-identical across two identical requests
+determinism_exit=0
+GREEN-OK

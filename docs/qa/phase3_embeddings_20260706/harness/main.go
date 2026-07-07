@@ -98,13 +98,15 @@ func cmdBoot(up bool) {
 	if up {
 		// Detach-only + host-side readiness poll (the Phase-2 proven path on
 		// this host's podman-compose shim, where `up --wait` is unsupported).
+		// NOTE: no WithForceRecreate — under this host's podman-compose provider
+		// `up --force-recreate` creates the pod but leaves it unstarted (the pod
+		// infra that owns the host-port mapping never comes up, so /health is
+		// unreachable). Freshness is instead guaranteed by a UNIQUE per-lane
+		// project name + a pre-clean boot-down (§11.4.108/§11.4.139), so plain
+		// `up -d` always starts a fresh, correctly-rendered container.
 		if err := orch.Up(ctx, p,
 			compose.WithUpDetach(true),
 			compose.WithRemoveOrphans(true),
-			// Force-recreate so every boot starts a FRESH container reflecting
-			// the current TEI_MODEL_ID — never a stale leftover container from
-			// a prior run (§11.4.108/§11.4.139 clean-target integrity).
-			compose.WithForceRecreate(true),
 		); err != nil {
 			fatal("compose up: %v", err)
 		}

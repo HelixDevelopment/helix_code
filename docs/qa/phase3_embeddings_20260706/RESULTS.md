@@ -36,14 +36,20 @@ Proven to genuinely discriminate — it does NOT rubber-stamp:
   wrong-dim. The analyzer rejects every degraded input.
 - **Real GREEN input** correctly **PASS** (above).
 
-## Known limitation (tracked follow-up — NOT a capability or analyzer defect)
+## Full self-validation GREEN (P3-EMB-1 RESOLVED, 2026-07-07)
 
-`12_self_validation.txt` reports the **golden-GOOD** self-validation FAIL: the analyzer's baked
-golden-good fixture is **dim-768 (the nomic primary lane)**, so on the **bge-small 384** fallback
-lane it fails the dim match (`expected 768, got 384`). This is a **fixture-dim limitation**, not a
-bluff — the analyzer's discrimination is independently proven above (RED + 3 golden-BAD all FAIL,
-real GREEN passes). **Follow-up P3-EMB-1:** make the golden-good fixture lane-dim-aware (or capture a
-real 384-dim golden-good), so the full §11.4.107(10) self-validation is GREEN on whichever lane runs.
+The complete §11.4.107(10) self-validation now PASSES on the served lane — `40_verify_improved_harness.log`:
+```
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit=0
+```
+An earlier run FALSE-NEG'd golden-good because the fixture dim was baked to the nomic primary lane
+(768) while the served fallback lane is bge-small (384). The harness now makes the golden-good
+lane-dim-aware, AND fixes the boot root cause (removed `WithForceRecreate`, which on this host's
+podman-compose shim left the pod unstarted → the earlier empty `21_health_primary.txt`; freshness is
+now a unique per-lane project name + pre-clean boot-down, §11.4.108/§11.4.139) + an exited-only
+fast-fail poll + a persistent HF cache volume. Boot is now reliable (`health OK after 2 polls`),
+runtime signature GREEN-OK, self-validation GREEN. P3-EMB-1 CLOSED.
 
 ## Reproduce
 

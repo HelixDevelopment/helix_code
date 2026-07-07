@@ -1,0 +1,1 @@
+SUBSTITUTION (§11.4.6): primary lane nomic-ai/nomic-embed-text-v1.5 did not become healthy (TEI cpu-1.9 rejects its config.json — 'duplicate field max_position_embeddings'); fell back to BAAI/bge-small-en-v1.5 (a design-listed TEI CPU model)

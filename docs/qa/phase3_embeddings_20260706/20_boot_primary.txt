@@ -1,2 +1,2 @@
-[17:28:36] boot TEI lane model=nomic-ai/nomic-embed-text-v1.5 port=18435 project=phase3embed_primary via containers submodule orchestrator
+[06:49:08] boot TEI lane model=nomic-ai/nomic-embed-text-v1.5 port=18435 project=phase3embed_primary via containers submodule orchestrator
 UP-OK: phase3embed_primary tei-embed via containers submodule orchestrator
