@@ -637,5 +637,39 @@ root-cause-before-fix, RED→fix→GREEN) · §11.4.107(10)/(15)
 (single-owner teardown, coder untouched) · §11.4.174 (shared-host
 process- ownership verification before diagnosing/acting) · §11.4.84 (no
 <code>git add -A</code>, scoped commit).</p>
+<h2 id="evidence-integrity-notes-independent-review-11.4.142-verdict-go">Evidence-integrity
+notes (independent review §11.4.142 — VERDICT GO)</h2>
+<p>Independent adversarial review returned <strong>GO</strong>.
+Evidence-hygiene findings are disclosed here per §11.4.6 — NONE affects
+the decision-bearing proof (the GREEN records, self-validation, and
+verdict files are plain-overwrite
+<code>os.WriteFile</code>/<code>&gt;</code> and fully consistent with
+<code>run_proof_console.log</code>, the authoritative single-run
+capture):</p>
+<ol type="1">
+<li><strong><code>20_boot_primary.txt</code> /
+<code>21_health_primary.txt</code> are append-mode
+(<code>tee -a</code>)</strong> and were not truncated between
+invocations, so they may retain lines from EARLIER failed attempts (host
+<code>rootlessport</code>/<code>fork: Resource temporarily unavailable</code>
+faults under concurrent-track thread pressure — §11.4.174 host load, NOT
+a fault of the documented green run). The authoritative single-run
+boot/health capture is <code>run_proof_console.log</code> (clean
+<code>UP-OK</code> + “health OK after 2 polls”, zero errors). Read those
+two files as cumulative history, not as the documented run in
+isolation.</li>
+<li><strong>Host-port default <code>18436</code> is shared</strong> with
+the sibling LibreTranslate-fallback proof
+(<code>docs/qa/phase3_translation_20260707/</code>) — no collision
+occurred (pre-flight confirmed the port free), but the two
+translation-lane proofs must not be run concurrently as configured.</li>
+<li>Minor: <code>run_lane_once()</code> falls through to
+<code>poll_health</code> regardless of the boot-up exit code (masked by
+the 10-consecutive-<code>created</code> fast-fail); the
+keyword-substring signature cannot catch negation/inversion (already
+disclosed in §8); the RED baseline is a synthetic echo-stub fixture
+(proves analyzer-mutation-resistance, consistent with the sibling
+proofs’ precedent).</li>
+</ol>
 </body>
 </html>

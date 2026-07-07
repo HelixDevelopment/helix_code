@@ -363,3 +363,25 @@ CTranslate2 + transformers, no bespoke NMT engine) · §11.4.76/§11.4.161
 (single-owner teardown, coder untouched) · §11.4.174 (shared-host process-
 ownership verification before diagnosing/acting) · §11.4.84 (no `git add -A`,
 scoped commit).
+
+## Evidence-integrity notes (independent review §11.4.142 — VERDICT GO)
+
+Independent adversarial review returned **GO**. Evidence-hygiene findings are disclosed
+here per §11.4.6 — NONE affects the decision-bearing proof (the GREEN records,
+self-validation, and verdict files are plain-overwrite `os.WriteFile`/`>` and fully
+consistent with `run_proof_console.log`, the authoritative single-run capture):
+
+1. **`20_boot_primary.txt` / `21_health_primary.txt` are append-mode (`tee -a`)** and were
+   not truncated between invocations, so they may retain lines from EARLIER failed attempts
+   (host `rootlessport`/`fork: Resource temporarily unavailable` faults under concurrent-track
+   thread pressure — §11.4.174 host load, NOT a fault of the documented green run). The
+   authoritative single-run boot/health capture is `run_proof_console.log` (clean `UP-OK` +
+   "health OK after 2 polls", zero errors). Read those two files as cumulative history, not
+   as the documented run in isolation.
+2. **Host-port default `18436` is shared** with the sibling LibreTranslate-fallback proof
+   (`docs/qa/phase3_translation_20260707/`) — no collision occurred (pre-flight confirmed the
+   port free), but the two translation-lane proofs must not be run concurrently as configured.
+3. Minor: `run_lane_once()` falls through to `poll_health` regardless of the boot-up exit code
+   (masked by the 10-consecutive-`created` fast-fail); the keyword-substring signature cannot
+   catch negation/inversion (already disclosed in §8); the RED baseline is a synthetic echo-stub
+   fixture (proves analyzer-mutation-resistance, consistent with the sibling proofs' precedent).
