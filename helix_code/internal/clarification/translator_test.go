@@ -169,6 +169,10 @@ func TestEngine_Resolve_HeaderGoesThroughTranslator(t *testing.T) {
 // the bare ID to end users, masking a real CONST-046 leak.
 func TestBundleParity_Round222_BundleEntriesMatchSentinel(t *testing.T) {
 	resetTranslator(t)
+	// Explicitly wire NoopTranslator so tr() echoes raw IDs --
+	// init() loaded the real bundle translator, so
+	// resetTranslator(nil) restores bundle prose, not Noop echo.
+	SetTranslator(clarificationi18n.NoopTranslator{})
 	defer resetTranslator(t)
 
 	// NoopTranslator returns the raw ID, so this test is really

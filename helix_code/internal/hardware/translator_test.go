@@ -180,6 +180,10 @@ func TestParseMemorySize_ParseFailureGoesThroughTranslator(t *testing.T) {
 // or a different literal.
 func TestRawText_EmittedByDefault(t *testing.T) {
 	resetTranslator(t)
+	// Explicitly wire NoopTranslator so tr() echoes raw IDs --
+	// init() loaded the real bundle translator, so
+	// resetTranslator(nil) restores bundle prose, not Noop echo.
+	SetTranslator(hardwarei18n.NoopTranslator{})
 
 	buf := captureLog(t)
 
