@@ -1,0 +1,33 @@
+{
+  "case": "listmodels",
+  "endpoint": "http://localhost:18444",
+  "bearer_set": true,
+  "content": "[/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf]",
+  "models": [
+    "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+  ],
+  "expected_facts": [
+    "Qwen3-Coder"
+  ],
+  "matched_facts": 1,
+  "expected_count": 1,
+  "not_identity": false,
+  "is_tool_error": false,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 2,
+  "raw_response": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf]"
+      }
+    ],
+    "structuredContent": {
+      "models": [
+        "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+      ]
+    }
+  }
+}

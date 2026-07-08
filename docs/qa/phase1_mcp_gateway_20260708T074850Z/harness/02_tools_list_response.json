@@ -1,0 +1,65 @@
+[
+  {
+    "description": "Generate a real chat completion from the live HelixLLM coder (OpenAI-compatible /v1/chat/completions). Never a simulated response.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tokens": {
+          "description": "maximum tokens to generate (default 256)",
+          "type": "integer"
+        },
+        "prompt": {
+          "description": "the user prompt to send to the live HelixLLM coder",
+          "type": "string"
+        }
+      },
+      "required": [
+        "prompt"
+      ],
+      "type": "object"
+    },
+    "name": "helixllm_generate",
+    "outputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "model_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model_id",
+        "content"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "description": "List the real models currently served by the live HelixLLM coder (OpenAI-compatible /v1/models). Never a hardcoded list (CONST-036).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "name": "helixllm_list_models",
+    "outputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "null",
+            "array"
+          ]
+        }
+      },
+      "required": [
+        "models"
+      ],
+      "type": "object"
+    }
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "case": "generate",
+  "endpoint": "http://localhost:18444",
+  "bearer_set": true,
+  "prompt": "What is 2+2? Reply with only the digit, nothing else.",
+  "content": "4",
+  "expected_facts": [
+    "4"
+  ],
+  "matched_facts": 1,
+  "expected_count": 1,
+  "not_identity": true,
+  "is_tool_error": false,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 23,
+  "raw_response": {
+    "content": [
+      {
+        "type": "text",
+        "text": "4"
+      }
+    ],
+    "structuredContent": {
+      "content": "4",
+      "model_id": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+    }
+  }
+}

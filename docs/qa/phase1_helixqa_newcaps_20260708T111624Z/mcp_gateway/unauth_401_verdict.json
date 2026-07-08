@@ -1,0 +1,15 @@
+{
+  "case": "unauth401",
+  "endpoint": "http://localhost:18444",
+  "bearer_set": false,
+  "http_status": 401,
+  "matched_facts": 0,
+  "expected_count": 0,
+  "not_identity": false,
+  "is_tool_error": false,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 0,
+  "raw_response": "no bearer token\n"
+}

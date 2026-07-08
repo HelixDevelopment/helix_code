@@ -1,0 +1,64 @@
+{
+  "endpoint": "http://localhost:18441/a2a",
+  "prompt": "What is 2+2? Reply with only the digit, nothing else.",
+  "bearer_set": true,
+  "task_id": "89a7958a-ed46-4f43-871d-6ae2456f9ee4",
+  "task_state": "completed",
+  "answer": "4",
+  "expected_facts": [
+    "banana",
+    "elephant"
+  ],
+  "matched_facts": 0,
+  "expected_count": 2,
+  "not_identity": true,
+  "hallucinated": false,
+  "task_completed": true,
+  "pass": false,
+  "expect_fail": true,
+  "case_result": true,
+  "latency_ms": 21,
+  "http_status": 200,
+  "raw_response": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "id": "89a7958a-ed46-4f43-871d-6ae2456f9ee4",
+      "status": {
+        "state": "completed",
+        "timestamp": "2026-07-08T11:15:25.37169493Z"
+      },
+      "history": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "kind": "text",
+              "text": "What is 2+2? Reply with only the digit, nothing else."
+            }
+          ]
+        },
+        {
+          "role": "agent",
+          "parts": [
+            {
+              "kind": "text",
+              "text": "4"
+            }
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "generated-code",
+          "parts": [
+            {
+              "kind": "text",
+              "text": "4"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

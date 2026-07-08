@@ -1,0 +1,13 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "[/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf]"
+    }
+  ],
+  "structuredContent": {
+    "models": [
+      "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+    ]
+  }
+}

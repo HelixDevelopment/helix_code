@@ -1,0 +1,12 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "4"
+    }
+  ],
+  "structuredContent": {
+    "content": "4",
+    "model_id": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+  }
+}
