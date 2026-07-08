@@ -152,19 +152,31 @@ helix_code/
    make build
    ```
 
-3. **Setup database**:
+3. **Put the HelixCode power sub-systems on your PATH (optional, no sudo)**:
+   ```bash
+   ./install_helix_path.sh
+   ```
+   Builds (or reuses already-built) `helixcode`, `helixcode` CLI, `helixagent`,
+   `helixllm`, `llms-verifier`, and `helixqa`, symlinks each into
+   `$HOME/.local/bin` (override with `HELIX_BIN_DIR`), and idempotently
+   appends the PATH export to your shell rc. Re-run any time — it never
+   double-installs or duplicates the PATH block. See the script's own header
+   comment for full usage, and `tests/install_helix_path/test_install_helix_path.sh`
+   for its black-box test suite.
+
+4. **Setup database**:
    ```bash
    createdb helixcode
    createuser helixcode
    ```
 
-4. **Configure environment**:
+5. **Configure environment**:
    ```bash
    export HELIX_DATABASE_PASSWORD=your_password
    export HELIX_AUTH_JWT_SECRET=your_jwt_secret
    ```
 
-5. **Run the server**:
+6. **Run the server**:
    ```bash
    ./bin/helixcode
    ```

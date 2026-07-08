@@ -103,6 +103,7 @@ setup_fixture() {
   make_fake_bin "$root/submodules/helix_agent/bin/helixagent" "helixagent"
   make_fake_bin "$root/submodules/helix_llm/bin/helixllm" "helixllm"
   make_fake_bin "$root/submodules/llms_verifier/llm-verifier/bin/llm-verifier" "llms-verifier"
+  make_fake_bin "$root/submodules/helix_qa/bin/helixqa" "helixqa"
 }
 
 # Runs the REAL script under test with an isolated repo root / bin dir / HOME.
@@ -143,12 +144,12 @@ run_case_a_b() {
   CASE_FAIL=0
   assert "(a) exit code 0" test "$rc1" -eq 0
   local comp st
-  for comp in helixcode helixagent helixllm llms-verifier helixcode-cli; do
+  for comp in helixcode helixagent helixllm llms-verifier helixcode-cli helixqa; do
     st="$(component_status "$log1" "$comp")"
     assert "(a) component '$comp' reports INSTALLED (got: ${st:-<none>})" test "${st:-}" = "INSTALLED"
   done
   local fb
-  for fb in helixcode helixagent helixllm llm-verifier helixcli; do
+  for fb in helixcode helixagent helixllm llm-verifier helixcli helixqa; do
     assert "(a) installed symlink $binout/$fb resolves+executes" test -x "$binout/$fb"
   done
   local begin_count end_count

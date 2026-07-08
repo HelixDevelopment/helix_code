@@ -3,9 +3,9 @@
 # install_helix_path.sh
 #
 # Builds (or locates already-built) the HelixCode power sub-systems --
-# HelixCode server + CLI, HelixAgent, HelixLLM, LLMsVerifier -- and installs
-# each into a user-writable PATH directory (no sudo, no root), idempotently
-# exporting that directory onto the user's shell rc.
+# HelixCode server + CLI, HelixAgent, HelixLLM, LLMsVerifier, HelixQA -- and
+# installs each into a user-writable PATH directory (no sudo, no root),
+# idempotently exporting that directory onto the user's shell rc.
 #
 # Design: see docs/design/setup_path_install.md (same authoring pass).
 #
@@ -79,6 +79,14 @@ hr()   { printf -- '------------------------------------------------------------
 #   HelixCode CLI    : NO Makefile target exists for bin/cli (open question,
 #                       see design doc) -- treated as best-effort direct
 #                       `go build`, non-mandatory.
+#   HelixQA          : submodules/helix_qa/Makefile:17-18 (`build:` ->
+#                       `go build -o bin/helixqa ./cmd/helixqa`) -- HelixQA is
+#                       the constitutionally-mandated (CONST-050) autonomous
+#                       QA power sub-system; added 2026-07-08 as part of the
+#                       "and all others" scope of this installer (§11.4.74
+#                       extend-the-scan-not-reimplement -- discovered by
+#                       grepping every submodules/*/Makefile for a real
+#                       `build:` target producing a binary).
 #
 # make_target field: a literal make target name, OR `go:<pkg>` to run
 # `go build -o <bin_relpath> <pkg>` inside build_dir (used where no correct
@@ -90,6 +98,7 @@ COMPONENTS=(
   "helixllm|submodules/helix_llm|build|bin/helixllm|helixllm|1"
   "llms-verifier|submodules/llms_verifier/llm-verifier|go:./cmd|bin/llm-verifier|llm-verifier|1"
   "helixcode-cli|helix_code|go:./cmd/cli|bin/cli|helixcli|0"
+  "helixqa|submodules/helix_qa|build|bin/helixqa|helixqa|1"
 )
 
 declare -A RESULT_STATUS
@@ -252,10 +261,29 @@ verify_component() {
     return
   fi
 
+  # §11.4.146 finding (real binary, not the fixture): HelixLLM's CLI has no
+  # subcommand dispatch -- it only defines `flag` package flags. A bare
+  # positional `version` arg (no leading `-`) is NOT rejected by `flag.Parse`;
+  # it is silently ignored and the binary falls straight through to its
+  # default behavior, which is *launching the full server* (binds a port,
+  # attempts outbound HuggingFace/Redis/Qdrant network calls). Reproduced
+  # against the real built binary 2026-07-08 (real_install_run.log): the
+  # probe would have hung the installer on a server process instead of a
+  # cheap health check. Fix: (1) try the flag-style probes first (an
+  # unrecognized `-flag` is rejected fast by `flag.Parse`, exit != 0) and
+  # leave the risky bare `version` last; (2) ALWAYS bound every probe with a
+  # timeout and a closed stdin so a mis-probed binary can never hang this
+  # installer or leak a long-lived process, regardless of probe order.
+  local probe_timeout_s="${HELIX_PROBE_TIMEOUT_S:-5}"
+  local timeout_cmd=()
+  if command -v timeout >/dev/null 2>&1; then
+    timeout_cmd=(timeout "${probe_timeout_s}s")
+  fi
+
   local probe_out=""
   local probe_ok=0
-  for flag in --version version --help; do
-    if probe_out="$("$found_path" "$flag" 2>&1 | head -n1)"; then
+  for flag in --help --version version; do
+    if probe_out="$("${timeout_cmd[@]}" "$found_path" "$flag" </dev/null 2>&1 | head -n1)"; then
       probe_ok=1
       break
     fi
