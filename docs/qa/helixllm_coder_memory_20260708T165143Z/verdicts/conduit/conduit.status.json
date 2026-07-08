@@ -1,0 +1,26 @@
+{
+  "session": "helixllm_coder_memory",
+  "state": "starting",
+  "started_at": "2026-07-08T16:51:32.430500961Z",
+  "updated_at": "2026-07-08T16:51:33.306264634Z",
+  "last_seq": 3,
+  "last_event": {
+    "seq": 3,
+    "time": "2026-07-08T16:51:33.306256001Z",
+    "type": "challenge_verdict",
+    "session": "helixllm_coder_memory",
+    "challenge": "MEMORY-SELF-VALIDATE-001-BAD",
+    "verdict": "PASS"
+  },
+  "counts": {
+    "challenges_started": 1,
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "operator_blocked": 0,
+    "evidence_captured": 1,
+    "errors": 0,
+    "llm_calls": 0,
+    "vision_calls": 0
+  }
+}

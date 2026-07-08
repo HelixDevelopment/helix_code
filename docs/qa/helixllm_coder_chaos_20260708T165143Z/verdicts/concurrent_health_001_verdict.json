@@ -1,0 +1,13 @@
+{
+  "mode": "concurrent-health",
+  "n_concurrent": 5,
+  "n_models": 3,
+  "n_models_ok": 3,
+  "models_ok": true,
+  "all_ok": true,
+  "endpoint": "http://localhost:18434",
+  "port": 0,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

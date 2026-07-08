@@ -1,0 +1,1426 @@
+{
+  "mode": "burst",
+  "n": 200,
+  "n_ok": 200,
+  "n_429": 0,
+  "n_refused": 0,
+  "n_5xx": 0,
+  "n_other": 0,
+  "n_dropped": 0,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "total_received": 200,
+  "no_loss": true,
+  "no_5xx": true,
+  "no_crash": true,
+  "duration": "18.078s",
+  "throughput_req_per_sec": 11.063467397568768,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Count to 5. NONCE:\u003cidx\u003e",
+  "results": [
+    {
+      "index": 0,
+      "nonce": "NONCE:8p8ihauc",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:8p8ihauc",
+      "status_code": 200,
+      "latency_ms": 1505
+    },
+    {
+      "index": 1,
+      "nonce": "NONCE:hvycwrz9",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:hvycwrz9\" appears to be a random string used for security purposes, likely in cryptographic operations or as a unique identifier. It's not related to the counting task but serves as a unique value in systems requiring non-repeating identifiers for security protocols.",
+      "status_code": 200,
+      "latency_ms": 2280
+    },
+    {
+      "index": 2,
+      "nonce": "NONCE:8sgawy0k",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:8sgawy0k",
+      "status_code": 200,
+      "latency_ms": 1286
+    },
+    {
+      "index": 3,
+      "nonce": "NONCE:7fkg9yg5",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: NONCE:NONCE:7fkg9yg5",
+      "status_code": 200,
+      "latency_ms": 1326
+    },
+    {
+      "index": 4,
+      "nonce": "NONCE:ds6c0bqo",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: ds6c0bqo",
+      "status_code": 200,
+      "latency_ms": 1739
+    },
+    {
+      "index": 5,
+      "nonce": "NONCE:55rpf3gg",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:55rpf3gg",
+      "status_code": 200,
+      "latency_ms": 2325
+    },
+    {
+      "index": 6,
+      "nonce": "NONCE:fhb6zwe7",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"fhb6zwe7\" that's typically used in cryptographic contexts or as a unique identifier for a specific request or transaction. It's not related to the counting task, but I included it as requested in your message.",
+      "status_code": 200,
+      "latency_ms": 1904
+    },
+    {
+      "index": 7,
+      "nonce": "NONCE:vy4bc94c",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"vy4bc94c\" which is typically used in cryptographic operations or as a unique identifier. However, it's not related to the counting task.",
+      "status_code": 200,
+      "latency_ms": 773
+    },
+    {
+      "index": 8,
+      "nonce": "NONCE:mx6wwux4",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"mx6wwux4\" which doesn't affect the counting sequence. I've counted normally from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 1184
+    },
+    {
+      "index": 9,
+      "nonce": "NONCE:77tt4vms",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: 77tt4vms",
+      "status_code": 200,
+      "latency_ms": 403
+    },
+    {
+      "index": 10,
+      "nonce": "NONCE:o71br52z",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:o71br52z\" appears to be a random string or identifier, but it doesn't affect the counting sequence. I've counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 870
+    },
+    {
+      "index": 11,
+      "nonce": "NONCE:tmrkc581",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be \"tmrkc581\" but I notice it's repeated twice in the prompt. This seems like it might be a placeholder or test value rather than a cryptographic nonce in a real system.",
+      "status_code": 200,
+      "latency_ms": 830
+    },
+    {
+      "index": 12,
+      "nonce": "NONCE:zeyfzqbl",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"zeyfzqbl\" which seems unrelated to the counting task. I've completed the count from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 2744
+    },
+    {
+      "index": 13,
+      "nonce": "NONCE:mfmy9bcl",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:mfmy9bcl",
+      "status_code": 200,
+      "latency_ms": 306
+    },
+    {
+      "index": 14,
+      "nonce": "NONCE:90p4es5s",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"90p4es5s\" which doesn't affect the counting sequence. I simply counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 1609
+    },
+    {
+      "index": 15,
+      "nonce": "NONCE:7gibeg33",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: 7gibeg33",
+      "status_code": 200,
+      "latency_ms": 403
+    },
+    {
+      "index": 16,
+      "nonce": "NONCE:dhxsxw19",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:dhxsxw19\" appears to be a repeated string pattern, but I've counted to 5 as requested. The nonce itself seems to be a random-looking string that's been repeated twice with \"NONCE:\" prefix.",
+      "status_code": 200,
+      "latency_ms": 2743
+    },
+    {
+      "index": 17,
+      "nonce": "NONCE:869hm4rd",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: 869hm4rd",
+      "status_code": 200,
+      "latency_ms": 2487
+    },
+    {
+      "index": 18,
+      "nonce": "NONCE:t8z34obh",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:t8z34obh\" appears to be a random string used for authentication or security purposes, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 1147
+    },
+    {
+      "index": 19,
+      "nonce": "NONCE:ao14ykfd",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"ao14ykfd\" which is unrelated to the counting task. I've completed the count from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 1084
+    },
+    {
+      "index": 20,
+      "nonce": "NONCE:23cgrmt8",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided (NONCE:NONCE:23cgrmt8) appears to be a duplicate nonce value, which is typically used in cryptographic contexts to prevent replay attacks. The actual counting from 1 to 5 is complete above.",
+      "status_code": 200,
+      "latency_ms": 939
+    },
+    {
+      "index": 21,
+      "nonce": "NONCE:r082lylc",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"NONCE:r082lylc\" which seems unrelated to the counting task. I've completed the count to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 2859
+    },
+    {
+      "index": 22,
+      "nonce": "NONCE:m7q07fpo",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:m7q07fpo",
+      "status_code": 200,
+      "latency_ms": 2135
+    },
+    {
+      "index": 23,
+      "nonce": "NONCE:ln76q8wu",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"ln76q8wu\" which is commonly used in cryptographic contexts, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 1695
+    },
+    {
+      "index": 24,
+      "nonce": "NONCE:7fehi3hv",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"7fehi3hv\" which is unrelated to the counting task. I've completed the requested count from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 2092
+    },
+    {
+      "index": 25,
+      "nonce": "NONCE:71m5ywya",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"71m5ywya\" which is commonly used in cryptographic contexts, but it's not related to the counting task. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 2543
+    },
+    {
+      "index": 26,
+      "nonce": "NONCE:59xqsi77",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"59xqsi77\" that was included in your message, but it doesn't affect the counting task. I've counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 2061
+    },
+    {
+      "index": 27,
+      "nonce": "NONCE:22fmj9bu",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"22fmj9bu\" that was included in your message, but it doesn't affect the counting sequence. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 3884
+    },
+    {
+      "index": 28,
+      "nonce": "NONCE:lwxwgmkx",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:lwxwgmkx",
+      "status_code": 200,
+      "latency_ms": 4416
+    },
+    {
+      "index": 29,
+      "nonce": "NONCE:q4lk2c5z",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value you provided appears to be a random string \"q4lk2c5z\" which is commonly used in cryptographic operations, API requests, or blockchain transactions to ensure uniqueness and prevent replay attacks. However, this nonce is unrelated to the counting task you requested. Let me know if you'd like me to assist with anything else!",
+      "status_code": 200,
+      "latency_ms": 5105
+    },
+    {
+      "index": 30,
+      "nonce": "NONCE:a1rrt2t9",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:a1rrt2t9\" appears to be a random string or token, possibly used for security purposes like preventing replay attacks or ensuring message uniqueness. It's not a count or number sequence.",
+      "status_code": 200,
+      "latency_ms": 5172
+    },
+    {
+      "index": 31,
+      "nonce": "NONCE:yi8vl2ep",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: yi8vl2ep",
+      "status_code": 200,
+      "latency_ms": 4829
+    },
+    {
+      "index": 32,
+      "nonce": "NONCE:24q4055l",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:24q4055l\" appears to be a repeated nonce value, which is typically used in cryptographic contexts to ensure uniqueness in operations like encryption or authentication. However, the actual counting task was simply to count to 5, which I've completed.",
+      "status_code": 200,
+      "latency_ms": 5262
+    },
+    {
+      "index": 33,
+      "nonce": "NONCE:2vrueps1",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:2vrueps1",
+      "status_code": 200,
+      "latency_ms": 3674
+    },
+    {
+      "index": 34,
+      "nonce": "NONCE:xz7of8f9",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:xz7of8f9\" appears to be a random string or identifier, but I don't see any specific instructions to incorporate it into the counting process. I simply counted normally from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 3816
+    },
+    {
+      "index": 35,
+      "nonce": "NONCE:fkb6csws",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:fkb6csws",
+      "status_code": 200,
+      "latency_ms": 3085
+    },
+    {
+      "index": 36,
+      "nonce": "NONCE:kyxjezil",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: NONCE:NONCE:kyxjezil",
+      "status_code": 200,
+      "latency_ms": 4022
+    },
+    {
+      "index": 37,
+      "nonce": "NONCE:tgdbxkbd",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:tgdbxkbd\" appears to be a repeated pattern followed by what seems to be a random string. This format suggests it might be a cryptographic nonce or identifier, but I can't determine its specific purpose or meaning without additional context about where it's being used.",
+      "status_code": 200,
+      "latency_ms": 4175
+    },
+    {
+      "index": 38,
+      "nonce": "NONCE:d4j69alx",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:d4j69alx",
+      "status_code": 200,
+      "latency_ms": 3926
+    },
+    {
+      "index": 39,
+      "nonce": "NONCE:qk883nfi",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: qk883nfi",
+      "status_code": 200,
+      "latency_ms": 738
+    },
+    {
+      "index": 40,
+      "nonce": "NONCE:ywp61yyu",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:ywp61yyu",
+      "status_code": 200,
+      "latency_ms": 2690
+    },
+    {
+      "index": 41,
+      "nonce": "NONCE:r2rc1fx3",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:NONCE:r2rc1fx3\" which seems unrelated to the counting task. I've counted to 5 as requested, ignoring the nonce portion.",
+      "status_code": 200,
+      "latency_ms": 3596
+    },
+    {
+      "index": 42,
+      "nonce": "NONCE:o4o7i60o",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:NONCE:o4o7i60o\" which doesn't affect the counting sequence. I simply counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 4525
+    },
+    {
+      "index": 43,
+      "nonce": "NONCE:1weqsvz4",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:1weqsvz4",
+      "status_code": 200,
+      "latency_ms": 2662
+    },
+    {
+      "index": 44,
+      "nonce": "NONCE:ge1zts32",
+      "content": "1, 2, 3, 4, 5\n\nI notice the nonce appears to be repeated in your message (NONCE:NONCE:ge1zts32). Is there something specific you'd like me to do with this nonce, or were you just testing the counting function?",
+      "status_code": 200,
+      "latency_ms": 3053
+    },
+    {
+      "index": 45,
+      "nonce": "NONCE:2cae56nm",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: NONCE:2cae56nm",
+      "status_code": 200,
+      "latency_ms": 3291
+    },
+    {
+      "index": 46,
+      "nonce": "NONCE:cphlkvk0",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:cphlkvk0",
+      "status_code": 200,
+      "latency_ms": 4052
+    },
+    {
+      "index": 47,
+      "nonce": "NONCE:k1bvwkbo",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:k1bvwkbo\" appears to be a random string used for security purposes, likely in a cryptographic or authentication context. It's not related to the counting task.",
+      "status_code": 200,
+      "latency_ms": 3483
+    },
+    {
+      "index": 48,
+      "nonce": "NONCE:nf2o8ipr",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"nf2o8ipr\" which doesn't affect the counting sequence. I've simply counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 3484
+    },
+    {
+      "index": 49,
+      "nonce": "NONCE:517di3k0",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:517di3k0",
+      "status_code": 200,
+      "latency_ms": 4457
+    },
+    {
+      "index": 50,
+      "nonce": "NONCE:qrnb12yh",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:qrnb12yh\" appears to be a repeated nonce value, which is typically used in cryptographic contexts to ensure uniqueness and prevent replay attacks. However, it seems to be duplicated in this case.",
+      "status_code": 200,
+      "latency_ms": 4772
+    },
+    {
+      "index": 51,
+      "nonce": "NONCE:l4etperc",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:NONCE:l4etperc\" which seems unrelated to the counting task. I've completed the counting from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 4374
+    },
+    {
+      "index": 52,
+      "nonce": "NONCE:up8r3i2o",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:up8r3i2o\" appears to be a repeated nonce value, which is generally not recommended for security purposes as it could potentially be exploited in cryptographic operations. However, I've simply counted to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 3536
+    },
+    {
+      "index": 53,
+      "nonce": "NONCE:jnnxr0x5",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:jnnxr0x5",
+      "status_code": 200,
+      "latency_ms": 6869
+    },
+    {
+      "index": 54,
+      "nonce": "NONCE:75jlwjyb",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value \"NONCE:NONCE:75jlwjyb\" appears to be a repeated nonce identifier, but I've only counted to 5 as requested. The nonce itself seems to be a random string used for security purposes in cryptographic operations.",
+      "status_code": 200,
+      "latency_ms": 5723
+    },
+    {
+      "index": 55,
+      "nonce": "NONCE:hqx4nh4s",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:hqx4nh4s",
+      "status_code": 200,
+      "latency_ms": 4745
+    },
+    {
+      "index": 56,
+      "nonce": "NONCE:pxdk5ezo",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:pxdk5ezo\" appears to be a repeated nonce value, which in cryptographic contexts could indicate a potential security issue if reused, as nonces are typically meant to be unique values used only once. However, for the simple counting task, I've provided the sequence 1 through 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 6026
+    },
+    {
+      "index": 57,
+      "nonce": "NONCE:blo3edu5",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:blo3edu5\" appears to be a repeated nonce value, which is generally not recommended for security purposes as it reduces the uniqueness that nonces are designed to provide.",
+      "status_code": 200,
+      "latency_ms": 6343
+    },
+    {
+      "index": 58,
+      "nonce": "NONCE:jj254gfl",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"jj254gfl\" which is unrelated to the counting task. I've completed the counting from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 9669
+    },
+    {
+      "index": 59,
+      "nonce": "NONCE:h3yva76r",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"h3yva76r\" which is commonly used in cryptographic operations, API requests, or as a unique identifier. It's not related to the counting task but serves as a unique value to prevent replay attacks or ensure request uniqueness in various systems.",
+      "status_code": 200,
+      "latency_ms": 9525
+    },
+    {
+      "index": 60,
+      "nonce": "NONCE:pfgvk5jj",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:pfgvk5jj",
+      "status_code": 200,
+      "latency_ms": 7179
+    },
+    {
+      "index": 61,
+      "nonce": "NONCE:tlc4y7e4",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:tlc4y7e4",
+      "status_code": 200,
+      "latency_ms": 7246
+    },
+    {
+      "index": 62,
+      "nonce": "NONCE:87gtei0a",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: NONCE:NONCE:87gtei0a",
+      "status_code": 200,
+      "latency_ms": 8279
+    },
+    {
+      "index": 63,
+      "nonce": "NONCE:706ypl8s",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"706ypl8s\" that was included in your message, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 12195
+    },
+    {
+      "index": 64,
+      "nonce": "NONCE:uy17vz9n",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value provided appears to be a random string \"uy17vz9n\" which seems unrelated to the counting task. The counting from 1 to 5 is complete.",
+      "status_code": 200,
+      "latency_ms": 11344
+    },
+    {
+      "index": 65,
+      "nonce": "NONCE:uzs5z4a8",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value provided appears to be a random string \"uzs5z4a8\" which seems unrelated to the counting task. I've completed the requested count from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 11479
+    },
+    {
+      "index": 66,
+      "nonce": "NONCE:4457yk8y",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"4457yk8y\" that was included in your message, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 8785
+    },
+    {
+      "index": 67,
+      "nonce": "NONCE:atfjkzpn",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:atfjkzpn\" appears to be a random string used for security purposes, likely in a cryptographic context or as a unique identifier for a specific transaction or session. It's not related to the counting task.",
+      "status_code": 200,
+      "latency_ms": 8136
+    },
+    {
+      "index": 68,
+      "nonce": "NONCE:9ojol12l",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: 9ojol12l",
+      "status_code": 200,
+      "latency_ms": 7642
+    },
+    {
+      "index": 69,
+      "nonce": "NONCE:rntrimnl",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:rntrimnl\" appears to be a repeated nonce value, possibly from a cryptographic context. However, I cannot provide any additional information about this nonce without more context about its purpose or usage. If you have specific questions about nonces or cryptographic security, please let me know.",
+      "status_code": 200,
+      "latency_ms": 9915
+    },
+    {
+      "index": 70,
+      "nonce": "NONCE:hqjbkhuo",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"hqjbkhuo\" which seems unrelated to the counting task. I've counted to 5 as requested and ignored the nonce for the counting portion.",
+      "status_code": 200,
+      "latency_ms": 12163
+    },
+    {
+      "index": 71,
+      "nonce": "NONCE:cyw56jer",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value you provided appears to be a random string \"cyw56jer\" which is typically used in cryptographic contexts for security purposes. However, I'm not able to process or verify the nonce in any cryptographic operations - I can only count to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 7917
+    },
+    {
+      "index": 72,
+      "nonce": "NONCE:ok6c65zn",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:ok6c65zn",
+      "status_code": 200,
+      "latency_ms": 6976
+    },
+    {
+      "index": 73,
+      "nonce": "NONCE:3i5qa11y",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value \"NONCE:NONCE:3i5qa11y\" appears to be a repeated nonce identifier, which in cryptographic contexts typically means the same nonce value is being used multiple times. This could potentially be a security concern in certain cryptographic operations, as nonces are typically meant to be unique to prevent replay attacks or other security issues. However, in this simple counting task, the nonce doesn't affect the numerical sequence.",
+      "status_code": 200,
+      "latency_ms": 9788
+    },
+    {
+      "index": 74,
+      "nonce": "NONCE:ocxsq2mt",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: ocxsq2mt",
+      "status_code": 200,
+      "latency_ms": 6703
+    },
+    {
+      "index": 75,
+      "nonce": "NONCE:c7hfjjgi",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value you provided appears to be a random string \"NONCE:c7hfjjgi\" which seems unrelated to the counting task. I've completed the counting from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 8684
+    },
+    {
+      "index": 76,
+      "nonce": "NONCE:0uhaiczm",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"0uhaiczm\" which doesn't affect the counting sequence. I've counted normally from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 8379
+    },
+    {
+      "index": 77,
+      "nonce": "NONCE:d7jiuqej",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:d7jiuqej\" which seems unrelated to the counting task. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 9157
+    },
+    {
+      "index": 78,
+      "nonce": "NONCE:6vjb7r8b",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:6vjb7r8b\" appears to be a repeated nonce value, which is typically used in cryptographic contexts to ensure uniqueness. However, this is unrelated to the counting task.",
+      "status_code": 200,
+      "latency_ms": 9397
+    },
+    {
+      "index": 79,
+      "nonce": "NONCE:xtcygy5m",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:xtcygy5m\" appears to be a repeated nonce pattern, likely used for authentication or identification purposes in a system or protocol. The actual count sequence is 1 through 5.",
+      "status_code": 200,
+      "latency_ms": 7861
+    },
+    {
+      "index": 80,
+      "nonce": "NONCE:8b60o53l",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:8b60o53l",
+      "status_code": 200,
+      "latency_ms": 7333
+    },
+    {
+      "index": 81,
+      "nonce": "NONCE:u0bjh98c",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: u0bjh98c",
+      "status_code": 200,
+      "latency_ms": 9699
+    },
+    {
+      "index": 82,
+      "nonce": "NONCE:v3eqsieq",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:NONCE:v3eqsieq\" which seems unrelated to the counting task. I've completed the counting from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 10264
+    },
+    {
+      "index": 83,
+      "nonce": "NONCE:tu3o65sq",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:tu3o65sq",
+      "status_code": 200,
+      "latency_ms": 8523
+    },
+    {
+      "index": 84,
+      "nonce": "NONCE:i6y05q88",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:NONCE:i6y05q88\" which doesn't affect the counting sequence. I simply counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 10444
+    },
+    {
+      "index": 85,
+      "nonce": "NONCE:d37175iw",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:d37175iw\" which doesn't affect the counting sequence. I've counted normally from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 10587
+    },
+    {
+      "index": 86,
+      "nonce": "NONCE:e121tswz",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:NONCE:e121tswz\" which doesn't affect the counting sequence. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 12445
+    },
+    {
+      "index": 87,
+      "nonce": "NONCE:b02wss5t",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:b02wss5t\" which seems unrelated to the counting task. I've completed the count to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 9435
+    },
+    {
+      "index": 88,
+      "nonce": "NONCE:qkx98dac",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"qkx98dac\" which seems unrelated to the counting task. I've completed the counting from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 10307
+    },
+    {
+      "index": 89,
+      "nonce": "NONCE:ih8o15t3",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value appears to be: ih8o15t3",
+      "status_code": 200,
+      "latency_ms": 9579
+    },
+    {
+      "index": 90,
+      "nonce": "NONCE:3l1z7zik",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: 3l1z7zik",
+      "status_code": 200,
+      "latency_ms": 10068
+    },
+    {
+      "index": 91,
+      "nonce": "NONCE:s3ml01ks",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:s3ml01ks",
+      "status_code": 200,
+      "latency_ms": 10416
+    },
+    {
+      "index": 92,
+      "nonce": "NONCE:8n8zd2ft",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:8n8zd2ft\" appears to be a duplicate nonce value, which is typically used in cryptographic contexts to prevent replay attacks. The actual counting from 1 to 5 is complete.",
+      "status_code": 200,
+      "latency_ms": 13004
+    },
+    {
+      "index": 93,
+      "nonce": "NONCE:a507z39u",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:a507z39u",
+      "status_code": 200,
+      "latency_ms": 13448
+    },
+    {
+      "index": 94,
+      "nonce": "NONCE:oy6jjpvx",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:oy6jjpvx",
+      "status_code": 200,
+      "latency_ms": 10858
+    },
+    {
+      "index": 95,
+      "nonce": "NONCE:vtlmli1y",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"vtlmli1y\" which seems unrelated to the counting task. I've completed the count from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 10677
+    },
+    {
+      "index": 96,
+      "nonce": "NONCE:ecf07gj2",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:ecf07gj2",
+      "status_code": 200,
+      "latency_ms": 10721
+    },
+    {
+      "index": 97,
+      "nonce": "NONCE:ocin6rj8",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"ocin6rj8\" which is being used as a unique identifier or salt value. This is commonly used in cryptographic operations, authentication protocols, or to prevent replay attacks. The nonce itself doesn't affect the counting sequence, but it serves as a unique value in cryptographic contexts.",
+      "status_code": 200,
+      "latency_ms": 11907
+    },
+    {
+      "index": 98,
+      "nonce": "NONCE:cn89uo73",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"cn89uo73\" which is unrelated to the counting task. I've completed the count from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 11100
+    },
+    {
+      "index": 99,
+      "nonce": "NONCE:by5emxqz",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:by5emxqz\" appears to be a random string used for security purposes, likely in cryptographic operations or as a unique identifier. However, I cannot provide any meaningful interpretation of this nonce beyond its apparent role as a security parameter.",
+      "status_code": 200,
+      "latency_ms": 11788
+    },
+    {
+      "index": 100,
+      "nonce": "NONCE:tuc1j2f2",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:tuc1j2f2\" appears to be a unique identifier or token, but it doesn't affect the counting sequence. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 11299
+    },
+    {
+      "index": 101,
+      "nonce": "NONCE:jdz6vmtj",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:jdz6vmtj\" which is commonly used in cryptographic contexts or as a unique identifier for transactions. However, it doesn't affect the counting sequence. Let me know if you'd like me to do anything else with this nonce or if you have another request!",
+      "status_code": 200,
+      "latency_ms": 11744
+    },
+    {
+      "index": 102,
+      "nonce": "NONCE:utlx046r",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:utlx046r",
+      "status_code": 200,
+      "latency_ms": 11601
+    },
+    {
+      "index": 103,
+      "nonce": "NONCE:aggtq02g",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: aggtq02g",
+      "status_code": 200,
+      "latency_ms": 11199
+    },
+    {
+      "index": 104,
+      "nonce": "NONCE:q3mue7vv",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value provided appears to be a random string \"q3mue7vv\" which seems unrelated to the counting task. This type of nonce is typically used in cryptographic contexts or as a unique identifier, but it doesn't affect the simple counting sequence from 1 to 5.",
+      "status_code": 200,
+      "latency_ms": 13135
+    },
+    {
+      "index": 105,
+      "nonce": "NONCE:hdclomzx",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: hdclomzx",
+      "status_code": 200,
+      "latency_ms": 11677
+    },
+    {
+      "index": 106,
+      "nonce": "NONCE:74fbeqkd",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:74fbeqkd\" appears to be a random string used for security purposes, likely in a cryptographic or authentication context. It's not related to the counting task.",
+      "status_code": 200,
+      "latency_ms": 12327
+    },
+    {
+      "index": 107,
+      "nonce": "NONCE:7hepsq1o",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value \"NONCE:NONCE:7hepsq1o\" appears to be a repeated nonce identifier, possibly from a cryptographic or authentication context, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 12690
+    },
+    {
+      "index": 108,
+      "nonce": "NONCE:g0nfioih",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:g0nfioih\" appears to be a random string or identifier, but it doesn't affect the counting sequence. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 12523
+    },
+    {
+      "index": 109,
+      "nonce": "NONCE:a9mlcc7f",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:a9mlcc7f",
+      "status_code": 200,
+      "latency_ms": 12096
+    },
+    {
+      "index": 110,
+      "nonce": "NONCE:5uvfinvv",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be \"5uvfinvv\" but I notice it's repeated twice in your message. This looks like a random string or token that might be used for security purposes, but I don't have any additional context about its specific use case.",
+      "status_code": 200,
+      "latency_ms": 12721
+    },
+    {
+      "index": 111,
+      "nonce": "NONCE:inxs7xkn",
+      "content": "1, 2, 3, 4, 5\n\nI notice the nonce appears to be a random string \"inxs7xkn\" that was included in your request. This seems to be a technical identifier, but I don't need to incorporate it into my response for the counting task.",
+      "status_code": 200,
+      "latency_ms": 13594
+    },
+    {
+      "index": 112,
+      "nonce": "NONCE:d7lmbw9g",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:d7lmbw9g",
+      "status_code": 200,
+      "latency_ms": 4288
+    },
+    {
+      "index": 113,
+      "nonce": "NONCE:6n72htb1",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:6n72htb1",
+      "status_code": 200,
+      "latency_ms": 1930
+    },
+    {
+      "index": 114,
+      "nonce": "NONCE:6afph5uc",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:6afph5uc",
+      "status_code": 200,
+      "latency_ms": 2911
+    },
+    {
+      "index": 115,
+      "nonce": "NONCE:s2rlm2i2",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:s2rlm2i2\" appears to be a random or pseudo-random string used for security purposes, likely in cryptographic operations or as a unique identifier. It's not directly related to the counting task, but it's formatted as a nonce value.",
+      "status_code": 200,
+      "latency_ms": 5545
+    },
+    {
+      "index": 116,
+      "nonce": "NONCE:5sssborq",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:5sssborq\" appears to be a random string or identifier, not related to the counting task. I've counted to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 8082
+    },
+    {
+      "index": 117,
+      "nonce": "NONCE:rp2hy1f5",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:rp2hy1f5\" appears to be a random string used typically in cryptographic contexts or as a unique identifier. It's not related to the counting task but was included in your message.",
+      "status_code": 200,
+      "latency_ms": 5304
+    },
+    {
+      "index": 118,
+      "nonce": "NONCE:l7hrl86v",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:l7hrl86v\" which seems unrelated to the counting task. I've completed the count to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 5517
+    },
+    {
+      "index": 119,
+      "nonce": "NONCE:77s9uwdh",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"77s9uwdh\" which doesn't affect the counting sequence. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 5930
+    },
+    {
+      "index": 120,
+      "nonce": "NONCE:yn5q34oo",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:yn5q34oo",
+      "status_code": 200,
+      "latency_ms": 5646
+    },
+    {
+      "index": 121,
+      "nonce": "NONCE:b2jgxi2g",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:b2jgxi2g",
+      "status_code": 200,
+      "latency_ms": 5490
+    },
+    {
+      "index": 122,
+      "nonce": "NONCE:bhmce1wu",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"bhmce1wu\" which doesn't affect the counting sequence. I've counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 6461
+    },
+    {
+      "index": 123,
+      "nonce": "NONCE:2wbtj53s",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: 2wbtj53s",
+      "status_code": 200,
+      "latency_ms": 5930
+    },
+    {
+      "index": 124,
+      "nonce": "NONCE:9rrf5sio",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"9rrf5sio\" which doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 6108
+    },
+    {
+      "index": 125,
+      "nonce": "NONCE:5cl2xgmh",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:5cl2xgmh",
+      "status_code": 200,
+      "latency_ms": 6026
+    },
+    {
+      "index": 126,
+      "nonce": "NONCE:edgveai7",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:edgveai7\" appears to be a random string used for security purposes, likely in a cryptographic context or as a unique identifier for a specific transaction or session.",
+      "status_code": 200,
+      "latency_ms": 6899
+    },
+    {
+      "index": 127,
+      "nonce": "NONCE:4mc29vni",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value appears to be: 4mc29vni",
+      "status_code": 200,
+      "latency_ms": 6538
+    },
+    {
+      "index": 128,
+      "nonce": "NONCE:8t1bx88u",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value \"NONCE:NONCE:8t1bx88u\" appears to be a random string used for security purposes, likely in cryptographic operations or as a unique identifier for a specific transaction or session. It's not related to the counting task but serves as a unique parameter in various security protocols.",
+      "status_code": 200,
+      "latency_ms": 7123
+    },
+    {
+      "index": 129,
+      "nonce": "NONCE:f2f6hzau",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:f2f6hzau\" which seems unrelated to the counting task. I've completed the counting from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 6770
+    },
+    {
+      "index": 130,
+      "nonce": "NONCE:t4az6d11",
+      "content": "1, 2, 3, 4, 5\n\nI notice you've included what appears to be a nonce value (NONCE:NONCE:t4az6d11) in your request. This seems to be a cryptographic nonce or session identifier, but I've simply counted to 5 as requested. Is there something specific you'd like me to do with this nonce value, or was it just included as part of the input?",
+      "status_code": 200,
+      "latency_ms": 7469
+    },
+    {
+      "index": 131,
+      "nonce": "NONCE:7iweh9bc",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:7iweh9bc\" appears to be a random string used for authentication or identification purposes, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 6799
+    },
+    {
+      "index": 132,
+      "nonce": "NONCE:oqx8fr26",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:oqx8fr26\" appears to be a random string or token, possibly used for security purposes like preventing replay attacks or ensuring message uniqueness in cryptographic protocols. The actual counting was straightforward: 1, 2, 3, 4, 5. Let me know if you had a different question or needed something else!",
+      "status_code": 200,
+      "latency_ms": 10764
+    },
+    {
+      "index": 133,
+      "nonce": "NONCE:1h6hotkb",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"1h6hotkb\" which is often used in cryptographic contexts or as a unique identifier. It's not related to the counting task but was included in your message.",
+      "status_code": 200,
+      "latency_ms": 7590
+    },
+    {
+      "index": 134,
+      "nonce": "NONCE:86srsg11",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:86srsg11\" appears to be a random string or identifier, but it doesn't affect the counting sequence. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 10547
+    },
+    {
+      "index": 135,
+      "nonce": "NONCE:w3qncqsb",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:w3qncqsb",
+      "status_code": 200,
+      "latency_ms": 8896
+    },
+    {
+      "index": 136,
+      "nonce": "NONCE:9h3k4pve",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"9h3k4pve\" that was included in your message, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 7805
+    },
+    {
+      "index": 137,
+      "nonce": "NONCE:m9szisp3",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"m9szisp3\" which is being used as a unique identifier or timestamp value. This type of nonce is commonly used in cryptographic operations, API requests, or blockchain transactions to ensure messages are unique and prevent replay attacks.",
+      "status_code": 200,
+      "latency_ms": 8939
+    },
+    {
+      "index": 138,
+      "nonce": "NONCE:amnzqn28",
+      "content": "1, 2, 3, 4, 5\n\nI notice the nonce value \"NONCE:NONCE:amnzqn28\" appears in your message, but I've simply counted to 5 as requested. The nonce seems to be a random or pseudo-random value, possibly for security or identification purposes, but it doesn't affect the counting task.",
+      "status_code": 200,
+      "latency_ms": 8579
+    },
+    {
+      "index": 139,
+      "nonce": "NONCE:07jnkbue",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:07jnkbue",
+      "status_code": 200,
+      "latency_ms": 9269
+    },
+    {
+      "index": 140,
+      "nonce": "NONCE:qq4bz6mw",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:qq4bz6mw",
+      "status_code": 200,
+      "latency_ms": 11480
+    },
+    {
+      "index": 141,
+      "nonce": "NONCE:u7tysqnz",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"u7tysqnz\" that was included in your message. This type of nonce is typically used for security purposes like preventing replay attacks or ensuring message uniqueness in cryptographic protocols.",
+      "status_code": 200,
+      "latency_ms": 8448
+    },
+    {
+      "index": 142,
+      "nonce": "NONCE:m5pnahjh",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:m5pnahjh\" appears to be a random string or identifier, but I don't see any specific instruction to use it in the counting process. I simply counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 13267
+    },
+    {
+      "index": 143,
+      "nonce": "NONCE:aepqqx4y",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:aepqqx4y\" appears to be a random string used for security purposes, likely in cryptographic operations or as a unique identifier. It's not related to the counting task but serves as a unique value to prevent replay attacks or ensure freshness in cryptographic protocols.",
+      "status_code": 200,
+      "latency_ms": 14197
+    },
+    {
+      "index": 144,
+      "nonce": "NONCE:d4zyeawu",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"d4zyeawu\" which is 8 characters long. This looks like a typical nonce value that might be used for security purposes like preventing replay attacks or ensuring message freshness in cryptographic protocols.",
+      "status_code": 200,
+      "latency_ms": 13103
+    },
+    {
+      "index": 145,
+      "nonce": "NONCE:zcoxm6zs",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:zcoxm6zs",
+      "status_code": 200,
+      "latency_ms": 13048
+    },
+    {
+      "index": 146,
+      "nonce": "NONCE:snbb3aya",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be \"snbb3aya\" which seems to be a random string or identifier, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 14078
+    },
+    {
+      "index": 147,
+      "nonce": "NONCE:q7pn3rb4",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value provided (NONCE:NONCE:q7pn3rb4) appears to be a cryptographic nonce or identifier, but it doesn't affect the counting sequence. I've counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 13405
+    },
+    {
+      "index": 148,
+      "nonce": "NONCE:itlnjp0w",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:itlnjp0w\" appears to be a random string used for security purposes, likely in a cryptographic context or as a unique identifier for a specific transaction or session.",
+      "status_code": 200,
+      "latency_ms": 14488
+    },
+    {
+      "index": 149,
+      "nonce": "NONCE:qvdqym62",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: qvdqym62",
+      "status_code": 200,
+      "latency_ms": 13477
+    },
+    {
+      "index": 150,
+      "nonce": "NONCE:7xmr8qoe",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:7xmr8qoe\" appears to be a repeated nonce value, which is typically used in cryptographic contexts or blockchain transactions to ensure uniqueness and prevent replay attacks. However, this is unrelated to the counting task you requested.",
+      "status_code": 200,
+      "latency_ms": 14107
+    },
+    {
+      "index": 151,
+      "nonce": "NONCE:kmrkbh6s",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value provided appears to be \"NONCE:NONCE:kmrkbh6s\" but I've simply counted sequentially as requested.",
+      "status_code": 200,
+      "latency_ms": 13047
+    },
+    {
+      "index": 152,
+      "nonce": "NONCE:99aui76m",
+      "content": "1, 2, 3, 4, 5\n\nI notice the nonce appears to be a random string \"99aui76m\" which seems unrelated to the counting task. The counting itself is straightforward: 1, 2, 3, 4, 5.",
+      "status_code": 200,
+      "latency_ms": 13966
+    },
+    {
+      "index": 153,
+      "nonce": "NONCE:fxvigtmg",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"fxvigtmg\" which seems unrelated to the counting task. I've completed the counting from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 15132
+    },
+    {
+      "index": 154,
+      "nonce": "NONCE:cg3v3zwo",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string used for security purposes, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 15200
+    },
+    {
+      "index": 155,
+      "nonce": "NONCE:uuo6o8qh",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: uuo6o8qh",
+      "status_code": 200,
+      "latency_ms": 15388
+    },
+    {
+      "index": 156,
+      "nonce": "NONCE:2o8pc9j5",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: 2o8pc9j5",
+      "status_code": 200,
+      "latency_ms": 13843
+    },
+    {
+      "index": 157,
+      "nonce": "NONCE:j3o8iklb",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:j3o8iklb",
+      "status_code": 200,
+      "latency_ms": 14255
+    },
+    {
+      "index": 158,
+      "nonce": "NONCE:9p7j9y6u",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:9p7j9y6u\" appears to be a repeated nonce value, which is typically used in cryptographic contexts to ensure uniqueness in operations like encryption or authentication. However, in this simple counting task, it doesn't affect the numerical sequence.",
+      "status_code": 200,
+      "latency_ms": 15360
+    },
+    {
+      "index": 159,
+      "nonce": "NONCE:wyc42v8m",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:wyc42v8m",
+      "status_code": 200,
+      "latency_ms": 14284
+    },
+    {
+      "index": 160,
+      "nonce": "NONCE:xrv0nssx",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: NONCE:NONCE:xrv0nssx",
+      "status_code": 200,
+      "latency_ms": 14586
+    },
+    {
+      "index": 161,
+      "nonce": "NONCE:gxda5h0w",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:gxda5h0w\" which doesn't affect the counting sequence. I've simply counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 15321
+    },
+    {
+      "index": 162,
+      "nonce": "NONCE:wq19mjpe",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:wq19mjpe",
+      "status_code": 200,
+      "latency_ms": 13649
+    },
+    {
+      "index": 163,
+      "nonce": "NONCE:bk04p8h5",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:bk04p8h5",
+      "status_code": 200,
+      "latency_ms": 13843
+    },
+    {
+      "index": 164,
+      "nonce": "NONCE:wbrdkqqs",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:wbrdkqqs\" which doesn't affect the counting sequence. I simply counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 15031
+    },
+    {
+      "index": 165,
+      "nonce": "NONCE:4wui7n3f",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value \"NONCE:NONCE:4wui7n3f\" appears to be a random string used for security purposes, likely in a cryptographic context or as a unique identifier for a specific operation. It's not related to the counting task but was included in your message.",
+      "status_code": 200,
+      "latency_ms": 15277
+    },
+    {
+      "index": 166,
+      "nonce": "NONCE:gzj4454t",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value you provided appears to be a random string \"gzj4454t\" which is typically used in cryptographic contexts to ensure uniqueness or prevent replay attacks. However, it doesn't affect the counting sequence itself.",
+      "status_code": 200,
+      "latency_ms": 15960
+    },
+    {
+      "index": 167,
+      "nonce": "NONCE:vy7cnrz7",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: vy7cnrz7",
+      "status_code": 200,
+      "latency_ms": 15540
+    },
+    {
+      "index": 168,
+      "nonce": "NONCE:mw2oh45j",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:mw2oh45j",
+      "status_code": 200,
+      "latency_ms": 14390
+    },
+    {
+      "index": 169,
+      "nonce": "NONCE:65wrl3eo",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be a random string \"65wrl3eo\" which doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 14675
+    },
+    {
+      "index": 170,
+      "nonce": "NONCE:h2eackii",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:h2eackii\" appears to be a random string prefixed with \"NONCE:NONCE:\" - this seems like it might be a cryptographic nonce or identifier, but I cannot determine its specific purpose or meaning without additional context. The actual counting task was completed successfully.",
+      "status_code": 200,
+      "latency_ms": 14745
+    },
+    {
+      "index": 171,
+      "nonce": "NONCE:st1r2str",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: st1r2str",
+      "status_code": 200,
+      "latency_ms": 14944
+    },
+    {
+      "index": 172,
+      "nonce": "NONCE:4rg04xwr",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:4rg04xwr",
+      "status_code": 200,
+      "latency_ms": 15694
+    },
+    {
+      "index": 173,
+      "nonce": "NONCE:tuzwn48q",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:tuzwn48q\" appears to be a random string used for security purposes, often in cryptographic contexts or to prevent replay attacks. It's not related to the counting task, but I've included it as requested in the prompt.",
+      "status_code": 200,
+      "latency_ms": 15750
+    },
+    {
+      "index": 174,
+      "nonce": "NONCE:rietjeih",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:rietjeih\" appears to be a random string or identifier, but it doesn't affect the counting sequence. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 16230
+    },
+    {
+      "index": 175,
+      "nonce": "NONCE:r474urcj",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:r474urcj\" appears to be a random string used for authentication or security purposes, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 16159
+    },
+    {
+      "index": 176,
+      "nonce": "NONCE:wnti55gw",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce appears to be: wnti55gw",
+      "status_code": 200,
+      "latency_ms": 15617
+    },
+    {
+      "index": 177,
+      "nonce": "NONCE:e6ujtq1q",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:NONCE:e6ujtq1q\" which seems unrelated to the counting task. I've counted from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 16282
+    },
+    {
+      "index": 178,
+      "nonce": "NONCE:pb3pvxc0",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value appears to be: pb3pvxc0",
+      "status_code": 200,
+      "latency_ms": 16029
+    },
+    {
+      "index": 179,
+      "nonce": "NONCE:iwub2ghw",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:iwub2ghw",
+      "status_code": 200,
+      "latency_ms": 15918
+    },
+    {
+      "index": 180,
+      "nonce": "NONCE:5eg4f1s1",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:5eg4f1s1",
+      "status_code": 200,
+      "latency_ms": 16116
+    },
+    {
+      "index": 181,
+      "nonce": "NONCE:0f2s9yb9",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:0f2s9yb9",
+      "status_code": 200,
+      "latency_ms": 16189
+    },
+    {
+      "index": 182,
+      "nonce": "NONCE:66z1hank",
+      "content": "1, 2, 3, 4, 5\n\nI notice the NONCE:NONCE:66z1hank appears to be a placeholder or identifier, but I'll focus on the counting task as requested.",
+      "status_code": 200,
+      "latency_ms": 16615
+    },
+    {
+      "index": 183,
+      "nonce": "NONCE:fvsch1d9",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:NONCE:fvsch1d9\" which seems unrelated to the counting task. I've completed the counting from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 16803
+    },
+    {
+      "index": 184,
+      "nonce": "NONCE:78jehtvg",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"78jehtvg\" which doesn't affect the counting sequence. I simply counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 16747
+    },
+    {
+      "index": 185,
+      "nonce": "NONCE:m92crh6o",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"m92crh6o\" which is commonly used in cryptographic contexts or as a unique identifier for transactions. However, it doesn't affect the counting sequence itself.",
+      "status_code": 200,
+      "latency_ms": 16937
+    },
+    {
+      "index": 186,
+      "nonce": "NONCE:zdi2ly5x",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value \"NONCE:NONCE:zdi2ly5x\" appears to be a random string used for security purposes, likely in a cryptographic context or as a unique identifier for a specific operation or session. The actual counting from 1 to 5 is straightforward and doesn't require any special handling of the nonce value itself.",
+      "status_code": 200,
+      "latency_ms": 17278
+    },
+    {
+      "index": 187,
+      "nonce": "NONCE:30linsbx",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:30linsbx\" appears to be a repeated nonce value, which is typically used in cryptographic contexts to ensure uniqueness in operations like encryption or authentication. However, the repeated nonce could potentially pose security risks in certain cryptographic protocols where uniqueness is required. This appears to be a system-generated identifier rather than a count sequence.",
+      "status_code": 200,
+      "latency_ms": 17357
+    },
+    {
+      "index": 188,
+      "nonce": "NONCE:yqea69oz",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"yqea69oz\" which is typically used in cryptographic contexts or as a unique identifier. It's not related to the counting task but was included in your message.",
+      "status_code": 200,
+      "latency_ms": 17026
+    },
+    {
+      "index": 189,
+      "nonce": "NONCE:08m4l9xm",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"08m4l9xm\" which is commonly used in cryptographic contexts or as a unique identifier for transactions, but it doesn't affect the counting sequence.",
+      "status_code": 200,
+      "latency_ms": 17027
+    },
+    {
+      "index": 190,
+      "nonce": "NONCE:llgem4l0",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce \"NONCE:NONCE:llgem4l0\" appears to be a random string used typically in cryptographic contexts or as a unique identifier. It's not related to the counting task, but I've included it as requested.",
+      "status_code": 200,
+      "latency_ms": 17501
+    },
+    {
+      "index": 191,
+      "nonce": "NONCE:dvrrnb1z",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"dvrrnb1z\" which is unrelated to the counting task. I've counted to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 17438
+    },
+    {
+      "index": 192,
+      "nonce": "NONCE:ba0ks6s4",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value \"NONCE:NONCE:ba0ks6s4\" appears to be a repeated nonce identifier, but I don't see any specific instruction to process or analyze it beyond the counting task you requested. The counting from 1 to 5 is complete.",
+      "status_code": 200,
+      "latency_ms": 17731
+    },
+    {
+      "index": 193,
+      "nonce": "NONCE:o33lgmkg",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"NONCE:o33lgmkg\" which doesn't affect the counting sequence. I simply counted sequentially from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 17678
+    },
+    {
+      "index": 194,
+      "nonce": "NONCE:euz26i6v",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:euz26i6v",
+      "status_code": 200,
+      "latency_ms": 17400
+    },
+    {
+      "index": 195,
+      "nonce": "NONCE:0gojnk3y",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce you provided appears to be a random string \"0gojnk3y\" which seems unrelated to the counting task. I've completed the counting from 1 to 5 as requested.",
+      "status_code": 200,
+      "latency_ms": 17732
+    },
+    {
+      "index": 196,
+      "nonce": "NONCE:vyg7pu61",
+      "content": "1, 2, 3, 4, 5\n\nThe nonce value \"NONCE:NONCE:vyg7pu61\" appears to be a repeated nonce identifier, but I've counted to 5 as requested. The nonce seems to be a random string used for security purposes in cryptographic operations.",
+      "status_code": 200,
+      "latency_ms": 17986
+    },
+    {
+      "index": 197,
+      "nonce": "NONCE:ioeg4hn7",
+      "content": "1, 2, 3, 4, 5\n\nI notice the nonce appears to be a random string \"ioeg4hn7\" that was included in your message. This seems to be a unique identifier or token that's typically used in cryptographic operations or to prevent replay attacks. The nonce itself doesn't affect the counting task, but it's interesting that you included it in your request.",
+      "status_code": 200,
+      "latency_ms": 18066
+    },
+    {
+      "index": 198,
+      "nonce": "NONCE:ka9j7qfd",
+      "content": "1, 2, 3, 4, 5\n\nI notice the nonce appears to be a random string (ka9j7qfd) that was included in your message. This seems to be a standard counting task, but I wanted to acknowledge the nonce that was included.",
+      "status_code": 200,
+      "latency_ms": 6153
+    },
+    {
+      "index": 199,
+      "nonce": "NONCE:lqpr2p6o",
+      "content": "1, 2, 3, 4, 5\n\nNONCE:NONCE:lqpr2p6o",
+      "status_code": 200,
+      "latency_ms": 374
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

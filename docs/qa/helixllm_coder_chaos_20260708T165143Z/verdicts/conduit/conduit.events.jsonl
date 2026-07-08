@@ -1,0 +1,14 @@
+{"seq":1,"time":"2026-07-08T16:45:35.243652889Z","type":"challenge_start","session":"helixllm_coder_chaos","platform":"coder_chaos","challenge":"CODER-CHAOS-001"}
+{"seq":2,"time":"2026-07-08T16:45:36.03933068Z","type":"challenge_verdict","session":"helixllm_coder_chaos","challenge":"CODER-CHAOS-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:45:44.745382108Z","type":"challenge_start","session":"helixllm_coder_chaos","platform":"coder_chaos","challenge":"CODER-CHAOS-002"}
+{"seq":2,"time":"2026-07-08T16:45:44.879265339Z","type":"challenge_verdict","session":"helixllm_coder_chaos","challenge":"CODER-CHAOS-002","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:45:44.902528659Z","type":"challenge_start","session":"helixllm_coder_chaos","platform":"coder_chaos","challenge":"CODER-CHAOS-003"}
+{"seq":2,"time":"2026-07-08T16:45:45.505234993Z","type":"challenge_verdict","session":"helixllm_coder_chaos","challenge":"CODER-CHAOS-003","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:45:54.232133235Z","type":"challenge_start","session":"helixllm_coder_chaos","platform":"coder_chaos","challenge":"CODER-CHAOS-SELF-VALIDATE-001-GOOD"}
+{"seq":2,"time":"2026-07-08T16:45:54.818415206Z","type":"challenge_verdict","session":"helixllm_coder_chaos","challenge":"CODER-CHAOS-SELF-VALIDATE-001-GOOD","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:45:54.840481025Z","type":"challenge_start","session":"helixllm_coder_chaos","platform":"coder_chaos","challenge":"CODER-CHAOS-SELF-VALIDATE-001-BAD"}
+{"seq":2,"time":"2026-07-08T16:45:55.394501771Z","type":"challenge_verdict","session":"helixllm_coder_chaos","challenge":"CODER-CHAOS-SELF-VALIDATE-001-BAD","verdict":"FAIL","reason":"post-flood request failed: http: Post \"http://localhost:19999/v1/chat/completions\": dial tcp 127.0.0.1:19999: connect: connection refused"}
+{"seq":1,"time":"2026-07-08T16:46:02.949454606Z","type":"challenge_start","session":"helixllm_coder_chaos","platform":"coder_chaos","challenge":"CODER-CHAOS-SELF-VALIDATE-001-BAD"}
+{"seq":2,"time":"2026-07-08T16:46:03.503107696Z","type":"challenge_verdict","session":"helixllm_coder_chaos","challenge":"CODER-CHAOS-SELF-VALIDATE-001-BAD","verdict":"FAIL","reason":"post-flood request failed: http: Post \"http://localhost:19999/v1/chat/completions\": dial tcp 127.0.0.1:19999: connect: connection refused"}
+{"seq":1,"time":"2026-07-08T16:49:08.737863183Z","type":"challenge_start","session":"helixllm_coder_chaos","platform":"coder_chaos","challenge":"CODER-CHAOS-SELF-VALIDATE-001-BAD"}
+{"seq":2,"time":"2026-07-08T16:49:09.291569257Z","type":"challenge_verdict","session":"helixllm_coder_chaos","challenge":"CODER-CHAOS-SELF-VALIDATE-001-BAD","verdict":"PASS","reason":"post-flood request failed: http: Post \"http://localhost:19999/v1/chat/completions\": dial tcp 127.0.0.1:19999: connect: connection refused"}

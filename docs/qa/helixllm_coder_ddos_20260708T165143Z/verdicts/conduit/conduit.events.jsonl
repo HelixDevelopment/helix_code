@@ -1,0 +1,9 @@
+{"seq":1,"time":"2026-07-08T16:49:17.239945085Z","type":"challenge_start","session":"helixllm_coder_ddos","platform":"coder_ddos_burst","challenge":"DDOS-CODER-001"}
+{"seq":2,"time":"2026-07-08T16:49:35.31827377Z","type":"evidence_captured","session":"helixllm_coder_ddos","challenge":"DDOS-CODER-001","evidence_path":"qa-results/helixllm_coder_ddos/burst_001_verdict.json","evidence_kind":"ddos_verdict_json"}
+{"seq":3,"time":"2026-07-08T16:49:35.318383606Z","type":"challenge_verdict","session":"helixllm_coder_ddos","challenge":"DDOS-CODER-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:49:48.533950725Z","type":"challenge_start","session":"helixllm_coder_ddos","platform":"coder_ddos_soak","challenge":"DDOS-CODER-002"}
+{"seq":2,"time":"2026-07-08T16:50:18.597265225Z","type":"evidence_captured","session":"helixllm_coder_ddos","challenge":"DDOS-CODER-002","evidence_path":"qa-results/helixllm_coder_ddos/soak_001_verdict.json","evidence_kind":"ddos_verdict_json"}
+{"seq":3,"time":"2026-07-08T16:50:18.599049633Z","type":"challenge_verdict","session":"helixllm_coder_ddos","challenge":"DDOS-CODER-002","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:50:26.232802049Z","type":"challenge_start","session":"helixllm_coder_ddos","platform":"coder_ddos_conn-flood","challenge":"DDOS-CODER-003"}
+{"seq":2,"time":"2026-07-08T16:50:31.696950955Z","type":"evidence_captured","session":"helixllm_coder_ddos","challenge":"DDOS-CODER-003","evidence_path":"qa-results/helixllm_coder_ddos/conn_flood_001_verdict.json","evidence_kind":"ddos_verdict_json"}
+{"seq":3,"time":"2026-07-08T16:50:31.697059219Z","type":"challenge_verdict","session":"helixllm_coder_ddos","challenge":"DDOS-CODER-003","verdict":"PASS"}

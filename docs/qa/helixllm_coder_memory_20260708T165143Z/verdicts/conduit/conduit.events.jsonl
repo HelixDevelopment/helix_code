@@ -1,0 +1,15 @@
+{"seq":1,"time":"2026-07-08T16:50:38.444133153Z","type":"challenge_start","session":"helixllm_coder_memory","platform":"coder_memory_soak","challenge":"MEMORY-MONO-001"}
+{"seq":2,"time":"2026-07-08T16:50:50.567791409Z","type":"evidence_captured","session":"helixllm_coder_memory","challenge":"MEMORY-MONO-001","evidence_path":"qa-results/helixllm_coder_memory/mono_001_verdict.json","evidence_kind":"memory_soak_verdict_json"}
+{"seq":3,"time":"2026-07-08T16:50:50.567996348Z","type":"challenge_verdict","session":"helixllm_coder_memory","challenge":"MEMORY-MONO-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:50:59.73309435Z","type":"challenge_start","session":"helixllm_coder_memory","platform":"coder_memory_soak","challenge":"MEMORY-GC-001"}
+{"seq":2,"time":"2026-07-08T16:51:11.788240692Z","type":"evidence_captured","session":"helixllm_coder_memory","challenge":"MEMORY-GC-001","evidence_path":"qa-results/helixllm_coder_memory/gc_001_verdict.json","evidence_kind":"memory_soak_verdict_json"}
+{"seq":3,"time":"2026-07-08T16:51:11.788360032Z","type":"challenge_verdict","session":"helixllm_coder_memory","challenge":"MEMORY-GC-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:51:11.79762018Z","type":"challenge_start","session":"helixllm_coder_memory","platform":"coder_memory_soak","challenge":"MEMORY-STEADY-001"}
+{"seq":2,"time":"2026-07-08T16:51:24.037614872Z","type":"evidence_captured","session":"helixllm_coder_memory","challenge":"MEMORY-STEADY-001","evidence_path":"qa-results/helixllm_coder_memory/steady_001_verdict.json","evidence_kind":"memory_soak_verdict_json"}
+{"seq":3,"time":"2026-07-08T16:51:24.037735264Z","type":"challenge_verdict","session":"helixllm_coder_memory","challenge":"MEMORY-STEADY-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:51:31.535749205Z","type":"challenge_start","session":"helixllm_coder_memory","platform":"coder_memory_soak","challenge":"MEMORY-SELF-VALIDATE-001-GOOD"}
+{"seq":2,"time":"2026-07-08T16:51:32.407463437Z","type":"evidence_captured","session":"helixllm_coder_memory","challenge":"MEMORY-SELF-VALIDATE-001-GOOD","evidence_path":"qa-results/helixllm_coder_memory/self_validate_001_golden_good_verdict.json","evidence_kind":"memory_soak_verdict_json"}
+{"seq":3,"time":"2026-07-08T16:51:32.407620154Z","type":"challenge_verdict","session":"helixllm_coder_memory","challenge":"MEMORY-SELF-VALIDATE-001-GOOD","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T16:51:32.43050667Z","type":"challenge_start","session":"helixllm_coder_memory","platform":"coder_memory_soak","challenge":"MEMORY-SELF-VALIDATE-001-BAD"}
+{"seq":2,"time":"2026-07-08T16:51:33.306136681Z","type":"evidence_captured","session":"helixllm_coder_memory","challenge":"MEMORY-SELF-VALIDATE-001-BAD","evidence_path":"qa-results/helixllm_coder_memory/self_validate_001_golden_bad_verdict.json","evidence_kind":"memory_soak_verdict_json"}
+{"seq":3,"time":"2026-07-08T16:51:33.306256001Z","type":"challenge_verdict","session":"helixllm_coder_memory","challenge":"MEMORY-SELF-VALIDATE-001-BAD","verdict":"PASS"}

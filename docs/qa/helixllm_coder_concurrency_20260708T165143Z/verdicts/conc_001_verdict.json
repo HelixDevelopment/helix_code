@@ -1,0 +1,99 @@
+{
+  "mode": "parallel",
+  "n": 10,
+  "n_ok": 10,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "nonces_ok": true,
+  "consistent": true,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Repeat this word exactly: NONCE",
+  "results": [
+    {
+      "index": 0,
+      "nonce": "yfd99ctw",
+      "content": "NONCE\n\nNONCE: yfd99ctw",
+      "status_code": 200,
+      "latency_ms": 193,
+      "nonce_found": true
+    },
+    {
+      "index": 1,
+      "nonce": "29fbpllt",
+      "content": "NONCE\n\nNONCE: 29fbpllt",
+      "status_code": 200,
+      "latency_ms": 193,
+      "nonce_found": true
+    },
+    {
+      "index": 2,
+      "nonce": "adww62z2",
+      "content": "NONCE\n\nNONCE: adww62z2",
+      "status_code": 200,
+      "latency_ms": 194,
+      "nonce_found": true
+    },
+    {
+      "index": 3,
+      "nonce": "m08t7mb4",
+      "content": "NONCE\n\nNONCE: m08t7mb4",
+      "status_code": 200,
+      "latency_ms": 238,
+      "nonce_found": true
+    },
+    {
+      "index": 4,
+      "nonce": "14yna4hc",
+      "content": "NONCE\n\nNONCE: 14yna4hc",
+      "status_code": 200,
+      "latency_ms": 339,
+      "nonce_found": true
+    },
+    {
+      "index": 5,
+      "nonce": "cvcuz392",
+      "content": "NONCE\n\nNONCE: cvcuz392",
+      "status_code": 200,
+      "latency_ms": 193,
+      "nonce_found": true
+    },
+    {
+      "index": 6,
+      "nonce": "4007jakx",
+      "content": "NONCE\n\nNONCE: 4007jakx",
+      "status_code": 200,
+      "latency_ms": 240,
+      "nonce_found": true
+    },
+    {
+      "index": 7,
+      "nonce": "y58w6vhx",
+      "content": "NONCE\n\nNONCE: y58w6vhx",
+      "status_code": 200,
+      "latency_ms": 240,
+      "nonce_found": true
+    },
+    {
+      "index": 8,
+      "nonce": "x8a6hkcw",
+      "content": "NONCE\n\nNONCE: x8a6hkcw",
+      "status_code": 200,
+      "latency_ms": 343,
+      "nonce_found": true
+    },
+    {
+      "index": 9,
+      "nonce": "09zeza96",
+      "content": "NONCE\n\nNONCE: 09zeza96",
+      "status_code": 200,
+      "latency_ms": 240,
+      "nonce_found": true
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

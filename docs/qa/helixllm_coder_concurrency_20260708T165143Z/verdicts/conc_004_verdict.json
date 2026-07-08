@@ -1,0 +1,229 @@
+{
+  "mode": "parallel",
+  "n": 30,
+  "n_ok": 30,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "nonces_ok": true,
+  "consistent": true,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Say hello.",
+  "results": [
+    {
+      "index": 0,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 454,
+      "nonce_found": false
+    },
+    {
+      "index": 1,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 207,
+      "nonce_found": false
+    },
+    {
+      "index": 2,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 331,
+      "nonce_found": false
+    },
+    {
+      "index": 3,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 331,
+      "nonce_found": false
+    },
+    {
+      "index": 4,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 259,
+      "nonce_found": false
+    },
+    {
+      "index": 5,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 454,
+      "nonce_found": false
+    },
+    {
+      "index": 6,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 131,
+      "nonce_found": false
+    },
+    {
+      "index": 7,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 207,
+      "nonce_found": false
+    },
+    {
+      "index": 8,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 131,
+      "nonce_found": false
+    },
+    {
+      "index": 9,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 680,
+      "nonce_found": false
+    },
+    {
+      "index": 10,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 583,
+      "nonce_found": false
+    },
+    {
+      "index": 11,
+      "content": "Hello! It's nice to meet you! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 474,
+      "nonce_found": false
+    },
+    {
+      "index": 12,
+      "content": "Hello! Nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 558,
+      "nonce_found": false
+    },
+    {
+      "index": 13,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 259,
+      "nonce_found": false
+    },
+    {
+      "index": 14,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 403,
+      "nonce_found": false
+    },
+    {
+      "index": 15,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 454,
+      "nonce_found": false
+    },
+    {
+      "index": 16,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 130,
+      "nonce_found": false
+    },
+    {
+      "index": 17,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 547,
+      "nonce_found": false
+    },
+    {
+      "index": 18,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 655,
+      "nonce_found": false
+    },
+    {
+      "index": 19,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 609,
+      "nonce_found": false
+    },
+    {
+      "index": 20,
+      "content": "Hello! It's nice to meet you! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 418,
+      "nonce_found": false
+    },
+    {
+      "index": 21,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 583,
+      "nonce_found": false
+    },
+    {
+      "index": 22,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 207,
+      "nonce_found": false
+    },
+    {
+      "index": 23,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 131,
+      "nonce_found": false
+    },
+    {
+      "index": 24,
+      "content": "Hello! It's nice to meet you! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 548,
+      "nonce_found": false
+    },
+    {
+      "index": 25,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 330,
+      "nonce_found": false
+    },
+    {
+      "index": 26,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 647,
+      "nonce_found": false
+    },
+    {
+      "index": 27,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 207,
+      "nonce_found": false
+    },
+    {
+      "index": 28,
+      "content": "Hello! It's nice to meet you!",
+      "status_code": 200,
+      "latency_ms": 259,
+      "nonce_found": false
+    },
+    {
+      "index": 29,
+      "content": "Hello! It's nice to meet you! How are you doing today?",
+      "status_code": 200,
+      "latency_ms": 455,
+      "nonce_found": false
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

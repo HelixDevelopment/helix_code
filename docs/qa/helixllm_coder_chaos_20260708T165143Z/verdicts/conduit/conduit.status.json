@@ -1,0 +1,27 @@
+{
+  "session": "helixllm_coder_chaos",
+  "state": "starting",
+  "started_at": "2026-07-08T16:49:08.737859187Z",
+  "updated_at": "2026-07-08T16:49:09.2915847Z",
+  "last_seq": 2,
+  "last_event": {
+    "seq": 2,
+    "time": "2026-07-08T16:49:09.291569257Z",
+    "type": "challenge_verdict",
+    "session": "helixllm_coder_chaos",
+    "challenge": "CODER-CHAOS-SELF-VALIDATE-001-BAD",
+    "verdict": "PASS",
+    "reason": "post-flood request failed: http: Post \"http://localhost:19999/v1/chat/completions\": dial tcp 127.0.0.1:19999: connect: connection refused"
+  },
+  "counts": {
+    "challenges_started": 1,
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "operator_blocked": 0,
+    "evidence_captured": 0,
+    "errors": 0,
+    "llm_calls": 0,
+    "vision_calls": 0
+  }
+}

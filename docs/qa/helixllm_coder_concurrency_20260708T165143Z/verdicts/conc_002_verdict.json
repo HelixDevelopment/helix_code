@@ -1,0 +1,369 @@
+{
+  "mode": "parallel",
+  "n": 50,
+  "n_ok": 50,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "nonces_ok": true,
+  "consistent": true,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Name three colors.",
+  "results": [
+    {
+      "index": 0,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 548,
+      "nonce_found": false
+    },
+    {
+      "index": 1,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 467,
+      "nonce_found": false
+    },
+    {
+      "index": 2,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 139,
+      "nonce_found": false
+    },
+    {
+      "index": 3,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 467,
+      "nonce_found": false
+    },
+    {
+      "index": 4,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 547,
+      "nonce_found": false
+    },
+    {
+      "index": 5,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 549,
+      "nonce_found": false
+    },
+    {
+      "index": 6,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 223,
+      "nonce_found": false
+    },
+    {
+      "index": 7,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 467,
+      "nonce_found": false
+    },
+    {
+      "index": 8,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 468,
+      "nonce_found": false
+    },
+    {
+      "index": 9,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 385,
+      "nonce_found": false
+    },
+    {
+      "index": 10,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 304,
+      "nonce_found": false
+    },
+    {
+      "index": 11,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 304,
+      "nonce_found": false
+    },
+    {
+      "index": 12,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 140,
+      "nonce_found": false
+    },
+    {
+      "index": 13,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 467,
+      "nonce_found": false
+    },
+    {
+      "index": 14,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 467,
+      "nonce_found": false
+    },
+    {
+      "index": 15,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 223,
+      "nonce_found": false
+    },
+    {
+      "index": 16,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 385,
+      "nonce_found": false
+    },
+    {
+      "index": 17,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 222,
+      "nonce_found": false
+    },
+    {
+      "index": 18,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 385,
+      "nonce_found": false
+    },
+    {
+      "index": 19,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 303,
+      "nonce_found": false
+    },
+    {
+      "index": 20,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 548,
+      "nonce_found": false
+    },
+    {
+      "index": 21,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 548,
+      "nonce_found": false
+    },
+    {
+      "index": 22,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 303,
+      "nonce_found": false
+    },
+    {
+      "index": 23,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 548,
+      "nonce_found": false
+    },
+    {
+      "index": 24,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 138,
+      "nonce_found": false
+    },
+    {
+      "index": 25,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 548,
+      "nonce_found": false
+    },
+    {
+      "index": 26,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 385,
+      "nonce_found": false
+    },
+    {
+      "index": 27,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 223,
+      "nonce_found": false
+    },
+    {
+      "index": 28,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 222,
+      "nonce_found": false
+    },
+    {
+      "index": 29,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 466,
+      "nonce_found": false
+    },
+    {
+      "index": 30,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 548,
+      "nonce_found": false
+    },
+    {
+      "index": 31,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 139,
+      "nonce_found": false
+    },
+    {
+      "index": 32,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 385,
+      "nonce_found": false
+    },
+    {
+      "index": 33,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 303,
+      "nonce_found": false
+    },
+    {
+      "index": 34,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 138,
+      "nonce_found": false
+    },
+    {
+      "index": 35,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 303,
+      "nonce_found": false
+    },
+    {
+      "index": 36,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 589,
+      "nonce_found": false
+    },
+    {
+      "index": 37,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 384,
+      "nonce_found": false
+    },
+    {
+      "index": 38,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 384,
+      "nonce_found": false
+    },
+    {
+      "index": 39,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 222,
+      "nonce_found": false
+    },
+    {
+      "index": 40,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 589,
+      "nonce_found": false
+    },
+    {
+      "index": 41,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 302,
+      "nonce_found": false
+    },
+    {
+      "index": 42,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 138,
+      "nonce_found": false
+    },
+    {
+      "index": 43,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 221,
+      "nonce_found": false
+    },
+    {
+      "index": 44,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 221,
+      "nonce_found": false
+    },
+    {
+      "index": 45,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 384,
+      "nonce_found": false
+    },
+    {
+      "index": 46,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 302,
+      "nonce_found": false
+    },
+    {
+      "index": 47,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 136,
+      "nonce_found": false
+    },
+    {
+      "index": 48,
+      "content": "Red, blue, and green.",
+      "status_code": 200,
+      "latency_ms": 465,
+      "nonce_found": false
+    },
+    {
+      "index": 49,
+      "content": "Red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 140,
+      "nonce_found": false
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}
