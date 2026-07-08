@@ -1,0 +1,36 @@
+{
+  "choices": [
+    {
+      "finish_reason": "length",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here's a Python class that implements a thread-safe async task queue with priority support, dependency tracking, and progress callbacks using `asyncio` and `typing`. This example uses `asyncio.Queue` for the task queue and `asyncio.Lock` for thread safety.\n\n```python\nimport asyncio\nfrom typing import Callable, Dict, Optional, Tuple\n\nclass AsyncTaskQueue:\n    \"\"\"A thread-safe async task queue with priority support, dependency tracking, and progress callbacks.\"\"\"\n\n    def __init__(self):\n        self._queue: Dict[int, asyncio.Queue] = {i: asyncio.Queue() for i in range(10)}  # Priorities from 0 to 9\n        self._lock = asyncio.Lock()\n        self._task_id_counter = 0\n        self._task_map: Dict[int, Tuple[Callable, Dict[int, bool]]] = {}\n\n    async def add_task(\n        self,\n        priority: int,\n        task: Callable,\n        dependencies: Optional[Dict[int, bool]] = None,\n        on_progress: Optional[Callable[[float], None]] = None,\n    ) -> int:\n        \"\"\"Add a task to the queue with the given priority, dependencies, and progress callback.\n\n        Args:\n            priority (int): The priority of the task (0-9).\n            task (Callable): The async task to be executed.\n            dependencies (Optional[Dict[int, bool]]): A dictionary mapping task IDs to their required completion status.\n            on_progress (Optional[Callable[[float], None]]): A callback function to be called on task progress.\n\n        Returns:\n            int: The ID of the added task.\n        \"\"\"\n        if priority < 0 or priority > 9:\n            raise ValueError(\"Priority must be between 0 and 9.\")\n\n        task_id = self._task_id_counter\n        self._task_id_counter += 1\n\n        if dependencies is None:\n            dependencies = {}\n\n        self._task_map[task_id] = (task, dependencies)\n\n        await self._queue[priority].put((task_id, on_progress))\n\n        return task_id\n\n    async def run(self):\n        \"\"\"Run the task queue, processing tasks in priority order.\"\"\"\n        while any(queue.qsize() > 0 for queue in self._queue.values()):\n            for priority in range(10):\n                if self._queue[priority].qsize() > 0:\n                    task_id, on_progress = await self._queue[priority].get()\n                    task, dependencies = self._task_map[task_id]\n\n                    # Check if all dependencies are met\n                    if all(dependencies.get(task_id, True) for task_id in dependencies):\n                        async with self._lock:\n                            try:\n                                progress = 0.0\n                                if on_progress is not None:\n                                    on_progress(progress)\n\n                                result = await task()\n                                progress = 1.0\n                                if on_progress is not None:\n                                    on_progress(progress)\n\n                                # Remove task from dependencies of other tasks\n                                for other_task_id, (other_task, other_dependencies) in self._task_map.items():\n                                    if task_id in other_dependencies:\n                                        del other_dependencies[task_id]\n                            except Exception as e:\n                                # Handle exceptions here if needed\n                                print(f\"Task {task_id} raised an exception: {e}\")\n                    else:\n                        # Put the task back into the queue if dependencies are not met\n                        await self._queue[priority].put((task_id, on_progress))\n\n# Usage example\nasync def task1():\n    await asyncio.sleep(1)\n    return \"Task 1 completed\"\n\nasync def task2(task_id: int):\n   "
+      }
+    }
+  ],
+  "created": 1783525024,
+  "model": "/models/Mistral-Nemo-Instruct-2407-Q4_K_M.gguf",
+  "system_fingerprint": "b1-3b4fca1",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 768,
+    "prompt_tokens": 37,
+    "total_tokens": 805,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "id": "chatcmpl-9n0aZ1IYmPHJJz3LXYjtV4owPejJsyqs",
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 37,
+    "prompt_ms": 19.591,
+    "prompt_per_token_ms": 0.5294864864864866,
+    "prompt_per_second": 1888.6223265785306,
+    "predicted_n": 768,
+    "predicted_ms": 4618.895,
+    "predicted_per_token_ms": 6.0141861979166675,
+    "predicted_per_second": 166.273535120413
+  }
+}

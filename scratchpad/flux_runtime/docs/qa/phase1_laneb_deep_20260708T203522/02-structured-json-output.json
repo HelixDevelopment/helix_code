@@ -1,0 +1,36 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here's a complete employee database schema in JSON format:\n\n```json\n{\n  \"employees\": [\n    {\n      \"id\": 1,\n      \"name\": \"John Doe\",\n      \"email\": \"john.doe@example.com\",\n      \"department\": \"DEV\",\n      \"salary\": 60000,\n      \"startDate\": \"2020-01-15\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Jane Smith\",\n      \"email\": \"jane.smith@example.com\",\n      \"department\": \"HR\",\n      \"salary\": 55000,\n      \"startDate\": \"2019-06-10\"\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Mike Johnson\",\n      \"email\": \"mike.johnson@example.com\",\n      \"department\": \"FIN\",\n      \"salary\": 70000,\n      \"startDate\": \"2021-02-20\"\n    }\n  ],\n  \"departments\": {\n    \"DEV\": \"Development\",\n    \"HR\": \"Human Resources\",\n    \"FIN\": \"Finance\"\n  },\n  \"summary\": {\n    \"totalEmployees\": 3,\n    \"averageSalary\": 61666.67\n  }\n}\n```\n\nIn this schema:\n\n- `employees` is an array of objects, where each object represents an employee with properties: `id`, `name`, `email`, `department`, `salary`, and `startDate`.\n- `departments` is an object that maps department codes to their respective names.\n- `summary` is an object containing two properties: `totalEmployees` and `averageSalary`. The `averageSalary` is calculated by summing all salaries and dividing by the total number of employees."
+      }
+    }
+  ],
+  "created": 1783525019,
+  "model": "/models/Mistral-Nemo-Instruct-2407-Q4_K_M.gguf",
+  "system_fingerprint": "b1-3b4fca1",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 393,
+    "prompt_tokens": 55,
+    "total_tokens": 448,
+    "prompt_tokens_details": {
+      "cached_tokens": 54
+    }
+  },
+  "id": "chatcmpl-CgHAEGDcseNJj0q4cFAKtIleotBOkvzm",
+  "timings": {
+    "cache_n": 54,
+    "prompt_n": 1,
+    "prompt_ms": 7.097,
+    "prompt_per_token_ms": 7.097,
+    "prompt_per_second": 140.90460758066789,
+    "predicted_n": 393,
+    "predicted_ms": 2354.981,
+    "predicted_per_token_ms": 5.992318066157761,
+    "predicted_per_second": 166.88032727227946
+  }
+}
