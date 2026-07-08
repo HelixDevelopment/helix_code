@@ -1,0 +1,26 @@
+{
+  "session": "helixllm_vision",
+  "state": "starting",
+  "started_at": "2026-07-08T06:17:54.742887285Z",
+  "updated_at": "2026-07-08T06:17:54.792585467Z",
+  "last_seq": 4,
+  "last_event": {
+    "seq": 4,
+    "time": "2026-07-08T06:17:54.792568341Z",
+    "type": "challenge_verdict",
+    "session": "helixllm_vision",
+    "challenge": "VIS-SELF-VALIDATE-001-BAD",
+    "verdict": "PASS"
+  },
+  "counts": {
+    "challenges_started": 1,
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "operator_blocked": 0,
+    "evidence_captured": 1,
+    "errors": 0,
+    "llm_calls": 0,
+    "vision_calls": 1
+  }
+}

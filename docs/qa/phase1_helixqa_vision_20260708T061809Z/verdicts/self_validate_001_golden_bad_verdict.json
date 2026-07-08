@@ -1,0 +1,22 @@
+{
+  "image": "data/vision_gt/red_circle.png",
+  "prompt": "What shape and what color is the main object in this image? Answer with the shape name and the color.",
+  "endpoint": "http://localhost:18439/v1/chat/completions",
+  "model_requested": "vision",
+  "model_served": "/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+  "expected_facts": [
+    "square",
+    "blue"
+  ],
+  "response": "The main object in the image is a circle, and it is red in color.",
+  "matched_facts": 0,
+  "expected_count": 2,
+  "hallucinated": false,
+  "pass": false,
+  "expect_fail": true,
+  "case_result": true,
+  "latency_ms": 48,
+  "http_status": 200,
+  "prompt_tokens": 164,
+  "completion_tokens": 18
+}

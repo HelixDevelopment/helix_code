@@ -1,0 +1,21 @@
+{
+  "image": "data/vision_gt/three_blue_circles.png",
+  "prompt": "How many blue circles are in this image? Reply with just the number as a word or digit.",
+  "endpoint": "http://localhost:18439/v1/chat/completions",
+  "model_requested": "vision",
+  "model_served": "/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+  "expected_facts": [
+    "3"
+  ],
+  "response": "3",
+  "matched_facts": 1,
+  "expected_count": 1,
+  "hallucinated": false,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 59,
+  "http_status": 200,
+  "prompt_tokens": 162,
+  "completion_tokens": 2
+}

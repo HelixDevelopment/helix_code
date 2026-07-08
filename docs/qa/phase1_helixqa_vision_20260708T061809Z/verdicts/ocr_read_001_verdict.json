@@ -1,0 +1,21 @@
+{
+  "image": "data/vision_gt/text_helix.png",
+  "prompt": "What single word is written in this image? Reply with just the word.",
+  "endpoint": "http://localhost:18439/v1/chat/completions",
+  "model_requested": "vision",
+  "model_served": "/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+  "expected_facts": [
+    "helix"
+  ],
+  "response": "HELIX",
+  "matched_facts": 1,
+  "expected_count": 1,
+  "hallucinated": false,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 14,
+  "http_status": 200,
+  "prompt_tokens": 106,
+  "completion_tokens": 3
+}

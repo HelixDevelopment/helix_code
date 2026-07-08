@@ -1,0 +1,24 @@
+=== BEFORE teardown ===
+--- podman ps ---
+CONTAINER ID  IMAGE                                              COMMAND               CREATED         STATUS         PORTS                                          NAMES
+1484eac80acb  localhost/helixllm/llamacpp-router:cuda12.8-sm120  -m /models/Qwen3-...  40 hours ago    Up 16 minutes  8080/tcp, 50052/tcp                            helixllm-coder
+11d2081e69ca  localhost/helixllm/llamacpp-router:cuda12.8-sm120  -m /models/Qwen2....  13 minutes ago  Up 13 minutes  0.0.0.0:18439->18439/tcp, 8080/tcp, 50052/tcp  helixllm_visiongen_visiongen_1
+--- nvidia-smi ---
+memory.total [MiB], memory.used [MiB], memory.free [MiB]
+32607 MiB, 24097 MiB, 8024 MiB
+=== AFTER teardown ===
+--- podman ps ---
+CONTAINER ID  IMAGE                                              COMMAND               CREATED       STATUS         PORTS                NAMES
+1484eac80acb  localhost/helixllm/llamacpp-router:cuda12.8-sm120  -m /models/Qwen3-...  40 hours ago  Up 17 minutes  8080/tcp, 50052/tcp  helixllm-coder
+--- podman ps -a (confirm visiongen removed, coder untouched) ---
+CONTAINER ID  IMAGE                                              COMMAND               CREATED       STATUS                   PORTS                                                                            NAMES
+8df438e908b3  localhost/helixcode-caddy-brotli:2                 caddy run --confi...  4 days ago    Exited (0) 4 days ago    0.0.0.0:52080->80/tcp, 0.0.0.0:52443->443/tcp, 0.0.0.0:52443->443/udp, 2019/tcp  deploy_caddy_1
+fc7e996657df  docker.io/library/postgres:16                      postgres              3 days ago    Exited (0) 3 days ago    5432/tcp                                                                         helix_sonarqube_db
+2284744b9e7e  docker.io/library/sonarqube:community                                    3 days ago    Exited (130) 3 days ago  0.0.0.0:9000->9000/tcp                                                           helix_sonarqube
+1484eac80acb  localhost/helixllm/llamacpp-router:cuda12.8-sm120  -m /models/Qwen3-...  40 hours ago  Up 17 minutes            8080/tcp, 50052/tcp                                                              helixllm-coder
+--- nvidia-smi ---
+memory.total [MiB], memory.used [MiB], memory.free [MiB]
+32607 MiB, 19430 MiB, 12691 MiB
+--- coder health check ---
+--- coder check via :18434 (per design docs) ---
+{"models":[{"name":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","model":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","modified_at":"","size":"","digest":"","type":"model","description":"","tags":[""],"capabilities":["completion"],"parameters":"","details":{"parent_model":"","format":"gguf","family":"","families":[""],"parameter_size":"","quantization_level":""}}],"object":"list","data":[{"id":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","aliases":["/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"],"tags":[],"object":"model","created":1783491535,"owned_by":"llamacpp","meta":{"vocab_type":2,"n_vocab":151936,"n_ctx":3072,"n_ctx_train":262144,"n_embd":2048,"n_params":30532122624,"size":18550716416,"ftype":"Q4_K - Medium"}}]}
