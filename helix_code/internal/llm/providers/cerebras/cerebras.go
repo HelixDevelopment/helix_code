@@ -218,7 +218,7 @@ func (cb *Provider) Close() error {
 }
 
 // GetContextWindow returns the model's context window size in tokens.
-// Default: 128_000 — Cerebras-hosted Llama 3.1 70B and 405B both
+// Default: 128_000 — Cerebras-hosted models (gemma-4-31b, gpt-oss-120b, zai-glm-4.7) all
 // advertise 128k context; safe conservative value.
 func (cb *Provider) GetContextWindow() int {
 	return 128_000
@@ -240,25 +240,25 @@ func (cb *Provider) initializeModels() {
 	// by Qwen and Copilot.
 	cb.models = []llm.ModelInfo{
 		{
-			Name:        "llama3.1-8b",
+			Name:        "gemma-4-31b",
 			Provider:    llm.ProviderTypeCerebras,
 			ContextSize: 128000,
 			MaxTokens:   8192,
-			Description: "Cerebras Llama 3.1 8B - Fast inference-optimised model",
+			Description: "Google Gemma 4 31B on Cerebras CS-3 -- frontier-class reasoning and instruction following",
 		},
 		{
-			Name:        "llama3.1-70b",
+			Name:        "gpt-oss-120b",
 			Provider:    llm.ProviderTypeCerebras,
 			ContextSize: 128000,
 			MaxTokens:   8192,
-			Description: "Cerebras Llama 3.1 70B - Balanced quality and speed",
+			Description: "Cerebras GPT-OSS 120B -- open-source GPT-class model trained on CS-3",
 		},
 		{
-			Name:        "llama-3.3-70b",
+			Name:        "zai-glm-4.7",
 			Provider:    llm.ProviderTypeCerebras,
 			ContextSize: 128000,
 			MaxTokens:   8192,
-			Description: "Cerebras Llama 3.3 70B - Latest Meta model on Cerebras CS-3",
+			Description: "Zhipu AI GLM 4.7 on Cerebras CS-3 -- bilingual Chinese-English model",
 		},
 	}
 
