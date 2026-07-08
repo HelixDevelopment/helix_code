@@ -2,6 +2,6 @@
 pg-helixmemory + tei-helixmemory containers (expect none):
   (none — removed)
 coder still running (untouched):
-helixllm-coder Up 24 minutes
+helixllm-coder Up 35 minutes
 ports 18450/18451 freed:
   both free
