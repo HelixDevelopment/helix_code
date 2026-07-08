@@ -2,12 +2,10 @@
   "mcpServers": {
     "codegraph": {
       "type": "stdio",
-      "command": "/Users/milosvasic/.local/bin/codegraph",
+      "command": "codegraph",
       "args": [
         "serve",
-        "--mcp",
-        "--path",
-        "/Volumes/T7/Projects/helix_code"
+        "--mcp"
       ]
     },
     "media-validator": {
