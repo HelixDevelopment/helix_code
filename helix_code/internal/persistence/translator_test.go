@@ -182,10 +182,10 @@ func TestNewStore_BadBasePathGoesThroughTranslator(t *testing.T) {
 	}
 }
 
-// TestRawText_EmittedByDefault asserts that with no translator wired
-// (NoopTranslator), Validate emits the bundle message IDs verbatim
-// — confirming the migration didn't accidentally pass an empty string
-// or a different literal.
+// TestRawText_EmittedByDefault asserts that the embedded i18n bundle
+// resolves the error message to human-readable prose (§11.4.120 reconcile —
+// HXC-097/CONST-046: init() loads active.en.yaml; SetTranslator(nil)
+// now restores resolved prose, not the raw message-ID echo).
 func TestRawText_EmittedByDefault(t *testing.T) {
 	resetTranslator(t)
 
@@ -193,7 +193,11 @@ func TestRawText_EmittedByDefault(t *testing.T) {
 	if err == nil {
 		t.Fatal("Validate(unknown format) returned nil — want error")
 	}
-	if !strings.Contains(err.Error(), "internal_persistence_serializer_unknown_format") {
-		t.Fatalf("err = %q, want contain raw ID (Noop echo)", err.Error())
-	}
+		// assert bundle resolved (prose, not raw ID echo) (§11.4.120 reconcile — HXC-097 bundle in init())
+		if strings.Contains(err.Error(), "internal_persistence_serializer_unknown_format") {
+			t.Fatalf("err = %q, expected resolved prose but got raw message ID — translator bypassed bundle (§11.4.120)", err.Error())
+		}
+		if !strings.Contains(err.Error(), "unknown format") {
+			t.Fatalf("err = %q, want 'unknown format' in resolved prose", err.Error())
+		}
 }
