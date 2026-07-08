@@ -98,8 +98,10 @@
 //
 // The server includes several middleware components:
 //
-//	// CORS middleware for cross-origin requests
-//	server.CORSMiddleware()
+//	// CORS middleware for cross-origin requests — takes an explicit
+//	// origin allowlist (cfg.Auth.CORSAllowedOrigins /
+//	// HELIX_CORS_ALLOWED_ORIGINS); never a wildcard + credentials combo
+//	server.CORSMiddleware(allowedOrigins)
 //
 //	// Security headers middleware
 //	server.SecurityMiddleware()

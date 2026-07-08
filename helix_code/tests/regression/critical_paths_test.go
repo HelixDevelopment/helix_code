@@ -104,7 +104,7 @@ func TestCriticalPath_ServerStartupAndInitialization(t *testing.T) {
 		require.NotNil(t, srv, "Server should be created")
 
 		// Middleware should be properly configured
-		corsMiddleware := server.CORSMiddleware()
+		corsMiddleware := server.CORSMiddleware(nil)
 		assert.NotNil(t, corsMiddleware, "CORS middleware should be created")
 
 		securityMiddleware := server.SecurityMiddleware()
@@ -703,7 +703,7 @@ func TestCriticalPath_APIEndpointAvailability(t *testing.T) {
 
 	// Get the router for testing
 	router := gin.New()
-	router.Use(server.CORSMiddleware())
+	router.Use(server.CORSMiddleware(nil))
 	router.Use(server.SecurityMiddleware())
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -921,7 +921,7 @@ func TestCriticalPath_FullServerFlow(t *testing.T) {
 		// Create test router
 		router := gin.New()
 		router.Use(gin.Recovery())
-		router.Use(server.CORSMiddleware())
+		router.Use(server.CORSMiddleware(nil))
 		router.Use(server.SecurityMiddleware())
 
 		// Add health endpoint

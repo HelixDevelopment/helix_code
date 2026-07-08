@@ -72,7 +72,13 @@ func TestNewServer_ReleaseMode(t *testing.T) {
 }
 
 func TestCORSMiddleware(t *testing.T) {
-	middleware := CORSMiddleware()
+	// §11.4.135 note: CORSMiddleware now takes an explicit allowlist (fix
+	// for the confirmed wildcard-origin+credentials CORS spec violation —
+	// see cors_security_test.go). "http://localhost:3000" is allowlisted
+	// here so this test still exercises the allowed-origin path; the
+	// forbidden-combo + disallowed-origin + Vary:Origin assertions live in
+	// cors_security_test.go as the permanent regression guard.
+	middleware := CORSMiddleware([]string{"http://localhost:3000"})
 
 	assert.NotNil(t, middleware)
 
@@ -92,7 +98,10 @@ func TestCORSMiddleware(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 204, w.Code)
-	assert.Equal(t, "*", w.Header().Get("Access-Control-Allow-Origin"))
+	// Allowlisted origin is echoed back verbatim — never a wildcard.
+	assert.Equal(t, "http://localhost:3000", w.Header().Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "Origin", w.Header().Get("Vary"))
+	assert.Equal(t, "true", w.Header().Get("Access-Control-Allow-Credentials"))
 	assert.Equal(t, "POST, OPTIONS, GET, PUT, DELETE", w.Header().Get("Access-Control-Allow-Methods"))
 	assert.Equal(t, "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With", w.Header().Get("Access-Control-Allow-Headers"))
 }
@@ -227,7 +236,7 @@ func BenchmarkNewServer(b *testing.B) {
 }
 
 func BenchmarkCORSMiddleware(b *testing.B) {
-	middleware := CORSMiddleware()
+	middleware := CORSMiddleware([]string{"http://localhost:3000"})
 
 	router := gin.New()
 	router.Use(middleware)
