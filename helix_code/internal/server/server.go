@@ -83,8 +83,14 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 		authService = auth.NewAuthService(authConfig, authDB)
 	}
 
-	// Initialize MCP server
+	// Initialize MCP server. The upgrader's Origin allowlist defaults to
+	// same-origin/localhost/no-Origin-header (see mcp.newOriginChecker);
+	// extend it with any operator-configured extra origins
+	// (cfg.Auth.WSAllowedOrigins / HELIX_WS_ALLOWED_ORIGINS) — see
+	// docs/research/07.2026/05_mcp_acp_protocols/WS_ENDPOINT_AUTH_DESIGN.md
+	// §6.1.3/§8 Option B.
 	mcpServer := mcp.NewMCPServer()
+	mcpServer.SetAllowedOrigins(strings.Split(cfg.Auth.WSAllowedOrigins, ","))
 
 	// Initialize notification engine
 	notificationEngine := notification.NewNotificationEngine()
@@ -427,7 +433,24 @@ func (s *Server) setupRoutes() {
 	s.router.POST("/v1/messages", s.wireFacadeAuthMiddleware(), s.anthropicMessages)
 
 	// WebSocket routes
-	s.router.GET("/ws", s.handleWebSocket)
+	//
+	// SECURITY (confirmed unauthenticated-access finding, closed): this
+	// route was registered with ZERO middleware — any client, from any
+	// origin, with no credential, could complete the MCP WS handshake.
+	// Fixed per Option B of
+	// docs/research/07.2026/05_mcp_acp_protocols/WS_ENDPOINT_AUTH_DESIGN.md
+	// (§8): a pre-upgrade Bearer/x-api-key gate (s.wsAuthMiddleware(),
+	// reusing cfg.Auth.WireFacadeAPIKeys — the same credential class as
+	// wireFacadeAuthMiddleware) plus the CheckOrigin allowlist fix in
+	// internal/mcp/server.go. Option B was chosen over the ticket-pattern
+	// Option A because a repo-wide grep confirmed no browser/JS client
+	// (web/frontend/**, applications/**, cmd/**) opens `/ws` today — see
+	// this fix's commit message for the STEP-0 fact-check evidence — so
+	// the non-browser-lane fix alone is a complete closure for the
+	// currently-shipped surface. §11.4.115 regression guard:
+	// ws_auth_test.go RED-reproduces the pre-fix "unauthenticated -> 101"
+	// defect and GREEN-confirms the fix.
+	s.router.GET("/ws", s.wsAuthMiddleware(), s.handleWebSocket)
 
 	// Static file serving for web interface
 	s.router.Static("/static", "./web/frontend/static")
@@ -604,6 +627,83 @@ func (s *Server) wireFacadeAuthMiddleware() gin.HandlerFunc {
 		for _, configured := range strings.Split(configuredKeys, ",") {
 			if strings.TrimSpace(configured) == token {
 				c.Set("wire_facade_api_key", token)
+				c.Next()
+				return
+			}
+		}
+
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": gin.H{
+				"message": "invalid API key",
+				"type":    "authentication_error",
+			},
+		})
+		c.Abort()
+	}
+}
+
+// wsAuthMiddleware gates the /ws MCP WebSocket route (non-browser lane —
+// Option B of
+// docs/research/07.2026/05_mcp_acp_protocols/WS_ENDPOINT_AUTH_DESIGN.md §6/§8)
+// with the SAME Bearer/x-api-key check as wireFacadeAuthMiddleware, reusing
+// cfg.Auth.WireFacadeAPIKeys as the credential source (§11.4.74
+// extend-don't-reimplement: extends the existing wire-facade credential
+// class rather than inventing a new standing secret). Runs BEFORE
+// websocket.Upgrader.Upgrade(), so an unauthenticated caller never
+// completes the WS handshake, gets a plain HTTP 401, and never spawns an
+// MCP session goroutine — closing the design doc's §3.1
+// resource-exhaustion/DoS finding as a byproduct (no auth, no upgrade, no
+// goroutine, no session-map entry).
+//
+// Fail-closed, identical semantics to wireFacadeAuthMiddleware: an empty
+// cfg.Auth.WireFacadeAPIKeys (the zero-value default in every shipped
+// config) rejects EVERY request, even one carrying a bearer token — an
+// operator must explicitly configure at least one key
+// (HELIX_WIRE_FACADE_API_KEYS or auth.wire_facade_api_keys) before /ws
+// accepts any connection.
+//
+// Non-browser MCP SDK / CLI clients (Go/Python/Node MCP client libraries,
+// curl-style test harnesses, gorilla/websocket dialers) CAN set arbitrary
+// headers on the pre-upgrade HTTP request, so this check works for them
+// unmodified — unlike a genuine browser `WebSocket()` client, which cannot
+// set Authorization/x-api-key on the handshake at all (see the design doc
+// §4). STEP-0 fact-check (repo-wide grep of web/frontend/**,
+// applications/**, cmd/** for `new WebSocket`/`ws://`/`wss://`/`/ws`)
+// confirmed no browser/JS client opens `/ws` in this codebase today, so
+// this non-browser-lane fix alone is a complete closure of the confirmed
+// finding for the currently-shipped surface.
+func (s *Server) wsAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		configuredKeys := ""
+		if s.config != nil {
+			configuredKeys = s.config.Auth.WireFacadeAPIKeys
+		}
+
+		token := ""
+		if authHeader := c.GetHeader("Authorization"); authHeader != "" {
+			const bearerPrefix = "Bearer "
+			if len(authHeader) > len(bearerPrefix) && authHeader[:len(bearerPrefix)] == bearerPrefix {
+				token = authHeader[len(bearerPrefix):]
+			}
+		}
+		if token == "" {
+			token = c.GetHeader("x-api-key")
+		}
+
+		if token == "" || configuredKeys == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": gin.H{
+					"message": "missing or invalid API key: provide 'Authorization: Bearer <key>' or 'x-api-key: <key>' before opening the /ws connection",
+					"type":    "authentication_error",
+				},
+			})
+			c.Abort()
+			return
+		}
+
+		for _, configured := range strings.Split(configuredKeys, ",") {
+			if strings.TrimSpace(configured) == token {
+				c.Set("ws_api_key", token)
 				c.Next()
 				return
 			}

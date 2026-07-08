@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -97,18 +99,82 @@ func unmarshalParams(params interface{}, dst interface{}) error {
 	return json.Unmarshal(raw, dst)
 }
 
-// NewMCPServer creates a new MCP server
+// newOriginChecker builds a websocket.Upgrader.CheckOrigin function that
+// validates the handshake request's Origin header against an explicit
+// allowlist, per OWASP's WebSocket Security Cheat Sheet primary CSWSH
+// (Cross-Site WebSocket Hijacking) defense: "Use an allowlist, not a
+// denylist. Avoid wildcards or substring matching." (see the deep-research
+// citation in
+// docs/research/07.2026/05_mcp_acp_protocols/WS_ENDPOINT_AUTH_DESIGN.md §5.3).
+//
+// Requests with NO Origin header are allowed through: the Origin header is a
+// browser-only artefact of the Fetch/WebSocket spec — a malicious web page's
+// browser ALWAYS attaches it, so its absence identifies a non-browser client
+// (Go/Python/Node MCP SDKs, curl-style harnesses, gorilla/websocket dialers)
+// rather than a spoofing attempt; those clients are gated separately by
+// server.go's wsAuthMiddleware() Bearer/x-api-key check.
+//
+// Same-origin (Origin host == request Host) and localhost/127.0.0.1/::1
+// origins are always allowed. extraAllowed (operator-configured via
+// cfg.Auth.WSAllowedOrigins / HELIX_WS_ALLOWED_ORIGINS) extends the
+// allowlist for legitimate cross-origin browser deployments; anything not
+// covered is rejected — never a wildcard "return true".
+func newOriginChecker(extraAllowed []string) func(r *http.Request) bool {
+	return func(r *http.Request) bool {
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			return true
+		}
+
+		u, err := url.Parse(origin)
+		if err != nil {
+			return false
+		}
+
+		if strings.EqualFold(u.Host, r.Host) {
+			return true
+		}
+
+		switch strings.ToLower(u.Hostname()) {
+		case "localhost", "127.0.0.1", "::1":
+			return true
+		}
+
+		for _, allowed := range extraAllowed {
+			allowed = strings.TrimSpace(allowed)
+			if allowed != "" && strings.EqualFold(allowed, origin) {
+				return true
+			}
+		}
+
+		return false
+	}
+}
+
+// NewMCPServer creates a new MCP server. The WebSocket upgrader's Origin
+// allowlist defaults to same-origin/localhost/no-Origin-header only (see
+// newOriginChecker) — call SetAllowedOrigins to extend it with
+// operator-configured extra origins before the server starts accepting
+// connections.
 func NewMCPServer() *MCPServer {
 	return &MCPServer{
 		upgrader: websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-				// In production, you should validate the origin
-				return true
-			},
+			CheckOrigin: newOriginChecker(nil),
 		},
 		sessions: make(map[uuid.UUID]*MCPSession),
 		tools:    make(map[string]*Tool),
 	}
+}
+
+// SetAllowedOrigins overrides the WebSocket upgrader's Origin allowlist with
+// operator-configured extra origins (cfg.Auth.WSAllowedOrigins), layered on
+// top of the always-allowed same-origin/localhost/no-Origin-header defaults
+// baked into newOriginChecker. Intended to be called once, at construction
+// time, before the server starts accepting connections (server.New does
+// this immediately after mcp.NewMCPServer()); not safe for concurrent use
+// with an in-flight Upgrade() call.
+func (s *MCPServer) SetAllowedOrigins(extraAllowed []string) {
+	s.upgrader.CheckOrigin = newOriginChecker(extraAllowed)
 }
 
 // RegisterTool registers a new tool with the MCP server.

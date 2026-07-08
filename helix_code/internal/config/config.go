@@ -107,6 +107,25 @@ type AuthConfig struct {
 	// these routes drive real, paid LLM provider calls (CONST-035/BLUFF-001)
 	// and MUST NOT be reachable by an unauthenticated caller in production.
 	WireFacadeAPIKeys string `mapstructure:"wire_facade_api_keys"`
+
+	// WSAllowedOrigins extends the /ws MCP WebSocket upgrader's Origin
+	// allowlist (internal/mcp.NewMCPServer's CheckOrigin, set via
+	// MCPServer.SetAllowedOrigins in server.New) beyond the always-allowed
+	// same-origin / localhost / no-Origin-header (non-browser client)
+	// defaults baked into internal/mcp.newOriginChecker. Closes the
+	// confirmed CSWSH finding (Cross-Site WebSocket Hijacking, OWASP
+	// WebSocket Security Cheat Sheet) where CheckOrigin previously
+	// unconditionally returned true — see
+	// docs/research/07.2026/05_mcp_acp_protocols/WS_ENDPOINT_AUTH_DESIGN.md
+	// §6.1.3/§8 Option B.
+	//
+	// A comma-separated list of extra allowed Origin header VALUES (e.g.
+	// "https://app.example.com,https://admin.example.com"). Populate via
+	// the HELIX_WS_ALLOWED_ORIGINS env var (see setupEnvBindings) or an
+	// operator-owned config overlay. Empty (the zero-value default) means
+	// only the same-origin/localhost/no-Origin-header defaults apply —
+	// never a wildcard.
+	WSAllowedOrigins string `mapstructure:"ws_allowed_origins"`
 }
 
 // ServerConfig represents server configuration
@@ -333,6 +352,7 @@ func Load() (*Config, error) {
 	// Explicitly bind environment variables for critical settings
 	v.BindEnv("auth.jwt_secret", "HELIX_AUTH_JWT_SECRET")
 	v.BindEnv("auth.wire_facade_api_keys", "HELIX_WIRE_FACADE_API_KEYS")
+	v.BindEnv("auth.ws_allowed_origins", "HELIX_WS_ALLOWED_ORIGINS")
 	v.BindEnv("database.password", "HELIX_DATABASE_PASSWORD")
 	v.BindEnv("database.host", "HELIX_DATABASE_HOST")
 	v.BindEnv("database.port", "HELIX_DATABASE_PORT")
