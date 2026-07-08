@@ -1,0 +1,4 @@
+STEP: POST /api/v1/llm/generate with empty body {}
+EXPECT: 400 Bad Request — request-body validation catches empty body before handler
+BLUFF-PROOF: Gin's ShouldBindJSON fails, returning 400. Tests validation-layer guarding.
+EVIDENCE: Asserted by HTTPExecutor — real status code check.

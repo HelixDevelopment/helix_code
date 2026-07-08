@@ -1,0 +1,6 @@
+STEP: POST /api/v1/llm/generate with Authorization: Bearer definitely_not_a_real_jwt
+BODY: {"provider":"helixllm","model":"llama3.2","prompt":"Say hello in one short sentence"}
+EXPECT: 401 Unauthorized — VerifyJWTWithDB rejects invalid/expired JWT
+BLUFF-PROOF: Only a genuine JWT verified against the DB should pass.
+  A fake token with bogus signature is rejected at the JWT-verify layer.
+EVIDENCE: Asserted by HTTPExecutor — real status code check.

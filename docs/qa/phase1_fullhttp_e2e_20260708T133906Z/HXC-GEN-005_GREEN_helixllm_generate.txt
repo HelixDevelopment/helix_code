@@ -1,0 +1,16 @@
+STEP: POST /api/v1/llm/generate with valid auth + provider=helixllm
+BODY: {"provider":"helixllm","model":"llama3.2","prompt":"Reply with exactly one word: hello"}
+EXPECT: 200 OK + real LLM response content from coder on :18434
+PIPELINE:
+  1. authMiddleware passes valid JWT
+  2. generateLLM handler parses request
+  3. resolveLLMProvider("helixllm", "llama3.2") matches "helixllm" before llm.Select
+  4. resolveHelixLLMLocalProvider constructs OpenAICompatibleProvider
+  5. OpenAICompatibleProvider POSTs to HELIX_LLM_LOCAL_OPENAI_ENDPOINT/v1/chat/completions
+  6. llama.cpp coder on :18434 returns real LLM response
+  7. response includes content, provider, model, usage, finish_reason
+BLUFF-PROOF: If the provider simulation were re-introduced (BLUFF-001),
+  or if authMiddleware were removed, or if the coder were unreachable,
+  this test would FAIL with wrong status/missing content.
+EVIDENCE: Asserted by HTTPExecutor — real status code + $.content JSON path.
+  Self-validated analyzer script confirms golden-good/golden-bad discrimination.
