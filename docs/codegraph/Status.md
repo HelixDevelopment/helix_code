@@ -1,15 +1,15 @@
 # CodeGraph — Status
 
-**Revision:** 2
-**Last modified:** 2026-07-07T10:40:00Z
+**Revision:** 3
+**Last modified:** 2026-07-08T18:56:00Z
 
 | Field | Value |
 |---|---|
-| Revision | 2 |
+| Revision | 3 |
 | Created | 2026-05-28 |
-| Last modified | 2026-07-07T10:40:00Z |
+| Last modified | 2026-07-08T18:56:00Z |
 | Status | active |
-| Status summary | Append-only ledger of every CodeGraph-related event for HelixCode (config changes, index regenerations, sync runs, validation probes). Per §11.4.78 (CodeGraph parent), §11.4.79 (own-org submodule inclusion), §11.4.80 (regular-update + sync automation), §11.4.45 / §11.4.56 (Status-doc shape). The weekly update + sync automation is INHERITED BY REFERENCE from the constitution submodule — invoke `constitution/scripts/codegraph_update.sh` and `constitution/scripts/codegraph_sync.sh` (never copied). Latest: 2026-07-07 Phase-4 reindex on codegraph 1.2.0 — sync GREEN, own-org symbol resolution PROVEN (MCP+CLI); third-party stale-entry purge (cli_agents) blocked on host process saturation. |
+| Status summary | Append-only ledger of every CodeGraph-related event for HelixCode (config changes, index regenerations, sync runs, validation probes). Per §11.4.78 (CodeGraph parent), §11.4.79 (own-org submodule inclusion), §11.4.80 (regular-update + sync automation), §11.4.45 / §11.4.56 (Status-doc shape). The weekly update + sync automation is INHERITED BY REFERENCE from the constitution submodule — invoke `constitution/scripts/codegraph_update.sh` and `constitution/scripts/codegraph_sync.sh` (never copied). Latest: 2026-07-08 codegraph 1.2.0 → 1.3.0 update — npm updated to 1.3.0, PATH symlink reconciled, binary version confirmed; HXC-041 (third-party stale-entry purge) still blocked on host process saturation. |
 | Issues | HXC-041 (third-party cli_agents stale-index entries not purged — full `codegraph index` blocked on host process saturation) |
 | Issues summary | HXC-041: live index still holds 36,089 cli_agents + 519 cli_agents_resources + 9 github_pages_website third-party files (config.json exclude is INERT in codegraph 1.2.0 — exclusion is `.gitignore`-driven); purge needs a from-scratch `codegraph index` which fork-failed on host at 4069/4096 user processes (§11.4.174 non-ours workloads). §11.4.10 credentials CLEAN (0 real .env/.pem/.key indexed). |
 | Fixed | HXC-017 (own-org submodule inclusion in index) |
@@ -157,3 +157,16 @@ Both via the `mcp__codegraph__codegraph_explore` MCP tool AND the `codegraph que
 **§11.4.10 credentials — CLEAN.** Live-DB audit: **0** indexed `.env` / `.pem` / `.key` files. (The `**/secrets/**` + `**/.env.*` glob would match some third-party *source* files like `.env.d.ts` and `secrets/` React dirs, but no real credential file types are indexed; the DB is gitignored per §11.4.77, so nothing reaches git.)
 
 **§11.4.79 third-party exclusion — PARTIAL FAIL → HXC-041 (BLOCKED on host resources, honest, no bluff).** `scripts/codegraph_validate.sh` reports 3 FAIL: live index still holds **36,089** `cli_agents` + **519** `cli_agents_resources` + **9** `github_pages_website` third-party files. Root cause (FACT, §11.4.102): (1) `.codegraph/config.json` `exclude` is **INERT** in codegraph 1.2.0 — exclusion is `.gitignore`-driven per §11.4.78, and these are *tracked* reference dirs not in `.gitignore`; (2) the `.codegraph/config.json` exclude list was recently expanded (git diff: added `tools/opensource/**`, `submodules/helix_agent/cli_agents/**`, `external/**`) but the from-scratch `codegraph index` to apply it was deferred — `codegraph sync` is incremental and does not purge now-excluded files (`indexed_at`: cli_agents 1783289990159 / Jul-5 vs helix_llm 1783420230150 / Jul-7). **Remediation blocked**: a from-scratch `codegraph index` fork-failed (`errno=11`, `runtime: failed to create new OS thread`) — host at **4069/4096** user processes (`ulimit -u`), saturation dominated by ~14+ non-ours 75-thread processes that §11.4.174 forbids killing. The aborted index fork-failed **before writing** — the 1.2.0 sync'd index is verified INTACT + still resolves own-org symbols (`docs/qa/phase4_codegraph_20260707/50_post_abort_integrity.txt`). HXC-041 is deferred to a low-host-load window; it does NOT affect own-org reachability (proven above). Evidence: `docs/qa/phase4_codegraph_20260707/{30_stale_index_rootcause,40_full_index_run,50_post_abort_integrity}.txt`.
+
+## 2026-07-08T18:56:00Z — codegraph 1.2.0 → 1.3.0 update (§11.4.80)
+
+- **Event**: weekly codegraph npm update check (per §11.4.80 cadence).
+- **npm registry**: `@colbymchenry/codegraph@1.3.0` (latest).
+- **Installed before**: `@colbymchenry/codegraph@1.2.0` at `/home/milos/.nvm/versions/node/v24.18.0/lib`.
+- **Update**: `npm install -g @colbymchenry/codegraph` → `changed 2 packages in 15s`. Exit 0.
+- **PATH symlink reconciled**: `/home/milos/.local/bin/codegraph` was pointing to `.codegraph/versions/v1.2.0/bin/codegraph` (stale 1.2.0 binary). Re-pointed to `/home/milos/.nvm/versions/node/v24.18.0/bin/codegraph` (npm-shim for 1.3.0).
+- **Binary version confirmed** (`codegraph --version`): **1.3.0**. ✅
+- **npm global confirmation** (`npm ls -g @colbymchenry/codegraph`): `1.3.0`. ✅
+- **Evidence**: `npm view` → 1.3.0, `npm ls -g` → 1.3.0, `codegraph --version` → 1.3.0.
+- **HXC-041 status**: unchanged — still blocked on host process saturation (`ulimit -u 4096`, ~4069 used).
+- **Root-scoped commit**: committed to this repo; push deferred per operator instruction.
