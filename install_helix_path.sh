@@ -278,6 +278,24 @@ verify_component() {
   local timeout_cmd=()
   if command -v timeout >/dev/null 2>&1; then
     timeout_cmd=(timeout "${probe_timeout_s}s")
+  elif command -v gtimeout >/dev/null 2>&1; then
+    # §11.4.81 cross-platform parity: macOS ships no GNU coreutils
+    # timeout(1) by default. Homebrew's coreutils package installs the
+    # same GNU timeout under the `g`-prefixed name (`gtimeout`) to avoid
+    # clobbering the BSD toolchain -- this is the documented, standard
+    # macOS equivalent (verified against Homebrew coreutils' own
+    # g-prefixing convention, 2026-07-08). Same bounding behavior as the
+    # Linux `timeout` branch above; nothing else changes.
+    timeout_cmd=(gtimeout "${probe_timeout_s}s")
+  else
+    # Honest degrade (§11.4.6 -- never silently proceed as if bounded):
+    # neither timeout nor gtimeout is present, so every probe below runs
+    # UNBOUNDED on this host. A mis-probed binary (see the HelixLLM
+    # bare-`version` case documented above) could hang this installer
+    # indefinitely. Tell the operator plainly instead of masking it.
+    log "WARNING: neither 'timeout' nor 'gtimeout' found on this host -- version/health"
+    log "         probes below run UNBOUNDED (no per-probe safety timeout). Install GNU"
+    log "         coreutils to get bounded, safe probes (macOS: 'brew install coreutils')."
   fi
 
   local probe_out=""
