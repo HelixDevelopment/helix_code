@@ -22,13 +22,14 @@
       "autoApprove": []
     },
     "open-design": {
-      "description": "OpenDesign MCP server for UI design system (§11.4.162). Requires OD daemon running on localhost:7456.",
+      "description": "OpenDesign MCP server for UI design system (§11.4.162). Bridges the agent to the OpenDesign daemon (nexu-io/open-design) on localhost:7456. Start the daemon first: `node apps/daemon/dist/cli.js --port 7456 --no-open` from a from-source checkout, or the desktop app / `docker compose up` in deploy/ (fixed :7456). od_generate_design additionally needs operator BYOK env (HELIX_OD_BYOK_* in .env, §11.4.10) — the read/list/create/get/lint tools do not.",
+      "type": "stdio",
       "command": "npx",
       "args": ["-y", "open-design-mcp"],
       "env": {
         "OD_DAEMON_URL": "http://localhost:7456"
       },
-      "disabled": true,
+      "disabled": false,
       "autoApprove": []
     }
   }
