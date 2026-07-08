@@ -39,6 +39,40 @@ go build -tags nogui -o bin/helix-desktop-cli ./applications/desktop
 - C compiler (gcc on Linux/Windows, clang on macOS)
 - OpenGL development libraries (for GUI mode only)
 
+**This is a build-host environment prerequisite, not a code defect (§11.4.77).**
+`applications/desktop`, `applications/aurora_os`, and `applications/harmony_os`
+all pull in Fyne's default desktop OpenGL driver, which transitively depends on
+`github.com/go-gl/gl` (needs `gl.pc` via `pkg-config`) and
+`github.com/go-gl/glfw` (needs `X11/Xlib.h` via CGO). On a build host missing
+the X11/OpenGL dev headers below, `go build ./applications/desktop/...` (and
+the `aurora_os`/`harmony_os` equivalents, which share the same Fyne GUI
+dependency) fails with:
+
+```
+# github.com/go-gl/gl/v2.1/gl
+# [pkg-config --cflags  -- gl gl]
+Package gl was not found in the pkg-config search path.
+Perhaps you should add the directory containing `gl.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'gl' found
+...
+# github.com/go-gl/glfw/v3.3/glfw
+In file included from ./glfw/src/internal.h:188,
+                 from ./glfw/src/context.c:30,
+                 from .../go-gl/glfw/v3.3/glfw@.../c_glfw.go:4:
+./glfw/src/x11_platform.h:33:10: fatal error: X11/Xlib.h: No such file or directory
+   33 | #include <X11/Xlib.h>
+      |          ^~~~~~~~~~~~
+compilation terminated.
+```
+
+Installing the per-distro dev packages below (§11.4.99 — verified against the
+current official Fyne prerequisites doc,
+[docs.fyne.io/started/quick](https://docs.fyne.io/started/quick/), fetched
+2026-07-08) resolves it. To sidestep the GUI toolchain entirely (e.g. on a
+headless build host), use `-tags nogui` — see "Headless/Server Environments"
+below.
+
 ### Linux Requirements
 
 #### Debian/Ubuntu
@@ -108,6 +142,46 @@ apk add \
     libxi-dev \
     mesa-dev
 ```
+
+#### ALT Linux
+
+**Verified on this host** (`ALT Workstation 11.1 "Prometheus"`, kernel
+`6.12.41-6.12-alt1`, `x86_64-alt-linux-gcc (GCC) 15.2.1`, `pkg-config 0.29.2`)
+via `apt-cache search`/`apt-cache show` against the live Sisyphus repo index —
+these package names exist on this host's configured repositories as of
+2026-07-08. `gcc` and `pkg-config` are already present on this host; only the
+X11/OpenGL `-devel` packages are missing.
+
+```bash
+# Essential build tools (gcc/pkg-config are usually already present)
+su -c 'apt-get install -y gcc gcc-c++ pkgconf'
+
+# GUI dependencies (required for GUI mode) — mirrors the RPM/Fedora naming
+# convention that ALT Linux (an independent RPM-based distro) follows
+su -c 'apt-get install -y \
+    libX11-devel \
+    libXcursor-devel \
+    libXrandr-devel \
+    libXinerama-devel \
+    libXi-devel \
+    libXxf86vm-devel \
+    libGL-devel \
+    libxkbcommon-devel'
+
+# Optional: for Wayland support
+su -c 'apt-get install -y wayland-devel'
+```
+
+**Honest boundary (UNCONFIRMED, §11.4.6):** package *existence* was verified
+live against this host's repo metadata (`apt-cache show`), but the exact
+`.pc` filename each package installs (e.g. whether `libGL-devel` ships
+`gl.pc` under that literal name, as Fedora's `mesa-libGL-devel` does) was
+**not** independently confirmed by actually installing the packages and
+re-running the build in this session — that step still needs to be run by
+whoever installs these packages, to close the loop per §11.4.108
+(source→artifact→runtime→user-visible). If `pkg-config --cflags gl` still
+fails to find `gl.pc` after installing `libGL-devel`, check
+`rpm -ql libGL-devel | grep '\.pc$'` for the actual provided `.pc` name/path.
 
 ### macOS Requirements
 
