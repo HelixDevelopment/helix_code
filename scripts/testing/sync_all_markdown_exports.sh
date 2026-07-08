@@ -1,14 +1,29 @@
 #!/usr/bin/env bash
 # scripts/testing/sync_all_markdown_exports.sh
 # §11.4.65 / CONST-066 — canonical markdown→{.html,.pdf} sibling exporter.
+# §11.4.168 — Mermaid-aware: diagrams render as IMAGES, never raw source text.
 #
 # Every governed/working doc under docs/**/*.md SHALL ship synchronized
 # .html + .pdf siblings. This helper renders those siblings from the .md
 # source with a single, depth-independent pipeline:
 #
+#   mmdc (mermaid-cli, OPTIONAL) : any ```mermaid fence is rendered to a PNG
+#             and swapped for an image reference BEFORE pandoc ever sees the
+#             doc — this is what keeps raw `flowchart TD` / `sequenceDiagram`
+#             / `gantt` / ... source text out of the shipped HTML/PDF
+#             (§11.4.168). Applied PER-DIAGRAM: one bad fence never blocks
+#             the rest of the doc — a per-block mmdc failure falls back to
+#             embedding that single block's raw source with an honest
+#             §11.4.6 WARN on stderr, never a silent or hook-breaking
+#             failure. Docs with no ```mermaid fence, or a host with mmdc
+#             absent, take the pre-existing byte-identical pandoc path — this
+#             degrades gracefully and NEVER hard-fails a commit.
 #   pandoc  : .md → self-contained .html (CSS embedded inline via
 #             --embed-resources, so the HTML renders identically no matter
-#             how deeply nested the source doc is — no relative-CSS breakage).
+#             how deeply nested the source doc is — no relative-CSS breakage;
+#             --embed-resources also base64-inlines any Mermaid-rendered PNG
+#             referenced above, so the HTML stays a single self-contained
+#             file).
 #   weasyprint : that .html → .pdf  (timeout-bounded; warnings are benign).
 #
 # Idempotent: a sibling is only (re)rendered when missing or stale (source
@@ -27,8 +42,13 @@
 #       found, or a render failed.
 #
 # Dependencies: pandoc (mandatory), weasyprint (mandatory for .pdf), find.
+#   mmdc / @mermaid-js/mermaid-cli (OPTIONAL — only needed for docs that
+#   actually contain ```mermaid fences; its absence is a graceful, warned
+#   degrade per §11.4.6, never a fatal error).
 # Cross-references: §11.4.65 / CONST-066 / §11.4.75 (the pre-commit gate
-#   that consumes these siblings); scripts/git_hooks/pre-commit.
+#   that consumes these siblings); §11.4.168 (exported-doc content+textual+
+#   visual validation — the mandate this Mermaid-awareness satisfies);
+#   scripts/git_hooks/pre-commit.
 
 set -uo pipefail
 
@@ -58,6 +78,95 @@ done
 command -v pandoc >/dev/null 2>&1 || { echo "FATAL: pandoc not installed" >&2; exit 2; }
 HAVE_WEASY=1
 command -v weasyprint >/dev/null 2>&1 || HAVE_WEASY=0
+
+# §11.4.168 Mermaid-awareness. OPTIONAL dependency — its absence degrades
+# gracefully (raw Mermaid source ships, honestly warned) rather than
+# blocking the html/pdf pipeline or breaking the §11.4.75 commit hook.
+HAVE_MMDC=1
+command -v mmdc >/dev/null 2>&1 || HAVE_MMDC=0
+
+MERMAID_TMPROOT=""
+if [ "$HAVE_MMDC" -eq 1 ]; then
+  MERMAID_TMPROOT="$(mktemp -d "${TMPDIR:-/tmp}/sync_md_mermaid.XXXXXX")"
+  trap 'rm -rf "$MERMAID_TMPROOT"' EXIT
+fi
+
+# A doc "has Mermaid" if it contains a ```mermaid (or :::mermaid) fence.
+has_mermaid() {
+  # $1 = source.md
+  grep -qE '^[[:space:]]*(```+|:::)[[:space:]]*mermaid[[:space:]]*$' "$1" 2>/dev/null
+}
+
+# Render every ```mermaid fence in $1 to a standalone PNG and rewrite $2 with
+# each fence replaced by an image reference to that PNG (absolute path, so
+# pandoc's --embed-resources can base64-inline it regardless of cwd). A
+# per-block mmdc failure is NOT fatal: that one block's raw source is kept
+# (with an honest §11.4.6 WARN to stderr) while every other block in the
+# same doc still renders — one bad diagram never blocks the rest of the doc,
+# and never blocks the doc from getting SOME sibling at all.
+preprocess_mermaid() {
+  # $1 = source.md  $2 = output effective .md  $3 = per-doc image workdir
+  local src="$1" out="$2" workdir="$3"
+  mkdir -p "$workdir"
+  : > "$out"
+  local in_block=0 idx=0 block_file="" line
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [ "$in_block" -eq 0 ] \
+       && printf '%s\n' "$line" | grep -qE '^[[:space:]]*(```+|:::)[[:space:]]*mermaid[[:space:]]*$'; then
+      in_block=1
+      idx=$((idx + 1))
+      block_file="$workdir/block_${idx}.mmd"
+      : > "$block_file"
+      continue
+    fi
+    if [ "$in_block" -eq 1 ] \
+       && printf '%s\n' "$line" | grep -qE '^[[:space:]]*(```+|:::)[[:space:]]*$'; then
+      in_block=0
+      local png="$workdir/block_${idx}.png"
+      local mlog="$workdir/block_${idx}.mmdc.log"
+      if mmdc -i "$block_file" -o "$png" -b white >"$mlog" 2>&1 && [ -f "$png" ]; then
+        printf '\n![Mermaid diagram %d](%s)\n\n' "$idx" "$png" >> "$out"
+      else
+        echo "WARN §11.4.6/§11.4.168: mmdc failed to render Mermaid block #$idx in $src" \
+             "— embedding RAW SOURCE for this block only (log: $mlog)." >&2
+        printf '\n```mermaid\n' >> "$out"
+        cat "$block_file" >> "$out"
+        printf '```\n\n' >> "$out"
+      fi
+      continue
+    fi
+    if [ "$in_block" -eq 1 ]; then
+      printf '%s\n' "$line" >> "$block_file"
+      continue
+    fi
+    printf '%s\n' "$line" >> "$out"
+  done < "$src"
+}
+
+# Return (on stdout) the markdown path pandoc should actually read for $1:
+# the original file untouched (no Mermaid, or mmdc unavailable — the latter
+# case prints an honest §11.4.6 warning), or a Mermaid-preprocessed copy.
+effective_source() {
+  # $1 = source.md
+  local src="$1"
+  if ! has_mermaid "$src"; then
+    printf '%s' "$src"
+    return 0
+  fi
+  if [ "$HAVE_MMDC" -eq 0 ]; then
+    echo "WARN §11.4.6/§11.4.168: mmdc (mermaid-cli) not found on PATH — $src contains" \
+         "Mermaid diagram(s) that will export as RAW SOURCE TEXT (violates §11.4.168)." \
+         "Install: npm i -g @mermaid-js/mermaid-cli" >&2
+    printf '%s' "$src"
+    return 0
+  fi
+  local workdir="$MERMAID_TMPROOT/$(printf '%s' "$src" | tr '/' '_')"
+  local out="$workdir/effective.md"
+  if [ ! -f "$out" ]; then
+    preprocess_mermaid "$src" "$out" "$workdir"
+  fi
+  printf '%s' "$out"
+}
 
 # Collect the .md source set.
 declare -a SOURCES=()
@@ -104,14 +213,22 @@ for src in "${SOURCES[@]}"; do
 
   title="$(basename "$base")"
 
+  # §11.4.168: Mermaid-preprocessed only when needed and only computed once
+  # per doc, even though it may be consulted from both the html and the pdf
+  # (html-fallback) branches below.
+  effsrc="$src"
+  if [ "$need_html" -eq 1 ] || [ "$need_pdf" -eq 1 ]; then
+    effsrc="$(effective_source "$src")"
+  fi
+
   if [ "$need_html" -eq 1 ]; then
     # Primary render. If pandoc trips on a stray `---` it mistakes for a
     # YAML metadata block, retry with yaml_metadata_block disabled so the
     # `---` is treated as a literal horizontal rule (the doc is content,
     # not front-matter).
-    if pandoc "$src" -s --embed-resources --standalone \
+    if pandoc "$effsrc" -s --embed-resources --standalone \
          --metadata title="$title" --css "$CSS" -o "$html" 2>/dev/null \
-       || pandoc "$src" -f markdown-yaml_metadata_block -s --embed-resources \
+       || pandoc "$effsrc" -f markdown-yaml_metadata_block -s --embed-resources \
          --standalone --metadata title="$title" --css "$CSS" -o "$html" 2>/dev/null; then
       rendered=$((rendered+1))
     else
@@ -121,9 +238,9 @@ for src in "${SOURCES[@]}"; do
 
   if [ "$need_pdf" -eq 1 ] && [ "$HAVE_WEASY" -eq 1 ]; then
     # HTML must exist (render it if it was up-to-date but we still need pdf).
-    [ -f "$html" ] || pandoc "$src" -s --embed-resources --standalone \
+    [ -f "$html" ] || pandoc "$effsrc" -s --embed-resources --standalone \
          --metadata title="$title" --css "$CSS" -o "$html" 2>/dev/null \
-      || pandoc "$src" -f markdown-yaml_metadata_block -s --embed-resources \
+      || pandoc "$effsrc" -f markdown-yaml_metadata_block -s --embed-resources \
          --standalone --metadata title="$title" --css "$CSS" -o "$html" 2>/dev/null
     if timeout "$TIMEOUT_SECS" weasyprint "$html" "$pdf" >/dev/null 2>&1; then
       rendered=$((rendered+1))

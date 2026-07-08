@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HELIXLLM_CAPABILITIES_GUIDE</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HELIXLLM_CAPABILITIES_GUIDE</h1>
+</header>
+<h1 id="helixllm-capabilities-guide-operator-end-user-manual">HelixLLM
+Capabilities Guide — Operator / End-User Manual</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Scope</strong></td>
+<td>Every LLM/AI-serving capability landed under
+<code>feature/helixllm-full-extension</code> — what it does, its real
+port, a real copy-pasteable invocation, the model it runs, and its
+current runtime state.</td>
+</tr>
+<tr>
+<td><strong>Audience</strong></td>
+<td>Operators driving the HelixCode stack, CLI-agent integrators
+(HelixAgent, claude_toolkit, any OpenAI/Anthropic-compatible client),
+and anyone deciding which capability to boot next.</td>
+</tr>
+<tr>
+<td><strong>Track / branch</strong></td>
+<td><code>(T1/feature/helixllm-full-extension)</code></td>
+</tr>
+<tr>
+<td><strong>Grounding (§11.4.6 / §11.4.123)</strong></td>
+<td>Every port, endpoint, and example command below is copied from a
+captured, re-runnable evidence file or a source-verified design doc —
+never invented. Where the real invocation could not be determined from
+evidence, this guide says so explicitly and points at the evidence path
+instead of guessing.</td>
+</tr>
+<tr>
+<td><strong>Honest boundary</strong></td>
+<td>This is a snapshot of the
+<code>feature/helixllm-full-extension</code> branch as of the evidence
+dated 2026-07-06 → 2026-07-08 (see <code>## Sources</code>).
+Ports/behaviour may have moved since; re-run the cited reproduce command
+to re-confirm before relying on any figure here.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="architecture-at-a-glance">1. Architecture at a glance</h2>
+<figure>
+<img role="img" aria-label="Mermaid diagram 1" src="data:image/png;base64,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" alt="Mermaid diagram 1" />
+<figcaption aria-hidden="true">Mermaid diagram 1</figcaption>
+</figure>
+<p><strong>Reading the diagram:</strong> HelixCode’s own CLI agents,
+<code>claude_toolkit</code>-mediated CLI agents, and any generic
+OpenAI/Anthropic client all reach HelixLLM either directly (coder fleet,
+<code>:18434</code>) or through HelixAgent’s
+<code>helixllm.Provider</code> seam (which also drives Postgres session
+persistence and Redis caching). LLMsVerifier never talks model
+<em>content</em> — it only discovers and verifies capability metadata by
+querying each endpoint’s own <code>/v1/models</code> (CONST-036: no
+hardcoded model lists). The VRAM broker sits between HelixLLM and every
+non-resident (warm/burst) service, admitting each lease against a live
+<code>nvidia-smi</code>/NVML read — never a cached number.</p>
+<hr />
+<h2 id="quick-reference-table">2. Quick-reference table</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Capability</th>
+<th>Port</th>
+<th>State</th>
+<th>Model / engine</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Coder serving</td>
+<td><code>:18434</code></td>
+<td><strong>LIVE</strong> (always-on, resident)</td>
+<td>Qwen3-Coder-30B-A3B-Instruct-Q4_K_M (llama.cpp router)</td>
+<td><code>docs/qa/phase2_e2e_20260706/</code>,
+<code>submodules/helix_llm/docs/OPERATOR_GUIDE.md</code> §3</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Full Go gateway (OpenAI+Anthropic)</td>
+<td><code>:8443</code></td>
+<td><strong>Code-verified, not captured live-serving this
+session</strong></td>
+<td>Embedded llama.cpp brain (<code>Llama-3.1-70B-Instruct-Q4_K_M</code>
+default) or the resident coder when wired</td>
+<td><code>submodules/helix_llm/docs/API_CONTRACT.md</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Embeddings (TEI)</td>
+<td><code>:18435</code></td>
+<td><strong>On-demand boot</strong> (proven when running)</td>
+<td><code>BAAI/bge-small-en-v1.5</code>, dim 384 (fallback lane;
+<code>nomic-embed-text-v1.5</code> primary lane fails to boot on this
+TEI build)</td>
+<td><code>docs/qa/phase3_embeddings_20260706/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Vision VLM</td>
+<td><code>:18439</code></td>
+<td><strong>On-demand boot; currently STOPPED</strong></td>
+<td>Qwen2.5-VL-3B-Instruct-Q4_K_M + mmproj (llama.cpp multimodal)</td>
+<td><code>docs/qa/helixllm_vision_boot_20260707T215007Z/RESULTS.md</code>,
+<code>docs/qa/phase1_helixqa_vision_20260708T061809Z/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Translation (NLLB, primary)</td>
+<td><code>:18436</code></td>
+<td><strong>On-demand boot</strong> (proven when running)</td>
+<td>NLLB-200-distilled-600M via CTranslate2 (CPU)</td>
+<td><code>docs/qa/phase3_translation_nllb_20260707/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>5b</td>
+<td>Translation (LibreTranslate, fallback)</td>
+<td><code>:18436</code>*</td>
+<td><strong>On-demand boot</strong> (proven when running)</td>
+<td>LibreTranslate/Argos (CPU)</td>
+<td><code>docs/qa/phase3_translation_20260707/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Whisper STT</td>
+<td><code>:18437</code></td>
+<td><strong>On-demand boot</strong> (proven when running)</td>
+<td>faster-whisper (CTranslate2), <code>model=base</code>,
+<code>int8</code>, CPU</td>
+<td><code>docs/qa/phase3_whisper_stt_20260707/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Tesseract OCR</td>
+<td><code>:18438</code></td>
+<td><strong>On-demand boot</strong> (proven when running)</td>
+<td>Tesseract 5.3.0-2 (OEM 1 / LSTM), CPU</td>
+<td><code>docs/qa/phase3_tesseract_ocr_20260707/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>RAG (retrieval-augmented generation)</td>
+<td>own TEI <code>:18440</code> + coder <code>:18434</code></td>
+<td><strong>On-demand boot</strong> (proven pipeline)</td>
+<td><code>BAAI/bge-small-en-v1.5</code> embed + live coder generate</td>
+<td><code>docs/qa/phase3_rag_20260707/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>A2A (Google Agent2Agent)</td>
+<td><code>:18441</code></td>
+<td><strong>On-demand boot</strong> (proven when running)</td>
+<td>Server-side only; routes Tasks to the live coder</td>
+<td><code>docs/qa/phase3_a2a_20260707/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Network provider (LAN/VPN)</td>
+<td>same coder port, remote host</td>
+<td><strong>LIVE</strong> (env-var driven, no separate service)</td>
+<td>Same coder / gateway, reached over
+<code>HELIX_LLM_HOST</code>/<code>HELIX_LLM_PORT</code></td>
+<td><code>docs/qa/helixagent_network_provider_20260707/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>11</td>
+<td>VRAM broker</td>
+<td>n/a (in-process package)</td>
+<td><strong>CORE landed</strong> (<code>a12df57c</code>); no
+eviction/pause-warm-tier logic yet</td>
+<td><code>internal/vrambroker</code> —
+<code>Acquire</code>/<code>Release</code>/<code>Budget</code></td>
+<td><code>docs/research/07.2026/00_master/MASTER_IMPLEMENTATION_PLAN.md</code>
+§1.1; <code>submodules/helix_llm/docs/VRAM_BROKER.md</code>
+(design)</td>
+</tr>
+<tr>
+<td>12</td>
+<td>HelixMemory</td>
+<td>ephemeral Postgres+pgvector <code>:18450</code> + TEI
+<code>:18451</code> in the proof harness</td>
+<td><strong>Reference implementation PROVEN</strong>, not the literal
+mem0/Graphiti package</td>
+<td>pgvector cosine recall + live coder generate</td>
+<td><code>docs/qa/phase1_helixmemory_20260708T061824Z/RESULTS.md</code>,
+<code>docs/research/07.2026/04_embeddings_rag/HELIXMEMORY_PROVIDER.md</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td>Image generation</td>
+<td><code>:18442</code></td>
+<td><strong>SCAFFOLD-ONLY</strong> — broker-integrated, self-validated
+CLIPScore analyzer, RED-first; runtime proof pending</td>
+<td>ComfyUI + FLUX.1-schnell (flagship, burst) / stable-diffusion.cpp
+fallback (co-resident)</td>
+<td><code>docs/research/07.2026/00_master/IMAGE_GEN_PROVIDER.md</code>;
+<code>MASTER_IMPLEMENTATION_PLAN.md</code> §1.2</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Video generation</td>
+<td><code>:18443</code></td>
+<td><strong>SCAFFOLD-ONLY</strong> — same posture as image-gen; runtime
+proof pending</td>
+<td>WAN 2.2 / LTX-Video (design)</td>
+<td><code>MASTER_IMPLEMENTATION_PLAN.md</code> §1.2</td>
+</tr>
+<tr>
+<td>15</td>
+<td>OpenDesign (UI design system)</td>
+<td><code>:7456</code> (planned)</td>
+<td><strong>NOT YET INSTALLED</strong> — design-only, recommended next
+step</td>
+<td>n/a</td>
+<td><code>MASTER_IMPLEMENTATION_PLAN.md</code> §6.6</td>
+</tr>
+</tbody>
+</table>
+<p>* The NLLB-primary and LibreTranslate-fallback translation proofs
+both default to host port <code>18436</code> in their harnesses; per the
+evidence, <strong>do not run both proofs concurrently</strong>
+(<code>docs/qa/phase3_translation_nllb_20260707/RESULTS.md</code>
+“Evidence-integrity notes”, item 2).</p>
+<hr />
+<h2 id="coder-serving-18434-live">3. Coder serving — <code>:18434</code>
+— LIVE</h2>
+<p><strong>What it does.</strong> The always-on, resident inference
+fleet. Serves genuine code-completion output over an OpenAI-compatible
+HTTP surface via <code>llama-server</code> (llama.cpp), 8 concurrent
+slots with continuous batching, q8_0-quantized KV cache, 24k
+context.</p>
+<p><strong>Model:</strong>
+<code>Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf</code>,
+<code>-ngl 99</code> (fully GPU-offloaded on the RTX 5090).</p>
+<p><strong>State:</strong> LIVE, always resident, never evicted by the
+VRAM broker (<code>ClassCoder</code>). Measured resident VRAM ≈ 19.4
+GiB.</p>
+<p><strong>Real health check:</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:18434/health</span></code></pre></div>
+<p><strong>Real chat completion</strong> (this exact example was proven
+end-to-end and returned genuine code, not a stub —
+<code>submodules/helix_llm/docs/OPERATOR_GUIDE.md</code> §4):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> http://localhost:18434/v1/chat/completions <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;model&quot;: &quot;/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf&quot;,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;messages&quot;: [</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="st">      {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Write a Python function is_palindrome(s) that ignores case and non-alphanumerics.&quot;}</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="st">    ]</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="st">  }&#39;</span></span></code></pre></div>
+<p>Proven throughput: <strong>~220 tok/s single-stream</strong>;
+<strong>85–96 tok/s per stream at 8 concurrent agents</strong>
+(<code>docs/qa/phase2_e2e_20260706/RESULTS.md</code>,
+<code>submodules/helix_llm/docs/OPERATOR_GUIDE.md</code> §6).</p>
+<p><strong>The <code>/v1</code> base-URL gotcha (load-bearing).</strong>
+<code>llama-server</code>’s chat route is
+<code>POST /v1/chat/completions</code>. If your client library appends
+<code>/v1/chat/completions</code> to a configured base URL itself, the
+base URL MUST be <code>http://localhost:18434</code> —
+<strong>without</strong> a trailing <code>/v1</code>. Writing
+<code>http://localhost:18434/v1</code> as the base produces
+<code>/v1/v1/chat/completions</code> → <strong>HTTP 404</strong>.
+Confirmed both ways in
+<code>docs/qa/phase2_e2e_20260706/12_endpoint_finding.txt</code>.</p>
+<p><strong>HelixAgent integration (proven, RED→GREEN):</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/helix_agent</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">HELIX_LLM_LOCAL_OPENAI_ENDPOINT</span><span class="op">=</span>http://localhost:18434   <span class="co"># base, NO /v1</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>helixllm_e2e <span class="at">-run</span> TestE2E_HelixAgent_To_LiveHelixLLM <span class="at">-v</span> <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  ./internal/llm/providers/helixllm/</span></code></pre></div>
+<p>Real captured output:
+<code>func Add(a int, b int) int { return a + b }</code>,
+<code>tokens_used=53</code>, <code>elapsed=108ms</code>
+(<code>docs/qa/phase2_e2e_20260706/RESULTS.md</code>). Session
+persistence (Postgres <code>user_sessions</code> table) and cache
+persistence (Redis) were also proven against real infrastructure in the
+same run.</p>
+<hr />
+<h2 id="full-helixllm-go-gateway-8443-code-verified-not-captured-live-serving-this-session">4.
+Full HelixLLM Go gateway — <code>:8443</code> — code-verified, not
+captured live-serving this session</h2>
+<p><strong>What it does.</strong> A separate, standalone HelixLLM Go
+server (<code>cmd/helixllm/main.go</code>) fronting an
+<strong>embedded</strong> llama.cpp brain behind a TLS-mandatory, dual
+OpenAI + Anthropic gateway. This is a distinct binary from the raw coder
+fleet on <code>:18434</code> — the two are not the same process.</p>
+<p><strong>State:</strong> documented directly from source code
+(<code>submodules/helix_llm/docs/API_CONTRACT.md</code>, HEAD
+<code>e035599d</code>, <code>go build ./...</code> exits 0) —
+<strong>not</strong> exercised by a captured live-serving run in the
+evidence corpus this guide draws from. Treat every claim below as “the
+code says this,” not “this was watched running.”</p>
+<p><strong>Listen address:</strong> <code>https://0.0.0.0:8443</code>,
+TLS 1.3 minimum (mandatory — serving fails immediately if cert/key are
+empty), HTTP/3 (QUIC) + HTTP/2 on the same port.</p>
+<p><strong>Routes (verbatim from the contract,
+<code>API_CONTRACT.md</code> §2/§4/§5):</strong></p>
+<pre><code>POST /v1/chat/completions   (OpenAI-compatible, API-key auth)
+POST /v1/completions        (OpenAI-compatible, API-key auth)
+GET  /v1/models             (OpenAI-compatible, API-key auth — models sourced from the Brain, never hardcoded)
+POST /v1/embeddings         (OpenAI-compatible, API-key auth)
+POST /v1/messages           (Anthropic-compatible, API-key auth)
+GET  /internal/health       (public, no auth)
+GET  /ws                    (WebSocket, internal chat shape — NOT the OpenAI shape)</code></pre>
+<p><strong>Example request</strong> (derived from the
+<code>ChatCompletionRequest</code> struct —
+<code>pkg/api/openai.go:4-18</code>; not a captured live
+transcript):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="er">POST</span> <span class="er">/v1/chat/completions</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="er">Authorization:</span> <span class="er">Bearer</span> <span class="er">&lt;key&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="er">Content-Type:</span> <span class="er">application/json</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span><span class="dt">&quot;model&quot;</span><span class="fu">:</span><span class="st">&quot;llama-3.1-70b&quot;</span><span class="fu">,</span><span class="dt">&quot;messages&quot;</span><span class="fu">:</span><span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;role&quot;</span><span class="fu">:</span><span class="st">&quot;user&quot;</span><span class="fu">,</span><span class="dt">&quot;content&quot;</span><span class="fu">:</span><span class="st">&quot;What is 2+2?&quot;</span><span class="fu">}</span><span class="ot">]</span><span class="fu">,</span><span class="dt">&quot;stream&quot;</span><span class="fu">:</span><span class="kw">false</span><span class="fu">}</span></span></code></pre></div>
+<p><strong>Security finding carried over from the code review (do not
+expose <code>:8443</code> on an untrusted network without addressing
+this first):</strong> the API-key middleware was originally applied only
+to the gateway’s own <code>/v1</code> group; <code>/v1/agents/*</code>,
+<code>/v1/cache/stats</code>, all <code>/internal/*</code>,
+<code>/metrics</code>, and <code>/ws</code> were unauthenticated. A
+DZ-05 remediation wired the same middleware onto the
+agent/knowledge/control route groups (proven RED→GREEN,
+<code>docs/qa/dz05_endpoint_auth_20260707/</code>), but <code>/ws</code>
+remains open by explicit design decision (browser-native WebSocket
+clients cannot set an <code>Authorization</code> header) — an unresolved
+operator decision on the WS credential channel. See
+<code>API_CONTRACT.md</code> §2 footnotes for the full auth matrix.</p>
+<hr />
+<h2 id="embeddings-18435-on-demand-boot">5. Embeddings —
+<code>:18435</code> — on-demand boot</h2>
+<p><strong>What it does.</strong> A CPU-only embeddings service (no GPU)
+serving vector embeddings over the OpenAI-compatible
+<code>/v1/embeddings</code> route via HuggingFace
+Text-Embeddings-Inference (TEI).</p>
+<p><strong>Model:</strong> <code>BAAI/bge-small-en-v1.5</code>, dim 384.
+(The design’s primary lane, <code>nomic-ai/nomic-embed-text-v1.5</code>,
+fails to boot on this TEI build — <code>cpu-1.9</code> rejects its
+<code>config.json</code> with “duplicate field
+<code>max_position_embeddings</code>” — so the fallback
+<code>bge-small</code> lane is what actually ships; see honest
+substitution note below.)</p>
+<p><strong>State:</strong> proven when running; booted on-demand via the
+containers submodule, torn down single-owner (<code>§11.4.119</code>)
+when the proof finished. It is not resident by default.</p>
+<p><strong>Real invocation</strong> (the exact request the proof harness
+sends,
+<code>docs/qa/phase3_embeddings_20260706/harness/main.go</code>):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> http://localhost:18435/v1/embeddings <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;model&quot;:&quot;helix-embed&quot;,&quot;input&quot;:[&quot;The cat sat on the mat.&quot;,&quot;A feline rested on the rug.&quot;,&quot;Stock markets fell sharply today.&quot;]}&#39;</span></span></code></pre></div>
+<p>Real captured signature: <code>dim=384</code>, related-pair cosine
+<code>0.7509</code>, unrelated-pair cosine <code>0.3931</code>, margin
+<code>0.3578</code> (required ≥ 0.15) — real, deterministic,
+semantically-ordered embeddings, not zero vectors
+(<code>docs/qa/phase3_embeddings_20260706/RESULTS.md</code>).</p>
+<p><strong>Honest substitution note (§11.4.6):</strong> if you need the
+768-dim nomic-embed-text-v1.5 lane specifically, it does not currently
+boot on this TEI image — pin a TEI-parseable nomic revision or upgrade
+TEI first (tracked follow-up in the RESULTS.md).</p>
+<hr />
+<h2 id="vision-vlm-18439-on-demand-boot-currently-stopped">6. Vision
+(VLM) — <code>:18439</code> — on-demand boot, currently STOPPED</h2>
+<p><strong>What it does.</strong> Multimodal (image + text) chat
+completion over the same OpenAI-compatible
+<code>/v1/chat/completions</code> route the coder uses, via a llama.cpp
+multimodal server (GGUF weights + libmtmd mmproj projector).</p>
+<p><strong>Model:</strong>
+<code>Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf</code> +
+<code>mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf</code>. (A 7B/8B upgrade
+tier is a documented env-override path, not exercised in the cited
+evidence.)</p>
+<p><strong>State:</strong> on-demand, warm-tier co-resident with the
+coder (<code>ClassVLM</code> in the VRAM broker) — <strong>container
+currently STOPPED / torn down mid-session, no VRAM held</strong>.
+Boot/teardown is fully automated via the <code>visiongen-boot</code>
+tool through the containers submodule.</p>
+<p><strong>Boot it</strong> (real commands,
+<code>docs/qa/phase1_helixqa_vision_20260708T061809Z/RESULTS.md</code>):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/helix_llm</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./visiongen-boot</span> admit-check</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./visiongen-boot</span> boot compose.vision.yml helixllm_visiongen</span></code></pre></div>
+<p><strong>Real invocation</strong> (exact request shape captured in
+<code>docs/qa/helixllm_vision_boot_20260707T215007Z/inference_request.json</code>
+— base64 image data URI, OpenAI-compatible multimodal content
+parts):</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> http://localhost:18439/v1/chat/completions <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;model&quot;: &quot;vlm&quot;,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;messages&quot;: [{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="st">      &quot;role&quot;: &quot;user&quot;,</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="st">      &quot;content&quot;: [</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="st">        {&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: &quot;Describe this image in one sentence.&quot;},</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="st">        {&quot;type&quot;: &quot;image_url&quot;, &quot;image_url&quot;: {&quot;url&quot;: &quot;data:image/png;base64,&lt;BASE64_PNG_HERE&gt;&quot;}}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="st">      ]</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="st">    }],</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;max_tokens&quot;: 200,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;temperature&quot;: 0.2</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="st">  }&#39;</span></span></code></pre></div>
+<p>Real captured responses (two separate runs of the SAME test image —
+different wording each time, proving genuine live sampling, not a cached
+string): <em>“A red square is displayed on a black background.”</em> /
+<em>“The image shows a red square on a black background.”</em> A
+HelixQA-driven ground-truth bank
+(<code>submodules/helix_qa/banks/helixllm_vision.yaml</code>)
+additionally confirmed real understanding tasks: counting (“3” blue
+circles), OCR-read (“HELIX”), and spatial reasoning (“left”) — all
+against the live 3B model, all self-validated with a
+golden-good/golden-bad pair
+(<code>docs/qa/phase1_helixqa_vision_20260708T061809Z/RESULTS.md</code>).</p>
+<p><strong>Tear it down:</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./visiongen-boot</span> down compose.vision.yml helixllm_visiongen</span></code></pre></div>
+<p><strong>On-demand boot / VRAM budget rule (§11.4.119 single-owner,
+master plan §3):</strong> vision’s admission is gated on a LIVE
+<code>nvidia-smi</code>/<code>Budget().free</code> read before every
+boot — never a cached number. At the time of the cited evidence, free
+VRAM after the coder alone was ≈12.4–12.7 GiB; vision (≈5 GiB
+placeholder / ≈4.1 GiB measured peak) fits comfortably. Vision
+(<code>ClassVLM</code>) and a hypothetical 2nd coder lane
+(<code>ClassAgent</code>) are independent warm-tier admissions;
+<code>ClassImage</code>/<code>ClassVideo</code> burst classes are
+mutually exclusive with each other and may require pausing the warm tier
+— see §11 below.</p>
+<hr />
+<h2 id="translation-18436-on-demand-boot-two-proven-lanes">7.
+Translation — <code>:18436</code> — on-demand boot (two proven
+lanes)</h2>
+<p><strong>What it does.</strong> Machine translation over a thin
+bespoke HTTP shim,
+<code>POST /translate {&quot;q&quot;,&quot;source&quot;,&quot;target&quot;} -&gt; {&quot;translatedText&quot;}</code>.</p>
+<p><strong>Two proven lanes</strong> (do not run both on the same port
+concurrently — see the quick-reference table footnote):</p>
+<ul>
+<li><strong>Primary: NLLB-200-distilled-600M via CTranslate2
+(CPU)</strong> — the design’s documented default. Language codes are
+FLORES-200 format (<code>eng_Latn</code>, <code>deu_Latn</code>,
+<code>fra_Latn</code>).</li>
+<li><strong>Fallback: LibreTranslate/Argos (CPU)</strong> —
+already-shipped fallback lane, proven independently.</li>
+</ul>
+<p><strong>Real invocation (NLLB primary lane):</strong></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> http://localhost:18436/translate <span class="dt">\</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;q&quot;:&quot;The house is blue.&quot;,&quot;source&quot;:&quot;eng_Latn&quot;,&quot;target&quot;:&quot;deu_Latn&quot;}&#39;</span></span></code></pre></div>
+<p>Real captured output: <code>&quot;Das Haus ist blau.&quot;</code>
+(deterministic — byte-identical across two identical requests,
+<code>docs/qa/phase3_translation_nllb_20260707/RESULTS.md</code>). A
+second pair, English→French: <em>“The cat sleeps.”</em> → <em>“Le chat
+dort.”</em></p>
+<p><strong>Honest license note (§11.4.6):</strong> NLLB-200 weights are
+CC-BY-NC-4.0 (non-commercial) — unresolved, flagged in the design doc as
+Open Question Q5.</p>
+<p><strong>Boot/teardown</strong> goes through the containers submodule
+orchestrator, rootless podman, no GPU device anywhere in the compose
+spec
+(<code>docs/qa/phase3_translation_nllb_20260707/harness/compose.phase3translatenllb.yml</code>);
+reproduce via
+<code>cd docs/qa/phase3_translation_nllb_20260707/harness &amp;&amp; ./run_proof.sh</code>.</p>
+<hr />
+<h2 id="whisper-stt-18437-on-demand-boot">8. Whisper STT —
+<code>:18437</code> — on-demand boot</h2>
+<p><strong>What it does.</strong> Speech-to-text transcription over
+<code>POST /v1/audio/transcriptions</code>.</p>
+<p><strong>Model / engine:</strong> faster-whisper (CTranslate2),
+<code>model=base</code>, <code>device=cpu</code>,
+<code>compute_type=int8</code>, with a Silero-VAD +
+<code>no_speech_prob≥0.6</code> silence-hallucination guard.</p>
+<p><strong>State:</strong> proven when running, on-demand boot via the
+containers submodule (<code>--build</code> from
+<code>submodules/helix_llm/container/Containerfile.whisper</code>), no
+GPU.</p>
+<p><strong>Real invocation</strong> (the harness posts a real
+synthesized WAV file; the shape is the standard OpenAI Whisper multipart
+form):</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> http://localhost:18437/v1/audio/transcriptions <span class="dt">\</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-F</span> file=@fox.wav <span class="dt">\</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-F</span> model=whisper-base</span></code></pre></div>
+<p>Real captured transcript:
+<code>&quot;The quick brown fox dumps over the lazy dog.&quot;</code> (a genuine,
+minor ASR mis-hear of “jumps”→“dumps” on synthetic TTS audio — disclosed
+honestly, not hidden) and <code>&quot;Hello World 1, 2, 3!&quot;</code> for a
+second fixture. Metadata confirms real engine telemetry:
+<code>language=en</code>, <code>max_no_speech_prob=0.0197</code>
+(<code>docs/qa/phase3_whisper_stt_20260707/RESULTS.md</code>).</p>
+<p>Reproduce:
+<code>cd docs/qa/phase3_whisper_stt_20260707/harness &amp;&amp; ./run_proof.sh</code>.</p>
+<hr />
+<h2 id="tesseract-ocr-18438-on-demand-boot">9. Tesseract OCR —
+<code>:18438</code> — on-demand boot</h2>
+<p><strong>What it does.</strong> Optical character recognition over two
+routes: <code>/v1/render</code> (renders a known text string to an
+image, used by the proof harness to generate unfakeable ground truth)
+and <code>/v1/ocr</code> (recovers text from an image).</p>
+<p><strong>Engine:</strong> Tesseract 5.3.0-2 (OEM 1 / LSTM, Debian
+<code>bookworm</code> package), behind a minimal Go HTTP shim
+(<code>submodules/helix_llm/services/ocr/</code>).</p>
+<p><strong>State:</strong> proven when running, on-demand boot via the
+containers submodule, no GPU. The real invocation shape (multipart image
+upload to <code>/v1/ocr</code>) was not captured verbatim in a
+standalone example in the cited evidence — see
+<code>submodules/helix_llm/services/ocr/main.go</code> and
+<code>docs/qa/phase3_tesseract_ocr_20260707/RESULTS.md</code> for the
+exact wire contract before scripting against it.</p>
+<p>Real captured signature (both fixtures rendered by the service
+itself, then OCR’d back): <code>&quot;HELIX OCR 2026 quick brown fox&quot;</code>
+at <code>mean_conf=95.99</code>,
+<code>&quot;PHASE THREE TESSERACT PROOF SEVEN&quot;</code> at
+<code>mean_conf=94.77</code>; a wrong-content fixture scored high
+confidence (95.98) yet correctly FAILED the expected-token check —
+proving the analyzer needs both confidence AND content matching
+(<code>docs/qa/phase3_tesseract_ocr_20260707/RESULTS.md</code>).</p>
+<p>Reproduce:
+<code>cd docs/qa/phase3_tesseract_ocr_20260707/harness &amp;&amp; ./run_proof.sh</code>
+(builds the <code>ocr-shim</code> static binary automatically).</p>
+<hr />
+<h2 id="rag-retrieval-augmented-generation-own-tei-18440-live-coder-18434-on-demand-boot">10.
+RAG (Retrieval-Augmented Generation) — own TEI <code>:18440</code> +
+live coder <code>:18434</code> — on-demand boot</h2>
+<p><strong>What it does.</strong> A real embed → cosine top-k retrieve →
+grounded-prompt → generate pipeline, proven against the LIVE coder
+composed with a dedicated CPU embeddings instance on its own port
+<code>:18440</code> (a second, independent TEI instance from the
+standing embeddings capability on <code>:18435</code>).</p>
+<p><strong>State:</strong> proven as a harness/pipeline pattern, not
+(yet) exposed as a single standing HelixLLM route — RAG here means “boot
+a TEI instance + call the coder with retrieved context,” reproduced via
+the cited harness.</p>
+<p><strong>How it works (the exact proven flow):</strong> 1. Embed a
+small document corpus via the TEI instance’s <code>/v1/embeddings</code>
+(same shape as §5, on port <code>18440</code>). 2. Rank documents by
+real cosine similarity (<code>sort.Slice</code> over real vectors —
+never a hardcoded pick). 3. Stuff the top-ranked document(s) into a
+grounded system+user prompt (“answer ONLY from context”). 4. Generate
+via the live coder’s <code>/v1/chat/completions</code>
+(<code>:18434</code>).</p>
+<p>Real captured proof: asked “what is the internal codename for the
+2027 HelixCode release?” with NO retrieval context, the live coder said
+it had no such information (RED — correctly cannot answer an invented
+fact); WITH the retrieval pipeline, it answered <em>“…is called
+Borealis-9.”</em> — a fact invented purely for this proof and
+retrievable only through the pipeline
+(<code>docs/qa/phase3_rag_20260707/RESULTS.md</code>). Retrieval ranking
+margin was ≥0.16 over the runner-up document for both test queries.</p>
+<p>Reproduce:
+<code>cd submodules/helix_llm/docs/qa/phase3_rag_20260707/harness &amp;&amp; ./run_proof.sh</code>.</p>
+<hr />
+<h2 id="a2a-google-agent2agent-18441-on-demand-boot">11. A2A (Google
+Agent2Agent) — <code>:18441</code> — on-demand boot</h2>
+<p><strong>What it does.</strong> Implements the Google A2A protocol
+(operator-resolved: A2A, <strong>not</strong> Zed ACP) — server side
+only. Other A2A-speaking agents can discover HelixLLM’s Agent Card and
+send it Tasks, which route to the live coder.</p>
+<p><strong>Routes:</strong></p>
+<pre><code>GET  /.well-known/agent-card.json     (discovery)
+POST /a2a                             (JSON-RPC 2.0, method message/send)</code></pre>
+<p><strong>Real invocation:</strong></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># discover the agent card</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> http://localhost:18441/.well-known/agent-card.json</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># send a task (Bearer auth required)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> <span class="at">-X</span> POST http://localhost:18441/a2a <span class="dt">\</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;jsonrpc&quot;: &quot;2.0&quot;,</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;id&quot;: 1,</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;method&quot;: &quot;message/send&quot;,</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;params&quot;: {&quot;message&quot;: {&quot;role&quot;: &quot;user&quot;, &quot;parts&quot;: [{&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: &quot;Write a Go function that returns the nth Fibonacci number.&quot;}]}}</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="st">  }&#39;</span></span></code></pre></div>
+<p>Real captured result: the Task transitioned to
+<code>state=&quot;completed&quot;</code> with a real Artifact containing multiple
+genuine <code>func fibonacci(...)</code> implementations, round-tripped
+correctly through <code>tasks/get</code>
+(<code>docs/qa/phase3_a2a_20260707/RESULTS.md</code>). Unauthorized (no
+Bearer) requests get HTTP 401; malformed JSON-RPC gets HTTP 400.</p>
+<p><strong>Honest scope (§11.4.6):</strong> <code>message/stream</code>
+(SSE), push notifications, the extended/authenticated Agent Card flow,
+and gRPC/HTTP+JSON-REST transport bindings are <strong>NOT
+implemented</strong> — the Agent Card truthfully advertises
+<code>streaming:false</code>, <code>pushNotifications:false</code>,
+<code>extendedAgentCard:false</code>. Only the JSON-RPC 2.0-over-HTTP
+core task round-trip is proven.</p>
+<p>Reproduce (build + RED baseline + GREEN proof) is documented
+step-by-step in <code>docs/qa/phase3_a2a_20260707/RESULTS.md</code>
+§4.</p>
+<hr />
+<h2 id="network-provider-lan-vpn-env-var-driven-no-separate-service">12.
+Network provider (LAN / VPN) — env-var driven, no separate service</h2>
+<p><strong>What it does.</strong> The <code>helixllm.Provider</code>
+inside HelixAgent works as an OpenAI-compatible provider alias reachable
+not only on <code>localhost</code> but anywhere on the LAN or VPN,
+parameterized entirely by environment variables — <strong>no code
+change, no hardcoded host</strong>.</p>
+<p><strong>Env vars</strong>
+(<code>docs/qa/helixagent_network_provider_20260707/RESULTS.md</code>,
+<code>submodules/helix_llm/docs/OPERATOR_GUIDE.md</code> §7):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Var</th>
+<th>Meaning</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HELIX_LLM_HOST</code></td>
+<td>host/IP of the router to connect to</td>
+<td><code>localhost</code></td>
+</tr>
+<tr>
+<td><code>HELIX_LLM_PORT</code></td>
+<td>port of that router</td>
+<td><code>18434</code></td>
+</tr>
+<tr>
+<td><code>HELIX_LLM_API_KEY</code></td>
+<td>optional Bearer key
+(<code>Authorization: Bearer &lt;key&gt;</code>)</td>
+<td><em>(none)</em></td>
+</tr>
+<tr>
+<td><code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT</code></td>
+<td>explicit base URL seam (wins over HOST/PORT)</td>
+<td><em>(none)</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Real invocation over the LAN</strong> (host
+<code>10.6.100.221</code> used in the proof, replace with your own):</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">HELIX_LLM_HOST</span><span class="op">=</span>10.6.100.221      <span class="co"># the coder host&#39;s LAN/VPN IP, NOT localhost</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">HELIX_LLM_PORT</span><span class="op">=</span>18434</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/helix_agent</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>helixllm_e2e <span class="at">-run</span> TestE2E_HelixAgent_To_LiveHelixLLM_ViaHostPort <span class="at">-v</span> <span class="dt">\</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  ./internal/llm/providers/helixllm/</span></code></pre></div>
+<p>Real captured proof: <code>remote=10.6.100.221:18434</code>, real
+coder output <code>func Add(a int, b int) int { return a + b }</code> —
+the request genuinely traversed the LAN interface, not loopback
+(<code>docs/qa/helixagent_network_provider_20260707/RESULTS.md</code>).</p>
+<p><strong>Auth matrix (proven with an ephemeral key-checking OpenAI
+server on <code>:18439</code> in this proof — note: this is a DIFFERENT,
+throwaway use of port 18439 from the vision capability in §6, run at a
+different time; do not confuse them):</strong> no key → 401; wrong key →
+401; correct key → 200 + real completion. The raw coder fleet on
+<code>:18434</code> itself does <strong>not</strong> enforce auth
+(any/no key accepted) — front it with a key-checking server
+(<code>--api-key</code> flag) if auth is required.</p>
+<hr />
+<h2 id="vram-broker-in-process-package-core-landed">13. VRAM broker —
+in-process package, CORE landed</h2>
+<p><strong>What it does.</strong> Cross-service GPU admission
+arbitration on the single RTX 5090 (32 GiB). Keeps the coder fleet
+resident, gates warm-tier (vision, translation-if-GPU, a hypothetical
+2nd coder lane) and burst-tier (image-gen, video-gen) admission against
+a LIVE <code>nvidia-smi</code>/NVML read, and enforces single-owner
+sequencing for mutually-exclusive burst classes.</p>
+<p><strong>State:</strong> the broker CORE landed at commit
+<code>a12df57c</code> (reviewed GO) —
+<code>internal/vrambroker/broker.go</code> with <code>ClassCoder</code>
+(resident)/<code>ClassVLM</code>/<code>ClassImage</code>/<code>ClassVideo</code>
+(burst, single-owner §11.4.119)/<code>ClassTranslate</code>
+(warm)/<code>ClassEmbed</code> (CPU, 0-byte lease);
+<code>Acquire</code>/<code>Release</code>/<code>Budget()</code> API;
+fail-closed <code>admit()</code>. <strong>Honest gap:</strong> eviction
+/ pause-warm-tier logic does <strong>not</strong> yet exist — the broker
+refuses over-budget admission but does not yet automatically evict a
+warm-tier lease to make room
+(<code>docs/research/07.2026/00_master/MASTER_IMPLEMENTATION_PLAN.md</code>
+§1.1). The full design (residency tiers, admission-API sketch,
+eviction/fairness policy, anti-bluff acceptance criteria) predates the
+core landing and is documented in
+<code>submodules/helix_llm/docs/VRAM_BROKER.md</code> — read that file
+for the target end-state, not the current wiring.</p>
+<p><strong>VRAM lane budget (single shared GPU truth, master plan §3 —
+re-read live before trusting):</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Lane</th>
+<th>Class</th>
+<th>Residency</th>
+<th>Size (at time of evidence)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coder</td>
+<td><code>ClassCoder</code></td>
+<td>resident, always-on, never evicted</td>
+<td>~19.4 GiB</td>
+</tr>
+<tr>
+<td>2nd coder/agent lane</td>
+<td><code>ClassAgent</code> (not yet added to the enum)</td>
+<td>warm</td>
+<td>Mistral-Nemo-12B Q4 best-fit candidate</td>
+</tr>
+<tr>
+<td>Vision (VLM)</td>
+<td><code>ClassVLM</code></td>
+<td>warm, currently STOPPED</td>
+<td>~2 GiB (3B) / ~12–16 GiB (8B upgrade, unmeasured)</td>
+</tr>
+<tr>
+<td>Image-gen fallback</td>
+<td><code>ClassImage</code>, burst, single-owner</td>
+<td>burst</td>
+<td>~7–9 GiB — <strong>fits now</strong></td>
+</tr>
+<tr>
+<td>Image-gen flagship</td>
+<td><code>ClassImage</code>, burst</td>
+<td>burst</td>
+<td>~16–20 GiB — needs a scheduled coder-pause burst window</td>
+</tr>
+<tr>
+<td>Video-gen fast lane</td>
+<td><code>ClassVideo</code>, burst, single-owner</td>
+<td>burst</td>
+<td>~6–9 GiB — <strong>fits now</strong></td>
+</tr>
+<tr>
+<td>Video-gen flagship</td>
+<td><code>ClassVideo</code>, burst</td>
+<td>burst</td>
+<td>~14–20 GiB — needs a scheduled coder-pause burst window</td>
+</tr>
+<tr>
+<td>Translation / embeddings</td>
+<td><code>ClassTranslate</code>/<code>ClassEmbed</code></td>
+<td>warm/CPU</td>
+<td>0 or ~3–4 GiB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>§11.4.119 single-owner rule:</strong> <code>ClassImage</code>
+and <code>ClassVideo</code> are mutually exclusive — never run
+concurrently. Vision (<code>ClassVLM</code>) and a Lane-B agent
+(<code>ClassAgent</code>) are independent warm-tier admissions, both
+gated by the same live <code>Budget().free</code> read.
+<strong>Live-reading discipline (DZ-23):</strong> free VRAM was observed
+moving from ≈7.9 GiB (coder+vision resident) to ≈12.4 GiB (coder-only)
+within a single session — every admission decision MUST re-read
+<code>nvidia-smi</code>/<code>Budget().free</code> immediately before
+acting, never trust a cached table past the moment it was read (this
+table included).</p>
+<hr />
+<h2 id="helixmemory-reference-implementation-ephemeral-proof-ports-1845018451">14.
+HelixMemory — reference implementation, ephemeral proof ports
+<code>:18450</code>/<code>:18451</code></h2>
+<p><strong>What it does.</strong> A store → recall → ground pipeline:
+embed a fact → persist vector+text in Postgres/pgvector → embed a query
+→ real pgvector cosine-distance top-1 recall → ground a prompt with ONLY
+the recalled memory → generate via the live coder.</p>
+<p><strong>Honest scope note (read before citing this as “mem0/Graphiti
+proven”) (§11.4.6):</strong> this proof does <strong>NOT</strong>
+install or invoke the upstream <code>mem0</code> Python package nor the
+<code>graphiti-core</code> library / Graphiti MCP server. It is a
+minimal reference implementation of the underlying mechanism those
+projects use, built directly against Postgres+pgvector. See
+<code>docs/research/07.2026/04_embeddings_rag/HELIXMEMORY_PROVIDER.md</code>
+§6–§7 for the full recommended production stack (Graphiti+FalkorDB
+durable spine + mem0 extraction layer, MCP-exposed) and the explicit
+follow-on work items to wire the literal upstream packages. Also note:
+<strong>Zep Community Edition is deprecated</strong> (April 2025) — the
+durable-spine recommendation is the raw Graphiti library/MCP server
+(Apache-2.0), correcting an earlier assumption.</p>
+<p><strong>State:</strong> proven end-to-end in a throwaway harness that
+boots its own <code>pgvector/pgvector:pg16</code> (port
+<code>18450</code>) and its own TEI instance (port <code>18451</code>)
+via the containers submodule, then tears both down. These are
+proof-harness ports, not standing HelixLLM capability ports.</p>
+<p>Real captured proof: asked to recall “my preferred deployment region
+for HelixLLM,” with nothing stored the coder said it had no such
+information (RED); with the store→recall pipeline it answered <em>“…is
+called Emberfall-Station”</em> — a fact invented purely for this proof
+(<code>docs/qa/phase1_helixmemory_20260708T061824Z/RESULTS.md</code>). A
+second fact (“Wraithloom” internal alias) was correctly recalled and NOT
+confused with a topic-adjacent distractor.</p>
+<p>Reproduce:
+<code>cd submodules/helix_llm/docs/qa/phase1_helixmemory_20260708T061824Z/harness &amp;&amp; ./run_proof.sh</code>.</p>
+<hr />
+<h2 id="image-generation-18442-scaffold-only-runtime-proof-pending">15.
+Image generation — <code>:18442</code> — SCAFFOLD-ONLY, runtime proof
+pending</h2>
+<p><strong>Honest state (§11.4.6 / §11.4.123): this capability is design
++ scaffold, NOT proven live in this evidence corpus.</strong> Do not
+present it as a working, callable capability to an end user.</p>
+<p><strong>What exists:</strong> broker-integrated scaffold
+(<code>ClassImage</code>, burst, single-owner), a self-validated
+CLIPScore semantic-similarity analyzer (image vs prompt), RED-first test
+authoring — all reviewed GO <strong>at the scaffold layer only</strong>.
+Commit <code>0f07559</code>.</p>
+<p><strong>Engine decision (design doc, not yet run):</strong> ComfyUI
+serving FLUX.1-schnell as the flagship burst-tier lane (needs a
+scheduled operator-authorized coder-pause window — see §13 VRAM table),
+with a stable-diffusion.cpp + FLUX-schnell-Q4 fallback lane that fits
+the free VRAM <em>without</em> a pause.</p>
+<p><strong>What is missing:</strong> an actual runtime proof — the
+fallback/fast-lane tiers reportedly fit the currently-free VRAM and
+could be exercised without an operator pause, but no captured evidence
+of a real generated image + CLIPScore PASS exists in this corpus
+yet.</p>
+<p>Full design:
+<code>docs/research/07.2026/00_master/IMAGE_GEN_PROVIDER.md</code>.</p>
+<hr />
+<h2 id="video-generation-18443-scaffold-only-runtime-proof-pending">16.
+Video generation — <code>:18443</code> — SCAFFOLD-ONLY, runtime proof
+pending</h2>
+<p><strong>Honest state (§11.4.6 / §11.4.123): same posture as image
+generation — design + scaffold, NOT proven live in this evidence
+corpus.</strong></p>
+<p><strong>What exists:</strong> broker-integrated scaffold
+(<code>ClassVideo</code>, burst, single-owner), self-validated analyzer,
+RED-first authoring, reviewed GO at the scaffold layer. Commit
+<code>9145505</code>.</p>
+<p><strong>Design (not yet run):</strong> WAN 2.2 / LTX-Video fast-lane
+tiers fit the free VRAM without a pause; flagship WAN 2.2 A14B MoE fp8
+needs the same scheduled coder-pause burst window as image-gen’s
+flagship tier.</p>
+<p>Full design context:
+<code>docs/research/07.2026/00_master/MASTER_IMPLEMENTATION_PLAN.md</code>
+§1.2, §3.</p>
+<hr />
+<h2 id="opendesign-ui-design-system-not-yet-installed">17. OpenDesign
+(UI design system) — NOT YET INSTALLED</h2>
+<p><strong>Honest state:</strong> design-only / recommended-next-step,
+per master plan §6.6 (“codegraph/opendesign-as-core wiring fix”). No
+<code>opendesign</code> daemon is installed or running against this
+codebase yet. The recommended next step is: install/start the opendesign
+daemon on <code>:7456</code> and seed a <code>helixcode-brand</code>
+project (per §11.4.162’s OpenDesign UI-design-system mandate). This
+guide lists it for completeness — <strong>do not</strong> present it as
+available today.</p>
+<hr />
+<h2 id="on-demand-boot-what-is-always-live-vs-booted-on-demand">18.
+On-demand boot — what is always-live vs booted-on-demand</h2>
+<p><strong>Always-LIVE, never touched casually:</strong> the coder fleet
+(<code>:18434</code>). Per the master plan’s
+“coder-never-casually-restart” constraint (D8/§11.4.122),
+<code>helixllm-coder</code> is explicitly <em>never restarted without
+operator authorization</em>. Every capability below it in this guide is
+designed to boot, run, and tear down <strong>without ever touching the
+coder container</strong> — every proof in the evidence corpus explicitly
+confirms the coder’s uptime/container-id is unchanged before and
+after.</p>
+<p><strong>Booted-on-demand via the containers submodule (§11.4.76,
+rootless podman §11.4.161):</strong> embeddings (<code>:18435</code>),
+vision (<code>:18439</code>), translation (<code>:18436</code>), Whisper
+(<code>:18437</code>), Tesseract (<code>:18438</code>), RAG’s dedicated
+TEI (<code>:18440</code>), A2A (<code>:18441</code>), HelixMemory’s
+Postgres+TEI pair (<code>:18450</code>/<code>:18451</code>). None of
+these are ad-hoc <code>podman run</code>/<code>docker</code> commands —
+every one goes through <code>digital.vasic.containers</code>’s
+<code>pkg/compose.Orchestrator</code> public API, and every proof tears
+its own container(s) down single-owner when finished, leaving the coder
+and every sibling capability’s port untouched.</p>
+<p><strong>§11.4.119 single-owner + VRAM-budget rule (master plan
+§3):</strong> for GPU-touching capabilities (vision, image-gen,
+video-gen), admission is gated by the VRAM broker’s <code>admit()</code>
+against a LIVE <code>Budget().free</code>/<code>nvidia-smi</code> read —
+<strong>never</strong> a cached number, because free VRAM has been
+observed to shift by several GiB within a single session (coder+vision
+resident ≈7.9 GiB free vs coder-only ≈12.4–12.7 GiB free).
+<code>ClassImage</code> and <code>ClassVideo</code> (both burst) are
+mutually exclusive with each other and may require pausing the warm
+tier; <code>ClassVLM</code> (vision) and a would-be
+<code>ClassAgent</code> (2nd coder lane) are independent warm-tier
+admissions. Any operator wanting to boot a GPU-touching capability
+should re-run the relevant <code>admit-check</code> (see §6 for the
+vision example) immediately before booting, not rely on a table in this
+document.</p>
+<p><strong>CPU-only capabilities never need broker admission:</strong>
+embeddings, translation, Whisper, Tesseract, RAG’s TEI, and
+HelixMemory’s Postgres+TEI all run with <code>device=cpu</code> / no GPU
+device in their compose specs — they always fit and never contend for
+VRAM.</p>
+<hr />
+<h2 id="provider-model-discovery-how-llmsverifier-claude_toolkit-expose-these">19.
+Provider / model discovery — how LLMsVerifier + claude_toolkit expose
+these</h2>
+<p><strong>LLMsVerifier is the single source of truth for provider and
+model metadata (CONST-036 through CONST-040) — no hardcoded model lists
+anywhere in HelixCode.</strong> Every provider — including HelixLLM’s
+own coder fleet and gateway — is registered in LLMsVerifier’s provider
+registry as a data record:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">// submodules/llms_verifier/llm-verifier/providers/model_provider_service.go</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderClient <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    Name    <span class="dt">string</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    BaseURL <span class="dt">string</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    APIKey  <span class="dt">string</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>LLMsVerifier discovers each provider’s model set by querying that
+provider’s own live <code>GET /v1/models</code> — it never enumerates
+models in source. Capability flags (MCP, LSP, ACP, Embedding, RAG,
+Skills, Plugins per CONST-040) are likewise sourced from a real
+<code>VerificationResult</code> produced by probing the live endpoint,
+never hardcoded. Freshness is bound to CONST-037 (re-verify within 24h)
+and CONST-038 (status reflects verifier state within 60s / poll
+≤60s).</p>
+<p><strong>Extended (non-CONST-039-core) provider coverage</strong> was
+evaluated the same way: 13 hosted providers (Poe, Perplexity/Sonar,
+Sakana Fugu, Xiaomi MiMo, Tencent Hunyuan, xAI Grok, Moonshot/Kimi,
+Zhipu/Z.ai GLM, Fireworks AI, DeepInfra, Novita, AI21/Jamba, Reka) were
+confirmed as OpenAI-compatible and integrated as <strong>config-only
+rows</strong> (<code>{Name, BaseURL, APIKey-env-var}</code>) into the
+existing adapter — no new adapter code, because none of them require a
+bespoke wire shape. Two more (Hyperbolic, Baseten) are
+<code>UNVERIFIED — verify-at-build</code>, never silently assumed. Full
+mapping and per-provider verified source URLs:
+<code>docs/research/07.2026/00_master/PROVIDER_COVERAGE.md</code>.</p>
+<p><strong>claude_toolkit</strong> is the companion CLI-agent-provider
+alias tool referenced in the master plan (§6.7, “claude_toolkit alias
+reconciliation”). Per the master plan’s operator-decision list, item 4:
+the extended-provider commits currently live on
+<code>origin/feature/helixllm-full-extension</code>, not
+<code>origin/main</code>; claude_toolkit’s own LLMsVerifier trunk-bump
+(Phase 7, master plan §2) is gated on an operator decision about merging
+this feature branch to <code>main</code>, or explicitly pointing
+claude_toolkit’s vendored submodule at the feature branch as a
+documented deviation. Do not assume claude_toolkit already surfaces
+every extended provider listed above until that trunk-bump lands — check
+<code>docs/research/07.2026/00_master/PROVIDER_COVERAGE.md</code> and
+the master plan §2 Phase 7/8 rows for the current gate status.</p>
+<p><strong>In practice, to discover what HelixLLM itself exposes right
+now:</strong></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:18434/v1/models</span></code></pre></div>
+<p>This is the real, non-hardcoded model-discovery call for the live
+coder fleet (CONST-036 in action — the response reflects the
+actually-loaded GGUF, not a static list).</p>
+<hr />
+<h2 id="sources">Sources</h2>
+<p>Every fact in this guide is cited to one of the files below (dated
+2026-07-06 → 2026-07-08). Re-run the “Reproduce” command in the linked
+RESULTS.md before relying on any figure for a decision — VRAM and port
+assignments are live-state, not fixed constants.</p>
+<ul>
+<li><code>docs/research/07.2026/00_master/MASTER_IMPLEMENTATION_PLAN.md</code>
+(§1.1 reviewed-GO capability table, §1.2 scaffold-complete generative,
+§3 VRAM lane budget, §5 operator-decision list, §6 immediate Phase-1
+work)</li>
+<li><code>docs/qa/phase2_e2e_20260706/RESULTS.md</code> — coder fleet,
+HelixAgent integration, Postgres/Redis persistence</li>
+<li><code>docs/qa/phase3_embeddings_20260706/RESULTS.md</code> —
+embeddings (TEI, bge-small-en-v1.5)</li>
+<li><code>docs/qa/helixllm_vision_boot_20260707T215007Z/RESULTS.md</code>
+— vision boot/teardown lifecycle</li>
+<li><code>docs/qa/phase1_helixqa_vision_20260708T061809Z/RESULTS.md</code>
+— vision HelixQA ground-truth bank</li>
+<li><code>docs/qa/phase3_translation_nllb_20260707/RESULTS.md</code> —
+translation, NLLB primary lane</li>
+<li><code>docs/qa/phase3_translation_20260707/RESULTS.md</code> —
+translation, LibreTranslate fallback lane</li>
+<li><code>docs/qa/phase3_whisper_stt_20260707/RESULTS.md</code> —
+Whisper STT</li>
+<li><code>docs/qa/phase3_tesseract_ocr_20260707/RESULTS.md</code> —
+Tesseract OCR</li>
+<li><code>docs/qa/phase3_rag_20260707/RESULTS.md</code> — RAG
+pipeline</li>
+<li><code>docs/qa/phase3_a2a_20260707/RESULTS.md</code> — A2A
+server</li>
+<li><code>docs/qa/helixagent_network_provider_20260707/RESULTS.md</code>
+— LAN/VPN network provider</li>
+<li><code>docs/qa/phase1_helixmemory_20260708T061824Z/RESULTS.md</code>
+— HelixMemory reference implementation</li>
+<li><code>submodules/helix_llm/docs/API_CONTRACT.md</code> — the
+<code>:8443</code> Go gateway HTTP contract (source-verified)</li>
+<li><code>submodules/helix_llm/docs/OPERATOR_GUIDE.md</code> — coder run
+line, LAN/VPN wiring, base-URL gotcha, troubleshooting</li>
+<li><code>submodules/helix_llm/docs/VRAM_BROKER.md</code> — VRAM broker
+design spike (target end-state; core landing is per the master plan, not
+this doc)</li>
+<li><code>docs/research/07.2026/00_master/PROVIDER_COVERAGE.md</code> —
+LLMsVerifier extended-provider coverage mapping</li>
+<li><code>docs/research/07.2026/00_master/IMAGE_GEN_PROVIDER.md</code> —
+image-gen design/scaffold posture</li>
+<li><code>docs/research/07.2026/04_embeddings_rag/HELIXMEMORY_PROVIDER.md</code>
+— HelixMemory production-stack design (Graphiti+FalkorDB+mem0)</li>
+</ul>
+</body>
+</html>
