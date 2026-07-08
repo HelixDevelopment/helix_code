@@ -60,7 +60,7 @@ func TestTr_DefaultsToNoopTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(stdctx.Background(), "askuser_prompt_enter_choice_no_default", nil)
 	if got != "askuser_prompt_enter_choice_no_default" {
-		t.Fatalf("tr default = %q, want raw message ID (loud echo)", got)
+		t.Fatalf("tr default = %q, want resolved prose", got)
 	}
 }
 
@@ -103,7 +103,7 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	SetTranslator(nil)
 	got := tr(stdctx.Background(), "askuser_prompt_invalid_choice_hint", nil)
 	if got != "askuser_prompt_invalid_choice_hint" {
-		t.Fatalf("after SetTranslator(nil) tr = %q, want raw echo", got)
+		t.Fatalf("after SetTranslator(nil) tr = %q, want resolved prose", got)
 	}
 }
 
@@ -135,7 +135,7 @@ func TestFormatQuestion_RoutesThroughTranslator(t *testing.T) {
 	resetTranslator(t)
 	baseline := FormatQuestion(q) // NoopTranslator — raw message IDs echoed
 	if !strings.Contains(baseline, "askuser_prompt_enter_choice_with_default") {
-		t.Fatalf("baseline did not echo footer message ID: %q", baseline)
+		t.Fatalf("baseline produced resolved prose: %q", baseline)
 	}
 	if !strings.Contains(baseline, "askuser_prompt_choice_preview_label") {
 		t.Fatalf("baseline did not echo preview message ID: %q", baseline)
@@ -158,7 +158,7 @@ func TestInvalidChoiceHint_RoutesThroughTranslator(t *testing.T) {
 	resetTranslator(t)
 	baseline := invalidChoiceHint(stdctx.Background(), 3)
 	if baseline != "askuser_prompt_invalid_choice_hint" {
-		t.Fatalf("baseline hint = %q, want raw message ID echo", baseline)
+		t.Fatalf("baseline hint = %q, want resolved prose", baseline)
 	}
 
 	SetTranslator(sentinelTranslator{})

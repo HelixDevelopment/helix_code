@@ -132,7 +132,7 @@ func TestTemplateValidate_EmptyName_RawTextByDefault(t *testing.T) {
 		t.Fatal("Validate on empty Name returned no error")
 	}
 	if !strings.Contains(err.Error(), "internal_template_validate_name_empty") {
-		t.Fatalf("Validate err = %q, want raw message ID (Noop echo)", err.Error())
+		t.Fatalf("Validate err = %q, want resolved prose", err.Error())
 	}
 }
 
