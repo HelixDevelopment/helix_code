@@ -168,6 +168,26 @@ effective_source() {
   printf '%s' "$out"
 }
 
+# --- §11.4.186 doc-integrity gate (anti-divergence enforcement) ---
+# Runs BEFORE any export render — a FAIL here refuses the export.
+CHECKSET="$REPO_ROOT/.helix_code/doc_integrity/checkset.yaml"
+if [ -f "$CHECKSET" ] && command -v bash >/dev/null 2>&1; then
+  if ! bash constitution/scripts/doc_integrity/wire/doc_integrity_gate.sh \
+       "$CHECKSET" "$REPO_ROOT" --divergence-class-only; then
+    # exit 1 means hard FAIL; exit 3 means SKIP (source unavailable — proceed
+    # with warning). Only exit 1 aborts the render.
+    rc=$?
+    if [ "$rc" -eq 1 ]; then
+      echo "FATAL §11.4.186: doc-integrity FAIL — export REFUSED. Fix cross-doc" \
+           "divergences before exporting." >&2
+      exit 1
+    fi
+  fi
+else
+  echo "WARN §11.4.186/§11.4.3: checkset not found at $CHECKSET — gate skipped" >&2
+fi
+# --- end doc-integrity gate ---
+
 # Collect the .md source set.
 declare -a SOURCES=()
 if [ "${#EXPLICIT[@]}" -gt 0 ]; then
