@@ -1,0 +1,22 @@
+{
+  "wav_path": "data/whisper_gt/helloworld.wav",
+  "endpoint": "http://localhost:18437/v1/audio/transcriptions",
+  "transcript": "Hello World 1, 2, 3!",
+  "normalized": "hello world 1 2 3",
+  "expected_words": [
+    "hello",
+    "world",
+    "one",
+    "two",
+    "three"
+  ],
+  "matched_words": 5,
+  "expected_count": 5,
+  "language": "en",
+  "no_speech_prob": 0,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 565,
+  "http_status": 200
+}

@@ -1,0 +1,21 @@
+{
+  "known_text": "PHASE THREE TESSERACT PROOF SEVEN",
+  "mode": "label",
+  "endpoint": "http://localhost:18438",
+  "full_text": "PHASE THREE TESSERACT PROOF SEVEN",
+  "mean_conf": 94.7696318,
+  "conf_floor": 60,
+  "expected_facts": [
+    "phase",
+    "three",
+    "tesseract",
+    "proof",
+    "seven"
+  ],
+  "matched_facts": 5,
+  "expected_count": 5,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 115
+}

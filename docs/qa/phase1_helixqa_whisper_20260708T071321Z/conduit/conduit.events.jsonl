@@ -1,0 +1,12 @@
+{"seq":1,"time":"2026-07-08T07:17:28.688575726Z","type":"challenge_start","session":"helixllm_whisper","platform":"stt","challenge":"STT-FOX-001"}
+{"seq":2,"time":"2026-07-08T07:17:29.314151956Z","type":"evidence_captured","session":"helixllm_whisper","challenge":"STT-FOX-001","evidence_path":"qa-results/helixllm_whisper/fox_001_verdict.json","evidence_kind":"stt_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:17:29.314258808Z","type":"challenge_verdict","session":"helixllm_whisper","challenge":"STT-FOX-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T07:17:29.322023205Z","type":"challenge_start","session":"helixllm_whisper","platform":"stt","challenge":"STT-HELLOWORLD-001"}
+{"seq":2,"time":"2026-07-08T07:17:29.88808793Z","type":"evidence_captured","session":"helixllm_whisper","challenge":"STT-HELLOWORLD-001","evidence_path":"qa-results/helixllm_whisper/helloworld_001_verdict.json","evidence_kind":"stt_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:17:29.888198457Z","type":"challenge_verdict","session":"helixllm_whisper","challenge":"STT-HELLOWORLD-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T07:17:29.896036596Z","type":"challenge_start","session":"helixllm_whisper","platform":"stt","challenge":"STT-SELF-VALIDATE-001-GOOD"}
+{"seq":2,"time":"2026-07-08T07:17:30.44970486Z","type":"evidence_captured","session":"helixllm_whisper","challenge":"STT-SELF-VALIDATE-001-GOOD","evidence_path":"qa-results/helixllm_whisper/self_validate_001_golden_good_verdict.json","evidence_kind":"stt_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:17:30.449832634Z","type":"challenge_verdict","session":"helixllm_whisper","challenge":"STT-SELF-VALIDATE-001-GOOD","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T07:17:30.457358671Z","type":"challenge_start","session":"helixllm_whisper","platform":"stt","challenge":"STT-SELF-VALIDATE-001-BAD"}
+{"seq":2,"time":"2026-07-08T07:17:31.015869075Z","type":"evidence_captured","session":"helixllm_whisper","challenge":"STT-SELF-VALIDATE-001-BAD","evidence_path":"qa-results/helixllm_whisper/self_validate_001_golden_bad_verdict.json","evidence_kind":"stt_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:17:31.015992953Z","type":"challenge_verdict","session":"helixllm_whisper","challenge":"STT-SELF-VALIDATE-001-BAD","verdict":"PASS"}

@@ -1,0 +1,44 @@
+{
+  "query": "What is the name of the internal service-mesh sidecar used for HelixLLM routing?",
+  "expect_token": "Quillfeather-7",
+  "expect_doc": "doc_sidecar",
+  "embed_endpoint": "http://localhost:18435/v1/embeddings",
+  "chat_endpoint": "http://localhost:18434/v1/chat/completions",
+  "no_context": false,
+  "top_k": 2,
+  "ranking": [
+    {
+      "id": "doc_sidecar",
+      "score": 0.885509526710884
+    },
+    {
+      "id": "doc_codename",
+      "score": 0.6819100931391842
+    },
+    {
+      "id": "doc_ci",
+      "score": 0.6335768554403256
+    },
+    {
+      "id": "doc_coffee",
+      "score": 0.4618679678097032
+    },
+    {
+      "id": "doc_revenue",
+      "score": 0.41135394285561183
+    },
+    {
+      "id": "doc_cat",
+      "score": 0.34773968341545813
+    }
+  ],
+  "top1_id": "doc_sidecar",
+  "top1_score": 0.885509526710884,
+  "retrieval_ok": true,
+  "answer": "The internal service-mesh sidecar used internally for HelixLLM routing is called Quillfeather-7.",
+  "token_found": true,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 128
+}

@@ -1,0 +1,44 @@
+{
+  "query": "What is the internal codename for the 2027 HelixCode release?",
+  "expect_token": "Borealis-9",
+  "expect_doc": "doc_codename",
+  "embed_endpoint": "http://localhost:18435/v1/embeddings",
+  "chat_endpoint": "http://localhost:18434/v1/chat/completions",
+  "no_context": false,
+  "top_k": 2,
+  "ranking": [
+    {
+      "id": "doc_codename",
+      "score": 0.885177716460242
+    },
+    {
+      "id": "doc_ci",
+      "score": 0.7166139003402228
+    },
+    {
+      "id": "doc_sidecar",
+      "score": 0.6766061971219052
+    },
+    {
+      "id": "doc_coffee",
+      "score": 0.45773165497504925
+    },
+    {
+      "id": "doc_revenue",
+      "score": 0.3922136640424146
+    },
+    {
+      "id": "doc_cat",
+      "score": 0.30288582666596114
+    }
+  ],
+  "top1_id": "doc_codename",
+  "top1_score": 0.885177716460242,
+  "retrieval_ok": true,
+  "answer": "The internal codename for the 2027 HelixCode release is Borealis-9.",
+  "token_found": true,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 137
+}

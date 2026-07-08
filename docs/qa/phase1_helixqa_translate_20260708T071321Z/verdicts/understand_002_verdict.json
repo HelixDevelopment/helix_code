@@ -1,0 +1,20 @@
+{
+  "source": "The cat sleeps.",
+  "source_lang": "eng_Latn",
+  "target_lang": "fra_Latn",
+  "endpoint": "http://localhost:18436/translate",
+  "forward": "Le chat dort.",
+  "expected_facts": [
+    "chat",
+    "dort"
+  ],
+  "matched_facts": 2,
+  "expected_count": 2,
+  "not_identity": true,
+  "hallucinated": false,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 255,
+  "http_status": 200
+}

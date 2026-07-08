@@ -1,0 +1,23 @@
+{
+  "wav_path": "data/whisper_gt/fox.wav",
+  "endpoint": "http://localhost:18437/v1/audio/transcriptions",
+  "transcript": "The quick brown fox dumps over the lazy dog.",
+  "normalized": "the quick brown fox dumps over the lazy dog",
+  "expected_words": [
+    "hello",
+    "world"
+  ],
+  "matched_words": 0,
+  "expected_count": 2,
+  "missing": [
+    "hello",
+    "world"
+  ],
+  "language": "en",
+  "no_speech_prob": 0,
+  "pass": false,
+  "expect_fail": true,
+  "case_result": true,
+  "latency_ms": 557,
+  "http_status": 200
+}

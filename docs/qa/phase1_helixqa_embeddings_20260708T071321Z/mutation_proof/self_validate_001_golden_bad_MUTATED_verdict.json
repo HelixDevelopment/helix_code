@@ -1,0 +1,20 @@
+{
+  "text_a": "The cat sat on the mat.",
+  "text_a_prime": "Quarterly revenue rose four percent.",
+  "text_u": "A feline rested on the rug.",
+  "endpoint": "http://localhost:18435/v1/embeddings",
+  "model_served": "BAAI/bge-small-en-v1.5",
+  "dim": 384,
+  "norm_a": 1.0000000223831755,
+  "norm_a_prime": 0.9999999730301892,
+  "norm_u": 1.0000000113281104,
+  "cos_a_aprime": 0.3931068174484705,
+  "cos_a_u": 0.7508617072409091,
+  "margin": -0.3577548897924386,
+  "margin_floor": 0.15,
+  "pass": true,
+  "expect_fail": true,
+  "case_result": false,
+  "latency_ms": 6,
+  "http_status": 200
+}

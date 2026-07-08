@@ -1,0 +1,12 @@
+{"seq":1,"time":"2026-07-08T07:48:37.463227464Z","type":"challenge_start","session":"helixllm_rag","platform":"rag","challenge":"RAG-Q1-001"}
+{"seq":2,"time":"2026-07-08T07:48:37.600846465Z","type":"evidence_captured","session":"helixllm_rag","challenge":"RAG-Q1-001","evidence_path":"qa-results/helixllm_rag/q1_verdict.json","evidence_kind":"rag_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:48:37.601043342Z","type":"challenge_verdict","session":"helixllm_rag","challenge":"RAG-Q1-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T07:48:37.608890365Z","type":"challenge_start","session":"helixllm_rag","platform":"rag","challenge":"RAG-Q2-001"}
+{"seq":2,"time":"2026-07-08T07:48:37.737859129Z","type":"evidence_captured","session":"helixllm_rag","challenge":"RAG-Q2-001","evidence_path":"qa-results/helixllm_rag/q2_verdict.json","evidence_kind":"rag_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:48:37.737995405Z","type":"challenge_verdict","session":"helixllm_rag","challenge":"RAG-Q2-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T07:48:37.745121728Z","type":"challenge_start","session":"helixllm_rag","platform":"rag","challenge":"RAG-SELF-VALIDATE-001-GOOD"}
+{"seq":2,"time":"2026-07-08T07:48:37.862402483Z","type":"evidence_captured","session":"helixllm_rag","challenge":"RAG-SELF-VALIDATE-001-GOOD","evidence_path":"qa-results/helixllm_rag/self_validate_001_golden_good_verdict.json","evidence_kind":"rag_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:48:37.862603647Z","type":"challenge_verdict","session":"helixllm_rag","challenge":"RAG-SELF-VALIDATE-001-GOOD","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T07:48:37.870147732Z","type":"challenge_start","session":"helixllm_rag","platform":"rag","challenge":"RAG-SELF-VALIDATE-001-BAD"}
+{"seq":2,"time":"2026-07-08T07:48:37.976586707Z","type":"evidence_captured","session":"helixllm_rag","challenge":"RAG-SELF-VALIDATE-001-BAD","evidence_path":"qa-results/helixllm_rag/self_validate_001_golden_bad_verdict.json","evidence_kind":"rag_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:48:37.97671408Z","type":"challenge_verdict","session":"helixllm_rag","challenge":"RAG-SELF-VALIDATE-001-BAD","verdict":"PASS"}

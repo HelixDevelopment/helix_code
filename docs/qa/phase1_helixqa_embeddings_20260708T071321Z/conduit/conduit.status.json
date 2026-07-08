@@ -1,0 +1,26 @@
+{
+  "session": "helixllm_embeddings",
+  "state": "starting",
+  "started_at": "2026-07-08T07:41:44.82278772Z",
+  "updated_at": "2026-07-08T07:41:44.833096564Z",
+  "last_seq": 3,
+  "last_event": {
+    "seq": 3,
+    "time": "2026-07-08T07:41:44.83308723Z",
+    "type": "challenge_verdict",
+    "session": "helixllm_embeddings",
+    "challenge": "EMB-SELF-VALIDATE-001-BAD",
+    "verdict": "PASS"
+  },
+  "counts": {
+    "challenges_started": 1,
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "operator_blocked": 0,
+    "evidence_captured": 1,
+    "errors": 0,
+    "llm_calls": 0,
+    "vision_calls": 0
+  }
+}

@@ -1,0 +1,12 @@
+{"seq":1,"time":"2026-07-08T07:21:31.486200822Z","type":"challenge_start","session":"helixllm_tesseract","platform":"ocr","challenge":"OCR-GOOD-001"}
+{"seq":2,"time":"2026-07-08T07:21:31.599091691Z","type":"evidence_captured","session":"helixllm_tesseract","challenge":"OCR-GOOD-001","evidence_path":"qa-results/helixllm_tesseract/good_001_verdict.json","evidence_kind":"ocr_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:21:31.599212624Z","type":"challenge_verdict","session":"helixllm_tesseract","challenge":"OCR-GOOD-001","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T07:21:31.604597735Z","type":"challenge_start","session":"helixllm_tesseract","platform":"ocr","challenge":"OCR-GOOD-002"}
+{"seq":2,"time":"2026-07-08T07:21:31.720753209Z","type":"evidence_captured","session":"helixllm_tesseract","challenge":"OCR-GOOD-002","evidence_path":"qa-results/helixllm_tesseract/good_002_verdict.json","evidence_kind":"ocr_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:21:31.720842033Z","type":"challenge_verdict","session":"helixllm_tesseract","challenge":"OCR-GOOD-002","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T07:21:31.726406616Z","type":"challenge_start","session":"helixllm_tesseract","platform":"ocr","challenge":"OCR-SELF-VALIDATE-001-GOOD"}
+{"seq":2,"time":"2026-07-08T07:21:31.838383423Z","type":"evidence_captured","session":"helixllm_tesseract","challenge":"OCR-SELF-VALIDATE-001-GOOD","evidence_path":"qa-results/helixllm_tesseract/self_validate_001_golden_good_verdict.json","evidence_kind":"ocr_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:21:31.83858649Z","type":"challenge_verdict","session":"helixllm_tesseract","challenge":"OCR-SELF-VALIDATE-001-GOOD","verdict":"PASS"}
+{"seq":1,"time":"2026-07-08T07:21:31.844000374Z","type":"challenge_start","session":"helixllm_tesseract","platform":"ocr","challenge":"OCR-SELF-VALIDATE-001-BAD"}
+{"seq":2,"time":"2026-07-08T07:21:31.95848971Z","type":"evidence_captured","session":"helixllm_tesseract","challenge":"OCR-SELF-VALIDATE-001-BAD","evidence_path":"qa-results/helixllm_tesseract/self_validate_001_golden_bad_verdict.json","evidence_kind":"ocr_verdict_json"}
+{"seq":3,"time":"2026-07-08T07:21:31.958667239Z","type":"challenge_verdict","session":"helixllm_tesseract","challenge":"OCR-SELF-VALIDATE-001-BAD","verdict":"PASS"}

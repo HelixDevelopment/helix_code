@@ -1,0 +1,16 @@
+{
+  "query": "What is the internal codename for the 2027 HelixCode release?",
+  "expect_token": "Borealis-9",
+  "expect_doc": "doc_codename",
+  "embed_endpoint": "http://localhost:18435/v1/embeddings",
+  "chat_endpoint": "http://localhost:18434/v1/chat/completions",
+  "no_context": true,
+  "top_k": 2,
+  "retrieval_ok": false,
+  "answer": "I don't have access to internal Microsoft codenames or future release information for 2027 HelixCode.",
+  "token_found": false,
+  "pass": true,
+  "expect_fail": true,
+  "case_result": false,
+  "latency_ms": 105
+}

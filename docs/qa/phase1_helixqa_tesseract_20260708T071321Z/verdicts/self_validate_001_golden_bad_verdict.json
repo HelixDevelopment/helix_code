@@ -1,0 +1,21 @@
+{
+  "known_text": "HELIX OCR 2026 quick brown fox",
+  "mode": "label",
+  "endpoint": "http://localhost:18438",
+  "full_text": "HELIX OCR 2026 quick brown fox",
+  "mean_conf": 95.98556383333334,
+  "conf_floor": 60,
+  "expected_facts": [
+    "phase",
+    "three",
+    "tesseract",
+    "proof",
+    "seven"
+  ],
+  "matched_facts": 0,
+  "expected_count": 5,
+  "pass": false,
+  "expect_fail": true,
+  "case_result": true,
+  "latency_ms": 114
+}
