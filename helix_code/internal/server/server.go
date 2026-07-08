@@ -67,7 +67,7 @@ func New(cfg *config.Config, db *database.Database, rds *redis.Client) *Server {
 	// Global middleware
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	router.Use(CORSMiddleware())
+	router.Use(CORSMiddleware(strings.Split(cfg.Auth.CORSAllowedOrigins, ",")))
 	router.Use(SecurityMiddleware())
 
 	// Initialize auth service
@@ -724,11 +724,45 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 	s.mcp.HandleWebSocket(c.Writer, c.Request)
 }
 
-// CORSMiddleware provides CORS headers
-func CORSMiddleware() gin.HandlerFunc {
+// CORSMiddleware provides CORS headers for cross-origin requests.
+//
+// SECURITY (fixed — was CVE-class CORS misconfiguration): this middleware
+// MUST NEVER combine a wildcard "Access-Control-Allow-Origin: *" with
+// "Access-Control-Allow-Credentials: true" — that combination is forbidden
+// by the Fetch/CORS spec. Real browsers reject a wildcard Allow-Origin
+// whenever credentials mode is "include", and an implementation that
+// instead reflects the wildcard as the literal request Origin would let
+// ANY origin make credentialed cross-origin requests (a genuine
+// cross-origin credential-theft vector).
+//
+// Only an origin present in allowedOrigins is ever echoed back — as that
+// SPECIFIC origin, never "*" — together with "Vary: Origin" (so shared
+// caches don't leak one origin's response to another) and only then is
+// Allow-Credentials set. Every other request (no Origin header, or an
+// Origin not on the allowlist) gets no CORS-allow headers at all
+// (default-deny); same-origin requests are unaffected since browsers don't
+// consult CORS headers for those.
+//
+// allowedOrigins is populated from cfg.Auth.CORSAllowedOrigins /
+// HELIX_CORS_ALLOWED_ORIGINS (§11.4.74 reuse of the WSAllowedOrigins
+// allowlist pattern used by the /ws MCP WebSocket upgrader).
+func CORSMiddleware(allowedOrigins []string) gin.HandlerFunc {
+	allowed := make(map[string]struct{}, len(allowedOrigins))
+	for _, o := range allowedOrigins {
+		o = strings.TrimSpace(o)
+		if o != "" {
+			allowed[o] = struct{}{}
+		}
+	}
+
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		if origin := c.Request.Header.Get("Origin"); origin != "" {
+			if _, ok := allowed[origin]; ok {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+				c.Writer.Header().Add("Vary", "Origin")
+				c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			}
+		}
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
 

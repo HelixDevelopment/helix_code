@@ -126,6 +126,26 @@ type AuthConfig struct {
 	// only the same-origin/localhost/no-Origin-header defaults apply —
 	// never a wildcard.
 	WSAllowedOrigins string `mapstructure:"ws_allowed_origins"`
+
+	// CORSAllowedOrigins is the allowlist used by the HTTP-wide
+	// CORSMiddleware (internal/server.CORSMiddleware, wired in server.New)
+	// for the "Access-Control-Allow-Origin" / "Access-Control-Allow-Credentials"
+	// response headers. §11.4.74 reuse of the WSAllowedOrigins pattern:
+	// closes the confirmed CORS spec violation where the middleware
+	// previously emitted a wildcard "Access-Control-Allow-Origin: *"
+	// TOGETHER WITH "Access-Control-Allow-Credentials: true" on every
+	// response — a combination forbidden by the Fetch/CORS spec (browsers
+	// reject it, and if reflected as the literal request Origin it would
+	// let ANY origin make credentialed cross-origin requests).
+	//
+	// A comma-separated list of exact allowed Origin header VALUES (e.g.
+	// "https://app.example.com,https://admin.example.com"). Populate via
+	// the HELIX_CORS_ALLOWED_ORIGINS env var (see setupEnvBindings) or an
+	// operator-owned config overlay. Empty (the zero-value default) means
+	// no cross-origin request is ever granted Allow-Origin/Allow-Credentials
+	// (default-deny) — same-origin requests are unaffected because
+	// browsers don't consult CORS headers for those. Never a wildcard.
+	CORSAllowedOrigins string `mapstructure:"cors_allowed_origins"`
 }
 
 // ServerConfig represents server configuration
@@ -353,6 +373,7 @@ func Load() (*Config, error) {
 	v.BindEnv("auth.jwt_secret", "HELIX_AUTH_JWT_SECRET")
 	v.BindEnv("auth.wire_facade_api_keys", "HELIX_WIRE_FACADE_API_KEYS")
 	v.BindEnv("auth.ws_allowed_origins", "HELIX_WS_ALLOWED_ORIGINS")
+	v.BindEnv("auth.cors_allowed_origins", "HELIX_CORS_ALLOWED_ORIGINS")
 	v.BindEnv("database.password", "HELIX_DATABASE_PASSWORD")
 	v.BindEnv("database.host", "HELIX_DATABASE_HOST")
 	v.BindEnv("database.port", "HELIX_DATABASE_PORT")
