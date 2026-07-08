@@ -1,0 +1,11 @@
+{
+  "mode": "port-flood",
+  "flood_sent": 50,
+  "flood_burst_size": 5,
+  "endpoint": "http://localhost:18434",
+  "port": 18434,
+  "pass": false,
+  "expect_fail": false,
+  "case_result": false,
+  "error": "post-flood request failed: http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+}

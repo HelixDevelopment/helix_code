@@ -1,0 +1,35 @@
+{
+  "mode": "parallel",
+  "n": 2,
+  "n_ok": 2,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "nonces_ok": true,
+  "consistent": true,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Count to 3.",
+  "results": [
+    {
+      "index": 0,
+      "nonce": "rccoremg",
+      "content": "Sure, let's count to 3 using the \"rccoremg\" nonce:\n\n1. Count to 1: \"r\"\n2. Count to 2: \"c\"\n3. Count to 3: \"o\"",
+      "status_code": 200,
+      "latency_ms": 86799,
+      "nonce_found": true
+    },
+    {
+      "index": 1,
+      "nonce": "9nt6vjxd",
+      "content": "1\n2",
+      "status_code": 200,
+      "latency_ms": 14600,
+      "nonce_found": false
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

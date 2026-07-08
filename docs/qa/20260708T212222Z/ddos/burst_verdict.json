@@ -1,0 +1,426 @@
+{
+  "mode": "burst",
+  "n": 50,
+  "n_ok": 0,
+  "n_429": 0,
+  "n_refused": 50,
+  "n_5xx": 0,
+  "n_other": 0,
+  "n_dropped": 0,
+  "n_failed": 0,
+  "n_timeout": 50,
+  "total_received": 0,
+  "no_loss": false,
+  "no_5xx": true,
+  "no_crash": true,
+  "duration": "2m0.092s",
+  "throughput_req_per_sec": 0.4163488343767499,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Count to 5.",
+  "results": [
+    {
+      "index": 0,
+      "nonce": "NONCE:eaz3x2nf",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 1,
+      "nonce": "NONCE:cmyilw3y",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 2,
+      "nonce": "NONCE:il92yfl0",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 3,
+      "nonce": "NONCE:pzh7qtjy",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 4,
+      "nonce": "NONCE:0r18oofh",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 5,
+      "nonce": "NONCE:7if5jdgd",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 6,
+      "nonce": "NONCE:0dyi3ezb",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 7,
+      "nonce": "NONCE:ylkg721d",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 8,
+      "nonce": "NONCE:6k6w2mhu",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 9,
+      "nonce": "NONCE:ubjuguyu",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 10,
+      "nonce": "NONCE:ij0vs54f",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 11,
+      "nonce": "NONCE:cyf6ikek",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 12,
+      "nonce": "NONCE:fncvj2a4",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 13,
+      "nonce": "NONCE:4hdnbcqn",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 14,
+      "nonce": "NONCE:fkfuqc6h",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 15,
+      "nonce": "NONCE:oidv76t3",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 16,
+      "nonce": "NONCE:lxier0v8",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 17,
+      "nonce": "NONCE:82r7weyu",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 18,
+      "nonce": "NONCE:16f6je0p",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 19,
+      "nonce": "NONCE:s1t19ebd",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 20,
+      "nonce": "NONCE:mpgfp4ih",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 21,
+      "nonce": "NONCE:pxxi3u7l",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 22,
+      "nonce": "NONCE:petn7tg4",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 23,
+      "nonce": "NONCE:c93epl28",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 24,
+      "nonce": "NONCE:47wqzxku",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 25,
+      "nonce": "NONCE:32ah3g29",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 26,
+      "nonce": "NONCE:ugs0f2ve",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 27,
+      "nonce": "NONCE:mgzo8c3y",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 28,
+      "nonce": "NONCE:m3sh1q5a",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 29,
+      "nonce": "NONCE:6dh4tojz",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 30,
+      "nonce": "NONCE:jzaz3nas",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120091,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 31,
+      "nonce": "NONCE:qxoy9oqp",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 32,
+      "nonce": "NONCE:gi662rf6",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 33,
+      "nonce": "NONCE:q10lw30m",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 34,
+      "nonce": "NONCE:a3ll40nj",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 35,
+      "nonce": "NONCE:2dwwsik3",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 36,
+      "nonce": "NONCE:jj83hmdg",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 37,
+      "nonce": "NONCE:0zk9m6em",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 38,
+      "nonce": "NONCE:oao7c6u6",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 39,
+      "nonce": "NONCE:294oc7pn",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 40,
+      "nonce": "NONCE:6uvktb36",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 41,
+      "nonce": "NONCE:raxvgl01",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 42,
+      "nonce": "NONCE:3ouz4n69",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 43,
+      "nonce": "NONCE:7vi9rp1r",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 44,
+      "nonce": "NONCE:5l04oovq",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 45,
+      "nonce": "NONCE:3uwdfu7k",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 46,
+      "nonce": "NONCE:7zmqo23v",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 47,
+      "nonce": "NONCE:dnsztr92",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 48,
+      "nonce": "NONCE:9ceoflz9",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 49,
+      "nonce": "NONCE:rzozg71n",
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 120090,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    }
+  ],
+  "pass": false,
+  "expect_fail": false,
+  "case_result": false
+}

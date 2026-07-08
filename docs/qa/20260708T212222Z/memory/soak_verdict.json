@@ -1,0 +1,39 @@
+{
+  "mode": "memory_soak",
+  "n": 10,
+  "interval": 5,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Count to 3.",
+  "coder_pid": 3898752,
+  "initial_rss_kb": 1366944,
+  "final_rss_kb": 1376508,
+  "rss_peak_kb": 1376508,
+  "leak_pct": 15,
+  "rss_samples": [
+    {
+      "index": 0,
+      "rss_kb": 1366944,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 5,
+      "rss_kb": 1370880,
+      "delta_kb": 3936,
+      "delta_pct": 0.2879415689304024
+    },
+    {
+      "index": 10,
+      "rss_kb": 1376508,
+      "delta_kb": 5628,
+      "delta_pct": 0.41053921568627455
+    }
+  ],
+  "monotonic_no_leak": true,
+  "gc_stability": true,
+  "steady_state": true,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}
