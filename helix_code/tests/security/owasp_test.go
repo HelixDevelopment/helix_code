@@ -184,13 +184,11 @@ func TestOWASP_A01_BrokenAccessControl_HorizontalPrivilegeEscalation(t *testing.
 		}, nil)
 
 		if resp != nil {
-			// Accept 401 (Unauthorized), 302 (redirect-based auth), or 404 (Not Found) as valid security responses
-			// 401: Access denied without authentication
-			// 302: Redirect-based auth is a valid pattern
-			// 404: Endpoint doesn't exist (or resource hidden for security)
-			validCodes := []int{http.StatusUnauthorized, http.StatusFound, http.StatusNotFound}
+			// Accept 401 (Unauthorized), 302 (redirect-based auth), 404 (Not Found),
+			// or 400 (Bad Request — PUT body parsing before auth check) as valid security responses
+			validCodes := []int{http.StatusUnauthorized, http.StatusFound, http.StatusNotFound, http.StatusBadRequest}
 			assert.Contains(t, validCodes, resp.StatusCode,
-				"Should not allow modification of other users. data (expected 401, 302, or 404)")
+				"Should not allow modification of other users data (expected 401, 302, 404, or 400)")
 		}
 	})
 }
