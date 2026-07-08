@@ -25,12 +25,12 @@ import (
 
 type MockSecurityAuthRepository struct {
 	mock.Mock
-	loginAttempts     map[string]int
-	loginAttemptsMu   sync.Mutex
-	blockedUsers      map[string]time.Time
-	blockedUsersMu    sync.Mutex
-	sessions          map[string]*auth.Session
-	sessionsMu        sync.Mutex
+	loginAttempts   map[string]int
+	loginAttemptsMu sync.Mutex
+	blockedUsers    map[string]time.Time
+	blockedUsersMu  sync.Mutex
+	sessions        map[string]*auth.Session
+	sessionsMu      sync.Mutex
 }
 
 func NewMockSecurityAuthRepository() *MockSecurityAuthRepository {
