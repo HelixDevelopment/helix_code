@@ -1,0 +1,13 @@
+=== Smoke Test 1: Health Check ===
+Timestamp: 2026-07-08T14:07:33+00:00
+Endpoint: GET http://127.0.0.1:8090/health
+---
+HTTP 200
+
+{
+    "status": "healthy",
+    "timestamp": "2026-07-08T14:07:33.373716956Z",
+    "version": "1.0.0"
+}
+
+PASS

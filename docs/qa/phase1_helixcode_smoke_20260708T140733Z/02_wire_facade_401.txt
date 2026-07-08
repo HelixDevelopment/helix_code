@@ -1,0 +1,14 @@
+=== Smoke Test 2: Wire Facade 401 (no auth) ===
+Timestamp: 2026-07-08T14:07:33+00:00
+Endpoint: POST http://127.0.0.1:8090/v1/chat/completions (no auth header)
+---
+HTTP 401
+
+{
+    "error": {
+        "message": "missing or invalid API key: provide 'Authorization: Bearer <key>' or 'x-api-key: <key>'",
+        "type": "authentication_error"
+    }
+}
+
+PASS

@@ -1,0 +1,3 @@
+=== Smoke Test 4: Anti-bluff server code check ===
+Bluff count: 0
+PASS (no bluff patterns in server code)

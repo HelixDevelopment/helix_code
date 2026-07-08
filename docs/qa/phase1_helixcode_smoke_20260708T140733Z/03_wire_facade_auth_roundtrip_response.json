@@ -1,0 +1,1 @@
+{"id":"chatcmpl-86b06e2d-69de-4622-903f-bd4244d8c667","object":"chat.completion","created":1783519653,"model":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","choices":[{"index":0,"message":{"role":"assistant","content":"Hello!"},"finish_reason":"stop"}],"usage":{"prompt_tokens":13,"completion_tokens":3,"total_tokens":16}}
