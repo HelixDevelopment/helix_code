@@ -1,0 +1,9 @@
+{
+  "exclude": [
+    "cli_agents/",
+    "cli_agents_resources/",
+    "github_pages_website/",
+    "submodules/**/tools/opensource/**",
+    "submodules/helix_agent/external/**"
+  ]
+}
