@@ -50,15 +50,22 @@ import (
 // /api/v1/llm/generate surface makes.
 //
 // Known, documented scope limits (honest, not silently omitted — §11.4.6):
-//   - No auth middleware is attached to either route. Genuine OpenAI clients
-//     send `Authorization: Bearer sk-...` and genuine Anthropic clients send
-//     `x-api-key: ...` — neither maps onto this server's internal user JWT
-//     (VerifyJWTWithDB), so wiring the existing authMiddleware here would
-//     break the exact wire-compatibility this facade exists to provide. This
-//     mirrors the existing public GET /api/v1/llm/providers|models group's
-//     posture, NOT the authenticated POST /generate|/stream group's — a
-//     tracked follow-up (see EXPANSION_PLAN_v2 §3 Phase D) is translating an
-//     external API-key header into this server's internal auth model.
+//   - AUTH (RESOLVED): both routes are gated by server.go's
+//     s.wireFacadeAuthMiddleware(), NOT the internal-user JWT
+//     authMiddleware()/VerifyJWTWithDB. Genuine OpenAI clients send
+//     `Authorization: Bearer sk-...` and genuine Anthropic clients send
+//     `x-api-key: ...` — neither maps onto this server's session JWT, so
+//     wireFacadeAuthMiddleware accepts either header shape and checks it
+//     against the operator-configured cfg.Auth.WireFacadeAPIKeys list
+//     (HELIX_WIRE_FACADE_API_KEYS). This closed a real security finding: an
+//     independent security review + the dual-wire review both flagged that
+//     these two routes previously had NO authentication at all while every
+//     shipped config profile (including config/production-config.yaml)
+//     binds server.address to 0.0.0.0 — an unauthenticated, real-provider,
+//     token-consuming surface reachable on any interface. See
+//     wireFacadeAuthMiddleware's doc-comment in server.go for the fail-closed
+//     rationale and wire_facade_auth_test.go for the RED->GREEN regression
+//     guard.
 //   - Anthropic's `system` field is accepted as a plain string only (the
 //     dominant real-world shape); the array-of-blocks `system` form (used for
 //     cache_control annotations) is not translated.

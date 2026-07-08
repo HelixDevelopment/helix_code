@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"dev.helix.code/internal/auth"
@@ -405,11 +406,25 @@ func (s *Server) setupRoutes() {
 	// Both handlers translate their wire shape into the EXISTING internal
 	// llm.LLMRequest / provider routing (llmProviderResolver +
 	// resolveDefaultModel + provider.Generate/GenerateStream) — see
-	// wire_facade.go's file-level doc-comment for the reuse contract and the
-	// documented, honest scope limits (no auth middleware attached; see that
-	// file for why).
-	s.router.POST("/v1/chat/completions", s.chatCompletions)
-	s.router.POST("/v1/messages", s.anthropicMessages)
+	// wire_facade.go's file-level doc-comment for the reuse contract.
+	//
+	// SECURITY (independent security review + dual-wire review finding,
+	// closed): these two routes drive real, paid-provider LLM generation
+	// (CONST-035/BLUFF-001) and were shipped with NO authentication at all —
+	// combined with every shipped config profile binding server.address to
+	// 0.0.0.0, that made them an unauthenticated, token-consuming surface
+	// reachable from any interface. The existing internal-user JWT
+	// s.authMiddleware() cannot be reused here (see wire_facade.go doc
+	// comment: genuine OpenAI/Anthropic clients send `Authorization: Bearer
+	// sk-...` / `x-api-key: ...`, never this server's session JWT), so a
+	// dedicated, wire-compatible API-key middleware
+	// (s.wireFacadeAuthMiddleware(), defined below) is applied to both
+	// routes instead. §11.4.115 regression guard:
+	// llm_generate_helixllm_live_test.go / llm_generate_helixllm_test.go's
+	// sibling test file wire_facade_auth_test.go RED-reproduces the
+	// pre-fix "unauthenticated -> 200" defect and GREEN-confirms the fix.
+	s.router.POST("/v1/chat/completions", s.wireFacadeAuthMiddleware(), s.chatCompletions)
+	s.router.POST("/v1/messages", s.wireFacadeAuthMiddleware(), s.anthropicMessages)
 
 	// WebSocket routes
 	s.router.GET("/ws", s.handleWebSocket)
@@ -524,6 +539,83 @@ func (s *Server) authMiddleware() gin.HandlerFunc {
 		// Set user in context
 		c.Set("user", user)
 		c.Next()
+	}
+}
+
+// wireFacadeAuthMiddleware authenticates the OpenAI-compatible
+// (POST /v1/chat/completions) and Anthropic-compatible (POST /v1/messages)
+// wire-facade routes registered in wire_facade.go.
+//
+// This is a DELIBERATELY SEPARATE check from authMiddleware(): genuine
+// OpenAI/Anthropic SDK clients pointed at this server via OPENAI_BASE_URL /
+// ANTHROPIC_BASE_URL send an API key, not this server's internal-user JWT —
+// `Authorization: Bearer sk-...` (OpenAI wire convention) or `x-api-key: ...`
+// (Anthropic wire convention, see wire_facade.go's file-level doc-comment).
+// Wiring authMiddleware()/VerifyJWTWithDB here would reject every genuine
+// client and defeat the wire-compatibility this facade exists to provide.
+//
+// Pattern reused, not reinvented (§11.4.74 extend-don't-reimplement): this
+// mirrors submodules/helix_llm's internal/gateway/middleware.APIKeyAuth,
+// which authenticated HelixLLM's own OpenAI-compatible gateway the same way
+// (DZ-05 fix, commit 60b8e4a) — Bearer/x-api-key token compared against a
+// configured, comma-separated key list.
+//
+// Fail-closed by design (unlike APIKeyAuth's "empty keys => open access"
+// convenience mode): cfg.Auth.WireFacadeAPIKeys defaults to "" in every
+// shipped config, and these routes drive real, paid-provider LLM calls
+// (CONST-035/BLUFF-001) that were the subject of the security finding this
+// middleware closes — an operator MUST explicitly configure at least one key
+// (HELIX_WIRE_FACADE_API_KEYS or auth.wire_facade_api_keys) before either
+// route accepts any request. No key configured => every request, even one
+// carrying a bearer token, is rejected with 401.
+func (s *Server) wireFacadeAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		configuredKeys := ""
+		if s.config != nil {
+			configuredKeys = s.config.Auth.WireFacadeAPIKeys
+		}
+
+		// Extract the caller-supplied token from either accepted wire
+		// convention. `Authorization: Bearer <key>` first (OpenAI + generic
+		// wire clients), falling back to the Anthropic-native `x-api-key`
+		// header used by Claude Code and other Anthropic SDK clients.
+		token := ""
+		if authHeader := c.GetHeader("Authorization"); authHeader != "" {
+			const bearerPrefix = "Bearer "
+			if len(authHeader) > len(bearerPrefix) && authHeader[:len(bearerPrefix)] == bearerPrefix {
+				token = authHeader[len(bearerPrefix):]
+			}
+		}
+		if token == "" {
+			token = c.GetHeader("x-api-key")
+		}
+
+		if token == "" || configuredKeys == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": gin.H{
+					"message": "missing or invalid API key: provide 'Authorization: Bearer <key>' or 'x-api-key: <key>'",
+					"type":    "authentication_error",
+				},
+			})
+			c.Abort()
+			return
+		}
+
+		for _, configured := range strings.Split(configuredKeys, ",") {
+			if strings.TrimSpace(configured) == token {
+				c.Set("wire_facade_api_key", token)
+				c.Next()
+				return
+			}
+		}
+
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": gin.H{
+				"message": "invalid API key",
+				"type":    "authentication_error",
+			},
+		})
+		c.Abort()
 	}
 }
 

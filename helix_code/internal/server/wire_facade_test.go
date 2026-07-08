@@ -82,11 +82,21 @@ func (p *wireFacadeFakeProvider) GenerateStream(ctx context.Context, req *llm.LL
 	return nil
 }
 
+// wireFacadeRoutesTestAPIKey is the fixed test-only key configured on the
+// server built by newTestServerForWireFacade, so requests exercised through
+// the REAL router (srv.router.ServeHTTP — as opposed to the direct-handler
+// postJSON helper used by the shape/streaming tests below, which bypass
+// middleware entirely) satisfy s.wireFacadeAuthMiddleware() (see
+// wire_facade_auth_test.go for the dedicated auth-guard coverage; this file
+// is about route WIRING + wire-shape translation, not auth).
+const wireFacadeRoutesTestAPIKey = "test-only-route-registration-key-not-a-real-secret"
+
 func newTestServerForWireFacade(t *testing.T) *Server {
 	t.Helper()
 	cfg := &config.Config{
 		Server:  config.ServerConfig{Address: "localhost", Port: 0},
 		Logging: config.LoggingConfig{Level: "error"},
+		Auth:    config.AuthConfig{WireFacadeAPIKeys: wireFacadeRoutesTestAPIKey},
 	}
 	db := (*database.Database)(nil)
 	srv := New(cfg, db, nil)
@@ -109,6 +119,7 @@ func TestDualWireFacade_RoutesRegistered(t *testing.T) {
 		body := `{"model":"test-model","messages":[{"role":"user","content":"What is 2+2?"}]}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+wireFacadeRoutesTestAPIKey)
 		srv.router.ServeHTTP(w, req)
 
 		require.NotEqual(t, http.StatusNotFound, w.Code,
@@ -121,6 +132,7 @@ func TestDualWireFacade_RoutesRegistered(t *testing.T) {
 		body := `{"model":"test-model","max_tokens":128,"messages":[{"role":"user","content":"What is 2+2?"}]}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/messages", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+wireFacadeRoutesTestAPIKey)
 		srv.router.ServeHTTP(w, req)
 
 		require.NotEqual(t, http.StatusNotFound, w.Code,

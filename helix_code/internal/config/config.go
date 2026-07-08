@@ -87,6 +87,26 @@ type AuthConfig struct {
 	TokenExpiry   int    `mapstructure:"token_expiry"`
 	SessionExpiry int    `mapstructure:"session_expiry"`
 	BcryptCost    int    `mapstructure:"bcrypt_cost"`
+
+	// WireFacadeAPIKeys authenticates the OpenAI-compatible (POST
+	// /v1/chat/completions) and Anthropic-compatible (POST /v1/messages)
+	// wire-facade routes registered in wire_facade.go (server.go's
+	// s.wireFacadeAuthMiddleware()). These routes intentionally do NOT use
+	// the internal-user JWT authMiddleware — genuine OpenAI/Anthropic SDK
+	// clients send `Authorization: Bearer sk-...` or `x-api-key: ...`, never
+	// this server's session JWT — so a separate, wire-compatible API-key
+	// check is required (§11.4.74 extend-don't-reimplement: mirrors
+	// submodules/helix_llm's internal/gateway/middleware.APIKeyAuth pattern).
+	//
+	// A comma-separated list of accepted keys. §11.4.10: NEVER hardcode a
+	// real value here or in any shipped config file — populate via the
+	// HELIX_WIRE_FACADE_API_KEYS env var (see setupEnvBindings) or an
+	// operator-owned, gitignored config overlay. Deliberately fails CLOSED:
+	// an empty value means the wire-facade routes reject every request
+	// (401), rather than defaulting to the pre-fix open-access behavior —
+	// these routes drive real, paid LLM provider calls (CONST-035/BLUFF-001)
+	// and MUST NOT be reachable by an unauthenticated caller in production.
+	WireFacadeAPIKeys string `mapstructure:"wire_facade_api_keys"`
 }
 
 // ServerConfig represents server configuration
@@ -312,6 +332,7 @@ func Load() (*Config, error) {
 
 	// Explicitly bind environment variables for critical settings
 	v.BindEnv("auth.jwt_secret", "HELIX_AUTH_JWT_SECRET")
+	v.BindEnv("auth.wire_facade_api_keys", "HELIX_WIRE_FACADE_API_KEYS")
 	v.BindEnv("database.password", "HELIX_DATABASE_PASSWORD")
 	v.BindEnv("database.host", "HELIX_DATABASE_HOST")
 	v.BindEnv("database.port", "HELIX_DATABASE_PORT")
