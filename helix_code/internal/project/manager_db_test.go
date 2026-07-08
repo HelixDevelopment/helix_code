@@ -80,7 +80,7 @@ func TestDatabaseManager_CreateProjectDatabaseError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, project)
-	assert.Contains(t, err.Error(), "internal_project_create_failed")
+	assert.Contains(t, err.Error(), "failed to create project in database")
 	mockDB.AssertExpectations(t)
 }
 
@@ -240,7 +240,7 @@ func TestDatabaseManager_GetProjectNotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, project)
-	assert.Contains(t, err.Error(), "internal_project_get_failed")
+	assert.Contains(t, err.Error(), "failed to get project from database")
 	mockDB.AssertExpectations(t)
 }
 
@@ -258,7 +258,7 @@ func TestDatabaseManager_GetProjectDatabaseError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, project)
-	assert.Contains(t, err.Error(), "internal_project_get_failed")
+	assert.Contains(t, err.Error(), "failed to get project from database")
 	mockDB.AssertExpectations(t)
 }
 
@@ -351,7 +351,7 @@ func TestDatabaseManager_ListProjectsQueryError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, projects)
-	assert.Contains(t, err.Error(), "internal_project_list_query_failed")
+	assert.Contains(t, err.Error(), "failed to query projects")
 	mockDB.AssertExpectations(t)
 }
 
@@ -369,7 +369,7 @@ func TestDatabaseManager_ListProjectsIterationError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, projects)
-	assert.Contains(t, err.Error(), "internal_project_list_iter_failed")
+	assert.Contains(t, err.Error(), "error iterating project rows")
 	mockDB.AssertExpectations(t)
 }
 
@@ -414,7 +414,7 @@ func TestDatabaseManager_UpdateProjectMetadataInvalidID(t *testing.T) {
 	err := dm.UpdateProjectMetadata(ctx, "invalid-uuid", metadata)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "internal_project_update_metadata_failed")
+	assert.Contains(t, err.Error(), "failed to update project metadata")
 	mockDB.AssertExpectations(t)
 }
 
@@ -432,7 +432,7 @@ func TestDatabaseManager_UpdateProjectMetadataExecError(t *testing.T) {
 	err := dm.UpdateProjectMetadata(ctx, projectID.String(), metadata)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "internal_project_update_metadata_failed")
+	assert.Contains(t, err.Error(), "failed to update project metadata")
 	mockDB.AssertExpectations(t)
 }
 
@@ -451,7 +451,7 @@ func TestDatabaseManager_UpdateProjectMetadataUpdateError(t *testing.T) {
 	err := dm.UpdateProjectMetadata(ctx, projectID.String(), metadata)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "internal_project_update_metadata_failed")
+	assert.Contains(t, err.Error(), "failed to update project metadata")
 	mockDB.AssertExpectations(t)
 }
 

@@ -48,8 +48,8 @@ func resetTranslator(t *testing.T) {
 func TestTr_DefaultsToNoopTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(stdctx.Background(), "internal_project_no_active_project", nil)
-	if got != "internal_project_no_active_project" {
-		t.Fatalf("tr default = %q, want raw message ID (loud echo)", got)
+	if got != "no active project found" {
+		t.Fatalf("tr default = %q, want resolved prose", got)
 	}
 }
 
@@ -86,8 +86,8 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	defer resetTranslator(t)
 
 	got := tr(stdctx.Background(), "internal_project_path_does_not_exist", nil)
-	if got != "internal_project_path_does_not_exist" {
-		t.Fatalf("tr after nil-reset = %q, want raw ID (Noop restored)", got)
+	if got != "project path does not exist: <no value>" {
+		t.Fatalf("tr after nil-reset = %q, want resolved prose", got)
 	}
 }
 
@@ -179,7 +179,7 @@ func TestRawText_EmittedByDefault(t *testing.T) {
 	if err == nil {
 		t.Fatal("GetActiveProject(empty manager) returned no error")
 	}
-	if !strings.Contains(err.Error(), "internal_project_no_active_project") {
-		t.Fatalf("GetActiveProject error = %q, want raw message ID (Noop echo)", err.Error())
+	if !strings.Contains(err.Error(), "no active project found") {
+		t.Fatalf("GetActiveProject error = %q, want resolved prose", err.Error())
 	}
 }
