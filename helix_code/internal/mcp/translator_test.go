@@ -261,10 +261,9 @@ func TestHandleInitialize_ServerNameGoesThroughTranslator(t *testing.T) {
 	}
 }
 
-// TestRawText_RegisterToolDefaultEcho asserts that with no translator
-// wired (NoopTranslator), RegisterTool emits the bundle message ID
-// verbatim — confirming the migration didn't accidentally pass an
-// empty string or a different literal.
+// TestRawText_RegisterToolDefaultEcho asserts that with the default
+// bundle translator (loaded via init), RegisterTool emits resolved
+// prose — confirming the HXC-097 init() path works correctly.
 func TestRawText_RegisterToolDefaultEcho(t *testing.T) {
 	resetTranslator(t)
 
@@ -277,7 +276,7 @@ func TestRawText_RegisterToolDefaultEcho(t *testing.T) {
 	}
 
 	out := buf.String()
-	if !strings.Contains(out, "internal_mcp_server_tool_registered") {
-		t.Fatalf("log = %q, want contain raw registration ID (Noop echo)", out)
+	if !strings.Contains(out, "✅ MCP Tool registered: Echo (echo-tool)") {
+		t.Fatalf("log = %q, want resolved prose for tool registration (HXC-097)", out)
 	}
 }

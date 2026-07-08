@@ -191,11 +191,11 @@ func TestPlanDeleteTool_Description_RoutesThroughTranslator(t *testing.T) {
 	}
 }
 
-// TestPlanTools_Description_NoopEchoesRawID is the paired-mutation
-// safety net: with no translator wired (the boot-time default), the
-// Description() output MUST equal the raw message ID — not the
-// English bundle value — so missing wiring surfaces immediately.
-func TestPlanTools_Description_NoopEchoesRawID(t *testing.T) {
+// TestPlanTools_Description_DefaultsToBundleProse asserts that
+// with the default bundle translator (loaded via init), each
+// tool's Description() returns the resolved English prose —
+// confirming the HXC-097 init() path works correctly.
+func TestPlanTools_Description_DefaultsToBundleProse(t *testing.T) {
 	resetTranslator(t)
 	SetTranslator(nil)
 
@@ -204,16 +204,16 @@ func TestPlanTools_Description_NoopEchoesRawID(t *testing.T) {
 		got  string
 		want string
 	}{
-		{"create", NewPlanCreateTool(nil).Description(), "internal_plantree_tool_create_description"},
-		{"branch", NewPlanBranchTool(nil).Description(), "internal_plantree_tool_branch_description"},
-		{"merge", NewPlanMergeTool(nil).Description(), "internal_plantree_tool_merge_description"},
-		{"list", NewPlanListTool(nil).Description(), "internal_plantree_tool_list_description"},
-		{"show", NewPlanShowTool(nil).Description(), "internal_plantree_tool_show_description"},
-		{"delete", NewPlanDeleteTool(nil).Description(), "internal_plantree_tool_delete_description"},
+		{"create", NewPlanCreateTool(nil).Description(), "Create a new plan tree with a root node"},
+		{"branch", NewPlanBranchTool(nil).Description(), "Add a child node under an existing plan node"},
+		{"merge", NewPlanMergeTool(nil).Description(), "Merge a completed child node back into its parent"},
+		{"list", NewPlanListTool(nil).Description(), "List all saved plan trees with summaries"},
+		{"show", NewPlanShowTool(nil).Description(), "Display a plan tree with status markers"},
+		{"delete", NewPlanDeleteTool(nil).Description(), "Delete a plan tree"},
 	}
 	for _, c := range cases {
 		if c.got != c.want {
-			t.Errorf("%s: Description() = %q, want raw ID echo %q (Noop default)", c.name, c.got, c.want)
+			t.Errorf("%s: Description() = %q, want bundle prose %q (HXC-097)", c.name, c.got, c.want)
 		}
 	}
 }

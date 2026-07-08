@@ -167,15 +167,15 @@ func TestRepoMapTool_DescriptionUsesTranslatorSeam(t *testing.T) {
 }
 
 // TestRepoMapTool_DescriptionDefaultEchoesID confirms that under the
-// Noop default, Description() returns the raw message ID (which is
-// the loud-echo failure mode by design). Paired with the above
-// sentinel test, this proves the call site reads from tr() and not
-// from a frozen literal.
+// default bundle translator (loaded via init), Description() returns
+// the resolved English prose — confirming the HXC-097 init() path
+// works correctly. Paired with the above sentinel test, this proves
+// the call site reads from tr() and not from a frozen literal.
 func TestRepoMapTool_DescriptionDefaultEchoesID(t *testing.T) {
 	resetTranslator(t)
 	tool := &RepoMapTool{}
 	got := tool.Description()
-	if got != "internal_repomap_tool_description" {
-		t.Fatalf("RepoMapTool.Description() default = %q, want raw ID echo", got)
+	if got != "Generate a semantic map of the codebase using tree-sitter" {
+		t.Fatalf("RepoMapTool.Description() default = %q, want bundle prose (HXC-097)", got)
 	}
 }
