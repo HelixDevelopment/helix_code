@@ -1,0 +1,147 @@
+{
+  "mode": "memory_soak",
+  "n": 200,
+  "interval": 10,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Count from 1 to 5.",
+  "coder_pid": 3840080,
+  "initial_rss_kb": 683956,
+  "final_rss_kb": 684000,
+  "rss_peak_kb": 684000,
+  "leak_pct": 15,
+  "rss_samples": [
+    {
+      "index": 0,
+      "rss_kb": 683956,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 10,
+      "rss_kb": 683956,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 20,
+      "rss_kb": 683976,
+      "delta_kb": 20,
+      "delta_pct": 0.0029241647123499173
+    },
+    {
+      "index": 30,
+      "rss_kb": 683976,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 40,
+      "rss_kb": 683976,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 50,
+      "rss_kb": 683976,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 60,
+      "rss_kb": 683980,
+      "delta_kb": 4,
+      "delta_pct": 0.0005848158414915143
+    },
+    {
+      "index": 70,
+      "rss_kb": 683980,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 80,
+      "rss_kb": 683980,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 90,
+      "rss_kb": 683980,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 100,
+      "rss_kb": 683980,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 110,
+      "rss_kb": 683984,
+      "delta_kb": 4,
+      "delta_pct": 0.0005848124214158308
+    },
+    {
+      "index": 120,
+      "rss_kb": 683988,
+      "delta_kb": 4,
+      "delta_pct": 0.0005848090013801492
+    },
+    {
+      "index": 130,
+      "rss_kb": 683988,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 140,
+      "rss_kb": 683988,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 150,
+      "rss_kb": 683988,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 160,
+      "rss_kb": 683988,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 170,
+      "rss_kb": 683988,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 180,
+      "rss_kb": 684000,
+      "delta_kb": 12,
+      "delta_pct": 0.001754416744153406
+    },
+    {
+      "index": 190,
+      "rss_kb": 684000,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 200,
+      "rss_kb": 684000,
+      "delta_kb": 0,
+      "delta_pct": 0
+    }
+  ],
+  "monotonic_no_leak": true,
+  "gc_stability": true,
+  "steady_state": true,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}
