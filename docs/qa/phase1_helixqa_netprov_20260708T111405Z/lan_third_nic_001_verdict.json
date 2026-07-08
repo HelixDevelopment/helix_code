@@ -1,0 +1,24 @@
+{
+  "endpoint": "http://10.6.100.58:18434/v1/chat/completions",
+  "resolved_host": "10.6.100.58",
+  "is_loopback": false,
+  "require_lan": true,
+  "lan_check_pass": true,
+  "prompt": "What color do you get by mixing blue and yellow paint? Reply with only the color name.",
+  "model_requested": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "model_served": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "expected_facts": [
+    "green"
+  ],
+  "response": "Green",
+  "matched_facts": 1,
+  "expected_count": 1,
+  "hallucinated": false,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 22,
+  "http_status": 200,
+  "prompt_tokens": 27,
+  "completion_tokens": 2
+}

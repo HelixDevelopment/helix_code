@@ -1,0 +1,24 @@
+{
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "resolved_host": "localhost",
+  "is_loopback": true,
+  "require_lan": true,
+  "lan_check_pass": false,
+  "prompt": "reply with only the word OK",
+  "model_requested": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "model_served": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "expected_facts": [
+    "ok"
+  ],
+  "response": "OK",
+  "matched_facts": 1,
+  "expected_count": 1,
+  "hallucinated": false,
+  "pass": false,
+  "expect_fail": true,
+  "case_result": true,
+  "latency_ms": 67,
+  "http_status": 200,
+  "prompt_tokens": 14,
+  "completion_tokens": 2
+}

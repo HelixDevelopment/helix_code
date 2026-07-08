@@ -1,0 +1,24 @@
+{
+  "endpoint": "http://10.111.28.100:18434/v1/chat/completions",
+  "resolved_host": "10.111.28.100",
+  "is_loopback": false,
+  "require_lan": true,
+  "lan_check_pass": true,
+  "prompt": "What is the capital of France? Reply with only the city name.",
+  "model_requested": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "model_served": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "expected_facts": [
+    "paris"
+  ],
+  "response": "Paris",
+  "matched_facts": 1,
+  "expected_count": 1,
+  "hallucinated": false,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 22,
+  "http_status": 200,
+  "prompt_tokens": 22,
+  "completion_tokens": 2
+}

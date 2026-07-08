@@ -1,0 +1,25 @@
+{
+  "endpoint": "http://10.6.100.221:19999/v1/chat/completions",
+  "resolved_host": "10.6.100.221",
+  "is_loopback": false,
+  "require_lan": true,
+  "lan_check_pass": true,
+  "prompt": "reply with only the word OK",
+  "model_requested": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "model_served": "",
+  "expected_facts": [
+    "ok"
+  ],
+  "response": "",
+  "matched_facts": 0,
+  "expected_count": 1,
+  "hallucinated": false,
+  "pass": false,
+  "expect_fail": true,
+  "case_result": true,
+  "latency_ms": 0,
+  "http_status": 0,
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "error": "http request: Post \"http://10.6.100.221:19999/v1/chat/completions\": dial tcp 10.6.100.221:19999: connect: connection refused"
+}

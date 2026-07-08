@@ -1,0 +1,24 @@
+{
+  "endpoint": "http://10.6.100.221:18434/v1/chat/completions",
+  "resolved_host": "10.6.100.221",
+  "is_loopback": false,
+  "require_lan": true,
+  "lan_check_pass": true,
+  "prompt": "What is 17 + 25? Reply with only the number.",
+  "model_requested": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "model_served": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "expected_facts": [
+    "42"
+  ],
+  "response": "42",
+  "matched_facts": 1,
+  "expected_count": 1,
+  "hallucinated": false,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true,
+  "latency_ms": 28,
+  "http_status": 200,
+  "prompt_tokens": 24,
+  "completion_tokens": 3
+}
