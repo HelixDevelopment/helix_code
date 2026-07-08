@@ -1,0 +1,6 @@
+{
+  "model": "gemma-4-31b",
+  "messages": [{"role":"user","content":"Reply with EXACTLY this token and nothing else: LIVEPROOF-b98891e0b0a8"}],
+  "max_tokens": 32,
+  "temperature": 0
+}

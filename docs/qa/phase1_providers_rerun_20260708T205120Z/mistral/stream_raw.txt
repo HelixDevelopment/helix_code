@@ -1,0 +1,11 @@
+data: {"id":"4fa47cc7fa174b3183edebe65e722c86","object":"chat.completion.chunk","created":1783543889,"model":"mistral-small-2603","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"id":"4fa47cc7fa174b3183edebe65e722c86","object":"chat.completion.chunk","created":1783543889,"model":"mistral-small-2603","choices":[{"index":0,"delta":{"content":"ST"},"finish_reason":null}],"p":"abcdefghijklmnopqrstuvwxyz012345"}
+
+data: {"id":"4fa47cc7fa174b3183edebe65e722c86","object":"chat.completion.chunk","created":1783543889,"model":"mistral-small-2603","choices":[{"index":0,"delta":{"content":"REAM-d70"},"finish_reason":null}],"p":"abcdefghijklmnopqrstuvwxyz"}
+
+data: {"id":"4fa47cc7fa174b3183edebe65e722c86","object":"chat.completion.chunk","created":1783543889,"model":"mistral-small-2603","choices":[{"index":0,"delta":{"content":"af928"},"finish_reason":null}],"p":"abcdefghijklmn"}
+
+data: {"id":"4fa47cc7fa174b3183edebe65e722c86","object":"chat.completion.chunk","created":1783543889,"model":"mistral-small-2603","choices":[{"index":0,"delta":{"content":""},"finish_reason":"stop"}],"usage":{"prompt_tokens":36,"total_tokens":46,"completion_tokens":10,"prompt_tokens_details":{"cached_tokens":0}},"p":"abcdefghijklmnopqrstuvwxyz"}
+
+data: [DONE]

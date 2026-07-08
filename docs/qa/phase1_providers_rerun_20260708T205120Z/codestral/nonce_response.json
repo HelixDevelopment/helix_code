@@ -1,0 +1,1 @@
+{"id":"2c872c55f8f6447db715992735fc9604","created":1783543891,"model":"codestral-latest","usage":{"prompt_tokens":27,"total_tokens":41,"completion_tokens":14,"prompt_tokens_details":{"cached_tokens":0}},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"LIVEPROOF-cfbeb0d9412e"}}]}

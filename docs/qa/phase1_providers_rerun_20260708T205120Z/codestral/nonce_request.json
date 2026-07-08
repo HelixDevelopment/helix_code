@@ -1,0 +1,6 @@
+{
+  "model": "codestral-latest",
+  "messages": [{"role":"user","content":"Reply with EXACTLY this token and nothing else: LIVEPROOF-cfbeb0d9412e"}],
+  "max_tokens": 32,
+  "temperature": 0
+}

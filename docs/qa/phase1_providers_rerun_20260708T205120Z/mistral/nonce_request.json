@@ -1,0 +1,6 @@
+{
+  "model": "mistral-small-2603",
+  "messages": [{"role":"user","content":"Reply with EXACTLY this token and nothing else: LIVEPROOF-cd11139464f3"}],
+  "max_tokens": 32,
+  "temperature": 0
+}

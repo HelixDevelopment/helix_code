@@ -1,0 +1,3 @@
+verdict: PASS
+detail: nonce echo: echoed fresh nonce LIVEPROOF-d47a7fb8813c
+timestamp_utc: 2026-07-08T20:51:36Z
