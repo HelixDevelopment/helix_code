@@ -126,6 +126,18 @@ func resolveLLMProvider(providerName, model string) (llm.Provider, error) {
 		requested = strings.TrimSpace(sel.Env)
 	}
 
+	// Local HelixLLM coder route (the in-repo llama.cpp OpenAI-compatible
+	// sidecar — see resolveHelixLLMLocalProvider's doc-comment). Checked
+	// BEFORE llm.Select/llm.NewCloudProvider (the F12 direct-cloud-provider
+	// path) because that path's parseCloudProviderType does not — and MUST
+	// NOT, per its own doc-comment scoping it to the four Feature-12 cloud
+	// backends plus Ollama/llamacpp — recognise "helixllm"/"local"; without
+	// this early check the request would be rejected as errUnknownProvider
+	// even though the coder is genuinely reachable.
+	if strings.EqualFold(requested, "helixllm") || strings.EqualFold(requested, "local") {
+		return resolveHelixLLMLocalProvider(model)
+	}
+
 	ptype, selErr := llm.Select(sel)
 	switch {
 	case selErr == nil:
@@ -397,4 +409,61 @@ func providerResolveStatus(err error) int {
 // has a single, testable env touch point.
 func envLLMProvider() string {
 	return os.Getenv("HELIX_LLM_PROVIDER")
+}
+
+// helixLLMLocalOpenAIEndpointEnv is the SAME env var the sibling
+// submodules/helix_agent HelixLLM provider adapter
+// (internal/llm/providers/helixllm/provider.go:41, EnvLocalOpenAIEndpoint)
+// and the submodules/llms_verifier helixllm ProviderConfig row
+// (llm-verifier/providers/config.go:15) already read — the single
+// established, project-wide convention for pointing at the in-repo
+// llama.cpp OpenAI-compatible coder sidecar (CONST-036/§11.4.74: reuse the
+// existing convention, do not invent a new env var). Base URL only, with NO
+// trailing "/v1" — the llama-server always answers under "/v1/..." and the
+// OpenAICompatibleConfig ChatEndpoint/ModelEndpoint defaults already carry
+// that prefix.
+const helixLLMLocalOpenAIEndpointEnv = "HELIX_LLM_LOCAL_OPENAI_ENDPOINT"
+
+// helixLLMLocalDefaultEndpoint is the sane out-of-the-box default matching
+// the coder's actual listening port. §11.4.28: this is the ONLY hardcoded
+// host in this route, and it is overridable by every deployment via
+// helixLLMLocalOpenAIEndpointEnv.
+const helixLLMLocalDefaultEndpoint = "http://localhost:18434"
+
+// envHelixLLMLocalEndpoint reads HELIX_LLM_LOCAL_OPENAI_ENDPOINT, falling
+// back to helixLLMLocalDefaultEndpoint when unset or blank.
+func envHelixLLMLocalEndpoint() string {
+	if v := strings.TrimSpace(os.Getenv(helixLLMLocalOpenAIEndpointEnv)); v != "" {
+		return v
+	}
+	return helixLLMLocalDefaultEndpoint
+}
+
+// resolveHelixLLMLocalProvider constructs the local HelixLLM coder route: a
+// REAL *llm.OpenAICompatibleProvider (internal/llm/openai_compatible_provider.go)
+// — the same generic OpenAI-compatible HTTP client HelixCode already uses
+// for VLLM/LMStudio/LocalAI/etc. — pointed at the local llama.cpp sidecar's
+// base URL. This is deliberately NOT llm.NewLlamaCPPProvider: that adapter
+// always POSTs to "/v1/completions" even when the request carries
+// request.Messages (a chat-shaped payload), which a real llama.cpp server
+// rejects with `400 key 'prompt' not found` (verified live against the
+// coder during this change) — OpenAICompatibleProvider correctly POSTs
+// messages to "/v1/chat/completions". No API key: the coder is a
+// loopback/LAN service with no auth, so nothing is read or leaked
+// (CONST-042/§12.1).
+func resolveHelixLLMLocalProvider(model string) (llm.Provider, error) {
+	cfg := llm.OpenAICompatibleConfig{
+		BaseURL:          envHelixLLMLocalEndpoint(),
+		DefaultModel:     strings.TrimSpace(model),
+		Timeout:          120 * time.Second,
+		StreamingSupport: true,
+	}
+	provider, err := llm.NewOpenAICompatibleProvider("helixllm", cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to construct helixllm local provider: %w", err)
+	}
+	if provider == nil {
+		return nil, fmt.Errorf("helixllm local provider constructed nil without an error")
+	}
+	return provider, nil
 }
