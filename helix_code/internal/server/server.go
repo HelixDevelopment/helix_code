@@ -395,6 +395,22 @@ func (s *Server) setupRoutes() {
 		s.mountPprof()
 	}
 
+	// Dual OpenAI-style + Anthropic-style wire facade — Provider-Coverage
+	// Expansion Plan v2 §3 Phase D
+	// (docs/research/07.2026/06_providers_coverage/EXPANSION_PLAN_v2.md).
+	// Registered at the WIRE-STANDARD paths (no /api/v1 prefix) so an
+	// OpenAI-compatible client (OPENAI_BASE_URL) or an Anthropic-compatible
+	// client (ANTHROPIC_BASE_URL, e.g. Claude Code itself) auto-recognizes
+	// this server when pointed at it — mirroring HelixLLM's own dual facade.
+	// Both handlers translate their wire shape into the EXISTING internal
+	// llm.LLMRequest / provider routing (llmProviderResolver +
+	// resolveDefaultModel + provider.Generate/GenerateStream) — see
+	// wire_facade.go's file-level doc-comment for the reuse contract and the
+	// documented, honest scope limits (no auth middleware attached; see that
+	// file for why).
+	s.router.POST("/v1/chat/completions", s.chatCompletions)
+	s.router.POST("/v1/messages", s.anthropicMessages)
+
 	// WebSocket routes
 	s.router.GET("/ws", s.handleWebSocket)
 
