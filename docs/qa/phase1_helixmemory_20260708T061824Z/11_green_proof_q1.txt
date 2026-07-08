@@ -1,0 +1,15 @@
+### qkey=q1 pipeline
+EMBED-QUERY-OK: qkey=q1 model=BAAI/bge-small-en-v1.5 dim=384 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase1_helixmemory_20260708T061824Z/query_embedding_q1.json
+RECALL-OK: qkey=q1 top1=mem_region score=0.8536 (of 4 facts) wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase1_helixmemory_20260708T061824Z/retrieval_q1.json
+  rank1 id=mem_region score=0.8536
+  rank2 id=mem_alias score=0.6216
+  rank3 id=mem_color score=0.4249
+  rank4 id=mem_lunch score=0.3698
+[RETRIEVAL-CHECK] PASS: qkey=q1 real-pgvector top1=mem_region (score=0.8536) == expected mem_region
+checkretrieval_exit_q1=0
+GREEN answer (qkey=q1, grounded on recalled memory mem_region): "Based on your recalled memory, your preferred deployment region for HelixLLM is called Emberfall-Station."
+[GREEN] GREEN-OK: qkey=q1 memory-grounded answer contains invented token "Emberfall-Station"
+green_exit_q1=0
+[MEMORY-RUNTIME-SIGNATURE] PASS top1=mem_region(score=0.8536, ok=true) tokenFound=true answer="Based on your recalled memory, your preferred deployment region for HelixLLM is called Emberfall-Station."
+analyze_exit_q1=0
+qkey=q1: GREEN-OK (memory runtime signature PASS)

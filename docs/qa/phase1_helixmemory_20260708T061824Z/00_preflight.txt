@@ -1,0 +1,11 @@
+### pre-flight (§11.4.119 single-owner, coder untouched)
+date_utc=2026-07-08T06:26:07Z
+uname_m=x86_64  podman=podman version 5.7.1  psql=psql (PostgreSQL) 17.5
+coder container (MUST remain running, untouched):
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 24 minutes
+coder live model + health:
+coder /v1/models http_code=200
+target host ports 18450 (postgres) / 18451 (tei) listeners (expect none):
+  (both free)
+other host containers observed (read-only, never touched — §11.4.174):
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 24 minutes

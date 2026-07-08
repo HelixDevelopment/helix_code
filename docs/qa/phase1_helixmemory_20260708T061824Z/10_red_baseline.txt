@@ -1,0 +1,10 @@
+### RED baseline (§11.4.115): coder asked the SAME recall questions with NOTHING stored/retrieved
+RED_MODE=1 — expect the coder to NOT know either invented fact (defect reproduced)
+--- qkey=q1 ---
+RED answer (qkey=q1, no memory): "I don't have any information about your preferred deployment region for HelixLLM, as this would be specific to your configuration or settings that aren't provided in our conversation."
+[RED] RED-OK: qkey=q1 coder did NOT know "Emberfall-Station" without memory recall (defect correctly reproduced — it has no way to answer)
+red_exit_q1=0
+--- qkey=q2 ---
+RED answer (qkey=q2, no memory): "I don't have access to information about any internal alias or specific identifier for a \"coder agent\" in our conversation."
+[RED] RED-OK: qkey=q2 coder did NOT know "Wraithloom" without memory recall (defect correctly reproduced — it has no way to answer)
+red_exit_q2=0

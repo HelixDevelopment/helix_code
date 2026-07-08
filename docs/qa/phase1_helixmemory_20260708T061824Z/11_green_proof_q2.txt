@@ -1,0 +1,15 @@
+### qkey=q2 pipeline
+EMBED-QUERY-OK: qkey=q2 model=BAAI/bge-small-en-v1.5 dim=384 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase1_helixmemory_20260708T061824Z/query_embedding_q2.json
+RECALL-OK: qkey=q2 top1=mem_alias score=0.8781 (of 4 facts) wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase1_helixmemory_20260708T061824Z/retrieval_q2.json
+  rank1 id=mem_alias score=0.8781
+  rank2 id=mem_region score=0.6140
+  rank3 id=mem_color score=0.3892
+  rank4 id=mem_lunch score=0.3220
+[RETRIEVAL-CHECK] PASS: qkey=q2 real-pgvector top1=mem_alias (score=0.8781) == expected mem_alias
+checkretrieval_exit_q2=0
+GREEN answer (qkey=q2, grounded on recalled memory mem_alias): "Your internal alias for the coder agent is Wraithloom."
+[GREEN] GREEN-OK: qkey=q2 memory-grounded answer contains invented token "Wraithloom"
+green_exit_q2=0
+[MEMORY-RUNTIME-SIGNATURE] PASS top1=mem_alias(score=0.8781, ok=true) tokenFound=true answer="Your internal alias for the coder agent is Wraithloom."
+analyze_exit_q2=0
+qkey=q2: GREEN-OK (memory runtime signature PASS)

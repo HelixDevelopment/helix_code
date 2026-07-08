@@ -1,0 +1,1 @@
+REMEMBER-ALL-OK: model=BAAI/bge-small-en-v1.5 dim=384 facts=4 persisted to Postgres wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/phase1_helixmemory_20260708T061824Z/remembered_facts.json

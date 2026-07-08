@@ -1,0 +1,5 @@
+DB-INIT-OK: extension+table ready
+CREATE EXTENSION
+DROP TABLE
+CREATE TABLE
+

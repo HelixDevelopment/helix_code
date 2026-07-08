@@ -1,0 +1,26 @@
+{
+  "query": "What is my internal alias for the coder agent?",
+  "qkey": "q2",
+  "ranked": [
+    {
+      "id": "mem_alias",
+      "text": "Remember that my internal alias for the coder agent is Wraithloom.",
+      "score": 0.8781366609971725
+    },
+    {
+      "id": "mem_region",
+      "text": "Remember that my preferred deployment region for HelixLLM is called Emberfall-Station.",
+      "score": 0.6139652729034424
+    },
+    {
+      "id": "mem_color",
+      "text": "Remember that my favorite color is teal.",
+      "score": 0.38924217224121094
+    },
+    {
+      "id": "mem_lunch",
+      "text": "Remember that I usually eat lunch at noon.",
+      "score": 0.32200939422873853
+    }
+  ]
+}

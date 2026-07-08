@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Based on your recalled memory, your preferred deployment region for HelixLLM is called Emberfall-Station."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-DzQZFh9fWv5fjPLAeC1LXBQu2KsKNz4H"
+}

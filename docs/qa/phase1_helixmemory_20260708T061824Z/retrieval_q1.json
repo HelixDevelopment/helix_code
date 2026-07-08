@@ -1,0 +1,26 @@
+{
+  "query": "What is my preferred deployment region for HelixLLM?",
+  "qkey": "q1",
+  "ranked": [
+    {
+      "id": "mem_region",
+      "text": "Remember that my preferred deployment region for HelixLLM is called Emberfall-Station.",
+      "score": 0.8536281840094386
+    },
+    {
+      "id": "mem_alias",
+      "text": "Remember that my internal alias for the coder agent is Wraithloom.",
+      "score": 0.6215797437178936
+    },
+    {
+      "id": "mem_color",
+      "text": "Remember that my favorite color is teal.",
+      "score": 0.42490185573404615
+    },
+    {
+      "id": "mem_lunch",
+      "text": "Remember that I usually eat lunch at noon.",
+      "score": 0.3697886687391203
+    }
+  ]
+}

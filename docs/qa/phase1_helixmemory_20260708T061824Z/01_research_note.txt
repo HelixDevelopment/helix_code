@@ -1,0 +1,15 @@
+### deep-research note (§11.4.150) — HelixMemory local stack, access-date 2026-07-08
+Zep Community Edition is DEPRECATED (April 2025, Apache-2.0 code frozen, no updates) —
+https://blog.getzep.com/announcing-a-new-direction-for-zeps-open-source-strategy/ .
+Self-hostable durable spine today = the raw Graphiti library/MCP-server (Apache-2.0,
+https://github.com/getzep/graphiti), backed by Neo4j 5.26 / FalkorDB 1.1.2 (SSPLv1,
+https://docs.falkordb.com/license.html) / Amazon Neptune / Kuzu 0.11.2 (embedded, MIT).
+Graphiti supports OpenAI-compatible local endpoints (Ollama/vLLM/llama.cpp/LM Studio) via
+OpenAIGenericClient with a custom base_url — the live coder (:18434) qualifies.
+mem0 (Apache-2.0, https://github.com/mem0ai/mem0) self-hosted OSS server = FastAPI +
+Postgres/pgvector (ankane/pgvector image) + optional Neo4j; 'swap both [LLM+embed] for
+Ollama models to go fully offline' (https://mem0.ai/blog/self-host-mem0-docker).
+This harness implements the mem0-style embed/persist/recall/ground mechanism directly
+against Postgres+pgvector (pgvector/pgvector:pg16) — see HELIXMEMORY_PROVIDER.md for the
+full citation set + the honest scope note (no upstream mem0/Graphiti package installed
+this session).

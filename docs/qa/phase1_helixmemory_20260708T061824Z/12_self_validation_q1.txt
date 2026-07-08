@@ -1,0 +1,11 @@
+### analyzer self-validation (§11.4.107(10)) qkey=q1
+[GOLDEN-GOOD(expect PASS)] PASS top1=mem_region(score=0.8536, ok=true) tokenFound=true answer="Based on your recalled memory, your preferred deployment region for HelixLLM is called Emberfall-Station."
+[GOLDEN-BAD-NO-FACT(expect FAIL)] FAIL top1=mem_region(score=0.8536, ok=true) tokenFound=false answer="I don't know based on the given memory."
+    reason: answer does not contain invented token "Emberfall-Station"
+[GOLDEN-BAD-WRONG-RECALL(expect FAIL)] FAIL top1=mem_lunch(score=0.8536, ok=false) tokenFound=true answer="Based on your recalled memory, your preferred deployment region for HelixLLM is called Emberfall-Station."
+    reason: recall top-1 "mem_lunch" != expected fact-bearing memory "mem_region"
+[GOLDEN-BAD-EMPTY-ANSWER(expect FAIL)] FAIL top1=mem_region(score=0.8536, ok=true) tokenFound=false answer=""
+    reason: empty generated answer
+    reason: answer does not contain invented token "Emberfall-Station"
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit_q1=0

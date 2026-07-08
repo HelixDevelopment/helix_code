@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "I don't have any information about your preferred deployment region for HelixLLM, as this would be specific to your configuration or settings that aren't provided in our conversation."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-xOs4AjPKj99tKfQV2EXg8taRqpVDjPY0"
+}

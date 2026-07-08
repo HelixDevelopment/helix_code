@@ -1,0 +1,22 @@
+{
+  "model": "BAAI/bge-small-en-v1.5",
+  "dim": 384,
+  "remembered": [
+    {
+      "id": "mem_region",
+      "dim": 384
+    },
+    {
+      "id": "mem_alias",
+      "dim": 384
+    },
+    {
+      "id": "mem_lunch",
+      "dim": 384
+    },
+    {
+      "id": "mem_color",
+      "dim": 384
+    }
+  ]
+}
