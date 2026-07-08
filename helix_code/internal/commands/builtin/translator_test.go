@@ -128,12 +128,15 @@ func TestTrc_TranslatorErrorReturnsMessageID(t *testing.T) {
 
 func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	SetTranslator(sentinelTranslator{})
-	SetTranslator(nil) // explicit reset → NoopTranslator
+	SetTranslator(nil) // explicit reset → defaultTranslator
 	defer withRealBundleTranslator(t)
 
 	got := trc("builtin_newtask_description", nil)
-	if got != "builtin_newtask_description" {
-		t.Fatalf("trc after nil-reset = %q, want raw ID (Noop restored)", got)
+	// SetTranslator(nil) restores defaultTranslator — the real bundle
+	// translator installed by init() — so the message ID resolves to
+	// prose, not to a raw ID echo.
+	if got != "Create a new task with current context preserved" {
+		t.Fatalf("trc after nil-reset = %q, want resolved prose %q", got, "Create a new task with current context preserved")
 	}
 }
 

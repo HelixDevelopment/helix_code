@@ -65,8 +65,8 @@ func TestSetTranslator_Nil_ResetsToNoop(t *testing.T) {
 	}
 	SetTranslator(nil)
 	got = tr(context.Background(), "internal_autocommit_skipped_disabled", nil)
-	if got != "internal_autocommit_skipped_disabled" {
-		t.Fatalf("after SetTranslator(nil), expected loud message-ID echo, got %q", got)
+	if got != "auto-commit disabled" {
+		t.Fatalf("after SetTranslator(nil), expected resolved prose %q, got %q", "auto-commit disabled", got)
 	}
 }
 

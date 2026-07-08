@@ -96,7 +96,7 @@ func TestCommitter_SkipRequested_Honoured(t *testing.T) {
 	require.True(t, res.Skipped)
 	// CONST-046 round-229: Reason resolved via NoopTranslator → loud
 	// echo of "internal_autocommit_skipped_per_edit_skip_requested".
-	require.Contains(t, res.Reason, "per_edit_skip")
+	require.Contains(t, res.Reason, "per-edit skip requested")
 }
 
 func TestCommitter_NotAGitRepo_Skips(t *testing.T) {
@@ -108,7 +108,7 @@ func TestCommitter_NotAGitRepo_Skips(t *testing.T) {
 	require.True(t, res.Skipped)
 	// CONST-046 round-229: Reason resolved via NoopTranslator → loud
 	// echo of "internal_autocommit_skipped_not_a_git_repo".
-	require.Contains(t, res.Reason, "not_a_git_repo")
+	require.Contains(t, res.Reason, "not a git repo")
 }
 
 func TestCommitter_CleanTree_NoChanges(t *testing.T) {
@@ -121,7 +121,7 @@ func TestCommitter_CleanTree_NoChanges(t *testing.T) {
 	require.True(t, res.Skipped)
 	// CONST-046 round-229: Reason resolved via NoopTranslator → loud
 	// echo of "internal_autocommit_skipped_no_changes_to_commit".
-	require.Contains(t, res.Reason, "no_changes")
+	require.Contains(t, res.Reason, "no changes to commit")
 }
 
 func TestCommitter_LLMUnavailable_FallsBack_StillCommits(t *testing.T) {
@@ -137,7 +137,7 @@ func TestCommitter_LLMUnavailable_FallsBack_StillCommits(t *testing.T) {
 	// CONST-046 round-229: deterministic-fallback subject resolved via
 	// NoopTranslator → loud echo of
 	// "internal_autocommit_subject_auto_edit_prefix".
-	require.Contains(t, res.Subject, "auto_edit_prefix")
+	require.Contains(t, res.Subject, "Auto-edit:")
 }
 
 func TestCommitter_SetEnabled_AtomicSwap_NextCallSeesNewState(t *testing.T) {
