@@ -197,3 +197,6 @@ tools/codegraph/package-lock.json
 
 # transient PID files (§11.4.30)
 *.pid
+
+# OpenDesign supervised bring-up runtime artifacts (§11.4.162, §11.4.30)
+scripts/opendesign/run/
