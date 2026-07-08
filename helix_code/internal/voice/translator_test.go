@@ -67,14 +67,14 @@ func resetTranslator(t *testing.T) {
 func TestSetTranslator_Nil_ResetsToNoop(t *testing.T) {
 	resetTranslator(t)
 	SetTranslator(sentinelTranslator{})
-	got := tr(context.Background(), "Start recording audio from microphone", nil)
+	got := tr(context.Background(), "internal_voice_tool_start_description", nil)
 	if got != "<SENT:internal_voice_tool_start_description>" {
 		t.Fatalf("expected sentinel-wrapped output, got %q", got)
 	}
 	SetTranslator(nil)
-	got = tr(context.Background(), "Start recording audio from microphone", nil)
-	if got == "Start recording audio from microphone" || got == "" {
-		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
+	got = tr(context.Background(), "internal_voice_tool_start_description", nil)
+	if got != "Start recording audio from microphone" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q", got)
 	}
 }
 
@@ -84,9 +84,9 @@ func TestTr_FallsBackToMessageIDOnError(t *testing.T) {
 	// PASS-bluff at the i18n fallback layer (user sees nothing).
 	resetTranslator(t)
 	SetTranslator(errorTranslator{})
-	got := tr(context.Background(), "Start recording audio from microphone", nil)
-	if got != "Start recording audio from microphone" {
-		t.Fatalf("tr() with failing translator returned %q, want raw message ID", got)
+	got := tr(context.Background(), "internal_voice_tool_start_description", nil)
+	if got != "internal_voice_tool_start_description" {
+		t.Fatalf("tr() with failing translator returned %q, want raw message ID (self-healed)", got)
 	}
 }
 
@@ -97,9 +97,9 @@ func TestTr_FallsBackToMessageIDOnEmpty(t *testing.T) {
 	// operator — a §11.4 PASS-bluff at the i18n fallback layer.
 	resetTranslator(t)
 	SetTranslator(emptyTranslator{})
-	got := tr(context.Background(), "Start recording audio from microphone", nil)
-	if got != "Start recording audio from microphone" {
-		t.Fatalf("tr() with empty translator returned %q, want raw message ID", got)
+	got := tr(context.Background(), "internal_voice_tool_start_description", nil)
+	if got != "internal_voice_tool_start_description" {
+		t.Fatalf("tr() with empty translator returned %q, want raw message ID (self-healed)", got)
 	}
 }
 
@@ -109,9 +109,9 @@ func TestTr_FallsBackToMessageIDOnEmpty(t *testing.T) {
 func TestTr_SelfHealsFromNilPackageTranslator(t *testing.T) {
 	resetTranslator(t)
 	translator = nil
-	got := tr(context.Background(), "Start recording audio from microphone", nil)
-	if got != "Start recording audio from microphone" {
-		t.Fatalf("tr() after nil translator returned %q, want raw ID (self-healed)", got)
+	got := tr(context.Background(), "internal_voice_tool_start_description", nil)
+	if got != "internal_voice_tool_start_description" {
+		t.Fatalf("tr() after nil translator returned %q, want raw message ID (self-healed)", got)
 	}
 }
 

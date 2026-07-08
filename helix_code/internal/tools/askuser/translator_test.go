@@ -59,8 +59,8 @@ func resetTranslator(t *testing.T) {
 func TestTr_DefaultsToNoopTranslator(t *testing.T) {
 	resetTranslator(t)
 	got := tr(stdctx.Background(), "askuser_prompt_enter_choice_no_default", nil)
-	if got != "askuser_prompt_enter_choice_no_default" {
-		t.Fatalf("tr default = %q, want resolved prose", got)
+	if got == "askuser_prompt_enter_choice_no_default" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 
@@ -102,8 +102,8 @@ func TestSetTranslator_NilResetsToNoop(t *testing.T) {
 	SetTranslator(sentinelTranslator{})
 	SetTranslator(nil)
 	got := tr(stdctx.Background(), "askuser_prompt_invalid_choice_hint", nil)
-	if got != "askuser_prompt_invalid_choice_hint" {
-		t.Fatalf("after SetTranslator(nil) tr = %q, want resolved prose", got)
+	if got == "askuser_prompt_invalid_choice_hint" || got == "" {
+		t.Fatalf("HXC-097 §11.4.120: default/nil path must resolve to bundle prose, got %q (raw key or empty)", got)
 	}
 }
 
@@ -134,11 +134,11 @@ func TestFormatQuestion_RoutesThroughTranslator(t *testing.T) {
 
 	resetTranslator(t)
 	baseline := FormatQuestion(q) // NoopTranslator — raw message IDs echoed
-	if !strings.Contains(baseline, "askuser_prompt_enter_choice_with_default") {
-		t.Fatalf("baseline produced resolved prose: %q", baseline)
+	if !strings.Contains(baseline, "Enter choice [1-2, default no]:") {
+		t.Fatalf("baseline does not contain resolved prose: %q", baseline)
 	}
-	if !strings.Contains(baseline, "askuser_prompt_choice_preview_label") {
-		t.Fatalf("baseline did not echo preview message ID: %q", baseline)
+	if !strings.Contains(baseline, "   preview: diff") {
+		t.Fatalf("baseline does not contain preview prose: %q", baseline)
 	}
 
 	SetTranslator(sentinelTranslator{})
@@ -157,8 +157,8 @@ func TestFormatQuestion_RoutesThroughTranslator(t *testing.T) {
 func TestInvalidChoiceHint_RoutesThroughTranslator(t *testing.T) {
 	resetTranslator(t)
 	baseline := invalidChoiceHint(stdctx.Background(), 3)
-	if baseline != "askuser_prompt_invalid_choice_hint" {
-		t.Fatalf("baseline hint = %q, want resolved prose", baseline)
+	if baseline != "Please enter a number 1-3." {
+		t.Fatalf("baseline hint = %q, want %q", baseline, "Please enter a number 1-3.")
 	}
 
 	SetTranslator(sentinelTranslator{})

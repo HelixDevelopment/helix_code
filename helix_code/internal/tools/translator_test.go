@@ -265,20 +265,20 @@ func TestRawText_EmittedByDefault(t *testing.T) {
 		got  string
 		want string
 	}{
-		{"FSReadTool", (&FSReadTool{}).Description(), "internal_tools_fs_read_description"},
-		{"FSWriteTool", (&FSWriteTool{}).Description(), "internal_tools_fs_write_description"},
-		{"FSEditTool", (&FSEditTool{}).Description(), "internal_tools_fs_edit_description"},
-		{"GlobTool", (&GlobTool{}).Description(), "internal_tools_glob_description"},
-		{"GrepTool", (&GrepTool{}).Description(), "internal_tools_grep_description"},
-		{"BrowserClickTool", (&BrowserClickTool{}).Description(), "internal_tools_browser_click_description"},
-		{"BrowserTypeTool", (&BrowserTypeTool{}).Description(), "internal_tools_browser_type_description"},
-		{"BrowserCloseToolV2", (&BrowserCloseToolV2{}).Description(), "internal_tools_browser_close_v2_description"},
-		{"BrowserScreenshotToolV2", (&BrowserScreenshotToolV2{}).Description(), "internal_tools_browser_screenshot_v2_description"},
-		{"TaskStopTool", (&TaskStopTool{}).Description(), "internal_tools_task_stop_description"},
+		{"FSReadTool", (&FSReadTool{}).Description(), "Read file contents from the filesystem"},
+		{"FSWriteTool", (&FSWriteTool{}).Description(), "Write content to a file"},
+		{"FSEditTool", (&FSEditTool{}).Description(), "Edit file contents with structured operations"},
+		{"GlobTool", (&GlobTool{}).Description(), "Find files matching a glob pattern"},
+		{"GrepTool", (&GrepTool{}).Description(), "Search file contents for a pattern"},
+		{"BrowserClickTool", (&BrowserClickTool{}).Description(), "Click an element by CSS selector."},
+		{"BrowserTypeTool", (&BrowserTypeTool{}).Description(), "Type text into an input/textarea/contenteditable element by selector."},
+		{"BrowserCloseToolV2", (&BrowserCloseToolV2{}).Description(), "Close the active browser session and terminate the chromium subprocess."},
+		{"BrowserScreenshotToolV2", (&BrowserScreenshotToolV2{}).Description(), "Capture a screenshot of the current page as a PNG file."},
+		{"TaskStopTool", (&TaskStopTool{}).Description(), "Cancel a running background task by ID."},
 	}
 	for _, c := range ids {
 		if c.got != c.want {
-			t.Errorf("%s default Description = %q, want %q (NoopTranslator should echo raw ID)", c.name, c.got, c.want)
+			t.Errorf("%s default Description = %q, want %q (should resolve to bundle prose)", c.name, c.got, c.want)
 		}
 	}
 }

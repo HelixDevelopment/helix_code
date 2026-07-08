@@ -159,8 +159,8 @@ func TestDefaultDangerPatterns_RawIDsByDefault(t *testing.T) {
 		if p.Description == "" {
 			t.Errorf("pattern %q Description is empty — migration emitted blank", p.Name)
 		}
-		if !strings.HasPrefix(p.Description, "internal_tools_confirmation_danger_") {
-			t.Errorf("pattern %q Description = %q, want resolved danger description", p.Name, p.Description)
+		if strings.HasPrefix(p.Description, "internal_tools_confirmation_danger_") {
+			t.Errorf("pattern %q Description = %q, still contains raw ID, expected resolved prose", p.Name, p.Description)
 		}
 	}
 }

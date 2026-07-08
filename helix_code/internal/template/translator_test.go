@@ -131,7 +131,7 @@ func TestTemplateValidate_EmptyName_RawTextByDefault(t *testing.T) {
 	if err == nil {
 		t.Fatal("Validate on empty Name returned no error")
 	}
-	if !strings.Contains(err.Error(), "internal_template_validate_name_empty") {
+	if !strings.Contains(err.Error(), "template name cannot be empty") {
 		t.Fatalf("Validate err = %q, want resolved prose", err.Error())
 	}
 }
