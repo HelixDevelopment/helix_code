@@ -1,0 +1,34 @@
+context: doc_integrity
+description: >-
+  §11.4.186 check node — cross-document consistency gate. Verifies that all
+  tracked representations (plan docs, issues, fixed, db) are internally
+  consistent before export, sync-verify, or doc-set commit. DEDUP/TIMELINE/
+  CROSS-DOC/STRUCTURAL findings REFUSE the seam; INTEGRITY-class findings are
+  surfaced but non-refusing (--divergence-class-only). Consumed by reference
+  per §11.4.177: uses constitution/scripts/doc_integrity/ — NEVER copied locally.
+
+  References:
+  - docs/research/07.2026/00_master/DOC_INTEGRITY_INTEGRATION.md
+  - constitution/scripts/doc_integrity/README.md
+  - §11.4.186 (anti-divergence enforcement)
+
+nodes:
+  plan_md:              { kind: markdown, path: docs/research/07.2026/00_master/MASTER_IMPLEMENTATION_PLAN.md }
+  issues_md:            { kind: markdown, path: docs/Issues.md }
+  issues_summary_md:    { kind: markdown, path: docs/Issues_Summary.md }
+  fixed_md:             { kind: markdown, path: docs/Fixed.md }
+  fixed_summary_md:     { kind: markdown, path: docs/Fixed_Summary.md }
+  workable_items_db:    { kind: sqlite,   path: docs/workable_items.db }
+
+checks:
+  - name: doc_integrity
+    command: >
+      constitution/scripts/doc_integrity/wire/doc_integrity_gate.sh
+        .helix_code/doc_integrity/checkset.yaml "$REPO_ROOT"
+        --divergence-class-only
+    description: >
+      Run the doc-integrity validator against the registered doc-set.
+      REFUSES on any DEDUP/TIMELINE/CROSS-DOC/STRUCTURAL finding.
+      INTEGRITY-class findings are surfaced but non-refusing
+      (--divergence-class-only).
+    exit_on_fail: true
