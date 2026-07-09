@@ -1,0 +1,54 @@
+{
+  "mode": "parallel",
+  "n": 5,
+  "n_ok": 5,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "nonces_ok": true,
+  "consistent": true,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Simply write: 42",
+  "results": [
+    {
+      "index": 0,
+      "content": "42",
+      "status_code": 200,
+      "latency_ms": 6584,
+      "nonce_found": false
+    },
+    {
+      "index": 1,
+      "content": "42",
+      "status_code": 200,
+      "latency_ms": 6585,
+      "nonce_found": false
+    },
+    {
+      "index": 2,
+      "content": "42",
+      "status_code": 200,
+      "latency_ms": 6585,
+      "nonce_found": false
+    },
+    {
+      "index": 3,
+      "content": "42",
+      "status_code": 200,
+      "latency_ms": 6585,
+      "nonce_found": false
+    },
+    {
+      "index": 4,
+      "content": "42",
+      "status_code": 200,
+      "latency_ms": 6585,
+      "nonce_found": false
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

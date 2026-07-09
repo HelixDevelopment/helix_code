@@ -1,0 +1,54 @@
+{
+  "mode": "parallel",
+  "n": 5,
+  "n_ok": 5,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "nonces_ok": true,
+  "consistent": true,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Count from 1 to 3.",
+  "results": [
+    {
+      "index": 0,
+      "content": "1, 2, 3",
+      "status_code": 200,
+      "latency_ms": 29949,
+      "nonce_found": false
+    },
+    {
+      "index": 1,
+      "content": "1\n2\n3",
+      "status_code": 200,
+      "latency_ms": 24750,
+      "nonce_found": false
+    },
+    {
+      "index": 2,
+      "content": "Sure, I can count from 1 to 3:\n\n1. 1\n2. 2\n3. 3",
+      "status_code": 200,
+      "latency_ms": 63850,
+      "nonce_found": false
+    },
+    {
+      "index": 3,
+      "content": "Sure, here are the counts from 1 to 3:\n\n1. 1\n2. 2\n3. 3\n\nIf you have any other questions or need further assistance, feel free to ask!",
+      "status_code": 200,
+      "latency_ms": 85049,
+      "nonce_found": false
+    },
+    {
+      "index": 4,
+      "content": "Sure, I can count from 1 to 3. Here's the list:\n\n1. 1\n2. 2\n3. 3\n\nI hope you enjoy counting together!",
+      "status_code": 200,
+      "latency_ms": 81850,
+      "nonce_found": false
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

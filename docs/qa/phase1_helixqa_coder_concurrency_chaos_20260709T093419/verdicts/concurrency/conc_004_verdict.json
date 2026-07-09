@@ -1,0 +1,124 @@
+{
+  "mode": "parallel",
+  "n": 15,
+  "n_ok": 15,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "nonces_ok": true,
+  "consistent": true,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Say hello.",
+  "results": [
+    {
+      "index": 0,
+      "content": "Hello! It's nice to meet you. How may I assist you today?",
+      "status_code": 200,
+      "latency_ms": 18557,
+      "nonce_found": false
+    },
+    {
+      "index": 1,
+      "content": "Hello! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 12352,
+      "nonce_found": false
+    },
+    {
+      "index": 2,
+      "content": "Hello! It's nice to meet you. How may I assist you today?",
+      "status_code": 200,
+      "latency_ms": 18557,
+      "nonce_found": false
+    },
+    {
+      "index": 3,
+      "content": "Hello! It's nice to meet you. How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 18557,
+      "nonce_found": false
+    },
+    {
+      "index": 4,
+      "content": "Hello! How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 12353,
+      "nonce_found": false
+    },
+    {
+      "index": 5,
+      "content": "Hello! It's nice to meet you. How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 18557,
+      "nonce_found": false
+    },
+    {
+      "index": 6,
+      "content": "Hello! How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 12352,
+      "nonce_found": false
+    },
+    {
+      "index": 7,
+      "content": "Hello! It's a pleasure to meet you. How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 18752,
+      "nonce_found": false
+    },
+    {
+      "index": 8,
+      "content": "Hello! It's nice to meet you. How may I assist you today?",
+      "status_code": 200,
+      "latency_ms": 18557,
+      "nonce_found": false
+    },
+    {
+      "index": 9,
+      "content": "Hello! How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 12352,
+      "nonce_found": false
+    },
+    {
+      "index": 10,
+      "content": "Hello! How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 12352,
+      "nonce_found": false
+    },
+    {
+      "index": 11,
+      "content": "Hello! How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 12353,
+      "nonce_found": false
+    },
+    {
+      "index": 12,
+      "content": "Hello! How may I assist you today?",
+      "status_code": 200,
+      "latency_ms": 12257,
+      "nonce_found": false
+    },
+    {
+      "index": 13,
+      "content": "Hello! How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 12352,
+      "nonce_found": false
+    },
+    {
+      "index": 14,
+      "content": "Hello! How can I assist you today?",
+      "status_code": 200,
+      "latency_ms": 12353,
+      "nonce_found": false
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

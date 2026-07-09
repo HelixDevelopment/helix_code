@@ -1,0 +1,13 @@
+{
+  "mode": "oversized-prompt",
+  "oversized_status": 400,
+  "oversized_handled": true,
+  "oversized_body_snippet": "{\"error\":{\"code\":400,\"message\":\"request (45550 tokens) exceeds the available context size (256 tokens), try increasing it\",\"type\":\"exceed_context_size_error\",\"n_prompt_tokens\":45550,\"n_ctx\":256}}",
+  "post_oversized_ok": true,
+  "post_oversized_body_snippet": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Count from 1 to 5:\\n\\n1. One\\n2. Two\\n3. Three\\n4. Four\\n5. Five\"}}],\"created\":1783573350,\"model\":\"llama3.2\",\"sys",
+  "endpoint": "http://localhost:18434",
+  "port": 0,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

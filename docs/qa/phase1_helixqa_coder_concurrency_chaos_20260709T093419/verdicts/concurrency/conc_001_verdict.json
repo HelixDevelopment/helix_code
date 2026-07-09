@@ -1,0 +1,89 @@
+{
+  "mode": "parallel",
+  "n": 10,
+  "n_ok": 10,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "nonces_ok": true,
+  "consistent": true,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Count from 1 to 5.",
+  "results": [
+    {
+      "index": 0,
+      "content": "Sure, here are the numbers from 1 to 5:\n\n1, 2, 3, 4, 5",
+      "status_code": 200,
+      "latency_ms": 87153,
+      "nonce_found": false
+    },
+    {
+      "index": 1,
+      "content": "Sure, here are the numbers from 1 to 5:\n\n1\n2\n3\n4\n5",
+      "status_code": 200,
+      "latency_ms": 78653,
+      "nonce_found": false
+    },
+    {
+      "index": 2,
+      "content": "Here is the count from 1 to 5:\n\n1, 2, 3, 4, 5",
+      "status_code": 200,
+      "latency_ms": 82853,
+      "nonce_found": false
+    },
+    {
+      "index": 3,
+      "content": "1, 2, 3, 4, 5",
+      "status_code": 200,
+      "latency_ms": 49353,
+      "nonce_found": false
+    },
+    {
+      "index": 4,
+      "content": "Sure, here are the numbers from 1 to 5:\n\n1\n2\n3\n4\n5\n\nYou've counted up to 5!",
+      "status_code": 200,
+      "latency_ms": 91956,
+      "nonce_found": false
+    },
+    {
+      "index": 5,
+      "content": "Sure, I can count from 1 to 5 for you.\n\n1. 1\n2. 2\n3. 3\n4. 4\n5. 5",
+      "status_code": 200,
+      "latency_ms": 96452,
+      "nonce_found": false
+    },
+    {
+      "index": 6,
+      "content": "1, 2, 3, 4, 5.",
+      "status_code": 200,
+      "latency_ms": 53054,
+      "nonce_found": false
+    },
+    {
+      "index": 7,
+      "content": "1, 2, 3, 4, 5.",
+      "status_code": 200,
+      "latency_ms": 53053,
+      "nonce_found": false
+    },
+    {
+      "index": 8,
+      "content": "Sure, here we go! Here are the numbers from 1 to 5:\n\n1\n2\n3\n4\n5",
+      "status_code": 200,
+      "latency_ms": 87153,
+      "nonce_found": false
+    },
+    {
+      "index": 9,
+      "content": "1\n2\n3\n4\n5",
+      "status_code": 200,
+      "latency_ms": 37956,
+      "nonce_found": false
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

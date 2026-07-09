@@ -1,0 +1,159 @@
+{
+  "mode": "parallel",
+  "n": 20,
+  "n_ok": 20,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "nonces_ok": true,
+  "consistent": true,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "llama3.2",
+  "prompt": "Name three colors.",
+  "results": [
+    {
+      "index": 0,
+      "content": "Three colors are: red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 6472,
+      "nonce_found": false
+    },
+    {
+      "index": 1,
+      "content": "I apologize, but I don't have access to any information about you or any specific colors to name. As a Qwen AI, I don't have personal preferences, emotions, or memories. My purpose is to provide information and assist with tasks as instructed by users like you. I don't have the ability to name colors.",
+      "status_code": 200,
+      "latency_ms": 76671,
+      "nonce_found": false
+    },
+    {
+      "index": 2,
+      "content": "Sure, here are three colors for you:\n\n1. Red - A strong, warm, and bright color often associated with passion, energy, and excitement. It's commonly used in branding, fashion, and advertising.\n\n2. Blue - A deep, calming, and soothing color that often symbolizes trust, stability, and reliability. It's commonly used in branding, design, and communication.\n\n3. Green - A fresh, earthy, and nature-loving color that symbolizes growth, harmony, and renewal. It's commonly used in branding, design, and communication.",
+      "status_code": 200,
+      "latency_ms": 153580,
+      "nonce_found": false
+    },
+    {
+      "index": 3,
+      "content": "Three common colors are blue, green, and red.",
+      "status_code": 200,
+      "latency_ms": 6473,
+      "nonce_found": false
+    },
+    {
+      "index": 4,
+      "content": "Sure! Three common colors that are widely recognized are:\n\n1. Red - A primary color in the visual spectrum, used to distinguish between different shades and tones.\n\n2. Blue - A secondary color, used to create shades and tones of red, orange, and yellow.\n\n3. Green - Another secondary color, used to create shades of yellow, blue, and green. Green is often used to create a sense of freshness and tranquility.",
+      "status_code": 200,
+      "latency_ms": 114371,
+      "nonce_found": false
+    },
+    {
+      "index": 5,
+      "content": "Sure! Three common colors are:\n\n1. **Blue**: Blue is a color that is commonly associated with calmness, trust, and nature. It can evoke feelings of tranquility, peacefulness, and tranquility.\n\n2. **Green**: Green is another color that is often associated with growth, nature, and health. It can symbolize growth, renewal, and vitality.\n\n3. **Red**: Red is a color that can evoke feelings of passion, excitement, and energy. It can also symbolize danger, danger, and excitement.\n\nThese colors are commonly used in various contexts, from design and branding to art and symbolism.",
+      "status_code": 200,
+      "latency_ms": 168971,
+      "nonce_found": false
+    },
+    {
+      "index": 6,
+      "content": "Three colors are:\n\n1. Red - a symbol of passion, energy, and excitement in most cultures. It's often associated with love, passion, and joy. \n\n2. Blue - a symbol of calmness, stability, and trust, it is often associated with peace, serenity, and tranquility. \n\n3. Yellow - a symbol of hope, joy, and happiness, it is often associated with life, love, and warmth. It's also a symbol of optimism and enthusiasm.",
+      "status_code": 200,
+      "latency_ms": 131772,
+      "nonce_found": false
+    },
+    {
+      "index": 7,
+      "content": "Three common colors are:\n\n1. Red\n2. Yellow\n3. Blue",
+      "status_code": 200,
+      "latency_ms": 10674,
+      "nonce_found": false
+    },
+    {
+      "index": 8,
+      "content": "Sure! Three colors are red, blue, and yellow.",
+      "status_code": 200,
+      "latency_ms": 7272,
+      "nonce_found": false
+    },
+    {
+      "index": 9,
+      "content": "Sure, three colors are:\n\n1. Red\n2. Blue\n3. Green\n\nI'm glad I could help with that! If you have any other questions, feel free to ask.",
+      "status_code": 200,
+      "latency_ms": 39272,
+      "nonce_found": false
+    },
+    {
+      "index": 10,
+      "content": "Sure! Three colors are:\n\n1. Yellow\n2. Red\n3. Blue\n\nEach of these colors has its unique properties and associations that can be used in various contexts, such as in art, design, and even in everyday life.",
+      "status_code": 200,
+      "latency_ms": 54670,
+      "nonce_found": false
+    },
+    {
+      "index": 11,
+      "content": "Sure, I can name three colors for you:\n\n1. Red - A deep, fiery red that often symbolizes passion, excitement, and energy. It's often used in branding to represent a strong, energetic, or daring personality.\n\n2. Blue - A calming, sky-blue color that often symbolizes trust, reliability, and stability. It's often used in branding to represent a firm, dependable, or reliable brand.\n\n3. Green - A fresh, verdant green that often symbolizes growth, nature, and sustainability. It's often used in branding to represent a youthful, creative, or forward-thinking brand.",
+      "status_code": 200,
+      "latency_ms": 166272,
+      "nonce_found": false
+    },
+    {
+      "index": 12,
+      "content": "I'm sorry, but as an artificial intelligence language model, I am not capable of experiencing emotions or names. However, I can provide information about various colors based on my knowledge.",
+      "status_code": 200,
+      "latency_ms": 34974,
+      "nonce_found": false
+    },
+    {
+      "index": 13,
+      "content": "Three colors are:\n\n1. Red: A warm, bright, and often used in a variety of contexts like sports, electronics, and fashion. It has a reputation for being associated with excitement, energy, and passion.\n\n2. Blue: A deep, calming, and often used in a variety of contexts like art, design, and philosophy. It has a reputation for being associated with depth, reflection, and a sense of calmness.\n\n3. Green: A bright, cheerful, and often used in a variety of contexts like nature, agriculture, and gardening. It has a reputation for being associated with growth, vitality, and a sense of joy.",
+      "status_code": 200,
+      "latency_ms": 169672,
+      "nonce_found": false
+    },
+    {
+      "index": 14,
+      "content": "Sure, here are three colors:\n\n1. Blue: This is a fundamental color, often associated with calmness, trustworthiness, and stability. It has a deep and rich hue, often used in a range of shades.\n\n2. Yellow: This color is associated with happiness, energy, and optimism. It has a vibrant hue, often used in a range of shades.\n\n3. Purple: This color is associated with passion, elegance, and sophistication. It has a deep and rich hue, often used in a range of shades.",
+      "status_code": 200,
+      "latency_ms": 146870,
+      "nonce_found": false
+    },
+    {
+      "index": 15,
+      "content": "Sure, three colors are:\n\n1. Red\n2. Blue\n3. Green",
+      "status_code": 200,
+      "latency_ms": 11571,
+      "nonce_found": false
+    },
+    {
+      "index": 16,
+      "content": "Sure, here are three colors:\n\n1. Red - The primary color in the visible spectrum, often associated with passion, energy, and excitement.\n\n2. Yellow - A warm, cheerful, and bright color, commonly used in branding to represent fun, happiness, and optimism.\n\n3. Blue - A deep, calming, and harmonious color, often associated with trust, stability, and stability.",
+      "status_code": 200,
+      "latency_ms": 101170,
+      "nonce_found": false
+    },
+    {
+      "index": 17,
+      "content": "Sure, here are three colors:\n1. Red\n2. Yellow\n3. Blue",
+      "status_code": 200,
+      "latency_ms": 12571,
+      "nonce_found": false
+    },
+    {
+      "index": 18,
+      "content": "Three colors are red, blue, and yellow. These colors are commonly used in various contexts such as art, fashion, and branding.",
+      "status_code": 200,
+      "latency_ms": 23073,
+      "nonce_found": false
+    },
+    {
+      "index": 19,
+      "content": "Sure, here are three colors I can provide:\n\n1. Red\n2. Blue\n3. Green\n\nThese are all widely recognized colors and are often used in design, branding, and everyday life.",
+      "status_code": 200,
+      "latency_ms": 42770,
+      "nonce_found": false
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}
