@@ -1,0 +1,74 @@
+{
+  "mode": "distinct",
+  "n": 6,
+  "n_ok": 0,
+  "n_failed": 0,
+  "n_timeout": 6,
+  "all_ok": false,
+  "no_loss": true,
+  "no_duplicate": true,
+  "own_nonce_ok": true,
+  "no_cross_contam": true,
+  "deterministic_ok": false,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "results": [
+    {
+      "index": 0,
+      "nonce": "RACEID_QK2DCIGCX35M",
+      "expected_sum": 1001,
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 1,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 1,
+      "nonce": "RACEID_2O1Y4TV7O3GT",
+      "expected_sum": 1011,
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 1,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 2,
+      "nonce": "RACEID_JV5KU1N6TC4M",
+      "expected_sum": 1021,
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 1,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 3,
+      "nonce": "RACEID_F1PAUORKR5Y5",
+      "expected_sum": 1031,
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 1,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 4,
+      "nonce": "RACEID_D9HTJ70CDQI7",
+      "expected_sum": 1041,
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 1,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    },
+    {
+      "index": 5,
+      "nonce": "RACEID_5QV0OGPD20DI",
+      "expected_sum": 1051,
+      "content": "",
+      "status_code": 0,
+      "latency_ms": 1,
+      "error": "http: Post \"http://localhost:18434/v1/chat/completions\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    }
+  ],
+  "pass": false,
+  "expect_fail": true,
+  "case_result": true
+}

@@ -1,0 +1,14 @@
+{
+  "mode": "concurrent-health",
+  "n_concurrent": 5,
+  "n_models": 3,
+  "n_models_ok": 3,
+  "models_ok": true,
+  "all_ok": true,
+  "endpoint": "http://localhost:18434",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "port": 0,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

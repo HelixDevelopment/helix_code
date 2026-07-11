@@ -1,0 +1,626 @@
+{
+  "mode": "conn-flood",
+  "n": 100,
+  "n_ok": 100,
+  "n_429": 0,
+  "n_refused": 0,
+  "n_5xx": 0,
+  "n_other": 0,
+  "n_dropped": 0,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "total_received": 100,
+  "no_loss": true,
+  "no_5xx": true,
+  "no_crash": true,
+  "duration": "2.187s",
+  "throughput_req_per_sec": 45.72982200059605,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "prompt": "Hi.",
+  "results": [
+    {
+      "index": 0,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 328
+    },
+    {
+      "index": 1,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 345
+    },
+    {
+      "index": 2,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 778
+    },
+    {
+      "index": 3,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 480
+    },
+    {
+      "index": 4,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 344
+    },
+    {
+      "index": 5,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 776
+    },
+    {
+      "index": 6,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1242
+    },
+    {
+      "index": 7,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 329
+    },
+    {
+      "index": 8,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 659
+    },
+    {
+      "index": 9,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 480
+    },
+    {
+      "index": 10,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1108
+    },
+    {
+      "index": 11,
+      "content": "Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 167
+    },
+    {
+      "index": 12,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 659
+    },
+    {
+      "index": 13,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 593
+    },
+    {
+      "index": 14,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 495
+    },
+    {
+      "index": 15,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1150
+    },
+    {
+      "index": 16,
+      "content": "Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 608
+    },
+    {
+      "index": 17,
+      "content": "Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 792
+    },
+    {
+      "index": 18,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 197
+    },
+    {
+      "index": 19,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 181
+    },
+    {
+      "index": 20,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 329
+    },
+    {
+      "index": 21,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 944
+    },
+    {
+      "index": 22,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 990
+    },
+    {
+      "index": 23,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 197
+    },
+    {
+      "index": 24,
+      "content": "Hi there! It's nice to meet you! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1200
+    },
+    {
+      "index": 25,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1123
+    },
+    {
+      "index": 26,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 990
+    },
+    {
+      "index": 27,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 943
+    },
+    {
+      "index": 28,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 822
+    },
+    {
+      "index": 29,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1370
+    },
+    {
+      "index": 30,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1409
+    },
+    {
+      "index": 31,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1449
+    },
+    {
+      "index": 32,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1491
+    },
+    {
+      "index": 33,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 313
+    },
+    {
+      "index": 34,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1621
+    },
+    {
+      "index": 35,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1755
+    },
+    {
+      "index": 36,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1954
+    },
+    {
+      "index": 37,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 2012
+    },
+    {
+      "index": 38,
+      "content": "Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 2114
+    },
+    {
+      "index": 39,
+      "content": "Hi there! It's nice to meet you! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 2185
+    },
+    {
+      "index": 40,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 2141
+    },
+    {
+      "index": 41,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1321
+    },
+    {
+      "index": 42,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1279
+    },
+    {
+      "index": 43,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1449
+    },
+    {
+      "index": 44,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1464
+    },
+    {
+      "index": 45,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1621
+    },
+    {
+      "index": 46,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1621
+    },
+    {
+      "index": 47,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1663
+    },
+    {
+      "index": 48,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1811
+    },
+    {
+      "index": 49,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1838
+    },
+    {
+      "index": 50,
+      "content": "Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 738
+    },
+    {
+      "index": 51,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 480
+    },
+    {
+      "index": 52,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 657
+    },
+    {
+      "index": 53,
+      "content": "Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 442
+    },
+    {
+      "index": 54,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 181
+    },
+    {
+      "index": 55,
+      "content": "Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 608
+    },
+    {
+      "index": 56,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 944
+    },
+    {
+      "index": 57,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 495
+    },
+    {
+      "index": 58,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 905
+    },
+    {
+      "index": 59,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 806
+    },
+    {
+      "index": 60,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 182
+    },
+    {
+      "index": 61,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 344
+    },
+    {
+      "index": 62,
+      "content": "Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 777
+    },
+    {
+      "index": 63,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 329
+    },
+    {
+      "index": 64,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1150
+    },
+    {
+      "index": 65,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1107
+    },
+    {
+      "index": 66,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1107
+    },
+    {
+      "index": 67,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 973
+    },
+    {
+      "index": 68,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 821
+    },
+    {
+      "index": 69,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1295
+    },
+    {
+      "index": 70,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 181
+    },
+    {
+      "index": 71,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1492
+    },
+    {
+      "index": 72,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1582
+    },
+    {
+      "index": 73,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1664
+    },
+    {
+      "index": 74,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1714
+    },
+    {
+      "index": 75,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1954
+    },
+    {
+      "index": 76,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1969
+    },
+    {
+      "index": 77,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 2012
+    },
+    {
+      "index": 78,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 2128
+    },
+    {
+      "index": 79,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 2153
+    },
+    {
+      "index": 80,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1279
+    },
+    {
+      "index": 81,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1279
+    },
+    {
+      "index": 82,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1321
+    },
+    {
+      "index": 83,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1449
+    },
+    {
+      "index": 84,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1541
+    },
+    {
+      "index": 85,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1636
+    },
+    {
+      "index": 86,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1795
+    },
+    {
+      "index": 87,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1795
+    },
+    {
+      "index": 88,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1795
+    },
+    {
+      "index": 89,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1838
+    },
+    {
+      "index": 90,
+      "content": "Hi there! It's nice to meet you! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1938
+    },
+    {
+      "index": 91,
+      "content": "Hi there! It's nice to meet you! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1982
+    },
+    {
+      "index": 92,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1953
+    },
+    {
+      "index": 93,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 958
+    },
+    {
+      "index": 94,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 196
+    },
+    {
+      "index": 95,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 1067
+    },
+    {
+      "index": 96,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 636
+    },
+    {
+      "index": 97,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 494
+    },
+    {
+      "index": 98,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 636
+    },
+    {
+      "index": 99,
+      "content": "Hello! Hi there! How can I help you today?",
+      "status_code": 200,
+      "latency_ms": 481
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

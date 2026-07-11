@@ -1,0 +1,148 @@
+{
+  "mode": "distinct",
+  "n": 16,
+  "n_ok": 16,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "no_duplicate": true,
+  "own_nonce_ok": true,
+  "no_cross_contam": true,
+  "deterministic_ok": false,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "results": [
+    {
+      "index": 0,
+      "nonce": "RACEID_OSU6X153L0J9",
+      "expected_sum": 1001,
+      "content": "1001\nRACEID_OSU6X153L0J9",
+      "status_code": 200,
+      "latency_ms": 366
+    },
+    {
+      "index": 1,
+      "nonce": "RACEID_KJ8K8B7PW3D7",
+      "expected_sum": 1011,
+      "content": "1011\nRACEID_KJ8K8B7PW3D7",
+      "status_code": 200,
+      "latency_ms": 366
+    },
+    {
+      "index": 2,
+      "nonce": "RACEID_JSS451R5WMBV",
+      "expected_sum": 1021,
+      "content": "1021\nRACEID_JSS451R5WMBV",
+      "status_code": 200,
+      "latency_ms": 672
+    },
+    {
+      "index": 3,
+      "nonce": "RACEID_JWBROD9ZCTB4",
+      "expected_sum": 1031,
+      "content": "1031\nRACEID_JWBROD9ZCTB4",
+      "status_code": 200,
+      "latency_ms": 672
+    },
+    {
+      "index": 4,
+      "nonce": "RACEID_F9RTY7Z6DSIU",
+      "expected_sum": 1041,
+      "content": "1041\nRACEID_F9RTY7Z6DSIU",
+      "status_code": 200,
+      "latency_ms": 295
+    },
+    {
+      "index": 5,
+      "nonce": "RACEID_48IN8FFWDAYV",
+      "expected_sum": 1051,
+      "content": "1051\nRACEID_48IN8FFWDAYV",
+      "status_code": 200,
+      "latency_ms": 295
+    },
+    {
+      "index": 6,
+      "nonce": "RACEID_9IWKG5P6V86V",
+      "expected_sum": 1061,
+      "content": "1061\nRACEID_9IWKG5P6V86V",
+      "status_code": 200,
+      "latency_ms": 366
+    },
+    {
+      "index": 7,
+      "nonce": "RACEID_1Q7BKXO5U18O",
+      "expected_sum": 1071,
+      "content": "1071\nRACEID_1Q7BKXO5U18O",
+      "status_code": 200,
+      "latency_ms": 443
+    },
+    {
+      "index": 8,
+      "nonce": "RACEID_ZSSM92VN6T0R",
+      "expected_sum": 1081,
+      "content": "1081\nRACEID_ZSSM92VN6T0R",
+      "status_code": 200,
+      "latency_ms": 656
+    },
+    {
+      "index": 9,
+      "nonce": "RACEID_UN8WX3QNL1OH",
+      "expected_sum": 1091,
+      "content": "1091\nRACEID_UN8WX3QNL1OH",
+      "status_code": 200,
+      "latency_ms": 667
+    },
+    {
+      "index": 10,
+      "nonce": "RACEID_L0MVD18ZIIIC",
+      "expected_sum": 1101,
+      "content": "1101\n\nRACEID_L0MVD18ZIIIC",
+      "status_code": 200,
+      "latency_ms": 666
+    },
+    {
+      "index": 11,
+      "nonce": "RACEID_TNOQT7DU4OID",
+      "expected_sum": 1111,
+      "content": "1111\nRACEID_TNOQT7DU4OID",
+      "status_code": 200,
+      "latency_ms": 277
+    },
+    {
+      "index": 12,
+      "nonce": "RACEID_KPAIO761FWM6",
+      "expected_sum": 1121,
+      "content": "1121\nRACEID_KPAIO761FWM6",
+      "status_code": 200,
+      "latency_ms": 621
+    },
+    {
+      "index": 13,
+      "nonce": "RACEID_16H7F4E54ILP",
+      "expected_sum": 1131,
+      "content": "1131\nRACEID_16H7F4E54ILP",
+      "status_code": 200,
+      "latency_ms": 442
+    },
+    {
+      "index": 14,
+      "nonce": "RACEID_WAIPPNOV9KL7",
+      "expected_sum": 1141,
+      "content": "1141\nRACEID_WAIPPNOV9KL7",
+      "status_code": 200,
+      "latency_ms": 655
+    },
+    {
+      "index": 15,
+      "nonce": "RACEID_GB236MZ7L3X8",
+      "expected_sum": 1151,
+      "content": "1151\nRACEID_GB236MZ7L3X8",
+      "status_code": 200,
+      "latency_ms": 656
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

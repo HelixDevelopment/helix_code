@@ -1,0 +1,72 @@
+{
+  "mode": "identical",
+  "n": 8,
+  "n_ok": 8,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "no_duplicate": false,
+  "own_nonce_ok": false,
+  "no_cross_contam": false,
+  "deterministic_ok": true,
+  "distinct_answers": [
+    "391"
+  ],
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "prompt": "Compute 17 * 23. Respond with ONLY the numeric result.",
+  "results": [
+    {
+      "index": 0,
+      "content": "391",
+      "status_code": 200,
+      "latency_ms": 100
+    },
+    {
+      "index": 1,
+      "content": "391",
+      "status_code": 200,
+      "latency_ms": 100
+    },
+    {
+      "index": 2,
+      "content": "391",
+      "status_code": 200,
+      "latency_ms": 100
+    },
+    {
+      "index": 3,
+      "content": "391",
+      "status_code": 200,
+      "latency_ms": 101
+    },
+    {
+      "index": 4,
+      "content": "391",
+      "status_code": 200,
+      "latency_ms": 100
+    },
+    {
+      "index": 5,
+      "content": "391",
+      "status_code": 200,
+      "latency_ms": 100
+    },
+    {
+      "index": 6,
+      "content": "391",
+      "status_code": 200,
+      "latency_ms": 100
+    },
+    {
+      "index": 7,
+      "content": "391",
+      "status_code": 200,
+      "latency_ms": 101
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

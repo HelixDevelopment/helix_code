@@ -1,0 +1,51 @@
+{
+  "mode": "memory_soak",
+  "n": 20,
+  "interval": 5,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "prompt": "Count from 1 to 3.",
+  "coder_pid": 1980342,
+  "initial_rss_kb": 2963264,
+  "final_rss_kb": 2963264,
+  "rss_peak_kb": 2963264,
+  "leak_pct": -1,
+  "rss_samples": [
+    {
+      "index": 0,
+      "rss_kb": 2963264,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 5,
+      "rss_kb": 2963264,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 10,
+      "rss_kb": 2963264,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 15,
+      "rss_kb": 2963264,
+      "delta_kb": 0,
+      "delta_pct": 0
+    },
+    {
+      "index": 20,
+      "rss_kb": 2963264,
+      "delta_kb": 0,
+      "delta_pct": 0
+    }
+  ],
+  "monotonic_no_leak": false,
+  "gc_stability": false,
+  "steady_state": true,
+  "pass": false,
+  "expect_fail": true,
+  "case_result": true
+}

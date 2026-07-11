@@ -1,0 +1,12 @@
+{
+  "mode": "port-flood",
+  "flood_sent": 10,
+  "flood_burst_size": 5,
+  "endpoint": "http://localhost:19999",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "port": 19999,
+  "pass": false,
+  "expect_fail": true,
+  "case_result": true,
+  "error": "post-flood request failed: http: Post \"http://localhost:19999/v1/chat/completions\": dial tcp 127.0.0.1:19999: connect: connection refused"
+}

@@ -1,0 +1,84 @@
+{
+  "mode": "distinct",
+  "n": 8,
+  "n_ok": 8,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "no_duplicate": true,
+  "own_nonce_ok": true,
+  "no_cross_contam": true,
+  "deterministic_ok": false,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "results": [
+    {
+      "index": 0,
+      "nonce": "RACEID_V4FSAO2COPSX",
+      "expected_sum": 1001,
+      "content": "1001\nRACEID_V4FSAO2COPSX",
+      "status_code": 200,
+      "latency_ms": 244
+    },
+    {
+      "index": 1,
+      "nonce": "RACEID_3QR9R1VR7VAS",
+      "expected_sum": 1011,
+      "content": "1011\nRACEID_3QR9R1VR7VAS",
+      "status_code": 200,
+      "latency_ms": 244
+    },
+    {
+      "index": 2,
+      "nonce": "RACEID_3NBM5DK02Y7Y",
+      "expected_sum": 1021,
+      "content": "1021\nRACEID_3NBM5DK02Y7Y",
+      "status_code": 200,
+      "latency_ms": 261
+    },
+    {
+      "index": 3,
+      "nonce": "RACEID_IUDOH351XFOA",
+      "expected_sum": 1031,
+      "content": "1031\nRACEID_IUDOH351XFOA",
+      "status_code": 200,
+      "latency_ms": 244
+    },
+    {
+      "index": 4,
+      "nonce": "RACEID_ANNQZKKROSBF",
+      "expected_sum": 1041,
+      "content": "1041\nRACEID_ANNQZKKROSBF",
+      "status_code": 200,
+      "latency_ms": 233
+    },
+    {
+      "index": 5,
+      "nonce": "RACEID_N2VPQ5KW7AY1",
+      "expected_sum": 1051,
+      "content": "1051\nRACEID_N2VPQ5KW7AY1",
+      "status_code": 200,
+      "latency_ms": 244
+    },
+    {
+      "index": 6,
+      "nonce": "RACEID_TE0P0G7UGA5G",
+      "expected_sum": 1061,
+      "content": "1061\nRACEID_TE0P0G7UGA5G",
+      "status_code": 200,
+      "latency_ms": 252
+    },
+    {
+      "index": 7,
+      "nonce": "RACEID_AXL72IPUX23F",
+      "expected_sum": 1071,
+      "content": "1071\nRACEID_AXL72IPUX23F",
+      "status_code": 200,
+      "latency_ms": 244
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

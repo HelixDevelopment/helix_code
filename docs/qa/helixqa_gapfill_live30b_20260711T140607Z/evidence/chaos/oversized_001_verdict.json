@@ -1,0 +1,14 @@
+{
+  "mode": "oversized-prompt",
+  "oversized_status": 400,
+  "oversized_handled": true,
+  "oversized_body_snippet": "{\"error\":{\"code\":400,\"message\":\"request (45529 tokens) exceeds the available context size (3072 tokens), try increasing it\",\"type\":\"exceed_context_size_error\",\"n_prompt_tokens\":45529,\"n_ctx\":3072}}",
+  "post_oversized_ok": true,
+  "post_oversized_body_snippet": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"1, 2, 3, 4, 5\"}}],\"created\":1783778863,\"model\":\"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf\",\"system_fingerp",
+  "endpoint": "http://localhost:18434",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "port": 0,
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

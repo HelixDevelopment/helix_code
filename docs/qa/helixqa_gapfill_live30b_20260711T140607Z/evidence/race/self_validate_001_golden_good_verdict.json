@@ -1,0 +1,68 @@
+{
+  "mode": "distinct",
+  "n": 6,
+  "n_ok": 6,
+  "n_failed": 0,
+  "n_timeout": 0,
+  "all_ok": true,
+  "no_loss": true,
+  "no_duplicate": true,
+  "own_nonce_ok": true,
+  "no_cross_contam": true,
+  "deterministic_ok": false,
+  "endpoint": "http://localhost:18434/v1/chat/completions",
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "results": [
+    {
+      "index": 0,
+      "nonce": "RACEID_5Y56MIE4HU85",
+      "expected_sum": 1001,
+      "content": "1001\nRACEID_5Y56MIE4HU85",
+      "status_code": 200,
+      "latency_ms": 243
+    },
+    {
+      "index": 1,
+      "nonce": "RACEID_UEXSMORMFTJD",
+      "expected_sum": 1011,
+      "content": "1011\nRACEID_UEXSMORMFTJD",
+      "status_code": 200,
+      "latency_ms": 200
+    },
+    {
+      "index": 2,
+      "nonce": "RACEID_OD330LRI0PRF",
+      "expected_sum": 1021,
+      "content": "1021\nRACEID_OD330LRI0PRF",
+      "status_code": 200,
+      "latency_ms": 222
+    },
+    {
+      "index": 3,
+      "nonce": "RACEID_XC7XAWDCS02W",
+      "expected_sum": 1031,
+      "content": "1031\nRACEID_XC7XAWDCS02W",
+      "status_code": 200,
+      "latency_ms": 235
+    },
+    {
+      "index": 4,
+      "nonce": "RACEID_XHJ39VV7W1P9",
+      "expected_sum": 1041,
+      "content": "1041\nRACEID_XHJ39VV7W1P9",
+      "status_code": 200,
+      "latency_ms": 243
+    },
+    {
+      "index": 5,
+      "nonce": "RACEID_6ML7V3VNTKEL",
+      "expected_sum": 1051,
+      "content": "1051\nRACEID_6ML7V3VNTKEL",
+      "status_code": 200,
+      "latency_ms": 235
+    }
+  ],
+  "pass": true,
+  "expect_fail": false,
+  "case_result": true
+}

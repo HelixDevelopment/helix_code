@@ -1,0 +1,2 @@
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                    
+LISTEN 0      512          0.0.0.0:18434      0.0.0.0:*    users:(("llama-server",pid=1980342,fd=34))
