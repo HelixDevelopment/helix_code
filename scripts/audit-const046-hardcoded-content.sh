@@ -3,7 +3,14 @@
 # audit walker over HelixCode's scannable roots. Round 92: SOFT-WARN
 # (always exits 0). Round 99b: BASELINE-AWARE — pre-existing findings
 # are accepted via baseline snapshot, but NEW violations beyond the
-# baseline cause exit 1 in --fail-on-new mode.
+# baseline cause exit 1 in --fail-on-new mode. Round 100: portability
+# fix (§11.4.108/§11.4.177) — passes --repo-root "${REPO_ROOT}" (always
+# computed dynamically relative to THIS script's own location, never a
+# hardcoded host path) so the auditor stores/matches violation
+# identity as repo-root-relative, slash-normalized paths instead of
+# absolute filesystem paths. Without this the baseline was pinned to
+# whatever host/clone-directory it was generated on and every OTHER
+# checkout saw 100% of findings misclassified as NEW.
 # Usage:
 #   bash scripts/audit-const046-hardcoded-content.sh                    # soft-warn (default)
 #   bash scripts/audit-const046-hardcoded-content.sh --fail-on-new      # gate mode
@@ -61,5 +68,9 @@ BIN="${BUILD_TMP}/audit_const046"
 
 # Pass through any flags from the caller (--json, --quiet, --fail-on-new,
 # --update-baseline). The --baseline path defaults to ${BASELINE} unless
-# the caller supplies their own --baseline flag.
-exec "${BIN}" --roots "${ROOTS_CSV}" --allowlist "${ALLOWLIST}" --baseline "${BASELINE}" "$@"
+# the caller supplies their own --baseline flag. --repo-root is always
+# ${REPO_ROOT} (computed above from this script's own path — no
+# hardcoded host path, §11.4.177) unless the caller overrides it by
+# supplying their own --repo-root in "$@" (Go's flag package: last
+# occurrence of a flag wins, same override precedent as --baseline).
+exec "${BIN}" --roots "${ROOTS_CSV}" --allowlist "${ALLOWLIST}" --baseline "${BASELINE}" --repo-root "${REPO_ROOT}" "$@"

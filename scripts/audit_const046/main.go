@@ -5,14 +5,33 @@
 // the i18n bundle / LLM / configuration per CONST-046.
 //
 // Round 92 introduced the auditor in soft-warn mode (always exits 0).
-// Round 99b (this revision) adds a BASELINE mechanism so the gate can
-// fail-on-NEW-violations while tolerating the pre-existing ~57k findings
-// that cannot all be migrated in one round. Operating modes:
+// Round 99b adds a BASELINE mechanism so the gate can fail-on-NEW-
+// violations while tolerating the pre-existing ~57k findings that
+// cannot all be migrated in one round. Operating modes:
 //
 //	(default)         soft-warn — reports all findings, exits 0
 //	--fail-on-new     diff vs baseline; exit 1 iff any violation is NOT
 //	                  in the baseline (matched by path + literal hash)
 //	--update-baseline regenerate the baseline snapshot, exit 0
+//
+// Round 100 (this revision) fixes a §11.4.108/§11.4.177 portability
+// defect: the baseline's identity key embedded ABSOLUTE filesystem
+// paths (e.g. a specific developer host's checkout location). On any
+// OTHER checkout — a different host, a different clone directory, a
+// different developer's machine — every violation's absolute path
+// mismatched the baseline, so --fail-on-new classified 100% of
+// findings as "NEW" regardless of whether the underlying source had
+// actually changed. The gate was silently non-functional everywhere
+// except the one host/path where the baseline was generated.
+//
+// Fix: an optional --repo-root flag. When supplied, every violation's
+// Path (and every baseline entry's Path, transitively, since the
+// baseline is generated the same way) is stored and matched as a
+// REPO-ROOT-RELATIVE, slash-normalized path instead of an absolute
+// one. This makes the baseline identity portable across hosts,
+// clones, and operating systems — no hardcoded host path anywhere
+// (CONST-045 / §11.4.177). Callers that omit --repo-root keep the
+// legacy absolute-path behavior unchanged (backward compatible).
 //
 // The auditor's OWN strings are developer-facing infrastructure and are
 // not themselves CONST-046 violations.
@@ -39,7 +58,7 @@ import (
 )
 
 // toolVersion bumps when the heuristic or baseline schema changes.
-const toolVersion = "0.2"
+const toolVersion = "0.3"
 
 // baselineSchemaVersion bumps when the JSON shape changes.
 const baselineSchemaVersion = 1
@@ -115,6 +134,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		baselinePth  string
 		failOnNew    bool
 		updateBase   bool
+		repoRootPth  string
 	)
 	fs.StringVar(&rootsCSV, "roots", "", "comma-separated list of directories to scan (required)")
 	fs.StringVar(&allowlistPth, "allowlist", "", "path to allowlist file (optional)")
@@ -123,6 +143,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	fs.StringVar(&baselinePth, "baseline", "", "path to baseline JSON file (default: <script_dir>/.baseline.json)")
 	fs.BoolVar(&failOnNew, "fail-on-new", false, "exit 1 if any violation is not present in baseline")
 	fs.BoolVar(&updateBase, "update-baseline", false, "regenerate baseline JSON snapshot and exit 0")
+	fs.StringVar(&repoRootPth, "repo-root", "", "repository root; when set, violation paths are stored/matched as repo-root-relative + slash-normalized so the baseline is portable across hosts/clones/OSes (recommended; omit only for legacy absolute-path behavior)")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -162,8 +183,21 @@ func run(args []string, stdout, stderr io.Writer) int {
 	// Compute literal hash for every violation (re-read the source
 	// region for stability; cheaper to recompute from the excerpt
 	// since the excerpt is already truncated — instead we read the
-	// raw bytes via byte offset for full fidelity).
+	// raw bytes via byte offset for full fidelity). This MUST happen
+	// while Path is still absolute/on-disk-resolvable, i.e. BEFORE any
+	// repo-root normalization below.
 	hashViolations(&report)
+
+	// Normalize violation Paths to repo-root-relative, slash-normalized
+	// form when --repo-root is supplied. This is what makes the
+	// baseline identity (path + literal hash) portable across hosts,
+	// clones, and OSes instead of being pinned to one absolute
+	// filesystem layout (§11.4.108 / §11.4.177). Must run AFTER
+	// hashViolations (which needs the real absolute path to read the
+	// file) and BEFORE sorting/baseline comparison/output.
+	if repoRootPth != "" {
+		normalizeReportPaths(&report, repoRootPth)
+	}
 
 	sort.Slice(report.Violations, func(i, j int) bool {
 		if report.Violations[i].Path != report.Violations[j].Path {
@@ -207,10 +241,15 @@ func run(args []string, stdout, stderr io.Writer) int {
 				newViolations = append(newViolations, v)
 			}
 		}
-		fmt.Fprintf(stdout, "CONST-046 audit (fail-on-new, round 99b):\n")
+		fmt.Fprintf(stdout, "CONST-046 audit (fail-on-new, round 100):\n")
 		fmt.Fprintf(stdout, "  scanned files : %d\n", report.ScannedFiles)
 		fmt.Fprintf(stdout, "  skipped files : %d\n", report.SkippedFiles)
 		fmt.Fprintf(stdout, "  allowlist hits: %d\n", report.AllowlistHits)
+		if repoRootPth != "" {
+			fmt.Fprintf(stdout, "  repo root     : %s (paths normalized relative+portable)\n", repoRootPth)
+		} else {
+			fmt.Fprintf(stdout, "  repo root     : (none — legacy absolute-path matching; NOT portable across hosts/clones)\n")
+		}
 		fmt.Fprintf(stdout, "  baseline file : %s (loaded=%v, entries=%d)\n", baselinePth, baseLoaded, len(baseSet))
 		fmt.Fprintf(stdout, "  Total: %d (NEW: %d, PRE-EXISTING: %d)\n\n", len(report.Violations), newCount, preCount)
 		if !quiet && newCount > 0 {
@@ -232,7 +271,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		_ = enc.Encode(report)
 		return 0
 	}
-	fmt.Fprintf(stdout, "CONST-046 audit (soft-warn, round 92/99b):\n")
+	fmt.Fprintf(stdout, "CONST-046 audit (soft-warn, round 92/99b/100):\n")
 	fmt.Fprintf(stdout, "  scanned files : %d\n", report.ScannedFiles)
 	fmt.Fprintf(stdout, "  skipped files : %d\n", report.SkippedFiles)
 	fmt.Fprintf(stdout, "  allowlist hits: %d\n", report.AllowlistHits)
@@ -319,6 +358,33 @@ func shortHash(s string) string {
 // Same (path, literal_hash) ⇒ same violation, even if line shifted.
 func violationKey(path, hash string) string {
 	return path + "\x00" + hash
+}
+
+// normalizeReportPaths rewrites every violation's Path to be relative
+// to repoRoot and slash-normalized (portable across OSes). A path that
+// cannot be resolved relative to repoRoot (outside the tree, or a
+// resolution error) is left UNCHANGED as an absolute path — this is a
+// deliberate best-effort fallback, never a silent violation drop: the
+// finding is still reported and still counted, just without the
+// portability benefit for that one entry.
+func normalizeReportPaths(r *Report, repoRoot string) {
+	absRoot, err := filepath.Abs(repoRoot)
+	if err != nil {
+		return
+	}
+	absRoot = filepath.Clean(absRoot)
+	for i := range r.Violations {
+		v := &r.Violations[i]
+		absPath, err := filepath.Abs(v.Path)
+		if err != nil {
+			continue
+		}
+		rel, err := filepath.Rel(absRoot, absPath)
+		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			continue
+		}
+		v.Path = filepath.ToSlash(rel)
+	}
 }
 
 // defaultBaselineFromSource attempts to locate the canonical baseline

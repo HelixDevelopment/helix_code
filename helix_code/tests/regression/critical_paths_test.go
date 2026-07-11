@@ -701,9 +701,19 @@ func TestCriticalPath_APIEndpointAvailability(t *testing.T) {
 	srv := server.New(cfg, nil, nil)
 	require.NotNil(t, srv, "Server should be created")
 
-	// Get the router for testing
+	// Get the router for testing.
+	//
+	// §11.4.120 stale-test reconciliation note: the CORS allowlist below is
+	// intentionally non-nil. Production CORSMiddleware was hardened to a
+	// strict allowlist (cfg.Auth.CORSAllowedOrigins / HELIX_CORS_ALLOWED_ORIGINS)
+	// that never echoes "*" and never grants Allow-Origin to an origin absent
+	// from the allowlist (default-deny). The CORSHeaders subtest below was
+	// reconciled to assert that secure behavior instead of the removed
+	// insecure wildcard behavior — see cors_security_test.go for the
+	// canonical anti-bluff coverage of the middleware itself.
+	corsAllowedOrigins := []string{"http://localhost:3000"}
 	router := gin.New()
-	router.Use(server.CORSMiddleware(nil))
+	router.Use(server.CORSMiddleware(corsAllowedOrigins))
 	router.Use(server.SecurityMiddleware())
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -723,6 +733,12 @@ func TestCriticalPath_APIEndpointAvailability(t *testing.T) {
 	})
 
 	t.Run("CORSHeaders", func(t *testing.T) {
+		// Allowlisted origin: CORSMiddleware MUST echo the exact origin
+		// (never "*") and MUST NOT set Allow-Credentials without an
+		// explicit per-request opt-in that isn't exercised here — the
+		// echoed-origin + Vary:Origin pairing is what matters for this
+		// critical-path smoke test (full anti-bluff coverage of every
+		// header combination lives in cors_security_test.go).
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("OPTIONS", "/health", nil)
 		req.Header.Set("Origin", "http://localhost:3000")
@@ -730,8 +746,22 @@ func TestCriticalPath_APIEndpointAvailability(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusNoContent, w.Code, "OPTIONS should return 204")
-		assert.Equal(t, "*", w.Header().Get("Access-Control-Allow-Origin"), "CORS origin should be set")
+		assert.Equal(t, "http://localhost:3000", w.Header().Get("Access-Control-Allow-Origin"),
+			"allowlisted origin should be echoed back verbatim, never a wildcard (§11.4.120: hardened CORSMiddleware never emits \"*\")")
+		assert.NotEqual(t, "*", w.Header().Get("Access-Control-Allow-Origin"),
+			"CORS origin must never be a wildcard (secure allowlist behavior)")
 		assert.Contains(t, w.Header().Get("Access-Control-Allow-Methods"), "GET", "CORS methods should include GET")
+
+		// Non-allowlisted origin: default-deny — no Allow-Origin header at all.
+		w2 := httptest.NewRecorder()
+		req2, _ := http.NewRequest("OPTIONS", "/health", nil)
+		req2.Header.Set("Origin", "http://evil.example.com")
+		req2.Header.Set("Access-Control-Request-Method", "GET")
+		router.ServeHTTP(w2, req2)
+
+		assert.Equal(t, http.StatusNoContent, w2.Code, "OPTIONS should still return 204 for a disallowed origin")
+		assert.Empty(t, w2.Header().Get("Access-Control-Allow-Origin"),
+			"disallowed origin must receive no Access-Control-Allow-Origin header (default-deny)")
 	})
 
 	t.Run("SecurityHeaders", func(t *testing.T) {

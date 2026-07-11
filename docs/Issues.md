@@ -566,3 +566,93 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 ---
 
 *Last updated: 2026-05-29 — filed HXC-035 (POST /auth/register 400 internal_auth_failed_create_user — High, systematic-debugging in progress per §11.4.102); HXC-029 now 4/18 banks verified (full-qa-api + entity-management + admin-operations + security-validation, each 3×+mutation vs live server); filed HXC-034 (cascade constitution §11.4.102 into 68 owned submodules + gate — Task); constitution submodule §11.4.102 added+pushed (656b43a), meta pointer bumped; HXC-029 full-qa-api bank verified (§11.4.98); HXC-030 §11.4.99 sweep COMPLETE (38/38). Prior: filed HXC-033 (codegraph 0.9.7 index/sync crash + §11.4.79 own-org regression — Operator-blocked); HXC-032 FIXED+closed (LLMOrchestrator conflict markers; submodule d3956ad, helix_agent builds); reclassified HXC-031 (CONST-052 renames RESOLVED/none-remain, only Codex/Cline ports remain); HXC-029 §11.4.98 2 confirmed violations fixed; HXC-030 §11.4.99 Go 1.24→1.26.3 + PG 14→15 doc reconciliation. Prior: filed HXC-029 (§11.4.98 forward sweep), HXC-030 (§11.4.99 forward sweep), HXC-031 (deferred rename/port long-tail) per operator "do it all"; added scripts/generate_{issues,fixed}_summary.sh + G12 summary-freshness gate (§11.4.91/12). Previously: 2026-05-28 — constitution submodule pulled 7f738df→15cd4bc (§11.4.79–97); HXC-013..019,022 filed (open: SQLite-DB / stress+chaos / cross-platform / submodule-cascade / codegraph-own-org / obsolete+summary-tooling / docs-qa / test_bank-noncompile); HXC-021 + HXC-014a + HXC-015a FIXED→Fixed.md (commit f464adb0 — fake-skip Assert(true) bluffs + empty stress stub → honest SKIP); CONST-052/HXC-001 leaf-rename programme COMPLETE (Phases 1-4), Phase 5 org-grouping dirs kept as namespace carve-outs per operator decision 2026-05-28 → HXC-001 closeable. Prior: 2026-05-20 (round 463 — HXC-003 closed `Implemented (→ Fixed.md)` and migrated to `docs/Fixed.md`: the CONST-046 i18n migration campaign is concluded — the genuine user-facing (C) string-literal surface is exhausted across all 7 scope areas (helix_code `internal/`+`cmd/`+`applications/`, LLMsVerifier, helix_qa, all owned `vasic-digital/*`+`HelixDevelopment/*` submodules); ~91-462 rounds migrated tens of thousands of literals with paired-mutation anti-bluff tests; remaining ~55k audit hits are all out of CONST-046 scope per `docs/audits/2026-05-20-internal-const046-classification.md`. Open set is now HXC-001 (CONST-052 renames — Task, In progress) + HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task)). Previous round 402 — HXC-011 closed `Fixed (→ Fixed.md)`: the helix_qa runner's `run` path on the `desktop` platform now genuinely executes a bank case's `shell:` action via `os/exec`. Round 400 — speed-programme close-out: HXC-006 closed `Implemented (→ Fixed.md)`. To update Issues_Summary.md mechanically, run `scripts/generate_issues_summary.sh` (TODO: create — currently this Issues.md is the source of truth and Summary is hand-maintained).*
+## HXC-117 — Model capability flags (MCP, LSP, ACP, RAG, Skills, Plugins) are not sourced from the verifier as required
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** High
+**Created-By:** Claude
+
+Governance rule CONST-040 requires that every advanced capability a model supports be reported by the central verifier component rather than hardcoded. Today the verifier only records whether a model supports embeddings; the other six capabilities are documented as verifier-sourced but are not implemented there. As a result the product cannot truthfully tell users which models support which capabilities. The work adds these capability fields to the verifier's results and has the product read them from there. Users then receive accurate, single-source-of-truth capability information.
+
+## HXC-118 — Retrieval-Augmented-Generation (RAG) module exists but is not connected to the application
+
+**Status:** Queued
+**Type:** Feature
+**Severity:** High
+**Created-By:** Claude
+
+A dedicated Retrieval-Augmented-Generation component is maintained as its own reusable module, but the main application does not import or use it anywhere. A capability the product is expected to offer (answering using retrieved documents) is therefore effectively unavailable to end users despite the code existing. The work integrates the existing RAG module into the application, wires it into the request flow, and exposes its capability flag. Users gain working document-grounded answers instead of an orphaned, unused component.
+
+## HXC-119 — Agent Client Protocol (ACP) support is absent from the platform
+
+**Status:** Queued
+**Type:** Feature
+**Severity:** High
+**Created-By:** Claude
+
+Governance rule CONST-040 lists the Agent Client Protocol among required capabilities, but there is no implementation of it anywhere in the codebase. Any user or integration expecting ACP connectivity currently cannot use it. The work is to design and implement real ACP support, or, if it proves structurally infeasible, to document that with cited evidence. The platform will then either genuinely support ACP or hold an honest, evidenced position instead of an unmet claim.
+
+## HXC-122 — Memory and automation test suites mostly skip themselves without a running server
+
+**Status:** Queued
+**Type:** Task
+**Severity:** Medium
+**Created-By:** Claude
+
+Two categories of tests, memory-usage and end-to-end automation, skip most of their cases by default because they require a live server or special environment flags not set in normal runs. In practice these areas are largely unverified even though the tests appear to exist. The work provides a documented, repeatable way to run them against real infrastructure so they actually execute and prove the behavior. Memory and automation behavior then becomes genuinely tested rather than merely scaffolded.
+
+## HXC-124 — HelixQA task-workflow bank cannot fully self-run due to a JWT token-minting gap
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Medium
+**Created-By:** Claude
+
+One automated quality-assurance test bank that drives real server workflows has a documented gap: it cannot mint the authentication token needed to finish the workflow end-to-end without manual help, so it does not meet the fully-automated no-human-intervention standard. The work provides an automated way to obtain a valid token during the test so the workflow runs unattended. The QA bank then becomes fully automated and re-runnable.
+
+## HXC-125 — Integration-tagged tests are invisible to the default test run
+
+**Status:** Queued
+**Type:** Task
+**Severity:** Low
+**Created-By:** Claude
+
+A large set of integration tests is hidden behind a build tag, so an ordinary test run never compiles or executes them and their pass/fail signal is absent from routine checks. They pass when the tag is supplied, so this is a visibility gap, not a broken feature. The work makes the standard test command or a documented target include them so their status is always visible. Everyday test results then reflect integration coverage.
+
+## HXC-126 — Eleven closed items still appear in the open-issues tracker instead of the resolved tracker
+
+**Status:** Queued
+**Type:** Task
+**Severity:** Medium
+**Created-By:** Claude
+
+Eleven work items marked finished still appear in the open-issues document and are missing from the resolved-items document, so the two views disagree about their state and become untrustworthy. The work regenerates the tracker documents from the authoritative database so finished items appear only in the resolved view. The human-readable trackers then accurately reflect the true state.
+
+## HXC-127 — The obsolete-items detail table is empty, so retired items lack required justification
+
+**Status:** Queued
+**Type:** Task
+**Severity:** Low
+**Created-By:** Claude
+
+When an item is retired as obsolete, governance requires a recorded reason, date, and superseding reference, but the table holding these details is completely empty, including for the one currently obsolete item. This leaves retirements unexplained and non-compliant. The work populates the required justification details for obsolete items so every retired item carries an auditable reason.
+
+## HXC-128 — Thirty-six work items have descriptions too short to be understandable
+
+**Status:** Queued
+**Type:** Task
+**Severity:** Low
+**Created-By:** Claude
+
+Thirty-six tracked items have descriptions shorter than the minimum length needed to convey what they are about, so a reader cannot understand them without reading code. The work rewrites these into clear plain-language descriptions explaining what each item is and why it matters. Every item then becomes understandable to non-developers and stakeholders.
+
+## HXC-129 — Severity is blank on 79 closed feature items, blocking risk-based prioritization
+
+**Status:** Queued
+**Type:** Task
+**Severity:** Low
+**Created-By:** Claude
+
+Seventy-nine finished feature items have no severity recorded, so risk-ordered validation and reporting cannot rank them by importance. The work backfills an appropriate severity for each item based on its content and impact. Risk-based ordering and reporting then work correctly across the full item set.
+

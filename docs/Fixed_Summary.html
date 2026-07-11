@@ -1,57 +1,2781 @@
-<h1 id="helixcode-fixed-items-summary">HelixCode — Fixed Items
-Summary</h1>
-<blockquote>
-<p>Generated <strong>mechanically</strong> from
-<code>docs/Fixed.md</code> by
-<code>scripts/generate_fixed_summary.sh</code> per Constitution §11.4.19
-+ §11.4.57 (Type-aware closure vocabulary). Counts only — do not
-hand-edit, re-run the generator.</p>
-</blockquote>
-<h2 id="aggregate-counts">Aggregate counts</h2>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Fixed_Summary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="fixed_summary">Fixed_Summary</h1>
+<p>Closed workable items (current_location = Fixed), regenerated from
+the SQLite single-source-of-truth (§11.4.53).</p>
+<h2 id="counts-by-type-status">Counts by Type × Status</h2>
 <table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr>
 <th>Type</th>
+<th>Status</th>
 <th>Count</th>
-<th>Closure vocabulary (CONST-057)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Bug</td>
-<td>79</td>
-<td><code>Fixed (→ Fixed.md)</code></td>
+<td>Fixed (→ Fixed.md)</td>
+<td>130</td>
+</tr>
+<tr>
+<td>Bug</td>
+<td>Obsolete (→ Fixed.md)</td>
+<td>2</td>
 </tr>
 <tr>
 <td>Feature</td>
-<td>79</td>
-<td><code>Implemented (→ Fixed.md)</code></td>
+<td>Implemented (→ Fixed.md)</td>
+<td>89</td>
 </tr>
 <tr>
 <td>Task</td>
-<td>30</td>
-<td><code>Completed (→ Fixed.md)</code></td>
+<td>Completed (→ Fixed.md)</td>
+<td>52</td>
 </tr>
 <tr>
-<td>Obsolete</td>
-<td>1</td>
-<td><code>Obsolete (→ Fixed.md)</code> (§11.4.90 — terminal Status,
-orthogonal to Type)</td>
+<td><strong>TOTAL</strong></td>
+<td></td>
+<td><strong>273</strong></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Total closed items</strong>: 188 (counted directly from the
-<code>docs/Fixed.md</code> closure table).</p>
-<h2 id="obsolete-items-11.4.90">Obsolete items (§11.4.90)</h2>
-<ul>
-<li>HXC-044: internal/cognee — AMD-GPU rocm-smi JSON parser returns -1
-sentinel instead of parsed GPU-use value</li>
-</ul>
-<p><em>Last regenerated: 2026-07-12 by
-<code>scripts/generate_fixed_summary.sh</code>. HTML/PDF exports via
-<code>scripts/regenerate-tracker-exports.sh</code>.</em></p>
+<h2 id="items">Items</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Level</th>
+<th>Status</th>
+<th>Type</th>
+<th>Fixed-In Tag(s)</th>
+<th>One-line description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19 — CONST-046 i18n architecture design doc — 368 LOC
+design; Option D (nicksnyder/go-i18n/v2) selected</td>
+</tr>
+<tr>
+<td>2</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#1 — pkg/i18n core foundation — 11 tests + mutation;
+Bundle/Localizer + sentinel errors</td>
+</tr>
+<tr>
+<td>3</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#10 — panoptic × 5 cobra Short descriptions
+migration</td>
+</tr>
+<tr>
+<td>4</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#11 — challenges/pkg/i18n/ Phase 4 infrastructure +
+evaluators.go migration</td>
+</tr>
+<tr>
+<td>5</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#12 —
+challenges/pkg/userflow/challenge_recorded_ai_testgen.go × 10 of 25
+migration</td>
+</tr>
+<tr>
+<td>6</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#13 — challenges/pkg/userflow/challenge_desktop.go
+migration</td>
+</tr>
+<tr>
+<td>7</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#14 — challenges/pkg/userflow/challenge_ai_testgen.go
+× 10 user-facing migration</td>
+</tr>
+<tr>
+<td>8</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#15 —
+challenges/pkg/userflow/challenge_recorded_mobile.go × 7 unique × 14
+call sites</td>
+</tr>
+<tr>
+<td>9</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>FIX-2026-05-19#16 — CONST-046 i18n implemented-architecture overview
+doc</td>
+</tr>
+<tr>
+<td>10</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#17 — Tracker HTML + PDF exports per §11.4.19</td>
+</tr>
+<tr>
+<td>11</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#18 — helix_code/cmd/helix_config/main.go × 10
+migration</td>
+</tr>
+<tr>
+<td>12</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#19 — helix_qa i18n kickoff (Phase 4 round 7)</td>
+</tr>
+<tr>
+<td>13</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#2 — CONST-046 audit script (soft-warn) — 5 tests;
+real-tree scan 57,345 violations across 21,937 files</td>
+</tr>
+<tr>
+<td>14</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>FIX-2026-05-19#20 — CONST-052 rename programme phased plan (HXC-001
+plan, ex-ISSUE-005)</td>
+</tr>
+<tr>
+<td>15</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#21 — LLMOrchestrator i18n kickoff (Phase 4 round
+9)</td>
+</tr>
+<tr>
+<td>16</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#22 — LLMsVerifier i18n kickoff (Phase 4 round 8)</td>
+</tr>
+<tr>
+<td>17</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#23 — HelixSpecifier i18n kickoff (Phase 4 round
+10)</td>
+</tr>
+<tr>
+<td>18</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#24 — Storage i18n kickoff (Phase 4 round 11)</td>
+</tr>
+<tr>
+<td>19</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#25 — LLMOps i18n kickoff (Phase 4 round 12)</td>
+</tr>
+<tr>
+<td>20</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#26 — VectorDB i18n kickoff (Phase 4 round 13)</td>
+</tr>
+<tr>
+<td>21</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#27 — Observability i18n kickoff (Phase 4 round
+14)</td>
+</tr>
+<tr>
+<td>22</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#28 — MCP_Module i18n kickoff (Phase 4 round 15)</td>
+</tr>
+<tr>
+<td>23</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#29 — Messaging i18n kickoff (Phase 4 round 16)</td>
+</tr>
+<tr>
+<td>24</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#3 — Per-submodule i18n injection wiring +
+i18nadapter</td>
+</tr>
+<tr>
+<td>25</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#30 — Middleware i18n kickoff (Phase 4 round 17)</td>
+</tr>
+<tr>
+<td>26</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#31 — Plugins i18n kickoff (Phase 4 round 18)</td>
+</tr>
+<tr>
+<td>27</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#32 — Streaming i18n kickoff (Phase 4 round 19)</td>
+</tr>
+<tr>
+<td>28</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#33 — Watcher i18n kickoff (Phase 4 round 20)</td>
+</tr>
+<tr>
+<td>29</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#34 — conversation i18n kickoff (Phase 4 round
+21)</td>
+</tr>
+<tr>
+<td>30</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#35 — containers i18n kickoff (Phase 4 round 22)</td>
+</tr>
+<tr>
+<td>31</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#36 — security i18n kickoff (Phase 4 round 23)</td>
+</tr>
+<tr>
+<td>32</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#37 — helix_code/cmd/cli/main.go × 10 migration (Phase
+4 round 24)</td>
+</tr>
+<tr>
+<td>33</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#38 — AutoTemp i18n kickoff (Phase 4 round 25)</td>
+</tr>
+<tr>
+<td>34</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#39 — Auth i18n kickoff (Phase 4 round 26)</td>
+</tr>
+<tr>
+<td>35</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#4 — SelfImprove × 8 hardcoded-content migration</td>
+</tr>
+<tr>
+<td>36</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#40 — helix_code/cmd/server/main.go × 10 migration
+(Phase 4 round 27)</td>
+</tr>
+<tr>
+<td>37</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#41 — PliniusCommon i18n kickoff (Phase 4 round
+28)</td>
+</tr>
+<tr>
+<td>38</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#42 — helix_code/applications/terminal_ui × up to 10
+migration (Phase 4 round 30)</td>
+</tr>
+<tr>
+<td>39</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#43 — helix_code/applications/desktop i18n (Phase 4
+round 29)</td>
+</tr>
+<tr>
+<td>40</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#44 — helix_code/applications/ios infrastructure-only
+(Phase 4 round 31)</td>
+</tr>
+<tr>
+<td>41</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#45 — helix_code/applications/android
+infrastructure-only (Phase 4 round 32)</td>
+</tr>
+<tr>
+<td>42</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#46 — helix_code/applications/aurora_os × up to 10
+migration (Phase 4 round 33)</td>
+</tr>
+<tr>
+<td>43</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#47 — helix_code/cmd/config_test × 12 migration (Phase
+4 round 34)</td>
+</tr>
+<tr>
+<td>44</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#48 — helix_code/cmd/security_test × 10 migration
+(Phase 4 round 35)</td>
+</tr>
+<tr>
+<td>45</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#49 — helix_code/cmd/security_fix × 10 migration
+(Phase 4 round 36)</td>
+</tr>
+<tr>
+<td>46</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#5 — HelixLLM × 2 CLI strings migration</td>
+</tr>
+<tr>
+<td>47</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#50 — helix_code/cmd/performance_optimization × 10
+migration (Phase 4 round 37)</td>
+</tr>
+<tr>
+<td>48</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#51 — helix_code/cmd/security_fix_standalone × 10 of
+27 migration (Phase 4 round 38)</td>
+</tr>
+<tr>
+<td>49</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#52 — helix_code/internal/auth × up to 10 migration
+(Phase 4 round 39)</td>
+</tr>
+<tr>
+<td>50</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#53 — helix_code/internal/agent × 10 of 64 migration
+(Phase 4 round 40)</td>
+</tr>
+<tr>
+<td>51</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#54 — helix_code/internal/cognee × migration (Phase 4
+round 41)</td>
+</tr>
+<tr>
+<td>52</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#55 — helix_code/internal/commands × 10 migration
+(Phase 4 round 42)</td>
+</tr>
+<tr>
+<td>53</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#56 — helix_code/internal/config × 10 migration (Phase
+4 round 43)</td>
+</tr>
+<tr>
+<td>54</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#57 — helix_code/internal/context × 8 sites / 5 IDs
+(Phase 4 round 44)</td>
+</tr>
+<tr>
+<td>55</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#58 — helix_code/internal/database × 8 migration
+(Phase 4 round 45)</td>
+</tr>
+<tr>
+<td>56</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#59 — helix_code/internal/discovery migration (Phase 4
+round 47)</td>
+</tr>
+<tr>
+<td>57</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#6 — harmony_os × 5 CLI headers migration</td>
+</tr>
+<tr>
+<td>58</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#60 — helix_code/internal/deployment × 10 migration
+(Phase 4 round 46)</td>
+</tr>
+<tr>
+<td>59</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#61 — helix_code/internal/editor migration (Phase 4
+round 48)</td>
+</tr>
+<tr>
+<td>60</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#62 — helix_code/internal/event migration (Phase 4
+round 49)</td>
+</tr>
+<tr>
+<td>61</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#63 — helix_code/internal/focus migration (Phase 4
+round 50)</td>
+</tr>
+<tr>
+<td>62</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#64 — helix_code/internal/hardware migration (Phase 4
+round 51)</td>
+</tr>
+<tr>
+<td>63</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>FIX-2026-05-19#65 — Round 74-87 release-gate stabilization — 19 of
+26 round-74 FAILs closed
+(helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges)</td>
+</tr>
+<tr>
+<td>64</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#66 — release-gate-test.sh –skip-env-failures
+filter</td>
+</tr>
+<tr>
+<td>65</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>FIX-2026-05-19#67 — CONST-052 reference-drift sweep (73
+submodules)</td>
+</tr>
+<tr>
+<td>66</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>FIX-2026-05-19#68 — challenges go.mod path fix
+<code>../Containers</code>→<code>../containers</code></td>
+</tr>
+<tr>
+<td>67</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#69 — LLMOrchestrator builders × 5 wired —
+gemini/junie/opencode/claudecode/qwencode CLI binaries</td>
+</tr>
+<tr>
+<td>68</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#7 — DocProcessor CLI × 8 migration — Refactored to
+runCLI(); 6 tests + mutation; Upstreams recipe fix bonus</td>
+</tr>
+<tr>
+<td>69</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#70 — 4-vendor GPU telemetry chain
+(NVIDIA+AMD+Apple+Intel)</td>
+</tr>
+<tr>
+<td>70</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#71 — LLM Err coverage 100% across 17 providers</td>
+</tr>
+<tr>
+<td>71</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#8 — Planning × 3 + VisionEngine × 4 migration</td>
+</tr>
+<tr>
+<td>72</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>FIX-2026-05-19#9 — CONST-046 audit-gate fail-on-new + baseline</td>
+</tr>
+<tr>
+<td>73</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXA-001 — HXA-001 (ex-ISSUE-009): helix_agent 4 handler tests</td>
+</tr>
+<tr>
+<td>74</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXA-002 — HXA-002 (ex-ISSUE-010): helix_agent debate/llmprovider
+sibling-submodule API drift</td>
+</tr>
+<tr>
+<td>75</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXA-003 — HXA-003 (ex-ISSUE-011): venice
+<code>TestGetCapabilities</code> CONST-037 model-list drift</td>
+</tr>
+<tr>
+<td>76</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-001 — HXC-001 (ex-ISSUE-005): CONST-052 lowercase-snake_case
+rename programme — all owned-org submodule leaf dirs + 57
+<code>Upstreams/</code> dirs renamed</td>
+</tr>
+<tr>
+<td>77</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-002 — HXC-002 (ex-ISSUE-006) (partial): HelixMemory LOGIC-class
+FAIL cleanup</td>
+</tr>
+<tr>
+<td>78</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-002#1 — HXC-002 (ex-ISSUE-006) (partial): Planning LOGIC FAIL
+audit confirms clean</td>
+</tr>
+<tr>
+<td>79</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-002#2 — HXC-002 (ex-ISSUE-006) (final): helix_agent inner LOGIC
+FAIL cleanup</td>
+</tr>
+<tr>
+<td>80</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-003 — HXC-003: CONST-046 i18n migration backlog (no user-facing
+text hardcoded as static string literals)</td>
+</tr>
+<tr>
+<td>81</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-004 — HXC-004: recovery-batch 4-package under-verification (llm
++ logo + notification test-assertion drift + performance translator.go
+build break)</td>
+</tr>
+<tr>
+<td>82</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-005 — HXC-005:
+<code>cmd/performance_optimization_standalone/main.go</code> is a
+CONST-035 simulation bluff</td>
+</tr>
+<tr>
+<td>83</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-006 — HXC-006: HelixCode Speed Programme — 3-5× faster than
+competitor AI CLI agents (6-phase / 31-task)</td>
+</tr>
+<tr>
+<td>84</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-007 — HXC-007: Constitution §11.4.68/70-74 cascade +
+meta-pointer bump</td>
+</tr>
+<tr>
+<td>85</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-008 — HXC-008: CONST-055 G1 governance gaps surfaced by
+post-constitution-pull validation sweep</td>
+</tr>
+<tr>
+<td>86</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-009 — HXC-009: Owned-submodule GitHub ↔︎ GitLab mirror-divergence
+reconciliation</td>
+</tr>
+<tr>
+<td>87</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-010 — HXC-010: End-to-end Kimi CLI + Qwen Code CodeGraph
+verification (operator-blocked on LLM backend quota/credentials)</td>
+</tr>
+<tr>
+<td>88</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-011 — HXC-011: helix_qa runner emits hollow sub-microsecond
+“PASSED” rows for desktop-platform bank cases instead of executing the
+case’s <code>action:</code></td>
+</tr>
+<tr>
+<td>89</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-012 — HXC-012: data race in
+<code>helix_code/internal/llm/load_balancer.go</code> background
+stat-collector goroutine</td>
+</tr>
+<tr>
+<td>90</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-016 — HXC-016: §11.4.69–97 governance cascade into all owned
+submodules + mechanical propagation gate (CONST-047/§3, §11.4.32)</td>
+</tr>
+<tr>
+<td>91</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-017 — HXC-017: CodeGraph index excluded all own-org submodules
+(blanket <code>dependencies/**</code>) + config.json was untracked —
+§11.4.79/§11.4.78/§11.4.80</td>
+</tr>
+<tr>
+<td>92</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-021 — HXC-021 + HXC-014a + HXC-015a: fake-skip
+<code>Assert(true,"...skipped")</code> bluffs (11) + empty
+<code>TestProviderStress</code> stubs report green while exercising
+nothing</td>
+</tr>
+<tr>
+<td>93</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-022 — HXC-022: test_bank platform+integration packages did not
+compile — half-written stubs + root package-name collision (anti-bluff:
+an uncompilable test package never runs)</td>
+</tr>
+<tr>
+<td>94</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-023 — HXC-023: literal-true
+<code>Assert(true,…)</code>/<code>AssertTrue(true,…)</code> PASS-bluffs
+across the e2e test banks (report PASS without exercising
+behaviour)</td>
+</tr>
+<tr>
+<td>95</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-029 — HXC-029: §11.4.98 full-automation compliance sweep —
+verify every live/integration/e2e/Challenge test is self-driving with no
+human-in-the-loop</td>
+</tr>
+<tr>
+<td>96</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-030 — HXC-030: §11.4.99 latest-source documentation
+cross-reference sweep across all operator-facing docs</td>
+</tr>
+<tr>
+<td>97</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-031 — Deferred long-tail: CONST-052 renames (RESOLVED — none
+remain) + Codex/Cline reference-agent ports</td>
+</tr>
+<tr>
+<td>98</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-031 — HXC-031: Deferred long-tail: CONST-052 renames (RESOLVED —
+none remain) + Codex/Cline reference-agent ports</td>
+</tr>
+<tr>
+<td>99</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-032 — HXC-032: LLMOrchestrator submodule had committed git
+conflict markers in 5 Go files (26 hunks) breaking
+<code>helix_agent</code> build — a §11.4 build-layer PASS-bluff already
+on origin/master</td>
+</tr>
+<tr>
+<td>100</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-033 — HXC-033: codegraph 0.9.7 update dropped own-org submodules
+from the index + full index/sync appeared to crash (§11.4.79
+regression)</td>
+</tr>
+<tr>
+<td>101</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-034 — HXC-034: Cascade constitution §11.4.102 (mandatory
+systematic-debugging + always-loaded using-superpowers +
+plugin-dependency availability) into every owned submodule + wire the
+CM-COVENANT-114-102-PROPAGATION enforcement gate</td>
+</tr>
+<tr>
+<td>102</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-035 — HXC-035: <code>POST /api/v1/auth/register</code> returned
+400 <code>internal_auth_failed_create_user</code> on a fresh DB —
+blocked all authenticated flows</td>
+</tr>
+<tr>
+<td>103</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-036 — HXC-036: Systemic CONST-046 i18n defect — 74 packages
+emitted raw message-ID keys to users because the boot-time translator
+wiring was never implemented (a §11.9 tests-green-feature-broken
+defect)</td>
+</tr>
+<tr>
+<td>104</td>
+<td>High</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-037 — §11.4.103-141 + CONST-048..060 anchor-cascade backfill
+into 7 owned submodules (verify-governance-cascade.sh 30→0)</td>
+</tr>
+<tr>
+<td>105</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-037 — HXC-037: §11.4.103-141 + CONST-048..060 anchor-cascade
+backfill into 7 owned submodules (verify-governance-cascade.sh
+30→0)</td>
+</tr>
+<tr>
+<td>106</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-038 — docs_chain G14: fixed.yaml fixed_summary
+transform-contract mismatch + stale state.json baseline false-CONFLICT
+on issues context</td>
+</tr>
+<tr>
+<td>107</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-038 — HXC-038: docs_chain G14: fixed.yaml fixed_summary
+transform-contract mismatch + stale state.json baseline false-CONFLICT
+on issues context</td>
+</tr>
+<tr>
+<td>108</td>
+<td>Medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-039 — G7 §11.4.83 docs/qa evidence gap: 8 past feature/fix
+commits lack docs/qa/<run-id>/ directories</td>
+</tr>
+<tr>
+<td>109</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-039 — HXC-039: G7 §11.4.83 docs/qa evidence gap: 8 past
+feature/fix commits lack docs/qa/<run-id>/ directories</td>
+</tr>
+<tr>
+<td>110</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-040 — CLAUDE.md §9/§3.4 anti-bluff smoke command false-alarm
+(527 i18n/test hits) + case-sensitivity miss of BLUFF-001</td>
+</tr>
+<tr>
+<td>111</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-040 — HXC-040: CLAUDE.md §9/§3.4 anti-bluff smoke command
+false-alarm (527 i18n/test hits) + case-sensitivity miss of
+BLUFF-001</td>
+</tr>
+<tr>
+<td>112</td>
+<td>Medium</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-041 — helixqa standalone HTTP bank-runner subcommand (helixqa
+http) drives http: banks vs live server without Playwright or LLM</td>
+</tr>
+<tr>
+<td>113</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-041 — HXC-041: helixqa standalone HTTP bank-runner subcommand
+(helixqa http) drives http: banks vs live server without Playwright or
+LLM</td>
+</tr>
+<tr>
+<td>114</td>
+<td>Medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-042 — CONST-050(B) challenge-coverage gap: 12 missing challenge
+scripts in debate_orchestrator + helix_agent
+(ddos/stress/chaos/scaling/ui/ux)</td>
+</tr>
+<tr>
+<td>115</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-042 — HXC-042: CONST-050(B) challenge-coverage gap: 12 missing
+challenge scripts in debate_orchestrator + helix_agent
+(ddos/stress/chaos/scaling/ui/ux)</td>
+</tr>
+<tr>
+<td>116</td>
+<td>High</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-043 — auth Login nil-DB panic causes HTTP 500: server advertises
+graceful no-DB operation but first /api/v1/auth/login dereferences nil
+s.db</td>
+</tr>
+<tr>
+<td>117</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-043 — HXC-043: auth Login nil-DB panic causes HTTP 500: server
+advertises graceful no-DB operation but first /api/v1/auth/login
+dereferences nil s.db</td>
+</tr>
+<tr>
+<td>118</td>
+<td>Medium</td>
+<td>Obsolete (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-044 — internal/cognee: AMD-GPU rocm-smi JSON parser returns -1
+sentinel instead of parsed GPU-use value</td>
+</tr>
+<tr>
+<td>119</td>
+<td>—</td>
+<td>Obsolete (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-044 — HXC-044: internal/cognee — AMD-GPU rocm-smi JSON parser
+returns -1 sentinel instead of parsed GPU-use value</td>
+</tr>
+<tr>
+<td>120</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-045 — internal/hooks: cancelled hook ExecutionResult leaves
+duration unset (should always be populated)</td>
+</tr>
+<tr>
+<td>121</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-045 — HXC-045: internal/hooks: cancelled hook ExecutionResult
+leaves duration unset (should always be populated)</td>
+</tr>
+<tr>
+<td>122</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-046 — internal/memory/providers: generateThreadID() non-unique
+under fast back-to-back calls (timestamp-only, same-nanosecond
+collision)</td>
+</tr>
+<tr>
+<td>123</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-046 — HXC-046: internal/memory/providers: generateThreadID()
+non-unique under fast back-to-back calls (timestamp-only,
+same-nanosecond collision)</td>
+</tr>
+<tr>
+<td>124</td>
+<td>Low</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-047 — internal/redis TestNewClient_WithDatabase needs-live-Redis
+with no SKIP-OK guard (§11.4.98) + i18n error no longer contains literal
+Redis</td>
+</tr>
+<tr>
+<td>125</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-047 — HXC-047: internal/redis TestNewClient_WithDatabase
+needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer
+contains literal Redis</td>
+</tr>
+<tr>
+<td>126</td>
+<td>Low</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-048 — helixcode-system.yaml HelixQA bank: 11 self-driving http
+cases for the non-auth server surface
+(health/server-info/system-status/llm-providers + negatives)</td>
+</tr>
+<tr>
+<td>127</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-048 — HXC-048: helixcode-system.yaml HelixQA bank: 11
+self-driving http cases for the non-auth server surface
+(health/server-info/system-status/llm-providers + negatives)</td>
+</tr>
+<tr>
+<td>128</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-049 — doc_processor TestAutomation_UpstreamsExist reads capital
+‘Upstreams’ but canonical dir is lowercase ‘upstreams’ (CONST-052 case
+drift, deterministic FAIL)</td>
+</tr>
+<tr>
+<td>129</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-049 — HXC-049: doc_processor TestAutomation_UpstreamsExist reads
+capital ‘Upstreams’ but canonical dir is lowercase ‘upstreams’
+(CONST-052 case drift, deterministic FAIL)</td>
+</tr>
+<tr>
+<td>130</td>
+<td>Low</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-050 — event_bus NATS env-gated integration skips lack SKIP-OK
+markers required by the no-silent-skips gate (§11.4.98)</td>
+</tr>
+<tr>
+<td>131</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-050 — HXC-050: event_bus NATS env-gated integration skips lack
+SKIP-OK markers required by the no-silent-skips gate (§11.4.98)</td>
+</tr>
+<tr>
+<td>132</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-051 — helix_llm + helix_memory go.mod replace directives point
+to non-existent ../../vasic-digital/* sibling layout (CONST-051(C)
+dependency-layout)</td>
+</tr>
+<tr>
+<td>133</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-051 — HXC-051: helix_llm + helix_memory go.mod replace
+directives point to non-existent ../../vasic-digital/* sibling layout
+(CONST-051(C) dependency-layout)</td>
+</tr>
+<tr>
+<td>134</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-052 — background_tasks go.mod build break — capitalised replace
+paths</td>
+</tr>
+<tr>
+<td>135</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-052 — HXC-052: background_tasks go.mod build break — capitalised
+replace paths</td>
+</tr>
+<tr>
+<td>136</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-053 — conversation go.mod build break — capitalised replace path
+../Messaging</td>
+</tr>
+<tr>
+<td>137</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-053 — HXC-053: conversation go.mod build break — capitalised
+replace path ../Messaging</td>
+</tr>
+<tr>
+<td>138</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-054 — leak_detector parallel test flake — §11.4.50
+determinism</td>
+</tr>
+<tr>
+<td>139</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-054 — HXC-054: leak_detector parallel test flake — §11.4.50
+determinism</td>
+</tr>
+<tr>
+<td>140</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-055 — formatters brittle cat –version probe + go_hello fixtures
+break go build</td>
+</tr>
+<tr>
+<td>141</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-055 — HXC-055: formatters brittle cat –version probe + go_hello
+fixtures break go build</td>
+</tr>
+<tr>
+<td>142</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-056 — 7 submodules: CONST-052 capitalised replace =&gt;
+../PliniusCommon (dir is plinius_common)</td>
+</tr>
+<tr>
+<td>143</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-056 — HXC-056: 7 submodules: CONST-052 capitalised replace =&gt;
+../PliniusCommon (dir is plinius_common)</td>
+</tr>
+<tr>
+<td>144</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-057 — recovery go.mod missing require+replace for
+digital.vasic.concurrency (pkg/breaker import unwired)</td>
+</tr>
+<tr>
+<td>145</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-057 — HXC-057: recovery go.mod missing require+replace for
+digital.vasic.concurrency (pkg/breaker import unwired)</td>
+</tr>
+<tr>
+<td>146</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-058 — helix_agent go build fails on vendored third-party
+cli_agents/continue test fixture (quarantine)</td>
+</tr>
+<tr>
+<td>147</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-058 — HXC-058: helix_agent go build fails on vendored
+third-party cli_agents/continue test fixture (quarantine)</td>
+</tr>
+<tr>
+<td>148</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-059 — debate_orchestrator sandbox: ctx-cancel/timeout fails to
+kill child process tree on non-Linux (§11.4.81)</td>
+</tr>
+<tr>
+<td>149</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-059 — HXC-059: debate_orchestrator sandbox: ctx-cancel/timeout
+fails to kill child process tree on non-Linux (§11.4.81)</td>
+</tr>
+<tr>
+<td>150</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-060 — debate_orchestrator challenges/runner/main.go:516 context
+cancel not called on all return paths (vet leak)</td>
+</tr>
+<tr>
+<td>151</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-060 — HXC-060: debate_orchestrator challenges/runner/main.go:516
+context cancel not called on all return paths (vet leak)</td>
+</tr>
+<tr>
+<td>152</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-061 — helix_agent legacy unit-test calls memory.GetRelevant with
+stale 2-arg signature (won’t compile)</td>
+</tr>
+<tr>
+<td>153</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-061 — HXC-061: helix_agent legacy unit-test calls
+memory.GetRelevant with stale 2-arg signature (won’t compile)</td>
+</tr>
+<tr>
+<td>154</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-062 — helix_specifier pkg/metrics copies sync.RWMutex by value
+(vet lock-copy, concurrency hazard)</td>
+</tr>
+<tr>
+<td>155</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-062 — HXC-062: helix_specifier pkg/metrics copies sync.RWMutex
+by value (vet lock-copy, concurrency hazard)</td>
+</tr>
+<tr>
+<td>156</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-063 — panoptic StartRecording: unreachable recording-bootstrap
+after early return nil — recorder never starts</td>
+</tr>
+<tr>
+<td>157</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-063 — HXC-063: panoptic StartRecording: unreachable
+recording-bootstrap after early return nil — recorder never starts</td>
+</tr>
+<tr>
+<td>158</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-064 — cognee AMD-GPU parser tests flake under parallel load
+(rocm-smi fake subprocess signal-killed before 2s timeout,
+§11.4.50)</td>
+</tr>
+<tr>
+<td>159</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-064 — HXC-064: cognee AMD-GPU parser tests flake under parallel
+load (rocm-smi fake subprocess signal-killed before 2s timeout,
+§11.4.50)</td>
+</tr>
+<tr>
+<td>160</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-065 — cache/pkg/postgres: finite-TTL Set invisible to immediate
+Get (expires_at clock/timezone skew vs real PG)</td>
+</tr>
+<tr>
+<td>161</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-065 — HXC-065: cache/pkg/postgres: finite-TTL Set invisible to
+immediate Get (expires_at clock/timezone skew vs real PG)</td>
+</tr>
+<tr>
+<td>162</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-066 — inner internal/database integration tests hardcode
+localhost:5433/helix_test, never read HELIX_DATABASE_* env</td>
+</tr>
+<tr>
+<td>163</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-066 — HXC-066: inner internal/database integration tests
+hardcode localhost:5433/helix_test, never read HELIX_DATABASE_* env</td>
+</tr>
+<tr>
+<td>164</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-067 — inner internal/redis stress suite reads
+TEST_REDIS_HOST/PORT (default :6379) not HELIX_REDIS_HOST/PORT</td>
+</tr>
+<tr>
+<td>165</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-067 — HXC-067: inner internal/redis stress suite reads
+TEST_REDIS_HOST/PORT (default :6379) not HELIX_REDIS_HOST/PORT</td>
+</tr>
+<tr>
+<td>166</td>
+<td>High</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-068 — speckit debate adapter wireable into agentic debate
+flow</td>
+</tr>
+<tr>
+<td>167</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-068 — HXC-068: speckit debate adapter wireable into agentic
+debate flow</td>
+</tr>
+<tr>
+<td>168</td>
+<td>High</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-069 — HelixMemory default-on durable persistence with graceful
+fallback</td>
+</tr>
+<tr>
+<td>169</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-069 — HXC-069: HelixMemory default-on durable persistence with
+graceful fallback</td>
+</tr>
+<tr>
+<td>170</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-070 — HelixMemory persist log no longer misreports success on
+failure</td>
+</tr>
+<tr>
+<td>171</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-070 — HXC-070: HelixMemory persist log no longer misreports
+success on failure</td>
+</tr>
+<tr>
+<td>172</td>
+<td>Medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-071 — Web LLM handler httptest coverage for generate and
+stream</td>
+</tr>
+<tr>
+<td>173</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-071 — HXC-071: Web LLM handler httptest coverage for generate
+and stream</td>
+</tr>
+<tr>
+<td>174</td>
+<td>High</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-072 — CLI /undo and /diff slash commands over autocommit
+substrate</td>
+</tr>
+<tr>
+<td>175</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-072 — HXC-072: CLI /undo and /diff slash commands over
+autocommit substrate</td>
+</tr>
+<tr>
+<td>176</td>
+<td>High</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-073 — Autocommit git substrate backing CLI edit history</td>
+</tr>
+<tr>
+<td>177</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-073 — HXC-073: Autocommit git substrate backing CLI edit
+history</td>
+</tr>
+<tr>
+<td>178</td>
+<td>Medium</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-074 — Mobile gomobile Generate binding for on-device LLM
+calls</td>
+</tr>
+<tr>
+<td>179</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-074 — HXC-074: Mobile gomobile Generate binding for on-device
+LLM calls</td>
+</tr>
+<tr>
+<td>180</td>
+<td>Low</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-075 — Phase-1 CLI-Agent Fusion plan reconciliation with
+delivered state</td>
+</tr>
+<tr>
+<td>181</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-075 — HXC-075: Phase-1 CLI-Agent Fusion plan reconciliation with
+delivered state</td>
+</tr>
+<tr>
+<td>182</td>
+<td>High</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-076 — Web /llm/generate + /llm/stream endpoints with frontend
+(partial — e2e pending)</td>
+</tr>
+<tr>
+<td>183</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-076 — HXC-076: Web /llm/generate + /llm/stream endpoints with
+frontend (partial — e2e pending)</td>
+</tr>
+<tr>
+<td>184</td>
+<td>Medium</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-077 — T1.5 context-window percentage indicator (partial)</td>
+</tr>
+<tr>
+<td>185</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-077 — HXC-077: T1.5 context-window percentage indicator
+(partial)</td>
+</tr>
+<tr>
+<td>186</td>
+<td>Medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-078 — T1.6 SKILL.md precedence resolution (partial)</td>
+</tr>
+<tr>
+<td>187</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-078 — HXC-078: T1.6 SKILL.md precedence resolution
+(partial)</td>
+</tr>
+<tr>
+<td>188</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-079 — debate_orchestrator consensus emits unresolved i18n
+key</td>
+</tr>
+<tr>
+<td>189</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-079 — HXC-079: debate_orchestrator consensus emits unresolved
+i18n key</td>
+</tr>
+<tr>
+<td>190</td>
+<td>High</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-080 — /debate and /specify broken at runtime — single agent vs
+2-min</td>
+</tr>
+<tr>
+<td>191</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-080 — HXC-080: /debate and /specify broken at runtime — single
+agent vs 2-min</td>
+</tr>
+<tr>
+<td>192</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-081 — helix_specifier speckit topic i18n key unresolved plus
+format-verb mismatch</td>
+</tr>
+<tr>
+<td>193</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-081 — HXC-081: helix_specifier speckit topic i18n key unresolved
+plus format-verb mismatch</td>
+</tr>
+<tr>
+<td>194</td>
+<td>High</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-082 — performance optimizer fabricates success — 8 apply methods
+sleep and return Success true</td>
+</tr>
+<tr>
+<td>195</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-082 — HXC-082: performance optimizer fabricates success — 8
+apply methods sleep and return Success true</td>
+</tr>
+<tr>
+<td>196</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-083 — production_deployer fabricates rollback env-prep
+server-validation and strategy differentiation</td>
+</tr>
+<tr>
+<td>197</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-083 — HXC-083: production_deployer fabricates rollback env-prep
+server-validation and strategy differentiation</td>
+</tr>
+<tr>
+<td>198</td>
+<td>High</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-084 — challenge scripts use GNU-only grep -P backslash-K —
+breaks on macOS BSD grep</td>
+</tr>
+<tr>
+<td>199</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-084 — HXC-084: challenge scripts use GNU-only grep -P
+backslash-K — breaks on macOS BSD grep</td>
+</tr>
+<tr>
+<td>200</td>
+<td>High</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-085 — 14 LLM providers HealthCheck hardcodes production URL
+ignoring injected baseURL</td>
+</tr>
+<tr>
+<td>201</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-085 — HXC-085: 14 LLM providers HealthCheck hardcodes production
+URL ignoring injected baseURL</td>
+</tr>
+<tr>
+<td>202</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-086 — SSE broker client-ID UnixNano collision under concurrent
+connect</td>
+</tr>
+<tr>
+<td>203</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-086 — HXC-086: SSE broker client-ID UnixNano collision under
+concurrent connect</td>
+</tr>
+<tr>
+<td>204</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-087 — skill_registry randomString UnixNano same-tick produces
+identical chars and colliding IDs</td>
+</tr>
+<tr>
+<td>205</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-087 — HXC-087: skill_registry randomString UnixNano same-tick
+produces identical chars and colliding IDs</td>
+</tr>
+<tr>
+<td>206</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-088 — llm_orchestrator opencode cancel path hangs 30s —
+cmd.WaitDelay unset</td>
+</tr>
+<tr>
+<td>207</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-088 — HXC-088: llm_orchestrator opencode cancel path hangs 30s —
+cmd.WaitDelay unset</td>
+</tr>
+<tr>
+<td>208</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-089 — panoptic web Element infinite-retry hang plus recorder
+zero-frames</td>
+</tr>
+<tr>
+<td>209</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-089 — HXC-089: panoptic web Element infinite-retry hang plus
+recorder zero-frames</td>
+</tr>
+<tr>
+<td>210</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-090 — panoptic tracks test-generated audit.json users.json
+(CONST-053 hygiene)</td>
+</tr>
+<tr>
+<td>211</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-090 — HXC-090: panoptic tracks test-generated audit.json
+users.json (CONST-053 hygiene)</td>
+</tr>
+<tr>
+<td>212</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-091 — containers custom health-check duration can be 0
+(timer-resolution flake)</td>
+</tr>
+<tr>
+<td>213</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-091 — HXC-091: containers custom health-check duration can be 0
+(timer-resolution flake)</td>
+</tr>
+<tr>
+<td>214</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-092 — debate_orchestrator 30s DefaultTimeout too short for
+capable models on multi-round /specify</td>
+</tr>
+<tr>
+<td>215</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-092 — HXC-092: debate_orchestrator 30s DefaultTimeout too short
+for capable models on multi-round /specify</td>
+</tr>
+<tr>
+<td>216</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-093 — helix_code module graph has phantom digital.vasic.*
+requires + private transitive blocking go list -m all / gomobile
+bind</td>
+</tr>
+<tr>
+<td>217</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-093 — HXC-093: helix_code module graph has phantom
+digital.vasic.* requires + private transitive blocking go list -m all /
+gomobile bind</td>
+</tr>
+<tr>
+<td>218</td>
+<td>Medium</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-094 — F12 workspace checkpoints — file snapshot + restore/undo
+safety net</td>
+</tr>
+<tr>
+<td>219</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-094 — HXC-094: F12 workspace checkpoints — file snapshot +
+restore/undo safety net</td>
+</tr>
+<tr>
+<td>220</td>
+<td>High</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-095 — CLI binary generate/debate/specify return 404 against live
+local ollama</td>
+</tr>
+<tr>
+<td>221</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-095 — HXC-095: CLI binary generate/debate/specify return 404
+against live local ollama</td>
+</tr>
+<tr>
+<td>222</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-096 — desktop nogui prints raw i18n keys + %!(EXTRA) format
+mismatch in status/help</td>
+</tr>
+<tr>
+<td>223</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-096 — HXC-096: desktop nogui prints raw i18n keys + %!(EXTRA)
+format mismatch in status/help</td>
+</tr>
+<tr>
+<td>224</td>
+<td>High</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-097 — SYSTEMIC: standalone binaries + internal/config +
+internal/database never wire i18n Translator -&gt; raw keys at
+runtime</td>
+</tr>
+<tr>
+<td>225</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-097 — HXC-097: SYSTEMIC: standalone binaries + internal/config +
+internal/database never wire i18n Translator -&gt; raw keys at
+runtime</td>
+</tr>
+<tr>
+<td>226</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-098 — out-of-box config fails ‘version required’ validation —
+blocks client status/system commands</td>
+</tr>
+<tr>
+<td>227</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-098 — HXC-098: out-of-box config fails ‘version required’
+validation — blocks client status/system commands</td>
+</tr>
+<tr>
+<td>228</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-099 — Systemic i18n raw-key sweep redo (CONST-046) — corrected,
+regression-free, with default-translator contract decision</td>
+</tr>
+<tr>
+<td>229</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-099 — HXC-099: Systemic i18n raw-key sweep redo (CONST-046) —
+corrected, regression-free, with default-translator contract
+decision</td>
+</tr>
+<tr>
+<td>230</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-100 — Resync docs/CONTINUATION.md to current HEAD + de-bloat the
+32k-token line-1 header (CONST-044/§12.10 + CONST-064 hygiene)</td>
+</tr>
+<tr>
+<td>231</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-100 — HXC-100: Resync docs/CONTINUATION.md to current HEAD +
+de-bloat the 32k-token line-1 header (CONST-044/§12.10 + CONST-064
+hygiene)</td>
+</tr>
+<tr>
+<td>232</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-101 — security/security_test.go TestTLSConfiguration —
+external-network dependency + nil-deref panic crashes the whole security
+test binary</td>
+</tr>
+<tr>
+<td>233</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-101 — HXC-101: security/security_test.go TestTLSConfiguration —
+external-network dependency + nil-deref panic crashes the whole security
+test binary</td>
+</tr>
+<tr>
+<td>234</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-102 — harmony_os main_nogui.go — 2 user-facing strings
+(‘Goodbye!’, ‘Error: %v’) bypass i18n (CONST-046, low severity)</td>
+</tr>
+<tr>
+<td>235</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-102 — HXC-102: harmony_os main_nogui.go — 2 user-facing strings
+(‘Goodbye!’, ‘Error: %v’) bypass i18n (CONST-046, low severity)</td>
+</tr>
+<tr>
+<td>236</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-103 — Web-client runtime e2e proof — live browser/HTTP -&gt;
+server -&gt; LLM provider round-trip for /api/v1/llm/generate +
+/llm/stream (CONTINUATION honest gap)</td>
+</tr>
+<tr>
+<td>237</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-103 — HXC-103: Web-client runtime e2e proof — live browser/HTTP
+-&gt; server -&gt; LLM provider round-trip for /api/v1/llm/generate +
+/llm/stream (CONTINUATION honest gap)</td>
+</tr>
+<tr>
+<td>238</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-104 — streamLLM /api/v1/llm/stream hangs forever — chunkChan
+never closed, [DONE] never emitted (production defect found by web
+e2e)</td>
+</tr>
+<tr>
+<td>239</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-104 — HXC-104: streamLLM /api/v1/llm/stream hangs forever —
+chunkChan never closed, [DONE] never emitted (production defect found by
+web e2e)</td>
+</tr>
+<tr>
+<td>240</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-105 — Runtime e2e for server POST /api/v1/specify — boot server
+-&gt; real spec output via live provider (speckit HTTP-endpoint
+gap)</td>
+</tr>
+<tr>
+<td>241</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-105 — HXC-105: Runtime e2e for server POST /api/v1/specify —
+boot server -&gt; real spec output via live provider (speckit
+HTTP-endpoint gap)</td>
+</tr>
+<tr>
+<td>242</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-106 — helix_agent durable memory: process-lifetime in-memory
+fallback is NOT disk-durable — recall lost on restart (CONTINUATION
+honest gap)</td>
+</tr>
+<tr>
+<td>243</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-106 — HXC-106: helix_agent durable memory: process-lifetime
+in-memory fallback is NOT disk-durable — recall lost on restart
+(CONTINUATION honest gap)</td>
+</tr>
+<tr>
+<td>244</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-107 — Feature Status docs program (docs/features) —
+comprehensive per-feature inventory across all
+components/clients/submodules/ported-cli_agents, docs_chain-synced</td>
+</tr>
+<tr>
+<td>245</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-108 — Video-QA program: record all clients x all features with
+strongest models + ensemble -&gt; /Volumes/T7/Downloads/Recordings,
+analyze + fix</td>
+</tr>
+<tr>
+<td>246</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-109 — Mobile apps are scaffolds — Android has no
+build.gradle/AndroidManifest, iOS has no Xcode project (not buildable
+-&gt; not recordable)</td>
+</tr>
+<tr>
+<td>247</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-109 — HXC-109: Mobile apps are scaffolds — Android has no
+build.gradle/AndroidManifest, iOS has no Xcode project (not buildable
+-&gt; not recordable)</td>
+</tr>
+<tr>
+<td>248</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-110 — Extend containers submodule to launch iOS simulators
+(operator-directed Apple-support mechanism)</td>
+</tr>
+<tr>
+<td>249</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-110 — HXC-110: Extend containers submodule to launch iOS
+simulators (operator-directed Apple-support mechanism)</td>
+</tr>
+<tr>
+<td>250</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-111 — Desktop GUI shows raw i18n keys
+(desktop_dashboard_header/_activity_title) — CONST-046 gap</td>
+</tr>
+<tr>
+<td>251</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-111 — HXC-111: Desktop GUI shows raw i18n keys
+(desktop_dashboard_header/_activity_title) — CONST-046 gap</td>
+</tr>
+<tr>
+<td>252</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-112 — Desktop GUI feature-recording: Fyne OpenGL canvas ignores
+osascript synthetic clicks — need cliclick/real-event automation to
+record LLM-chat in-GUI</td>
+</tr>
+<tr>
+<td>253</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-113 — MCP tool names use ‘server:name’ (colon) —
+OpenAI-compatible providers (DeepSeek/etc.) reject function names,
+breaking LLM chat with MCP enabled</td>
+</tr>
+<tr>
+<td>254</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-113 — HXC-113: MCP tool names use ‘server:name’ (colon) —
+OpenAI-compatible providers (DeepSeek/etc.) reject function names,
+breaking LLM chat with MCP enabled</td>
+</tr>
+<tr>
+<td>255</td>
+<td>Critical (production/release blocker — unauthenticated real, paid
+LLM-provider generation, reachable on every interface per every shipped
+config’s server.address: “0.0.0.0”)</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-114 — Wire facade (/v1/chat/completions, /v1/messages) had NO
+authentication — unauthenticated, paid-provider-consuming surface
+reachable on 0.0.0.0</td>
+</tr>
+<tr>
+<td>256</td>
+<td>High</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-115 — The automated check that scans the codebase for forbidden
+hardcoded user-facing text stores its list of known-good files using
+full disk paths tied to one specific machine. On any other computer or
+checkout location those paths no longer match, so the check wrongly
+flags every file as a brand-new violation and exits with an error. This
+silently disables a governance safety-net everywhere except its original
+machine. The fix stores the known-good list using paths relative to the
+project folder so the check works anywhere. This restores real
+enforcement for every developer and automated run.</td>
+</tr>
+<tr>
+<td>257</td>
+<td>Medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-116 — The multi-track development system’s configuration file
+and its command-line tool both direct readers to an operating guide that
+does not exist in the repository. Anyone trying to bring up or operate
+the parallel development tracks has no authoritative instructions. This
+risks mistakes with the shared storage drives. The task is to write the
+missing guide covering the track layout, how to start tracks safely, and
+the storage-drive precautions. Operators can then run the multi-track
+system correctly from documented steps.</td>
+</tr>
+<tr>
+<td>258</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-120 — A safety test for the web server checked that cross-origin
+browser requests are answered with a permissive wildcard allowing any
+website to call the API. The server was correctly hardened to allow only
+an explicit list of trusted sites, so the old test failed and encoded an
+insecure expectation. The fix updates the test to verify the secure
+behavior (only listed sites allowed, others refused) without
+reintroducing the wildcard. The test suite now protects the secure
+behavior instead of demanding an insecure one.</td>
+</tr>
+<tr>
+<td>259</td>
+<td>Medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-121 — The code connecting the platform to the HuggingFace and
+Together AI model services shipped with no automated tests. A future
+change could silently break how requests are built or responses parsed
+and nothing would catch it. The work adds real tests exercising the
+actual client code against a simulated provider endpoint, checking the
+outgoing request, the parsed reply, and error handling. These two
+integrations become protected against silent regressions.</td>
+</tr>
+<tr>
+<td>260</td>
+<td>Low</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-123 — The command-line security-scan helper ships without
+automated tests covering its behavior, so bugs could go unnoticed until
+a real scan produces wrong results. The work adds tests verifying the
+tool’s core scanning and reporting logic. The security-scan tool then
+becomes protected against silent breakage.</td>
+</tr>
+<tr>
+<td>261</td>
+<td>Medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-130 — A full build fails on a clean machine because the desktop
+and mobile graphical apps need system graphics libraries (X11 and
+OpenGL) that are neither installed nor documented, so newcomers hit a
+confusing build error with no guidance. The work documents the exact
+system packages required, the command to install them, and the headless
+no-graphics build path used for development and continuous integration.
+Anyone can then build the project or knowingly choose the headless path
+without surprise failures.</td>
+</tr>
+<tr>
+<td>262</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go
+hardcoded path</td>
+</tr>
+<tr>
+<td>263</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
+</tr>
+<tr>
+<td>264</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent
+<code>TestPerformance</code> flake (host-load-sensitive)</td>
+</tr>
+<tr>
+<td>265</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXQ-002 — HXQ-002: helix_qa <code>pkg/autonomous</code> ↔︎
+VisionEngine <code>remote</code> API drift blocks helix_agent
+<code>tests/integration</code> compile</td>
+</tr>
+<tr>
+<td>266</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXV-001 — HXV-001: LLMsVerifier 18 pre-existing <code>tests/</code>
+failures (CLI-integration + verification/scoring)</td>
+</tr>
+<tr>
+<td>267</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXV-002 — HXV-002: LLMsVerifier <code>verification/</code> package
+10 pre-existing test failures</td>
+</tr>
+<tr>
+<td>268</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXV-003 — HXV-003: LLMsVerifier
+<code>ProviderAdapterForBenchmark.Complete</code> is a CONST-050(A)
+production mock-bluff</td>
+</tr>
+<tr>
+<td>269</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>OPS-001 — OPS-001: LLMOps 2 pre-existing
+<code>CreatePromptExperiment</code> test failures</td>
+</tr>
+<tr>
+<td>270</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>PAN-001 — PAN-001: panoptic <code>appendJSONString</code> truncates
+multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
+corrupts non-ASCII)</td>
+</tr>
+<tr>
+<td>271</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine
+<code>helix-gitlab</code> URL fix (was misconfigured, not missing)</td>
+</tr>
+<tr>
+<td>272</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine
+<code>vasic-digital-github</code> fork lineage divergent at SHA
+93c830a</td>
+</tr>
+<tr>
+<td>273</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine
+<code>vasic-digital-github</code> fork lineage divergent at SHA
+93c830a</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

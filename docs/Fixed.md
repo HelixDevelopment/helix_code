@@ -1030,3 +1030,63 @@ Video-QA program: record all clients x all features with strongest models + ense
 
 Feature Status docs program (docs/features) — comprehensive per-feature inventory across all components/clients/submodules/ported-cli_agents, docs_chain-synced
 
+## HXC-115 — CONST-046 anti-bluff gate is non-functional on any non-original checkout
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/discovery_hardening_20260711T212548Z/S3_const046_gate_evidence.md
+**Severity:** High
+**Created-By:** Claude
+
+The automated check that scans the codebase for forbidden hardcoded user-facing text stores its list of known-good files using full disk paths tied to one specific machine. On any other computer or checkout location those paths no longer match, so the check wrongly flags every file as a brand-new violation and exits with an error. This silently disables a governance safety-net everywhere except its original machine. The fix stores the known-good list using paths relative to the project folder so the check works anywhere. This restores real enforcement for every developer and automated run.
+
+## HXC-116 — Missing multi-track development runbook referenced by config and tooling
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/discovery_hardening_20260711T212548Z/S4_docs_evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+
+The multi-track development system's configuration file and its command-line tool both direct readers to an operating guide that does not exist in the repository. Anyone trying to bring up or operate the parallel development tracks has no authoritative instructions. This risks mistakes with the shared storage drives. The task is to write the missing guide covering the track layout, how to start tracks safely, and the storage-drive precautions. Operators can then run the multi-track system correctly from documented steps.
+
+## HXC-120 — Regression test asserted insecure wildcard CORS the hardened server no longer returns
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/discovery_hardening_20260711T212548Z/S1_cors_evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+
+A safety test for the web server checked that cross-origin browser requests are answered with a permissive wildcard allowing any website to call the API. The server was correctly hardened to allow only an explicit list of trusted sites, so the old test failed and encoded an insecure expectation. The fix updates the test to verify the secure behavior (only listed sites allowed, others refused) without reintroducing the wildcard. The test suite now protects the secure behavior instead of demanding an insecure one.
+
+## HXC-121 — Two production model-provider integrations (HuggingFace, Together) had no automated tests
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/discovery_hardening_20260711T212548Z/S2_provider_tests_evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+
+The code connecting the platform to the HuggingFace and Together AI model services shipped with no automated tests. A future change could silently break how requests are built or responses parsed and nothing would catch it. The work adds real tests exercising the actual client code against a simulated provider endpoint, checking the outgoing request, the parsed reply, and error handling. These two integrations become protected against silent regressions.
+
+## HXC-123 — The security-scan command tool has no automated tests
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/discovery_hardening_20260711T212548Z/S5_security_scan_evidence.md
+**Severity:** Low
+**Created-By:** Claude
+
+The command-line security-scan helper ships without automated tests covering its behavior, so bugs could go unnoticed until a real scan produces wrong results. The work adds tests verifying the tool's core scanning and reporting logic. The security-scan tool then becomes protected against silent breakage.
+
+## HXC-130 — Building the desktop and mobile GUIs fails without documented X11/OpenGL system libraries
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/discovery_hardening_20260711T212548Z/S4_docs_evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+
+A full build fails on a clean machine because the desktop and mobile graphical apps need system graphics libraries (X11 and OpenGL) that are neither installed nor documented, so newcomers hit a confusing build error with no guidance. The work documents the exact system packages required, the command to install them, and the headless no-graphics build path used for development and continuous integration. Anyone can then build the project or knowingly choose the headless path without surprise failures.
+

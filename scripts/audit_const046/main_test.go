@@ -279,6 +279,125 @@ func TestBaseline_MissingFile_TreatsAsEmpty(t *testing.T) {
 	}
 }
 
+// TestBaseline_RepoRootRelative_PortableAcrossDifferentAbsolutePaths
+// is the regression guard for the CONST-046 gate portability defect
+// (§11.4.108/§11.4.177): a baseline generated under one absolute
+// checkout path MUST still classify the SAME violation as
+// PRE-EXISTING when re-scanned under a DIFFERENT absolute checkout
+// path (simulating a different host/clone/developer machine), as long
+// as --repo-root is supplied for both runs and the repo-relative path
+// is identical. Without the fix (i.e. running without --repo-root),
+// this exact scenario is what produced 19098/19098 false "NEW"
+// findings on a checkout other than the one the baseline was
+// generated on.
+func TestBaseline_RepoRootRelative_PortableAcrossDifferentAbsolutePaths(t *testing.T) {
+	literal := "Which file has the bug today, dear user?"
+	src := []byte("package pkg\n\nvar Question = \"" + literal + "\"\n")
+
+	// "Checkout A" — where the baseline is generated.
+	tmpA := t.TempDir()
+	rootA := filepath.Join(tmpA, "repo_a")
+	pkgDirA := filepath.Join(rootA, "pkg")
+	if err := os.MkdirAll(pkgDirA, 0o755); err != nil {
+		t.Fatalf("mkdir checkout A: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(pkgDirA, "v.go"), src, 0o644); err != nil {
+		t.Fatalf("write checkout A file: %v", err)
+	}
+	baselinePath := filepath.Join(tmpA, "baseline.json")
+
+	code, stdout, stderr := runInProcess(
+		"--roots", pkgDirA,
+		"--repo-root", rootA,
+		"--baseline", baselinePath,
+		"--update-baseline",
+	)
+	if code != 0 {
+		t.Fatalf("seed baseline on checkout A failed: %d; stdout=%s; stderr=%s", code, stdout, stderr)
+	}
+
+	// Assert the baseline stored a REPO-ROOT-RELATIVE path, not an
+	// absolute one — this is the load-bearing assertion that the fix
+	// actually changed on-disk identity, not just in-memory behavior.
+	data, err := os.ReadFile(baselinePath)
+	if err != nil {
+		t.Fatalf("read baseline: %v", err)
+	}
+	var b Baseline
+	if err := json.Unmarshal(data, &b); err != nil {
+		t.Fatalf("baseline not valid JSON: %v", err)
+	}
+	if len(b.Violations) != 1 {
+		t.Fatalf("expected 1 baseline violation, got %d: %+v", len(b.Violations), b.Violations)
+	}
+	wantRelPath := "pkg/v.go"
+	if b.Violations[0].Path != wantRelPath {
+		t.Fatalf("expected baseline Path to be repo-root-relative %q, got %q (absolute path leaked into baseline identity — the exact portability defect this test guards against)", wantRelPath, b.Violations[0].Path)
+	}
+
+	// "Checkout B" — a DIFFERENT absolute directory (simulating a
+	// different host / clone / developer machine) containing the
+	// IDENTICAL relative-path file with the IDENTICAL literal.
+	tmpB := t.TempDir()
+	rootB := filepath.Join(tmpB, "repo_b_completely_different_absolute_prefix")
+	pkgDirB := filepath.Join(rootB, "pkg")
+	if err := os.MkdirAll(pkgDirB, 0o755); err != nil {
+		t.Fatalf("mkdir checkout B: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(pkgDirB, "v.go"), src, 0o644); err != nil {
+		t.Fatalf("write checkout B file: %v", err)
+	}
+
+	code, stdout, stderr = runInProcess(
+		"--roots", pkgDirB,
+		"--repo-root", rootB,
+		"--baseline", baselinePath,
+		"--fail-on-new",
+	)
+	if code != 0 {
+		t.Fatalf("expected exit 0 (same relative path+literal ⇒ PRE-EXISTING even under a different absolute checkout root), got %d; stdout=%s; stderr=%s", code, stdout, stderr)
+	}
+	if !strings.Contains(stdout, "NEW: 0") {
+		t.Fatalf("expected 'NEW: 0' when re-scanned under a different absolute checkout path, got: %s", stdout)
+	}
+	if !strings.Contains(stdout, "PRE-EXISTING: 1") {
+		t.Fatalf("expected 'PRE-EXISTING: 1', got: %s", stdout)
+	}
+}
+
+// TestBaseline_WithoutRepoRoot_AbsolutePathBehaviorUnchanged proves the
+// fix is backward compatible: callers that omit --repo-root keep the
+// legacy absolute-path identity behavior byte-for-byte (all prior
+// tests in this file rely on this and must keep passing unmodified).
+func TestBaseline_WithoutRepoRoot_AbsolutePathBehaviorUnchanged(t *testing.T) {
+	root, _ := scratchTreeWithViolation(t)
+	baselinePath := filepath.Join(t.TempDir(), "legacy_absolute.json")
+
+	code, _, stderr := runInProcess(
+		"--roots", root,
+		"--baseline", baselinePath,
+		"--update-baseline",
+	)
+	if code != 0 {
+		t.Fatalf("update-baseline (no --repo-root) failed: %d; stderr=%s", code, stderr)
+	}
+
+	data, err := os.ReadFile(baselinePath)
+	if err != nil {
+		t.Fatalf("read baseline: %v", err)
+	}
+	var b Baseline
+	if err := json.Unmarshal(data, &b); err != nil {
+		t.Fatalf("baseline not valid JSON: %v", err)
+	}
+	if len(b.Violations) != 1 {
+		t.Fatalf("expected 1 violation, got %d", len(b.Violations))
+	}
+	if !filepath.IsAbs(b.Violations[0].Path) {
+		t.Fatalf("expected legacy absolute Path when --repo-root omitted, got relative-looking path %q", b.Violations[0].Path)
+	}
+}
+
 func TestBaseline_HashStability_LineShiftIgnored(t *testing.T) {
 	root, literal := scratchTreeWithViolation(t)
 	baselinePath := filepath.Join(t.TempDir(), "seed.json")
