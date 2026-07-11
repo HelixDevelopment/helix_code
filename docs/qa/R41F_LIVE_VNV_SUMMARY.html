@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>R41F_LIVE_VNV_SUMMARY</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">R41F_LIVE_VNV_SUMMARY</h1>
+</header>
+<h1 id="r41-f-consolidated-live-validationverification-evidence-summary">R41-F
+— Consolidated Live Validation+Verification Evidence Summary</h1>
+<p><strong>Revision:</strong> 1 <strong>Created:</strong> 2026-07-11
+<strong>Last modified:</strong> 2026-07-11 <strong>Status:</strong>
+active <strong>Track:</strong> (T1/feature/helixllm-full-extension -
+claude3) <strong>Scope:</strong> §11.4.83 (docs/qa/ end-user evidence
+mandate) — one reader-friendly index over the R41-F fleet’s fresh LIVE
+evidence, produced 2026-07-11 after the coder was booted rootless
+(§11.4.111 fix). This document is a <strong>read-only
+compilation</strong>: nothing it cites was re-run, re-verified, or
+modified to produce this index — every cell below is drawn directly from
+the named <code>RESULTS.md</code> (or equivalent) already committed by
+its owning stream.</p>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-scope-and-method">1. Scope and method</a></li>
+<li><a href="#2-evidence-index">2. Evidence index</a></li>
+<li><a href="#3-per-capability-detail">3. Per-capability detail</a></li>
+<li><a href="#4-114111-rootless-coder-boot-fix">4. §11.4.111 rootless
+coder-boot fix</a></li>
+<li><a href="#5-honest-boundary--what-this-document-does-not-establish">5.
+Honest boundary — what this document does NOT establish</a></li>
+<li><a href="#6-sources-verified">6. Sources verified</a></li>
+</ul>
+<h2 id="scope-and-method">1. Scope and method</h2>
+<p>On 2026-07-11 the HelixLLM coder
+(<code>Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf</code>, llama.cpp
+OpenAI-compatible server, port <code>:18434</code>) was brought up
+<strong>rootless</strong> after a CDI (Container Device Interface)
+stale-binding blocker was root-caused and fixed (§11.4.111 — see §4).
+With the coder live, four coder-independent-but-coder-exercising R41-F
+streams produced fresh, committed, real-evidence <code>RESULTS.md</code>
+documents. This summary:</p>
+<ul>
+<li>Verifies each cited <code>RESULTS.md</code> (or evidence file)
+<strong>exists on disk</strong> and <strong>skims its
+verdict/metrics</strong> before citing it (§11.4.6 — no fabricated
+metric appears below).</li>
+<li>Cites the <strong>exact evidence path + commit hash</strong> for
+every claim so a reader can open the primary source directly.</li>
+<li>Marks anything not yet landed as <strong>PENDING</strong>, never
+invents a result (§11.4.6 / §11.4.123).</li>
+<li>Was produced <strong>read-only</strong>: no submodule,
+<code>/mnt/track1</code>, <code>adb</code>, secret-scan script, git-hook
+script, or <code>helix_code/internal/server</code> file was touched by
+this task; the only new file is this document itself.</li>
+</ul>
+<h2 id="evidence-index">2. Evidence index</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Live-proven?</th>
+<th>Key metric</th>
+<th>Evidence path (+ commit)</th>
+<th>Analyzer self-validated?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coder boot (rootless)</td>
+<td><strong>YES</strong></td>
+<td>Fresh nonce <code>HELIX-1783774679-17765</code> echoed verbatim by
+the live coder (<code>completion_tokens=20</code>)</td>
+<td><code>docs/qa/coder_boot_liveproof_20260711T125759Z/RESULTS.md</code>
+(+<code>response.json</code>) — <strong>untracked at time of
+writing</strong>, commit pending in the same batch as the boot-fix
+(<code>4e993f1a</code> covers the script; the liveproof dir itself is
+not yet committed)</td>
+<td>N/A (raw nonce-echo probe, not a bank analyzer)</td>
+</tr>
+<tr>
+<td>Dual-wire facade — full HTTP E2E</td>
+<td><strong>YES</strong></td>
+<td>401 fail-closed (no auth) + OpenAI <code>/v1/chat/completions</code>
+200 nonce-echo + Anthropic <code>/v1/messages</code> 200 nonce-echo +
+live tool-call wire-shape divergence (both shapes), all via real
+<code>curl</code>+<code>httptest</code>+router+middleware+coder</td>
+<td><code>docs/qa/dualwire_live_e2e_20260711T130459Z/RESULTS.md</code> —
+commit <code>8a309004</code></td>
+<td>N/A (live HTTP round-trip test, not a self-validating analyzer;
+asserts against real captured response bytes)</td>
+</tr>
+<tr>
+<td>Lane-B multi-instance serving (co-resident)</td>
+<td><strong>YES</strong></td>
+<td>163.67 tok/s mean / 163.34 tok/s median single-stream (matches prior
+non-co-resident baseline); 3/3 concurrent succeeded; coder
+<code>llama-server</code> PID identical (1980342) pre/post — never
+restarted</td>
+<td><code>docs/qa/lane_b_liveproof_20260711T130533Z/RESULTS.md</code>
+(+<code>benchmark_results.json</code>, <code>benchmark_script.py</code>)
+— commit <code>8244b33e</code></td>
+<td>N/A (live benchmark harness against real ports
+<code>:18434</code>/<code>:18435</code>, not a golden-good/golden-bad
+analyzer)</td>
+</tr>
+<tr>
+<td>HelixQA coder-bench + concurrency banks</td>
+<td><strong>YES</strong></td>
+<td><strong>13/13 PASS, 0 FAIL</strong> — p50/p95/p99 latency
+152/171/187 ms <span class="citation" data-cites="concurrency-1">@concurrency-1</span> scaling to
+1076/2113/2128 ms <span class="citation" data-cites="concurrency-100">@concurrency-100</span>; throughput
+269.7–624.2 tok/s; TTFT p50=3 ms; 50/50 concurrent requests HTTP 200,
+zero drops, zero duplicate responses</td>
+<td><code>docs/qa/helixqa_live_vnv_20260711T130200Z/RESULTS.md</code> —
+commit <code>930cfddb</code></td>
+<td><strong>YES</strong> — golden-good/golden-bad fixture pair for both
+analyzers (§11.4.107(10)), PLUS a <strong>fresh live §1.1 mutation
+check</strong> performed in-session (forced <code>Pass=true</code>,
+verified the mutated binary flips golden-bad’s <code>case_result</code>
+false→ FAIL, then reverted with <code>git diff --stat</code> empty)</td>
+</tr>
+<tr>
+<td>Generative (image/video) live-proof</td>
+<td><strong>PENDING</strong></td>
+<td>Not yet on disk at time of writing
+(<code>docs/qa/generative_liveproof_*</code> absent;
+<code>find docs/qa -maxdepth 1 -iname &quot;*generative*&quot;</code> returns
+nothing)</td>
+<td>N/A — tracked in the SDD ledger
+(<code>.superpowers/sdd/progress.md</code> §“R41-F”) as stream
+<code>ad9a782848e068b2a</code>, dispatched as a GPU-freed backfill after
+Lane-B teardown, status “BACKFILL … generative” at time of writing, not
+yet returned</td>
+<td>N/A (not yet produced)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="per-capability-detail">3. Per-capability detail</h2>
+<h3 id="coder-boot-rootless">3.1 Coder boot (rootless)</h3>
+<p><code>docs/qa/coder_boot_liveproof_20260711T125759Z/RESULTS.md</code>
+(2 lines) records:</p>
+<pre><code>nonce=HELIX-1783774679-17765
+PASS: nonce echoed</code></pre>
+<p>The accompanying <code>response.json</code> in the same directory
+shows the full raw OpenAI-compatible chat-completion response from
+<code>/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf</code> echoing
+that exact nonce (<code>&quot;content&quot;:&quot;HELIX-1783774679-17765&quot;</code>), with
+real timing fields (<code>prompt_ms</code>, <code>predicted_ms</code>,
+<code>predicted_per_second≈285</code>) — a genuine, non-cached model
+response, not a fixture. This directory is <strong>currently
+untracked</strong> (<code>git status</code> shows <code>??</code>); it
+was produced by the coder-boot stream in the same session and is
+expected to land in the same commit batch as the
+<code>scripts/boot_coder_cdi.sh</code> rootless fix
+(<code>4e993f1a</code>, already committed — see §4).</p>
+<h3 id="dual-wire-facade-full-http-e2e">3.2 Dual-wire facade — full HTTP
+E2E</h3>
+<p><code>docs/qa/dualwire_live_e2e_20260711T130459Z/RESULTS.md</code>
+(commit <code>8a309004</code>) proves the complete live path
+<code>curl → gin router → wireFacadeAuthMiddleware → chatCompletions/ anthropicMessages → resolveLLMProvider(&quot;helixllm&quot;/&quot;local&quot;) → llm.OpenAICompatibleProvider → http://localhost:18434 (live coder) → real answer → back through the same translation layer</code>:</p>
+<ul>
+<li><strong>401</strong> on an unauthenticated request (fail-closed,
+confirmed before the request ever reaches provider resolution).</li>
+<li><strong>200 + nonce echo</strong> on both
+<code>/v1/chat/completions</code> (OpenAI shape) and
+<code>/v1/messages</code> (Anthropic shape), each with a <strong>fresh,
+independently generated nonce</strong>
+(<code>HELIXCODE-FULLHTTP-E2E-203036440e6c</code> and
+<code>...-f6a30d57b156</code>) echoed verbatim by the same live
+coder.</li>
+<li><strong>Live tool-call wire-shape divergence</strong>: the same
+coder, given the same <code>get_weather</code> tool definition and a
+nonce-bearing prompt, was driven through both wire shapes — OpenAI’s
+<code>function.arguments</code> renders as a JSON-<strong>encoded
+string</strong>, Anthropic’s <code>content[].input</code> renders as a
+JSON <strong>object</strong> — both carrying the identical live nonce
+(<code>HELIXCODE-FULLHTTP-E2E-292679c493a1</code>), proving the
+divergence is a genuine translation of one underlying
+<code>llm.ToolCall</code>, not two independently fabricated
+responses.</li>
+<li><strong>Coder-untouched confirmation</strong>: every call was a
+read-only <code>GET /v1/models</code> or
+<code>POST /v1/chat/completions</code> — no config write, no restart
+(§11.4.122).</li>
+<li><strong>Key-leak-free confirmation</strong>: only a test-only,
+self-documented non-secret key was used; <code>grep</code> for real
+credential patterns over the report and raw evidence returned no
+hits.</li>
+</ul>
+<h3 id="lane-b-multi-instance-serving-co-resident-with-the-coder">3.3
+Lane-B multi-instance serving (co-resident with the coder)</h3>
+<p><code>docs/qa/lane_b_liveproof_20260711T130533Z/RESULTS.md</code>
+(commit <code>8244b33e</code>, plus <code>benchmark_results.json</code>
+raw data and <code>benchmark_script.py</code> the exact harness
+executed) proves Mistral-Nemo-Instruct-2407-Q4_K_M (Lane-B, port
+<code>:18435</code>) was booted <strong>co-resident</strong> with the
+live 30B coder (port <code>:18434</code>) via
+<code>submodules/helix_llm/cmd/agentgen-boot</code>, rootless podman +
+NVIDIA CDI, on the shared RTX 5090:</p>
+<ul>
+<li><strong>Admission</strong>: live <code>nvidia-smi</code> read
+immediately before boot — free 12650 MiB ≥ need 9216 MiB + 2048 MiB
+headroom → <code>ADMIT-OK</code>.</li>
+<li><strong>Co-residence</strong>: both <code>:18434</code> and
+<code>:18435</code> answered <code>GET /v1/models</code> simultaneously
+post-boot; the coder’s <code>llama-server</code> PID
+(<code>1980342</code>) was <strong>identical</strong> before and after
+Lane-B’s full admit→boot→benchmark→teardown cycle — mechanical proof the
+coder was never restarted.</li>
+<li><strong>Single-stream throughput</strong>: mean 163.67 tok/s /
+median 163.34 tok/s — matches the 2026-07-08 non-co-resident baseline,
+i.e. co-residence did not degrade Lane-B’s own throughput.</li>
+<li><strong>3-parallel concurrent</strong>: 3/3 succeeded, 2.73 s
+wall-clock, per-request tok/s dropping ~2.2× under 3-way contention
+(consistent with continuous-batching sharing one GPU).</li>
+<li><strong>Tool-calling/arithmetic correctness</strong>:
+<code>&quot;What is 2+2?&quot;</code> → <code>&quot;4&quot;</code> via the chat-templated
+endpoint — a genuine methodology finding is documented in-report
+(§11.4.102): the raw <code>/v1/completions</code> continuation endpoint
+returned empty for a closed question, root-caused as a
+test-harness-endpoint mismatch (not a Lane-B defect), then fixed by
+switching to <code>/v1/chat/completions</code>.</li>
+<li><strong>Teardown</strong>: VRAM restored to ~12.6 GiB free (16 MiB
+delta = normal driver noise), Lane-B container/port fully removed, coder
+PID unchanged throughout.</li>
+</ul>
+<h3 id="helixqa-coder-bench-coder-concurrency-banks-live-against-the-coder">3.4
+HelixQA — coder-bench + coder-concurrency banks, live against the
+coder</h3>
+<p><code>docs/qa/helixqa_live_vnv_20260711T130200Z/RESULTS.md</code>
+(commit <code>930cfddb</code>) re-ran two HelixQA banks live against the
+resident coder with freshly rebuilt analyzers
+(<code>bin/helixqa-verify-coder-bench</code>,
+<code>bin/helixqa-verify-coder-concurrency</code>, both built from
+unmodified current source immediately before use — §11.4.108
+SOURCE→ARTIFACT):</p>
+<ul>
+<li><strong><code>helixllm_coder_bench.yaml</code></strong>: 7/7 PASS —
+p50/p95/p99 latency and tok/s at graduated concurrency (1/10/50/100),
+TTFT streaming case (p50=3 ms, p95=4 ms, p99=4 ms, well under the 5000
+ms budget), plus a golden-good and a golden-bad self-validation
+case.</li>
+<li><strong><code>helixllm_coder_concurrency.yaml</code></strong>: 6/6
+PASS — all-ok / no-loss / nonce-integrity / response-consistency
+confirmed across 50 concurrent requests (0 drops, 0 duplicate/canned
+responses), plus golden-good and golden-bad self-validation.</li>
+<li><strong>Self-validation (§11.4.107(10))</strong>: both analyzers’
+golden-bad fixtures genuinely produced a raw <code>pass=false</code>
+(never a hardcoded/metadata-only true), correctly inverted to a case
+PASS only because the bank declares <code>--expect-fail</code>.</li>
+<li><strong>Fresh live §1.1 mutation check</strong> (not merely cited
+from the bank’s 2026-07-08 authoring metadata): both analyzers were
+rebuilt with an unconditional <code>Pass = true</code> line injected
+immediately before the <code>ExpectFail</code> inversion, run against
+their golden-bad fixtures, and shown to flip <code>case_result</code>
+from PASS to <strong>FAIL</strong> — proving the assertion logic is
+genuinely load-bearing. The source files were reverted from
+<code>/tmp</code> backups immediately after, confirmed by an empty
+<code>git diff --stat</code> and no <code>MUTATED</code> residue
+(§11.4.84 working-tree quiescence held throughout).</li>
+<li><strong>Coder-untouched</strong>: same PID (<code>1980342</code>)
+and identical <code>/health</code> + <code>/props</code> responses
+before and after the full 13-case run; every call was read-only.</li>
+<li><strong>Scope note</strong> (stated honestly in the source report):
+DDoS, chaos, memory, and race dimensions for the coder are covered by
+separate banks not re-run in this task — those were previously live-run
+per <code>docs/qa/phase1_providers_rerun_20260708T204553Z/</code> and
+prior commits.</li>
+</ul>
+<h3 id="generative-imagevideo-live-proof-pending">3.5 Generative
+(image/video) live-proof — PENDING</h3>
+<p>No <code>docs/qa/generative_liveproof_*</code> directory exists on
+disk at the time of writing
+(<code>find docs/qa -maxdepth 1 -iname &quot;*generative*&quot;</code> returns
+nothing, and
+<code>find docs/qa -maxdepth 1 -type d -newer docs/qa/helixqa_live_vnv_20260711T130200Z</code>
+also returns nothing, confirming no newer generative-evidence directory
+has landed since the last confirmed evidence in this fleet). Per the SDD
+ledger (<code>.superpowers/sdd/progress.md</code>, section “R41-F”),
+this capability is owned by background stream
+<code>ad9a782848e068b2a</code>, dispatched as a GPU-freed backfill
+immediately after Lane-B’s teardown released VRAM, described as:</p>
+<blockquote>
+<p>“fast-lane GENERATIVE live-proof (FLUX-schnell/WAN fits free
+~12.6GiB, coder untouched, §11.4.107 self-validated analyzer,
+honest-BLOCKED if HF_TOKEN-gated model absent)”</p>
+</blockquote>
+<p><strong>This row is marked PENDING per §11.4.6 — no metric is claimed
+or invented for it.</strong> When that stream lands its
+<code>RESULTS.md</code>, this summary should be updated (or superseded)
+to fill in the row.</p>
+<h2 id="rootless-coder-boot-fix">4. §11.4.111 rootless coder-boot
+fix</h2>
+<p>The coder was down at the start of the 2026-07-11 session
+(<code>podman start helixllm-coder</code> failing). Root cause, per the
+SDD ledger and confirmed by reading the committed fix script
+(<code>scripts/boot_coder_cdi.sh</code>, commit <code>4e993f1a</code>,
+<em>“fix(§11.4.111): make coder-boot fully rootless — CDI to
+~/.config/cdi + CDI_SPEC_DIRS (no root/su/sudo)”</em>):</p>
+<ul>
+<li>The coder container binds its GPU via the CDI name
+<code>nvidia.com/gpu=all</code>.</li>
+<li>The CDI spec was <strong>pinned to a stale device path</strong>
+(<code>/dev/dri/card0</code>) from before a host reboot re-enumerated
+DRM devices to <code>card1</code> — a textbook §11.4.111 “resolve by
+stable name, not enumeration index” violation.</li>
+<li>No CDI spec had been (re)generated at all
+(<code>nvidia-ctk cdi list</code> reported 0 devices;
+<code>/etc/cdi</code> and <code>/var/run/cdi</code> were absent).</li>
+<li><strong>Fix, entirely rootless</strong> (no
+<code>su</code>/<code>sudo</code> needed):
+<code>nvidia-ctk cdi generate --output=~/.config/cdi/nvidia.yaml</code>
+regenerates a fresh, correctly-resolved spec into the user’s own XDG
+config dir, then
+<code>CDI_SPEC_DIRS=~/.config/cdi podman start helixllm-coder</code>
+points the rootless podman invocation at it — no <code>/etc/cdi</code>
+write, no privilege escalation, no image rebuild, no container
+recreation.</li>
+<li>The rewritten script is a <strong>permanent boot-guard</strong>: it
+is safe to re-run on any future DRM re-enumeration.</li>
+<li>Per the SDD ledger, the operator’s <code>su</code> password was
+offered but <strong>not stored</strong> by the agent (§11.4.10/CONST-042
+leak-avoidance) — the rootless path made storing/using it unnecessary.
+The ledger further notes the operator may wish to rotate that password
+out of caution since it briefly appeared in a transcript; that rotation
+decision is the operator’s, not restated as fact here beyond what the
+ledger records.</li>
+</ul>
+<p>Result: the coder came up <strong>rootless</strong>, live at
+<code>:18434</code>, and its liveness was immediately confirmed by a
+fresh nonce echo (§3.1) before any of the other three live-proven
+streams began exercising it.</p>
+<h2 id="honest-boundary-what-this-document-does-not-establish">5. Honest
+boundary — what this document does NOT establish</h2>
+<p>Per §11.4.6 (no-guessing) and §11.4.123
+(rock-solid-proof-or-research), this summary is explicit about its
+limits:</p>
+<ul>
+<li><strong>This document re-ran nothing.</strong> Every metric above is
+transcribed from an already-committed <code>RESULTS.md</code> (or, for
+the coder-boot capability, an already-produced but not-yet-committed
+evidence pair). If any underlying evidence file is later found to be
+inaccurate, this summary inherits that inaccuracy — it is an index, not
+an independent re-verification.</li>
+<li><strong>Generative capability is genuinely PENDING</strong>, not
+degraded-but-passing. No claim is made about FLUX/WAN2 image/video
+generation working or not working as of this document’s creation.</li>
+<li><strong>DDoS, chaos, memory, and race dimensions of the §11.4.169
+coverage enumeration were NOT re-run in this fleet</strong> for the
+coder — the HelixQA report explicitly scopes itself to
+benchmarking/performance and concurrency/atomicity only, citing prior
+separate bank runs
+(<code>docs/qa/phase1_providers_rerun_20260708T204553Z/</code> and
+earlier commits) for those other dimensions. This summary does not claim
+otherwise.</li>
+<li><strong>Operator-gated items remain open</strong> (per the SDD
+ledger, outside this task’s scope to resolve): constitution submodule
+push, root/submodule push to all upstreams (§11.4.113 ff-only, CONST-043
+explicit approval), rotation of the previously-leaked Gemini API key and
+the HF token exposed in a transcript, merge-to-main + production tag
+(§11.4.167/§11.4.151), §11.4.185 manual QA-team final confirmation, and
+the cerebras dead-code-removal / replicate-provider-wiring decisions.
+None of these are addressed or resolved by this document — it only
+indexes the already-committed live evidence produced so far.</li>
+<li><strong>The coder-boot evidence directory is currently
+untracked</strong> (<code>??</code> in <code>git status</code>) — it is
+cited here because it exists on disk and its content was verified, but
+it had not yet been committed by its owning stream at the time this
+summary was written. Its commit hash is therefore listed as “commit
+pending” rather than a concrete SHA.</li>
+<li>No secret values, API keys, or tokens are reproduced anywhere in
+this document (§11.4.10) — all evidence that mentions redacted
+credentials in the source <code>RESULTS.md</code> files is summarized
+here without those values.</li>
+</ul>
+<h2 id="sources-verified">6. Sources verified</h2>
+<ul>
+<li><code>docs/qa/coder_boot_liveproof_20260711T125759Z/RESULTS.md</code>
++ <code>response.json</code> — read directly, 2026-07-11 (this
+session).</li>
+<li><code>docs/qa/dualwire_live_e2e_20260711T130459Z/RESULTS.md</code> —
+read directly, commit <code>8a309004</code> confirmed present via
+<code>git log</code>/<code>git show --name-only</code>.</li>
+<li><code>docs/qa/lane_b_liveproof_20260711T130533Z/RESULTS.md</code> —
+read directly, commit <code>8244b33e</code> confirmed present via
+<code>git log</code>/<code>git show --name-only</code>.</li>
+<li><code>docs/qa/helixqa_live_vnv_20260711T130200Z/RESULTS.md</code> —
+read directly, commit <code>930cfddb</code> confirmed present via
+<code>git log</code>/<code>git show --name-only</code>.</li>
+<li><code>scripts/boot_coder_cdi.sh</code> — read directly, commit
+<code>4e993f1a</code> confirmed present via
+<code>git log</code>/<code>git show --stat</code>.</li>
+<li><code>.superpowers/sdd/progress.md</code> (section “R41-F”) — read
+directly for the narrative context (fleet composition, generative-stream
+status, rootless boot root-cause) attributed explicitly to the ledger
+throughout this document.</li>
+<li><code>find docs/qa -maxdepth 1 -iname &quot;*generative*&quot;</code> and
+<code>find docs/qa -maxdepth 1 -type d -newer docs/qa/helixqa_live_vnv_20260711T130200Z</code>
+— both run 2026-07-11, both empty, confirming the generative-evidence
+directory genuinely does not yet exist (not merely unsearched).</li>
+</ul>
+</body>
+</html>
