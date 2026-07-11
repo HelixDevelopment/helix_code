@@ -1,0 +1,18 @@
+### pre-flight (§11.4.119 single-owner, coder untouched) — LIVE RE-VALIDATION run
+run_kind=live_revalidation harness_commit=875e53a driver=scratchpad(read-only-on-submodule)
+date_utc=2026-07-11T13:40:05Z
+uname_m=x86_64  podman=podman version 5.7.1
+coder container (MUST remain running, untouched):
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 44 minutes
+coder live model + health:
+coder /v1/models http_code=200
+coder /v1/models body:
+{"models":[{"name":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","model":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","modified_at":"","size":"","digest":"","type":"model","description":"","tags":[""],"capabilities":["completion"],"parameters":"","details":{"parent_model":"","format":"gguf","family":"","families":[""],"parameter_size":"","quantization_level":""}}],"object":"list","data":[{"id":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","aliases":["/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"],"tags":[],"object":"model","created":1783777205,"owned_by":"llamacpp","meta":{"vocab_type":2,"n_vocab":151936,"n_ctx":3072,"n_ctx_train":262144,"n_embd":2048,"n_params":30532122624,"size":18550716416,"ftype":"Q4_K - Medium"}}]}
+target host port 18440 listeners (expect none):
+  (free)
+sibling Phase-3 ports 18435-18439 (MUST remain untouched by this run):
+  :18435 free
+  :18436 free
+  :18437 free
+  :18438 free
+  :18439 LISTENING (untouched by this harness)

@@ -1,0 +1,11 @@
+### analyzer self-validation (§11.4.107(10)) qkey=q1
+[GOLDEN-GOOD(expect PASS)] PASS top1=doc_codename(score=0.8852, ok=true) tokenFound=true answer="The internal codename for the 2027 HelixCode release is Borealis-9."
+[GOLDEN-BAD-NO-FACT(expect FAIL)] FAIL top1=doc_codename(score=0.8852, ok=true) tokenFound=false answer="I don't know based on the given context."
+    reason: answer does not contain invented token "Borealis-9"
+[GOLDEN-BAD-WRONG-RETRIEVAL(expect FAIL)] FAIL top1=doc_ci(score=0.8852, ok=false) tokenFound=true answer="The internal codename for the 2027 HelixCode release is Borealis-9."
+    reason: retrieval top-1 "doc_ci" != expected fact-bearing doc "doc_codename"
+[GOLDEN-BAD-EMPTY-ANSWER(expect FAIL)] FAIL top1=doc_codename(score=0.8852, ok=true) tokenFound=false answer=""
+    reason: empty generated answer
+    reason: answer does not contain invented token "Borealis-9"
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit_q1=0

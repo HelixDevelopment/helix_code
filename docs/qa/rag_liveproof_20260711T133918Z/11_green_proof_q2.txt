@@ -1,0 +1,17 @@
+### qkey=q2 pipeline
+EMBED-QUERY-OK: qkey=q2 model=BAAI/bge-small-en-v1.5 dim=384 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_liveproof_20260711T133918Z/query_embedding_q2.json
+RETRIEVE-OK: qkey=q2 top1=doc_sidecar score=0.8855 (of 6 docs) wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_liveproof_20260711T133918Z/retrieval_q2.json
+  rank1 id=doc_sidecar score=0.8855
+  rank2 id=doc_codename score=0.6819
+  rank3 id=doc_ci score=0.6336
+  rank4 id=doc_coffee score=0.4619
+  rank5 id=doc_revenue score=0.4114
+  rank6 id=doc_cat score=0.3477
+[RETRIEVAL-CHECK] PASS: qkey=q2 real-cosine top1=doc_sidecar (score=0.8855) == expected doc_sidecar
+checkretrieval_exit_q2=0
+GREEN answer (qkey=q2, grounded on top-2 retrieved docs): "The internal service-mesh sidecar used internally for HelixLLM routing is called Quillfeather-7."
+[GREEN] GREEN-OK: qkey=q2 grounded answer contains invented token "Quillfeather-7"
+green_exit_q2=0
+[RAG-RUNTIME-SIGNATURE] PASS top1=doc_sidecar(score=0.8855, ok=true) tokenFound=true answer="The internal service-mesh sidecar used internally for HelixLLM routing is called Quillfeather-7."
+analyze_exit_q2=0
+qkey=q2: GREEN-OK (RAG runtime signature PASS)

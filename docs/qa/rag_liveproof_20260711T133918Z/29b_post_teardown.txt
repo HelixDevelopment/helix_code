@@ -1,0 +1,13 @@
+### post-teardown state
+tei-rag containers (expect none):
+  (none — removed)
+coder still running (untouched):
+helixllm-coder Up 44 minutes
+coder /v1/models still responding:
+coder /v1/models http_code=200
+sibling ports 18435-18439 unaffected:
+  :18435 free
+  :18436 free
+  :18437 free
+  :18438 free
+  :18439 still LISTENING
