@@ -176,7 +176,7 @@ test-docs:
 # FULL TEST INFRASTRUCTURE (Zero Skipped Tests)
 # ============================================
 
-.PHONY: test-infra-up test-infra-down test-infra-status test-full test-unit-full test-integration-full test-e2e-full test-security-full
+.PHONY: test-infra-up test-infra-down test-infra-status test-full test-unit-full test-integration-full test-integration-tag test-e2e-full test-security-full
 
 # Compose runner auto-detection (Rule 4 / §11.4.76): prefer `docker compose`
 # when docker is on PATH, otherwise fall back to `podman compose` (or the
@@ -235,6 +235,25 @@ test-integration-full: test-infra-up
 	@echo "🧪 Running integration tests (-p $(GO_TEST_P) -parallel $(GO_TEST_PARALLEL))..."
 	@set -a && . ./.env.full-test && set +a && \
 	$(GO_TEST) -v -count=1 $(GO_TEST_PARFLAGS) -tags=integration -timeout=20m ./...
+
+# Lightweight standalone run of the `-tags=integration` suite under
+# tests/integration/**, WITHOUT bringing up docker-compose.full-test.yml.
+# (F-D1-06 / §11.4.169: these tests are gated by `//go:build integration` and
+# a bare `go test` / `make test` never compiles or runs them, so their
+# pass/fail signal was invisible in routine checks. `-tags=nogui` is required
+# so `applications/desktop/` resolves its no-GUI variant instead of pulling
+# in Fyne's X11 dependency chain — see verify-compile above for the same
+# rationale.) This is intentionally distinct from `test-integration-full`
+# (which requires the real Postgres/Redis/Ollama docker-compose stack per
+# CONST-050 no-mocks-beyond-unit-tests): individual test files may still
+# SKIP-with-reason at runtime when a specific external dependency they need
+# is unreachable (§11.4.3), but the suite itself now compiles and runs on a
+# bare host with zero infra bring-up, making its PASS/FAIL/SKIP status
+# visible in any ordinary dev/CI-less workflow.
+test-integration-tag:
+	@echo "🧪 Running -tags=integration suite standalone (no infra bring-up, -tags=nogui,integration)..."
+	$(GO_TEST) -v -tags=nogui,integration -count=1 ./tests/integration/...
+	@echo "✅ Standalone integration-tagged tests complete"
 
 # Run E2E tests with full infrastructure
 test-e2e-full: test-infra-up
@@ -486,6 +505,7 @@ help:
 	@echo "Usage:"
 	@echo "  make build           - Build the application"
 	@echo "  make test            - Run tests (build cache + -p/-parallel tuned)"
+	@echo "  make test-integration-tag - Run -tags=integration suite standalone, no infra bring-up"
 	@echo "  make clean           - Clean build artifacts"
 	@echo ""
 	@echo "Test parallelism tuning (P5-T01 — override on the command line):"

@@ -147,6 +147,19 @@ func (es *EmbeddedServer) handleModelDetail(w http.ResponseWriter, r *http.Reque
 		CodeCapabilityScore: found.CodeCapabilityScore,
 		ResponsivenessScore: found.ResponsivenessScore,
 		ReliabilityScore:    found.ReliabilityScore,
+		// CONST-040 capability flags — mirrored honestly from the
+		// VerifiedModel this embedded/fallback server already holds.
+		// FallbackModels (fallback_models.go) does not populate these
+		// yet (no MCP/LSP/ACP/RAG/Skills/Plugins probe exists for the
+		// embedded fallback path), so today this always propagates
+		// false — the correct "not verified as supporting" default,
+		// never a fabricated true.
+		SupportsMCP:     found.SupportsMCP,
+		SupportsLSP:     found.SupportsLSP,
+		SupportsACP:     found.SupportsACP,
+		SupportsRAG:     found.SupportsRAG,
+		SupportsSkills:  found.SupportsSkills,
+		SupportsPlugins: found.SupportsPlugins,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

@@ -3087,6 +3087,22 @@ func main() {
 		return
 	}
 
+	// Dispatcher: intercept the "acp" subcommand before flag.Parse() so that
+	// Cobra handles its own flag parsing (same pattern as "mcp"). This is an
+	// opt-in surface (HXC-119 Phase 1-3 scaffold, see internal/acp/doc.go):
+	// it only runs when explicitly invoked as `helixcode acp` and does not
+	// alter any other CLI invocation's behavior. Wires real os.Stdin/
+	// os.Stdout — the stdio subprocess transport an ACP-aware editor
+	// (Zed, JetBrains) launches HelixCode with.
+	if len(os.Args) >= 2 && os.Args[1] == "acp" {
+		cmd := newACPCommand(ACPCommandDeps{In: os.Stdin, Out: os.Stdout})
+		cmd.SetArgs(os.Args[2:])
+		if err := cmd.Execute(); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
 	// Dispatcher: intercept the "commands" subcommand group before flag.Parse()
 	// so that Cobra handles its own flag parsing (same pattern as "mcp").
 	// The loader and registry are constructed here with zero startup cost

@@ -26,6 +26,7 @@ require (
 	github.com/bradfitz/gomemcache v0.0.0-20260422231931-4d751bb6e37c
 	github.com/chromedp/cdproto v0.0.0-20260405000525-47a8ff65b46a
 	github.com/chromedp/chromedp v0.15.1
+	github.com/coder/acp-go-sdk v0.13.5
 	github.com/fatih/color v1.19.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gdamore/tcell/v2 v2.8.1

@@ -204,6 +204,17 @@ cli_mcp_auth_short:
 cli_mcp_logs_short:
   other: "Show recent stderr + lifecycle events for a server"
 
+# acp_cmd.go
+cli_acp_root_short:
+  other: "Run the ACP (Agent Client Protocol) agent-side stdio connection"
+cli_acp_root_long:
+  other: |-
+    Runs HelixCode as an ACP agent over stdio (stdin/stdout), the
+    subprocess transport an ACP-aware editor such as Zed or JetBrains
+    launches to talk to HelixCode. Blocks until the peer disconnects.
+cli_acp_listening:
+  other: "ACP agent listening on stdio"
+
 # permissions_cmd.go
 cli_permissions_root_short:
   other: "Manage HelixCode permission rules"
