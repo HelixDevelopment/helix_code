@@ -32,17 +32,30 @@
 #       either remove the content or add an explicit redaction marker)
 #   2 = usage / environment error (e.g. no grep found)
 #
-# Allowlist (content-based, NOT path-based): a matched line is treated as a
-# false positive and SKIPPED if it also contains (case-insensitive) any of:
-#   "redacted", "example", "..." (three literal dots — the "<...>" placeholder
-#   shape). This covers redaction markers like
-#   "<REDACTED-GEMINI-KEY-CONST-042-...>" and illustrative placeholders like
-#   "AIzaSyEXAMPLE..." without needing a path-based allowlist file.
+# Allowlist — TWO independent layers, either one suppresses a match:
+#   1. Content-based (unchanged): a matched line is a false positive and
+#      SKIPPED if it also contains (case-insensitive) any of "redacted",
+#      "example", "..." (three literal dots — the "<...>" placeholder
+#      shape). Covers redaction markers like
+#      "<REDACTED-GEMINI-KEY-CONST-042-...>" and illustrative placeholders
+#      like "AIzaSyEXAMPLE..." with no path-based entry needed.
+#   2. Path-based (2026-07-11 addition): repo-relative-path globs read from
+#      .scan-secrets-allow at the repo root — the SAME allowlist file
+#      scripts/scan-secrets.sh already reads. Before this addition,
+#      secret_scan.sh had NO path-based allowlist at all, so a confirmed
+#      fabricated-fixture test file (e.g. a Go unit test embedding a PEM
+#      body / GCP service-account JSON marker as a credential-parsing
+#      fixture) could ONLY be silenced by adding a "redacted"/"example"/
+#      "..." string INTO the fixture's own content — mutating test data
+#      just to satisfy this scanner. Consulting .scan-secrets-allow lets a
+#      confirmed false positive be allowlisted the same documented,
+#      reviewable way scan-secrets.sh already supports, with no fixture
+#      content changes and no drift between the two scanners' allowlists.
 #
 # Cross-references: §11.4.10 / §11.4.30 / §11.4.102 / §11.4.135 / §11.4.138 /
-#   CONST-042; scripts/scan-secrets.sh (pre-push, broader file-type scan,
-#   path-based .scan-secrets-allow — left untouched, not modified by this
-#   script); scripts/git_hooks/pre-commit (wired here, section 4).
+#   CONST-042; scripts/scan-secrets.sh (pre-push, broader file-type scan;
+#   .scan-secrets-allow is now shared between both scanners);
+#   scripts/git_hooks/pre-commit (wired here, section 4).
 
 set -uo pipefail
 
@@ -149,6 +162,46 @@ is_self() {
   return 1
 }
 
+# ---------------------------------------------------------------------------
+# Path-based allowlist (2026-07-11 addition) — reads the SAME
+# .scan-secrets-allow file scripts/scan-secrets.sh already consumes, so a
+# confirmed fabricated-fixture path is documented and allowlisted ONCE, for
+# BOTH scanners, instead of drifting into two separate lists.
+# ---------------------------------------------------------------------------
+ALLOWLIST_FILE="$REPO_ROOT/.scan-secrets-allow"
+ALLOW_PATTERNS=()
+if [ -f "$ALLOWLIST_FILE" ]; then
+  while IFS= read -r _line; do
+    _line="${_line#"${_line%%[![:space:]]*}"}"
+    _line="${_line%"${_line##*[![:space:]]}"}"
+    if [ -z "$_line" ] || [ "${_line:0:1}" = "#" ]; then
+      continue
+    fi
+    ALLOW_PATTERNS+=("$_line")
+  done < "$ALLOWLIST_FILE"
+fi
+
+is_path_allowlisted() {
+  # $1 = repo-relative (or ./-prefixed) file path.
+  local filepath="${1#./}"
+  local allow_glob basename_path
+  for allow_glob in "${ALLOW_PATTERNS[@]}"; do
+    allow_glob="${allow_glob#./}"
+    basename_path="${filepath##*/}"
+    # shellcheck disable=SC2254
+    case "$filepath" in
+      $allow_glob)     return 0 ;;
+      */$allow_glob)   return 0 ;;
+      */"$allow_glob") return 0 ;;
+    esac
+    # shellcheck disable=SC2254
+    case "$basename_path" in
+      $allow_glob) return 0 ;;
+    esac
+  done
+  return 1
+}
+
 found=0
 hits=""
 
@@ -182,6 +235,7 @@ scan_file_content() {
 scan_disk_file() {
   local f="$1"
   is_self "$f" && return 0
+  is_path_allowlisted "$f" && return 0
   [ -f "$f" ] || return 0
   # Skip binary files: a key-shaped ASCII secret cannot meaningfully live in
   # one, and reading NUL-containing content into a shell variable emits noisy
@@ -205,6 +259,7 @@ scan_disk_file() {
 scan_staged_file() {
   local f="$1"
   is_self "$f" && return 0
+  is_path_allowlisted "$f" && return 0
   local content
   content=$(git show ":$f" 2>/dev/null) || return 0
   local entry label pattern
