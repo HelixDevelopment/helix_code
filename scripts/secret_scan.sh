@@ -79,6 +79,7 @@ PATTERNS=(
   "Private key header|-----BEGIN (RSA|EC|OPENSSH|DSA|PGP) PRIVATE KEY-----"
   "Private key header (generic)|-----BEGIN PRIVATE KEY-----"
   "Slack bot token|xoxb-[0-9]{9,}-[0-9]{9,}-[A-Za-z0-9]{20,}"
+  "HuggingFace token|hf_[A-Za-z0-9]{30,}"
 )
 
 # Content-based allowlist markers (case-insensitive substrings). A matched

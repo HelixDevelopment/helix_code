@@ -95,6 +95,12 @@ check "Test 6: private-key header (generic PKCS8)" nonzero "$WORKDIR/6_pem_gener
 echo 'SLACK_BOT_TOKEN=xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx' > "$WORKDIR/7_slack_real.txt"
 check "Test 7: real-shaped Slack bot token (xoxb-N-N-alnum)" nonzero "$WORKDIR/7_slack_real.txt"
 
+# HuggingFace hf_ token — the exact class that partially leaked into the
+# session transcript on 2026-07-11 (catalogue-providers stream); added to
+# the guard patterns per §11.4.138 (close the class that escaped).
+echo 'HF_TOKEN=hf_fabricated0123456789ABCDEFGHIJKLMNOP' > "$WORKDIR/7b_hf.txt"
+check "Test 7b: real-shaped HuggingFace token (hf_...)" nonzero "$WORKDIR/7b_hf.txt"
+
 # ---------------------------------------------------------------------------
 # Allowlisted / non-matching fixtures → MUST NOT be detected (exit 0).
 # ---------------------------------------------------------------------------
