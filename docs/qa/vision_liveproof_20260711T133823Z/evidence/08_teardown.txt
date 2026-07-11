@@ -1,0 +1,2 @@
+DOWN-OK: helixllm_visiongen visiongen (single-owner cleanup, coder untouched)
+TEARDOWN_EXIT=0

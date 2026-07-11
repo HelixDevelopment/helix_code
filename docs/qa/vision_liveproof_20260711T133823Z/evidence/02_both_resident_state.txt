@@ -1,0 +1,15 @@
+=== nvidia-smi BOTH RESIDENT ===
+32607, 24051, 8047
+=== compute apps BOTH RESIDENT ===
+1980342, 19438 MiB, llama-server
+2514702, 4582 MiB, llama-server
+=== coder health (still up) ===
+{"status":"ok"}
+=== coder container status ===
+helixllm-coder Up 43 minutes 8080/tcp, 50052/tcp
+=== visiongen container status ===
+helixllm_visiongen_visiongen_1 Up 12 seconds 0.0.0.0:18439->18439/tcp, 8080/tcp, 50052/tcp
+=== visiongen /health ===
+{"status":"ok"}
+=== visiongen /v1/models ===
+{"models":[{"name":"/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf","model":"/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf","modified_at":"","size":"","digest":"","type":"model","description":"","tags":[""],"capabilities":["completion","multimodal"],"parameters":"","details":{"parent_model":"","format":"gguf","family":"","families":[""],"parameter_size":"","quantization_level":""}}],"object":"list","data":[{"id":"/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf","aliases":["/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf"],"tags":[],"object":"model","created":1783777129,"owned_by":"llamacpp","meta":{"vocab_type":2,"n_vocab":151936,"n_ctx":16384,"n_ctx_train":128000,"n_embd":2048,"n_params":3085938688,"size":1923946496,"ftype":"Q4_K - Medium"}}]}

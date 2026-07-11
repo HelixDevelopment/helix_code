@@ -1,0 +1,11 @@
+=== nvidia-smi BEFORE (live, pre-admission) ===
+32607, 19464, 12634
+=== compute apps BEFORE ===
+1980342, 19438 MiB, llama-server
+=== coder health BEFORE ===
+{"status":"ok"}
+=== coder container status BEFORE ===
+helixllm-coder Up 43 minutes 8080/tcp, 50052/tcp
+=== 18439 pre-check (must be down) ===
+http_code=000
+connect-failed (expected, port free)

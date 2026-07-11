@@ -1,0 +1,36 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The image features a simple and clean design. The main object is a large, solid red circle positioned centrally against a white background. Below the circle, the word \"HELIX\" is written in uppercase black letters. The text is straightforward and unembellished, with no additional graphics or embellishments. The overall design is minimalistic and modern."
+      }
+    }
+  ],
+  "created": 1783777172,
+  "model": "/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+  "system_fingerprint": "b1-3b4fca1",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 71,
+    "prompt_tokens": 369,
+    "total_tokens": 440,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "id": "chatcmpl-DVyvLZ6rt2CVo0MRFePziA8PerD0gRf1",
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 369,
+    "prompt_ms": 109.427,
+    "prompt_per_token_ms": 0.296550135501355,
+    "prompt_per_second": 3372.1110877571346,
+    "predicted_n": 71,
+    "predicted_ms": 170.885,
+    "predicted_per_token_ms": 2.406830985915493,
+    "predicted_per_second": 415.4840974924657
+  }
+}

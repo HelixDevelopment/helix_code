@@ -1,0 +1,19 @@
+{
+  "golden_good_fixture": {
+    "text": "the image shows a solid red circle centered on a white background, with the word helix printed below it in black letters.",
+    "grounded_pass": true,
+    "golden_bad_tokens_pass": false,
+    "overall": "PASS"
+  },
+  "golden_bad_fixture": {
+    "text": "the image shows a solid blue square centered on a white background, with the word acme printed below it in black letters.",
+    "grounded_pass": true,
+    "golden_bad_tokens_pass": true,
+    "overall": "FAIL"
+  },
+  "expect": {
+    "golden_good_fixture.overall": "PASS",
+    "golden_bad_fixture.overall": "FAIL"
+  },
+  "self_validation": "PASS"
+}

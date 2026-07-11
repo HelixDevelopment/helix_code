@@ -1,0 +1,15 @@
+=== podman ps AFTER teardown (visiongen must be gone) ===
+helixllm-coder Up 45 minutes 8080/tcp, 50052/tcp
+=== nvidia-smi AFTER teardown (restored) ===
+32607, 19464, 12634
+=== compute apps AFTER teardown ===
+1980342, 19438 MiB, llama-server
+=== 18439 post-teardown (must be down again) ===
+http_code=000
+connect-failed (expected, port released)
+=== coder health AFTER teardown ===
+{"status":"ok"}
+=== coder container status AFTER teardown ===
+helixllm-coder Up 45 minutes 8080/tcp, 50052/tcp
+=== coder real chat completion AFTER teardown ===
+{"choices":[{"finish_reason":"stop","index":0,"message":{"role":"assistant","content":"CODER_OK_AFTER_TEARDOWN"}}],"created":1783777228,"model":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","system_fingerprint":"b1-3b4fca1","object":"chat.completion","usage":{"completion_tokens":8,"prompt_tokens":19,"total_tokens":27,"prompt_tokens_details":{"cached_tokens":10}},"id":"chatcmpl-kbPkIVx5Ma7HrkwGxDkAYL2d8wRHUiZP","timings":{"cache_n":10,"prompt_n":9,"prompt_ms":18.743,"prompt_per_token_ms":2.0825555555555555,"prompt_per_second":480.1792669263192,"predicted_n":8,"predicted_ms":30.494,"predicted_per_token_ms":3.81175,"predicted_per_second":262.34669115235783}}

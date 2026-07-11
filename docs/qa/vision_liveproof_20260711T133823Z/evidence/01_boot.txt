@@ -1,0 +1,7 @@
+VRAM budget (nvidia-smi): total=32607MiB used=19464MiB free=12634MiB need=5120MiB headroom=2048MiB
+ADMIT-OK: VLM footprint admitted co-resident (coder stays live) — warm tier
+UP-OK: helixllm_visiongen visiongen via containers submodule orchestrator (:18439)
+HEALTH-OK: visiongen /health after 2 polls (status=200)
+BOOT-HEALTH-OK: visiongen /health answered. VLM stays UP (warm tier, coder untouched).
+Run `visiongen-boot down <compose-file> <project>` for single-owner teardown.
+BOOT_EXIT=0
