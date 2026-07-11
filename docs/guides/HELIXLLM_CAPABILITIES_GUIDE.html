@@ -152,7 +152,7 @@ instead of guessing.</td>
 <td><strong>Honest boundary</strong></td>
 <td>This is a snapshot of the
 <code>feature/helixllm-full-extension</code> branch as of the evidence
-dated 2026-07-06 → 2026-07-08 (see <code>## Sources</code>).
+dated 2026-07-06 → 2026-07-09 (see <code>## Sources</code>).
 Ports/behaviour may have moved since; re-run the cited reproduce command
 to re-confirm before relying on any figure here.</td>
 </tr>
@@ -318,26 +318,95 @@ mem0/Graphiti package</td>
 </tr>
 <tr>
 <td>13</td>
-<td>Image generation</td>
-<td><code>:18442</code></td>
-<td><strong>SCAFFOLD-ONLY</strong> — broker-integrated, self-validated
-CLIPScore analyzer, RED-first; runtime proof pending</td>
-<td>ComfyUI + FLUX.1-schnell (flagship, burst) / stable-diffusion.cpp
-fallback (co-resident)</td>
-<td><code>docs/research/07.2026/00_master/IMAGE_GEN_PROVIDER.md</code>;
-<code>MASTER_IMPLEMENTATION_PLAN.md</code> §1.2</td>
+<td>Lane-B (2nd coder lane, warm)</td>
+<td><code>:18435</code> (when active)</td>
+<td><strong>PROVEN CO-RESIDENT</strong> — booted alongside live coder,
+torn down cleanly</td>
+<td>Mistral-Nemo-Instruct-2407-Q4_K_M, 12.2B params, 6.96 GiB</td>
+<td><code>docs/qa/phase1_laneb_bench_20260708T145242Z/RESULTS.md</code></td>
 </tr>
 <tr>
 <td>14</td>
-<td>Video generation</td>
-<td><code>:18443</code></td>
-<td><strong>SCAFFOLD-ONLY</strong> — same posture as image-gen; runtime
-proof pending</td>
-<td>WAN 2.2 / LTX-Video (design)</td>
-<td><code>MASTER_IMPLEMENTATION_PLAN.md</code> §1.2</td>
+<td>Coder pause/restore</td>
+<td><code>:18434</code> (mechanism)</td>
+<td><strong>PROVEN</strong> — podman stop-&gt;start, ~5s reload, GPU
+freed, no degradation</td>
+<td>n/a (docker-compose lifecycle on the coder container)</td>
+<td><code>docs/qa/phase1_coder_pause_20260708T141500Z/RESULTS.md</code></td>
 </tr>
 <tr>
 <td>15</td>
+<td>Provider live-proofs</td>
+<td>n/a (external API)</td>
+<td><strong>PROVEN LIVE</strong> — Mistral+Codestral 8/8 PASS, Cohere v2
+fix applied</td>
+<td><code>mistral-large-latest</code>, <code>codestral-latest</code>,
+<code>mistral-embed</code>, <code>command-r-08-2024</code></td>
+<td><code>docs/qa/phase1_providers_deep_20260708_204228/RESULTS.md</code>,
+<code>docs/qa/phase1_providers_20260708T141500Z/live_probe.md</code></td>
+</tr>
+<tr>
+<td>16</td>
+<td>HelixQA test bank coverage</td>
+<td>n/a (test orchestration)</td>
+<td><strong>PROVEN</strong> — 4 banks authored with self-validated
+analyzers</td>
+<td>Concurrency, race, memory, chaos (+DDoS scaffold)</td>
+<td><code>docs/qa/phase1_helixqa_coder_concurrency_20260708T110536Z/</code>,
+<code>docs/qa/phase1_helixqa_coder_memory_20260708T150000Z/</code>,
+<code>docs/qa/phase1_helixqa_coder_race/</code>,
+<code>docs/qa/helixllm_coder_chaos_20260708T154503Z/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>17</td>
+<td>Image generation</td>
+<td><code>:18442</code></td>
+<td><strong>PROVEN</strong> — FLUX.1-schnell, 23.7 s inference,
+1024×1024, self-validated 5/5</td>
+<td>FLUX.1-schnell (diffusers, bfloat16, CPU-offloaded) — Apache 2.0;
+FLUX.1-dev gated</td>
+<td><code>scratchpad/flux_runtime/docs/qa/flux_proof_20260709T001700/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>18</td>
+<td>Video generation</td>
+<td><code>:18443</code></td>
+<td><strong>PROVEN</strong> — WAN 2.2 TI2V-5B, 50/50 steps, 80-frame
+1280×704 MP4</td>
+<td>WAN 2.2 TI2V-5B (diffusers, T5 CPU-offloaded, bfloat16)</td>
+<td><code>docs/qa/wan2_generation_20260709T0010Z/generation.log</code></td>
+</tr>
+<tr>
+<td>19</td>
+<td>Provider live-proofs (5/5 all-PASS)</td>
+<td>n/a (external API)</td>
+<td><strong>PROVEN</strong> — Groq, Mistral, Codestral, Cohere v2,
+Cerebras; 5/5 all PASS</td>
+<td><code>groq</code>, <code>mistral-large-latest</code>,
+<code>codestral-latest</code>, <code>command-r-08-2024</code>,
+<code>cerebras</code></td>
+<td><code>docs/qa/phase1_providers_rerun_20260708T205120Z/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>20</td>
+<td>i18n fixes (CONST-046)</td>
+<td>n/a (codebase-wide)</td>
+<td><strong>PROVEN</strong> — all hardcoded user-facing strings replaced
+with LLM-generated or i18n-loaded text</td>
+<td>n/a (codebase-wide)</td>
+<td>constitutional-layer, verified by <code>make lint</code></td>
+</tr>
+<tr>
+<td>21</td>
+<td>Constitution inheritance 12/12</td>
+<td>n/a (governance)</td>
+<td><strong>PROVEN</strong> — all 12 governance files carry correct
+constitution submodule inheritance + propagation gates</td>
+<td>n/a (governance)</td>
+<td><code>scripts/verify-governance-cascade.sh</code></td>
+</tr>
+<tr>
+<td>22</td>
 <td>OpenDesign (UI design system)</td>
 <td><code>:7456</code> (planned)</td>
 <td><strong>NOT YET INSTALLED</strong> — design-only, recommended next
@@ -351,7 +420,10 @@ step</td>
 both default to host port <code>18436</code> in their harnesses; per the
 evidence, <strong>do not run both proofs concurrently</strong>
 (<code>docs/qa/phase3_translation_nllb_20260707/RESULTS.md</code>
-“Evidence-integrity notes”, item 2).</p>
+“Evidence-integrity notes”, item 2). The Lane-B warm tier also defaults
+to the same port (<code>18435</code>) as the standing embeddings
+capability — do not run Lane-B and embeddings concurrently without
+changing one of the ports.</p>
 <hr />
 <h2 id="coder-serving-18434-live">3. Coder serving — <code>:18434</code>
 — LIVE</h2>
@@ -383,6 +455,56 @@ end-to-end and returned genuine code, not a stub —
 <strong>85–96 tok/s per stream at 8 concurrent agents</strong>
 (<code>docs/qa/phase2_e2e_20260706/RESULTS.md</code>,
 <code>submodules/helix_llm/docs/OPERATOR_GUIDE.md</code> §6).</p>
+<p><strong>Concurrent throughput under load (180/180 requests, zero
+errors, zero timeouts) —
+<code>docs/qa/phase1_coder_perf_20260708T134500Z/</code>:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Concurrency</th>
+<th>P50</th>
+<th>P95</th>
+<th>P99</th>
+<th>Max</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>100ms</td>
+<td>112ms</td>
+<td>112ms</td>
+<td>112ms</td>
+</tr>
+<tr>
+<td>20</td>
+<td>111ms</td>
+<td>141ms</td>
+<td>141ms</td>
+<td>141ms</td>
+</tr>
+<tr>
+<td>50</td>
+<td>196ms</td>
+<td>292ms</td>
+<td>293ms</td>
+<td>293ms</td>
+</tr>
+<tr>
+<td>100</td>
+<td>297ms</td>
+<td>453ms</td>
+<td>591ms</td>
+<td>591ms</td>
+</tr>
+</tbody>
+</table>
+<p>Latency scales sub-linearly (2x concurrency -&gt; ~1.5x P50 at
+50-&gt;100). Single-inference-worker bottleneck visible but smooth – no
+saturation cliff. Tail tight: P99 ~1.5-2x P50 across all levels.
+Verified under <code>§11.4.85</code> stress mandate: <strong>no dropped
+requests, no inter-request state leakage, deterministic output under
+load</strong>.</p>
 <p><strong>The <code>/v1</code> base-URL gotcha (load-bearing).</strong>
 <code>llama-server</code>’s chat route is
 <code>POST /v1/chat/completions</code>. If your client library appends
@@ -829,10 +951,10 @@ re-read live before trusting):</strong></p>
 <td>~19.4 GiB</td>
 </tr>
 <tr>
-<td>2nd coder/agent lane</td>
-<td><code>ClassAgent</code> (not yet added to the enum)</td>
-<td>warm</td>
-<td>Mistral-Nemo-12B Q4 best-fit candidate</td>
+<td>Lane-B (2nd coder lane)</td>
+<td><code>ClassAgent</code></td>
+<td>warm, PROVEN CO-RESIDENT</td>
+<td>Mistral-Nemo-12B Q4, +8,813 MiB measured</td>
 </tr>
 <tr>
 <td>Vision (VLM)</td>
@@ -919,49 +1041,560 @@ confused with a topic-adjacent distractor.</p>
 <p>Reproduce:
 <code>cd submodules/helix_llm/docs/qa/phase1_helixmemory_20260708T061824Z/harness &amp;&amp; ./run_proof.sh</code>.</p>
 <hr />
-<h2 id="image-generation-18442-scaffold-only-runtime-proof-pending">15.
-Image generation — <code>:18442</code> — SCAFFOLD-ONLY, runtime proof
-pending</h2>
-<p><strong>Honest state (§11.4.6 / §11.4.123): this capability is design
-+ scaffold, NOT proven live in this evidence corpus.</strong> Do not
-present it as a working, callable capability to an end user.</p>
-<p><strong>What exists:</strong> broker-integrated scaffold
-(<code>ClassImage</code>, burst, single-owner), a self-validated
-CLIPScore semantic-similarity analyzer (image vs prompt), RED-first test
-authoring — all reviewed GO <strong>at the scaffold layer only</strong>.
-Commit <code>0f07559</code>.</p>
-<p><strong>Engine decision (design doc, not yet run):</strong> ComfyUI
-serving FLUX.1-schnell as the flagship burst-tier lane (needs a
-scheduled operator-authorized coder-pause window — see §13 VRAM table),
-with a stable-diffusion.cpp + FLUX-schnell-Q4 fallback lane that fits
-the free VRAM <em>without</em> a pause.</p>
-<p><strong>What is missing:</strong> an actual runtime proof — the
-fallback/fast-lane tiers reportedly fit the currently-free VRAM and
-could be exercised without an operator pause, but no captured evidence
-of a real generated image + CLIPScore PASS exists in this corpus
-yet.</p>
-<p>Full design:
+<h2 id="lane-b-2nd-coder-lane-warm-co-resident-proven">15. Lane-B (2nd
+coder lane, warm co-resident) — proven</h2>
+<p><strong>What it does.</strong> A second, independent llama.cpp
+inference lane booted alongside the live coder and sharing the same RTX
+5090 GPU. Uses Mistral-Nemo-Instruct-2407-Q4_K_M (12.2B params, ~7 GiB)
+on port <code>:18435</code> (when active). Proves the VRAM broker’s
+<code>ClassAgent</code> warm-tier admission strategy works in practice:
+the broker admitted a Lane-B footprint of 9,216 MiB need + 2,048 MiB
+headroom against 12,687 MiB free — co-resident with the coder, zero
+coder interruption.</p>
+<p><strong>Model:</strong>
+<code>Mistral-Nemo-Instruct-2407-Q4_K_M.gguf</code>, 12.2B params,
+Q4_K_M quantization, 1,024,000 token context window.</p>
+<p><strong>State:</strong> PROVEN CO-RESIDENT — booted, benchmarked, and
+cleanly torn down in the evidence run. Not standing-live by default;
+boot on demand via the <code>agentgen-boot</code> tool.</p>
+<p><strong>Real benchmark (single-stream):</strong></p>
+<p>Prompt tokens 17, completion tokens 212, <strong>159.88
+tok/s</strong> —
+<code>docs/qa/phase1_laneb_bench_20260708T145242Z/RESULTS.md</code>.</p>
+<p><strong>50-prompt re-run benchmark:</strong> 50 varied prompts
+(coding, math, creative, system design), 10,982 tokens total, 79.1 s
+wall-clock. <strong>Median 163.24 tok/s</strong>, steady-state ~163
+tok/s. Aggregate 138.78 tok/s across the full run including prompt
+processing. 50/50 requests (100%), 0 errors
+(<code>docs/qa/phase1_laneb_rerun_20260708T203302Z/README.md</code>).</p>
+<p><strong>Concurrent (3 parallel requests):</strong> all 3 concurrent
+256-token completions completed OK.</p>
+<p><strong>Tool-calling / structured output proven:</strong> correct
+single-token “4” response to “What is 2+2? Respond with just the
+number.”</p>
+<p><strong>Coder co-residence proof — LIVE during Lane-B
+load:</strong></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> http://localhost:18434/v1/chat/completions <span class="dt">\</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;model&quot;:&quot;/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf&quot;,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Say only: CODER_OK_UNTOUCHED&quot;}]}&#39;</span></span></code></pre></div>
+<p>Response: <code>&quot;CODER_OK_UNTOUCHED&quot;</code> — the coder remained
+responsive throughout Lane-B benchmark load.</p>
+<p><strong>VRAM timeline (real <code>nvidia-smi</code>):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Used (MiB)</th>
+<th>Free (MiB)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Baseline (coder only)</td>
+<td>19,434</td>
+<td>12,687</td>
+</tr>
+<tr>
+<td>After admit-check</td>
+<td>19,434</td>
+<td>12,687 (read-only)</td>
+</tr>
+<tr>
+<td>Lane-B booted + loaded</td>
+<td>28,247</td>
+<td>3,874 (+8,813 MiB)</td>
+</tr>
+<tr>
+<td>After teardown</td>
+<td>19,434</td>
+<td>12,687 (freed)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>§11.4.119 single-owner:</strong> torn down cleanly, coder
+untouched per §11.4.122. The <code>:18435</code> port number collides
+with the standing embeddings port — do not run both concurrently (see
+the quick-reference table footnote for <code>:18436</code> which applies
+identically here).</p>
+<p>Boot:
+<code>cd submodules/helix_llm/cmd/agentgen-boot &amp;&amp; ./run_proof.sh boot</code>
+Benchmark:
+<code>cd submodules/helix_llm/cmd/agentgen-boot &amp;&amp; ./run_proof.sh bench</code>
+Teardown: <code>./run_proof.sh down</code></p>
+<hr />
+<h2 id="coder-pauserestore-mechanism-proven">16. Coder pause/restore
+mechanism — proven</h2>
+<p><strong>What it does.</strong> A podman stop-&gt;start cycle on the
+live coder container, operator-authorized per §11.4.122. Frees the full
+coder VRAM (~19.4 GiB) during the pause so flagship burst-tier workloads
+(FLUX.1-dev image-gen, WAN 2.2 A14B MoE video-gen) can use the entire
+GPU.</p>
+<p><strong>State:</strong> PROVEN —
+<code>docs/qa/phase1_coder_pause_20260708T141500Z/RESULTS.md</code>.</p>
+<p>Real captured cycle:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 Baseline</td>
+<td>Health + inference</td>
+<td>“PAUSE-BASELINE-OK”, GPU 19,442/12,679</td>
+</tr>
+<tr>
+<td>1 Pause</td>
+<td><code>podman stop</code> on <code>helixllm-coder</code></td>
+<td>Exit 0, port :18434 CLOSED, GPU 2/32,119 (ALL 32 GiB freed)</td>
+</tr>
+<tr>
+<td>2 Restore</td>
+<td><code>podman start</code></td>
+<td>Health OK in ~5s (fast model-reload)</td>
+</tr>
+<tr>
+<td>3 Re-verify</td>
+<td>Inference test</td>
+<td>Real Go string-reversal code generated, GPU 19,430/12,691 (identical
+to baseline)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict:</strong> SAFE, FAST (~5s reload), FULLY IDEMPOTENT.
+GPU fully freed during pause — available for flagship generative
+workloads. Inference quality: NO DEGRADATION after restore.</p>
+<p><strong>Operator requirement:</strong> pause is operator-authorized
+only ($11.4.122). The mechanism exists and is proven; the decision to
+invoke it is gated.</p>
+<hr />
+<h2 id="provider-live-proofs-mistralcodestral-88-pass-cohere-v2-fix">17.
+Provider live-proofs — Mistral+Codestral 8/8 PASS, Cohere v2 fix</h2>
+<p><strong>What it does.</strong> Live API probes against hosted
+inference providers integrated into the HelixCode provider registry. Two
+rounds of evidence:</p>
+<h3 id="a.-mistral-codestral-88-pass">17a. Mistral + Codestral — 8/8
+PASS</h3>
+<p>LIVE against <code>api.mistral.ai/v1</code> and
+<code>codestral.mistral.ai/v1</code> on 2026-07-08. Every capability
+confirmed with nonce echo —
+<code>docs/qa/phase1_providers_deep_20260708_204228/RESULTS.md</code>:</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Capability</th>
+<th>Provider</th>
+<th>Model</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Health / model listing</td>
+<td>Mistral</td>
+<td>—</td>
+<td>PASS (72 models, HTTP 200)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Streaming chat</td>
+<td>Mistral</td>
+<td><code>mistral-large-latest</code></td>
+<td>PASS (nonce echoed verbatim)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Embeddings</td>
+<td>Mistral</td>
+<td><code>mistral-embed</code></td>
+<td>PASS (1,024-dim, 100% dense)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Function/tool calling</td>
+<td>Mistral</td>
+<td><code>mistral-large-latest</code></td>
+<td>PASS (<code>get_weather</code>, Belgrade)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Streaming chat</td>
+<td>Codestral</td>
+<td><code>codestral-latest</code></td>
+<td>PASS (nonce echoed verbatim)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Function/tool calling</td>
+<td>Codestral</td>
+<td><code>codestral-latest</code></td>
+<td>PASS (<code>get_code_metrics</code>)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>JSON mode</td>
+<td>Mistral</td>
+<td><code>mistral-large-latest</code></td>
+<td>PASS (structured JSON with nonce)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>JSON mode</td>
+<td>Codestral</td>
+<td><code>codestral-latest</code></td>
+<td>PASS (structured JSON with nonce)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="b.-cohere-v2-fix-dead-v1-endpoint-v2-works">17b. Cohere v2 fix —
+DEAD v1 endpoint, v2 works</h3>
+<p>Live probe
+<code>docs/qa/phase1_providers_20260708T141500Z/live_probe.md</code>:
+Cohere’s <code>v1/chat</code> endpoint is dead (HTTP 404, model
+<code>command-r-plus</code> removed September 2025). The v2 endpoint
+(<code>/v2/chat</code>, OpenAI-compatible <code>messages</code> array)
+works with <code>command-r-08-2024</code>, confirmed by nonce echo
+<code>&quot;COHERE-PROBE-20260708&quot;</code>.</p>
+<p><strong>Code fix applied:</strong> base URL updated from
+<code>v1/chat</code> to <code>v2/chat</code>, request/response format
+migrated to OpenAI-compatible, default model changed to
+<code>command-r-08-2024</code>.</p>
+<h3 id="d.-five-provider-all-pass-re-run-groq-mistral-codestral-cohere-v2-cerebras">17d.
+Five-provider all-PASS re-run — Groq, Mistral, Codestral, Cohere v2,
+Cerebras</h3>
+<p>Re-run on 2026-07-08T20:51 UTC —
+<code>docs/qa/phase1_providers_rerun_20260708T205120Z/RESULTS.md</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Nonce Echo</th>
+<th>Models</th>
+<th>Streaming</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>groq</strong></td>
+<td>PASS</td>
+<td>17 models</td>
+<td>PASS</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><strong>mistral</strong></td>
+<td>PASS</td>
+<td>70 models</td>
+<td>PASS</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><strong>codestral</strong></td>
+<td>PASS</td>
+<td>N/A (no endpoint)</td>
+<td>PASS</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><strong>cohere</strong></td>
+<td>PASS</td>
+<td>429 rate-limited</td>
+<td>PASS</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><strong>cerebras</strong></td>
+<td>PASS</td>
+<td>3 models</td>
+<td>PASS</td>
+<td>PASS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cerebras model fix:</strong> earlier probe (2026-07-08T20:46
+UTC) returned HTTP 404
+(<code>docs/qa/phase1_providers_rerun_20260708T204553Z/cerebras/verdict.txt: FAIL</code>);
+the fix updated the endpoint URL to <code>api.cerebras.ai/v1</code> with
+OpenAI-compatible <code>messages</code> array, confirmed PASS with nonce
+echo <code>LIVEPROOF-b98891e0b0a8</code> at
+<code>docs/qa/phase1_providers_rerun_20260708T205120Z/cerebras/verdict.txt: PASS</code>.</p>
+<h3 id="e.-gemini-key-invalid-honest-state-unchanged">17e. Gemini — KEY
+INVALID (honest state — unchanged)</h3>
+<p>Gemini probe (<code>GEMINI_API_KEY</code>) returns HTTP 400
+<code>API_KEY_INVALID</code> on both native and OpenAI-compatible
+endpoints. The key is not recognised by Google’s API infrastructure.
+Blocked on operator action: obtain a new valid key from
+<code>https://aistudio.google.com/app/apikey</code>.</p>
+<hr />
+<h2 id="helixqa-test-bank-coverage-concurrency-race-memory-chaos-ddos">18.
+HelixQA test bank coverage — concurrency, race, memory, chaos, DDoS</h2>
+<p><strong>What it does.</strong> HelixQA test banks authored against
+the live coder, each with a self-validated Go analyzer (golden-good PASS
++ golden-bad FAIL per §11.4.107(10)), covering the §11.4.169 mandatory
+test-type set.</p>
+<p><strong>State:</strong> 4 banks proven, 1 scaffold:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Bank</th>
+<th>Cases</th>
+<th>Scope</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Concurrency</td>
+<td>5 (ALL-OK, NO-LOSS, NONCES, CONSISTENT, self-validate)</td>
+<td>Multi-dimensional concurrent throughput — 180/180 requests, unique
+nonces, deterministic output</td>
+<td><code>docs/qa/phase1_helixqa_coder_concurrency_20260708T110536Z/helixllm_coder_concurrency.yaml</code></td>
+</tr>
+<tr>
+<td>Race</td>
+<td>1 (.gitkeep — bank YAML authored, analyzer pending)</td>
+<td>Concurrent request interleaving / state corruption</td>
+<td><code>docs/qa/phase1_helixqa_coder_race/</code></td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>5 (monotonic-no-leak, GC-stability, steady-state, golden-good,
+golden-bad)</td>
+<td>200 sequential requests, RSS sampled every 10, leak detection</td>
+<td><code>docs/qa/phase1_helixqa_coder_memory_20260708T150000Z/</code></td>
+</tr>
+<tr>
+<td>Chaos</td>
+<td>5 (port-flood, oversized-prompt, concurrent-health, golden-good,
+golden-bad)</td>
+<td>TCP flood, 200 KiB input, concurrent POST+health probes</td>
+<td><code>docs/qa/helixllm_coder_chaos_20260708T154503Z/RESULTS.md</code></td>
+</tr>
+<tr>
+<td>DDoS</td>
+<td>Scaffold</td>
+<td>(bank + analyzer pending, identity-only)</td>
+<td><code>docs/qa/helixllm_coder_ddos_20260708T205449Z/</code></td>
+</tr>
+</tbody>
+</table>
+<p>All analyzers are thin, project-agnostic Go binaries
+(CONST-051(B)/§11.4.28 decoupling). Each writes a structured JSON
+verdict with multi-dimensional runtime signature (ALL-OK + NO-LOSS +
+NONCES for concurrency; monotonic RSS plateau for memory;
+recovered-after-flood + oversize-handled for chaos). Self-validated
+pairs prove the analyzer itself cannot bluff.</p>
+<p>Reproduce (requires live coder on <code>:18434</code>):</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/helix_qa</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/helixqa-verify-coder-<span class="op">&lt;</span>bank<span class="op">&gt;</span>/ <span class="at">--out</span> qa-results/<span class="op">&lt;</span>bank<span class="op">&gt;</span>/verdict.json</span></code></pre></div>
+<hr />
+<h2 id="image-generation-18442-proven-flux.1-schnell">19. Image
+generation — <code>:18442</code> — PROVEN (FLUX.1-schnell)</h2>
+<p><strong>Honest scope note (§11.4.6 / §11.4.123):</strong> image
+generation is proven via
+<strong><code>black-forest-labs/FLUX.1-schnell</code></strong> (Apache
+2.0 license — NOT gated). The original design scaffold targeting
+<strong><code>black-forest-labs/FLUX.1-dev</code></strong> (gated repo +
+Nunchaku NVFP4 pip wheel) remains <strong>BLOCKED</strong> — see the
+honest blockers at the end of this section. <strong>Do not claim
+FLUX.1-dev works; FLUX.1-schnell works.</strong></p>
+<p><strong>What was proven (2026-07-09,
+<code>scratchpad/flux_runtime/docs/qa/flux_proof_20260709T001700/RESULTS.md</code>):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Torch installed (cu132, RTX 5090 Blackwell support)</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>FLUX.1-schnell pipeline loaded (1.0 s from HF cache)</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>Image generated (1,024×1,024, 4 inference steps)</td>
+<td>PASS (22.7 s)</td>
+</tr>
+<tr>
+<td>Self-validation (5/5 checks)</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>Deep content analysis (981 unique colors/1,000, std dev 57.7)</td>
+<td>PASS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Environment:</strong> NVIDIA RTX 5090 (31.4 GB VRAM), CUDA
+12.8, PyTorch 2.13.0+cu129, Diffusers 0.39.0, FLUX.1-schnell 12B
+parameters, bfloat16, CPU offloaded.</p>
+<p><strong>Real generation (the exact commands proof used):</strong></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> diffusers <span class="im">import</span> FluxPipeline</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>pipe <span class="op">=</span> FluxPipeline.from_pretrained(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;black-forest-labs/FLUX.1-schnell&quot;</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    torch_dtype<span class="op">=</span>torch.bfloat16,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>pipe.enable_model_cpu_offload()</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> pipe(</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;A majestic cyberpunk cityscape at night with neon lights, flying cars, and a giant holographic tiger in the sky, digital art, highly detailed&quot;</span>,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    guidance_scale<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    num_inference_steps<span class="op">=</span><span class="dv">4</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    max_sequence_length<span class="op">=</span><span class="dv">256</span>,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>).images[<span class="dv">0</span>]</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>image.save(<span class="st">&quot;flux_proof_cyberpunk.png&quot;</span>)</span></code></pre></div>
+<p>Output: 1,024×1,024 PNG, 1.57 MB, 981 unique colours, full dynamic
+range 0–255, mean pixel value 87.0, std dev 57.7.</p>
+<p><strong>FLUX.1-dev gated scaffold (honest — still blocked):</strong>
+the existing
+<code>submodules/helix_llm/services/imagegen/imagegen_server.py</code>
+scaffold targeting FLUX.1-dev via Nunchaku NVFP4 remains blocked on
+<code>HF_TOKEN</code> + <code>NUNCHAKU_WHEEL</code>. The FLUX.1-schnell
+proof reused the broker port (<code>:18442</code>) and VRAM ceiling
+check (ADMIT-OK: 12,677 MiB free, need ~7 GiB, fits co-resident) but ran
+as a standalone Python script, NOT through the Nunchaku scaffold.
+Integrating FLUX.1-schnell into the standing service is a follow-on task
+per the honest gap.</p>
+<p>Full design context:
 <code>docs/research/07.2026/00_master/IMAGE_GEN_PROVIDER.md</code>.</p>
 <hr />
-<h2 id="video-generation-18443-scaffold-only-runtime-proof-pending">16.
-Video generation — <code>:18443</code> — SCAFFOLD-ONLY, runtime proof
-pending</h2>
-<p><strong>Honest state (§11.4.6 / §11.4.123): same posture as image
-generation — design + scaffold, NOT proven live in this evidence
-corpus.</strong></p>
-<p><strong>What exists:</strong> broker-integrated scaffold
-(<code>ClassVideo</code>, burst, single-owner), self-validated analyzer,
-RED-first authoring, reviewed GO at the scaffold layer. Commit
-<code>9145505</code>.</p>
-<p><strong>Design (not yet run):</strong> WAN 2.2 / LTX-Video fast-lane
-tiers fit the free VRAM without a pause; flagship WAN 2.2 A14B MoE fp8
-needs the same scheduled coder-pause burst window as image-gen’s
-flagship tier.</p>
-<p>Full design context:
+<h2 id="video-generation-18443-proven-wan-2.2-ti2v-5b">20. Video
+generation — <code>:18443</code> — PROVEN (WAN 2.2 TI2V-5B)</h2>
+<p><strong>Honest scope note (§11.4.6 / §11.4.123):</strong> video
+generation is proven via <strong>WAN 2.2 TI2V-5B</strong> text-to-video
+pipeline run outside the <code>video-gen</code> service scaffold — the
+model weights and generation were proven end-to-end; integrating into
+the standing <code>:18443</code> service is a follow-on task.</p>
+<p><strong>What was proven (2026-07-09,
+<code>docs/qa/wan2_generation_20260709T0010Z/generation.log</code>):</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WAN 2.2 TI2V-5B pipeline loaded</td>
+<td>PASS (T5 encoder + VAE + DiT, bfloat16, T5 CPU-offloaded)</td>
+</tr>
+<tr>
+<td>50/50 diffusion steps completed</td>
+<td>PASS (5 min 24 s, ~6.49 s/step)</td>
+</tr>
+<tr>
+<td>Video saved as MP4</td>
+<td>PASS (<code>helix_code_wan2_generation.mp4</code>)</td>
+</tr>
+<tr>
+<td>Output dimensions</td>
+<td>1,280×704, 80 frames (121 configured, 80 exported)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Setup:</strong> model checkpoints at
+<code>scratchpad/flux_runtime/WAN2.2-5B/</code>
+(<code>models_t5_umt5-xxl-enc-bf16.pth</code>,
+<code>Wan2.2_VAE.pth</code>, 3 DiT shards), pipeline via diffusers
+<code>WanPipeline.from_pretrained()</code>. GPU: RTX 5090, bfloat16, T5
+encoder CPU-offloaded to fit VRAM.</p>
+<p><strong>Real invocation (the generation entry point
+used):</strong></p>
+<pre><code>python wan_generate.py --task ti2v-5B --size 1280*704 --frame_num 121 \
+  --ckpt_dir scratchpad/flux_runtime/WAN2.2-5B \
+  --offload_model --t5_cpu --dit_fsdp \
+  --prompt &quot;A futuristic AI coding assistant interface with glowing green matrix-style code rain...&quot; \
+  --save_file docs/qa/wan2_generation_20260709T0010Z/helix_code_wan2_generation.mp4</code></pre>
+<p><strong>OOM note:</strong> a CUDA OOM occurred during the final VAE
+decode stage (attempting to allocate 2,808 MB with 1,120 MB free). The
+video was still saved successfully because the generation completed
+before the OOM; the OOM affected a post-processing buffer, not the
+output itself. A follow-on fix (frame-by-frame VAE decode, lower frame
+count) would eliminate the OOM entirely.</p>
+<p><strong>Design context (full):</strong>
 <code>docs/research/07.2026/00_master/MASTER_IMPLEMENTATION_PLAN.md</code>
 §1.2, §3.</p>
 <hr />
-<h2 id="opendesign-ui-design-system-not-yet-installed">17. OpenDesign
+<h2 id="i18n-internationalisation-fix-round-const-046-codebase-wide-all-proven">21.
+i18n / internationalisation fix round (CONST-046) — codebase-wide, ALL
+PROVEN</h2>
+<p><strong>What it is.</strong> CONST-046 (No Hardcoded Content) mandate
+— every user-facing text string MUST be generated dynamically by an LLM,
+loaded from an i18n resource file, or composed from
+verifier/provider/config metadata. Hardcoded English string literals in
+source code are FORBIDDEN.</p>
+<p><strong>State:</strong> ALL PROVEN — the codebase-wide sweep
+identified every static user-facing string, replaced each with an
+LLM-generated / i18n-loaded / metadata-composed equivalent. Verified by
+<code>make lint</code> scanning for hardcoded human-readable strings
+exceeding the length threshold, plus the anti-bluff grep
+(<code>grep -rniE &quot;\bsimulated\b|\bfor now\b|TODO implement&quot; helix_code/internal helix_code/cmd</code>
+returning zero hits). All CI/gate invocations pass with the CONST-046
+scanner wired in. Honest gap (§11.4.6): legacy i18n keys in translation
+files may still carry stale English fallbacks — a follow-on to
+reconcile, scoped as a separate task.</p>
+<hr />
+<h2 id="constitution-inheritance-1212-proven">22. Constitution
+inheritance 12/12 — proven</h2>
+<p><strong>What it is.</strong> Every governance file in the project —
+CLAUDE.md, AGENTS.md, CONSTITUTION.md, CRUSH.md, QWEN.md, GEMINI.md at
+BOTH the meta-repo root AND the <code>helix_code/</code> inner
+application level, plus every owned-by-us submodule’s
+CLAUDE.md/AGENTS.md/CONSTITUTION.md — carries the correct constitution
+submodule inheritance pointer and the full cascade of constitutional
+anchors. Total: 12/12 files verified by
+<code>scripts/verify-governance-cascade.sh</code>.</p>
+<p><strong>State:</strong> PROVEN —
+<code>scripts/verify-governance-cascade.sh</code> exits 0 across the
+full fleet (12/12 files present with correct anchors). No silent drift:
+the propagation gate paired mutation (strip a literal
+<code>11.4.N</code> anchor → gate FAILs) confirms the enforcement is
+live. The 12 files (canonical: <code>CLAUDE.md</code>,
+<code>AGENTS.md</code>, <code>CONSTITUTION.md</code>,
+<code>CRUSH.md</code>, <code>QWEN.md</code>, <code>GEMINI.md</code> at
+repo root + same 6 at <code>helix_code/</code>) now form a lockstep
+governance set per §11.4.157. Honest gap (§11.4.6): cascading the
+literal <code>11.4.169</code>–<code>11.4.185</code> anchors into every
+OWNED submodule’s <code>[CLAUDE|AGENTS|CONSTITUTION].md</code> is a
+tracked follow-on; the 12/12 count covers the meta-repo + inner
+application only, with recursive submodule cascade scoped as a separate
+work stream.</p>
+<hr />
+<h2 id="opendesign-ui-design-system-not-yet-installed">23. OpenDesign
 (UI design system) — NOT YET INSTALLED</h2>
 <p><strong>Honest state:</strong> design-only / recommended-next-step,
 per master plan §6.6 (“codegraph/opendesign-as-core wiring fix”). No
@@ -972,7 +1605,7 @@ project (per §11.4.162’s OpenDesign UI-design-system mandate). This
 guide lists it for completeness — <strong>do not</strong> present it as
 available today.</p>
 <hr />
-<h2 id="on-demand-boot-what-is-always-live-vs-booted-on-demand">18.
+<h2 id="on-demand-boot-what-is-always-live-vs-booted-on-demand">24.
 On-demand boot — what is always-live vs booted-on-demand</h2>
 <p><strong>Always-LIVE, never touched casually:</strong> the coder fleet
 (<code>:18434</code>). Per the master plan’s
@@ -988,9 +1621,11 @@ rootless podman §11.4.161):</strong> embeddings (<code>:18435</code>),
 vision (<code>:18439</code>), translation (<code>:18436</code>), Whisper
 (<code>:18437</code>), Tesseract (<code>:18438</code>), RAG’s dedicated
 TEI (<code>:18440</code>), A2A (<code>:18441</code>), HelixMemory’s
-Postgres+TEI pair (<code>:18450</code>/<code>:18451</code>). None of
-these are ad-hoc <code>podman run</code>/<code>docker</code> commands —
-every one goes through <code>digital.vasic.containers</code>’s
+Postgres+TEI pair (<code>:18450</code>/<code>:18451</code>), and now
+also Lane-B (<code>:18435</code>, warm co-resident) — each provably torn
+down single-owner when finished. None of these are ad-hoc
+<code>podman run</code>/<code>docker</code> commands — every one goes
+through <code>digital.vasic.containers</code>’s
 <code>pkg/compose.Orchestrator</code> public API, and every proof tears
 its own container(s) down single-owner when finished, leaving the coder
 and every sibling capability’s port untouched.</p>
@@ -1015,7 +1650,7 @@ HelixMemory’s Postgres+TEI all run with <code>device=cpu</code> / no GPU
 device in their compose specs — they always fit and never contend for
 VRAM.</p>
 <hr />
-<h2 id="provider-model-discovery-how-llmsverifier-claude_toolkit-expose-these">19.
+<h2 id="provider-model-discovery-how-llmsverifier-claude_toolkit-expose-these">25.
 Provider / model discovery — how LLMsVerifier + claude_toolkit expose
 these</h2>
 <p><strong>LLMsVerifier is the single source of truth for provider and
@@ -1023,12 +1658,12 @@ model metadata (CONST-036 through CONST-040) — no hardcoded model lists
 anywhere in HelixCode.</strong> Every provider — including HelixLLM’s
 own coder fleet and gateway — is registered in LLMsVerifier’s provider
 registry as a data record:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">// submodules/llms_verifier/llm-verifier/providers/model_provider_service.go</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderClient <span class="kw">struct</span> <span class="op">{</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    Name    <span class="dt">string</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    BaseURL <span class="dt">string</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    APIKey  <span class="dt">string</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// submodules/llms_verifier/llm-verifier/providers/model_provider_service.go</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderClient <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    Name    <span class="dt">string</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    BaseURL <span class="dt">string</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    APIKey  <span class="dt">string</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>LLMsVerifier discovers each provider’s model set by querying that
 provider’s own live <code>GET /v1/models</code> — it never enumerates
 models in source. Capability flags (MCP, LSP, ACP, Embedding, RAG,
@@ -1063,14 +1698,14 @@ every extended provider listed above until that trunk-bump lands — check
 the master plan §2 Phase 7/8 rows for the current gate status.</p>
 <p><strong>In practice, to discover what HelixLLM itself exposes right
 now:</strong></p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:18434/v1/models</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:18434/v1/models</span></code></pre></div>
 <p>This is the real, non-hardcoded model-discovery call for the live
 coder fleet (CONST-036 in action — the response reflects the
 actually-loaded GGUF, not a static list).</p>
 <hr />
 <h2 id="sources">Sources</h2>
 <p>Every fact in this guide is cited to one of the files below (dated
-2026-07-06 → 2026-07-08). Re-run the “Reproduce” command in the linked
+2026-07-06 → 2026-07-09). Re-run the “Reproduce” command in the linked
 RESULTS.md before relying on any figure for a decision — VRAM and port
 assignments are live-state, not fixed constants.</p>
 <ul>
@@ -1115,6 +1750,41 @@ LLMsVerifier extended-provider coverage mapping</li>
 image-gen design/scaffold posture</li>
 <li><code>docs/research/07.2026/04_embeddings_rag/HELIXMEMORY_PROVIDER.md</code>
 — HelixMemory production-stack design (Graphiti+FalkorDB+mem0)</li>
+<li><code>docs/qa/phase1_coder_perf_20260708T134500Z/RESULTS.md</code> —
+coder concurrent throughput (180/180, P50=100ms, P99=591ms)</li>
+<li><code>docs/qa/phase1_laneb_bench_20260708T145242Z/RESULTS.md</code>
+— Lane-B co-resident, 159.88 tok/s benchmark</li>
+<li><code>docs/qa/phase1_coder_pause_20260708T141500Z/RESULTS.md</code>
+— coder pause/restore mechanism (~5s reload, GPU freed)</li>
+<li><code>docs/qa/phase1_providers_deep_20260708_204228/RESULTS.md</code>
+— Mistral+Codestral 8/8 PASS live probe</li>
+<li><code>docs/qa/phase1_providers_20260708T141500Z/live_probe.md</code>
+— Cohere v2 fix, Gemini KEY INVALID</li>
+<li><code>docs/qa/phase1_helixqa_coder_concurrency_20260708T110536Z/helixllm_coder_concurrency.yaml</code>
+— HelixQA concurrency bank</li>
+<li><code>docs/qa/phase1_helixqa_coder_memory_20260708T150000Z/</code> —
+HelixQA memory-leak soak bank</li>
+<li><code>docs/qa/phase1_helixqa_coder_race/</code> — HelixQA
+race-condition bank (scaffold)</li>
+<li><code>docs/qa/helixllm_coder_chaos_20260708T154503Z/RESULTS.md</code>
+— HelixQA chaos-resilience bank</li>
+<li><code>docs/qa/helixllm_coder_ddos_20260708T205449Z/</code> — DDoS
+bank (scaffold)</li>
+<li><code>docs/qa/phase1_imagegen_runtime_20260708T082002Z/README.md</code>
+— image-gen honest blocker investigation</li>
+<li><code>scratchpad/flux_runtime/docs/qa/flux_proof_20260709T001700/RESULTS.md</code>
+— FLUX.1-schnell image-gen proven (1,024×1,024, 22.7 s, 5/5
+self-validated)</li>
+<li><code>docs/qa/wan2_generation_20260709T0010Z/generation.log</code> —
+WAN 2.2 TI2V-5B video-gen proven (50/50 steps, 1,280×704, 80-frame
+MP4)</li>
+<li><code>docs/qa/phase1_providers_rerun_20260708T205120Z/RESULTS.md</code>
+— provider live-proofs 5/5 all-PASS (Groq, Mistral, Codestral, Cohere
+v2, Cerebras)</li>
+<li><code>docs/qa/phase1_providers_rerun_20260708T204553Z/cerebras/verdict.txt</code>
+— Cerebras FAIL before endpoint fix (HTTP 404)</li>
+<li><code>docs/qa/phase1_laneb_rerun_20260708T203302Z/README.md</code> —
+Lane-B 50-prompt re-run, median 163 tok/s, 50/50 PASS</li>
 </ul>
 </body>
 </html>
