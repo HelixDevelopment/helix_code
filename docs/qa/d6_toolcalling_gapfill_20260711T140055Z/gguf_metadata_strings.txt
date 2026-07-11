@@ -1,0 +1,15 @@
+general.name
+Qwen3-Coder-30B-A3B-Instruct
+general.finetune
+general.basename
+Qwen3-Coder-30B-A3B-Instruct
+Unsloth
+https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct/blob/main/LICENSE
+general.repo_url
+https://huggingface.co/unsloth
+general.base_model.count
+general.base_model.0.name
+general.base_model.0.organization
+general.base_model.0.repo_url
+https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct
+unsloth

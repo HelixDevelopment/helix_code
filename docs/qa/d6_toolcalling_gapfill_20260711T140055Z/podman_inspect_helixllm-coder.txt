@@ -1,0 +1,7 @@
+["-m","/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","-ngl","99","-c","24576","--parallel","8","--cont-batching","-fa","on","--cache-type-k","q8_0","--cache-type-v","q8_0","--host","0.0.0.0","--port","18434","--jinja","--metrics"]
+Image: 8b2cf138a132beb5adcfa4ecf40c622abacc4a6d8e35049c87085f669e3fb3ca
+ImageName: localhost/helixllm/llamacpp-router:cuda12.8-sm120
+Created: 2026-07-06 19:05:40.946273085 +0500 +05
+StartedAt: 2026-07-11 17:55:17.079512721 +0500 +05
+Pid: 1980342
+Running: true

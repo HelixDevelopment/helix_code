@@ -1,0 +1,26 @@
+{
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "messages": [
+    {"role": "user", "content": "Use the add tool to compute 10 plus 78. Only call the tool, do not explain."}
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "add",
+        "description": "Add two integers and return the sum.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "a": {"type": "integer", "description": "first addend"},
+            "b": {"type": "integer", "description": "second addend"}
+          },
+          "required": ["a", "b"]
+        }
+      }
+    }
+  ],
+  "tool_choice": "auto",
+  "temperature": 0,
+  "max_tokens": 200
+}

@@ -1,0 +1,8 @@
+  File: /home/milos/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf
+  Size: 18556689568	Blocks: 36243552   IO Block: 4096   regular file
+Device: 259,8	Inode: 36590308    Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/   milos)   Gid: ( 1000/   milos)
+Access: 2026-07-11 18:58:25.632065071 +0500
+Modify: 2026-07-06 17:40:54.261998301 +0500
+Change: 2026-07-06 17:40:54.261998301 +0500
+ Birth: 2026-07-06 16:19:37.628060175 +0500
