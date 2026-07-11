@@ -110,6 +110,8 @@ EXCLUDE_FILES=(
   --exclude='scan-secrets.sh'
   --exclude='test-scan-secrets.sh'
   --exclude='test-scan-secrets-range-perf.sh'
+  --exclude='secret_scan.sh'
+  --exclude='secret_scan_test.sh'
 )
 
 # ---------------------------------------------------------------------------
@@ -204,7 +206,7 @@ is_excluded_dir_path() {
 is_excluded_file_path() {
   local base="${1##*/}"
   case "$base" in
-    *.example|*.template|*.sample|*-example|*-template|scan-secrets.sh|test-scan-secrets.sh|test-scan-secrets-range-perf.sh)
+    *.example|*.template|*.sample|*-example|*-template|scan-secrets.sh|test-scan-secrets.sh|test-scan-secrets-range-perf.sh|secret_scan.sh|secret_scan_test.sh)
       return 0 ;;
   esac
   return 1
