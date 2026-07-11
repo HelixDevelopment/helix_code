@@ -1,0 +1,9 @@
+{
+  "provider": "groq",
+  "provider_type": "groq",
+  "model": "llama-3.1-8b-instant",
+  "model_source": "catalogue:cheap-match",
+  "nonce": "LIVEPROOF-728365b040cd",
+  "prompt": "This is an automated liveness probe. Reply with EXACTLY this token and nothing else: LIVEPROOF-728365b040cd",
+  "requested_at_utc": "2026-07-11T10:21:02.484662362Z"
+}

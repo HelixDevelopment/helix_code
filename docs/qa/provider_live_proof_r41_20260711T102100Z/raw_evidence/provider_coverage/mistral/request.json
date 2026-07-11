@@ -1,0 +1,9 @@
+{
+  "provider": "mistral",
+  "provider_type": "mistral",
+  "model": "mistral-small-2603",
+  "model_source": "catalogue:cheap-match",
+  "nonce": "LIVEPROOF-b60344ec59e5",
+  "prompt": "This is an automated liveness probe. Reply with EXACTLY this token and nothing else: LIVEPROOF-b60344ec59e5",
+  "requested_at_utc": "2026-07-11T10:21:03.21667844Z"
+}

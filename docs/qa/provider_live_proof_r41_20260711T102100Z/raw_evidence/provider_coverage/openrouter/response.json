@@ -1,0 +1,13 @@
+{
+  "provider": "openrouter",
+  "content": "",
+  "nonce_echoed": false,
+  "finish_reason": "length",
+  "processing_time": "3.375308057s",
+  "usage": {
+    "prompt_tokens": 98,
+    "completion_tokens": 32,
+    "total_tokens": 130
+  },
+  "responded_at_utc": "2026-07-11T10:21:07.29580356Z"
+}
