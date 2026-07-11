@@ -750,3 +750,16 @@ Every fact in this guide is cited to one of the files below (dated 2026-07-06 �
 - `docs/qa/phase1_providers_rerun_20260708T205120Z/RESULTS.md` — provider live-proofs 5/5 all-PASS (Groq, Mistral, Codestral, Cohere v2, Cerebras)
 - `docs/qa/phase1_providers_rerun_20260708T204553Z/cerebras/verdict.txt` — Cerebras FAIL before endpoint fix (HTTP 404)
 - `docs/qa/phase1_laneb_rerun_20260708T203302Z/README.md` — Lane-B 50-prompt re-run, median 163 tok/s, 50/50 PASS
+
+## Sources verified 2026-07-11: https://docs.mistral.ai/api/ (confirms `api.mistral.ai/v1` is the current
+official Mistral chat-completions base URL, matching §17a), https://inference-docs.cerebras.ai/api-reference/chat-completions
+(confirms `api.cerebras.ai/v1` is the current official Cerebras Inference base URL, matching §17d's fix),
+https://docs.cohere.com/v2/reference/chat (confirms `POST https://api.cohere.com/v2/chat` is the current
+official v2 endpoint, matching §17b; the fetched page does not itself state whether the v1 endpoint has been
+formally removed — that specific claim rests on this guide's own live HTTP-404 probe evidence cited above, not
+on this external source), https://console.groq.com/docs/api-reference (confirms `https://api.groq.com/openai/v1`
+is the current official Groq OpenAI-compatible base URL, matching §17d). This guide's primary grounding remains
+the internal captured evidence listed in `## Sources` above (dated 2026-07-06 → 2026-07-09); the four external
+URLs above were cross-referenced per §11.4.99 solely to corroborate the third-party provider base-URL claims in
+§17. Re-verify both the internal evidence and these external sources before relying on this guide beyond its
+stated snapshot window.
