@@ -50,263 +50,102 @@ text-decoration: line-through;
 <header id="title-block-header">
 <h1 class="title">RESUME</h1>
 </header>
-<h1 id="resume-helixllm-full-extension-programme-session-resumption-file-11.4.131">RESUME
-— HelixLLM Full-Extension Programme (session-resumption file,
-§11.4.131)</h1>
-<blockquote>
-<p><strong>Fresh session? Paste the SHORT prompt below.</strong> This
-file is the single out-of-the-box entry point. Always current; re-read
-on every new session. Track <code>(T1/main)</code>.</p>
-</blockquote>
-<h2 id="short-resumption-prompt-paste-into-a-fresh-session">SHORT
-resumption prompt (paste into a fresh session)</h2>
-<blockquote>
-<p>Read <code>docs/research/07.2026/00_master/RESUME.md</code> +
-<code>.superpowers/sdd/progress.md</code> (the live SDD ledger), run
-<code>git fetch --all</code>, and continue the HelixLLM full-extension
-programme. The branch <code>feature/helixllm-full-extension</code> (HEAD
-<code>4d58464c</code>, 34 commits over merge-base <code>31cde9a1</code>)
-is <strong>RELEASE-READY</strong>: Phase 0 (GPU) + Phase 1 (fleet) +
-Phase 2 (HelixAgent→HelixLLM e2e) + Phase 3
-(embeddings/vision/translation-NLLB/Whisper/Tesseract/RAG/A2A/network-provider/
-VRAM-broker/LLMsVerifier chain) all PROVEN + individually review-GO; the
-whole-branch SDD end-gate returned <strong>GO across all 3 independent
-lenses</strong> (anti-bluff, security/§11.4.174,
-integration/release-readiness). §11.4.40 pre-tag sweep RUN
-(<code>qa-results/pretag_verify_*.log</code>): branch is
-regression-clean — QA-evidence 0 warnings; the only sweep FAILs are
-PRE-EXISTING governance debt on submodules my branch never touched (G1
-streaming/watcher inheritance pointers +
-doc_processor/llm_orchestrator/llm_provider/vision_engine anti-bluff
-anchors, from refactor <code>1422f7da</code>, not this branch) +
-third-party vendored Continue.dev <code>.skip()</code> (vendor-exempt
-§11.4.29). <strong>RELEASE PUBLISHED ✅ (operator-authorized 2026-07-07,
-completed 2026-07-08).</strong> Tag
-<code>helix-code-1.0.0-dev-0.0.1</code> (§11.4.151 prefix
-<code>helix-code</code>, kebab; supersedes old
-<code>helixcode-vN</code>) created + pushed across main-repo HEAD
-<code>10c40c85</code> (tag object <code>b7e78c3a</code>, on github
-Helix-CLI + gitlab HelixCode) AND all 7 owned submodule HEADs at their
-published SHAs — helix_llm(071c1223), doc_processor(b918111),
-llm_provider(4db6c49), llm_orchestrator(ee229a7, CONSTITUTION
-merge-onto-latest), llms_verifier(c696c5db), vision_engine(a97df79),
-helix_agent(cfa94f2f, foreign go.mod/.qa_bak never staged §11.4.174).
-Feature branch pushed (NO trunk merge, §11.4.167). Pre-tag §11.4.40
-sweep GREEN on owned scope: governance-cascade 0 failures, anti-bluff
-anchor present in all 18 files across 13 repos; residual no-silent-skips
-confined to vendored Continue.dev (§11.4.29 exempt). <strong>NEXT
-(post-tag scope, endless loop §11.4.126 continues)</strong> — operator
-UNLOCKED (all 3): GPU gen (FLUX-NVFP4/WAN/LTX — quant footprints
-RESOLVED; GPU-gen SCAFFOLD-COMPLETE + reviewed GO: image-gen helix_llm
-<code>0f07559</code> port 18442 + video-gen <code>9145505</code> port
-18443, both local-no-push, broker-fail-closed, RED-first self-validated
-analyzers; RUNTIME PROOF PENDING operator coder-pause §11.4.122 — run
-each <code>docs/qa/phase4_*/harness/run_proof.sh admit-check</code> then
-boot+generate in an authorized window), broad-provider live proofs
-(needs API keys §11.4.10), HelixMemory/cognee wire (design DONE
-<code>scratchpad/design_helixmemory_cognee.md</code> — P-OQ2-A
-Postgres-row persistence is container-independent + lands first; IMPL
-BLOCKED by §11.4.174 until the concurrent QA track’s foreign helix_agent
-go.mod/.qa_bak clears). Honor anti-bluff §11.4, subagent-driven
-§11.4.70, <code>(T1/&lt;branch&gt;)</code> labels §11.4.182, one
-canonical branch §11.4.181, no-force-push §11.4.113, §11.4.174
-shared-host ownership (helix_agent go.mod/.qa_bak FOREIGN — never
-stage), coder container live at 18434 (never restart §11.4.122).</p>
-</blockquote>
-<h2 id="current-phase-immediate-next-action">Current phase + immediate
-next action</h2>
+<h1 id="session-resume-helixllm-full-extension">Session Resume —
+HelixLLM Full-Extension</h1>
+<p><strong>Branch</strong>: <code>feature/helixllm-full-extension</code>
+| <strong>HEAD</strong>: <code>bc1daffa</code> (R41 convergence in
+progress — more commits landing) | <strong>Date</strong>: 2026-07-11 |
+<strong>Tags</strong>: <code>helix-code-1.1.0-dev-0.0.1</code> @
+<code>dfa6a2c2</code> (current release) +
+<code>helix-code-1.0.0-dev-0.0.1</code> @ <code>10c40c85</code></p>
+<h2 id="what-is-this">What is this</h2>
+<p>Machine-readable §11.4.131 session-resumption file. Fresh session:
+read this + <code>.superpowers/sdd/progress.md</code> (the full R1–R41
+ledger), <code>git fetch --all</code>, then continue automatically.</p>
+<h2 id="ground-truth-verify-git-log---oneline--12-podman-ps--a-nvidia-smi-ls-devdri">Ground
+Truth (verify: <code>git log --oneline -12</code>,
+<code>podman ps -a</code>, <code>nvidia-smi</code>,
+<code>ls /dev/dri</code>)</h2>
 <ul>
-<li><strong>BRANCH STATUS: RELEASE-READY.</strong> HEAD
-<code>4d58464c</code>, 34 commits over merge-base <code>31cde9a1</code>.
-Whole-branch SDD end-gate returned <strong>GO across all 3 independent
-lenses</strong> (anti-bluff · security/§11.4.174 · integration/
-release-readiness — the last NO-GO’d on 3 missing sibling exports, fixed
-in <code>4d58464c</code>, re-reviewed GO).</li>
-<li><strong>Phase 0 (GPU):</strong> ✅ rootless CDI passthrough + sm_120
-build + real 30B inference PROVEN.</li>
-<li><strong>Phase 1 (fleet):</strong> ✅ 30B coder live; Containerfile +
-claude_toolkit fixes, all re-reviewed <strong>GO</strong>.</li>
-<li><strong>Phase 2 (HelixAgent→HelixLLM e2e):</strong> ✅
-<strong>PROVEN + GO</strong> — real generate + Postgres/Redis
-persistence.</li>
-<li><strong>LLMsVerifier chain:</strong> ✅ C1 C2 C4 C5 C3 + advisories
-landed, combined review <strong>GO</strong>.</li>
-<li><strong>Phase-3:</strong> ✅ embeddings IMPL PROVEN (55bdf9b6) ·
-VRAM broker CORE GO (a12df57c) · translation NLLB-CT2
-<ol start="18436" type="1">
-<li>· Whisper STT (18437) · Tesseract OCR (18438) · RAG-TEI (18440) ·
-ACP→A2A (18441) · network-provider LAN/VPN — all landed + individually
-review-GO, QA siblings complete (9/9 RESULTS.md have .html+.pdf).</li>
-</ol></li>
-<li><strong>§11.4.40 PRE-TAG SWEEP RUN</strong>
-(<code>qa-results/pretag_verify_20260707_222458.log</code>,
-exit-captured): QA-evidence §11.4.83 = 0 warnings (PASS). The 3 sweep
-FAILs are ALL PRE-EXISTING, regression-isolated
-(<code>git diff 31cde9a1..HEAD</code> on those paths = EMPTY): G1
-(streaming/watcher inheritance pointers) +
-doc_processor/llm_orchestrator/llm_provider/vision_engine anti-bluff
-anchors (added by refactor <code>1422f7da</code>, not this branch) +
-third-party vendored Continue.dev <code>.skip()</code> (§11.4.29
-vendor-exempt). None block THIS branch’s tag; all are honest-tracked
-cross-cutting governance debt (own separate work stream).</li>
-<li><strong>Governance:</strong> constitution <code>5074d606</code>
-(through §11.4.183). Quant-footprint UNCONFIRMED → RESOLVED (a93140b1):
-≤10.4 GiB co-resident FLUX exists but MUST be NVFP4 on the 5090
-(Blackwell cc10.x → fp4, not int4).</li>
-<li><strong>RELEASE PUBLISHED ✅ (2026-07-08).</strong>
-<code>helix-code-1.0.0-dev-0.0.1</code> on main-repo HEAD
-<code>10c40c85</code> (tag object <code>b7e78c3a</code>, github
-Helix-CLI + gitlab HelixCode) + all 7 owned submodule HEADs. Main
-feature branch pushed (github+gitlab, NO trunk merge §11.4.167). Pre-tag
-§11.4.40 sweep GREEN on owned scope (governance-cascade 0 failures;
-anti-bluff anchor in all 18 files/13 repos).</li>
-<li><strong>IMMEDIATE NEXT = next-tag scope (endless loop §11.4.126
-continues past release).</strong> Non-blocked: vision local-serving impl
-(Qwen2.5-VL-7B co-resident, design
-<code>scratchpad/design_vision_local_serving.md</code>, §11.4.167 own
-feature work-stream), Stream-C <code>install_helix_path.sh</code> review
-(§11.4.142 + verify against §11.4.177
-no-project-tooling-on-shared-PATH). OPERATOR-GATED (honest blocks, not
-autonomously takeable): GPU gen runtime proofs (need coder-pause
-§11.4.122), provider live proofs (need API keys §11.4.10). Keep ≥3
-parallel streams on non-blocked work per §11.4.103.</li>
-<li><strong>Terminal goal (§11.4.126):</strong> a fully-validated,
-prefixed release tag (§11.4.151) published across main + all owned
-submodules; local HelixLLM on the RTX 5090 exposed via HelixAgent to
-HelixCode/CLI agents.</li>
+<li><strong>HEAD</strong>: root <code>bc1daffa</code> (branch == github
+== gitlab at <code>536ac9c6</code> before R41; R41 commits
+e461edc1→bc1daffa are LOCAL, UNPUSHED).</li>
+<li><strong>Owned submodule gitlinks — all SAME as their HEADs</strong>
+(helix_llm <code>b05e56c0</code>, llms_verifier <code>36b21b41</code>,
+helix_qa <code>01b47308</code>): NO owned-submodule pointer bump needed.
+<strong>Constitution submodule ADVANCED to
+<code>79c9804f</code></strong> (§11.4.182 hook/labeler) → root
+constitution gitlink bump OWED (push operator-gated).</li>
+<li><strong>🔴 CODER IS DOWN</strong>: <code>helixllm-coder</code> won’t
+boot — CDI pins stale <code>/dev/dri/card0</code>; host has
+<code>card1</code>+<code>renderD128</code> (§11.4.111 re-enumerated
+Jul-9 reboot); <code>nvidia-ctk cdi list</code>=0, no CDI spec. GPU idle
+(32081 MiB free). <strong>BOOT FIX (operator/root):</strong>
+<code>sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml &amp;&amp; podman start helixllm-coder</code>.
+All live-coder work blocked until then.</li>
+<li><strong>Foreign §11.4.174</strong>:
+<code>submodules/helix_agent</code> (FOREIGN go.mod/go.sum/.qa_bak —
+NEVER sweep) + <code>/mnt/track1/</code> (ATMOSphere T1 project
+live-recording 3 adb devices
+<code>66ff9c4f…</code>/<code>93f4f1fd…</code>/<code>998fd36…</code> —
+NEVER touch).</li>
 </ul>
-<h2 id="live-server-operator-testable-running-now">LIVE SERVER
-(operator-testable, running now)</h2>
-<p><strong>Qwen3-Coder-30B-A3B serving on
-<code>http://localhost:18434/v1</code></strong> (OpenAI-compatible) —
-container <code>helixllm-coder</code> (<code>podman ps</code>),
-<code>--network=host</code>, image
-<code>localhost/helixllm/llamacpp-router:cuda12.8-sm120</code>, 8
-parallel slots, 24k ctx, q8_0 KV, ~19.4 GB VRAM. PROVEN: single-stream
-~220 tok/s (coder_live_e2e log; RESUME’s older ~322 tok/s was a
-different –jinja/q8_0-KV run) + 8 concurrent agents <span class="citation" data-cites="85">@85</span>–96 tok/s; real coding output
-(<code>is_palindrome</code>, <code>func Add</code>). Restart:
-<code>podman start helixllm-coder</code>.</p>
-<blockquote>
-<p><strong>ENDPOINT GOTCHA (load-bearing, proven in Phase-2
-<code>docs/qa/phase2_e2e_20260706/12_endpoint_finding.txt</code>):</strong>
-raw <code>curl</code> uses
-<code>http://localhost:18434/v1/chat/completions</code>. A client/SDK
-that APPENDS <code>/v1/chat/completions</code> (incl. HelixAgent via
-<code>HELIX_LLM_LOCAL_OPENAI_ENDPOINT</code>) MUST use the BASE
-<code>http://localhost:18434</code> (NO <code>/v1</code>) — else
-<code>.../v1</code> → double <code>/v1/v1</code> → <strong>HTTP
-404</strong>. (This SUPERSEDES the <code>:18434/v1</code> value in
-<code>10_llmsverifier_helixagent/PHASE2_BLOCKERS_INVESTIGATION.md</code>
-OQ1 — that doc line is pending a correction commit in the release-gate
-sweep.) NOTE: latest llama.cpp <code>-fa</code> takes a value
-(<code>-fa on</code>).</p>
-</blockquote>
-<h2 id="live-state-anchors-facts-11.4.6">Live-state anchors (facts,
-§11.4.6)</h2>
-<table>
-<colgroup>
-<col style="width: 53%" />
-<col style="width: 46%" />
-</colgroup>
-<thead>
-<tr>
-<th>Anchor</th>
-<th>Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Constitution HEAD followed</td>
-<td><code>5074d606</code> (through §11.4.183 — maximal multi-agent +
-full-constitution + zero-bluff, cascaded to CLAUDE/AGENTS/QWEN/GEMINI;
-pointer bumped commit 0a469883)</td>
-</tr>
-<tr>
-<td>Host</td>
-<td>ALT Workstation 11.1; RTX 5090 32 GB; driver 570.169; CUDA 12.8;
-podman 5.7.1 rootless; 64 cores / 251 GiB</td>
-</tr>
-<tr>
-<td>Canonical branch (§11.4.181)</td>
-<td><code>feature/helixllm-full-extension</code> — ACTIVE (no upstream
-tracking configured yet)</td>
-</tr>
-<tr>
-<td>Router image (built+proven)</td>
-<td><code>localhost/helixllm/llamacpp-router:cuda12.8-sm120</code> —
-latest llama.cpp, sm_120, OpenSSL/curl (<code>-hf</code> HTTPS proven),
-ships <code>rpc-server</code></td>
-</tr>
-<tr>
-<td>Release prefix (§11.4.151)</td>
-<td><code>helix-code</code> (operator decision 2026-07-07;
-<code>.env</code> <code>HELIX_RELEASE_PREFIX=helix-code</code>; form
-<code>helix-code-1.0.0-dev-0.0.1</code>, supersedes old
-<code>helixcode-vN</code>)</td>
-</tr>
-<tr>
-<td>Shared-host caution (§11.4.174)</td>
-<td>helix_agent checkout carries a CONCURRENT QA/dep track’s uncommitted
-go.mod/go.sum + <code>.qa_bak</code> — NOT ours; do not sweep on
-pointer-bump</td>
-</tr>
-</tbody>
-</table>
-<h2 id="done-so-far-this-session-real-evidence-backed-commits">Done so
-far this session (real, evidence-backed commits)</h2>
-<ul>
-<li>helix_llm <code>13d2d27</code> Containerfile: hard-fail
-<code>ggml-rpc-server</code> copy (§11.4.122) + OpenSSL/curl — re-review
-<strong>GO</strong>; <code>d8b3fa2</code> phase-1 QA evidence
-(<code>-hf</code> 469MB HTTPS download + live coder e2e);
-<code>3f85e3d5</code> OPERATOR_GUIDE.</li>
-<li>claude_toolkit <code>ef77b19</code> loud-fail resolution +
-discriminating test; <code>9d12347</code> C1 regression guard (37/0,
-§1.1 mutation-proven) — <strong>REVIEW-3 CLEAN</strong>.</li>
-<li>llms_verifier <code>09f9533c</code> C4 · <code>28e6625a</code> C5 ·
-<code>ad18e91f</code> C3 · <code>d1f04e5c</code> advisories (detector
-gate + sentinel oracle) — <strong>chain + advisories complete, combined
-review GO</strong>.</li>
-<li>helix_llm <code>a12df57c</code> <strong>VRAM broker CORE</strong>
-(Budget/admission/single-owner, review GO — unblocks GPU tiers).</li>
-<li>helix_agent <code>17f08ba9</code> Phase-2 live tests (provider e2e +
-redis) — pointer NOT yet bumped (§11.4.174).</li>
-<li>helix_code <code>cf26b813</code> embeddings design ·
-<code>9bf4c3da</code> Phase-2 stack design · <code>da0fabae</code>
-blockers investigation · <code>5223d10d</code> C3 handoff ·
-<code>278df582</code> Phase-2 e2e evidence · <code>c9ac8683</code>
-translation design · <code>1e6f3347</code> provider-coverage design ·
-<code>55bdf9b6</code> <strong>embeddings IMPL proven</strong> (bge-small
-TEI, cos margin 0.3578).</li>
-</ul>
-<h2 id="next-actions-in-order">Next actions (in order)</h2>
+<h2 id="open-security-incident-const-042">🚨 OPEN SECURITY INCIDENT
+(CONST-042)</h2>
+<p>Leaked Google <code>GEMINI_API_KEY</code> was committed+pushed
+(<code>f994c0c2</code>, in
+<code>docs/qa/phase1_providers_20260708T141500Z/live_probe.md</code>).
+<strong>Redacted at HEAD (<code>41372967</code>)</strong> + post-mortem
+(<code>docs/qa/SECURITY_INCIDENT_gemini_key_leak_20260711.md</code>).
+Value remains in pushed history (force-push forbidden §11.4.113) →
+<strong>OPERATOR MUST ROTATE the key in Google Cloud</strong> — that is
+the only complete remediation. Permanent secret-scan guard landing in
+the security-fix stream.</p>
+<h2 id="phase-r41-convergence-tail-extendfinalizehold-plan-docssuperpowersplans2026-07-11-helixllm-extend-finalize-hold.md">Phase
+— R41 convergence tail (Extend→Finalize→Hold, plan
+<code>docs/superpowers/plans/2026-07-11-helixllm-extend-finalize-hold.md</code>)</h2>
+<p>Extend + finalize streams landed (all real-evidence, reviewed):
+§11.4.182 alias-label enforcement (hook+labeler+5-carrier+wired guard,
+reviewed GO); doc-integrity; governance sweep; fresh provider
+live-proofs; harness false-FAIL fix; QA-hygiene; provider §11.4.99
+currency; §11.4.124 dead-code disposition; carrier-PDF regen; security
+redaction. IN FLIGHT: security-fix (I-1/I-2 §11.4.120 + secret-scan
+guard), catalogue-providers (HF+together), labeler env-var
+follow-up.</p>
+<h2 id="next-actions">Next Actions</h2>
 <ol type="1">
-<li>Land the combined <strong>C4+C5+C3 review</strong> to GO (adjudicate
-<code>detector.go:61</code> no-probe self-cert).</li>
-<li>Correct <code>PHASE2_BLOCKERS_INVESTIGATION.md</code> OQ1 verdict →
-base <code>http://localhost:18434</code>.</li>
-<li>Release-prep: bump main-repo submodule pointers (helix_llm,
-claude_toolkit, llms_verifier; helix_agent carefully per §11.4.174) →
-§11.4.40 full-suite pre-tag sweep → prefixed tag (§11.4.151) → publish
-via merge-onto-latest (§11.4.113, NO force-push §2.1
-multi-upstream).</li>
-<li>Post-release follow-ups (tracked): P-OQ2-A wire
-<code>cognee_memory_repository</code> + P-OQ2-B re-verify cognee 1.2.2
-bug; <code>detector.go:61</code> no-probe self-cert; VRAM broker IMPL
-(design 5102607 done) to unlock GPU vision/image/video; Phase-3 CPU
-embeddings + translation NMT impl (designs done).</li>
+<li>Drain in-flight streams (security-fix, catalogue-providers,
+labeler-envvar) + §11.4.142 review each.</li>
+<li>WHOLE-BRANCH FINAL REVIEW (SDD end-gate, opus) over
+<code>dfa6a2c2..HEAD</code> (10 commits).</li>
+<li>Constitution submodule gitlink bump (§11.4.98) — after
+§11.4.182+labeler settle.</li>
+<li>Operator-gated: rotate key · coder-boot · constitution push ·
+merge-to-main+prefixed tag (§11.4.151/§11.4.167) · API keys · cerebras
+removal (§11.4.122) · wire replicate provider (§11.4.124) · §11.4.185
+manual QA final confirmation.</li>
 </ol>
-<h2 id="binding-constraints-do-not-violate">Binding constraints (do not
-violate)</h2>
-<p>Anti-bluff §11.4 (real captured proof, no metadata PASS) ·
-runtime-signature = done §11.4.108 · no-force-push merge-onto-latest
-§11.4.113 · rootless podman via containers submodule §11.4.76/§11.4.161
-· no CI §11.4.156 · no silent removal §11.4.122 /
-investigate-before-remove §11.4.124 · deep multi-angle research per
-change §11.4.150 · independent review to GO
-§11.4.125/§11.4.142/§11.4.134 · one canonical branch §11.4.181 ·
-<code>(T&lt;N&gt;/&lt;branch&gt;)</code> labels §11.4.182 · shared-host
-ownership §11.4.174.</p>
+<h2 id="binding-constraints">Binding Constraints</h2>
+<ul>
+<li>ANTI-BLUFF §11.4: every PASS = captured physical evidence; no
+metadata-only, no self-certification.</li>
+<li>NO FORCE PUSH §11.4.113: merge-onto-latest-main, ff-only. Outward
+push operator-gated (github+gitlab; GitFlic/GitVerse not
+configured).</li>
+<li>HOST SAFETY §12 / §12.12 RLIMIT_NPROC. Every guard §1.1
+paired-mutation-proven.</li>
+<li>LABELS §11.4.182: every agent/subagent/reference
+<code>(T1/feature/helixllm-full-extension - claude3)</code> (alias from
+CLAUDE_CONFIG_DIR=.claude-claude3); wired guard enforces it.</li>
+</ul>
+<h2 id="key-paths">Key paths</h2>
+<ul>
+<li>Ledger: <code>.superpowers/sdd/progress.md</code> (R41 = current) ·
+Plan:
+<code>docs/superpowers/plans/2026-07-11-helixllm-extend-finalize-hold.md</code></li>
+<li>R41 stream reports: <code>scratchpad/r41_*.md</code> · Security
+post-mortem:
+<code>docs/qa/SECURITY_INCIDENT_gemini_key_leak_20260711.md</code></li>
+</ul>
 </body>
 </html>
