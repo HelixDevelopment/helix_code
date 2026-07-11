@@ -22,6 +22,18 @@ covenant (§11.4.45 / §11.4.53 / §11.4.56 / §11.4.57 / CONST-063 / CONST-064)
 > real LLM and that recording has been analyzed. No false "yes". An un-recorded
 > or un-analyzed feature is honestly `📹 no` / `📹 pending`, never bluffed green.
 
+> **Related feature ledger (§11.4.153, added 2026-07-11):** the HelixLLM
+> full-extension programme (Lane-A/Lane-B serving, VRAM broker, vision/image/
+> video-gen, RAG, dual-wire protocol, MCP gateway, A2A, HelixQA extension
+> banks — 43 features) has its own detailed, more granular per-feature ledger
+> at `docs/features/helixllm-status.md` (+ `helixllm-status_summary.md`,
+> four-format `.html`/`.pdf`/`.docx` exports). This document (`Status.md`) is
+> the whole-platform inventory across all services/apps/submodules; the
+> `helixllm-status.md` ledger is narrower in scope (one submodule's
+> extension programme) but deeper in per-feature evidence-path detail. See
+> the `helix_llm` row in [Owned submodules](#) below for this document's
+> summary-level entry and its cross-reference note.
+
 ## Table of contents
 
 - [Status dimensions (legend)](#status-dimensions-legend)
@@ -910,6 +922,17 @@ Assessed from each submodule's `README.md`, exported package surface, and
 | submodule | toon | Token-Oriented Object Notation encode/decode | stub | no | no | unit | no | no | no | native | gap |
 
 55 features across 50 submodules.
+
+> **HelixLLM extension cross-reference (added 2026-07-11, §11.4.153/§11.4.91):**
+> the `helix_llm` row above (line ~885, summary-level, marked `gap` as of the
+> 2026-06-22 inventory pass) is now additionally covered by a detailed, more
+> current §11.4.153 per-feature ledger — see `docs/features/helixllm-status.md`
+> (43 rows, 34 PASS as of 2026-07-11) for the HelixLLM full-extension
+> programme's serving/capabilities/protocols/test-infra coverage in depth.
+> This row is left unchanged here per §11.4.122 (no destructive rewrite of an
+> existing row); `helixllm-status.md` is the authoritative, current source for
+> HelixLLM-extension-specific status, while this row remains this document's
+> summary-level entry pending a future full-ledger reconciliation pass.
 
 ### Coverage-depth honesty
 

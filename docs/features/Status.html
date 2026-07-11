@@ -2,174 +2,49 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Status</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      white-space: pre-wrap;
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-  </style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
 </head>
 <body>
 <header id="title-block-header">
@@ -220,6 +95,22 @@ it working end-to-end with a strong real LLM and that recording has been
 analyzed. No false “yes”. An un-recorded or un-analyzed feature is
 honestly <code>📹 no</code> / <code>📹 pending</code>, never bluffed
 green.</p>
+</blockquote>
+<blockquote>
+<p><strong>Related feature ledger (§11.4.153, added
+2026-07-11):</strong> the HelixLLM full-extension programme
+(Lane-A/Lane-B serving, VRAM broker, vision/image/ video-gen, RAG,
+dual-wire protocol, MCP gateway, A2A, HelixQA extension banks — 43
+features) has its own detailed, more granular per-feature ledger at
+<code>docs/features/helixllm-status.md</code> (+
+<code>helixllm-status_summary.md</code>, four-format
+<code>.html</code>/<code>.pdf</code>/<code>.docx</code> exports). This
+document (<code>Status.md</code>) is the whole-platform inventory across
+all services/apps/submodules; the <code>helixllm-status.md</code> ledger
+is narrower in scope (one submodule’s extension programme) but deeper in
+per-feature evidence-path detail. See the <code>helix_llm</code> row in
+<a href="#">Owned submodules</a> below for this document’s summary-level
+entry and its cross-reference note.</p>
 </blockquote>
 <h2 id="table-of-contents">Table of contents</h2>
 <ul>
@@ -355,8 +246,7 @@ one-shot claim.</p>
 </tr>
 </tbody>
 </table>
-<h2
-id="sources-verified-2026-06-22-helix_codeinternal-helix_codecmd-helix_codeapplications-submodules-cli_agents">Sources
+<h2 id="sources-verified-2026-06-22-helix_codeinternal-helix_codecmd-helix_codeapplications-submodules-cli_agents">Sources
 verified 2026-06-22: helix_code/internal/* , helix_code/cmd/* ,
 helix_code/applications/* , submodules/* , cli_agents/*</h2>
 <p>This document is REPO-STATE-DERIVED (per §11.4.99 the “sources” are
@@ -1535,8 +1425,7 @@ gate (§11.4.86) mechanically fails if any cited path goes missing.</li>
 <p><strong>Feature count: 67 rows</strong> (CLI REPL 14, CLI subcommand
 groups 7, server boot 1, web frontend 4, HTTP API groups 18, TUI 7,
 desktop 6, mobile 8, other cmd tools 11 + security_scan 1).</p>
-<h2
-id="sources-verified-2026-06-22-helix_codecmd-helix_codeapplications-helix_codeweb-helix_codetestsintegration_e2e_test.go">Sources
+<h2 id="sources-verified-2026-06-22-helix_codecmd-helix_codeapplications-helix_codeweb-helix_codetestsintegration_e2e_test.go">Sources
 verified 2026-06-22: helix_code/cmd/* , helix_code/applications/* ,
 helix_code/web/* , helix_code/tests/integration/*_e2e_test.go</h2>
 <p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
@@ -2673,8 +2562,7 @@ deepened)</h3>
 </tr>
 </tbody>
 </table>
-<h3
-id="owned-submodules-round-1-umbrella-rows-deepened-principal-packages">Owned
+<h3 id="owned-submodules-round-1-umbrella-rows-deepened-principal-packages">Owned
 submodules (round-1 umbrella rows → deepened principal packages)</h3>
 <table>
 <colgroup>
@@ -3642,8 +3530,7 @@ row is a candidate for a recorded scenario; none is video-confirmed (📹
 internal across 12 packages + 72 submodule across helix_agent 19,
 security 11, helix_specifier 10, helix_qa 14, panoptic 10, distributed
 across the wiring model).</p>
-<h2
-id="sources-verified-2026-06-22-helix_codeinternal-submoduleshelix_agentsecurityhelixspecifierhelix_qapanoptic">Sources
+<h2 id="sources-verified-2026-06-22-helix_codeinternal-submoduleshelix_agentsecurityhelixspecifierhelix_qapanoptic">Sources
 verified 2026-06-22: helix_code/internal/* ,
 submodules/{helix_agent,security,helixspecifier,helix_qa,panoptic}/</h2>
 <p>REPO-STATE-DERIVED (per §11.4.99 the sources are the cross-referenced
@@ -7784,8 +7671,7 @@ unimplemented, and HXC-031 (codex multimodal + cline computer-use) is a
 DRAFT plan with no code. No ported feature has an analyzed recording, so
 none can be <code>confirmed</code>; all landed ports are honestly
 <code>working-untaped</code> pending video V&amp;V.</p>
-<h2
-id="sources-verified-2026-06-22-cli_agents-helix_codeinternal-port-doc.go-origin-headers-docscontinuation.md-p2-fxx-ports-ledger-docsplanspower_features_porting_plan.md-docsplanshxc-031-codex-cline-port.md">Sources
+<h2 id="sources-verified-2026-06-22-cli_agents-helix_codeinternal-port-doc.go-origin-headers-docscontinuation.md-p2-fxx-ports-ledger-docsplanspower_features_porting_plan.md-docsplanshxc-031-codex-cline-port.md">Sources
 verified 2026-06-22: cli_agents/* , helix_code/internal/* (port doc.go
 origin headers) , docs/CONTINUATION.md (P2-Fxx ports ledger) ,
 docs/plans/POWER_FEATURES_PORTING_PLAN.md ,
@@ -8918,6 +8804,21 @@ i18n, types)</td>
 </tbody>
 </table>
 <p>55 features across 50 submodules.</p>
+<blockquote>
+<p><strong>HelixLLM extension cross-reference (added 2026-07-11,
+§11.4.153/§11.4.91):</strong> the <code>helix_llm</code> row above (line
+~885, summary-level, marked <code>gap</code> as of the 2026-06-22
+inventory pass) is now additionally covered by a detailed, more current
+§11.4.153 per-feature ledger — see
+<code>docs/features/helixllm-status.md</code> (43 rows, 34 PASS as of
+2026-07-11) for the HelixLLM full-extension programme’s
+serving/capabilities/protocols/test-infra coverage in depth. This row is
+left unchanged here per §11.4.122 (no destructive rewrite of an existing
+row); <code>helixllm-status.md</code> is the authoritative, current
+source for HelixLLM-extension-specific status, while this row remains
+this document’s summary-level entry pending a future full-ledger
+reconciliation pass.</p>
+</blockquote>
 <h3 id="coverage-depth-honesty">Coverage-depth honesty</h3>
 <ul>
 <li><strong>Shallow-inventoried (principal features only; deeper
@@ -8952,8 +8853,7 @@ rate_limiter, helix_llm, observability-N/A).</li>
 included only as the capabilities HelixCode consumes, marked
 QA/infra).</li>
 </ul>
-<h2
-id="sources-verified-2026-06-22-submodules-helix_codego.mod-submoduleshelix_agentgo.mod-each-submodules-readme.md-_test.go">Sources
+<h2 id="sources-verified-2026-06-22-submodules-helix_codego.mod-submoduleshelix_agentgo.mod-each-submodules-readme.md-_test.go">Sources
 verified 2026-06-22: submodules/* , helix_code/go.mod ,
 submodules/helix_agent/go.mod , each submodule’s README.md +
 *_test.go</h2>
