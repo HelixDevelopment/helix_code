@@ -1,0 +1,8 @@
+=== RUN   TestA2AStrictSDKWireShape
+    wireshape_test.go:122: card.URL="http://localhost:18443" card.PreferredTransport="JSONRPC"
+    wireshape_test.go:153: cardClient.SendMessage (literal card.URL="http://localhost:18443" dispatch) FAILED: unexpected HTTP status: 404 Not Found
+        This is exactly the failure class the fix (AgentCard.url base path + "kind":"task" discriminator) closes -- if this test is run against a PRE-FIX a2a-server binary, this failure IS the expected RED-baseline evidence (§11.4.115).
+--- FAIL: TestA2AStrictSDKWireShape (0.00s)
+FAIL
+FAIL	helixcode.a2a_wireshape_fix.harness	0.008s
+FAIL

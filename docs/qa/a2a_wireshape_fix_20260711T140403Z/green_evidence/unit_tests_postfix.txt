@@ -1,0 +1,12 @@
+=== RUN   TestAgentCardHasRequiredFields
+--- PASS: TestAgentCardHasRequiredFields (0.00s)
+=== RUN   TestMessageSendHappyPath
+--- PASS: TestMessageSendHappyPath (0.00s)
+=== RUN   TestMessageSendRejectsMissingAuth
+--- PASS: TestMessageSendRejectsMissingAuth (0.00s)
+=== RUN   TestDispatchRejectsMalformedRequest
+--- PASS: TestDispatchRejectsMalformedRequest (0.00s)
+=== RUN   TestTasksGetRoundTrip
+--- PASS: TestTasksGetRoundTrip (0.00s)
+PASS
+ok  	github.com/HelixDevelopment/HelixLLM/internal/a2a	0.008s

@@ -1,0 +1,6 @@
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sat, 11 Jul 2026 14:07:25 GMT
+Content-Length: 467
+
+{"jsonrpc":"2.0","id":1,"result":{"kind":"task","id":"6fc4ed90-8974-4ef3-96ca-622645942114","status":{"state":"completed","timestamp":"2026-07-11T14:07:25.371432844Z"},"history":[{"role":"user","parts":[{"kind":"text","text":"Reply with ONLY this exact token and nothing else: NONCE_rawcurlcheck"}]},{"role":"agent","parts":[{"kind":"text","text":"NONCE_rawcurlcheck"}]}],"artifacts":[{"name":"generated-code","parts":[{"kind":"text","text":"NONCE_rawcurlcheck"}]}]}}

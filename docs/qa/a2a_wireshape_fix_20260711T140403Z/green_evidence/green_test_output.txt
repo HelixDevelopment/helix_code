@@ -1,0 +1,7 @@
+=== RUN   TestA2AStrictSDKWireShape
+    wireshape_test.go:122: card.URL="http://localhost:18443/a2a" card.PreferredTransport="JSONRPC"
+    wireshape_test.go:172: cardClient.SendMessage strict-decoded *a2a.Task id=fc982510-1387-4ec5-a044-bff87f69736a state=completed nonce_echoed=true
+    wireshape_test.go:186: cardClient.GetTask strict-decoded id=fc982510-1387-4ec5-a044-bff87f69736a state=completed nonce_present=true
+--- PASS: TestA2AStrictSDKWireShape (0.30s)
+PASS
+ok  	helixcode.a2a_wireshape_fix.harness	0.303s
