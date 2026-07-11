@@ -1,0 +1,40 @@
+# Phase-3 CPU Whisper STT service — faster-whisper (CTranslate2), CPU-only.
+# Booted THROUGH the containers submodule compose.Orchestrator (§11.4.76),
+# rootless podman (§11.4.161). NO GPU device — the GPU is reserved for the
+# resident helixllm-coder fleet-model container (:18434).
+#
+# The image is BUILT from the HelixLLM submodule's own container definition
+# (§11.4.74 code lives in submodules/helix_llm, not duplicated into evidence).
+# The build context path below is a directory-topology reference (same class
+# as a go.mod `replace` directive), not a CONST-045/046 literal-content value;
+# every runtime VALUE (host port, model id, mem limit, cpu count, no-speech
+# threshold) is injected from the environment by run_proof.sh.
+services:
+  helixllm-stt:
+    build:
+      context: ../../../../../submodules/helix_llm/container
+      dockerfile: Containerfile.whisper
+    image: localhost/helixllm-stt:cpu
+    environment:
+      - WHISPER_MODEL=${WHISPER_MODEL}
+      - WHISPER_DEVICE=cpu
+      - WHISPER_COMPUTE_TYPE=${WHISPER_COMPUTE_TYPE}
+      - WHISPER_NO_SPEECH_THRESHOLD=${WHISPER_NO_SPEECH_THRESHOLD}
+    ports:
+      - "${STT_HOST_PORT}:8000"
+    volumes:
+      # Persistent HF-model cache — an EXTERNAL named volume so model weights
+      # are fetched from HF once and reused across runs (§11.4.77 re-obtain:
+      # the volume is re-populated automatically on next boot if dropped).
+      # The container/pod is still torn down each run (single-owner cleanup
+      # §11.4.119); only this cache survives.
+      - helixllm-whisper-cache:/models
+    # §12.3 container hygiene — bounded so the STT service never starves the
+    # developer host (§12.6). Config-injected, captured as evidence.
+    mem_limit: "${STT_MEM_LIMIT}"
+    cpus: ${STT_CPUS}
+    restart: "no"
+volumes:
+  helixllm-whisper-cache:
+    external: true
+    name: helixllm-whisper-cache

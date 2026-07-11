@@ -1,0 +1,7 @@
+# Build artifact (§11.4.30 / CONST-053) — regenerate via `go build` in run_proof.sh.
+*.bin
+go.sum
+# Defensive: an early buggy path-resolution attempt once misbuilt the harness
+# binary under this name here (root-caused + fixed; ocr-shim belongs ONLY in
+# submodules/helix_llm/services/ocr/, never here).
+ocr-shim

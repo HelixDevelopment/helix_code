@@ -1,0 +1,9 @@
+### pre-flight (§11.4.119 single-owner, coder + sibling capabilities untouched)
+date_utc=2026-07-11T13:42:21Z
+uname_m=x86_64  podman=podman version 5.7.1
+coder container (MUST remain running, untouched):
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 47 minutes
+sibling Phase-3 containers currently present (must remain untouched, informational):
+  (none currently present)
+target host port 18438 listeners (expect none):
+  (free)

@@ -1,0 +1,12 @@
+### lane decision / substitution (§11.4.6)
+DESIGN PRIMARY  : NLLB-200-distilled-600M CT2 int8 behind a custom
+                  LibreTranslate-shaped /translate FastAPI shim (TRANSLATION_PROVIDER.md §1.2).
+LANE PROVEN HERE: stock LibreTranslate (Argos/OPUS-MT on CTranslate2) — the design's
+                  DOCUMENTED FALLBACK lane (TRANSLATION_PROVIDER.md §1.2/§3.1): identical
+                  LibreTranslate /translate contract, same CTranslate2 engine, but a single
+                  pre-built CPU image (no custom shim + no CT2 model-conversion step).
+REASON          : reliable zero-new-shim CPU boot for this proof. The NLLB-CT2 primary needs
+                  a bespoke shim image build (python+ctranslate2+sentencepiece+FastAPI+lang-detect)
+                  plus an offline HF->CT2 int8 conversion — deferred as its own work item.
+HONEST          : this is a REAL NMT service (real Argos/CTranslate2 translation), the anti-gaming
+                  triple below proves genuine translation, NOT an identity/passthrough bluff.

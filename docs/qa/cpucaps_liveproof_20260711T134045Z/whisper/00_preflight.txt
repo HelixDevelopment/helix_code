@@ -1,0 +1,11 @@
+### pre-flight (§11.4.119 single-owner, coder + siblings untouched)
+date_utc=2026-07-11T13:41:44Z
+uname_m=x86_64  podman=podman version 5.7.1  espeak-ng=eSpeak NG text-to-speech: 1.52.0  Data at: /usr/share/espeak-ng-data  ffmpeg=ffmpeg version 8.1.2-alt1 Copyright (c) 2000-2026 the FFmpeg developers
+coder container (MUST remain running, untouched):
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 46 minutes
+sibling capability containers (embeddings/translation — MUST NOT be touched, expect none currently running):
+  (none running)
+target host port 18437 listeners (expect none):
+  (free)
+helixllm-stt image (expect absent on first run — built fresh via --build):
+localhost/helixllm-stt:cpu 1.01 GB

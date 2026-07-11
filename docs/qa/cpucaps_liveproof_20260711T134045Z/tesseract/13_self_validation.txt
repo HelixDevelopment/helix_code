@@ -1,0 +1,12 @@
+### analyzer self-validation (§11.4.107(10)) golden-good = real captured response (text="HELIX OCR 2026 quick brown fox")
+[GOLDEN-GOOD(expect PASS)] PASS mean_conf=95.99 found=[HELIX OCR 2026 QUICK BROWN FOX] missing=[] full_text="HELIX OCR 2026 quick brown fox"
+[GOLDEN-BAD-BLANK(expect FAIL)] FAIL mean_conf=0.00 found=[] missing=[HELIX OCR 2026 QUICK BROWN FOX] full_text=""
+    reason: missing expected token(s): HELIX,OCR,2026,QUICK,BROWN,FOX (normalized text="")
+    reason: mean_conf 0.00 < required floor 60.00
+[GOLDEN-BAD-NOISE(expect FAIL)] FAIL mean_conf=13.82 found=[] missing=[HELIX OCR 2026 QUICK BROWN FOX] full_text="Bi a a8 Oran Stes ponies pia ni wees eens RMT SHED aa Un tats koe MOET Ra NE nes aneeart Ee att enemy a es es ae oe ea tae 8 Ee an te as ee ees Do oe oo oe Oo ee es ee ae pe ee oe ee en ee ea a oo"
+    reason: missing expected token(s): HELIX,OCR,2026,QUICK,BROWN,FOX (normalized text="Bi a a8 Oran Stes ponies pia ni wees eens RMT SHED aa Un tats koe MOET Ra NE nes aneeart Ee att enemy a es es ae oe ea tae 8 Ee an te as ee ees Do oe oo oe Oo ee es ee ae pe ee oe ee en ee ea a oo")
+    reason: mean_conf 13.82 < required floor 60.00
+[GOLDEN-BAD-WRONGTEXT(expect FAIL)] FAIL mean_conf=95.98 found=[] missing=[HELIX OCR 2026 QUICK BROWN FOX] full_text="BANANA SPACESHIP GALAXY EIGHT"
+    reason: missing expected token(s): HELIX,OCR,2026,QUICK,BROWN,FOX (normalized text="BANANA SPACESHIP GALAXY EIGHT")
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit=0

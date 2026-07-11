@@ -1,0 +1,1 @@
+OCR-OK: status=200 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/tesseract/bad_response_noise.json (5378 bytes)

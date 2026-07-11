@@ -1,0 +1,4 @@
+### GREEN runtime signature (§11.4.108) fixture=helloworld
+[RUNTIME-SIGNATURE(helloworld)] PASS transcript="Hello World 1, 2, 3!" normalized="hello world 1 2 3" missing=[]
+signature_exit=0
+GREEN-OK(helloworld)

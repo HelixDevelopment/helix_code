@@ -1,0 +1,6 @@
+[RUNTIME-SIGNATURE] FAIL mean_conf=0.00 found=[] missing=[HELIX OCR 2026 QUICK BROWN FOX] full_text=""
+    reason: missing expected token(s): HELIX,OCR,2026,QUICK,BROWN,FOX (normalized text="")
+    reason: mean_conf 0.00 < required floor 60.00
+RED_MODE=1 — expect the analyzer to FAIL (exit != 0) = defect-shape reproduced
+analyzer_exit=1
+RED-OK: empty stub correctly FAILED the runtime signature

@@ -1,0 +1,1 @@
+RENDER-OK: mode=label wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/tesseract/fixture_wrong.png (4694 bytes)

@@ -1,0 +1,12 @@
+### RED baseline (§11.4.115): analyzer vs canned stub responses (fixture 0 = fox)
+RED_MODE=1 -- expect the analyzer to FAIL (exit 1) = defect reproduced
+-- stub: empty text --
+[RUNTIME-SIGNATURE(fox)] FAIL transcript="" normalized="" missing=[quick brown fox lazy dog]
+    reason: empty/blank transcript
+    reason: missing expected words: [quick brown fox lazy dog]
+analyzer_exit=1
+-- stub: canned wrong text --
+[RUNTIME-SIGNATURE(fox)] FAIL transcript="completely unrelated filler content about nothing relevant" normalized="completely unrelated filler content about nothing relevant" missing=[quick brown fox lazy dog]
+    reason: missing expected words: [quick brown fox lazy dog]
+analyzer_exit=1
+RED-OK: both stubs correctly FAILED the runtime signature

@@ -1,0 +1,8 @@
+### RED baseline (§11.4.115): analyzer vs the identity-passthrough 'warming' bluff
+RED_MODE=1 — expect the analyzer to FAIL (exit 1) = defect reproduced
+[RUNTIME-SIGNATURE(en->fr)] FAIL notIdentity=false targetMatch=false fwdChrF=0.2242(floor 0.30) backChrF=1.0000(margin 0.40)
+    reason: identity/passthrough: forward "The book is on the table." == source "The book is on the table." (or empty)
+    reason: detected language "en" != requested target "fr"
+    reason: forward chrF 0.2242 < floor 0.3000 (forward not adequate vs golden)
+analyzer_exit=1
+RED-OK: identity passthrough correctly FAILED the runtime signature

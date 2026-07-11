@@ -1,0 +1,2 @@
+OCR-OK: status=200 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/tesseract/green_response_good1.json (716 bytes)
+OCR-OK: status=200 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/tesseract/green_response_good1_rep.json (716 bytes)

@@ -1,0 +1,3 @@
+### determinism (fox x2)
+[DETERMINISM] PASS: normalized transcript identical across two identical requests: "the quick brown fox dumps over the lazy dog"
+determinism_exit=0

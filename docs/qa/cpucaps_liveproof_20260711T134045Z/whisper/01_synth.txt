@@ -1,0 +1,9 @@
+### synthesize deterministic KNOWN audio (espeak-ng TTS + ffmpeg silence/noise)
+SYNTH-OK: fixture=fox text="the quick brown fox jumps over the lazy dog" -> /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/whisper/harness/fox.wav
+SYNTH-OK: fixture=helloworld text="hello world one two three" -> /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/whisper/harness/helloworld.wav
+SYNTH-SILENCE-OK: 3s digital silence -> /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/whisper/harness/silence.wav
+SYNTH-NOISE-OK: 3s white noise -> /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/whisper/harness/noise.wav
+-rw-r--r-- 1 milos milos 145004 Jul 11 18:41 /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/whisper/harness/fox.wav
+-rw-r--r-- 1 milos milos  89708 Jul 11 18:41 /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/whisper/harness/helloworld.wav
+-rw-r--r-- 1 milos milos  96078 Jul 11 18:41 /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/whisper/harness/noise.wav
+-rw-r--r-- 1 milos milos  96078 Jul 11 18:41 /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/cpucaps_liveproof_20260711T134045Z/whisper/harness/silence.wav

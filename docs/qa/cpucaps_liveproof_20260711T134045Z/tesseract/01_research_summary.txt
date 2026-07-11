@@ -1,0 +1,5 @@
+### deep multi-angle research (§11.4.150) — see RESULTS.md for full citations
+angle 1: Debian bookworm tesseract-ocr package version = 5.3.0-2 (packages.debian.org, verified 2026-07-07)
+angle 2: tessdoc Command-Line-Usage — TSV column layout + --oem/--psm syntax (tesseract-ocr.github.io, verified 2026-07-07)
+angle 3: tesseract TSV conf column semantics (0-100 word-level, -1 layout rows) — tomrochette.com / GitHub issue #2746 (verified 2026-07-07)
+angle 4: prior local empirical proof docs/qa/p3_tesseract_ocr/README.md — same-class rendered-label OCR observed conf 94-96 (2026-07-xx, this repo)
