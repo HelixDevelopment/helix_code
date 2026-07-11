@@ -120,7 +120,14 @@ helix_code/p1f*_challenge
 helix_code/security-scan
 helix_code/testhelper
 helix_code/.helixcode/
-.claude/
+# .claude/ personal + local state is ignored, but the PROJECT-shared
+# settings.json (§11.4.109 PreToolUse hook wiring, §11.4.182 remediation
+# 2026-07-11) MUST be tracked so the guard hook applies to every clone/
+# contributor, not just a local working copy. `.claude/*` (not the bare
+# `.claude/` directory pattern) is required so the negation below can work —
+# git will not descend into a directory excluded via a bare `dir/` pattern.
+.claude/*
+!.claude/settings.json
 
 # P1.5-WP5: .env API-key dedup backups
 .env.backup_p1-5
