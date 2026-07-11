@@ -206,6 +206,72 @@ func TestHostedProvider_GetTypeDistinctAcrossCatalogue(t *testing.T) {
 	}
 }
 
+// TestHostedOpenAICompatibleCatalogue_HuggingFaceAndTogetherPresent is the
+// §11.4.124 catalogue-first regression guard for the huggingface + together
+// capability gap: both rows MUST be present with the §11.4.99 live-verified
+// (2026-07-11) CURRENT hosted-router base URLs — never the RETIRED hosts the
+// old bespoke clients (internal/llm/providers/huggingface,
+// internal/llm/providers/together) hardcode
+// (api-inference.huggingface.co/models/<model> for huggingface;
+// mistralai/Mixtral-8x22B-Instruct-v0.1 as together's default model, which is
+// no longer served). This is a §1.1 paired-mutation load-bearing test: delete
+// either row from HostedOpenAICompatibleCatalogue() (or point BaseURL back at
+// a retired host) and this test MUST fail.
+func TestHostedOpenAICompatibleCatalogue_HuggingFaceAndTogetherPresent(t *testing.T) {
+	want := map[string]string{
+		"huggingface": "https://router.huggingface.co/v1",
+		"together":    "https://api.together.ai/v1",
+	}
+	got := map[string]HostedOpenAICompatible{}
+	for _, h := range HostedOpenAICompatibleCatalogue() {
+		got[h.Name] = h
+	}
+
+	for name, wantBase := range want {
+		entry, ok := got[name]
+		if !ok {
+			t.Errorf("catalogue missing required row %q (§11.4.124 capability gap not closed)", name)
+			continue
+		}
+		if entry.BaseURL != wantBase {
+			t.Errorf("%s BaseURL = %q, want §11.4.99 live-verified %q", name, entry.BaseURL, wantBase)
+		}
+		// Both hosted routers already end in /v1 — the composition gotcha
+		// documented at the top of openai_compatible_catalogue.go requires
+		// explicit ModelEndpoint/ChatEndpoint so the composed URL is
+		// "<base>/models", never a doubled "/v1/v1/models".
+		if entry.ModelEndpoint != "/models" {
+			t.Errorf("%s ModelEndpoint = %q, want \"/models\"", name, entry.ModelEndpoint)
+		}
+		if entry.ChatEndpoint != "/chat/completions" {
+			t.Errorf("%s ChatEndpoint = %q, want \"/chat/completions\"", name, entry.ChatEndpoint)
+		}
+		if len(entry.KeyEnvAliases) == 0 {
+			t.Errorf("%s has no KeyEnvAliases", name)
+		}
+	}
+
+	// Regression-guard the specific RETIRED endpoints this task closed: the
+	// composed models URL for huggingface must never resolve through the
+	// retired api-inference.huggingface.co host, and together's BaseURL must
+	// never regress to a URL that still names the retired
+	// mistralai/Mixtral-8x22B-Instruct-v0.1 model (that string has no business
+	// appearing anywhere in a catalogue row).
+	if hf, ok := got["huggingface"]; ok {
+		if strings.Contains(hf.BaseURL, "api-inference.huggingface.co") {
+			t.Errorf("huggingface BaseURL %q regressed to the retired api-inference.huggingface.co host", hf.BaseURL)
+		}
+		if !strings.Contains(hf.ComposedModelsURL(), "router.huggingface.co") {
+			t.Errorf("huggingface composed models URL %q does not use the router.huggingface.co host", hf.ComposedModelsURL())
+		}
+	}
+	if tg, ok := got["together"]; ok {
+		if strings.Contains(tg.BaseURL, "Mixtral-8x22B") {
+			t.Errorf("together BaseURL %q references the retired Mixtral-8x22B model", tg.BaseURL)
+		}
+	}
+}
+
 // TestOpenAICompatibleProvider_KnownLocalNamesUnchanged guards the GetType fix:
 // the known local backends MUST keep their existing distinct types.
 func TestOpenAICompatibleProvider_KnownLocalNamesUnchanged(t *testing.T) {

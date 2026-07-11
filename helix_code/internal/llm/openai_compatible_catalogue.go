@@ -221,6 +221,54 @@ func HostedOpenAICompatibleCatalogue() []HostedOpenAICompatible {
 			ModelEndpoint: "/models",
 			ChatEndpoint:  "/chat/completions",
 		},
+		// huggingface — Hugging Face's hosted "Inference Providers" router
+		// gateway. §11.4.99 live-verified 2026-07-11 against the official docs
+		// (https://huggingface.co/docs/inference-providers/en/index, "Alternative:
+		// OpenAI-Compatible Chat Completions Endpoint" section): the drop-in
+		// OpenAI-compatible base is https://router.huggingface.co/v1 with
+		// POST /v1/chat/completions and GET /v1/models (models list requires no
+		// auth — live-verified same date: GET .../v1/models returned HTTP 200
+		// with 120 models). §11.4.124 catalogue-first note: the pre-existing
+		// bespoke client at internal/llm/providers/huggingface hardcodes the
+		// RETIRED host api-inference.huggingface.co/models/<model> (superseded by
+		// this router); that bespoke client is intentionally left untouched — this
+		// catalogue row is the CONST-036 catalogue-first fix, not a resurrection of
+		// the bespoke client. Current example/default model per the official docs'
+		// own samples, independently cross-verified present in the live
+		// GET /v1/models response on the same date: openai/gpt-oss-120b.
+		{
+			Name:          "huggingface",
+			BaseURL:       "https://router.huggingface.co/v1",
+			KeyEnvAliases: []string{"HF_TOKEN", "HUGGINGFACE_TOKEN", "HUGGINGFACE_API_KEY", "ApiKey_HuggingFace"},
+			ModelEndpoint: "/models",
+			ChatEndpoint:  "/chat/completions",
+		},
+		// together — Together AI. §11.4.99 live-verified 2026-07-11 against the
+		// official docs (https://docs.together.ai/docs/openai-api-compatibility and
+		// https://docs.together.ai/reference/chat-completions-1): the canonical
+		// OpenAI-compatible base is https://api.together.ai/v1 with
+		// POST /v1/chat/completions and GET /v1/models. (The legacy
+		// api.together.xyz host used by the pre-existing bespoke
+		// internal/llm/providers/together client still resolves and responds —
+		// both hosts returned an identical HTTP 401 "Missing API key" for an
+		// unauthenticated GET /v1/models live-check on the same date — but
+		// api.together.ai is the documented canonical host going forward, so that
+		// is what this row uses.) §11.4.124 catalogue-first note: that bespoke
+		// client's hardcoded default model "mistralai/Mixtral-8x22B-Instruct-v0.1"
+		// is RETIRED from Together's current catalogue; the official docs' current
+		// example model is "Qwen/Qwen3.5-9B", independently cross-verified as a
+		// live, currently-served model via GET https://router.huggingface.co/v1/models
+		// (which lists "together" as one of Qwen/Qwen3.5-9B's serving providers) on
+		// the same date. The bespoke client is intentionally left untouched — this
+		// catalogue row is the CONST-036 catalogue-first fix, not a resurrection of
+		// the bespoke client.
+		{
+			Name:          "together",
+			BaseURL:       "https://api.together.ai/v1",
+			KeyEnvAliases: []string{"TOGETHER_API_KEY", "TOGETHERAI_API_KEY", "ApiKey_Together"},
+			ModelEndpoint: "/models",
+			ChatEndpoint:  "/chat/completions",
+		},
 	}
 }
 
