@@ -1,0 +1,8 @@
+--- oversized payload (1.93 MB) ---
+status=400
+err=None
+elapsed=0.38s
+resp_head={"error":{"code":400,"message":"request (450009 tokens) exceeds the available context size (3072 tokens), try increasing it","type":"exceed_context_size_error","n_prompt_tokens":450009,"n_ctx":3072}}
+
+--- post-oversized health check ---
+status=200 body={"status":"ok"} err=None

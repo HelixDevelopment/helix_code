@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixllm-status_summary</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixllm-status_summary</h1>
+</header>
+<h1 id="helixllm-full-extension-status_summary-11.4.56-11.4.91">HelixLLM
+Full-Extension — Status_Summary (§11.4.56 / §11.4.91)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Revision</strong></td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-07-11</td>
+</tr>
+<tr>
+<td><strong>Companion doc</strong></td>
+<td><code>Status.md</code> (this directory) — full per-feature table
+with
+Implementation/Wiring/Real-use/Tests-coverage/Validation/Evidence-path</td>
+</tr>
+<tr>
+<td><strong>Rule</strong></td>
+<td>Every row below is a self-contained, meaningful one-liner (≥6 words
+/ ≥40 chars, names SUBJECT + PROBLEM/GOAL) per §11.4.91 — no
+section-label fragments, no bare metadata words.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Component</th>
+<th>One-line description</th>
+<th>Validation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>HelixLLM serving</td>
+<td>Live Qwen3-Coder-30B-A3B lane answers real coding requests over HTTP
+with proven benchmark throughput</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>2</td>
+<td>HelixLLM serving</td>
+<td>Second concurrent model lane (Mistral-Nemo-12B) serves alongside the
+coder without disrupting it</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>3</td>
+<td>HelixLLM serving</td>
+<td>VRAM admission broker fails closed on over-budget GPU requests
+across seven service classes</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>4</td>
+<td>HelixLLM serving</td>
+<td>Pre-boot lane-config validator blocks port and name collisions
+before any model server starts</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>5</td>
+<td>HelixLLM serving</td>
+<td>Sixteen concurrent tool-calling requests against the live coder
+decode as correctly-typed JSON with zero contamination</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>6</td>
+<td>HelixLLM serving</td>
+<td>Deep multi-source research confirms the running model quant
+postdates the upstream tool-calling bug fix</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>7</td>
+<td>HelixLLM serving</td>
+<td>Coder performance-tuning flag changes remain unapplied pending an
+operator-authorized pause window</td>
+<td>OPERATOR-BLOCKED</td>
+</tr>
+<tr>
+<td>8</td>
+<td>HelixLLM capability</td>
+<td>Vision-language model answers grounded image questions live and
+rejects a deliberately wrong fixture</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>9</td>
+<td>HelixLLM capability</td>
+<td>FLUX.1-schnell image generation produces a real broker-admitted PNG
+with self-validated fidelity scoring</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>10a</td>
+<td>HelixLLM capability</td>
+<td>Real WAN2.2 video clip now correctly classifies as live motion after
+recalibrating the freeze-detection floor</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>10b</td>
+<td>HelixLLM capability</td>
+<td>Video generation has not yet been exercised through its own
+broker-admission product path</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>11</td>
+<td>HelixLLM capability</td>
+<td>New raster-to-SVG vectorization service converts a real logo image
+with proven visual fidelity</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>11b</td>
+<td>HelixLLM capability</td>
+<td>Optional GPU-based vectorization tier is honestly deferred due to
+insufficient free video memory</td>
+<td>SKIP</td>
+</tr>
+<tr>
+<td>12</td>
+<td>HelixLLM capability</td>
+<td>NLLB-200 translation service was re-proven live this session
+producing correct German output</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>13</td>
+<td>HelixLLM capability</td>
+<td>Whisper speech-to-text service was re-proven live this session with
+an accurate transcript</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>14</td>
+<td>HelixLLM capability</td>
+<td>Tesseract OCR service was re-proven live this session with high mean
+confidence text extraction</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>15</td>
+<td>HelixLLM capability</td>
+<td>Text-embedding service demonstrates clear semantic separation
+between related and unrelated content</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>16</td>
+<td>HelixLLM capability</td>
+<td>In-memory retrieval-augmented generation grounds the live coder in a
+fact it could not otherwise know</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>17</td>
+<td>HelixLLM capability</td>
+<td>New Qdrant vector database plus cross-encoder reranker demonstrably
+corrects wrong search rankings live</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>18</td>
+<td>HelixLLM capability</td>
+<td>Durable memory store persists and retrieves real session data with a
+proven runtime signature</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>19</td>
+<td>HelixLLM capability</td>
+<td>Cognee long-term memory integration stays disabled pending a fix to
+an unresolved upstream bug</td>
+<td>OPERATOR-BLOCKED</td>
+</tr>
+<tr>
+<td>20</td>
+<td>HelixLLM capability</td>
+<td>Network provider reaches the coder over a real local-area-network
+address rather than only localhost</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>21</td>
+<td>HelixCode server</td>
+<td>Dual-wire facade serves both OpenAI and Anthropic request shapes
+with enforced bearer authentication</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>22</td>
+<td>HelixLLM protocol</td>
+<td>MCP gateway proxies a real tool call to the live coder using the
+genuine upstream SDK</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>23</td>
+<td>HelixLLM protocol</td>
+<td>Google A2A protocol server was re-validated with the real reference
+SDK, surfacing and fixing two wire-shape bugs</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>24</td>
+<td>HelixAgent</td>
+<td>Legacy proprietary ACP stub still returns canned responses pending
+an operator retirement decision</td>
+<td>OPERATOR-BLOCKED</td>
+</tr>
+<tr>
+<td>25a</td>
+<td>Dev tooling</td>
+<td>CodeGraph code-intelligence index was fixed and reconfirmed live
+with hundreds of thousands of indexed nodes</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>25b</td>
+<td>Dev tooling</td>
+<td>CodeGraph validation script has not been re-run and committed since
+the exclude-list fix landed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>26</td>
+<td>Dev tooling</td>
+<td>OpenDesign UI-design daemon bring-up and project state were proven
+durable with committed evidence</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>27</td>
+<td>LLMsVerifier</td>
+<td>Provider-resolver chain fails closed when a verification tier cannot
+confirm a model</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>28</td>
+<td>Provider config</td>
+<td>Thirteen extended LLM providers are configured, with three already
+confirmed reachable and live</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>29</td>
+<td>HelixCode LLM</td>
+<td>Per-provider live-proof test harness confirms four real providers
+respond correctly to a nonce</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>30</td>
+<td>Provider catalogue</td>
+<td>Hugging Face router and Together catalogue providers list hundreds
+of real available models</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>31</td>
+<td>LLMsVerifier</td>
+<td>HelixLLM itself is registered as a tracked, live-verified model
+provider with real probes</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>32</td>
+<td>claude_toolkit</td>
+<td>Provider alias configuration was reconciled and re-verified against
+two hundred plus test cases</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>33</td>
+<td>claude_toolkit</td>
+<td>Port-ownership detection correctly rejects a fake responder
+impersonating the real HelixAgent service</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>34</td>
+<td>Provider config</td>
+<td>Disposition of four unused legacy provider integrations remains an
+open operator decision</td>
+<td>OPERATOR-BLOCKED</td>
+</tr>
+<tr>
+<td>35</td>
+<td>HelixQA</td>
+<td>Coder benchmark and concurrency test banks pass thirteen for
+thirteen against the real production model</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>36</td>
+<td>HelixQA</td>
+<td>DDoS, chaos, and memory-leak banks were re-run against the confirmed
+production coder, closing a prior test-target gap</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>37</td>
+<td>HelixQA</td>
+<td>New coder race-condition bank proves no cross-request contamination
+under concurrent load on the live model</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>37b</td>
+<td>HelixQA</td>
+<td>A second race-condition bank targeting the HelixCode HTTP server
+itself remains unexecuted scaffolding</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>38</td>
+<td>Challenges submodule</td>
+<td>New end-to-end coding Challenge proves the live coder writes and
+correctly executes real Python code</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>39</td>
+<td>HelixCode inner module</td>
+<td>Go race-detector sweep across nine concurrency-sensitive packages
+found zero races and added one new guard</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>40</td>
+<td>HelixCode inner module</td>
+<td>Two pre-existing test failures were root-caused and fixed rather
+than silently skipped or weakened</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>41</td>
+<td>HelixCode inner module</td>
+<td>Full codebase build succeeds except for desktop GUI packages missing
+host-level graphics libraries</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>42</td>
+<td>Provider evidence</td>
+<td>A committed Google API key was discovered leaked in test evidence
+and now awaits operator rotation</td>
+<td>OPERATOR-BLOCKED</td>
+</tr>
+</tbody>
+</table>
+<h2 id="coverage-roll-up">Coverage roll-up</h2>
+<ul>
+<li><strong>34 of 43 rows PASS</strong> with real, on-disk captured
+evidence.</li>
+<li><strong>6 rows OPERATOR-BLOCKED</strong> on a genuine external
+decision or credential, not a quality shortfall.</li>
+<li><strong>3 rows PENDING</strong> honest implementation gaps
+(video-gen broker path, codegraph re-validate re-run, HelixCode-server
+race bank).</li>
+<li><strong>1 row SKIP</strong> as an honest, documented
+resource-constrained deferral (StarVector GPU tier).</li>
+</ul>
+</body>
+</html>

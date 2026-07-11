@@ -1,0 +1,124 @@
+{
+  "container": "helixllm-coder",
+  "num_requests_planned": 120,
+  "num_requests_actual": 432,
+  "concurrency": 4,
+  "duration_s": 30.516213178634644,
+  "ok_count": 432,
+  "err_count": 0,
+  "baseline_rss_bytes": 10518374907.904,
+  "baseline_raw": "helixllm-coder\t9.796GB / 269.7GB\t1.99%\t70",
+  "post_soak_rss_bytes": 11585674280.96,
+  "post_soak_raw": "helixllm-coder\t10.79GB / 269.7GB\t2.42%\t70",
+  "growth_ratio_post_vs_baseline": 1.101469987750102,
+  "max_rss_bytes_during_soak": 11585674280.96,
+  "min_rss_bytes_during_soak": 10518374907.904,
+  "trend_ratio_last_third_vs_first_third": 1.0809225302537628,
+  "leak_trend_threshold": 1.5,
+  "self_validation": {
+    "golden_good_not_flagged_as_leak": true,
+    "golden_bad_flagged_as_leak": true,
+    "synthetic_trend_ratio": 5.0
+  },
+  "timeseries": [
+    {
+      "t": 1783782574.6306305,
+      "raw": "helixllm-coder\t9.796GB / 269.7GB\t2.00%\t70",
+      "rss_bytes": 10518374907.904
+    },
+    {
+      "t": 1783782576.6272712,
+      "raw": "helixllm-coder\t9.844GB / 269.7GB\t2.02%\t70",
+      "rss_bytes": 10569914515.456
+    },
+    {
+      "t": 1783782578.6283517,
+      "raw": "helixllm-coder\t9.909GB / 269.7GB\t2.05%\t70",
+      "rss_bytes": 10639707734.016
+    },
+    {
+      "t": 1783782580.6309035,
+      "raw": "helixllm-coder\t9.973GB / 269.7GB\t2.08%\t70",
+      "rss_bytes": 10708427210.752
+    },
+    {
+      "t": 1783782582.6314774,
+      "raw": "helixllm-coder\t10.04GB / 269.7GB\t2.11%\t70",
+      "rss_bytes": 10780367912.96
+    },
+    {
+      "t": 1783782584.629353,
+      "raw": "helixllm-coder\t10.1GB / 269.7GB\t2.14%\t70",
+      "rss_bytes": 10844792422.4
+    },
+    {
+      "t": 1783782586.6295686,
+      "raw": "helixllm-coder\t10.17GB / 269.7GB\t2.16%\t70",
+      "rss_bytes": 10919954350.08
+    },
+    {
+      "t": 1783782588.6291475,
+      "raw": "helixllm-coder\t10.23GB / 269.7GB\t2.19%\t70",
+      "rss_bytes": 10984378859.52
+    },
+    {
+      "t": 1783782590.6316922,
+      "raw": "helixllm-coder\t10.3GB / 269.7GB\t2.22%\t70",
+      "rss_bytes": 11059540787.2
+    },
+    {
+      "t": 1783782592.6285102,
+      "raw": "helixllm-coder\t10.37GB / 269.7GB\t2.25%\t70",
+      "rss_bytes": 11134702714.88
+    },
+    {
+      "t": 1783782594.629379,
+      "raw": "helixllm-coder\t10.44GB / 269.7GB\t2.27%\t70",
+      "rss_bytes": 11209864642.56
+    },
+    {
+      "t": 1783782596.7898922,
+      "raw": "helixllm-coder\t10.51GB / 269.7GB\t2.30%\t70",
+      "rss_bytes": 11285026570.24
+    },
+    {
+      "t": 1783782598.6305945,
+      "raw": "helixllm-coder\t10.57GB / 269.7GB\t2.33%\t70",
+      "rss_bytes": 11349451079.68
+    },
+    {
+      "t": 1783782600.631676,
+      "raw": "helixllm-coder\t10.64GB / 269.7GB\t2.36%\t70",
+      "rss_bytes": 11424613007.36
+    },
+    {
+      "t": 1783782602.6300533,
+      "raw": "helixllm-coder\t10.7GB / 269.7GB\t2.38%\t70",
+      "rss_bytes": 11489037516.8
+    },
+    {
+      "t": 1783782604.6293502,
+      "raw": "helixllm-coder\t10.78GB / 269.7GB\t2.41%\t70",
+      "rss_bytes": 11574936862.72
+    },
+    {
+      "t": 1783782606.6298215,
+      "raw": "helixllm-coder\t10.79GB / 269.7GB\t2.42%\t70",
+      "rss_bytes": 11585674280.96
+    },
+    {
+      "t": 1783782608.6297092,
+      "raw": "helixllm-coder\t10.79GB / 269.7GB\t2.42%\t70",
+      "rss_bytes": 11585674280.96
+    },
+    {
+      "t": 1783782610.6289952,
+      "raw": "helixllm-coder\t10.79GB / 269.7GB\t2.42%\t70",
+      "rss_bytes": 11585674280.96
+    }
+  ],
+  "verdict": "PASS",
+  "reasons": [
+    "RSS stable/plateaued across soak window; 432/432 requests succeeded"
+  ]
+}

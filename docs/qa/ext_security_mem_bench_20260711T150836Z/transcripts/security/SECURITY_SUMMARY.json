@@ -1,0 +1,72 @@
+{
+  "self_validation": {
+    "all_checkers_valid": true,
+    "detail": {
+      "rejected_not_crashed": {
+        "golden_good_pass": true,
+        "golden_bad_fails": true,
+        "golden_bad_reason": "malformed/injection request ACCEPTED with 200 (expected 4xx rejection)"
+      },
+      "no_secret_leak": {
+        "golden_good_pass": true,
+        "golden_bad_fails": true,
+        "golden_bad_reason": "LEAKED markers found in response: ['HELIX_MODELS_MAX', 'SECRET_TOKEN_MARKER']"
+      },
+      "graceful_oversized": {
+        "golden_good_pass": true,
+        "golden_bad_fails": true,
+        "golden_bad_reason": "no HTTP response (connection dropped -- possible crash under load)"
+      }
+    }
+  },
+  "probes": [
+    {
+      "probe_id": "SEC-01-AUTH-BOUNDARY",
+      "description": "Auth-boundary: unauth vs bogus-auth-header request behavior + bind-address check",
+      "verdict": "FINDING",
+      "evidence_path": "/tmp/.private/milos/claude-1000/-home-milos-Factory-projects-tools-and-research-helix-code/454f5003-cc9c-4bc0-9c9c-b78813ab3940/scratchpad/wave2_ext_sec_mem_bench/transcripts/security/SEC-01-auth-boundary.txt",
+      "detail": "unauth request status=200, bogus-auth-header request status=200 (both succeed identically => NO auth boundary enforced at this layer); listen socket bound_to_all_interfaces=True",
+      "self_validated": null
+    },
+    {
+      "probe_id": "SEC-02-MALFORMED-JSON",
+      "description": "Malformed/invalid JSON body rejection (server returns 4xx, does not crash)",
+      "verdict": "FAIL",
+      "evidence_path": "/tmp/.private/milos/claude-1000/-home-milos-Factory-projects-tools-and-research-helix-code/454f5003-cc9c-4bc0-9c9c-b78813ab3940/scratchpad/wave2_ext_sec_mem_bench/transcripts/security/SEC-02-malformed-json.txt",
+      "detail": "cases=[('truncated-json', False, 'server error 500 (possible crash/unhandled exception)'), ('invalid-json-syntax', False, 'server error 500 (possible crash/unhandled exception)'), ('wrong-type-messages', True, 'correctly rejected with 400')]; server_alive_after=True",
+      "self_validated": null
+    },
+    {
+      "probe_id": "SEC-03-INJECTION",
+      "description": "Injection payload safe-handling (path traversal, null bytes, control chars, SQLi-like, prompt-injection, deep nesting)",
+      "verdict": "PASS",
+      "evidence_path": "/tmp/.private/milos/claude-1000/-home-milos-Factory-projects-tools-and-research-helix-code/454f5003-cc9c-4bc0-9c9c-b78813ab3940/scratchpad/wave2_ext_sec_mem_bench/transcripts/security/SEC-03-injection.txt",
+      "detail": "path-traversal-model=OK; null-byte-content=OK; control-chars-content=OK; sql-like-content=OK; prompt-injection-system-override=OK; oversized-array-nesting=OK",
+      "self_validated": null
+    },
+    {
+      "probe_id": "SEC-04-SECRET-LEAK",
+      "description": "Secret-leak scan (no env vars/keys/tokens echoed in normal or error responses)",
+      "verdict": "PASS",
+      "evidence_path": "/tmp/.private/milos/claude-1000/-home-milos-Factory-projects-tools-and-research-helix-code/454f5003-cc9c-4bc0-9c9c-b78813ab3940/scratchpad/wave2_ext_sec_mem_bench/transcripts/security/SEC-04-secret-leak.txt",
+      "detail": "direct-exfil-attempt: no secret markers found in response body; invalid-model-error-path: no secret markers found in response body",
+      "self_validated": null
+    },
+    {
+      "probe_id": "SEC-05-OVERSIZED-PAYLOAD",
+      "description": "Oversized payload (~2MB prompt) handled gracefully, server remains alive",
+      "verdict": "PASS",
+      "evidence_path": "/tmp/.private/milos/claude-1000/-home-milos-Factory-projects-tools-and-research-helix-code/454f5003-cc9c-4bc0-9c9c-b78813ab3940/scratchpad/wave2_ext_sec_mem_bench/transcripts/security/SEC-05-oversized-payload.txt",
+      "detail": "handled with status 400 in 0.38s (no crash); payload_size_mb=1.93; server_alive_after=True",
+      "self_validated": null
+    }
+  ],
+  "overall": {
+    "auth_boundary_finding_no_auth_enforced": true,
+    "auth_boundary_finding_bound_all_interfaces": true,
+    "malformed_json_rejected_safely": false,
+    "injection_handled_safely": true,
+    "no_secret_leak": true,
+    "oversized_payload_handled_gracefully": true
+  }
+}

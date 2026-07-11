@@ -1,0 +1,30 @@
+--- Case A: truncated JSON body ---
+sent=b'{"model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf", "max_tokens": 8, "messages": [{"role": "user", "content": "trunc'
+err=None
+resp_head=HTTP/1.1 500 Internal Server Error
+Connection: close
+Content-Type: application/json; charset=utf-8
+Server: llama.cpp
+Content-Length: 219
+Access-Control-Allow-Origin: 
+
+{"error":{"code":500,"message":"[json.exception.parse_error.101] parse error at line 1, column 127: syntax error while parsing value - invalid string: missing closing quote; last read: '\"trunc'","type":"server_error"}}
+
+--- Case B: invalid JSON syntax ---
+sent=b'{model: "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf", max_tokens: 8,}'
+err=None
+resp_head=HTTP/1.1 500 Internal Server Error
+Connection: close
+Content-Type: application/json; charset=utf-8
+Server: llama.cpp
+Content-Length: 220
+Access-Control-Allow-Origin: 
+
+{"error":{"code":500,"message":"[json.exception.parse_error.101] parse error at line 1, column 2: syntax error while parsing object key - invalid literal; last read: '{m'; expected string literal","type":"server_error"}}
+
+--- Case C: wrong-type messages field ---
+status=400
+err=None
+body={"error":{"code":400,"message":"Expected 'messages' to be an array","type":"invalid_request_error"}}
+
+post-malformed health check: status=200 body={"status":"ok"} err=None
