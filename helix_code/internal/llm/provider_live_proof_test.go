@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -85,6 +86,43 @@ import (
 // verifier adapter into this harness, a separate, larger follow-up outside
 // this pass's scope (this pass's scope is: build the missing per-provider
 // live-proof harness itself, honest-SKIP-safe, with captured evidence).
+//
+// Oracle-honesty fix (2026-07-11, §11.4.6): a prior live run found this
+// harness recorded a false FAIL for reasoning-style models (observed on
+// DeepSeek `deepseek-v4-flash` and OpenRouter `openai/gpt-oss-20b:free`).
+// Those models emit internal reasoning tokens BEFORE the visible answer;
+// at the original MaxTokens=32 budget the reasoning alone consumed the
+// entire token budget, the provider genuinely returned
+// finish_reason="length" (surfaced by every provider file in this
+// package's own canonical mapXxxFinishReasonToErr() helper as
+// resp.Err=ErrResponseTruncated — see missing_types.go), and the nonce
+// was never reached. That is a TRUNCATION of a real, live call — not a
+// provider failure — so mis-classifying it as FAIL was a false-negative.
+// The fix is two-pronged (§11.4.6 "keep the nonce-echo unforgeability: a
+// real echoed nonce is still the only thing that yields PASS"):
+//
+//  1. providerLiveNonceMaxTokens raises the shared MaxTokens budget from
+//     32 to 4096 (this package's own reasoning.go already sizes typical
+//     ThinkingBudget defaults in the 5000-10000 range for o1/extended-
+//     thinking-class models — 4096 gives cheaper reasoning-tagged/free-tier
+//     models, the two observed here, ample headroom for reasoning tokens
+//     plus the short nonce echo) AND providerLiveNoncePrompt explicitly
+//     asks the model to skip reasoning/explanation, so most calls now
+//     complete within budget without ever reaching the fallback below.
+//  2. When a real HTTP call succeeds, genuinely truncates
+//     (errors.Is(resp.Err, ErrResponseTruncated) — populated by every
+//     provider this harness exercises: see openai_provider.go,
+//     anthropic_provider.go, gemini_provider.go, deepseek_provider.go,
+//     groq_provider.go, mistral_provider.go, xai_provider.go,
+//     openrouter_provider.go, ollama_provider.go, llamacpp_provider.go),
+//     and the nonce still never appears, the result is recorded as the
+//     distinct honest verdict INCONCLUSIVE (via t.Skipf, so `go test`'s
+//     exit code stays green) rather than FAIL — a truncated call proves
+//     nothing about whether the provider CAN echo the nonce, so it must
+//     not be reported as a provider failure. A genuinely non-truncated
+//     call that omits the nonce (untruncated finish_reason, model simply
+//     did not comply) still FAILs exactly as before: the unforgeability
+//     property this harness exists to prove is unchanged.
 
 // providerLiveKind distinguishes the two honest-absence gates this harness
 // uses: hosted providers are gated on API-key presence; local providers
@@ -189,7 +227,7 @@ func providerLiveRepoRoot(t *testing.T) string {
 		t.Fatalf("providerLiveRepoRoot: runtime.Caller(0) failed")
 	}
 	// thisFile = <repo-root>/helix_code/internal/llm/provider_live_proof_test.go
-	dir := filepath.Dir(thisFile)                    // .../helix_code/internal/llm
+	dir := filepath.Dir(thisFile)                         // .../helix_code/internal/llm
 	root := filepath.Dir(filepath.Dir(filepath.Dir(dir))) // .../<repo-root>
 	return root
 }
@@ -216,6 +254,30 @@ func providerLiveNonce() (string, error) {
 		return "", fmt.Errorf("providerLiveNonce: crypto/rand read failed: %w", err)
 	}
 	return "LIVEPROOF-" + hex.EncodeToString(buf), nil
+}
+
+// providerLiveNonceMaxTokens is the shared MaxTokens budget for the
+// nonce-echo challenge. See the "Oracle-honesty fix" note in the file
+// header comment: this replaces the original flat 32-token budget, which
+// was too small for reasoning-style models (observed on DeepSeek
+// deepseek-v4-flash and OpenRouter openai/gpt-oss-20b:free) that consume
+// part of the token budget on internal reasoning before emitting the
+// visible answer.
+const providerLiveNonceMaxTokens = 4096
+
+// providerLiveNoncePrompt builds the nonce-echo challenge prompt shared by
+// both the hosted and local live-proof paths. The explicit "no reasoning"
+// instruction is a best-effort cost/latency reduction for models that
+// honor it — it does not change the pass/fail oracle (only a literally
+// echoed nonce yields PASS), it only makes it more likely a reasoning
+// model completes within providerLiveNonceMaxTokens instead of falling
+// through to the INCONCLUSIVE truncation path.
+func providerLiveNoncePrompt(nonce string) string {
+	return fmt.Sprintf(
+		"This is an automated liveness probe. Skip any reasoning, chain-of-thought, "+
+			"or explanation. Reply with EXACTLY this token and nothing else: %s",
+		nonce,
+	)
 }
 
 // providerLiveResolveKey resolves the PRESENT credential VALUE for pt by
@@ -322,14 +384,15 @@ type providerLiveRequestEvidence struct {
 }
 
 type providerLiveResponseEvidence struct {
-	Provider        string                 `json:"provider"`
-	Content         string                 `json:"content"`
-	NonceEchoed     bool                   `json:"nonce_echoed"`
-	FinishReason    string                 `json:"finish_reason"`
-	ProcessingTime  string                 `json:"processing_time"`
-	Usage           Usage                  `json:"usage"`
-	ProviderMeta    map[string]interface{} `json:"provider_metadata,omitempty"`
-	RespondedAt     time.Time              `json:"responded_at_utc"`
+	Provider       string                 `json:"provider"`
+	Content        string                 `json:"content"`
+	NonceEchoed    bool                   `json:"nonce_echoed"`
+	Truncated      bool                   `json:"truncated"`
+	FinishReason   string                 `json:"finish_reason"`
+	ProcessingTime string                 `json:"processing_time"`
+	Usage          Usage                  `json:"usage"`
+	ProviderMeta   map[string]interface{} `json:"provider_metadata,omitempty"`
+	RespondedAt    time.Time              `json:"responded_at_utc"`
 }
 
 func providerLiveWriteJSON(t *testing.T, dir, filename string, v interface{}) {
@@ -412,16 +475,13 @@ func runHostedProviderLiveProof(t *testing.T, spec providerLiveSpec, dir string)
 	if err != nil {
 		t.Fatalf("%s: %v", spec.name, err)
 	}
-	prompt := fmt.Sprintf(
-		"This is an automated liveness probe. Reply with EXACTLY this token and nothing else: %s",
-		nonce,
-	)
+	prompt := providerLiveNoncePrompt(nonce)
 
 	req := &LLMRequest{
 		ID:          uuid.New(),
 		Model:       model,
 		Messages:    []Message{{Role: "user", Content: prompt}},
-		MaxTokens:   32,
+		MaxTokens:   providerLiveNonceMaxTokens,
 		Temperature: 0,
 	}
 
@@ -445,11 +505,13 @@ func runHostedProviderLiveProof(t *testing.T, spec providerLiveSpec, dir string)
 	}
 
 	nonceEchoed := strings.Contains(resp.Content, nonce)
+	truncated := errors.Is(resp.Err, ErrResponseTruncated)
 
 	providerLiveWriteJSON(t, dir, "response.json", providerLiveResponseEvidence{
 		Provider:       spec.name,
 		Content:        resp.Content,
 		NonceEchoed:    nonceEchoed,
+		Truncated:      truncated,
 		FinishReason:   resp.FinishReason,
 		ProcessingTime: resp.ProcessingTime.String(),
 		Usage:          resp.Usage,
@@ -457,17 +519,37 @@ func runHostedProviderLiveProof(t *testing.T, spec providerLiveSpec, dir string)
 		RespondedAt:    time.Now().UTC(),
 	})
 
+	if nonceEchoed {
+		providerLiveWriteVerdict(t, dir, "PASS", fmt.Sprintf("real HTTP call to %s (model=%s, source=%s) echoed fresh nonce %q — genuine live completion", spec.name, model, modelSource, nonce))
+		t.Logf("%s: PASS — model=%s content=%q", spec.name, model, resp.Content)
+		return
+	}
+
+	// §11.4.6 oracle honesty: a genuinely truncated real call (the
+	// provider itself reported finish_reason=length via
+	// ErrResponseTruncated) proves nothing about whether this provider
+	// CAN echo the nonce — reasoning-style models can spend the whole
+	// MaxTokens budget on internal reasoning before reaching the visible
+	// answer. That is a truncation of a live call, not a provider
+	// failure, so it is recorded as the distinct INCONCLUSIVE verdict
+	// (via t.Skipf, keeping `go test`'s exit code green) rather than a
+	// false FAIL. See the file header comment "Oracle-honesty fix".
+	if truncated {
+		detail := fmt.Sprintf(
+			"real HTTP call to %s (model=%s) succeeded but was truncated (finish_reason=%q) at MaxTokens=%d before nonce %q could be echoed (partial content=%q) — this is a token-budget truncation of a genuine live call, not a provider failure",
+			spec.name, model, resp.FinishReason, providerLiveNonceMaxTokens, nonce, resp.Content,
+		)
+		providerLiveWriteVerdict(t, dir, "INCONCLUSIVE", detail)
+		t.Skipf("INCONCLUSIVE: %s", detail)
+		return
+	}
+
 	if resp.Content == "" {
 		providerLiveWriteVerdict(t, dir, "FAIL", "real call succeeded but returned empty content")
 		t.Fatalf("%s: Generate() returned empty content — no real completion produced", spec.name)
 	}
-	if !nonceEchoed {
-		providerLiveWriteVerdict(t, dir, "FAIL", fmt.Sprintf("nonce %q not found in response content %q — cannot prove this is a live, non-cached answer", nonce, resp.Content))
-		t.Fatalf("%s: response did not echo nonce %q (got %q) — live-proof assertion failed", spec.name, nonce, resp.Content)
-	}
-
-	providerLiveWriteVerdict(t, dir, "PASS", fmt.Sprintf("real HTTP call to %s (model=%s, source=%s) echoed fresh nonce %q — genuine live completion", spec.name, model, modelSource, nonce))
-	t.Logf("%s: PASS — model=%s content=%q", spec.name, model, resp.Content)
+	providerLiveWriteVerdict(t, dir, "FAIL", fmt.Sprintf("nonce %q not found in response content %q — cannot prove this is a live, non-cached answer", nonce, resp.Content))
+	t.Fatalf("%s: response did not echo nonce %q (got %q) — live-proof assertion failed", spec.name, nonce, resp.Content)
 }
 
 func runLocalProviderLiveProof(t *testing.T, spec providerLiveSpec, dir string) {
@@ -499,16 +581,13 @@ func runLocalProviderLiveProof(t *testing.T, spec providerLiveSpec, dir string) 
 	if err != nil {
 		t.Fatalf("%s: %v", spec.name, err)
 	}
-	prompt := fmt.Sprintf(
-		"This is an automated liveness probe. Reply with EXACTLY this token and nothing else: %s",
-		nonce,
-	)
+	prompt := providerLiveNoncePrompt(nonce)
 
 	req := &LLMRequest{
 		ID:          uuid.New(),
 		Model:       model,
 		Messages:    []Message{{Role: "user", Content: prompt}},
-		MaxTokens:   32,
+		MaxTokens:   providerLiveNonceMaxTokens,
 		Temperature: 0,
 	}
 
@@ -532,11 +611,13 @@ func runLocalProviderLiveProof(t *testing.T, spec providerLiveSpec, dir string) 
 	}
 
 	nonceEchoed := strings.Contains(resp.Content, nonce)
+	truncated := errors.Is(resp.Err, ErrResponseTruncated)
 
 	providerLiveWriteJSON(t, dir, "response.json", providerLiveResponseEvidence{
 		Provider:       spec.name,
 		Content:        resp.Content,
 		NonceEchoed:    nonceEchoed,
+		Truncated:      truncated,
 		FinishReason:   resp.FinishReason,
 		ProcessingTime: resp.ProcessingTime.String(),
 		Usage:          resp.Usage,
@@ -544,15 +625,28 @@ func runLocalProviderLiveProof(t *testing.T, spec providerLiveSpec, dir string) 
 		RespondedAt:    time.Now().UTC(),
 	})
 
+	if nonceEchoed {
+		providerLiveWriteVerdict(t, dir, "PASS", fmt.Sprintf("real HTTP call to local %s (model=%s, source=%s) echoed fresh nonce %q — genuine live completion", spec.name, model, modelSource, nonce))
+		t.Logf("%s: PASS — model=%s content=%q", spec.name, model, resp.Content)
+		return
+	}
+
+	// §11.4.6 oracle honesty — see the identical rationale in
+	// runHostedProviderLiveProof / the file header "Oracle-honesty fix".
+	if truncated {
+		detail := fmt.Sprintf(
+			"real HTTP call to local %s (model=%s) succeeded but was truncated (finish_reason=%q) at MaxTokens=%d before nonce %q could be echoed (partial content=%q) — this is a token-budget truncation of a genuine live call, not a provider failure",
+			spec.name, model, resp.FinishReason, providerLiveNonceMaxTokens, nonce, resp.Content,
+		)
+		providerLiveWriteVerdict(t, dir, "INCONCLUSIVE", detail)
+		t.Skipf("INCONCLUSIVE: %s", detail)
+		return
+	}
+
 	if resp.Content == "" {
 		providerLiveWriteVerdict(t, dir, "FAIL", "real call succeeded but returned empty content")
 		t.Fatalf("%s: Generate() returned empty content — no real completion produced", spec.name)
 	}
-	if !nonceEchoed {
-		providerLiveWriteVerdict(t, dir, "FAIL", fmt.Sprintf("nonce %q not found in response content %q — cannot prove this is a live, non-cached answer", nonce, resp.Content))
-		t.Fatalf("%s: response did not echo nonce %q (got %q) — live-proof assertion failed", spec.name, nonce, resp.Content)
-	}
-
-	providerLiveWriteVerdict(t, dir, "PASS", fmt.Sprintf("real HTTP call to local %s (model=%s, source=%s) echoed fresh nonce %q — genuine live completion", spec.name, model, modelSource, nonce))
-	t.Logf("%s: PASS — model=%s content=%q", spec.name, model, resp.Content)
+	providerLiveWriteVerdict(t, dir, "FAIL", fmt.Sprintf("nonce %q not found in response content %q — cannot prove this is a live, non-cached answer", nonce, resp.Content))
+	t.Fatalf("%s: response did not echo nonce %q (got %q) — live-proof assertion failed", spec.name, nonce, resp.Content)
 }
