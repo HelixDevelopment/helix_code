@@ -291,5 +291,107 @@ func TestWireFacade_FullHTTP_E2E_LiveRoundTrip(t *testing.T) {
 			parsed.Model, parsed.StopReason, parsed.Usage, fullText.String())
 	})
 
+	// tool_calls_shape_divergence_live is the LIVE proof (not merely a
+	// static code-read of llmResponseToOpenAI/llmResponseToAnthropic) of the
+	// genuine, documented wire-shape fork point between the two facades
+	// (wire_facade.go file-level doc-comment "Multi-modal content parts..."
+	// section + llmResponseToOpenAI/llmResponseToAnthropic doc-comments):
+	// the OpenAI wire's tool_calls[].function.arguments is a
+	// JSON-ENCODED STRING, while the Anthropic wire's
+	// content[].{type:"tool_use"}.input is a JSON OBJECT. Both requests
+	// below drive the SAME real coder through the SAME tool-definition and
+	// SAME nonce-bearing prompt so the divergence is observed on genuinely
+	// live, non-cached tool-call output — not two independently-fabricated
+	// fixtures.
+	t.Run("tool_calls_shape_divergence_live", func(t *testing.T) {
+		nonce := wireFacadeE2ENonce(t)
+		toolsJSON := `[{"type":"function","function":{"name":"get_weather","description":"Get the current weather for a city","parameters":{"type":"object","properties":{"city":{"type":"string"}},"required":["city"]}}}]`
+		prompt := fmt.Sprintf("What is the weather in the city named exactly %q? You MUST call the get_weather tool with that exact city string.", nonce)
+
+		t.Run("openai_tool_calls_arguments_is_json_string", func(t *testing.T) {
+			reqBody := fmt.Sprintf(`{"messages":[{"role":"user","content":%q}],"tools":%s,"max_tokens":64,"temperature":0}`, prompt, toolsJSON)
+			headers := []string{"Authorization: Bearer " + wireFacadeE2ETestAPIKey}
+			status, respBody, transcript := curlCapture(t, ts.URL+"/v1/chat/completions", headers, reqBody)
+			_ = os.WriteFile(filepath.Join(evidenceDir, "04_openai_tool_calls_200.txt"), []byte(transcript), 0o644)
+			require.Equalf(t, 200, status, "authenticated tool-calling POST /v1/chat/completions must succeed — got %d body=%s", status, respBody)
+
+			var parsed struct {
+				Choices []struct {
+					Message struct {
+						ToolCalls []struct {
+							Type     string `json:"type"`
+							Function struct {
+								Name      string `json:"name"`
+								Arguments string `json:"arguments"` // MUST be a JSON-encoded STRING on this wire
+							} `json:"function"`
+						} `json:"tool_calls"`
+					} `json:"message"`
+					FinishReason string `json:"finish_reason"`
+				} `json:"choices"`
+			}
+			require.NoErrorf(t, json.Unmarshal([]byte(respBody), &parsed), "response must be valid OpenAI-shaped JSON: %s", respBody)
+			require.Len(t, parsed.Choices, 1)
+			require.Equal(t, "tool_calls", parsed.Choices[0].FinishReason, "coder must have actually invoked the tool for this proof to be meaningful")
+			require.Len(t, parsed.Choices[0].Message.ToolCalls, 1)
+			tc := parsed.Choices[0].Message.ToolCalls[0]
+			require.Equal(t, "get_weather", tc.Function.Name)
+
+			// The wire-shape assertion: Arguments MUST decode as a Go string
+			// field straight off the JSON (proving the wire byte sequence was
+			// `"arguments":"{...}"` — a quoted, JSON-ENCODED STRING), and that
+			// string itself MUST re-parse as its own JSON object containing
+			// the live nonce.
+			require.NotEmpty(t, tc.Function.Arguments, "OpenAI wire tool_calls[].function.arguments must be a non-empty JSON-encoded string")
+			var argsObj map[string]interface{}
+			require.NoErrorf(t, json.Unmarshal([]byte(tc.Function.Arguments), &argsObj),
+				"function.arguments must itself be a valid JSON object once string-decoded (JSON-STRING-of-JSON wire shape): %q", tc.Function.Arguments)
+			require.Containsf(t, fmt.Sprintf("%v", argsObj["city"]), nonce, "tool arguments must echo the live nonce city: %v", argsObj)
+
+			t.Logf("PASS (OpenAI wire): tool_calls[0].function.arguments is a JSON-ENCODED STRING = %q (decodes to %v)", tc.Function.Arguments, argsObj)
+		})
+
+		t.Run("anthropic_tool_use_input_is_json_object", func(t *testing.T) {
+			reqBody := fmt.Sprintf(`{"messages":[{"role":"user","content":%q}],"tools":[{"name":"get_weather","description":"Get the current weather for a city","input_schema":{"type":"object","properties":{"city":{"type":"string"}},"required":["city"]}}],"max_tokens":64,"temperature":0}`, prompt)
+			headers := []string{"x-api-key: " + wireFacadeE2ETestAPIKey}
+			status, respBody, transcript := curlCapture(t, ts.URL+"/v1/messages", headers, reqBody)
+			_ = os.WriteFile(filepath.Join(evidenceDir, "05_anthropic_tool_use_200.txt"), []byte(transcript), 0o644)
+			require.Equalf(t, 200, status, "authenticated tool-calling POST /v1/messages must succeed — got %d body=%s", status, respBody)
+
+			var parsed struct {
+				StopReason string `json:"stop_reason"`
+				Content    []struct {
+					Type  string                 `json:"type"`
+					Name  string                 `json:"name"`
+					Input map[string]interface{} `json:"input"` // MUST be a JSON OBJECT on this wire
+				} `json:"content"`
+			}
+			require.NoErrorf(t, json.Unmarshal([]byte(respBody), &parsed), "response must be valid Anthropic-shaped JSON: %s", respBody)
+			require.Equal(t, "tool_use", parsed.StopReason, "coder must have actually invoked the tool for this proof to be meaningful")
+
+			var toolBlock *struct {
+				Type  string                 `json:"type"`
+				Name  string                 `json:"name"`
+				Input map[string]interface{} `json:"input"`
+			}
+			for i := range parsed.Content {
+				if parsed.Content[i].Type == "tool_use" {
+					toolBlock = &parsed.Content[i]
+					break
+				}
+			}
+			require.NotNilf(t, toolBlock, "response content must include a tool_use block: %s", respBody)
+			require.Equal(t, "get_weather", toolBlock.Name)
+
+			// The wire-shape assertion: Input decoded straight into a Go map
+			// off the raw response bytes — proving the wire byte sequence was
+			// `"input":{...}` — a genuine JSON OBJECT, never a quoted string.
+			require.NotEmptyf(t, toolBlock.Input, "Anthropic wire tool_use.input must be a non-empty JSON OBJECT")
+			require.Containsf(t, fmt.Sprintf("%v", toolBlock.Input["city"]), nonce, "tool input must echo the live nonce city: %v", toolBlock.Input)
+			require.NotContainsf(t, respBody, fmt.Sprintf(`"input":"{`), "tool_use.input must be a raw JSON object on the wire, never a JSON-encoded string")
+
+			t.Logf("PASS (Anthropic wire): content[].input is a JSON OBJECT = %v", toolBlock.Input)
+		})
+	})
+
 	t.Logf("evidence captured under %s", evidenceDir)
 }
