@@ -225,6 +225,17 @@ FIXTURE
 git add mutation_test_fixture.sh
 assert_block "mutation-test-exempt-header-plus-idiom" ALLOW "$(try_commit 'add exempt mutation test fixture')"
 
+# 18a-audit. Every GRANTED exemption emits an auditable NOTICE to stderr
+#            (2026-07-11 follow-up review finding) — never a silent pass.
+#            try_commit already captured the hook's combined stdout+stderr
+#            to /tmp/hk_out for case 18a's own commit; assert it contains
+#            the NOTICE naming the exempted file.
+if grep -qF 'NOTICE (§11.4.84 audit): mutation-test exemption granted for staged file: mutation_test_fixture.sh' /tmp/hk_out 2>/dev/null; then
+  ok "mutation-test-exemption-grant-emits-audit-notice"
+else
+  bad "mutation-test-exemption-grant-emits-audit-notice (no NOTICE line found in hook output)"
+fi
+
 # 18b. NON-test file with a BARE residue marker (no header, no idiom) ->
 #      still BLOCKS (regression proof: the exemption never widens beyond
 #      explicitly-marked files; unrelated real files keep tripping the
@@ -292,6 +303,105 @@ else
 fi
 git reset -q HEAD fake_exempt_check.sh >/dev/null 2>&1 || true
 rm -f fake_exempt_check.sh
+
+# ===========================================================================
+# pre-commit — §11.4.84 mutation-test exemption: SEMANTIC TIGHTENING
+# (2026-07-11 follow-up review finding). Before this fix, the exemption
+# check was two INDEPENDENT greps ("a trap...EXIT line exists somewhere in
+# the file" AND "a cp...backup / git checkout -- line exists somewhere in
+# the file") — satisfiable by two UNRELATED lines that happen to both be
+# present without the trap ACTUALLY restoring anything. The tightened check
+# requires the restore call to live INSIDE the trap's own target (a named
+# function's body, or the trap's own inline command).
+# ===========================================================================
+
+# 18e. Exemption header + a trap bound to a NO-OP function + an UNRELATED
+#      cp...backup line elsewhere in the same file (never reachable from
+#      the trap) -> still BLOCKS under the tightened, function-scoped check
+#      (this is the abuse case the semantic tightening closes: the OLD
+#      independent-grep check would have wrongly exempted this).
+cat > mutation_abuse_fixture.sh <<'FIXTURE'
+#!/usr/bin/env bash
+# §11.4.84-mutation-test-exempt: this file's markers are trap-restored test logic
+noop_cleanup() { echo "does nothing, does NOT restore anything"; }
+trap noop_cleanup EXIT
+# (MUTATED for paired §1.1 mutation test — restored unconditionally by the
+# EXIT trap above before this script returns).
+cp somefile.txt some_unrelated_backup_name.txt
+FIXTURE
+git add mutation_abuse_fixture.sh
+assert_block "semantic-tightening-unrelated-restore-call-still-blocks" BLOCK "$(try_commit 'add abuse fixture: unrelated restore call')"
+git reset -q HEAD mutation_abuse_fixture.sh >/dev/null 2>&1 || true
+rm -f mutation_abuse_fixture.sh
+
+# 18f. §1.1 PAIRED MUTATION — revert is_mutation_test_exempt() in a COPY of
+#      the pre-commit hook to the OLD independent-grep (unscoped) check, by
+#      APPENDING a second definition of the same function name to the copy
+#      (bash's "last definition wins" for same-named functions in one
+#      script, and the append lands textually before the mutation_hits
+#      call site further down, so the redefinition is the one actually
+#      invoked). Re-stage a FRESH copy of the 18e abuse fixture and assert
+#      it now WRONGLY passes -> proves 18e is load-bearing on the semantic
+#      (function-scoped) tightening specifically, not merely on the
+#      pre-existing header+idiom-presence checks case 18d already covers.
+#      Then restore and assert a fresh abuse fixture blocks again.
+MUT_HOOK84E=".git/hooks/pre-commit"
+cp "$MUT_HOOK84E" "$MUT_HOOK84E.bak84e"
+cat > "$TMP/mut_fn_insert_84e.txt" <<'MUTFN'
+
+# MUTATED for paired §1.1 mutation test — reverts is_mutation_test_exempt()
+# to the OLD independent-grep (unscoped) check via a same-named redefinition
+# (bash "last definition wins"), restored unconditionally below via mv.
+is_mutation_test_exempt() {
+  local blob="$1"
+  printf '%s' "$blob" | grep -qF '11.4.84-mutation-test-exempt' || return 1
+  printf '%s' "$blob" | grep -qE 'trap[[:space:]].*EXIT' || return 1
+  printf '%s' "$blob" | grep -qiE 'cp[[:space:]].*backup|git checkout --' || return 1
+  return 0
+}
+MUTFN
+sed -e '/^mutation_hits=""$/r '"$TMP/mut_fn_insert_84e.txt" "$MUT_HOOK84E.bak84e" > "$MUT_HOOK84E"
+chmod +x "$MUT_HOOK84E"
+
+cat > mutation_abuse_fixture_mut.sh <<'FIXTURE'
+#!/usr/bin/env bash
+# §11.4.84-mutation-test-exempt: this file's markers are trap-restored test logic
+noop_cleanup() { echo "does nothing, does NOT restore anything"; }
+trap noop_cleanup EXIT
+# (MUTATED for paired §1.1 mutation test — restored unconditionally by the
+# EXIT trap above before this script returns).
+cp somefile.txt some_unrelated_backup_name.txt
+FIXTURE
+git add mutation_abuse_fixture_mut.sh
+mut84e_rc=$(try_commit 'mutated: abuse fixture should now wrongly pass')
+if [ "$mut84e_rc" -eq 0 ]; then
+  ok "paired-mutation-114-84-semantic: unscoped check wrongly exempts abuse fixture (mutation detected)"
+else
+  bad "paired-mutation-114-84-semantic: hook still blocked despite unscoped check (mutation NOT detected -> test is blind)"
+fi
+git reset -q HEAD mutation_abuse_fixture_mut.sh >/dev/null 2>&1 || true
+rm -f mutation_abuse_fixture_mut.sh
+mv "$MUT_HOOK84E.bak84e" "$MUT_HOOK84E"
+chmod +x "$MUT_HOOK84E"
+
+cat > mutation_abuse_fixture_check.sh <<'FIXTURE'
+#!/usr/bin/env bash
+# §11.4.84-mutation-test-exempt: this file's markers are trap-restored test logic
+noop_cleanup() { echo "does nothing, does NOT restore anything"; }
+trap noop_cleanup EXIT
+# (MUTATED for paired §1.1 mutation test — restored unconditionally by the
+# EXIT trap above before this script returns).
+cp somefile.txt some_unrelated_backup_name.txt
+FIXTURE
+git add mutation_abuse_fixture_check.sh
+restored84e_rc=$(try_commit 'restored: fresh abuse fixture should block again')
+if [ "$restored84e_rc" -ne 0 ]; then
+  ok "paired-mutation-114-84-semantic: restored hook blocks abuse fixture again (invariant intact)"
+else
+  bad "paired-mutation-114-84-semantic: restored hook did NOT block abuse fixture (restore failed)"
+fi
+git reset -q HEAD mutation_abuse_fixture_check.sh >/dev/null 2>&1 || true
+rm -f mutation_abuse_fixture_check.sh
 
 # ===========================================================================
 # commit-msg — §11.4.75 bypass-rationale footer
@@ -376,6 +486,151 @@ if [ -f "$INSTALLER" ] && [ -n "$REAL_ROOT" ]; then
 else
   bad "installer-dry-run-prints-plan-no-mutation (installer missing at $INSTALLER)"
 fi
+
+# ===========================================================================
+# pre-push — range-scoped secret scan (2026-07-11 fix). The gate used to run
+# `scan-secrets.sh` with NO args (a whole-working-tree scan) as the final
+# pre-push check, which also swept UNTRACKED working-tree files and blocked
+# unrelated pushes on their content (docs/audit/bypass_events.md 2026-07-11
+# entry). It now runs `scan-secrets.sh --range <base> <new>`, scoped to the
+# commits actually being pushed via a real `git push` to a throwaway LOCAL
+# bare "remote" — exercising the real hook through git's own push mechanism
+# (which supplies the ref-update lines on stdin), not a hand-rolled
+# simulation. scripts/scan-secrets.sh is copied into this temp repo (it does
+# not otherwise exist here) so the hook's dynamic `$REPO_ROOT/scripts/
+# scan-secrets.sh` resolution finds it, exactly as install_git_hooks.sh
+# wires the real repo.
+# ===========================================================================
+TMP_REMOTE=$(mktemp -d 2>/dev/null) || { echo "mktemp (remote) failed"; exit 1; }
+cleanup_remote() { rm -rf "$TMP_REMOTE" 2>/dev/null || true; }
+git init -q --bare "$TMP_REMOTE"
+mkdir -p scripts
+cp "$HOOKS_SRC_DIR/../scan-secrets.sh" scripts/scan-secrets.sh
+chmod +x scripts/scan-secrets.sh
+git remote add secpush "$TMP_REMOTE" 2>/dev/null || git remote set-url secpush "$TMP_REMOTE"
+
+try_push() {
+  # $1 = refspec (e.g. HEAD:refs/heads/main). Returns rc; combined
+  # stdout+stderr captured to /tmp/hk_push for on-FAIL diagnostics.
+  git push secpush "$1" >/tmp/hk_push 2>&1
+  echo $?
+}
+
+# 24. baseline push (pre-existing seed commit, no secret content) -> ALLOW.
+#     Establishes a non-zero remote_sha so cases 25/26 exercise the PRIMARY
+#     "update an existing branch" range (remote_sha..local_sha), not the
+#     brand-new-ref merge-base fallback.
+push_rc24=$(try_push "HEAD:refs/heads/main")
+if [ "$push_rc24" -eq 0 ]; then
+  ok "pre-push-baseline-push-allowed"
+else
+  bad "pre-push-baseline-push-allowed (rc=$push_rc24)"
+  sed 's/^/    /' /tmp/hk_push
+fi
+
+# 25. a real-shaped secret IN THE PUSHED COMMIT -> BLOCK. The commit is
+#     created with --no-verify to land the secret locally despite the
+#     pre-commit secret_scan.sh gate (§11.4.135/§11.4.138) — deliberately
+#     bypassing THAT layer so this case isolates and exercises the
+#     PRE-PUSH gate specifically, the last line of defense if pre-commit
+#     were ever skipped or absent.
+printf 'AWS_ACCESS_KEY_ID=AKIA%s\n' "ABCDEFGHIJKLMNOP" > secret_leak.txt
+git add secret_leak.txt
+git commit -q --no-verify -m "leak: real-shaped AWS key" >/dev/null 2>&1
+push_rc25=$(try_push "HEAD:refs/heads/main")
+if [ "$push_rc25" -ne 0 ]; then
+  ok "pre-push-range-scan-blocks-real-secret-in-pushed-commit"
+else
+  bad "pre-push-range-scan-blocks-real-secret-in-pushed-commit (push wrongly allowed)"
+fi
+# Undo the secret commit locally so state matches the (unaffected) remote
+# again before case 26.
+git reset -q --hard HEAD~1
+rm -f secret_leak.txt
+
+# 26. a real-shaped secret in an UNTRACKED file (never staged, never
+#     committed) sitting alongside a clean, unrelated commit -> ALLOW. This
+#     is the exact false-positive class the range-scoping fix closes: a
+#     `git diff <base>..<new>` can never see an untracked file (it only
+#     ever compares two committed tree states), so the untracked secret
+#     MUST NOT influence the push decision either way.
+printf 'AWS_ACCESS_KEY_ID=AKIA%s\n' "ABCDEFGHIJKLMNOP" > untracked_secret.txt   # never `git add`ed
+printf 'harmless content\n' > clean_push_file.txt
+git add clean_push_file.txt
+git commit -q -m "clean commit alongside an untracked secret-shaped file" >/dev/null 2>&1
+push_rc26=$(try_push "HEAD:refs/heads/main")
+if [ "$push_rc26" -eq 0 ]; then
+  ok "pre-push-range-scan-ignores-untracked-secret-file"
+else
+  bad "pre-push-range-scan-ignores-untracked-secret-file (push wrongly blocked, rc=$push_rc26)"
+  sed 's/^/    /' /tmp/hk_push
+fi
+rm -f untracked_secret.txt
+
+# ===========================================================================
+# §1.1 PAIRED MUTATION — revert the pre-push hook's secret gate to the OLD
+# whole-working-tree scan (`scan-secrets.sh` with no args, scanning the
+# CURRENT WORKING DIRECTORY rather than the pushed range) in a COPY of the
+# hook, and prove case 26 (untracked secret must not block an unrelated
+# push) now WRONGLY fails under the old behaviour — showing case 26 is
+# genuinely load-bearing on the range-scoping fix, not a tautology. Then
+# restore and assert case 26's invariant holds again.
+# ===========================================================================
+MUT_HOOKPP=".git/hooks/pre-push"
+cp "$MUT_HOOKPP" "$MUT_HOOKPP.bakpp"
+cat > "$TMP/mut_prepush_insert.sh" <<'MUTPP'
+#!/usr/bin/env bash
+# MUTATED for paired §1.1 mutation test — reverts the secret gate to the
+# OLD whole-working-tree scan (pre-2026-07-11 behaviour), restored
+# unconditionally below via mv.
+set -uo pipefail
+remote_name="${1:-}"
+remote_url="${2:-}"
+cat >/dev/null   # drain stdin (git still provides ref-update lines)
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+SCANNER="$REPO_ROOT/scripts/scan-secrets.sh"
+if [ -x "$SCANNER" ]; then
+  if ! "$SCANNER" >/dev/null 2>&1; then
+    echo "BLOCKED by MUTATED pre-push hook: whole-tree scan-secrets.sh found a pattern." >&2
+    exit 1
+  fi
+fi
+exit 0
+MUTPP
+cp "$TMP/mut_prepush_insert.sh" "$MUT_HOOKPP"
+chmod +x "$MUT_HOOKPP"
+
+printf 'AWS_ACCESS_KEY_ID=AKIA%s\n' "ABCDEFGHIJKLMNOP" > untracked_secret_mut.txt   # untracked, working-tree only
+printf 'harmless again\n' > clean_push_file2.txt
+git add clean_push_file2.txt
+git commit -q -m "another clean commit, untracked secret still present" >/dev/null 2>&1
+mutpp_rc=$(try_push "HEAD:refs/heads/main")
+if [ "$mutpp_rc" -ne 0 ]; then
+  ok "paired-mutation-prepush-range-scope: old whole-tree scan wrongly blocks a clean push (mutation detected)"
+else
+  bad "paired-mutation-prepush-range-scope: mutated (whole-tree) hook still allowed the push (mutation NOT detected -> test is blind)"
+fi
+rm -f untracked_secret_mut.txt
+mv "$MUT_HOOKPP.bakpp" "$MUT_HOOKPP"
+chmod +x "$MUT_HOOKPP"
+
+# Sanity: restored hook allows a clean push despite an untracked secret file
+# again (the GREEN side of the pair).
+printf 'AWS_ACCESS_KEY_ID=AKIA%s\n' "ABCDEFGHIJKLMNOP" > untracked_secret_check.txt
+printf 'harmless once more\n' > clean_push_file3.txt
+git add clean_push_file3.txt
+git commit -q -m "restored: clean push despite untracked secret" >/dev/null 2>&1
+restoredpp_rc=$(try_push "HEAD:refs/heads/main")
+if [ "$restoredpp_rc" -eq 0 ]; then
+  ok "paired-mutation-prepush-range-scope: restored hook ignores untracked secret again (invariant intact)"
+else
+  bad "paired-mutation-prepush-range-scope: restored hook did NOT allow the clean push (restore failed)"
+  sed 's/^/    /' /tmp/hk_push
+fi
+rm -f untracked_secret_check.txt
+
+git remote remove secpush >/dev/null 2>&1 || true
+cleanup_remote
 
 # ===========================================================================
 # §1.1 PAIRED MUTATION — break the sibling assertion, prove a case FAILs,
