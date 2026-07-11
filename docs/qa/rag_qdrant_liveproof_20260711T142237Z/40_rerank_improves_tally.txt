@@ -1,0 +1,4 @@
+### rerank-improves-ordering tally (the reranker's causal contribution)
+DEMONSTRATED for: q3 q4 
+  (real Qdrant ANN top-1 was a distractor; real cross-encoder rerank promoted the fact doc to top-1)
+no-top-1-correction-needed for: q1 q2  (ANN already correct — honest)

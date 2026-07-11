@@ -1,0 +1,12 @@
+### analyzer self-validation (§11.4.107(10)) qkey=q1
+[GOLDEN-GOOD(expect PASS)] PASS reranked_top1=doc_fact_collection(score=0.9308, ok=true) tokenFound=true answer="Based on the context provided, the internal Qdrant collection alias for HelixCode's PRIMARY retrieval-augmented telemetry index is Nectarune-Delta7.\n\nThe context states that \"The Qdrant collection alias for HelixCode's primary retrieval-augmented telemetry index is Nectarune-Delta7\" and that \"HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.\" Since the question asks specifically for the primary retrieval-aug"
+[GOLDEN-BAD-NO-FACT(expect FAIL)] FAIL reranked_top1=doc_fact_collection(score=0.9308, ok=true) tokenFound=false answer="I don't know based on the given context."
+    reason: answer does not contain invented token "Nectarune-Delta7"
+[GOLDEN-BAD-WRONG-RERANK-TOP1(expect FAIL)] FAIL reranked_top1=doc_distractor_collection(score=0.9308, ok=false) tokenFound=true answer="Based on the context provided, the internal Qdrant collection alias for HelixCode's PRIMARY retrieval-augmented telemetry index is Nectarune-Delta7.\n\nThe context states that \"The Qdrant collection alias for HelixCode's primary retrieval-augmented telemetry index is Nectarune-Delta7\" and that \"HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.\" Since the question asks specifically for the primary retrieval-aug"
+    reason: post-rerank top-1 "doc_distractor_collection" != expected fact-bearing doc "doc_fact_collection"
+[GOLDEN-BAD-EMPTY-ANSWER(expect FAIL)] FAIL reranked_top1=doc_fact_collection(score=0.9308, ok=true) tokenFound=false answer=""
+    reason: empty generated answer
+    reason: answer does not contain invented token "Nectarune-Delta7"
+[GOLDEN-BAD-ANN-ALREADY-CORRECT(expect rerank-improves FAIL)] ann_top1(mutated)=doc_fact_collection reranked_top1=doc_fact_collection rerank_improves_claim_would_pass=false
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit_q1=0

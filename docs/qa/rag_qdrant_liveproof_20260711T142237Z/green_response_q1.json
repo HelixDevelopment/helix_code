@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Based on the context provided, the internal Qdrant collection alias for HelixCode's PRIMARY retrieval-augmented telemetry index is Nectarune-Delta7.\n\nThe context states that \"The Qdrant collection alias for HelixCode's primary retrieval-augmented telemetry index is Nectarune-Delta7\" and that \"HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.\" Since the question asks specifically for the primary retrieval-aug"
+      },
+      "finish_reason": "length"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-1fT7LXWM2ZdWx8hjhNG6S4FlB7MbJ4F7"
+}

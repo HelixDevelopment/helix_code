@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "I don't have access to HelixCode's internal system information or their specific Qdrant alias configurations, so I cannot identify which Qdrant alias they use for their production embeddings registry."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-ge9vmR6ps6JXe9rBOvnSUiE9aOA2wKkR"
+}

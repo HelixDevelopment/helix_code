@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Based on the context provided, the Qdrant alias that holds HelixCode's active production embeddings registry is **Emberkiln-Live**.\n\nThe context explicitly states in point 1 that \"The active production embeddings registry is published under Qdrant alias Emberkiln-Live.\" This directly answers the question about which Qdrant alias holds the active production embeddings registry.\n\nThe deprecated sandbox embeddings registry mentioned in point 2 is a separate Qdrant alias that serves as a non-production"
+      },
+      "finish_reason": "length"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-OzRMnIgXz2QNOm7gGDGUN48JpEVsrDVW"
+}

@@ -1,0 +1,17 @@
+### post-teardown state
+qdrant/tei-embed/tei-rerank containers (expect none):
+  (none — removed)
+coder still running (untouched):
+helixllm-coder Up 2 hours
+GPU state (unchanged by this CPU-only lane):
+19466 MiB, 32607 MiB
+sibling ports 18435-18443 unaffected:
+  :18435 free
+  :18436 free
+  :18437 free
+  :18438 free
+  :18439 free
+  :18440 free
+  :18441 free
+  :18442 free
+  :18443 free

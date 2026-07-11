@@ -1,0 +1,21 @@
+pre-mutation main.go sha256=c4fa85198ca5dacbc7b4720713216506194c4505380ad98d2afef2edc4fad4fd
+838:	res.pass = true // MUTATION §1.1: force-pass to prove the gate is load-bearing
+--- build mutated binary + run selfvalidate against REAL captured good artefacts (must FAIL) ---
+[GOLDEN-GOOD(expect PASS)] PASS reranked_top1=doc_fact_active(score=0.9987, ok=true) tokenFound=true answer="Based on the context provided, the Qdrant alias that holds HelixCode's active production embeddings registry is **Emberkiln-Live**.\n\nThe context explicitly states in point 1 that \"The active production embeddings registry is published under Qdrant alias Emberkiln-Live.\" This directly answers the question about which Qdrant alias holds the active production embeddings registry.\n\nThe deprecated sandbox embeddings registry mentioned in point 2 is a separate Qdrant alias that serves as a non-production"
+[GOLDEN-BAD-NO-FACT(expect FAIL)] PASS reranked_top1=doc_fact_active(score=0.9987, ok=true) tokenFound=false answer="I don't know based on the given context."
+    reason: answer does not contain invented token "Emberkiln-Live"
+    SELF-VALIDATION VIOLATION: no-fact answer PASSed the analyzer
+[GOLDEN-BAD-WRONG-RERANK-TOP1(expect FAIL)] PASS reranked_top1=doc_distractor_deprecated(score=0.9987, ok=false) tokenFound=true answer="Based on the context provided, the Qdrant alias that holds HelixCode's active production embeddings registry is **Emberkiln-Live**.\n\nThe context explicitly states in point 1 that \"The active production embeddings registry is published under Qdrant alias Emberkiln-Live.\" This directly answers the question about which Qdrant alias holds the active production embeddings registry.\n\nThe deprecated sandbox embeddings registry mentioned in point 2 is a separate Qdrant alias that serves as a non-production"
+    reason: post-rerank top-1 "doc_distractor_deprecated" != expected fact-bearing doc "doc_fact_active"
+    SELF-VALIDATION VIOLATION: wrong post-rerank top-1 PASSed the analyzer
+[GOLDEN-BAD-EMPTY-ANSWER(expect FAIL)] PASS reranked_top1=doc_fact_active(score=0.9987, ok=true) tokenFound=false answer=""
+    reason: empty generated answer
+    reason: answer does not contain invented token "Emberkiln-Live"
+    SELF-VALIDATION VIOLATION: empty answer PASSed the analyzer
+[GOLDEN-BAD-ANN-ALREADY-CORRECT(expect rerank-improves FAIL)] ann_top1(mutated)=doc_fact_active reranked_top1=doc_fact_active rerank_improves_claim_would_pass=false
+[SELF-VALIDATION] FAIL
+MUTATED_selfvalidate_exit=1 (MUST be non-zero — gate caught the mutation)
+post-restore main.go sha256=c4fa85198ca5dacbc7b4720713216506194c4505380ad98d2afef2edc4fad4fd
+RESTORE-OK: main.go byte-identical to pre-mutation (§11.4.84 no residue)
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+residual MUTATION markers in main.go: 1 (must be 0)

@@ -1,0 +1,23 @@
+### pre-flight
+date_utc=2026-07-11T14:40:39Z
+uname_m=x86_64  podman=podman version 5.7.1
+coder container (MUST remain running, untouched):
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 2 hours
+coder /v1/models http_code=200
+GPU state (MUST be untouched by this CPU-only lane):
+19466 MiB, 32607 MiB
+target host ports 18460,18461,18462,18463 (expect all free):
+  :18460 free
+  :18461 free
+  :18462 free
+  :18463 free
+sibling lanes 18435-18443 (MUST remain untouched by this run):
+  :18435 free
+  :18436 free
+  :18437 free
+  :18438 free
+  :18439 free
+  :18440 free
+  :18441 free
+  :18442 free
+  :18443 free

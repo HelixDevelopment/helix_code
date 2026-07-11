@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "I don't have access to HelixCode's specific Qdrant configuration details to identify which collection alias serves their primary telemetry index."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-5anx0Yo40LCHtyUz1fuisifmchI4XHwh"
+}

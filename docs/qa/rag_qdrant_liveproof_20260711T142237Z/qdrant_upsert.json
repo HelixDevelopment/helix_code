@@ -1,0 +1,7 @@
+{
+  "collection": "helixrag_qr_20260711T144037Z",
+  "create_response": "{\"result\":true,\"status\":\"ok\",\"time\":0.180993321}",
+  "dim": 384,
+  "points_upserted": 12,
+  "upsert_status": "completed"
+}

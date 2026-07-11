@@ -1,0 +1,12 @@
+### analyzer self-validation (§11.4.107(10)) qkey=q3
+[GOLDEN-GOOD(expect PASS)] PASS reranked_top1=doc_fact_primary(score=1.0000, ok=true) tokenFound=true answer="Based on the context provided, the Qdrant collection alias that serves HelixCode's primary telemetry index is Cindervale-Prime.\n\nThe context states in sentence 1: \"HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.\"\n\nThis directly answers the question by identifying Cindervale-Prime as the specific Qdrant collection alias for the primary telemetry index.\n"
+[GOLDEN-BAD-NO-FACT(expect FAIL)] FAIL reranked_top1=doc_fact_primary(score=1.0000, ok=true) tokenFound=false answer="I don't know based on the given context."
+    reason: answer does not contain invented token "Cindervale-Prime"
+[GOLDEN-BAD-WRONG-RERANK-TOP1(expect FAIL)] FAIL reranked_top1=doc_distractor_staging(score=1.0000, ok=false) tokenFound=true answer="Based on the context provided, the Qdrant collection alias that serves HelixCode's primary telemetry index is Cindervale-Prime.\n\nThe context states in sentence 1: \"HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.\"\n\nThis directly answers the question by identifying Cindervale-Prime as the specific Qdrant collection alias for the primary telemetry index.\n"
+    reason: post-rerank top-1 "doc_distractor_staging" != expected fact-bearing doc "doc_fact_primary"
+[GOLDEN-BAD-EMPTY-ANSWER(expect FAIL)] FAIL reranked_top1=doc_fact_primary(score=1.0000, ok=true) tokenFound=false answer=""
+    reason: empty generated answer
+    reason: answer does not contain invented token "Cindervale-Prime"
+[GOLDEN-BAD-ANN-ALREADY-CORRECT(expect rerank-improves FAIL)] ann_top1(mutated)=doc_fact_primary reranked_top1=doc_fact_primary rerank_improves_claim_would_pass=false
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit_q3=0

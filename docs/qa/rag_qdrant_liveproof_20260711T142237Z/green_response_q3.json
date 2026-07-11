@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Based on the context provided, the Qdrant collection alias that serves HelixCode's primary telemetry index is Cindervale-Prime.\n\nThe context states in sentence 1: \"HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.\"\n\nThis directly answers the question by identifying Cindervale-Prime as the specific Qdrant collection alias for the primary telemetry index.\n"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-rsAeCQRWBLeJQIqT11jqjVGcYeVSeDMV"
+}

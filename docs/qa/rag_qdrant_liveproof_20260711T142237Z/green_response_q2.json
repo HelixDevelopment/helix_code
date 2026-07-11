@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Based on the context provided, the internal HelixCode service that performs cross-encoder reranking of Qdrant search results is called Ashgrove-Sentinel.\n\nThe context explicitly states in the first point: \"The internal HelixCode service that performs cross-encoder reranking of Qdrant search results is called Ashgrove-Sentinel.\""
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-QfsMczS72x2kbABpiPDMaaHUyBgaW8Lm"
+}

@@ -1,0 +1,12 @@
+### analyzer self-validation (§11.4.107(10)) qkey=q4
+[GOLDEN-GOOD(expect PASS)] PASS reranked_top1=doc_fact_active(score=0.9987, ok=true) tokenFound=true answer="Based on the context provided, the Qdrant alias that holds HelixCode's active production embeddings registry is **Emberkiln-Live**.\n\nThe context explicitly states in point 1 that \"The active production embeddings registry is published under Qdrant alias Emberkiln-Live.\" This directly answers the question about which Qdrant alias holds the active production embeddings registry.\n\nThe deprecated sandbox embeddings registry mentioned in point 2 is a separate Qdrant alias that serves as a non-production"
+[GOLDEN-BAD-NO-FACT(expect FAIL)] FAIL reranked_top1=doc_fact_active(score=0.9987, ok=true) tokenFound=false answer="I don't know based on the given context."
+    reason: answer does not contain invented token "Emberkiln-Live"
+[GOLDEN-BAD-WRONG-RERANK-TOP1(expect FAIL)] FAIL reranked_top1=doc_distractor_deprecated(score=0.9987, ok=false) tokenFound=true answer="Based on the context provided, the Qdrant alias that holds HelixCode's active production embeddings registry is **Emberkiln-Live**.\n\nThe context explicitly states in point 1 that \"The active production embeddings registry is published under Qdrant alias Emberkiln-Live.\" This directly answers the question about which Qdrant alias holds the active production embeddings registry.\n\nThe deprecated sandbox embeddings registry mentioned in point 2 is a separate Qdrant alias that serves as a non-production"
+    reason: post-rerank top-1 "doc_distractor_deprecated" != expected fact-bearing doc "doc_fact_active"
+[GOLDEN-BAD-EMPTY-ANSWER(expect FAIL)] FAIL reranked_top1=doc_fact_active(score=0.9987, ok=true) tokenFound=false answer=""
+    reason: empty generated answer
+    reason: answer does not contain invented token "Emberkiln-Live"
+[GOLDEN-BAD-ANN-ALREADY-CORRECT(expect rerank-improves FAIL)] ann_top1(mutated)=doc_fact_active reranked_top1=doc_fact_active rerank_improves_claim_would_pass=false
+[SELF-VALIDATION] PASS: analyzer PASSes golden-good and FAILs all golden-bad fixtures
+selfvalidate_exit_q4=0

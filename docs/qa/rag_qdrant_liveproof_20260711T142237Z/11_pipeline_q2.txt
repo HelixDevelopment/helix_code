@@ -1,0 +1,37 @@
+### qkey=q2 pipeline (collection=helixrag_qr_20260711T144037Z topN=12)
+EMBED-QUERY-OK: qkey=q2 model=BAAI/bge-small-en-v1.5 dim=384 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_qdrant_liveproof_20260711T142237Z/query_embedding_q2.json
+QDRANT-SEARCH-OK: qkey=q2 collection=helixrag_qr_20260711T144037Z top1=doc_fact_service score=0.8672 (of 12 hits) wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_qdrant_liveproof_20260711T142237Z/ann_q2.json
+  ann_rank1 id=doc_fact_service score=0.8672
+  ann_rank2 id=doc_distractor_service score=0.7976
+  ann_rank3 id=doc_fact_collection score=0.7584
+  ann_rank4 id=doc_distractor_collection score=0.7407
+  ann_rank5 id=doc_fact_primary score=0.6998
+  ann_rank6 id=doc_distractor_deprecated score=0.6955
+  ann_rank7 id=doc_distractor_staging score=0.6919
+  ann_rank8 id=doc_ci score=0.6813
+  ann_rank9 id=doc_fact_active score=0.6623
+  ann_rank10 id=doc_coffee score=0.5280
+  ann_rank11 id=doc_revenue score=0.4214
+  ann_rank12 id=doc_cat score=0.3242
+RERANK-OK: qkey=q2 ann_top1=doc_fact_service reranked_top1=doc_fact_service reordered=false wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_qdrant_liveproof_20260711T142237Z/reranked_q2.json
+  rerank_rank1 id=doc_fact_service score=1.0000
+  rerank_rank2 id=doc_distractor_service score=0.9959
+  rerank_rank3 id=doc_fact_collection score=0.7341
+  rerank_rank4 id=doc_fact_primary score=0.2328
+  rerank_rank5 id=doc_distractor_collection score=0.2047
+  rerank_rank6 id=doc_distractor_staging score=0.0269
+  rerank_rank7 id=doc_ci score=0.0041
+  rerank_rank8 id=doc_fact_active score=0.0005
+  rerank_rank9 id=doc_distractor_deprecated score=0.0003
+  rerank_rank10 id=doc_coffee score=0.0000
+  rerank_rank11 id=doc_cat score=0.0000
+  rerank_rank12 id=doc_revenue score=0.0000
+[RERANK-IMPROVES-CHECK] FAIL: qkey=q2 ann_top1=doc_fact_service(wrong=false) reranked_top1=doc_fact_service(right=true) — does not demonstrate a genuine correction
+checkrerankimproves_exit_q2=1
+GREEN answer (qkey=q2, grounded on top-2 RERANKED docs): "Based on the context provided, the internal HelixCode service that performs cross-encoder reranking of Qdrant search results is called Ashgrove-Sentinel.\n\nThe context explicitly states in the first point: \"The internal HelixCode service that performs cross-encoder reranking of Qdrant search results is called Ashgrove-Sentinel.\""
+[GREEN] GREEN-OK: qkey=q2 grounded answer contains invented token "Ashgrove-Sentinel"
+green_exit_q2=0
+[RAG-QDRANT-RERANK-RUNTIME-SIGNATURE] PASS reranked_top1=doc_fact_service(score=1.0000, ok=true) tokenFound=true answer="Based on the context provided, the internal HelixCode service that performs cross-encoder reranking of Qdrant search results is called Ashgrove-Sentinel.\n\nThe context explicitly states in the first point: \"The internal HelixCode service that performs cross-encoder reranking of Qdrant search results is called Ashgrove-Sentinel.\""
+analyze_exit_q2=0
+qkey=q2: GREEN-OK (RAG+Qdrant+rerank runtime signature PASS)
+qkey=q2: rerank-did-not-demonstrably-improve-ordering (real ANN already ranked the fact doc top-1; see 11_pipeline_q2.txt) — honest, not a pipeline failure

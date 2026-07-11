@@ -1,0 +1,14 @@
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "I don't have specific information about the internal HelixCode service name for cross-encoder reranking of Qdrant search results."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "id": "chatcmpl-FjmS22VwlcvuqtrbbMfzdxW4XvNDqkHj"
+}

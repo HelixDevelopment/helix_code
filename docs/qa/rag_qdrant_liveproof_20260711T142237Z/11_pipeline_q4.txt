@@ -1,0 +1,37 @@
+### qkey=q4 pipeline (collection=helixrag_qr_20260711T144037Z topN=12)
+EMBED-QUERY-OK: qkey=q4 model=BAAI/bge-small-en-v1.5 dim=384 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_qdrant_liveproof_20260711T142237Z/query_embedding_q4.json
+QDRANT-SEARCH-OK: qkey=q4 collection=helixrag_qr_20260711T144037Z top1=doc_distractor_deprecated score=0.8541 (of 12 hits) wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_qdrant_liveproof_20260711T142237Z/ann_q4.json
+  ann_rank1 id=doc_distractor_deprecated score=0.8541
+  ann_rank2 id=doc_fact_active score=0.8208
+  ann_rank3 id=doc_distractor_collection score=0.7226
+  ann_rank4 id=doc_fact_collection score=0.7214
+  ann_rank5 id=doc_fact_service score=0.7000
+  ann_rank6 id=doc_ci score=0.6905
+  ann_rank7 id=doc_distractor_service score=0.6798
+  ann_rank8 id=doc_fact_primary score=0.6675
+  ann_rank9 id=doc_distractor_staging score=0.6379
+  ann_rank10 id=doc_coffee score=0.5054
+  ann_rank11 id=doc_revenue score=0.3953
+  ann_rank12 id=doc_cat score=0.3641
+RERANK-OK: qkey=q4 ann_top1=doc_distractor_deprecated reranked_top1=doc_fact_active reordered=true wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_qdrant_liveproof_20260711T142237Z/reranked_q4.json
+  rerank_rank1 id=doc_fact_active score=0.9987
+  rerank_rank2 id=doc_distractor_deprecated score=0.9459
+  rerank_rank3 id=doc_fact_primary score=0.8983
+  rerank_rank4 id=doc_fact_collection score=0.7201
+  rerank_rank5 id=doc_distractor_collection score=0.4568
+  rerank_rank6 id=doc_distractor_service score=0.0929
+  rerank_rank7 id=doc_distractor_staging score=0.0207
+  rerank_rank8 id=doc_fact_service score=0.0153
+  rerank_rank9 id=doc_ci score=0.0002
+  rerank_rank10 id=doc_coffee score=0.0000
+  rerank_rank11 id=doc_cat score=0.0000
+  rerank_rank12 id=doc_revenue score=0.0000
+[RERANK-IMPROVES-CHECK] PASS: qkey=q4 real ANN top1=doc_distractor_deprecated (WRONG, expected doc_fact_active) -> real reranked top1=doc_fact_active (CORRECT) — reranker genuinely fixed the ordering
+checkrerankimproves_exit_q4=0
+GREEN answer (qkey=q4, grounded on top-2 RERANKED docs): "Based on the context provided, the Qdrant alias that holds HelixCode's active production embeddings registry is **Emberkiln-Live**.\n\nThe context explicitly states in point 1 that \"The active production embeddings registry is published under Qdrant alias Emberkiln-Live.\" This directly answers the question about which Qdrant alias holds the active production embeddings registry.\n\nThe deprecated sandbox embeddings registry mentioned in point 2 is a separate Qdrant alias that serves as a non-production"
+[GREEN] GREEN-OK: qkey=q4 grounded answer contains invented token "Emberkiln-Live"
+green_exit_q4=0
+[RAG-QDRANT-RERANK-RUNTIME-SIGNATURE] PASS reranked_top1=doc_fact_active(score=0.9987, ok=true) tokenFound=true answer="Based on the context provided, the Qdrant alias that holds HelixCode's active production embeddings registry is **Emberkiln-Live**.\n\nThe context explicitly states in point 1 that \"The active production embeddings registry is published under Qdrant alias Emberkiln-Live.\" This directly answers the question about which Qdrant alias holds the active production embeddings registry.\n\nThe deprecated sandbox embeddings registry mentioned in point 2 is a separate Qdrant alias that serves as a non-production"
+analyze_exit_q4=0
+qkey=q4: GREEN-OK (RAG+Qdrant+rerank runtime signature PASS)
+qkey=q4: RERANK-IMPROVES-ORDERING DEMONSTRATED (real ANN top-1 was a distractor; cross-encoder promoted the fact doc to top-1)

@@ -1,0 +1,1 @@
+QDRANT-UPSERT-OK: collection=helixrag_qr_20260711T144037Z dim=384 points=12 upsert_status=completed

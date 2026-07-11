@@ -1,0 +1,37 @@
+### qkey=q3 pipeline (collection=helixrag_qr_20260711T144037Z topN=12)
+EMBED-QUERY-OK: qkey=q3 model=BAAI/bge-small-en-v1.5 dim=384 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_qdrant_liveproof_20260711T142237Z/query_embedding_q3.json
+QDRANT-SEARCH-OK: qkey=q3 collection=helixrag_qr_20260711T144037Z top1=doc_fact_collection score=0.9058 (of 12 hits) wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_qdrant_liveproof_20260711T142237Z/ann_q3.json
+  ann_rank1 id=doc_fact_collection score=0.9058
+  ann_rank2 id=doc_fact_primary score=0.8720
+  ann_rank3 id=doc_distractor_collection score=0.8533
+  ann_rank4 id=doc_distractor_staging score=0.8324
+  ann_rank5 id=doc_fact_service score=0.7077
+  ann_rank6 id=doc_ci score=0.6815
+  ann_rank7 id=doc_distractor_deprecated score=0.6603
+  ann_rank8 id=doc_distractor_service score=0.6507
+  ann_rank9 id=doc_fact_active score=0.6364
+  ann_rank10 id=doc_coffee score=0.4952
+  ann_rank11 id=doc_revenue score=0.4120
+  ann_rank12 id=doc_cat score=0.3334
+RERANK-OK: qkey=q3 ann_top1=doc_fact_collection reranked_top1=doc_fact_primary reordered=true wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/rag_qdrant_liveproof_20260711T142237Z/reranked_q3.json
+  rerank_rank1 id=doc_fact_primary score=1.0000
+  rerank_rank2 id=doc_fact_collection score=1.0000
+  rerank_rank3 id=doc_distractor_collection score=0.9998
+  rerank_rank4 id=doc_distractor_staging score=0.9947
+  rerank_rank5 id=doc_distractor_service score=0.5211
+  rerank_rank6 id=doc_fact_service score=0.3057
+  rerank_rank7 id=doc_fact_active score=0.2307
+  rerank_rank8 id=doc_distractor_deprecated score=0.0345
+  rerank_rank9 id=doc_ci score=0.0001
+  rerank_rank10 id=doc_coffee score=0.0000
+  rerank_rank11 id=doc_revenue score=0.0000
+  rerank_rank12 id=doc_cat score=0.0000
+[RERANK-IMPROVES-CHECK] PASS: qkey=q3 real ANN top1=doc_fact_collection (WRONG, expected doc_fact_primary) -> real reranked top1=doc_fact_primary (CORRECT) — reranker genuinely fixed the ordering
+checkrerankimproves_exit_q3=0
+GREEN answer (qkey=q3, grounded on top-2 RERANKED docs): "Based on the context provided, the Qdrant collection alias that serves HelixCode's primary telemetry index is Cindervale-Prime.\n\nThe context states in sentence 1: \"HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.\"\n\nThis directly answers the question by identifying Cindervale-Prime as the specific Qdrant collection alias for the primary telemetry index.\n"
+[GREEN] GREEN-OK: qkey=q3 grounded answer contains invented token "Cindervale-Prime"
+green_exit_q3=0
+[RAG-QDRANT-RERANK-RUNTIME-SIGNATURE] PASS reranked_top1=doc_fact_primary(score=1.0000, ok=true) tokenFound=true answer="Based on the context provided, the Qdrant collection alias that serves HelixCode's primary telemetry index is Cindervale-Prime.\n\nThe context states in sentence 1: \"HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.\"\n\nThis directly answers the question by identifying Cindervale-Prime as the specific Qdrant collection alias for the primary telemetry index.\n"
+analyze_exit_q3=0
+qkey=q3: GREEN-OK (RAG+Qdrant+rerank runtime signature PASS)
+qkey=q3: RERANK-IMPROVES-ORDERING DEMONSTRATED (real ANN top-1 was a distractor; cross-encoder promoted the fact doc to top-1)

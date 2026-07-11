@@ -1,0 +1,1 @@
+DOWN-OK: phase3ragqdrant qdrant+tei-embed+tei-rerank via containers submodule orchestrator

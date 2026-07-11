@@ -1,0 +1,7 @@
+### deep-research note (§11.4.150) — Qdrant hybrid RAG + cross-encoder rerank pattern
+Ref design: docs/research/07.2026/04_embeddings_rag/04_embeddings_rag.md
+  - Vector DB: Qdrant (REST /collections + /points/search, real ANN cosine)
+  - Reranker: bge-reranker-v2-m3-class cross-encoder via HF TEI /rerank endpoint
+  - Pattern: embed -> Qdrant ANN top-N -> cross-encoder rerank -> top-k -> grounded generation
+TEI /rerank confirmed via https://github.com/huggingface/text-embeddings-inference README
+  (curl 127.0.0.1:8080/rerank -d '{"query":...,"texts":[...]}, sequence-classification reranker models).

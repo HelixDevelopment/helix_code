@@ -1,0 +1,3 @@
+phase3ragqdrant_qdrant_1 docker.io/qdrant/qdrant:latest Up 7 seconds 0.0.0.0:18460-18461->6333-6334/tcp
+phase3ragqdrant_tei-embed_1 ghcr.io/huggingface/text-embeddings-inference:cpu-1.9 Up 7 seconds 0.0.0.0:18462->80/tcp
+phase3ragqdrant_tei-rerank_1 ghcr.io/huggingface/text-embeddings-inference:cpu-1.9 Up 7 seconds 0.0.0.0:18463->80/tcp

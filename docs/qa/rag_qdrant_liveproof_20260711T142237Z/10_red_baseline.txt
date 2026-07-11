@@ -1,0 +1,18 @@
+### RED baseline (§11.4.115): coder asked the SAME questions with NO retrieved context
+RED_MODE=1 — expect the coder to NOT know any FRESH invented fact (defect reproduced)
+--- qkey=q1 ---
+RED answer (qkey=q1, no context): "I don't have access to HelixCode's internal Qdrant collection aliases or their specific indexing infrastructure details."
+[RED] RED-OK: qkey=q1 coder did NOT know "Nectarune-Delta7" without context (defect correctly reproduced)
+red_exit_q1=0
+--- qkey=q2 ---
+RED answer (qkey=q2, no context): "I don't have specific information about the internal HelixCode service name for cross-encoder reranking of Qdrant search results."
+[RED] RED-OK: qkey=q2 coder did NOT know "Ashgrove-Sentinel" without context (defect correctly reproduced)
+red_exit_q2=0
+--- qkey=q3 ---
+RED answer (qkey=q3, no context): "I don't have access to HelixCode's specific Qdrant configuration details to identify which collection alias serves their primary telemetry index."
+[RED] RED-OK: qkey=q3 coder did NOT know "Cindervale-Prime" without context (defect correctly reproduced)
+red_exit_q3=0
+--- qkey=q4 ---
+RED answer (qkey=q4, no context): "I don't have access to HelixCode's internal system information or their specific Qdrant alias configurations, so I cannot identify which Qdrant alias they use for their production embeddings registry."
+[RED] RED-OK: qkey=q4 coder did NOT know "Emberkiln-Live" without context (defect correctly reproduced)
+red_exit_q4=0

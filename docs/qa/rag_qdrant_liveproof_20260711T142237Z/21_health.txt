@@ -1,0 +1,1 @@
+[14:40:48] health OK after 3 polls (qdrant=200 tei-embed=200 tei-rerank=200)

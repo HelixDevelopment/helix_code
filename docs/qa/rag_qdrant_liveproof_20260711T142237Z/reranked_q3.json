@@ -1,0 +1,129 @@
+{
+  "query": "Which Qdrant collection alias serves HelixCode's primary telemetry index?",
+  "qkey": "q3",
+  "collection": "helixrag_qr_20260711T144037Z",
+  "ann_ranked": [
+    {
+      "id": "doc_fact_collection",
+      "text": "The Qdrant collection alias for HelixCode's primary retrieval-augmented telemetry index is Nectarune-Delta7.",
+      "score": 0.90580434
+    },
+    {
+      "id": "doc_fact_primary",
+      "text": "HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.",
+      "score": 0.8719914
+    },
+    {
+      "id": "doc_distractor_collection",
+      "text": "The Qdrant collection alias for HelixCode's regional staging retrieval-augmented telemetry index is Opaline-Foxglove3, kept separate from the primary index for testing.",
+      "score": 0.85330236
+    },
+    {
+      "id": "doc_distractor_staging",
+      "text": "HelixCode's staging telemetry index is the non-primary counterpart of the primary telemetry index; this staging telemetry index is a separate Qdrant collection kept apart from the primary telemetry index and used only for pre-release testing of the telemetry index.",
+      "score": 0.8323932
+    },
+    {
+      "id": "doc_fact_service",
+      "text": "The internal HelixCode service that performs cross-encoder reranking of Qdrant search results is called Ashgrove-Sentinel.",
+      "score": 0.70768607
+    },
+    {
+      "id": "doc_ci",
+      "text": "The HelixCode continuous integration pipeline runs unit tests before every merge to main.",
+      "score": 0.6814778
+    },
+    {
+      "id": "doc_distractor_deprecated",
+      "text": "The deprecated sandbox embeddings registry is the non-production sibling of the active production embeddings registry; this deprecated embeddings registry is a separate Qdrant alias, retained only for archival and never used as the active production embeddings registry.",
+      "score": 0.6602774
+    },
+    {
+      "id": "doc_distractor_service",
+      "text": "The internal HelixCode service that performs the initial bi-encoder embedding of documents before they reach Qdrant search is called Ashgrove-Primer, a separate stage from reranking.",
+      "score": 0.6506873
+    },
+    {
+      "id": "doc_fact_active",
+      "text": "The active production embeddings registry is published under Qdrant alias Emberkiln-Live.",
+      "score": 0.636361
+    },
+    {
+      "id": "doc_coffee",
+      "text": "Coffee brewing techniques improve flavor extraction using controlled water temperature.",
+      "score": 0.4951719
+    },
+    {
+      "id": "doc_revenue",
+      "text": "Quarterly revenue rose four percent.",
+      "score": 0.41201743
+    },
+    {
+      "id": "doc_cat",
+      "text": "The cat sat on the mat.",
+      "score": 0.333385
+    }
+  ],
+  "reranked": [
+    {
+      "id": "doc_fact_primary",
+      "text": "HelixCode's primary telemetry index is served from Qdrant collection alias Cindervale-Prime.",
+      "score": 0.9999664
+    },
+    {
+      "id": "doc_fact_collection",
+      "text": "The Qdrant collection alias for HelixCode's primary retrieval-augmented telemetry index is Nectarune-Delta7.",
+      "score": 0.9999652
+    },
+    {
+      "id": "doc_distractor_collection",
+      "text": "The Qdrant collection alias for HelixCode's regional staging retrieval-augmented telemetry index is Opaline-Foxglove3, kept separate from the primary index for testing.",
+      "score": 0.9998072
+    },
+    {
+      "id": "doc_distractor_staging",
+      "text": "HelixCode's staging telemetry index is the non-primary counterpart of the primary telemetry index; this staging telemetry index is a separate Qdrant collection kept apart from the primary telemetry index and used only for pre-release testing of the telemetry index.",
+      "score": 0.99474925
+    },
+    {
+      "id": "doc_distractor_service",
+      "text": "The internal HelixCode service that performs the initial bi-encoder embedding of documents before they reach Qdrant search is called Ashgrove-Primer, a separate stage from reranking.",
+      "score": 0.5210638
+    },
+    {
+      "id": "doc_fact_service",
+      "text": "The internal HelixCode service that performs cross-encoder reranking of Qdrant search results is called Ashgrove-Sentinel.",
+      "score": 0.30573052
+    },
+    {
+      "id": "doc_fact_active",
+      "text": "The active production embeddings registry is published under Qdrant alias Emberkiln-Live.",
+      "score": 0.23067096
+    },
+    {
+      "id": "doc_distractor_deprecated",
+      "text": "The deprecated sandbox embeddings registry is the non-production sibling of the active production embeddings registry; this deprecated embeddings registry is a separate Qdrant alias, retained only for archival and never used as the active production embeddings registry.",
+      "score": 0.03454017
+    },
+    {
+      "id": "doc_ci",
+      "text": "The HelixCode continuous integration pipeline runs unit tests before every merge to main.",
+      "score": 0.00009004833
+    },
+    {
+      "id": "doc_coffee",
+      "text": "Coffee brewing techniques improve flavor extraction using controlled water temperature.",
+      "score": 0.000037429672
+    },
+    {
+      "id": "doc_revenue",
+      "text": "Quarterly revenue rose four percent.",
+      "score": 0.00003739767
+    },
+    {
+      "id": "doc_cat",
+      "text": "The cat sat on the mat.",
+      "score": 0.000037362377
+    }
+  ]
+}
