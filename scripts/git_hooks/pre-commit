@@ -266,6 +266,34 @@ if [ -n "$mutation_hits" ]; then
   block=1
 fi
 
+# ---------------------------------------------------------------------------
+# 4. §11.4.135 / §11.4.138 — key-shaped-secret content scan over STAGED
+#    CONTENT (scripts/secret_scan.sh --staged), closing the committed-key
+#    leak class (forensic anchor: commit 41372967 / docs/qa/
+#    SECURITY_INCIDENT_gemini_key_leak_20260711.md — a real Google API key
+#    was committed in a docs/qa/*.md evidence file; scripts/scan-secrets.sh
+#    already existed but was wired ONLY to the pre-push hook, so nothing
+#    blocked the COMMIT itself). Scans the staged git blobs (what is about
+#    to be committed), not the working tree. Never prints the matched
+#    secret value — only "<file>:<line>".
+# ---------------------------------------------------------------------------
+SECRET_SCANNER="$REPO_ROOT/scripts/secret_scan.sh"
+if [ -x "$SECRET_SCANNER" ]; then
+  secret_scan_output=$("$SECRET_SCANNER" --staged 2>&1)
+  secret_scan_rc=$?
+  if [ "$secret_scan_rc" -ne 0 ]; then
+    {
+      echo ""
+      echo "============================================================"
+      echo "BLOCKED by pre-commit hook (§11.4.135/§11.4.138 secret scan)"
+      echo "============================================================"
+      printf '%s\n' "$secret_scan_output"
+      echo "============================================================"
+    } >&2
+    block=1
+  fi
+fi
+
 if [ "$block" -eq 1 ]; then
   exit 1
 fi
