@@ -43,7 +43,7 @@ HTTP 200
 `helix_code/internal/llm/gemini_provider.go`
 
 ### API key
-`GEMINI_API_KEY=AIzaSyCMD4gp0sjfW7ryjsw2sN9BoVYpBVqw8Lg` (from `.env` + env var)
+`GEMINI_API_KEY=<REDACTED-GEMINI-KEY-CONST-042-rotate-required-see-Issues>` (from `.env` + env var)
 
 ### Result: KEY INVALID — 400
 Both native and OpenAI-compatible endpoints reject:
