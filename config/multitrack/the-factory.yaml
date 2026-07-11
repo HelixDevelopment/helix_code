@@ -1,0 +1,106 @@
+# Per-host multi-track config for helix_code (§11.4.187 / §11.4.176 / §11.4.178).
+# The project-agnostic engine at constitution/scripts/multitrack/ consumes THIS
+# file as DATA (§11.4.28(B) / §11.4.35). ONE file per host; committed to git.
+# Filename = <hostname>.yaml.
+#
+# helix_code COEXISTS with atmosphere + helix_ota on these /mnt/track<N> parents
+# (§11.4.178 multi-project-per-track). The track DRIVES are ATMOSphere-owned
+# encrypted btrfs volumes — helix_code NEVER formats / partitions / manages them;
+# it only creates + uses its OWN project subdir. The conductor (claude2, this
+# session) stays on the shared /home checkout and is NEVER worktree-bound
+# (§11.4.177). helix_code is a Go server/CLI/LLM platform: it has NO physical
+# Android test-device pool (unlike ATMOSphere); its live "sink" is the coder
+# service on :18434 (read-only). No device leasing.
+
+schema_version: 1
+
+host:
+  hostname: the-factory
+  machine_id: "199b17d394dc3ebb"   # first 16 of /etc/machine-id (disambiguation)
+
+# NEVER format/partition/encrypt — hard protect-guard keyed on stable serial
+# (§11.4.111). The system drive + every ATMOSphere-owned track drive; helix_code
+# coexists as a subdir only and never manages these.
+protected_drives:
+  - serial: "S7HDNJ0Y900101Y"
+    reason: "system + home + encrypted Factory — NEVER a track drive"
+# NOTE: the four ATMOSphere-owned track drives (nvme1-4) are USED as tracks below
+# (tracks[].drive_serial), so they are NOT protected here (a drive cannot be both
+# protected-from-use and a track). helix_code still NEVER formats/partitions them
+# — it only creates + uses its own project subdir under each already-live mount.
+
+# track-1 = main (never worktree-bound — git forbids the main branch in two
+# worktrees; the conductor coordinates from /home). track-2..4 = feature streams
+# for owned-submodule / feature work (§11.4.28 equal-codebase). Mounts are the
+# already-live ATMOSphere btrfs drives; helix_code's per-track checkout is
+# created under each mount per docs/guides/MULTITRACK_WORKTREE_RUNBOOK.md.
+tracks:
+  - id: track-1
+    role: main
+    branch: feature/helixllm-full-extension
+    drive_serial: "S7HDNJ0Y900098B"
+    fs: btrfs
+    mount: /mnt/track1
+    focus: "main — current working items; conductor (claude2) coordinates from /home, track-1/main never worktree-bound"
+  - id: track-2
+    role: feature
+    branch_pattern: "feature/*"
+    drive_serial: "S7HDNJ0Y900121H"
+    fs: btrfs
+    mount: /mnt/track2
+    focus: "owned-submodule / feature work-stream A (§11.4.28 equal-codebase)"
+  - id: track-3
+    role: feature
+    branch_pattern: "feature/*"
+    drive_serial: "S7HDNJ0Y900124L"
+    fs: btrfs
+    mount: /mnt/track3
+    focus: "owned-submodule / feature work-stream B (§11.4.28 equal-codebase)"
+  - id: track-4
+    role: feature
+    branch_pattern: "feature/*"
+    drive_serial: "S7HDNJ0Y900107J"
+    fs: btrfs
+    mount: /mnt/track4
+    focus: "owned-submodule / feature work-stream C (§11.4.28 equal-codebase)"
+
+# helix_code is a software platform — no physical test-device pool, no leasing.
+device_pool: []
+lease_policy: {}
+
+# Claude-Toolkit alias roster (REM-18 — NAMES ONLY, never keys/tokens; keys live
+# in the host's gitignored api_keys.sh, §11.4.10). claude3 + claude4 are HELD BY
+# LIVE ATMOSphere (§11.4.174) — present for the roster, but the orchestrator must
+# not double-bind them cross-project while ATMOSphere holds them.
+aliases:
+  - name: claude1
+    kind: native      # distinct Claude Max subscription
+  - name: claude2
+    kind: native      # CONDUCTOR (this session) — stays on /home, never bound
+  - name: claude3
+    kind: native      # currently held by live ATMOSphere
+  - name: claude4
+    kind: native      # currently held by live ATMOSphere
+  - name: deepseek
+    kind: provider
+  - name: opencode
+    kind: provider
+  - name: kimi-for-coding
+    kind: provider
+
+# §11.4.177 auto-conductor: claude2 (this session) stays on the shared /home
+# checkout and is NEVER worktree-bound (operator-designated, 2026-07-11/12).
+conductor: claude2
+
+# Per-track worktree subdir under a track mount (worktree = <mount>/<subdir>).
+# Base name = the project dir name (§11.4.29 lowercase snake_case). The per-track
+# -t<N> checkouts (/mnt/track<N>/helix_code-t<N>) are created per the worktree
+# runbook and recorded in the orchestrator bindings (which the resolver honors).
+worktree_subdir: helix_code
+
+# §11.4.177 auto-fallback: rate-limit transcript signatures the monitor matches
+# to trigger orchestrator fallback (consumer-overridable, §11.4.10 no keys).
+fallback:
+  signatures:
+    - '"apiErrorStatus":429'
+    - '"isApiErrorMessage":true'
