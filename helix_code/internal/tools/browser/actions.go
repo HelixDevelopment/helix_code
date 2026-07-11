@@ -218,6 +218,23 @@ func (e *DefaultActionExecutor) Scroll(ctx context.Context, browserID string, op
 }
 
 // Evaluate evaluates JavaScript
+//
+// §11.4.120 (2026-07-11, HXC test-fix pass): the function's own error
+// return was PREVIOUSLY always nil regardless of the underlying
+// chromedp.Run outcome — the real failure was stashed only in
+// EvaluateResult.Error, unlike every other ActionExecutor method
+// (Navigate, Click, Type, Scroll, GetElement, GetElements, GetPageInfo),
+// which all return the real error via the standard (T, error) idiom.
+// That inconsistency let a genuine execution failure (e.g. context
+// deadline exceeded) surface only as a nil EvaluateResult.Value with a
+// caller-visible err == nil, masking the real cause from any caller
+// doing the idiomatic `if err != nil` check (this is exactly what made
+// TestBrowserActions/evaluate_javascript's real failure look like an
+// unexplained nil value instead of the actual deadline-exceeded error).
+// Fixed: return the real chromedp.Run error as the function's own
+// error, matching every sibling method's contract. EvaluateResult.Error
+// is retained (unchanged field) for callers that want it alongside
+// Value/Type without re-deriving it from the returned error.
 func (e *DefaultActionExecutor) Evaluate(ctx context.Context, browserID, script string) (*EvaluateResult, error) {
 	browserCtx, _, err := e.controller.GetContext(browserID)
 	if err != nil {
@@ -225,7 +242,7 @@ func (e *DefaultActionExecutor) Evaluate(ctx context.Context, browserID, script 
 	}
 
 	var result interface{}
-	err = chromedp.Run(browserCtx,
+	runErr := chromedp.Run(browserCtx,
 		chromedp.Evaluate(script, &result),
 	)
 
@@ -237,8 +254,8 @@ func (e *DefaultActionExecutor) Evaluate(ctx context.Context, browserID, script 
 	return &EvaluateResult{
 		Value: result,
 		Type:  resultType,
-		Error: err,
-	}, nil
+		Error: runErr,
+	}, runErr
 }
 
 // GetElement gets an element

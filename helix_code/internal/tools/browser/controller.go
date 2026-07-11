@@ -180,11 +180,36 @@ func (c *DefaultController) Launch(ctx context.Context, opts *LaunchOptions) (*B
 	// Create allocator context
 	allocCtx, allocCancel := chromedp.NewExecAllocator(ctx, allocOpts...)
 
-	// Create browser context with timeout
+	// Create browser context with timeout.
+	//
+	// §11.4.120 root-cause fix (2026-07-11, HXC test-fix pass): opts.Timeout
+	// (30s via DefaultLaunchOptions) previously applied UNCONDITIONALLY as
+	// the browser session's hard lifetime deadline, silently overriding and
+	// SHRINKING a more generous caller-supplied ctx deadline. Root cause of
+	// TestBrowserActions' 4/6-subtest failure: browserCtx was derived from
+	// allocCtx via context.WithTimeout(allocCtx, opts.Timeout) REGARDLESS
+	// of ctx's own deadline, so the 30s default silently became the
+	// effective ceiling for the ENTIRE session (shared by every subsequent
+	// GetContext()-derived action via chromedp.Run) even though the test's
+	// caller-supplied ctx explicitly budgeted 180s. Combined with this
+	// host's slow headless-Chrome cold start (~25s for the first real
+	// navigation, confirmed independently via the raw `chromium --headless
+	// --dump-dom` CLI outside Go/chromedp entirely), the 30s ceiling was
+	// exhausted after ~1.5 subtests, and every action after that failed
+	// deterministically with "context deadline exceeded" — a real
+	// architecture bug, not test flakiness.
+	//
+	// Fix: opts.Timeout now applies ONLY as a fallback safety-net when the
+	// caller's ctx carries no deadline of its own. When ctx already has a
+	// deadline, that deadline is authoritative — it propagates through
+	// allocCtx (chromedp.NewExecAllocator wraps context.WithCancel(ctx),
+	// which preserves ancestor deadlines) into browserCtx via
+	// context.WithCancel, and MUST NOT be silently shrunk by the
+	// LaunchOptions default.
 	var browserCtx context.Context
 	var browserCancel context.CancelFunc
 
-	if opts.Timeout > 0 {
+	if _, callerHasDeadline := ctx.Deadline(); !callerHasDeadline && opts.Timeout > 0 {
 		browserCtx, browserCancel = context.WithTimeout(allocCtx, opts.Timeout)
 	} else {
 		browserCtx, browserCancel = context.WithCancel(allocCtx)
