@@ -245,24 +245,91 @@ fi
 #          never inferred — a file that does not carry this exact marker
 #          gets ZERO benefit of the doubt, so real (non-test) files are
 #          completely unaffected by this exemption.
-#      (b) PROVEN restore idiom — carries a `trap ... EXIT` wired to a
-#          command that visibly restores a backup (`cp ... BACKUP` /
-#          `git checkout --`), so a file can only claim the exemption if
-#          it actually implements the mutate -> assert -> restore
-#          discipline §11.4.84 demands, not merely assert it in prose.
-#          This closes the abuse case where a bare opt-in comment alone
-#          would let any real residue commit slip through unrestored.
+#      (b) PROVEN restore idiom, SEMANTICALLY WIRED (tightened 2026-07-11
+#          follow-up review): a `trap <target> EXIT` line where <target>
+#          is EITHER an inline command containing the restore call itself
+#          OR a named function whose OWN body (not merely "somewhere else
+#          in the file") contains a `cp ... backup ...` / `git checkout --`
+#          restore call. Requiring the restore command to live INSIDE the
+#          trap's actual target — rather than the two earlier independent
+#          greps ("a trap...EXIT line exists somewhere" AND "a cp...backup
+#          line exists somewhere", regardless of whether they're related —
+#          closes the abuse case where an UNRELATED cp of an UNRELATED
+#          "backup"-named file elsewhere in the same staged file could
+#          satisfy both greps without the trap actually restoring anything.
 #    A file satisfying (a) but not (b) (or vice-versa) is NOT exempt and
 #    is BLOCKED exactly as before this fix.
+#
+#    Every GRANTED exemption emits an auditable NOTICE to stderr (2026-07-11
+#    follow-up) — never writes to the tree mid-commit (that would itself be
+#    a §11.4.84 residue risk) — so a human reviewing hook output always sees
+#    exactly which staged file(s) were exempted and why, rather than the
+#    exemption being silent.
+#
+#    Honest limitation (§11.4.6): this remains a TEXTUAL / heuristic check,
+#    not a full semantic proof that the restore idiom actually executes
+#    correctly at runtime (that would require actually invoking the staged
+#    script in a sandbox and observing it restore a real mutated file,
+#    which is not cleanly doable from a pre-commit hook operating on a
+#    staged blob that may not even be executable yet, may depend on
+#    repo-relative paths that don't exist in isolation, etc.). The
+#    function-body scoping above is a genuine tightening — it requires the
+#    restore call to be REACHABLE from the trap's own target, not merely
+#    present anywhere in the file — but a sufficiently deliberate staged
+#    file could still satisfy the shape without the idiom being correct.
+#    This residual gap is accepted and documented rather than silently
+#    claimed closed.
 # ---------------------------------------------------------------------------
 is_mutation_test_exempt() {
   # $1 = staged blob content of a file that already matched a residue
   # marker. Returns 0 (exempt) only if BOTH the explicit opt-in header AND
-  # the proven trap+restore idiom are present.
+  # the semantically-scoped restore idiom (see above) are present.
   local blob="$1"
   printf '%s' "$blob" | grep -qF '11.4.84-mutation-test-exempt' || return 1
-  printf '%s' "$blob" | grep -qE 'trap[[:space:]].*EXIT' || return 1
-  printf '%s' "$blob" | grep -qiE 'cp[[:space:]].*backup|git checkout --' || return 1
+
+  local trap_line trap_target
+  trap_line=$(printf '%s\n' "$blob" | grep -E 'trap[[:space:]].*EXIT' | head -1)
+  [ -z "$trap_line" ] && return 1
+
+  # Named-function form: `trap cleanup EXIT` / `trap "cleanup" EXIT`.
+  trap_target=$(printf '%s' "$trap_line" | sed -nE "s/.*trap[[:space:]]+['\"]?([A-Za-z_][A-Za-z0-9_]*)['\"]?[[:space:]]+EXIT.*/\1/p")
+
+  if [ -n "$trap_target" ]; then
+    # Extract the trap TARGET function's own body — handles both a
+    # multi-line function (`fn() {` ... `}` on its own line) and a
+    # one-liner (`fn() { ...; }` all on one line) — and require the
+    # restore call to live INSIDE that specific body, not merely anywhere
+    # else in the staged file.
+    local func_body
+    func_body=$(printf '%s\n' "$blob" | awk -v fn="$trap_target" '
+      BEGIN { infn = 0 }
+      {
+        if (!infn && $0 ~ ("^" fn "\\(\\)[[:space:]]*\\{")) {
+          line = $0
+          sub("^" fn "\\(\\)[[:space:]]*\\{", "", line)
+          if (line ~ /\}[[:space:]]*$/) {
+            sub(/\}[[:space:]]*$/, "", line)
+            print line
+            infn = 0
+          } else {
+            print line
+            infn = 1
+          }
+          next
+        }
+        if (infn) {
+          if ($0 ~ /^[[:space:]]*\}[[:space:]]*$/) { infn = 0; next }
+          print
+        }
+      }
+    ')
+    printf '%s' "$func_body" | grep -qiE 'cp[[:space:]].*backup|git checkout --' || return 1
+  else
+    # Inline trap command form: `trap 'cp ... BACKUP ...' EXIT` — the
+    # restore call must appear IN THE TRAP LINE ITSELF.
+    printf '%s' "$trap_line" | grep -qiE 'cp[[:space:]].*backup|git checkout --' || return 1
+  fi
+
   return 0
 }
 
@@ -277,6 +344,9 @@ while IFS= read -r f; do
   blob=$(git show ":$f" 2>/dev/null) || continue
   if printf '%s' "$blob" | grep -qE 'MUTATED for paired|// always pass|# always pass|MUTATION-RESIDUE|_mutated_'; then
     if is_mutation_test_exempt "$blob"; then
+      # §11.4.84 audit trail: log the grant to stderr (never to the tree —
+      # writing a file mid-commit would itself risk leaving residue).
+      echo "NOTICE (§11.4.84 audit): mutation-test exemption granted for staged file: $f" >&2
       continue   # explicitly-marked + trap-restored mutation-test file: not residue
     fi
     mutation_hits="${mutation_hits}\n  ${f}"
