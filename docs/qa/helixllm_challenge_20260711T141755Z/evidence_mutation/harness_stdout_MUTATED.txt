@@ -1,0 +1,5 @@
+CASE fixed_1: FAIL nums=[2, 7, 11, 15] target=9 got=[0, 0] expect_indices=[0, 1]
+CASE fixed_2: FAIL nums=[3, 2, 4] target=6 got=[0, 0] expect_indices=[1, 2]
+CASE fixed_3: FAIL nums=[3, 3] target=6 got=[0, 0] expect_indices=[0, 1]
+CASE random_4: FAIL nums=[315, 58, 238, -63] target=553 got=[0, 0] expect_indices=[0, 2]
+OVERALL: FAIL

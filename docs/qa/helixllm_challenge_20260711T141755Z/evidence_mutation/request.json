@@ -1,0 +1,15 @@
+{
+  "model": "/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a precise Python coding assistant. Output ONLY a single fenced ```python code block containing exactly one function definition named two_sum(nums, target). No prose, no explanation, no example usage outside the code block."
+    },
+    {
+      "role": "user",
+      "content": "Write a Python function `two_sum(nums, target)` that returns a list of the two 0-based indices of the two distinct elements in `nums` that add up to `target`. Assume exactly one valid pair exists and you must not reuse the same index twice. Return ONLY a fenced python code block with the function definition — no tests, no explanation, no extra text."
+    }
+  ],
+  "temperature": 0.1,
+  "max_tokens": 500
+}

@@ -1,0 +1,14 @@
+HelixLLM Coder Live End-to-End Challenge — SUMMARY
+run_token=helixllm20260711T141801Z3052234
+date_utc=2026-07-11T14:18:01Z
+base_url=http://localhost:18434
+model=/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf
+completion_tokens=55
+random_vector: nums=[76,-410,-73,-291] target=-701 expect_indices=(3,1)
+verdict=PASS
+
+evidence files:
+  request.json         — exact HTTP request sent to the live coder
+  response.json        — exact HTTP response received from the live coder
+  solution.py           — code extracted from the response
+  harness_stdout.txt    — real python3 execution output (per-vector PASS/FAIL)

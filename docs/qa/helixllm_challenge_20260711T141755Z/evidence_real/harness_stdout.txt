@@ -1,0 +1,5 @@
+CASE fixed_1: PASS nums=[2, 7, 11, 15] target=9 got=[0, 1] expect_indices=[0, 1]
+CASE fixed_2: PASS nums=[3, 2, 4] target=6 got=[1, 2] expect_indices=[1, 2]
+CASE fixed_3: PASS nums=[3, 3] target=6 got=[0, 1] expect_indices=[0, 1]
+CASE random_4: PASS nums=[76, -410, -73, -291] target=-701 got=[1, 3] expect_indices=[1, 3]
+OVERALL: PASS
