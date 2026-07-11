@@ -1,0 +1,5 @@
+# Raw generated artifact — regenerable via ../../../submodules/helix_llm/docs/qa/
+# phase4_imagegen_20260707/harness/genproof (§11.4.77). Per this task's explicit
+# instruction (§11.4.30 no binary artifacts committed) the raw PNG is gitignored
+# here; RESULTS.md is the committed, curated evidence and references this path.
+*.png
