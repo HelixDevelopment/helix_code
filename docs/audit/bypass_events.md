@@ -1,0 +1,1 @@
+- 2026-07-11 commit 358ddc13 --no-verify: §11.4.84 residue-check false-positive on scripts/secret_scan_test.sh (mutation-test file legitimately holds the marker string); both files verified secret-clean via scripts/secret_scan.sh exit 0. Follow-up: exempt mutation-test files from residue check.
