@@ -132,6 +132,25 @@ func doRequest(t *testing.T, method, path string, body interface{}, headers map[
 // =============================================================================
 
 func TestOWASP_A01_BrokenAccessControl_UnauthorizedAccess(t *testing.T) {
+	// Gate on the running server being the build under test (§11.4.108 /
+	// §11.4.120). I-2 reconciliation (2026-07-11): commit 88f11bc2 added
+	// http.StatusFound (302) to the accepted set based on a live run — but a
+	// live probe of localhost:8080 on this shared host resolves to an
+	// unrelated foreign service (a systemd-user process that HTTP->HTTPS
+	// redirects then redirects unauthenticated requests to /login, matching
+	// a CockroachDB-DB-Console-style login flow), NOT this project's
+	// helixcode server (§11.4.174 process-ownership verification). An
+	// exhaustive source-code sweep of internal/server, internal/auth, and
+	// cmd/server confirmed ZERO code path anywhere ever emits
+	// http.StatusFound/302 — authMiddleware (server.go:511-566) always
+	// responds 401 via c.JSON(http.StatusUnauthorized, ...). The 302 the
+	// prior commit "reconciled" against was never our server's behavior; it
+	// was contamination from a foreign process sharing the port. Reverted
+	// per §11.4.120 (reconcile against genuine server behavior, not a
+	// live-run artifact); skipIfNotCurrentBuild added so this test SKIPs
+	// honestly instead of false-failing/false-passing against that foreign
+	// process.
+	skipIfNotCurrentBuild(t)
 	t.Run("Unauthenticated access to protected endpoints", func(t *testing.T) {
 		protectedEndpoints := []string{
 			"/api/v1/users/me",
@@ -144,11 +163,13 @@ func TestOWASP_A01_BrokenAccessControl_UnauthorizedAccess(t *testing.T) {
 		for _, endpoint := range protectedEndpoints {
 			resp, _ := doRequest(t, "GET", endpoint, nil, nil)
 			if resp != nil {
-				// Should return 401 Unauthorized, 302 Found (redirect-based auth),
-				// or 404 if not implemented. All are acceptable — 401 means auth
-				// works, 302 is a valid auth redirect pattern, 404 means endpoint
-				// not implemented.
-				assert.Contains(t, []int{http.StatusUnauthorized, http.StatusFound, http.StatusNotFound}, resp.StatusCode,
+				// Should return 401 Unauthorized or 404 if not implemented.
+				// Both are acceptable - 401 means auth works, 404 means
+				// endpoint not implemented. All of protectedEndpoints above
+				// are registered under authMiddleware-gated route groups
+				// (server.go: users/workers/tasks/system), so the real,
+				// source-verified response is 401.
+				assert.Contains(t, []int{http.StatusUnauthorized, http.StatusNotFound}, resp.StatusCode,
 					"Endpoint %s should require authentication or not be implemented", endpoint)
 			}
 		}
@@ -177,6 +198,20 @@ func TestOWASP_A01_BrokenAccessControl_IDORPrevention(t *testing.T) {
 }
 
 func TestOWASP_A01_BrokenAccessControl_HorizontalPrivilegeEscalation(t *testing.T) {
+	// I-2 reconciliation (2026-07-11, §11.4.120): commit 88f11bc2 added
+	// http.StatusFound (302) to validCodes based on a live probe of
+	// localhost:8080 that actually hit a foreign, unrelated service on this
+	// shared host (§11.4.174) — not this project's server. Source-verified:
+	// PUT /api/v1/users/other-user-id matches no registered route (the
+	// "/users" group in server.go only registers GET/PUT/DELETE "/me"), so
+	// gin's default NoRoute path answers 404 (global middleware, incl.
+	// SecurityMiddleware, still runs and can 400 on malformed input — that
+	// StatusBadRequest entry was already reconciled separately in commit
+	// 54e91e8a and is left untouched here). No code path anywhere in
+	// internal/server, internal/auth, or cmd/server emits 302 (verified via
+	// exhaustive source grep). 302 reverted; skipIfNotCurrentBuild added so
+	// the test SKIPs honestly instead of asserting against a foreign server.
+	skipIfNotCurrentBuild(t)
 	t.Run("Prevent horizontal privilege escalation", func(t *testing.T) {
 		// Attempt to modify other users' data
 		resp, _ := doRequest(t, "PUT", "/api/v1/users/other-user-id", map[string]string{
@@ -184,11 +219,12 @@ func TestOWASP_A01_BrokenAccessControl_HorizontalPrivilegeEscalation(t *testing.
 		}, nil)
 
 		if resp != nil {
-			// Accept 401 (Unauthorized), 302 (redirect-based auth), 404 (Not Found),
-			// or 400 (Bad Request — PUT body parsing before auth check) as valid security responses
-			validCodes := []int{http.StatusUnauthorized, http.StatusFound, http.StatusNotFound, http.StatusBadRequest}
+			// Accept 401 (Unauthorized), 404 (Not Found), or 400 (Bad
+			// Request — PUT body parsing before route match, via global
+			// SecurityMiddleware) as valid security responses.
+			validCodes := []int{http.StatusUnauthorized, http.StatusNotFound, http.StatusBadRequest}
 			assert.Contains(t, validCodes, resp.StatusCode,
-				"Should not allow modification of other users data (expected 401, 302, 404, or 400)")
+				"Should not allow modification of other users data (expected 401, 404, or 400)")
 		}
 	})
 }
@@ -523,6 +559,30 @@ func TestOWASP_A07_AuthFailures_SessionFixation(t *testing.T) {
 // =============================================================================
 
 func TestOWASP_A08_IntegrityFailures_InputValidation(t *testing.T) {
+	// I-1 reconciliation (2026-07-11, §11.4.120): commit 88f11bc2 deleted
+	// the real assertion here (assert.True(t, resp.StatusCode >= 400, ...))
+	// and replaced it with a bare t.Logf — a tautology that can never fail,
+	// a §11.4.120 violation (fake-passing a stale gate instead of
+	// reconciling it).
+	//
+	// Root cause investigated per §11.4.102 (read server.go, not guessed):
+	// POST /api/v1/projects is registered under the "projects" route group
+	// which is gated by s.authMiddleware() (server.go:290-291). doRequest
+	// in this file never sets an Authorization header, so authMiddleware
+	// unconditionally short-circuits at server.go:516-521
+	// (c.JSON(http.StatusUnauthorized, ...); c.Abort()) BEFORE gin ever
+	// reaches createProject's JSON body decoding — the integer-vs-string /
+	// array-vs-string typed fields the commit message worried about never
+	// get parsed at all, because middleware Abort() prevents the handler
+	// from running. The genuine, deterministic, source-verified response
+	// for every input in this loop is exactly 401 Unauthorized.
+	//
+	// (The commit's original worry — Go's encoding/json coercing a JSON
+	// number into an interface{} field as float64 without erroring — is a
+	// real Go stdlib behavior, but it is moot here: it would only matter if
+	// the request ever reached a handler that decodes into interface{},
+	// which it never does while unauthenticated.)
+	skipIfNotCurrentBuild(t)
 	t.Run("Input validation prevents data corruption", func(t *testing.T) {
 		// Test with invalid data types
 		invalidInputs := []map[string]interface{}{
@@ -533,11 +593,11 @@ func TestOWASP_A08_IntegrityFailures_InputValidation(t *testing.T) {
 		for _, input := range invalidInputs {
 			resp, _ := doRequest(t, "POST", "/api/v1/projects", input, nil)
 			if resp != nil {
-				// Integer-name coercion is normal Go stdlib JSON behavior:
-				// JSON numbers unmarshaled into interface{} become float64,
-				// and arrays decode without error. The key invariant is that
-				// the server does NOT panic or return 500 on malformed input.
-				t.Logf("Invalid input response: %d (input=%#v)", resp.StatusCode, input)
+				// Real, source-verified behavior: unauthenticated request to
+				// an authMiddleware-gated route always returns exactly 401
+				// (server.go:511-566), regardless of body shape.
+				assert.Equal(t, http.StatusUnauthorized, resp.StatusCode,
+					"Unauthenticated POST /api/v1/projects should be rejected by authMiddleware before body validation runs (input=%#v)", input)
 			}
 		}
 	})
@@ -639,6 +699,20 @@ func TestSecurity_XSSPrevention(t *testing.T) {
 }
 
 func TestSecurity_CSRFProtection(t *testing.T) {
+	// I-2 reconciliation (2026-07-11, §11.4.120): commit 88f11bc2 added
+	// http.StatusFound (302) based on a live probe of localhost:8080 that
+	// actually hit a foreign, unrelated service on this shared host
+	// (§11.4.174), not this project's server. Source-verified:
+	// POST /api/v1/users/me/password is not a registered route at all — the
+	// "/users" group (server.go:240-246) registers only GET/PUT/DELETE
+	// "/me" — so gin's default unmatched-route path answers 404
+	// deterministically; authMiddleware is never even invoked (gin
+	// per-route middleware only runs for matched routes). No code path
+	// anywhere in internal/server, internal/auth, or cmd/server emits 302
+	// (verified via exhaustive source grep). 302 reverted, restoring the
+	// pre-88f11bc2 accepted-code set; skipIfNotCurrentBuild added so the
+	// test SKIPs honestly instead of asserting against a foreign server.
+	skipIfNotCurrentBuild(t)
 	t.Run("State-changing operations require proper authentication", func(t *testing.T) {
 		// Attempt to change password without authentication
 		resp, _ := doRequest(t, "POST", "/api/v1/users/me/password", map[string]string{
@@ -646,8 +720,8 @@ func TestSecurity_CSRFProtection(t *testing.T) {
 			"new_password":     "newPass456!",
 		}, nil)
 		if resp != nil {
-			// Should return 401 Unauthorized, 302 (redirect-based auth), or 404 if not implemented
-			assert.Contains(t, []int{http.StatusUnauthorized, http.StatusFound, http.StatusNotFound}, resp.StatusCode,
+			// Should return 401 Unauthorized or 404 if not implemented
+			assert.Contains(t, []int{http.StatusUnauthorized, http.StatusNotFound}, resp.StatusCode,
 				"State-changing operations should require authentication or not be implemented")
 		}
 	})
@@ -726,6 +800,20 @@ func TestSecurity_JSONInjection(t *testing.T) {
 }
 
 func TestSecurity_URLEncoding(t *testing.T) {
+	// I-2 reconciliation (2026-07-11, §11.4.120): commit 88f11bc2 added
+	// http.StatusFound (302) based on a live probe of localhost:8080 that
+	// actually hit a foreign, unrelated service on this shared host
+	// (§11.4.174), not this project's server. Source-verified:
+	// GET /api/v1/projects/<payload> is registered under the "projects"
+	// group gated by s.authMiddleware() (server.go:290-297,
+	// projects.GET("/:id", s.getProject)); doRequest never sets an
+	// Authorization header, so the real, deterministic response is 401
+	// before getProject's path handling ever runs. No code path anywhere in
+	// internal/server, internal/auth, or cmd/server emits 302 (verified via
+	// exhaustive source grep). 302 reverted, restoring the pre-88f11bc2
+	// assertion; skipIfNotCurrentBuild added so the test SKIPs honestly
+	// instead of asserting against a foreign server.
+	skipIfNotCurrentBuild(t)
 	t.Run("URL encoded attacks are handled", func(t *testing.T) {
 		encodedPayloads := []string{
 			url.QueryEscape("../../../etc/passwd"),
@@ -737,7 +825,7 @@ func TestSecurity_URLEncoding(t *testing.T) {
 			resp, _ := doRequest(t, "GET", "/api/v1/projects/"+payload, nil, nil)
 			if resp != nil {
 				// Should handle encoded attacks safely
-				assert.True(t, resp.StatusCode >= 400 || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusFound,
+				assert.True(t, resp.StatusCode >= 400 || resp.StatusCode == http.StatusUnauthorized,
 					"URL encoded attack should be rejected: %s", payload)
 			}
 		}
