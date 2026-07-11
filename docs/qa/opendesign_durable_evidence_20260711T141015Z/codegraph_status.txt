@@ -1,0 +1,55 @@
+
+CodeGraph Status
+
+Project: /home/milos/Factory/projects/tools_and_research/helix_code
+
+Index Statistics:
+  Files:     22,690
+  Nodes:     460,470
+  Edges:     1,475,918
+  DB Size:   1488.95 MB
+  Backend:   node:sqlite — built-in (full WAL)
+  Journal:   wal
+
+Nodes by Kind:
+  import          110,567
+  function        110,002
+  method          89,777
+  property        35,856
+  file            21,036
+  struct          17,944
+  constant        16,531
+  class           14,887
+  interface       13,298
+  type_alias      13,268
+  variable        9,497
+  namespace       2,711
+  route           2,336
+  field           2,000
+  enum_member     565
+  enum            120
+  component       67
+  trait           8
+
+Files by Language:
+  go              10,613
+  python          3,870
+  typescript      3,038
+  csharp          2,796
+  yaml            1,618
+  tsx             367
+  javascript      196
+  rust            58
+  kotlin          44
+  dart            34
+  properties      34
+  swift           7
+  java            4
+  liquid          3
+  xml             3
+  ruby            2
+  vue             2
+  c               1
+
+✓ Index is up to date
+

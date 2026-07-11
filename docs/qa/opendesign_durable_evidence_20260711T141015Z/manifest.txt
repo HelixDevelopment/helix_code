@@ -1,0 +1,6 @@
+captured_at_utc=2026-07-11T14:11:18Z
+host=the-factory
+repo_root=/home/milos/Factory/projects/tools_and_research/helix_code
+od_health_url=http://127.0.0.1:7456/api/health
+od_projects_url=http://127.0.0.1:7456/api/projects
+exit_code=0
