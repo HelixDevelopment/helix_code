@@ -80,6 +80,57 @@ PATTERNS=(
   "Private key header (generic)|-----BEGIN PRIVATE KEY-----"
   "Slack bot token|xoxb-[0-9]{9,}-[0-9]{9,}-[A-Za-z0-9]{20,}"
   "HuggingFace token|hf_[A-Za-z0-9]{30,}"
+  # ---------------------------------------------------------------------
+  # Defense-in-depth hardening pass (§11.4.138 — closes additional key
+  # classes real .env files in this project could hold; the project ships
+  # ~30 provider .env aliases including xai, gcp, azure). Each pattern
+  # below was verified against the whole tracked tree before being added:
+  # a low-detection-threshold version would have false-positived on
+  # existing legitimate doc placeholders (e.g. "sk-ant-your-key") and Go
+  # unit-test fixtures (e.g. "sk-ant-realvalue-1234567890", 20 chars) —
+  # thresholds were tuned to clear the longest observed in-repo fixture
+  # with a safety margin while staying far below real key entropy length.
+  # See scratchpad/r41_guard_hardening.md for the full false-positive
+  # audit this session performed before landing these patterns.
+  # ---------------------------------------------------------------------
+  # xAI (Grok) API key: "xai-" + a pure-alphanumeric body (no hyphens in
+  # the real key body). Longest in-repo placeholder observed was
+  # "xai-secret-key-12345" (16 alnum-run chars, broken by hyphens); the
+  # 20-char pure-alnum-run requirement clears every such placeholder.
+  "xAI API key|xai-[A-Za-z0-9]{20,}"
+  # Anthropic API key, explicit label (diagnostic aid). NOTE: the existing
+  # generic "OpenAI API key|sk-[A-Za-z0-9]{20,}" pattern does NOT already
+  # cover this shape — real/leaked Anthropic keys are "sk-ant-api03-..."
+  # and the hyphen after "ant" breaks the OpenAI pattern's required
+  # 20-char pure-alnum run at only 3 characters ("ant"), so this is a
+  # genuine coverage gap being closed, not merely a redundant label.
+  # Threshold is 30 (not 20) specifically because the longest sk-ant-
+  # fixture already committed in this repo's Go unit tests is
+  # "sk-ant-realvalue-1234567890" (exactly 20 chars after "sk-ant-");
+  # 30 clears it with a 10-char margin while staying far below real
+  # Anthropic key length (~100+ chars for the sk-ant-api03-... format).
+  "Anthropic API key (explicit)|sk-ant-[A-Za-z0-9_-]{30,}"
+  # GCP service-account JSON credential marker: the literal
+  # "type": "service_account" key-value pair is unique to GCP
+  # service-account key files and does not occur in ordinary prose
+  # (verified: doc files in this repo that merely discuss "service
+  # account" in prose do not match this exact quoted-JSON shape).
+  "GCP service-account JSON marker (type)|\"type\"[[:space:]]*:[[:space:]]*\"service_account\""
+  # GCP service-account JSON credential marker: the "private_key_id" JSON
+  # key is likewise unique to GCP service-account key files. Matching on
+  # the key name + following colon (not a specific value shape) keeps
+  # this simple and low-FP since the exact literal never occurs outside
+  # that JSON shape.
+  "GCP service-account JSON marker (private_key_id)|\"private_key_id\"[[:space:]]*:"
+  # Azure key/secret, env-assignment shape: an AZURE_*KEY or AZURE_*SECRET
+  # env-var name, an assignment operator, and a 32+ char hex value (the
+  # shape used by Azure Cognitive Services / Azure OpenAI resource keys).
+  # Deliberately narrow: Azure also issues base64 Storage-account keys and
+  # mixed-charset AD client secrets, whose shapes are not "cleanly
+  # definable" without materially raising false-positive risk (see
+  # scratchpad/r41_guard_hardening.md for the honest skip note) — those
+  # are NOT covered by this pattern.
+  "Azure key/secret (env-assignment, hex)|AZURE_[A-Z0-9_]*(KEY|SECRET)[[:space:]]*[:=][[:space:]]*[\"']?[A-Fa-f0-9]{32,}[\"']?"
 )
 
 # Content-based allowlist markers (case-insensitive substrings). A matched

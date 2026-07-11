@@ -2,13 +2,17 @@
 # scripts/secret_scan_test.sh
 #
 # Hermetic test suite for scripts/secret_scan.sh (§11.4.135 / §11.4.138
-# permanent secret-scan guard). Ten real-vs-allowlisted fixture cases plus
-# one paired §1.1 mutation proving the guard is genuinely load-bearing (not
-# a tautology): neuter the Google-pattern line, plant a real-shaped Google
-# key, show the guard WRONGLY passes, restore, show it correctly fails
-# again. Never echoes a real secret value to stdout in this test's own
-# output beyond the deliberately-fake fixture strings written to disk
-# (none of the fixture strings are real credentials — see NOTE below).
+# permanent secret-scan guard). 22 real-vs-allowlisted fixture cases (12
+# from the original guard + HuggingFace follow-up, 8 from the 2026-07-11
+# defense-in-depth hardening pass covering xai/anthropic/gcp/azure key
+# classes, 2 post-restore re-checks) plus TWO paired §1.1 mutations proving
+# the guard is genuinely load-bearing (not a tautology): (1) neuter the
+# Google-pattern line, plant a real-shaped Google key, show the guard
+# WRONGLY passes, restore, show it correctly fails again; (2) same
+# mutate/assert/restore cycle for the new Anthropic-key pattern. Never
+# echoes a real secret value to stdout in this test's own output beyond
+# the deliberately-fake fixture strings written to disk (none of the
+# fixture strings are real credentials — see NOTE below).
 #
 # NOTE: every "real-shaped" fixture below is a FABRICATED placeholder built
 # to match the shape (prefix + length) of a real key, never a value that
@@ -109,6 +113,38 @@ echo 'HF_TOKEN=hf_fabricated0123456789ABCDEFGHIJKLMNOP' > "$WORKDIR/7b_hf.txt"
 check "Test 7b: real-shaped HuggingFace token (hf_...)" nonzero "$WORKDIR/7b_hf.txt"
 
 # ---------------------------------------------------------------------------
+# Defense-in-depth hardening pass (§11.4.138, 2026-07-11 follow-up): more
+# high-value key classes real .env files in this project could hold (the
+# project ships ~30 provider .env aliases including xai, gcp, azure).
+# Thresholds were tuned against the whole tracked tree (see
+# scratchpad/r41_guard_hardening.md) so they clear every existing
+# legitimate doc placeholder / Go unit-test fixture already committed.
+# ---------------------------------------------------------------------------
+
+echo 'XAI_API_KEY=xai-fabricated0123456789ABCDEFGHIJKLMNOP' > "$WORKDIR/13_xai.txt"
+check "Test 13: real-shaped xAI API key (xai-...)" nonzero "$WORKDIR/13_xai.txt"
+
+echo 'ANTHROPIC_API_KEY=sk-ant-api03-fabricatedNotARealKey0123456789ABCDEFGHIJ' > "$WORKDIR/15_anthropic.txt"
+check "Test 15: real-shaped Anthropic API key (sk-ant-api03-...)" nonzero "$WORKDIR/15_anthropic.txt"
+
+# Fabricated GCP service-account JSON credential blob (fake project id,
+# fake hex-looking private_key_id, no PEM body at all — this fixture is
+# deliberately narrower than a real credentials file so it isolates the
+# two new JSON-marker patterns from the pre-existing PEM pattern).
+cat > "$WORKDIR/17_gcp.txt" <<'GCPEOF'
+{
+  "type": "service_account",
+  "project_id": "fabricated-test-project",
+  "private_key_id": "fabricated0123456789abcdef01234567890123",
+  "client_email": "fabricated@fabricated-test-project.iam.gserviceaccount.com"
+}
+GCPEOF
+check "Test 17: fabricated GCP service-account JSON blob (type + private_key_id)" nonzero "$WORKDIR/17_gcp.txt"
+
+echo 'AZURE_OPENAI_API_KEY=1a2b3c4d5e6f70819203a4b5c6d7e8f9' > "$WORKDIR/19_azure.txt"
+check "Test 19: real-shaped Azure key (AZURE_*KEY=<32-hex>)" nonzero "$WORKDIR/19_azure.txt"
+
+# ---------------------------------------------------------------------------
 # Allowlisted / non-matching fixtures → MUST NOT be detected (exit 0).
 # ---------------------------------------------------------------------------
 
@@ -127,6 +163,24 @@ check "Test 10: xoxb- prose mention (not real token shape) is NOT flagged" zero 
 
 echo 'nothing sensitive here, just prose' > "$WORKDIR/11_clean.txt"
 check "Test 11: clean file" zero "$WORKDIR/11_clean.txt"
+
+# --- Clean-prose / near-miss fixtures for the 2026-07-11 hardening pass ---
+# Each of these is deliberately a NEAR MISS (mentions the same prefix/word
+# as its matching pattern) rather than generic unrelated prose, so a PASS
+# here is real evidence the pattern is shape-specific and not over-broad
+# (§11.4.6) — not just "the pattern doesn't match totally unrelated text".
+
+echo 'Configure XAI_API_KEY for Grok; the prefix is xai- for xAI keys.' > "$WORKDIR/14_xai_prose.txt"
+check "Test 14: xai- prose mention (not real token shape) is NOT flagged" zero "$WORKDIR/14_xai_prose.txt"
+
+echo 'export ANTHROPIC_API_KEY="sk-ant-your-key"' > "$WORKDIR/16_anthropic_placeholder.txt"
+check "Test 16: sk-ant-your-key doc placeholder (too short) is NOT flagged" zero "$WORKDIR/16_anthropic_placeholder.txt"
+
+echo 'GCP uses a service_account JSON credentials file with a type field.' > "$WORKDIR/18_gcp_prose.txt"
+check "Test 18: service_account prose mention (no JSON key:value shape) is NOT flagged" zero "$WORKDIR/18_gcp_prose.txt"
+
+echo 'AZURE_OPENAI_API_KEY=mock-azure-key-for-testing' > "$WORKDIR/20_azure_placeholder.txt"
+check "Test 20: AZURE_*_KEY=mock-... placeholder (non-hex value) is NOT flagged" zero "$WORKDIR/20_azure_placeholder.txt"
 
 # ---------------------------------------------------------------------------
 # Paired §1.1 mutation: neuter the Google-pattern line in secret_scan.sh,
@@ -161,6 +215,42 @@ cp "$BACKUP" "$SCANNER"
 
 echo "--- Paired mutation: scanner restored, expect Test 1 fixture to correctly fail again ---"
 check "Test 12: post-restore, real-shaped Google key correctly detected again" nonzero "$WORKDIR/1_google.txt"
+
+# ---------------------------------------------------------------------------
+# Second paired §1.1 mutation (2026-07-11 hardening pass): neuter the new
+# "Anthropic API key (explicit)" pattern line, re-run Test 15's fixture,
+# and assert it now WRONGLY passes — proving Test 15 genuinely depends on
+# that new pattern line (not merely on the pre-existing generic OpenAI
+# sk- pattern, which was independently confirmed NOT to match sk-ant-...
+# shapes during this hardening pass — see scratchpad/r41_guard_hardening.md).
+# Then restore and assert Test 15 passes again.
+# ---------------------------------------------------------------------------
+
+echo ""
+echo "--- Paired mutation: neuter Anthropic-key pattern, expect Test 15 fixture to WRONGLY pass ---"
+
+# (MUTATED for paired §1.1 mutation test — restored unconditionally by the
+# EXIT trap above before this script returns).
+sed -i.bak 's#Anthropic API key (explicit)|sk-ant-\[A-Za-z0-9_-\]{30,}#Anthropic API key (explicit)|ZZZ_THIS_PATTERN_CAN_NEVER_MATCH_ANYTHING_ZZZ#' "$SCANNER"
+rm -f "${SCANNER}.bak"
+
+mutation2_out=$("$SCANNER" "$WORKDIR/15_anthropic.txt" 2>&1)
+mutation2_rc=$?
+if [ "$mutation2_rc" -eq 0 ]; then
+  echo "PASS (mutation confirmed load-bearing): with the Anthropic pattern neutered, the real-shaped Anthropic key fixture WRONGLY passed (exit 0) — Test 15 genuinely depends on that pattern line."
+  PASS=$((PASS + 1))
+else
+  echo "FAIL (mutation did NOT flip the result): neutering the Anthropic pattern still produced exit $mutation2_rc — Test 15 may not be exercising the pattern this mutation targets, or another pattern independently caught it."
+  printf '%s\n' "$mutation2_out" | sed 's/^/    /'
+  FAIL=$((FAIL + 1))
+fi
+
+# Restore (also happens unconditionally in the EXIT trap; done explicitly
+# here too so the very next check runs against the restored scanner).
+cp "$BACKUP" "$SCANNER"
+
+echo "--- Paired mutation: scanner restored, expect Test 15 fixture to correctly fail again ---"
+check "Test 21: post-restore, real-shaped Anthropic key correctly detected again" nonzero "$WORKDIR/15_anthropic.txt"
 
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
