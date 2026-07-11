@@ -1,0 +1,4 @@
+=== Teardown record ===
+a2a-server PID killed: 2723249 (ownership-verified via ps argv=./bin/a2a-server before kill)
+coder llama-server PID never signalled: 1980342
+coder /v1/models HTTP status before=200 after=200

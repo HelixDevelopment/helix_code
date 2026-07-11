@@ -1,0 +1,34 @@
+{
+  "agent_card_checks": {
+    "description_nonempty": true,
+    "name_nonempty": true,
+    "preferredTransport_jsonrpc": true,
+    "securitySchemes_bearer": true,
+    "skill_generate_code": true,
+    "skills_nonempty": true,
+    "url_nonempty": true
+  },
+  "agent_card_real": true,
+  "card_url_conformance": {
+    "card_url": "http://localhost:18441",
+    "finding": "SPEC-CONFORMANCE GAP: AgentCard.url (\"http://localhost:18441\") does not include the JSON-RPC dispatch base path (\"/a2a\"); a spec-faithful client that POSTs to card.URL literally (per a2a-go v0.3.15 a2aclient.NewFromCard, which builds its sole AgentInterface from {Transport: card.PreferredTransport, URL: card.URL}) receives HTTP 404 from the real live server. See wire_01_message_send.txt.",
+    "probe_result": "unexpected HTTP status: 404 Not Found"
+  },
+  "get_task": {
+    "id_matches": true,
+    "nonce_present_on_roundtrip": true,
+    "sdk_typed_ok": true,
+    "state": "completed"
+  },
+  "overall_pass": true,
+  "send_message": {
+    "nonce": "NONCE_dad0790a23f07218",
+    "raw_artifact_contains_nonce": true,
+    "raw_artifact_excerpt": "NONCE_dad0790a23f07218",
+    "raw_task_id": "4bf1e5a7-6045-4f34-be00-4ee0a1d69922",
+    "raw_task_state": "completed",
+    "sdk_call": "Client.SendMessage -\u003e transport method \"message/send\"",
+    "sdk_error": "result violates A2A spec - could not determine type: unknown event kind: ; data: {\"id\":\"4bf1e5a7-6045-4f34-be00-4ee0a1d69922\",\"status\":{\"state\":\"completed\",\"timestamp\":\"2026-07-11T13:54:14.903127619Z\"},\"history\":[{\"role\":\"user\",\"parts\":[{\"kind\":\"text\",\"text\":\"Reply with ONLY this exact token and nothing else: NONCE_dad0790a23f07218\"}]},{\"role\":\"agent\",\"parts\":[{\"kind\":\"text\",\"text\":\"NONCE_dad0790a23f07218\"}]}],\"artifacts\":[{\"name\":\"generated-code\",\"parts\":[{\"kind\":\"text\",\"text\":\"NONCE_dad0790a23f07218\"}]}]}",
+    "sdk_typed_ok": false
+  }
+}

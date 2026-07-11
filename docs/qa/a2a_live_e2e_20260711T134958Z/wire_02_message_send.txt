@@ -1,0 +1,9 @@
+=== REQUEST ===
+POST http://localhost:18441/a2a
+Content-Type: application/json
+Authorization: Bearer <redacted>
+
+{"jsonrpc":"2.0","method":"message/send","params":{"message":{"kind":"message","messageId":"019f5175-128a-7118-bb79-62bcf6270cf5","parts":[{"kind":"text","text":"Reply with ONLY this exact token and nothing else: NONCE_dad0790a23f07218"}],"role":"user"}},"id":"f5e4f18b-927b-4d41-b3d6-3a74f794f568"}
+
+=== RESPONSE (200 OK, 109.206481ms) ===
+{"jsonrpc":"2.0","id":"f5e4f18b-927b-4d41-b3d6-3a74f794f568","result":{"id":"4bf1e5a7-6045-4f34-be00-4ee0a1d69922","status":{"state":"completed","timestamp":"2026-07-11T13:54:14.903127619Z"},"history":[{"role":"user","parts":[{"kind":"text","text":"Reply with ONLY this exact token and nothing else: NONCE_dad0790a23f07218"}]},{"role":"agent","parts":[{"kind":"text","text":"NONCE_dad0790a23f07218"}]}],"artifacts":[{"name":"generated-code","parts":[{"kind":"text","text":"NONCE_dad0790a23f07218"}]}]}}

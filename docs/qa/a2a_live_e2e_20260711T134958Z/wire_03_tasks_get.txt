@@ -1,0 +1,9 @@
+=== REQUEST ===
+POST http://localhost:18441/a2a
+Content-Type: application/json
+Authorization: Bearer <redacted>
+
+{"jsonrpc":"2.0","method":"tasks/get","params":{"id":"4bf1e5a7-6045-4f34-be00-4ee0a1d69922"},"id":"ddd4dc1c-889e-4cf4-96c9-5fb8547dc300"}
+
+=== RESPONSE (200 OK, 224.119µs) ===
+{"jsonrpc":"2.0","id":"ddd4dc1c-889e-4cf4-96c9-5fb8547dc300","result":{"id":"4bf1e5a7-6045-4f34-be00-4ee0a1d69922","status":{"state":"completed","timestamp":"2026-07-11T13:54:14.903127619Z"},"history":[{"role":"user","parts":[{"kind":"text","text":"Reply with ONLY this exact token and nothing else: NONCE_dad0790a23f07218"}]},{"role":"agent","parts":[{"kind":"text","text":"NONCE_dad0790a23f07218"}]}],"artifacts":[{"name":"generated-code","parts":[{"kind":"text","text":"NONCE_dad0790a23f07218"}]}]}}

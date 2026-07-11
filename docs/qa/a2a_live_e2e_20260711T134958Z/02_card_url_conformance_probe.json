@@ -1,0 +1,5 @@
+{
+  "card_url": "http://localhost:18441",
+  "finding": "SPEC-CONFORMANCE GAP: AgentCard.url (\"http://localhost:18441\") does not include the JSON-RPC dispatch base path (\"/a2a\"); a spec-faithful client that POSTs to card.URL literally (per a2a-go v0.3.15 a2aclient.NewFromCard, which builds its sole AgentInterface from {Transport: card.PreferredTransport, URL: card.URL}) receives HTTP 404 from the real live server. See wire_01_message_send.txt.",
+  "probe_result": "unexpected HTTP status: 404 Not Found"
+}

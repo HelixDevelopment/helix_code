@@ -1,0 +1,5 @@
+{
+  "sdk_MethodMessageSend": "message/send",
+  "sdk_MethodTasksGet": "tasks/get",
+  "server_method_seen_in_wire_capture": "message/send (confirmed via captured request body)"
+}

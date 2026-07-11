@@ -1,0 +1,27 @@
+[1] Resolving Agent Card via a2aclient/agentcard.DefaultResolver ...
+    check url_nonempty                 = true
+    check skills_nonempty              = true
+    check preferredTransport_jsonrpc   = true
+    check skill_generate_code          = true
+    check securitySchemes_bearer       = true
+    check name_nonempty                = true
+    check description_nonempty         = true
+[1] Agent Card real+valid: true
+
+[2] Constructing real a2aclient.Client via NewFromCard (JSONRPC transport, TRUSTING card.URL literally, per spec) ...
+    [FINDING] SPEC-CONFORMANCE GAP: AgentCard.url ("http://localhost:18441") does not include the JSON-RPC dispatch base path ("/a2a"); a spec-faithful client that POSTs to card.URL literally (per a2a-go v0.3.15 a2aclient.NewFromCard, which builds its sole AgentInterface from {Transport: card.PreferredTransport, URL: card.URL}) receives HTTP 404 from the real live server. See wire_01_message_send.txt.
+[2b] Constructing a second real a2aclient.Client via NewFromEndpoints (explicit /a2a dispatch URL, harness-side only) ...
+[2b] Real a2aclient.Client (explicit endpoint) constructed.
+
+[3] client.SendMessage (message/send) with nonce=NONCE_dad0790a23f07218 ...
+    client.SendMessage returned an ERROR (SDK-side typed decode): result violates A2A spec - could not determine type: unknown event kind: ; data: {"id":"4bf1e5a7-6045-4f34-be00-4ee0a1d69922","status":{"state":"completed","timestamp":"2026-07-11T13:54:14.903127619Z"},"history":[{"role":"user","parts":[{"kind":"text","text":"Reply with ONLY this exact token and nothing else: NONCE_dad0790a23f07218"}]},{"role":"agent","parts":[{"kind":"text","text":"NONCE_dad0790a23f07218"}]}],"artifacts":[{"name":"generated-code","parts":[{"kind":"text","text":"NONCE_dad0790a23f07218"}]}]}
+    RAW wire evidence: task_id=4bf1e5a7-6045-4f34-be00-4ee0a1d69922 state=completed nonce_echoed=true
+    RAW artifact excerpt: "NONCE_dad0790a23f07218"
+
+[4] client.GetTask (tasks/get) round-trip on id=4bf1e5a7-6045-4f34-be00-4ee0a1d69922 ...
+    client.GetTask via REAL SDK: id_matches=true state=completed nonce_present=true
+
+[5] JSON-RPC method-string conformance (vs vendored a2a-go v0.3.15 internal/jsonrpc constants) ...
+    map[sdk_MethodMessageSend:message/send sdk_MethodTasksGet:tasks/get server_method_seen_in_wire_capture:message/send (confirmed via captured request body)]
+
+[RESULT] PASS: real a2a-go SDK client -> live coder nonce-echo confirmed via raw wire evidence + tasks/get round-trip.

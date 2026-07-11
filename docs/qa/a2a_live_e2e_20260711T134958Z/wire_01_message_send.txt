@@ -1,0 +1,9 @@
+=== REQUEST ===
+POST http://localhost:18441
+Content-Type: application/json
+Authorization: Bearer <redacted>
+
+{"jsonrpc":"2.0","method":"message/send","params":{"message":{"kind":"message","messageId":"019f5175-1289-7bec-93a8-e0f04bbb3b26","parts":[{"kind":"text","text":"probe: NONCE_0023060364667284"}],"role":"user"}},"id":"b11078c7-59d9-43fd-af6a-aa114dcbd24f"}
+
+=== RESPONSE (404 Not Found, 106.531µs) ===
+404 page not found

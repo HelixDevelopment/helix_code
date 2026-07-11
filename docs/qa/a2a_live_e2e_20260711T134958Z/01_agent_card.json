@@ -1,0 +1,40 @@
+{
+  "capabilities": {},
+  "defaultInputModes": [
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "text/plain"
+  ],
+  "description": "HelixLLM CPU/GPU coder fleet exposed as a Google A2A (Agent2Agent) peer — accepts a code-generation Task and returns a completed Task whose Artifact carries the real model output.",
+  "name": "helixllm-coder-a2a",
+  "preferredTransport": "JSONRPC",
+  "protocolVersion": "",
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "securitySchemes": {
+    "bearer": {
+      "type": "http",
+      "scheme": "bearer"
+    }
+  },
+  "skills": [
+    {
+      "description": "Accepts a natural-language coding request and returns generated source via the live model \"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf\".",
+      "examples": [
+        "Write a Go function that returns the nth Fibonacci number."
+      ],
+      "id": "generate-code",
+      "name": "Generate code",
+      "tags": [
+        "code-generation",
+        "coder"
+      ]
+    }
+  ],
+  "url": "http://localhost:18441",
+  "version": "0.1.0"
+}
