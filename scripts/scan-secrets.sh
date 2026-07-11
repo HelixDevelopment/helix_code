@@ -247,10 +247,48 @@ run_scan() {
 #
 # NEVER prints the matched secret value itself — only "<file>: <label>",
 # mirroring scripts/secret_scan.sh's §11.4.10 value-never-printed contract.
+#
+# PERFORMANCE (§11.4.82 fix, 2026-07-11): the original implementation looped
+# over every surviving added line and, for EACH line, looped over EVERY
+# pattern in PATTERNS, spawning `printf | grep -qE` (two subprocesses) per
+# (line × pattern) pair — O(lines × patterns) subprocess spawns. On an
+# 18-commit / 1.8 MiB push this produced hundreds of thousands of spawns and
+# took ~15 minutes (the actual git transfer was instant), blocking every
+# root push. Fixed to O(total bytes): the per-line filtering (dir/file
+# excludes, extension include-list, allowlist — all pure-bash, no subprocess
+# cost) still runs once per line as before, but SURVIVING line content is
+# collected into parallel arrays instead of grepped inline. All PATTERNS are
+# combined ONCE into a single alternation regex, and the entire surviving
+# corpus is grepped in a SINGLE `printf | grep -nE` invocation — one process
+# spawn total instead of one per (line × pattern). The alternation
+# `(pat1)|(pat2)|...` is logically equivalent to "does any individual
+# pattern match this line" (each PATTERNS entry is a well-formed,
+# self-contained ERE, so wrapping each in its own group and joining with `|`
+# changes nothing about what matches — only how many processes it costs to
+# find out), so detection coverage is byte-for-byte identical to before.
 run_scan_range() {
   local base="$1" new="$2"
-  local current_file="" line content pattern label diff_out
+  local current_file="" line content pattern diff_out
   diff_out=$(git diff --unified=0 --no-color "$base" "$new" 2>/dev/null) || return 0
+
+  # Build the combined alternation ONCE (not per line). Each PATTERNS entry
+  # is wrapped in its own group so alternation precedence can never bleed
+  # across pattern boundaries.
+  local combined_pattern=""
+  for pattern in "${PATTERNS[@]}"; do
+    if [ -z "$combined_pattern" ]; then
+      combined_pattern="(${pattern})"
+    else
+      combined_pattern="${combined_pattern}|(${pattern})"
+    fi
+  done
+
+  # Single pass over the diff: apply the SAME per-line filtering as before
+  # (dir exclude / file exclude / extension include / allowlist — all
+  # subprocess-free bash predicates), but instead of grepping inline,
+  # collect surviving (file, content) pairs into parallel arrays.
+  local -a kept_files=()
+  local -a kept_contents=()
   while IFS= read -r line; do
     case "$line" in
       '+++ '*)
@@ -271,16 +309,26 @@ run_scan_range() {
         is_included_extension "$current_file" || continue
         is_path_allowlisted "$current_file" && continue
         content="${line#+}"
-        for pattern in "${PATTERNS[@]}"; do
-          if printf '%s' "$content" | "$GREP_BIN" -qE -e "$pattern" 2>/dev/null; then
-            echo "${current_file}: possible credential pattern in pushed range (value not printed)"
-            found=1
-            break
-          fi
-        done
+        kept_files+=("$current_file")
+        kept_contents+=("$content")
         ;;
     esac
   done <<< "$diff_out"
+
+  [ "${#kept_contents[@]}" -eq 0 ] && return 0
+
+  # ONE grep invocation over the ENTIRE surviving corpus, matching ANY
+  # pattern. `printf '%s\n' "${kept_contents[@]}"` emits exactly one line
+  # per array element in array order (each element is passed as a %s
+  # argument, never interpreted as a format string, so arbitrary content —
+  # backslashes, %, etc. — is safe); grep -n's 1-based line number therefore
+  # maps 1:1 onto (index - 1) in kept_files/kept_contents.
+  local match_line idx
+  while IFS= read -r match_line; do
+    idx="${match_line%%:*}"
+    echo "${kept_files[$((idx - 1))]}: possible credential pattern in pushed range (value not printed)"
+    found=1
+  done < <(printf '%s\n' "${kept_contents[@]}" | "$GREP_BIN" -nE -e "$combined_pattern" 2>/dev/null || true)
 }
 
 if [ "$MODE" = "range" ]; then
