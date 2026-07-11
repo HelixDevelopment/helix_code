@@ -1000,3 +1000,33 @@ internal/tools/registry.go:897 RegisterMCPManager names MCP tools server+':'+nam
 
 Commit 51c058b1 ("feat(server): dual OpenAI + Anthropic wire facade on HelixCode's own server") added POST /v1/chat/completions and POST /v1/messages to HelixCode's own server with no auth middleware attached, while every shipped config profile (config/production-config.yaml included) binds server.address to 0.0.0.0. Flagged as a production blocker by both an independent security review and the dual-wire review. Fixed by wiring a dedicated wireFacadeAuthMiddleware (fail-closed API-key check accepting Authorization: Bearer or x-api-key) onto both routes; see wire_facade_auth_test.go for the RED->GREEN regression guard.
 
+## HXC-112 — Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript synthetic clicks — need cliclick/real-event automation to record LLM-chat in-GUI
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/hxc_residuals_operator_closure_20260711/DECISION.md
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Desktop GUI feature-recording: Fyne OpenGL canvas ignores osascript synthetic clicks — need cliclick/real-event automation to record LLM-chat in-GUI
+
+## HXC-108 — Video-QA program: record all clients x all features with strongest models + ensemble -> /Volumes/T7/Downloads/Recordings, analyze + fix
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/hxc_residuals_operator_closure_20260711/DECISION.md
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Video-QA program: record all clients x all features with strongest models + ensemble -> /Volumes/T7/Downloads/Recordings, analyze + fix
+
+## HXC-107 — Feature Status docs program (docs/features) — comprehensive per-feature inventory across all components/clients/submodules/ported-cli_agents, docs_chain-synced
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/hxc_residuals_operator_closure_20260711/DECISION.md
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Feature Status docs program (docs/features) — comprehensive per-feature inventory across all components/clients/submodules/ported-cli_agents, docs_chain-synced
+
