@@ -1,0 +1,13 @@
+{
+  "provider": "deepseek",
+  "content": "",
+  "nonce_echoed": false,
+  "finish_reason": "length",
+  "processing_time": "1.216317103s",
+  "usage": {
+    "prompt_tokens": 36,
+    "completion_tokens": 32,
+    "total_tokens": 68
+  },
+  "responded_at_utc": "2026-07-08T20:43:50.149575128Z"
+}

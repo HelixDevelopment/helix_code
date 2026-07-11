@@ -1,0 +1,5 @@
+provider_live_proof verdict
+run_id: provider_live_proof_20260708T204347Z
+timestamp_utc: 2026-07-08T20:43:51Z
+verdict: PASS
+detail: real HTTP call to mistral (model=mistral-small-2603, source=catalogue:cheap-match) echoed fresh nonce "LIVEPROOF-e944b4ae9406" — genuine live completion

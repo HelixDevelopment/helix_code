@@ -1,0 +1,13 @@
+{
+  "provider": "groq",
+  "content": "LIVEPROOF-51d956af2352",
+  "nonce_echoed": true,
+  "finish_reason": "stop",
+  "processing_time": "499.996717ms",
+  "usage": {
+    "prompt_tokens": 64,
+    "completion_tokens": 12,
+    "total_tokens": 76
+  },
+  "responded_at_utc": "2026-07-08T20:43:50.706284184Z"
+}
