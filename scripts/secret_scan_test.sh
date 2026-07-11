@@ -16,6 +16,13 @@
 # secrets; these are synthetic test inputs, exactly like scan-secrets.sh's
 # own test suite (scripts/test-scan-secrets.sh) and the .scan-secrets-allow
 # entries that document this same convention project-wide.
+#
+# §11.4.84-mutation-test-exempt: this file's markers are trap-restored test
+# logic. The literal string "MUTATED for paired" below (in the paired §1.1
+# mutation comment) is documentation of this test's own mutate -> assert ->
+# restore sequence, not residue from an interrupted experiment — the
+# unconditional `trap cleanup EXIT` + `cp "$BACKUP" "$SCANNER"` restore
+# above proves the mutation never survives past this script's own exit.
 
 set -uo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"

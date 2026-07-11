@@ -202,6 +202,98 @@ git add auth.go
 assert_block "staged-clean-no-residue" ALLOW "$(try_commit 'add clean auth')"
 
 # ===========================================================================
+# pre-commit — §11.4.84 mutation-test exemption (false-positive fix,
+# 2026-07-11). A mutation-TEST script legitimately embeds a residue-marker
+# string as its own trap-restored test logic and must NOT be blocked, while
+# a real file that merely CLAIMS the exemption without the proven restore
+# idiom must still be blocked (the exemption is explicit + auditable, not
+# an abusable heuristic).
+# ===========================================================================
+
+# 18a. mutation-test file WITH exemption header + marker + proven trap+cp
+#      restore idiom -> ALLOW (this is the real-world secret_scan_test.sh
+#      shape reproduced as a minimal fixture).
+cat > mutation_test_fixture.sh <<'FIXTURE'
+#!/usr/bin/env bash
+# §11.4.84-mutation-test-exempt: this file's markers are trap-restored test logic
+BACKUP="$WORKDIR/target.orig-backup"
+cleanup() { cp "$BACKUP" "$TARGET"; }
+trap cleanup EXIT
+# Replace the pattern (MUTATED for paired §1.1 mutation test — restored
+# unconditionally by the EXIT trap above before this script returns).
+FIXTURE
+git add mutation_test_fixture.sh
+assert_block "mutation-test-exempt-header-plus-idiom" ALLOW "$(try_commit 'add exempt mutation test fixture')"
+
+# 18b. NON-test file with a BARE residue marker (no header, no idiom) ->
+#      still BLOCKS (regression proof: the exemption never widens beyond
+#      explicitly-marked files; unrelated real files keep tripping the
+#      original detector unchanged).
+printf 'func verify() bool { return true // always pass\n}\n' > auth_bare.go
+git add auth_bare.go
+assert_block "non-test-bare-marker-no-header-still-blocks" BLOCK "$(try_commit 'add bare-marker file')"
+git reset -q HEAD auth_bare.go; rm -f auth_bare.go
+
+# 18c. file CLAIMING the exemption header but WITHOUT the proven trap+cp
+#      restore idiom -> still BLOCKS (closes the "just type the magic
+#      comment" abuse case; the header alone is not sufficient).
+cat > fake_exempt.sh <<'FIXTURE'
+#!/usr/bin/env bash
+# §11.4.84-mutation-test-exempt: this file's markers are trap-restored test logic
+echo "MUTATED for paired residue with no real restore idiom"
+FIXTURE
+git add fake_exempt.sh
+assert_block "fake-exempt-header-without-idiom-still-blocks" BLOCK "$(try_commit 'add fake-exempt file')"
+git reset -q HEAD fake_exempt.sh; rm -f fake_exempt.sh
+
+# 18d. §1.1 PAIRED MUTATION — neuter is_mutation_test_exempt() in a COPY of
+#      the pre-commit hook (mutated hook always exempts, i.e. the idiom
+#      check is bypassed), stage a fresh fake-exempt fixture (header
+#      WITHOUT the real idiom), and assert it now WRONGLY passes -> proves
+#      the idiom requirement in case 18c is load-bearing, not a tautology.
+#      Then restore and assert a fresh fake-exempt fixture blocks again.
+#      Distinct filenames are used for the pre-/post-restore fixtures so
+#      each assertion is against a genuinely new staged file, never
+#      ambiguous with "nothing to commit" from a prior identical blob.
+MUT_HOOK84=".git/hooks/pre-commit"
+cp "$MUT_HOOK84" "$MUT_HOOK84.bak84"
+sed 's/^is_mutation_test_exempt() {/is_mutation_test_exempt() { return 0 #MUTATED for paired §1.1 mutation test/' \
+  "$MUT_HOOK84.bak84" > "$MUT_HOOK84"
+chmod +x "$MUT_HOOK84"
+
+cat > fake_exempt_mut.sh <<'FIXTURE'
+#!/usr/bin/env bash
+# §11.4.84-mutation-test-exempt: this file's markers are trap-restored test logic
+echo "MUTATED for paired residue with no real restore idiom"
+FIXTURE
+git add fake_exempt_mut.sh
+mut84_rc=$(try_commit 'mutated: fake-exempt should now wrongly pass')
+if [ "$mut84_rc" -eq 0 ]; then
+  ok "paired-mutation-114-84: broken idiom-check no longer blocks fake-exempt (mutation detected)"
+else
+  bad "paired-mutation-114-84: hook still blocked despite broken idiom-check (mutation NOT detected -> test is blind)"
+fi
+git reset -q HEAD fake_exempt_mut.sh >/dev/null 2>&1 || true
+rm -f fake_exempt_mut.sh
+mv "$MUT_HOOK84.bak84" "$MUT_HOOK84"
+chmod +x "$MUT_HOOK84"
+
+cat > fake_exempt_check.sh <<'FIXTURE'
+#!/usr/bin/env bash
+# §11.4.84-mutation-test-exempt: this file's markers are trap-restored test logic
+echo "MUTATED for paired residue with no real restore idiom"
+FIXTURE
+git add fake_exempt_check.sh
+restored84_rc=$(try_commit 'restored: fresh fake-exempt should block again')
+if [ "$restored84_rc" -ne 0 ]; then
+  ok "paired-mutation-114-84: restored hook blocks fake-exempt again (invariant intact)"
+else
+  bad "paired-mutation-114-84: restored hook did NOT block fake-exempt (restore failed)"
+fi
+git reset -q HEAD fake_exempt_check.sh >/dev/null 2>&1 || true
+rm -f fake_exempt_check.sh
+
+# ===========================================================================
 # commit-msg — §11.4.75 bypass-rationale footer
 #
 # NOTE on git semantics: `git commit --no-verify` skips ALL client hooks,

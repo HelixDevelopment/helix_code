@@ -232,7 +232,40 @@ fi
 #
 #    This hook excludes ITSELF and its sibling hooks + their test (the
 #    markers appear here as documentation/test fixtures, not residue).
+#
+#    False-positive fix (2026-07-11): a mutation-TEST script (e.g.
+#    scripts/secret_scan_test.sh) legitimately embeds a residue-marker
+#    string in its OWN source — as a comment documenting its paired §1.1
+#    mutation logic, or as a literal it mutates-in-then-restores under a
+#    `trap ... EXIT` — and is not itself residue. Such a file is EXEMPT
+#    from the BLOCK iff it satisfies BOTH:
+#      (a) EXPLICIT opt-in — carries the literal, greppable, auditable
+#          marker `11.4.84-mutation-test-exempt` (conventionally as a
+#          `# §11.4.84-mutation-test-exempt: ...` header comment). This is
+#          never inferred — a file that does not carry this exact marker
+#          gets ZERO benefit of the doubt, so real (non-test) files are
+#          completely unaffected by this exemption.
+#      (b) PROVEN restore idiom — carries a `trap ... EXIT` wired to a
+#          command that visibly restores a backup (`cp ... BACKUP` /
+#          `git checkout --`), so a file can only claim the exemption if
+#          it actually implements the mutate -> assert -> restore
+#          discipline §11.4.84 demands, not merely assert it in prose.
+#          This closes the abuse case where a bare opt-in comment alone
+#          would let any real residue commit slip through unrestored.
+#    A file satisfying (a) but not (b) (or vice-versa) is NOT exempt and
+#    is BLOCKED exactly as before this fix.
 # ---------------------------------------------------------------------------
+is_mutation_test_exempt() {
+  # $1 = staged blob content of a file that already matched a residue
+  # marker. Returns 0 (exempt) only if BOTH the explicit opt-in header AND
+  # the proven trap+restore idiom are present.
+  local blob="$1"
+  printf '%s' "$blob" | grep -qF '11.4.84-mutation-test-exempt' || return 1
+  printf '%s' "$blob" | grep -qE 'trap[[:space:]].*EXIT' || return 1
+  printf '%s' "$blob" | grep -qiE 'cp[[:space:]].*backup|git checkout --' || return 1
+  return 0
+}
+
 mutation_hits=""
 while IFS= read -r f; do
   case "$f" in
@@ -243,6 +276,9 @@ while IFS= read -r f; do
   # what is about to be committed.
   blob=$(git show ":$f" 2>/dev/null) || continue
   if printf '%s' "$blob" | grep -qE 'MUTATED for paired|// always pass|# always pass|MUTATION-RESIDUE|_mutated_'; then
+    if is_mutation_test_exempt "$blob"; then
+      continue   # explicitly-marked + trap-restored mutation-test file: not residue
+    fi
     mutation_hits="${mutation_hits}\n  ${f}"
   fi
 done <<EOF
