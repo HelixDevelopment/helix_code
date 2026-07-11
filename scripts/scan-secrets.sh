@@ -5,13 +5,29 @@
 # Per CONST-041: no credentials may be committed.
 # Used by: make verify-foundation, pre-push hook, manual audit.
 #
+# Usage:
+#   scripts/scan-secrets.sh                    # full tracked-tree scan (default)
+#   scripts/scan-secrets.sh <dir>               # targeted directory scan (test harness)
+#   scripts/scan-secrets.sh --range <base> <new> # scan ONLY lines ADDED between
+#       two git revisions (a `git diff <base> <new>`), never the working tree.
+#       Used by scripts/git_hooks/pre-push to scope the secret gate to the
+#       COMMITS ACTUALLY BEING PUSHED (§11.4.6 fix, 2026-07-11): the prior
+#       no-args tree scan also swept untracked working-tree files (scratchpad
+#       reports, local notes) and blocked unrelated pushes on their content —
+#       see docs/audit/bypass_events.md 2026-07-11 entry "Follow-up: ...
+#       scope pre-push to pushed-commits not full working tree." A diff-scoped
+#       scan structurally cannot see untracked files (git diff only ever
+#       compares two committed tree states) while still catching a real
+#       secret newly introduced by the pushed commits.
+#
 # Exit codes:
 #   0 = no credential patterns found
 #   1 = one or more matches (caller must rotate + git rm --cached + remediate)
 #
 # Allowlist:
 #   Create .scan-secrets-allow at repo root (one path glob per line, # for comments).
-#   Files/paths matching any allow rule are excluded from scanning.
+#   Files/paths matching any allow rule are excluded from scanning (tree,
+#   directory, AND --range modes — the allowlist is mode-independent).
 
 set -uo pipefail
 
@@ -36,8 +52,22 @@ if [ -z "$GREP_BIN" ]; then
   exit 2
 fi
 
-# Allow scanning a specific directory (used by tests)
+# Allow scanning a specific directory (used by tests), or a --range <base>
+# <new> git-revision pair (used by scripts/git_hooks/pre-push — see the
+# header comment above).
+MODE="dir"
 SCAN_TARGET="${1:-.}"
+RANGE_BASE=""
+RANGE_NEW=""
+if [ "${1:-}" = "--range" ]; then
+  MODE="range"
+  RANGE_BASE="${2:-}"
+  RANGE_NEW="${3:-}"
+  if [ -z "$RANGE_BASE" ] || [ -z "$RANGE_NEW" ]; then
+    echo "ERROR: --range requires <base-rev> <new-rev>" >&2
+    exit 2
+  fi
+fi
 
 # Patterns matching real-world secret shapes. Tighten over time.
 # Each entry is one extended-regex pattern.
@@ -100,15 +130,15 @@ if [ -f "$ALLOWLIST_FILE" ]; then
   done < "$ALLOWLIST_FILE"
 fi
 
-# Helper: check if a grep output line (file:lineno:content) matches any allow pattern.
-# The file path in grep output may be absolute or relative (e.g. ./foo/bar.md or
-# /tmp/something/bar.md). The allowlist globs are repo-relative (e.g. docs/foo.md
-# or *.md). We match if the filepath ends with the glob pattern or the basename matches.
-is_allowlisted() {
-  local match_line="$1"
-  # Extract the file path (everything before the first colon-digit sequence = line number)
-  local filepath
-  filepath="${match_line%%:*}"
+# Helper: check if a repo-relative-ish file PATH matches any allow pattern.
+# The path may be absolute or relative (e.g. ./foo/bar.md or /tmp/something/
+# bar.md). The allowlist globs are repo-relative (e.g. docs/foo.md or *.md).
+# We match if the filepath ends with the glob pattern or the basename matches.
+# Shared by is_allowlisted() (grep-output-line callers) and run_scan_range()
+# (--range diff-scan callers, which already have a bare path, no line-number
+# prefix to strip).
+is_path_allowlisted() {
+  local filepath="$1"
   # Normalize: strip leading ./
   filepath="${filepath#./}"
   local allow_glob
@@ -135,6 +165,61 @@ is_allowlisted() {
   return 1
 }
 
+# Helper: check if a grep output line (file:lineno:content) matches any allow
+# pattern. Extracts the file path (everything before the first colon-digit
+# sequence = line number) and delegates to is_path_allowlisted().
+is_allowlisted() {
+  local match_line="$1"
+  local filepath
+  filepath="${match_line%%:*}"
+  is_path_allowlisted "$filepath"
+}
+
+# ---------------------------------------------------------------------------
+# --range mode helpers: mirror the EXCLUDES / EXCLUDE_FILES / FILE_INCLUDES
+# filtering that the tree-mode `grep -r --exclude-dir=... --include=...`
+# invocation applies, but expressed as path-string predicates — --range mode
+# parses `git diff` output rather than walking the filesystem, so grep's
+# --exclude-dir/--include flags don't apply; without these, --range mode
+# would scan strictly MORE than tree mode ever does (e.g. a vendored
+# dependencies/ path edited in a push), a behaviour drift from the
+# already-audited tree-mode selectivity. Keep these three predicates in sync
+# with EXCLUDES / EXCLUDE_FILES / FILE_INCLUDES above if those ever change.
+# ---------------------------------------------------------------------------
+is_excluded_dir_path() {
+  local f="$1" seg
+  local IFS='/'
+  # shellcheck disable=SC2206
+  local segs=($f)
+  for seg in "${segs[@]}"; do
+    case "$seg" in
+      .git|node_modules|vendor|target|dist|build|Example_Projects|helix_agent|dependencies|Documentation)
+        return 0 ;;
+    esac
+  done
+  return 1
+}
+
+is_excluded_file_path() {
+  local base="${1##*/}"
+  case "$base" in
+    *.example|*.template|*.sample|*-example|*-template|scan-secrets.sh|test-scan-secrets.sh)
+      return 0 ;;
+  esac
+  return 1
+}
+
+is_included_extension() {
+  local base="${1##*/}"
+  case "$base" in
+    *.go|*.py|*.js|*.ts|*.tsx|*.jsx|*.kt|*.java|*.swift|*.rs|*.rb|*.php) return 0 ;;
+    *.json|*.yaml|*.yml|*.toml|*.md|*.txt|*.sh|*.bash) return 0 ;;
+    *.cfg|*.conf|*.ini|*.env|*.pem|*.key) return 0 ;;
+    id_rsa|id_rsa.*|id_ed25519|id_ed25519.*) return 0 ;;
+  esac
+  return 1
+}
+
 found=0
 
 run_scan() {
@@ -150,7 +235,57 @@ run_scan() {
   done < <("$GREP_BIN" "${grep_args[@]}" -e "$pattern" -- "$SCAN_TARGET" 2>/dev/null || true)
 }
 
-if [ "$SCAN_TARGET" = "." ]; then
+# run_scan_range <base-rev> <new-rev>
+#
+# Scans ONLY the lines ADDED between two git revisions (never the working
+# tree, never untracked files — `git diff` structurally cannot see either).
+# Parses unified diff output: tracks the current file from each "+++ b/<path>"
+# hunk header, then pattern-matches every "+"-prefixed content line against
+# PATTERNS, applying the SAME selectivity as tree mode (extension include
+# list, dir/file excludes, .scan-secrets-allow) so --range mode never flags
+# something tree mode would have silently skipped.
+#
+# NEVER prints the matched secret value itself — only "<file>: <label>",
+# mirroring scripts/secret_scan.sh's §11.4.10 value-never-printed contract.
+run_scan_range() {
+  local base="$1" new="$2"
+  local current_file="" line content pattern label diff_out
+  diff_out=$(git diff --unified=0 --no-color "$base" "$new" 2>/dev/null) || return 0
+  while IFS= read -r line; do
+    case "$line" in
+      '+++ '*)
+        current_file="${line#+++ }"
+        current_file="${current_file#b/}"
+        continue
+        ;;
+      '+++')
+        current_file=""
+        continue
+        ;;
+    esac
+    case "$line" in
+      '+'*)
+        [ -z "$current_file" ] && continue
+        is_excluded_dir_path "$current_file" && continue
+        is_excluded_file_path "$current_file" && continue
+        is_included_extension "$current_file" || continue
+        is_path_allowlisted "$current_file" && continue
+        content="${line#+}"
+        for pattern in "${PATTERNS[@]}"; do
+          if printf '%s' "$content" | "$GREP_BIN" -qE -e "$pattern" 2>/dev/null; then
+            echo "${current_file}: possible credential pattern in pushed range (value not printed)"
+            found=1
+            break
+          fi
+        done
+        ;;
+    esac
+  done <<< "$diff_out"
+}
+
+if [ "$MODE" = "range" ]; then
+  run_scan_range "$RANGE_BASE" "$RANGE_NEW"
+elif [ "$SCAN_TARGET" = "." ]; then
   # Full repo scan: restrict to known source + config file extensions
   FILE_INCLUDES=(
     --include='*.go' --include='*.py' --include='*.js' --include='*.ts'
@@ -173,7 +308,11 @@ else
 fi
 
 if [ "$found" -eq 0 ]; then
-  echo "OK: no credential patterns found in $SCAN_TARGET"
+  if [ "$MODE" = "range" ]; then
+    echo "OK: no credential patterns found in pushed range ${RANGE_BASE}..${RANGE_NEW}"
+  else
+    echo "OK: no credential patterns found in $SCAN_TARGET"
+  fi
   exit 0
 fi
 

@@ -10,7 +10,29 @@
 # (e.g. macOS, BSDs) the hook degrades gracefully: it warns and exits 0
 # rather than blocking every push.
 #
-# Additionally, runs scripts/scan-secrets.sh as a final pre-push gate.
+# Additionally, runs scripts/scan-secrets.sh --range <base> <new> — scoped
+# to the COMMITS ACTUALLY BEING PUSHED — as a final pre-push gate. This was
+# a whole-working-tree scan (`scan-secrets.sh` with no args) until the
+# 2026-07-11 fix below; the whole-tree form also swept UNTRACKED files
+# (scratchpad reports, local notes) sitting in the working directory and
+# blocked unrelated pushes on their content (see docs/audit/bypass_events.md
+# 2026-07-11 entry — "Follow-up: ... scope pre-push to pushed-commits not
+# full working tree."). §11.4.6: a push should be judged on what it actually
+# publishes, not on whatever happens to be lying around locally.
+#
+# The pushed range is read from the ref-update lines git supplies on this
+# hook's STDIN (documented pre-push protocol: one line per ref being
+# updated, "<local-ref> SP <local-oid> SP <remote-ref> SP <remote-oid>
+# LF"). For each updated ref: if the remote already has the ref, the range
+# is remote-oid..local-oid (the primary, everyday "update an existing
+# branch" case — diffs ONLY the new commits). If the ref is brand-new on
+# the remote (remote-oid is the all-zero SHA), the base is resolved as the
+# best-known merge-base against any existing remote-tracking ref for THIS
+# remote (content already known to be there); if none is found (a genuine
+# first-ever push with no shared history), the base falls back to the
+# well-known git empty-tree object so the ENTIRE new branch is scanned
+# (correct, if potentially large — a rare edge case, not the common path).
+#
 # If the scanner is missing (early P0 bootstrap), the check is skipped
 # with a warning rather than blocking the push.
 
@@ -59,20 +81,62 @@ if [ "$is_force" -eq 1 ] && [ "${HELIX_FORCE_PUSH_APPROVED:-0}" != "1" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 2.  Secret scan gate (best-effort; missing scanner does NOT block push
-#     during early P0 bootstrap).
+# 2.  Secret scan gate, SCOPED TO THE PUSHED RANGE (best-effort; missing
+#     scanner does NOT block push during early P0 bootstrap).
 # ---------------------------------------------------------------------------
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 SCANNER="$REPO_ROOT/scripts/scan-secrets.sh"
+ZERO_SHA="0000000000000000000000000000000000000000"
+EMPTY_TREE="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
 if [ -x "$SCANNER" ]; then
-  if ! "$SCANNER" >/dev/null 2>&1; then
-    echo "" >&2
-    echo "============================================================" >&2
-    echo "BLOCKED by pre-push hook: scan-secrets.sh found credential" >&2
-    echo "patterns in the working tree." >&2
-    echo "Run scripts/scan-secrets.sh and remediate before pushing." >&2
-    echo "============================================================" >&2
+  scan_block=0
+  # STDIN carries the ref-update lines for this push (git's documented
+  # pre-push protocol). Read them all before invoking any subcommand that
+  # might itself touch fd0, to avoid interleaving reads on the same pipe.
+  ref_updates=$(cat)
+
+  while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
+    [ -z "$local_ref" ] && continue
+    # Deleting a ref (local_sha all-zero) publishes nothing new — skip.
+    [ "$local_sha" = "$ZERO_SHA" ] && continue
+
+    base="$remote_sha"
+    if [ "$remote_sha" = "$ZERO_SHA" ]; then
+      # Brand-new ref on the remote: find the best-known base so we scan
+      # only what's genuinely new to the remote, not the ref's entire
+      # history. Only consider remote-tracking refs for THIS remote
+      # (content already known to be published there); never local
+      # branches (a candidate could trivially be the very branch being
+      # pushed, self-matching to an empty, secret-hiding diff).
+      base=""
+      while IFS= read -r candidate; do
+        [ -z "$candidate" ] && continue
+        mb=$(git merge-base "$local_sha" "$candidate" 2>/dev/null) || continue
+        if [ -n "$mb" ]; then
+          base="$mb"
+          break
+        fi
+      done < <(git for-each-ref --format='%(objectname)' "refs/remotes/${remote_name}/" 2>/dev/null)
+      [ -z "$base" ] && base="$EMPTY_TREE"
+    fi
+
+    range_out=$("$SCANNER" --range "$base" "$local_sha" 2>&1)
+    range_rc=$?
+    if [ "$range_rc" -ne 0 ]; then
+      echo "" >&2
+      echo "============================================================" >&2
+      echo "BLOCKED by pre-push hook: scan-secrets.sh --range found" >&2
+      echo "credential pattern(s) in the commits being pushed ($local_ref)." >&2
+      printf '%s\n' "$range_out" >&2
+      echo "Run: scripts/scan-secrets.sh --range $base $local_sha" >&2
+      echo "and remediate before pushing." >&2
+      echo "============================================================" >&2
+      scan_block=1
+    fi
+  done <<< "$ref_updates"
+
+  if [ "$scan_block" -eq 1 ]; then
     exit 1
   fi
 else
