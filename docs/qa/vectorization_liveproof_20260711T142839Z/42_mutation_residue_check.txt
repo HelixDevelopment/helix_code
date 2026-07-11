@@ -1,0 +1,2 @@
+### §11.4.84 mutation-residue check on tracked harness/main.go
+CLEAN: no mutation markers in tracked harness/main.go

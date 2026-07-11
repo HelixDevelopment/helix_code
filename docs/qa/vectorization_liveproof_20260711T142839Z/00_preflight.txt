@@ -1,0 +1,10 @@
+### pre-flight (§11.4.119 single-owner, coder + sibling capabilities untouched)
+date_utc=2026-07-11T14:32:09Z
+uname_m=x86_64  podman=podman version 5.7.1
+coder container (MUST remain running, untouched):
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 2 hours
+nvidia-smi (coder-only GPU baseline, MUST be unaffected by this CPU-only service):
+index, name, memory.total [MiB], memory.used [MiB], memory.free [MiB], utilization.gpu [%]
+0, NVIDIA GeForce RTX 5090, 32607 MiB, 19466 MiB, 12632 MiB, 0 %
+target host port 18452 listeners (expect none):
+  (free)

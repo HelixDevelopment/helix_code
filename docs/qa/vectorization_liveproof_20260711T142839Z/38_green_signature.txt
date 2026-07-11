@@ -1,0 +1,4 @@
+### GREEN runtime signature — real vectorize->rasterize round-trip vs source, floor=0.7468
+[RUNTIME-SIGNATURE] PASS ssim=0.9726
+signature_exit=0
+GREEN-OK

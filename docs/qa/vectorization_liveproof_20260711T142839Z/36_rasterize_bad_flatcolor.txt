@@ -1,0 +1,1 @@
+RASTERIZE-OK: status=200 wrote /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/vectorization_liveproof_20260711T142839Z/rasterized_bad_flatcolor.png (12032 bytes)

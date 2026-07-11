@@ -1,0 +1,5 @@
+helixllm-coder localhost/helixllm/llamacpp-router:cuda12.8-sm120 Up 2 hours 8080/tcp, 50052/tcp
+phase3ragqdrant_qdrant_1 docker.io/qdrant/qdrant:latest Up 3 minutes 0.0.0.0:18460-18461->6333-6334/tcp
+phase3ragqdrant_tei-embed_1 ghcr.io/huggingface/text-embeddings-inference:cpu-1.9 Up 3 minutes 0.0.0.0:18462->80/tcp
+phase3ragqdrant_tei-rerank_1 ghcr.io/huggingface/text-embeddings-inference:cpu-1.9 Up 3 minutes 0.0.0.0:18463->80/tcp
+vectorizeliveproof_vectorize_1 localhost/vectorizeliveproof_vectorize:latest Up Less than a second 0.0.0.0:18452->8080/tcp

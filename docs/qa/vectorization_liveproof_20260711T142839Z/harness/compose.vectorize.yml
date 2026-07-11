@@ -1,0 +1,23 @@
+# Vectorization capability — vtracer default raster->SVG engine (§11.4.6/
+# CAPABILITIES_MASTER_PLAN_v2.md P3-T4') behind the minimal Go HTTP shim in
+# submodules/helix_llm/services/vectorize/. Booted THROUGH the containers
+# submodule compose.Orchestrator (§11.4.76), rootless podman (§11.4.161).
+# NO GPU device — vtracer is CPU-bound by design.
+#
+# No hardcoded host port / resource limit (§CONST-045 / §CONST-046): every
+# value is injected from the environment by run_proof.sh; the compose file
+# carries no literal for those. The build context path is a structural
+# reference to this repo's own tree (not a secret/host/credential literal).
+services:
+  vectorize:
+    build:
+      context: ../../../../submodules/helix_llm/services/vectorize
+      dockerfile: Containerfile
+    ports:
+      - "${VECTORIZE_HOST_PORT}:8080"
+    # §12.3 container hygiene — bounded so the vectorize service never
+    # starves the developer host (§12.6). Config-injected, captured as
+    # evidence.
+    mem_limit: "${VECTORIZE_MEM_LIMIT}"
+    cpus: ${VECTORIZE_CPUS}
+    restart: "no"

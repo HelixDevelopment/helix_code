@@ -1,0 +1,5 @@
+### fidelity floor calibration (§11.4.6/§11.4.107(13)) — observed on THIS run's real fixtures
+golden_good_ssim=0.9726
+golden_bad_blank_ssim=0.5209
+golden_bad_flatcolor_ssim=0.4840
+SSIM_FLOOR=0.7468 (midpoint of golden-good=0.9726 and max golden-bad=0.5209)

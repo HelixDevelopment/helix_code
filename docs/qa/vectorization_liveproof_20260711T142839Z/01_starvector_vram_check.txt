@@ -1,0 +1,4 @@
+### StarVector-8B optional-tier VRAM fitness check (§11.4.6 — no guessing, real nvidia-smi read)
+free_vram_mib=12632
+starvector_estimated_footprint_gb=12-16 (per docs/research/07.2026/02_vision_generative/CAPABILITIES_MASTER_PLAN_v2.md P3-T4')
+verdict=HONEST_DEFER (free VRAM 12632 MiB is at/below the low end of the 12-16 GB estimated footprint, no safe headroom; StarVector optional tier NOT attempted this run — documented follow-up per README 'StarVector tier status')

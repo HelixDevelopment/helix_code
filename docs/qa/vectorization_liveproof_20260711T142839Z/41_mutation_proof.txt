@@ -1,0 +1,10 @@
+### §1.1 paired mutation: fidelity check neutered (forced always-pass) in a DISPOSABLE /tmp scratch binary
+expectation: golden-bad fixtures WRONGLY pass under the neutered check (proving the real check IS load-bearing)
+[GOLDEN-BAD-BLANK-MUTATED-NEUTERED] PASS ssim=0.5209 (fidelity check forced to always-pass)
+[GOLDEN-BAD-FLATCOLOR-MUTATED-NEUTERED] PASS ssim=0.4840 (fidelity check forced to always-pass)
+mutated_blank_exit=0 (0=wrongly-passed, expected 0 under mutation)
+mutated_flatcolor_exit=0 (0=wrongly-passed, expected 0 under mutation)
+MUTATION-PROOF-OK: neutered check wrongly PASSED both golden-bad fixtures, as expected
+REVERT: no tracked source was ever modified (scratch-binary approach, §11.4.84) — the real harness's
+  39_self_validation.txt (above) already proves the NON-mutated, committed analyzer correctly FAILs
+  both golden-bad fixtures. Discarding scratch dir now.

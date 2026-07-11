@@ -1,0 +1,8 @@
+### post-teardown state
+vectorize containers (expect none):
+  (none — removed)
+coder still running (untouched):
+helixllm-coder Up 2 hours
+coder GPU memory unaffected (compare to 00_preflight.txt):
+index, name, memory.total [MiB], memory.used [MiB], memory.free [MiB], utilization.gpu [%]
+0, NVIDIA GeForce RTX 5090, 32607 MiB, 19466 MiB, 12632 MiB, 0 %

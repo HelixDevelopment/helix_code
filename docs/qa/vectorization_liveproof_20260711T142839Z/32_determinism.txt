@@ -1,0 +1,1 @@
+[DETERMINISM] PASS: byte-identical SVG (18041 chars) across two independent /v1/vectorize calls on the same input
