@@ -21,6 +21,30 @@
 # own test suite (scripts/test-scan-secrets.sh) and the .scan-secrets-allow
 # entries that document this same convention project-wide.
 #
+# RUNTIME-ASSEMBLED FIXTURES (2026-07-11 fix, closes a real GitHub
+# push-protection block): every "MUST be detected" fixture below (the ones
+# our guard is required to catch — Tests 1-7b/13/15/17/19) is assembled at
+# RUNTIME from separate prefix/body fragments (`printf '...%s' "$frag"`)
+# rather than written as one contiguous literal, so NO contiguous
+# secret-shaped token ever appears in this file's SOURCE TEXT — only in the
+# ephemeral $WORKDIR temp file the assembled value is written to (never
+# committed, never even tracked by git). GitHub's server-side push
+# protection scans the DIFF TEXT of what's being pushed; a literal fixture
+# with the real Slack-bot-token shape (xoxb- + a digit run + "-" + a digit
+# run + "-" + an alphanumeric run — deliberately NOT reproduced verbatim
+# even here in prose, per the same fix this comment documents) sitting in
+# committed source is indistinguishable to that scanner from a real leaked
+# token and gets blocked (this happened on 2026-07-11 for that fixture).
+# Splitting the prefix (kept inline in the printf FORMAT string,
+# far too short alone to match any pattern) from the long fabricated body
+# (held in a shell variable, never adjacent to its defining prefix in
+# source) breaks every pattern's required contiguous shape in the SOURCE
+# while leaving the value the guard actually tests — the text written to
+# the WORKDIR temp file at runtime — byte-identical to before. The
+# allowlisted / non-matching fixtures (Tests 8,9,10,11,14,16,18,20) are
+# deliberately NOT real-shaped to begin with (that's the point of those
+# cases) and are left as plain literals.
+#
 # §11.4.84-mutation-test-exempt: this file's markers are trap-restored test
 # logic. The literal string "MUTATED for paired" below (in the paired §1.1
 # mutation comment) is documentation of this test's own mutate -> assert ->
@@ -85,31 +109,48 @@ check() {
 # credential — see file-level NOTE) → MUST be detected (non-zero exit).
 # ---------------------------------------------------------------------------
 
-echo 'GEMINI_API_KEY=AIzaSyD-fabricated0123456789abcdef' > "$WORKDIR/1_google.txt"
+frag="SyD-fabricated0123456789abcdef"
+printf 'GEMINI_API_KEY=AIza%s\n' "$frag" > "$WORKDIR/1_google.txt"
 check "Test 1: real-shaped Google API key" nonzero "$WORKDIR/1_google.txt"
 
-echo 'OPENAI_API_KEY=sk-fabricated0123456789ABCDEFGHIJKLMN' > "$WORKDIR/2_openai.txt"
+frag="fabricated0123456789ABCDEFGHIJKLMN"
+printf 'OPENAI_API_KEY=sk-%s\n' "$frag" > "$WORKDIR/2_openai.txt"
 check "Test 2: real-shaped OpenAI API key" nonzero "$WORKDIR/2_openai.txt"
 
-echo 'AWS_ACCESS_KEY_ID=AKIAABCDEFGHIJKLMNOP' > "$WORKDIR/3_aws.txt"
+frag="ABCDEFGHIJKLMNOP"
+printf 'AWS_ACCESS_KEY_ID=AKIA%s\n' "$frag" > "$WORKDIR/3_aws.txt"
 check "Test 3: real-shaped AWS access key" nonzero "$WORKDIR/3_aws.txt"
 
-echo 'GITHUB_TOKEN=ghp_fabricated0123456789ABCDEFGHIJKLMNOPQR' > "$WORKDIR/4_github.txt"
+frag="fabricated0123456789ABCDEFGHIJKLMNOPQR"
+printf 'GITHUB_TOKEN=ghp_%s\n' "$frag" > "$WORKDIR/4_github.txt"
 check "Test 4: real-shaped GitHub PAT" nonzero "$WORKDIR/4_github.txt"
 
-printf -- '-----BEGIN RSA PRIVATE KEY-----\nMIIfabricatedNotARealKeyBodyAtAll\n-----END RSA PRIVATE KEY-----\n' > "$WORKDIR/5_pem.txt"
+# PEM headers: the leading "-----" run is kept in a separate variable from
+# the "BEGIN ... PRIVATE KEY"/"END ... PRIVATE KEY" words so the full
+# 5-dash + BEGIN/END + key-type + "PRIVATE KEY" + 5-dash marker the guard
+# (and GitHub's own private-key scanner) looks for is never contiguous in
+# this file's source — not even spelled out verbatim in this comment.
+dash="-----"
+frag="MIIfabricatedNotARealKeyBodyAtAll"
+printf '%sBEGIN RSA PRIVATE KEY%s\n%s\n%sEND RSA PRIVATE KEY%s\n' \
+  "$dash" "$dash" "$frag" "$dash" "$dash" > "$WORKDIR/5_pem.txt"
 check "Test 5: private-key header (RSA)" nonzero "$WORKDIR/5_pem.txt"
 
-printf -- '-----BEGIN PRIVATE KEY-----\nMIIfabricatedGenericPKCS8Body\n-----END PRIVATE KEY-----\n' > "$WORKDIR/6_pem_generic.txt"
+dash="-----"
+frag="MIIfabricatedGenericPKCS8Body"
+printf '%sBEGIN PRIVATE KEY%s\n%s\n%sEND PRIVATE KEY%s\n' \
+  "$dash" "$dash" "$frag" "$dash" "$dash" > "$WORKDIR/6_pem_generic.txt"
 check "Test 6: private-key header (generic PKCS8)" nonzero "$WORKDIR/6_pem_generic.txt"
 
-echo 'SLACK_BOT_TOKEN=xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx' > "$WORKDIR/7_slack_real.txt"
+printf 'SLACK_BOT_TOKEN=xoxb-%s-%s-%s\n' \
+  "123456789012" "123456789012" "abcdefghijklmnopqrstuvwx" > "$WORKDIR/7_slack_real.txt"
 check "Test 7: real-shaped Slack bot token (xoxb-N-N-alnum)" nonzero "$WORKDIR/7_slack_real.txt"
 
 # HuggingFace hf_ token — the exact class that partially leaked into the
 # session transcript on 2026-07-11 (catalogue-providers stream); added to
 # the guard patterns per §11.4.138 (close the class that escaped).
-echo 'HF_TOKEN=hf_fabricated0123456789ABCDEFGHIJKLMNOP' > "$WORKDIR/7b_hf.txt"
+frag="fabricated0123456789ABCDEFGHIJKLMNOP"
+printf 'HF_TOKEN=hf_%s\n' "$frag" > "$WORKDIR/7b_hf.txt"
 check "Test 7b: real-shaped HuggingFace token (hf_...)" nonzero "$WORKDIR/7b_hf.txt"
 
 # ---------------------------------------------------------------------------
@@ -121,27 +162,41 @@ check "Test 7b: real-shaped HuggingFace token (hf_...)" nonzero "$WORKDIR/7b_hf.
 # legitimate doc placeholder / Go unit-test fixture already committed.
 # ---------------------------------------------------------------------------
 
-echo 'XAI_API_KEY=xai-fabricated0123456789ABCDEFGHIJKLMNOP' > "$WORKDIR/13_xai.txt"
+frag="fabricated0123456789ABCDEFGHIJKLMNOP"
+printf 'XAI_API_KEY=xai-%s\n' "$frag" > "$WORKDIR/13_xai.txt"
 check "Test 13: real-shaped xAI API key (xai-...)" nonzero "$WORKDIR/13_xai.txt"
 
-echo 'ANTHROPIC_API_KEY=sk-ant-api03-fabricatedNotARealKey0123456789ABCDEFGHIJ' > "$WORKDIR/15_anthropic.txt"
+# "sk-ant-api03-" (13 chars total after "sk-ant-": "api03-" is only 6 chars,
+# far short of the guard's 30-char threshold) stays a literal prefix in the
+# printf FORMAT string below — only the long fabricated body is a variable,
+# so "sk-ant-[A-Za-z0-9_-]{30,}" never matches this file's source text.
+frag="fabricatedNotARealKey0123456789ABCDEFGHIJ"
+printf 'ANTHROPIC_API_KEY=sk-ant-api03-%s\n' "$frag" > "$WORKDIR/15_anthropic.txt"
 check "Test 15: real-shaped Anthropic API key (sk-ant-api03-...)" nonzero "$WORKDIR/15_anthropic.txt"
 
 # Fabricated GCP service-account JSON credential blob (fake project id,
 # fake hex-looking private_key_id, no PEM body at all — this fixture is
 # deliberately narrower than a real credentials file so it isolates the
-# two new JSON-marker patterns from the pre-existing PEM pattern).
-cat > "$WORKDIR/17_gcp.txt" <<'GCPEOF'
+# two new JSON-marker patterns from the pre-existing PEM pattern). The
+# guard's two GCP patterns each require a JSON key name IMMEDIATELY
+# followed (mod whitespace) by its colon — so each key name and its
+# ": value" suffix are assembled from two separate string literals that are
+# never adjacent in source, only in the printf-assembled output line.
+gcp_frag="fabricated0123456789abcdef01234567890123"
+gcp_type_suffix=': "service_account"'
+gcp_pkid_suffix=": \"$gcp_frag\""
 {
-  "type": "service_account",
-  "project_id": "fabricated-test-project",
-  "private_key_id": "fabricated0123456789abcdef01234567890123",
-  "client_email": "fabricated@fabricated-test-project.iam.gserviceaccount.com"
-}
-GCPEOF
+  printf '{\n'
+  printf '  "type"%s,\n' "$gcp_type_suffix"
+  printf '  "project_id": "fabricated-test-project",\n'
+  printf '  "private_key_id"%s,\n' "$gcp_pkid_suffix"
+  printf '  "client_email": "fabricated@fabricated-test-project.iam.gserviceaccount.com"\n'
+  printf '}\n'
+} > "$WORKDIR/17_gcp.txt"
 check "Test 17: fabricated GCP service-account JSON blob (type + private_key_id)" nonzero "$WORKDIR/17_gcp.txt"
 
-echo 'AZURE_OPENAI_API_KEY=1a2b3c4d5e6f70819203a4b5c6d7e8f9' > "$WORKDIR/19_azure.txt"
+frag="1a2b3c4d5e6f70819203a4b5c6d7e8f9"
+printf 'AZURE_OPENAI_API_KEY=%s\n' "$frag" > "$WORKDIR/19_azure.txt"
 check "Test 19: real-shaped Azure key (AZURE_*KEY=<32-hex>)" nonzero "$WORKDIR/19_azure.txt"
 
 # ---------------------------------------------------------------------------
