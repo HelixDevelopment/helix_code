@@ -1,0 +1,33 @@
+ok  	dev.helix.code/internal/llm	112.182s
+ok  	dev.helix.code/internal/llm/compression	1.038s
+ok  	dev.helix.code/internal/llm/compressioniface	1.013s
+ok  	dev.helix.code/internal/llm/i18n	1.013s
+ok  	dev.helix.code/internal/llm/litellm	1.026s
+ok  	dev.helix.code/internal/llm/promptcache	1.151s
+ok  	dev.helix.code/internal/llm/providers/cerebras	1.029s
+ok  	dev.helix.code/internal/llm/providers/cohere	1.027s
+ok  	dev.helix.code/internal/llm/providers/helixagent	1.041s
+?   	dev.helix.code/internal/llm/providers/huggingface	[no test files]
+ok  	dev.helix.code/internal/llm/providers/replicate	1.135s
+?   	dev.helix.code/internal/llm/providers/together	[no test files]
+ok  	dev.helix.code/internal/llm/routing	1.012s
+ok  	dev.helix.code/internal/llm/vision	1.246s
+ok  	dev.helix.code/internal/server	2.237s
+ok  	dev.helix.code/internal/server/i18n	1.014s
+ok  	dev.helix.code/internal/worker	40.846s
+ok  	dev.helix.code/internal/worker/i18n	1.013s
+ok  	dev.helix.code/internal/task	2.302s
+?   	dev.helix.code/internal/task/i18n	[no test files]
+ok  	dev.helix.code/internal/session	6.488s
+?   	dev.helix.code/internal/session/i18n	[no test files]
+ok  	dev.helix.code/internal/provider	1.051s
+ok  	dev.helix.code/internal/provider/i18n	1.034s
+ok  	dev.helix.code/internal/providers	2.069s
+ok  	dev.helix.code/internal/providers/httpclient	1.030s
+ok  	dev.helix.code/internal/providers/i18n	1.013s
+ok  	dev.helix.code/internal/redis	9.409s
+ok  	dev.helix.code/internal/redis/i18n	1.015s
+ok  	dev.helix.code/internal/memory	5.672s
+?   	dev.helix.code/internal/memory/i18n	[no test files]
+ok  	dev.helix.code/internal/memory/providers	40.098s
+EXIT_CODE=0

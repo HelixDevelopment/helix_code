@@ -1,0 +1,1130 @@
+==================
+WARNING: DATA RACE
+Read at 0x00c0002b3530 by goroutine 13:
+  runtime.mapIterStart()
+      /usr/lib/golang/src/runtime/map.go:156 +0x0
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModelLocked()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:650 +0x148
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:236 +0x1dd
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c0002b3530 by goroutine 12:
+  runtime.mapassign_faststr()
+      /usr/lib/golang/src/internal/runtime/maps/runtime_faststr.go:263 +0x0
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:238 +0x286
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 12 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380288 by goroutine 13:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModelLocked()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:650 +0x1d4
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:236 +0x1dd
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c000380288 by goroutine 12:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:238 +0x295
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 12 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0003800d0 by goroutine 13:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModelLocked()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:651 +0x1f8
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:236 +0x1dd
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c0003800d0 by goroutine 12:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 12 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0002b3530 by goroutine 13:
+  reflect.maplen()
+      /usr/lib/golang/src/runtime/map.go:284 +0x0
+  reflect.Value.lenNonSlice()
+      /usr/lib/golang/src/reflect/value.go:1866 +0x1e4
+  reflect.Value.Len()
+      /usr/lib/golang/src/reflect/value.go:1855 +0x41e
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:784 +0x400
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c0002b3530 by goroutine 11:
+  runtime.mapassign_faststr()
+      /usr/lib/golang/src/internal/runtime/maps/runtime_faststr.go:263 +0x0
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:238 +0x286
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0003802b8 by goroutine 13:
+  reflect.copyVal()
+      /usr/lib/golang/src/reflect/value.go:1889 +0x5a
+  reflect.(*MapIter).Value()
+      /usr/lib/golang/src/reflect/map.go:300 +0x124
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:792 +0x615
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c0003802b8 by goroutine 11:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:238 +0x295
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380410 by goroutine 13:
+  reflect.Value.String()
+      /usr/lib/golang/src/reflect/value.go:2444 +0x5fa
+  encoding/json.stringEncoder()
+      /usr/lib/golang/src/encoding/json/encode.go:632 +0x54d
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.ptrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:919 +0x3c2
+  encoding/json.ptrEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:804 +0x7b0
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c000380410 by goroutine 11:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380450 by goroutine 13:
+  reflect.Value.Int()
+      /usr/lib/golang/src/reflect/value.go:1469 +0x204
+  encoding/json.intEncoder()
+      /usr/lib/golang/src/encoding/json/encode.go:556 +0x185
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.ptrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:919 +0x3c2
+  encoding/json.ptrEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:804 +0x7b0
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c000380450 by goroutine 11:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380468 by goroutine 13:
+  time.(*Time).MarshalJSON()
+      <autogenerated>:1 +0x38
+  encoding/json.addrMarshalerEncoder()
+      /usr/lib/golang/src/encoding/json/encode.go:502 +0x194
+  encoding/json.condAddrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:934 +0x8d
+  encoding/json.condAddrEncoder.encode-fm()
+      <autogenerated>:1 +0x8a
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.ptrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:919 +0x3c2
+  encoding/json.ptrEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:804 +0x7b0
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c000380468 by goroutine 11:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380498 by goroutine 13:
+  reflect.Value.Int()
+      /usr/lib/golang/src/reflect/value.go:1461 +0x1b3
+  encoding/json.intEncoder()
+      /usr/lib/golang/src/encoding/json/encode.go:556 +0x185
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.ptrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:919 +0x3c2
+  encoding/json.ptrEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:804 +0x7b0
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c000380498 by goroutine 11:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0003804a0 by goroutine 13:
+  reflect.Value.IsNil()
+      /usr/lib/golang/src/reflect/value.go:1647 +0xd3
+  encoding/json.sliceEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:844 +0xf1
+  encoding/json.sliceEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.ptrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:919 +0x3c2
+  encoding/json.ptrEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:804 +0x7b0
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c0003804a0 by goroutine 11:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0003804b8 by goroutine 13:
+  reflect.Value.IsNil()
+      /usr/lib/golang/src/reflect/value.go:1641 +0x14b
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:766 +0xf4
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.ptrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:919 +0x3c2
+  encoding/json.ptrEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:804 +0x7b0
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c0003804b8 by goroutine 11:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0003804c8 by goroutine 13:
+  reflect.Value.Len()
+      /usr/lib/golang/src/reflect/value.go:1853 +0x9b
+  encoding/json.arrayEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:885 +0xa5
+  encoding/json.arrayEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.sliceEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:863 +0x502
+  encoding/json.sliceEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.ptrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:919 +0x3c2
+  encoding/json.ptrEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:804 +0x7b0
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c0003804c8 by goroutine 11:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c00038c0e0 by goroutine 13:
+  reflect.Value.String()
+      /usr/lib/golang/src/reflect/value.go:2444 +0x5fa
+  encoding/json.stringEncoder()
+      /usr/lib/golang/src/encoding/json/encode.go:632 +0x54d
+  encoding/json.arrayEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:890 +0x102
+  encoding/json.arrayEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.sliceEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:863 +0x502
+  encoding/json.sliceEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.ptrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:919 +0x3c2
+  encoding/json.ptrEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:804 +0x7b0
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c00038c0e0 by goroutine 11:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModelLocked()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:669 +0x5f5
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:236 +0x1dd
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 13 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380180 by goroutine 11:
+  reflect.Value.IsNil()
+      /usr/lib/golang/src/reflect/value.go:1647 +0xd3
+  encoding/json.sliceEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:844 +0xf1
+  encoding/json.sliceEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.ptrEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:919 +0x3c2
+  encoding/json.ptrEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:804 +0x7b0
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous write at 0x00c000380180 by goroutine 12:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:236 +0x1fc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 11 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 12 (finished) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c0002b3530 by goroutine 15:
+  runtime.mapassign_faststr()
+      /usr/lib/golang/src/internal/runtime/maps/runtime_faststr.go:263 +0x0
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:238 +0x286
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous read at 0x00c0002b3530 by goroutine 13:
+  reflect.mapIterStart()
+      /usr/lib/golang/src/reflect/map.go:177 +0x0
+  reflect.(*MapIter).Next()
+      /usr/lib/golang/src/reflect/map.go:342 +0x112
+  reflect.(*MapIter).Next()
+      /usr/lib/golang/src/reflect/map.go:342 +0x112
+  encoding/json.mapEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:788 +0x544
+  encoding/json.mapEncoder.encode-fm()
+      <autogenerated>:1 +0x72
+  encoding/json.structEncoder.encode()
+      /usr/lib/golang/src/encoding/json/encode.go:747 +0x4dd
+  encoding/json.structEncoder.encode-fm()
+      <autogenerated>:1 +0xdc
+  encoding/json.(*encodeState).reflectValue()
+      /usr/lib/golang/src/encoding/json/encode.go:367 +0x83
+  encoding/json.(*encodeState).marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:343 +0xdb
+  encoding/json.Marshal()
+      /usr/lib/golang/src/encoding/json/encode.go:209 +0x11e
+  encoding/json.MarshalIndent()
+      /usr/lib/golang/src/encoding/json/encode.go:222 +0x6b
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).saveRegistry()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:388 +0xd1
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:241 +0x2e4
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 15 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 13 (finished) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380300 by goroutine 85:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModelLocked()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:650 +0x1d4
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:637 +0xfe
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func9()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:113 +0x104
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap3()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:114 +0x38
+
+Previous write at 0x00c000380300 by goroutine 14:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:238 +0x295
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 85 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:111 +0x248
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 14 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380a90 by goroutine 85:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModelLocked()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:651 +0x1f8
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:637 +0xfe
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func9()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:113 +0x104
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap3()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:114 +0x38
+
+Previous write at 0x00c000380a90 by goroutine 14:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 85 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:111 +0x248
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 14 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380b40 by goroutine 89:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).FindModelsForProvider()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:265 +0x279
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func5()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:89 +0x87
+
+Previous write at 0x00c000380b40 by goroutine 14:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:46 +0x1bc
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 89 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:87 +0x5dc
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 14 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c00038c320 by goroutine 89:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).FindModelsForProvider()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:265 +0x2eb
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func5()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:89 +0x87
+
+Previous write at 0x00c00038c320 by goroutine 14:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModelLocked()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:669 +0x5f5
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:236 +0x1dd
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 89 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:87 +0x5dc
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 14 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c0002b3530 by goroutine 17:
+  runtime.mapassign_faststr()
+      /usr/lib/golang/src/internal/runtime/maps/runtime_faststr.go:263 +0x0
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:238 +0x286
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous read at 0x00c0002b3530 by goroutine 49:
+  runtime.mapIterStart()
+      /usr/lib/golang/src/runtime/map.go:156 +0x0
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).FindModelsForProvider()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:264 +0x124
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func5()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:89 +0x87
+
+Goroutine 17 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 49 (finished) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:87 +0x5dc
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c000380330 by goroutine 32:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).GetDownloadedModels()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:250 +0x204
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func4()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:83 +0x7b
+
+Previous write at 0x00c000380330 by goroutine 18:
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:238 +0x295
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Goroutine 32 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:81 +0x51c
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 18 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c0002b3530 by goroutine 25:
+  runtime.mapassign_faststr()
+      /usr/lib/golang/src/internal/runtime/maps/runtime_faststr.go:263 +0x0
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:238 +0x286
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x317
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.gowrap1()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:55 +0x38
+
+Previous read at 0x00c0002b3530 by goroutine 48:
+  runtime.mapIterStart()
+      /usr/lib/golang/src/runtime/map.go:156 +0x0
+  dev.helix.code/internal/llm.(*CrossProviderRegistry).GetDownloadedModels()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:250 +0x105
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func4()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:83 +0x7b
+
+Goroutine 25 (running) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa4
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+
+Goroutine 48 (finished) created at:
+  dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace()
+      /home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:81 +0x51c
+  testing.tRunner()
+      /usr/lib/golang/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /usr/lib/golang/src/testing/testing.go:2101 +0x38
+==================
+fatal error: concurrent map iteration and map write
+
+goroutine 15 [running]:
+internal/runtime/maps.fatal({0x24cf5f3?, 0x34aedd8?})
+	/usr/lib/golang/src/runtime/panic.go:1181 +0x18
+internal/runtime/maps.(*Iter).Next(0xc000095d70?)
+	/usr/lib/golang/src/internal/runtime/maps/table.go:819 +0x86
+dev.helix.code/internal/llm.(*CrossProviderRegistry).findCompatibleProvidersForModelLocked(0xc00032a050, {0xc0002df539, 0x7}, {0x248b8f6, 0x4})
+	/home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:650 +0x149
+dev.helix.code/internal/llm.(*CrossProviderRegistry).RegisterDownloadedModel(0xc00032a050, 0xc00042e9c0)
+	/home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry.go:236 +0x1de
+dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace.func1(0x6)
+	/home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:52 +0x318
+created by dev.helix.code/internal/llm.TestGuard_CrossProviderRegistry_ConcurrentAccess_NoRace in goroutine 8
+	/home/milos/Factory/projects/tools_and_research/helix_code/helix_code/internal/llm/cross_provider_registry_race_test.go:44 +0xa5
+FAIL	dev.helix.code/internal/llm	0.039s
+FAIL
+EXIT=1

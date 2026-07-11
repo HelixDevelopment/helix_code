@@ -1,0 +1,10 @@
+ok  	dev.helix.code/internal/provider	1.073s
+ok  	dev.helix.code/internal/provider/i18n	1.011s
+ok  	dev.helix.code/internal/providers	2.477s
+ok  	dev.helix.code/internal/providers/httpclient	1.030s
+ok  	dev.helix.code/internal/providers/i18n	1.012s
+ok  	dev.helix.code/internal/redis	9.446s
+ok  	dev.helix.code/internal/redis/i18n	1.012s
+ok  	dev.helix.code/internal/memory	7.281s
+?   	dev.helix.code/internal/memory/i18n	[no test files]
+ok  	dev.helix.code/internal/memory/providers	45.868s
