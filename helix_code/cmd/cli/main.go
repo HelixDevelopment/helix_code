@@ -38,6 +38,7 @@ import (
 	"dev.helix.code/internal/plantree"
 	"dev.helix.code/internal/pprofutil"
 	"dev.helix.code/internal/projectmemory"
+	"dev.helix.code/internal/rag"
 	"dev.helix.code/internal/render"
 	"dev.helix.code/internal/roocode"
 	"dev.helix.code/internal/secrets"
@@ -1755,6 +1756,33 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 	// Get provider
 	provider := c.llmProvider
 
+	// CONST-040 §HXC-118 Phase 2/3: optional RAG (Retrieval-Augmented
+	// Generation) context injection — default-OFF.
+	//
+	// rag.NewFromEnv resolves HELIXCODE_RAG_ENABLED (unset/false by
+	// default per internal/rag/config.go) and constructs an Adapter that
+	// is disabled unless the operator explicitly opts in. When disabled,
+	// Adapter.Retrieve (internal/rag/adapter.go, Phase 1) returns
+	// (nil, false, nil) WITHOUT calling the underlying retriever — no
+	// HTTP call, no allocation beyond the inert Adapter/Embedder/store
+	// structs themselves — so effectivePrompt stays byte-identical to
+	// prompt and the request built below is IDENTICAL to the pre-HXC-118
+	// behavior. ANTI-BLUFF (§11.4.6): when enabled, ragAdapter.Retrieve
+	// performs a REAL embedding call + REAL in-memory cosine-similarity
+	// search (internal/rag/vectorstore.go); a retrieval failure degrades
+	// gracefully (logged, generation proceeds on the original prompt)
+	// rather than aborting the user's request.
+	effectivePrompt := prompt
+	ragAdapter := rag.NewFromEnv(os.Getenv)
+	if ragAdapter.Enabled() {
+		ragDocs, ragRan, ragErr := ragAdapter.Retrieve(ctx, prompt, rag.RetrieveOptionsFromEnv(os.Getenv))
+		if ragErr != nil {
+			log.Printf("rag: retrieval failed, continuing without RAG context: %v", ragErr)
+		} else if ragRan && len(ragDocs) > 0 {
+			effectivePrompt = rag.PrependContext(prompt, ragDocs)
+		}
+	}
+
 	// Create generation request with the prompt as a user message
 	req := &llm.LLMRequest{
 		Model:       modelName,
@@ -1762,7 +1790,7 @@ func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxToken
 		Temperature: temperature,
 		Stream:      stream,
 		Messages: []llm.Message{
-			{Role: "user", Content: prompt},
+			{Role: "user", Content: effectivePrompt},
 		},
 	}
 

@@ -196,6 +196,7 @@ func unmarshalModelArray(raw json.RawMessage) ([]*VerifiedModel, error) {
 		RawID   json.RawMessage `json:"id"`
 		ModelID string          `json:"model_id"`
 		Status  string          `json:"status"`
+		capabilityAliasFields
 	}
 	if err := json.Unmarshal(raw, &rawObjs); err != nil {
 		return nil, fmt.Errorf("failed to decode models: %w", err)
@@ -225,9 +226,71 @@ func unmarshalModelArray(raw json.RawMessage) ([]*VerifiedModel, error) {
 			m.VerificationStatus = rawObjs[i].Status
 		}
 
+		// CONST-040 capability-flag reconciliation (HXC-117 Phase 2). See the
+		// capabilityAliasFields doc comment below.
+		rawObjs[i].capabilityAliasFields.applyTo(&m.SupportsMCP, &m.SupportsLSP, &m.SupportsACP)
+
 		models[i] = &m
 	}
 	return models, nil
+}
+
+// capabilityAliasFields captures the plural-keyed MCP/LSP/ACP CONST-040
+// capability flags used by the REAL LLMsVerifier service's own DB-backed wire
+// schema — confirmed by direct inspection of
+// submodules/llms_verifier/llm-verifier/database/database.go (type
+// VerificationResult, fields SupportsMCPs/SupportsLSPs/SupportsACPs, json tags
+// "supports_mcps"/"supports_lsps"/"supports_acps") and
+// submodules/llms_verifier/llm-verifier/verification/verification.go (the
+// real per-capability probe engine that populates them from actual model
+// probes, not a stub) during this session (2026-07-12, see
+// docs/research/const040_capability_model_20260712/W4_117_evidence.md).
+//
+// HelixCode's own VerifiedModel/VerificationResult (HXC-117 Phase 1,
+// types.go) use the SINGULAR CONST-040 doc.go convention
+// ("supports_mcp"/"supports_lsp"/"supports_acp") instead — RAG/Skills/Plugins
+// already match exactly on both sides (both name them "supports_rag" /
+// "supports_skills" / "supports_plugins"), so only MCP/LSP/ACP need
+// reconciliation. This mirrors the id/model_id and status-field reconciliation
+// already applied above for the same real-vs-embedded-server shape mismatch
+// reason.
+//
+// Honest boundary (§11.4.6 / §11.4.123): as of this session, NEITHER the
+// singular NOR the plural keys are actually emitted by the real LLMsVerifier
+// service's live /api/models, /api/models/{id}, or /api/models/{id}/verify
+// HTTP handlers (submodules/llms_verifier/llm-verifier/api/handlers.go
+// ListModelsHandler/GetModelHandler/VerifyModelHandler all hand-roll a
+// map[string]any response that does not include any of the six CONST-040
+// capability keys, even though the underlying database.VerificationResult
+// struct and probe engine already compute and persist them) — so today this
+// reconciliation is a documented no-op on the live wire and every capability
+// flag legitimately stays false ("not verified as supporting"). This is
+// forward-compatible plumbing for the day those handlers start emitting
+// either key convention, proven correct now (not merely asserted) by
+// TestClient_GetModels_CapabilityFlags_* / TestClient_VerifyModel_CapabilityFlags_*
+// in capability_flags_test.go, which exercise this exact decode path against
+// synthetic real-server-shaped responses.
+type capabilityAliasFields struct {
+	SupportsMCPAlias *bool `json:"supports_mcps"`
+	SupportsLSPAlias *bool `json:"supports_lsps"`
+	SupportsACPAlias *bool `json:"supports_acps"`
+}
+
+// applyTo promotes a true plural-keyed alias value onto the corresponding
+// already-decoded singular-tag field. It NEVER demotes an already-true
+// primary field back to false, and a nil/false/absent alias changes nothing —
+// so it can never turn a verified "true" into a fabricated "false", and it can
+// never fabricate a "true" the alias itself did not carry.
+func (c capabilityAliasFields) applyTo(mcp, lsp, acp *bool) {
+	if c.SupportsMCPAlias != nil && *c.SupportsMCPAlias {
+		*mcp = true
+	}
+	if c.SupportsLSPAlias != nil && *c.SupportsLSPAlias {
+		*lsp = true
+	}
+	if c.SupportsACPAlias != nil && *c.SupportsACPAlias {
+		*acp = true
+	}
 }
 
 // GetModelByID fetches a single model by ID.
@@ -252,10 +315,17 @@ func (c *Client) GetModelByID(ctx context.Context, modelID string) (*VerifiedMod
 		return nil, fmt.Errorf("verifier model get: HTTP %d", resp.StatusCode)
 	}
 
-	var model VerifiedModel
-	if err := json.NewDecoder(resp.Body).Decode(&model); err != nil {
+	var raw struct {
+		VerifiedModel
+		capabilityAliasFields
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
 		return nil, fmt.Errorf("failed to decode model: %w", err)
 	}
+	model := raw.VerifiedModel
+	// CONST-040 capability-flag reconciliation (HXC-117 Phase 2) — see the
+	// capabilityAliasFields doc comment in unmarshalModelArray above.
+	raw.capabilityAliasFields.applyTo(&model.SupportsMCP, &model.SupportsLSP, &model.SupportsACP)
 	return &model, nil
 }
 
@@ -358,10 +428,17 @@ func (c *Client) VerifyModel(ctx context.Context, modelID string) (*Verification
 		return nil, fmt.Errorf("verifier verify: HTTP %d", resp.StatusCode)
 	}
 
-	var result VerificationResult
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	var raw struct {
+		VerificationResult
+		capabilityAliasFields
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
 		return nil, fmt.Errorf("failed to decode verification result: %w", err)
 	}
+	result := raw.VerificationResult
+	// CONST-040 capability-flag reconciliation (HXC-117 Phase 2) — see the
+	// capabilityAliasFields doc comment in unmarshalModelArray above.
+	raw.capabilityAliasFields.applyTo(&result.SupportsMCP, &result.SupportsLSP, &result.SupportsACP)
 	return &result, nil
 }
 
