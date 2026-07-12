@@ -455,7 +455,12 @@ services:
   # ============================================
   helixcode-server:
     build:
-      context: .
+      # Dockerfile.test lives at the meta-repo root (../Dockerfile.test relative
+      # to this compose file) and its COPY instructions (`COPY helix_code/...`,
+      # `COPY scripts/run-docker-tests.sh ...`) are written relative to that
+      # root, not to this helix_code/ subdirectory. context: . would resolve
+      # dockerfile: Dockerfile.test to a nonexistent helix_code/Dockerfile.test.
+      context: ..
       dockerfile: Dockerfile.test
     container_name: helixcode-server-full
     ports:

@@ -8,6 +8,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"os"
 	"runtime"
 	"sync"
 	"testing"
@@ -26,10 +27,20 @@ type TestConfig struct {
 	Concurrency int
 }
 
+// getTestBaseURL returns the HelixCode server URL to test against, honoring
+// the HELIXCODE_TEST_URL override (same convention as tests/security and
+// tests/e2e/test_bank) so the suite can be pointed at a real running server.
+func getTestBaseURL() string {
+	if baseURL := os.Getenv("HELIXCODE_TEST_URL"); baseURL != "" {
+		return baseURL
+	}
+	return "http://localhost:8080"
+}
+
 // DefaultTestConfig returns a default test configuration
 func DefaultTestConfig() *TestConfig {
 	return &TestConfig{
-		BaseURL:     "http://localhost:8080",
+		BaseURL:     getTestBaseURL(),
 		AdminToken:  "test-admin-token",
 		Timeout:     30 * time.Second,
 		Iterations:  100,
