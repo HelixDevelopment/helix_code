@@ -69,12 +69,3 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
-## HXC-119 — Agent Client Protocol (ACP) support is absent from the platform
-
-**Status:** Queued
-**Type:** Feature
-**Severity:** High
-**Created-By:** Claude
-
-Governance rule CONST-040 lists the Agent Client Protocol among required capabilities, but there is no implementation of it anywhere in the codebase. Any user or integration expecting ACP connectivity currently cannot use it. The work is to design and implement real ACP support, or, if it proves structurally infeasible, to document that with cited evidence. The platform will then either genuinely support ACP or hold an honest, evidenced position instead of an unmet claim.
-
