@@ -41,7 +41,7 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 	t.Run("ProviderCreation", func(t *testing.T) {
 		provider, err := llm.NewOpenRouterProvider(config)
 		require.NoError(t, err)
-		assert.NotNil(t, provider)
+		require.NotNil(t, provider)
 		assert.Equal(t, llm.ProviderTypeOpenRouter, provider.GetType())
 		assert.Equal(t, "OpenRouter", provider.GetName())
 	})
@@ -103,8 +103,8 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 		defer cancel()
 
 		health, err := provider.GetHealth(ctx)
-		assert.NoError(t, err)
-		assert.NotNil(t, health)
+		require.NoError(t, err)
+		require.NotNil(t, health)
 		assert.NotEmpty(t, health.Status)
 		assert.Greater(t, health.LastCheck.Unix(), int64(0))
 
@@ -166,8 +166,8 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 		}
 
 		response, err := provider.Generate(ctx, request)
-		assert.NoError(t, err)
-		assert.NotNil(t, response)
+		require.NoError(t, err)
+		require.NotNil(t, response)
 		assert.Contains(t, response.Content, "func") // Should contain Go function
 		assert.Contains(t, response.Content, "int")  // Should contain type annotations
 		assert.Greater(t, response.Usage.TotalTokens, 0)
@@ -207,7 +207,7 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 			case response := <-ch:
 				responses = append(responses, response)
 			case err := <-errCh:
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				break collectionLoop
 			case <-timeout:
 				t.Fatal("Streaming test timed out")
@@ -291,7 +291,7 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 	// Test provider cleanup
 	t.Run("ProviderCleanup", func(t *testing.T) {
 		err := provider.Close()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Log("✅ All OpenRouter provider automation tests passed!")
@@ -446,7 +446,7 @@ func TestOpenRouterProviderModelCompatibility(t *testing.T) {
 				return
 			}
 
-			assert.NotNil(t, response)
+			require.NotNil(t, response)
 			assert.NotEmpty(t, response.Content)
 			assert.Greater(t, response.Usage.TotalTokens, 0)
 

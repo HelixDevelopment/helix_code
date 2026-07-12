@@ -98,7 +98,7 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 			t.Run("Creation", func(t *testing.T) {
 				p, err := llm.NewProvider(config)
 				require.NoError(t, err)
-				assert.NotNil(t, p)
+				require.NotNil(t, p)
 				assert.Equal(t, config.Type, p.GetType())
 				assert.Contains(t, p.GetName(), provider.name)
 			})
@@ -132,8 +132,8 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 				defer cancel()
 
 				health, err := p.GetHealth(ctx)
-				assert.NoError(t, err)
-				assert.NotNil(t, health)
+				require.NoError(t, err)
+				require.NotNil(t, health)
 				assert.NotEmpty(t, health.Status)
 			})
 
@@ -191,7 +191,7 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 					case response := <-ch:
 						responses = append(responses, response)
 					case err := <-errCh:
-						assert.NoError(t, err)
+						require.NoError(t, err)
 						break collectionLoop
 					case <-timeout:
 						t.Fatal("Streaming test timed out")
@@ -226,7 +226,7 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 			// Test provider cleanup
 			t.Run("Cleanup", func(t *testing.T) {
 				err := p.Close()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			})
 
 			successfulProviders++

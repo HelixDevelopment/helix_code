@@ -71,7 +71,7 @@ var xiaomiSeedModels = []ModelInfo{
 		Description:    "Xiaomi MiMo V2 Omni - multimodal, 256K context (deprecated 2026-06-30, routes to V2.5)",
 	},
 	{
-		Name:        "mimo-v2-flash",
+		Name:        "mimo-v2.5-pro",
 		Provider:    ProviderTypeXiaomi,
 		ContextSize: 256000,
 		MaxTokens:   64000,
@@ -80,7 +80,7 @@ var xiaomiSeedModels = []ModelInfo{
 			CapabilityReasoning,
 		},
 		SupportsTools: true,
-		Description:   "Xiaomi MiMo V2 Flash - fast text generation, 256K context (deprecated 2026-06-30, routes to V2.5)",
+		Description:   "Xiaomi MiMo V2.5 Pro - multimodal, 256K context, reasoning",
 	},
 	{
 		Name:        "mimo-v2.5-asr",

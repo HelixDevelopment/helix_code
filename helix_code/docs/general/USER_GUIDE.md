@@ -86,7 +86,7 @@ HelixCode supports multiple AI providers with a focus on free and accessible mod
 
 #### Free Providers (No API Key Required)
 - **XAI (Grok)**: `grok-3-fast-beta`, `grok-3-mini-fast-beta` - Fast and capable models for coding
-- **OpenRouter**: `deepseek-r1-free`, `meta-llama/llama-3.2-3b-instruct:free` - Free models from various providers
+- **OpenRouter**: `openai/gpt-oss-20b:free`, `meta-llama/llama-3.2-3b-instruct:free` - Free models from various providers
 - **GitHub Copilot**: `gpt-4o`, `claude-3.5-sonnet`, `o1` - Free with GitHub subscription
 - **Qwen**: OAuth2 authentication available, no API key required for basic usage
 

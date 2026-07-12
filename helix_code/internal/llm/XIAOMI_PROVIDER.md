@@ -29,7 +29,7 @@ and web search.
 | `mimo-v2.5` | 1M | 128K | Omni-modal (text/image/video/audio) |
 | `mimo-v2-pro` | 1M | 128K | Text gen (deprecated 2026-06-30) |
 | `mimo-v2-omni` | 256K | 128K | Multimodal (deprecated 2026-06-30) |
-| `mimo-v2-flash` | 256K | 64K | Fast text gen |
+| `mimo-v2.5-pro` | 256K | 64K | Fast text gen |
 | `mimo-v2.5-asr` | 8K | 2K | Speech recognition |
 | `mimo-v2.5-tts` | 8K | 8K | Speech synthesis |
 | `mimo-v2.5-tts-voiceclone` | 8K | 8K | Voice cloning |
