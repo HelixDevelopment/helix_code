@@ -26,22 +26,15 @@
 // its own provider, keeping provider-selection policy out of the protocol
 // layer.
 //
-// One capability remains DELIBERATELY deferred to a later, separately
-// reviewed phase and is NOT implemented here:
-//
-//   - ACP permission requests mapped onto HelixCode's existing
-//     internal/approval / internal/tools/permissions subsystems —
-//     HXC-119 Phase 5 (explicitly flagged medium-high risk, requires its own
-//     security-focused review pass before any code lands). Prompt does not
-//     yet perform any tool-call/file-write action on the client's behalf, so
-//     it never needs to request permission in this phase.
-//
-// Because permission-request handling is not implemented, any ACP method
-// that would need it returns a real, honest JSON-RPC protocol error
-// (acp.NewMethodNotFound / acp.NewInternalError) rather than a fabricated
-// completion. Turn generation itself is never fabricated: Prompt only ever
-// forwards content HelixCode's real provider actually produced. This keeps
-// the package anti-bluff-clean per CLAUDE.md §3.3 / Article XI §11.9.
+// As of Phase 5 (HXC-119, Option B — tool-execution gate), ACP permission
+// requests are mapped onto HelixCode's internal/tools/permissions engine via
+// the PermissionAdapter (permission.go). When the agent receives a tool call
+// from the ACP client, it evaluates the call against the permissions engine:
+// ActionAllow → execute without asking; ActionDeny → reject; ActionAsk →
+// call conn.RequestPermission on the client, presenting allow/reject options.
+// If the engine is unavailable, all requests default to ActionAsk (fail-closed,
+// never auto-approve). The adapter is injected by the caller via
+// SetPermissionAdapter, keeping this package decoupled from engine construction.
 //
 // Constitutional anchors: CONST-040 (capability integration — see HXC-117 for
 // the VerificationResult.SupportsACP field this package will read from in a

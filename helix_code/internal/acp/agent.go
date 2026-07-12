@@ -34,8 +34,9 @@ type sessionState struct {
 // Agent implements github.com/coder/acp-go-sdk's acp.Agent interface for
 // HelixCode. See package doc.go for the current scope boundary: real
 // handshake + real session tracking + Prompt turn generation wired to
-// HelixCode's real LLM provider (HXC-119 Phase 4); permission-request
-// handling is still deferred to Phase 5.
+// HelixCode's real LLM provider (HXC-119 Phase 4) + permission-request
+// handling mapped onto internal/tools/permissions (HXC-119 Phase 5,
+// Option B — tool-execution gate).
 type Agent struct {
 	mu       sync.Mutex
 	sessions map[acpsdk.SessionId]*sessionState
@@ -54,6 +55,11 @@ type Agent struct {
 	// an honest error rather than silently dropping stream output if a
 	// caller forgets this step.
 	conn *acpsdk.AgentSideConnection
+	// perm bridges ACP's session/request_permission onto HelixCode's
+	// internal/tools/permissions engine (HXC-119 Phase 5, Option B).
+	// Injected by the caller; nil → all requests default to ActionAsk
+	// (fail-closed, never auto-approve).
+	perm *PermissionAdapter
 }
 
 var _ acpsdk.Agent = (*Agent)(nil)
@@ -80,6 +86,14 @@ func NewAgent(provider llm.Provider) *Agent {
 func (a *Agent) SetConnection(conn *acpsdk.AgentSideConnection) {
 	a.mu.Lock()
 	a.conn = conn
+	a.mu.Unlock()
+}
+
+// SetPermissionAdapter wires the ACP permission adapter (HXC-119 Phase 5).
+// If not called, all permission requests default to ActionAsk (fail-closed).
+func (a *Agent) SetPermissionAdapter(perm *PermissionAdapter) {
+	a.mu.Lock()
+	a.perm = perm
 	a.mu.Unlock()
 }
 
