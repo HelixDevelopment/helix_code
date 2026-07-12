@@ -1170,3 +1170,13 @@ The client that talks to the Cognee memory service stopped completing its login 
 
 The full-infrastructure test stack fails to build the HelixCode server container because its build recipe points at a Dockerfile path that does not exist, and many memory and security tests skip themselves because they look for a server on a fixed port 8080 with no way to override it. As a result a whole class of tests never run against a real server. The work is to fix the container build path and make the server URL configurable so those tests execute. This unlocks real end-to-end coverage of server-dependent features.
 
+## HXC-137 — Re-verify every owned code module builds, checks, and tests cleanly
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/submodule_health_20260712/results.csv
+**Severity:** Medium
+**Created-By:** Claude
+
+The project depends on many owned code modules, and a full health check of all of them (does each build, pass static checks, and pass its tests) did not finish in the latest session. The work is to run that complete health sweep and record the result for every module. This assures that the whole codebase, not just the main application, is in good shape.
+

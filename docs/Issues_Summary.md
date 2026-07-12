@@ -7,13 +7,13 @@ Open workable items (current_location = Issues), regenerated from the SQLite sin
 | Type | Status | Count |
 |---|---|---|
 | Bug | Fixed (→ Fixed.md) | 19 |
-| Bug | Queued | 2 |
+| Bug | Queued | 5 |
 | Feature | Implemented (→ Fixed.md) | 3 |
 | Feature | Queued | 3 |
 | Task | Completed (→ Fixed.md) | 18 |
 | Task | Fixed (→ Fixed.md) | 1 |
-| Task | Queued | 5 |
-| **TOTAL** | | **51** |
+| Task | Queued | 4 |
+| **TOTAL** | | **53** |
 
 ## Items
 
@@ -62,8 +62,10 @@ Open workable items (current_location = Issues), regenerated from the SQLite sin
 | HXC-134 | Bug | Queued | Medium | The central model-verifier service reports each model's id as a numeric value, while HelixCode expects the id as text — a type mismatch that can break how verified models are matched and displayed. The work is to align the two so the id is consistently text end to end. Correct model identity keeps verification, listing, and status accurate for users. |
 | HXC-135 | Feature | Queued | Medium | HelixCode is now wired to read six advanced capability indicators (tool protocols, code intelligence, retrieval, skills, plugins) from the central verifier, but the verifier's live responses do not yet include those fields, so the flags always read as unsupported. The work is to have the verifier publish these capability values it already computes. Then users see accurate per-model capability information across the product. |
 | HXC-136 | Task | Queued | Medium | Several mandated automated test categories — load/denial-of-service, scaling, stress and chaos, and user-interface/experience — were not exercised in the latest real-infrastructure run, so their current health is unconfirmed. The work is to run each of these test types against real infrastructure and capture proof of the results. This completes the promised full test-type coverage and confirms the product holds up under load and adverse conditions. |
-| HXC-137 | Task | Queued | Medium | The project depends on many owned code modules, and a full health check of all of them (does each build, pass static checks, and pass its tests) did not finish in the latest session. The work is to run that complete health sweep and record the result for every module. This assures that the whole codebase, not just the main application, is in good shape. |
 | HXC-138 | Task | Queued | Low | The end-to-end challenge runner can now launch all its scenarios (a missing option was just fixed), but the scenarios still need to be executed against a live server with a real model to confirm the complete user journeys work. The work is to stand up a server and run the challenges, capturing the results. This provides real proof that the headline user workflows function end to end. |
+| HXC-139 | Bug | Queued | High | A vendored copy of a third-party reference coding-agent (the Continue project) includes a Go source file that imports a path that does not exist, and because that file has no separate module marker it gets swept into the helix_agent module's build — breaking the build and static checks for the whole module. This blocks reliable building and testing of the agent module. The work is to isolate those vendored reference files so they are not compiled as part of our module (a build-ignore or nested module marker). Developers regain a clean, buildable agent module. |
+| HXC-140 | Bug | Queued | Medium | The quality-assurance module has code that copies a value containing a lock (a mutex) instead of sharing it, which the Go checker flags as unsafe and can cause subtle concurrency bugs; separately, one test that loads real test banks is failing. The work is to pass the lock-bearing value by reference (pointer) instead of copying it, and to fix or reconcile the failing test-bank test. This makes the QA module concurrency-safe and its tests green. |
+| HXC-141 | Bug | Queued | Medium | The MCP module's Docker adapter crashes with a null-pointer error when asked to stop a container that was never started or does not exist, instead of returning cleanly. This can bring down callers that expect a safe no-op. The work is to guard the stop path so a not-started or missing container is handled gracefully. The adapter becomes robust against stop-before-start and missing-container situations. |
 | HXL-001 | Bug | Fixed (→ Fixed.md) | — | HelixLLM `internal/agents/tools/analysis_test.go` hardcoded absolute path |
 | HXL-002 | Bug | Fixed (→ Fixed.md) | — | HelixLLM `internal/gateway/middleware` TOON `WriteTOON` returns 500 |
 | HXQ-001 | Bug | Fixed (→ Fixed.md) | — | helix_qa intermittent TestPerformance flake (host-load-sensitive) |

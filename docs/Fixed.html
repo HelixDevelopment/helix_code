@@ -4049,6 +4049,20 @@ override it. As a result a whole class of tests never run against a real
 server. The work is to fix the container build path and make the server
 URL configurable so those tests execute. This unlocks real end-to-end
 coverage of server-dependent features.</p>
+<h2
+id="hxc-137-re-verify-every-owned-code-module-builds-checks-and-tests-cleanly">HXC-137
+— Re-verify every owned code module builds, checks, and tests
+cleanly</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/submodule_health_20260712/results.csv <strong>Severity:</strong>
+Medium <strong>Created-By:</strong> Claude</p>
+<p>The project depends on many owned code modules, and a full health
+check of all of them (does each build, pass static checks, and pass its
+tests) did not finish in the latest session. The work is to run that
+complete health sweep and record the result for every module. This
+assures that the whole codebase, not just the main application, is in
+good shape.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />
