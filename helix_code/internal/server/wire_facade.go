@@ -625,13 +625,17 @@ func (s *Server) chatCompletions(c *gin.Context) {
 	defer func() { _ = provider.Close() }()
 	llmReq.Model = resolveDefaultModel(provider, llmReq.Model)
 
+	// HXC-148: apply RAG retrieval-augmentation (mirrors generateLLM in
+	// llm_generate.go). Disabled by default (HELIXCODE_RAG_ENABLED unset/false);
+	// graceful degrade on retrieval error — never fails the request.
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
+	defer cancel()
+	applyRAGContext(ctx, ragAdapterResolver(), llmReq)
+
 	if req.Stream {
 		s.streamOpenAIChatCompletion(c, provider, llmReq)
 		return
 	}
-
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
-	defer cancel()
 
 	resp, genErr := provider.Generate(ctx, llmReq)
 	if genErr != nil {
@@ -677,13 +681,16 @@ func (s *Server) anthropicMessages(c *gin.Context) {
 	defer func() { _ = provider.Close() }()
 	llmReq.Model = resolveDefaultModel(provider, llmReq.Model)
 
+	// HXC-148: apply RAG retrieval-augmentation (mirrors generateLLM in
+	// llm_generate.go). Disabled by default; graceful degrade on error.
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
+	defer cancel()
+	applyRAGContext(ctx, ragAdapterResolver(), llmReq)
+
 	if req.Stream {
 		s.streamAnthropicMessages(c, provider, llmReq)
 		return
 	}
-
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
-	defer cancel()
 
 	resp, genErr := provider.Generate(ctx, llmReq)
 	if genErr != nil {
