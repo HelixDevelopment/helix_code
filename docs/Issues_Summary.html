@@ -190,6 +190,11 @@ SQLite single-source-of-truth (§11.4.12).</p>
 </thead>
 <tbody>
 <tr>
+<td>Bug</td>
+<td>Queued</td>
+<td>4</td>
+</tr>
+<tr>
 <td>Feature</td>
 <td>Queued</td>
 <td>2</td>
@@ -197,12 +202,12 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Task</td>
 <td>Queued</td>
-<td>3</td>
+<td>4</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>5</strong></td>
+<td><strong>10</strong></td>
 </tr>
 </tbody>
 </table>
@@ -290,6 +295,79 @@ executed against a live server with a real model to confirm the complete
 user journeys work. The work is to stand up a server and run the
 challenges, capturing the results. This provides real proof that the
 headline user workflows function end to end.</td>
+</tr>
+<tr>
+<td>HXC-142</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>High</td>
+<td>The automation-tagged test package fails to build, so an entire
+mandated test type cannot execute at all. Two real causes were found
+during the 2026-07-12 real-infra retest: a duplicate symbol
+(isRateLimitError/contains declared in both xai and qwen automation test
+files) and deeper API drift where the tests reference llm.ProviderConfig
+and NewProviderManager which no longer exist in the current provider
+package. The work is to reconcile the automation tests with the current
+provider API and remove the duplicate helpers so the suite compiles and
+runs against real infrastructure. Evidence:
+docs/qa/infra_retest_20260712_hxc122_138/automation_tests.log.</td>
+</tr>
+<tr>
+<td>HXC-143</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>High</td>
+<td>The e2e-tagged test package fails to build because getEnvOrDefault
+is declared more than once in the package, so another mandated test type
+cannot execute. The work is to remove the duplicate declaration
+(consolidate to a single shared helper) so the e2e suite compiles and
+can run end-to-end against a real server. Discovered during the
+2026-07-12 real-infra retest. Evidence:
+docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md.</td>
+</tr>
+<tr>
+<td>HXC-144</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>Under the sustained request-flood chaos test against the real
+running server, the goroutine count grew by 5 which exceeds the
+tolerance of 4, signalling a goroutine leak in a request-handling path
+when the server is hammered. Left unaddressed this degrades long-running
+server stability under load. The work is to find the leaking goroutine
+(likely an unclosed channel, context, or connection in a hot handler)
+and fix it so the count stays within tolerance under flood. Evidence:
+docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Server 7/8).</td>
+</tr>
+<tr>
+<td>HXC-145</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>Low</td>
+<td>During the real-infra retest the Xiaomi provider chaos tests failed
+2 of 5 because the model id configured for Xiaomi (mimo-v2-flash) is
+rejected by the live Xiaomi API, indicating the configured model name is
+stale or wrong. Users selecting the Xiaomi provider with that model
+would get errors. The work is to determine the correct current Xiaomi
+model id (from the provider or the verifier as single source of truth)
+and update the configuration so Xiaomi requests succeed. Evidence:
+docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Xiaomi 3/5).</td>
+</tr>
+<tr>
+<td>HXC-146</td>
+<td>Task</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>The e2e challenge runner advertises multiple interface modes (cli,
+rest, tui, websocket) but none of them actually exercises the HelixCode
+server’s real HTTP API during a run, so the challenges validate the
+runner’s own logic rather than the shipped server endpoints. This is a
+documentation-versus-implementation gap that weakens the end-to-end
+proof. The work is to wire the challenge runner’s interfaces to
+genuinely call the running server’s HTTP API so the challenges prove the
+real user-facing endpoints work. Discovered 2026-07-12 real-infra
+retest. Evidence:
+docs/qa/infra_retest_20260712_hxc122_138/hxc138_challenge_report.json.</td>
 </tr>
 </tbody>
 </table>

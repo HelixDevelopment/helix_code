@@ -114,3 +114,48 @@ Several mandated automated test categories — load/denial-of-service, scaling, 
 
 The end-to-end challenge runner can now launch all its scenarios (a missing option was just fixed), but the scenarios still need to be executed against a live server with a real model to confirm the complete user journeys work. The work is to stand up a server and run the challenges, capturing the results. This provides real proof that the headline user workflows function end to end.
 
+## HXC-142 — Automation test suite (test/automation, -tags=automation) does not compile
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** High
+**Created-By:** Claude
+
+The automation-tagged test package fails to build, so an entire mandated test type cannot execute at all. Two real causes were found during the 2026-07-12 real-infra retest: a duplicate symbol (isRateLimitError/contains declared in both xai and qwen automation test files) and deeper API drift where the tests reference llm.ProviderConfig and NewProviderManager which no longer exist in the current provider package. The work is to reconcile the automation tests with the current provider API and remove the duplicate helpers so the suite compiles and runs against real infrastructure. Evidence: docs/qa/infra_retest_20260712_hxc122_138/automation_tests.log.
+
+## HXC-143 — E2E test suite (test/e2e, -tags=e2e) does not compile due to redeclared getEnvOrDefault
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** High
+**Created-By:** Claude
+
+The e2e-tagged test package fails to build because getEnvOrDefault is declared more than once in the package, so another mandated test type cannot execute. The work is to remove the duplicate declaration (consolidate to a single shared helper) so the e2e suite compiles and can run end-to-end against a real server. Discovered during the 2026-07-12 real-infra retest. Evidence: docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md.
+
+## HXC-144 — Server leaks goroutines under sustained DDoS-flood load (chaos test)
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Medium
+**Created-By:** Claude
+
+Under the sustained request-flood chaos test against the real running server, the goroutine count grew by 5 which exceeds the tolerance of 4, signalling a goroutine leak in a request-handling path when the server is hammered. Left unaddressed this degrades long-running server stability under load. The work is to find the leaking goroutine (likely an unclosed channel, context, or connection in a hot handler) and fix it so the count stays within tolerance under flood. Evidence: docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Server 7/8).
+
+## HXC-145 — Configured Xiaomi model mimo-v2-flash is rejected by the real Xiaomi API
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Low
+**Created-By:** Claude
+
+During the real-infra retest the Xiaomi provider chaos tests failed 2 of 5 because the model id configured for Xiaomi (mimo-v2-flash) is rejected by the live Xiaomi API, indicating the configured model name is stale or wrong. Users selecting the Xiaomi provider with that model would get errors. The work is to determine the correct current Xiaomi model id (from the provider or the verifier as single source of truth) and update the configuration so Xiaomi requests succeed. Evidence: docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Xiaomi 3/5).
+
+## HXC-146 — E2E challenge runner interfaces (cli/rest/tui/websocket) do not drive the real server HTTP API
+
+**Status:** Queued
+**Type:** Task
+**Severity:** Medium
+**Created-By:** Claude
+
+The e2e challenge runner advertises multiple interface modes (cli, rest, tui, websocket) but none of them actually exercises the HelixCode server's real HTTP API during a run, so the challenges validate the runner's own logic rather than the shipped server endpoints. This is a documentation-versus-implementation gap that weakens the end-to-end proof. The work is to wire the challenge runner's interfaces to genuinely call the running server's HTTP API so the challenges prove the real user-facing endpoints work. Discovered 2026-07-12 real-infra retest. Evidence: docs/qa/infra_retest_20260712_hxc122_138/hxc138_challenge_report.json.
+
