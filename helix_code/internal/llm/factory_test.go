@@ -178,6 +178,22 @@ func TestNewProvider_AllProviderTypes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Anti-bluff (§11.4.115): make the Azure subtest hermetic against
+			// the ambient environment. AZURE_OPENAI_ENDPOINT is exported by
+			// .env.full-test for the full-infra test stack (test-infra-up /
+			// test-full); without this isolation, NewAzureProvider legitimately
+			// picks up that env-var fallback (see
+			// TestAzureProvider_EndpointPrecedence_EnvWinsOverError in
+			// azure_provider_audit_test.go — that IS intended behavior) and
+			// the "requires AZURE_OPENAI_ENDPOINT env var" wantErr:true
+			// assumption below breaks. t.Setenv clears the var for this
+			// subtest only and auto-restores it afterward, so the result is
+			// deterministic regardless of ambient env state (same class of
+			// fix as TestAzureProvider_NewWithoutEndpoint).
+			if tt.providerType == ProviderTypeAzure {
+				t.Setenv("AZURE_OPENAI_ENDPOINT", "")
+			}
+
 			config := ProviderConfigEntry{
 				Type:     tt.providerType,
 				Endpoint: tt.endpoint,
