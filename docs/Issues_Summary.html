@@ -197,7 +197,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Queued</td>
-<td>4</td>
+<td>3</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -227,7 +227,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>52</strong></td>
+<td><strong>51</strong></td>
 </tr>
 </tbody>
 </table>
@@ -662,18 +662,6 @@ loads real test banks is failing. The work is to pass the lock-bearing
 value by reference (pointer) instead of copying it, and to fix or
 reconcile the failing test-bank test. This makes the QA module
 concurrency-safe and its tests green.</td>
-</tr>
-<tr>
-<td>HXC-141</td>
-<td>Bug</td>
-<td>Queued</td>
-<td>Medium</td>
-<td>The MCP module’s Docker adapter crashes with a null-pointer error
-when asked to stop a container that was never started or does not exist,
-instead of returning cleanly. This can bring down callers that expect a
-safe no-op. The work is to guard the stop path so a not-started or
-missing container is handled gracefully. The adapter becomes robust
-against stop-before-start and missing-container situations.</td>
 </tr>
 <tr>
 <td>HXL-001</td>

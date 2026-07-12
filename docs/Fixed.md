@@ -1190,3 +1190,13 @@ The project depends on many owned code modules, and a full health check of all o
 
 A vendored copy of a third-party reference coding-agent (the Continue project) includes a Go source file that imports a path that does not exist, and because that file has no separate module marker it gets swept into the helix_agent module's build — breaking the build and static checks for the whole module. This blocks reliable building and testing of the agent module. The work is to isolate those vendored reference files so they are not compiled as part of our module (a build-ignore or nested module marker). Developers regain a clean, buildable agent module.
 
+## HXC-141 — mcp_module Docker adapter crashes when stopping a container that was never started
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/hxc141_20260712T111849Z/EVIDENCE.md
+**Severity:** Medium
+**Created-By:** Claude
+
+The MCP module's Docker adapter crashes with a null-pointer error when asked to stop a container that was never started or does not exist, instead of returning cleanly. This can bring down callers that expect a safe no-op. The work is to guard the stop path so a not-started or missing container is handled gracefully. The adapter becomes robust against stop-before-start and missing-container situations.
+
