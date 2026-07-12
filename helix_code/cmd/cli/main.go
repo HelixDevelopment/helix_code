@@ -1489,17 +1489,41 @@ func (c *CLI) handleListModels(ctx context.Context) error {
 // printFallbackModels renders the offline fallback list with an explicit
 // unverified label (D-2 anti-bluff: never claim fallback == verified working).
 func (c *CLI) printFallbackModels(models []*verifier.VerifiedModel) {
+	fmt.Print(renderFallbackModels(models))
+}
+
+// renderFallbackModels builds the offline-fallback --list-models output for
+// a slice of fallback models and returns it as a string (HXC-117 follow-up
+// fix: testable seam mirroring renderVerifiedModels below).
+//
+// Fallback rows share the cli_model_info_verified template with
+// renderVerifiedModels -- that template gained a "Capabilities:" line when
+// HXC-117 first landed, but printFallbackModels (this function's
+// predecessor) supplied no "Capabilities" key. Go's text/template renders a
+// missing map key as the literal string "<no value>", so every offline
+// fallback row leaked "Capabilities: <no value>" to end users -- a §11.4.1
+// fix-A-breaks-B regression against this file's OTHER caller of the shared
+// template key. Fallback models are reached precisely when the verifier is
+// unavailable (Priority 3 in handleListModels), so no per-flag CONST-040
+// capability data exists for them; fabricating ✓/✗ values here would itself
+// be a CONST-040 / BLUFF-002 bluff. The honest fix is an explicit,
+// i18n-sourced "capabilities unknown" indicator -- never the raw
+// text/template zero-value string, never a fabricated capability.
+func renderFallbackModels(models []*verifier.VerifiedModel) string {
+	var sb strings.Builder
 	for _, m := range models {
 		scoreStr := fmt.Sprintf("SC:%.1f", m.OverallScore)
-		fmt.Printf("%s\n\n", trc("cli_model_info_verified", map[string]any{
-			"ID":          m.ID,
-			"Name":        m.DisplayName,
-			"Provider":    m.Provider,
-			"Score":       scoreStr,
-			"ContextSize": m.ContextSize,
-			"Status":      "⚠ unverified fallback",
-		}))
+		sb.WriteString(fmt.Sprintf("%s\n\n", trc("cli_model_info_verified", map[string]any{
+			"ID":           m.ID,
+			"Name":         m.DisplayName,
+			"Provider":     m.Provider,
+			"Score":        scoreStr,
+			"ContextSize":  m.ContextSize,
+			"Status":       "⚠ unverified fallback",
+			"Capabilities": trc("cli_capability_flags_unknown", nil),
+		})))
 	}
+	return sb.String()
 }
 
 // printSupplementalModels appends seed models from FallbackModels for any
@@ -1579,6 +1603,16 @@ func isWorkingForDisplay(m *verifier.VerifiedModel) bool {
 }
 
 func (c *CLI) printVerifiedModels(models []*verifier.VerifiedModel) {
+	fmt.Print(renderVerifiedModels(models))
+}
+
+// renderVerifiedModels builds the --list-models output for a slice of
+// verified models and returns it as a string (HXC-117: split out of
+// printVerifiedModels as a testable seam -- the stdout call site above is
+// unchanged, but unit tests can now assert on the rendered text without
+// capturing os.Stdout).
+func renderVerifiedModels(models []*verifier.VerifiedModel) string {
+	var sb strings.Builder
 	for _, m := range models {
 		// D-2 defensive gate: never render a non-working row, regardless of
 		// which caller supplied the list (the verifier funnel SHOULD already
@@ -1588,15 +1622,54 @@ func (c *CLI) printVerifiedModels(models []*verifier.VerifiedModel) {
 		}
 		status := "✓ verified"
 		scoreStr := fmt.Sprintf("SC:%.1f", m.OverallScore)
-		fmt.Printf("%s\n\n", trc("cli_model_info_verified", map[string]any{
-			"ID":          m.ID,
-			"Name":        m.DisplayName,
-			"Provider":    m.Provider,
-			"Score":       scoreStr,
-			"ContextSize": m.ContextSize,
-			"Status":      status,
-		}))
+		sb.WriteString(fmt.Sprintf("%s\n\n", trc("cli_model_info_verified", map[string]any{
+			"ID":           m.ID,
+			"Name":         m.DisplayName,
+			"Provider":     m.Provider,
+			"Score":        scoreStr,
+			"ContextSize":  m.ContextSize,
+			"Status":       status,
+			"Capabilities": formatCapabilityFlags(m),
+		})))
 	}
+	return sb.String()
+}
+
+// formatCapabilityFlags renders the 6 CONST-040 capability flags (MCP / LSP
+// / ACP / RAG / Skills / Plugins) for CLI display, sourced directly from
+// the verifier-decoded VerifiedModel fields (internal/verifier/types.go
+// SupportsMCP / SupportsLSP / SupportsACP / SupportsRAG / SupportsSkills /
+// SupportsPlugins -- the fields client.go's VerifyModel decodes from the
+// LLMsVerifier response). NEVER hardcode a capability value here: CONST-040
+// / BLUFF-002 requires every displayed capability to trace back to
+// LLMsVerifier via the decoded model, never a constant.
+//
+// CONST-046: MCP/LSP/ACP/RAG are protocol acronyms (technical terms, not
+// translatable prose) so they stay as literals here, matching the JSON key
+// convention on the server surface. The Skills/Plugins labels and the
+// supported/unsupported indicators ARE user-facing translatable content, so
+// they are i18n-sourced from the active bundle rather than hardcoded English
+// words / hardcoded glyphs.
+func formatCapabilityFlags(m *verifier.VerifiedModel) string {
+	supportedIndicator := trc("cli_capability_indicator_supported", nil)
+	unsupportedIndicator := trc("cli_capability_indicator_unsupported", nil)
+	skillsLabel := trc("cli_capability_label_skills", nil)
+	pluginsLabel := trc("cli_capability_label_plugins", nil)
+
+	flag := func(supported bool, label string) string {
+		if supported {
+			return label + ":" + supportedIndicator
+		}
+		return label + ":" + unsupportedIndicator
+	}
+	return strings.Join([]string{
+		flag(m.SupportsMCP, "MCP"),
+		flag(m.SupportsLSP, "LSP"),
+		flag(m.SupportsACP, "ACP"),
+		flag(m.SupportsRAG, "RAG"),
+		flag(m.SupportsSkills, skillsLabel),
+		flag(m.SupportsPlugins, pluginsLabel),
+	}, " ")
 }
 
 // handleHealthCheck performs system health check

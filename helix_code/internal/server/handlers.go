@@ -1389,8 +1389,21 @@ func verifiedModelToJSON(m *verifier.VerifiedModel) gin.H {
 		"status":          status,
 		"supports_vision": m.SupportsVision,
 		"supports_tools":  m.SupportsTools,
-		"open_source":     m.OpenSource,
-		"source":          m.Source,
+		// CONST-040 capability flags -- MCP / LSP / ACP / RAG / Skills /
+		// Plugins -- sourced directly from the verifier-decoded
+		// VerifiedModel fields (internal/verifier/types.go SupportsMCP /
+		// SupportsLSP / SupportsACP / SupportsRAG / SupportsSkills /
+		// SupportsPlugins). NEVER hardcode a capability value here:
+		// CONST-040 / BLUFF-002 requires every value exposed here to trace
+		// back to LLMsVerifier via the decoded model (HXC-117).
+		"supports_mcp":     m.SupportsMCP,
+		"supports_lsp":     m.SupportsLSP,
+		"supports_acp":     m.SupportsACP,
+		"supports_rag":     m.SupportsRAG,
+		"supports_skills":  m.SupportsSkills,
+		"supports_plugins": m.SupportsPlugins,
+		"open_source":      m.OpenSource,
+		"source":           m.Source,
 	}
 }
 

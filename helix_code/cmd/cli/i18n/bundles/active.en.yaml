@@ -341,6 +341,17 @@ cli_model_info_verified:
       Score: {{.Score}}
       Context Size: {{.ContextSize}}
       Status: {{.Status}}
+      Capabilities: {{.Capabilities}}
+cli_capability_flags_unknown:
+  other: "unknown (verifier unavailable for this fallback model)"
+cli_capability_indicator_supported:
+  other: "✓"
+cli_capability_indicator_unsupported:
+  other: "✗"
+cli_capability_label_skills:
+  other: "Skills"
+cli_capability_label_plugins:
+  other: "Plugins"
 cli_health_worker_pool_ok:
   other: "Worker Pool: {{.Count}} healthy workers"
 cli_health_worker_pool_none:
