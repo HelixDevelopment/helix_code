@@ -128,14 +128,12 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeOpenRouter,
 			Model:        "deepseek-r1-free", // Use free model for testing
 			Messages: []llm.Message{
 				{Role: "user", Content: "Hello! Please respond with exactly 'Hello from OpenRouter!'"},
 			},
 			MaxTokens:   50,
 			Temperature: 0.1,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(ctx, request)
@@ -159,14 +157,12 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeOpenRouter,
 			Model:        "microsoft/wizardlm-2-8x22b:free", // Use free coding model
 			Messages: []llm.Message{
 				{Role: "user", Content: "Write a simple Go function that adds two numbers and includes proper documentation."},
 			},
 			MaxTokens:   200,
 			Temperature: 0.3,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(ctx, request)
@@ -186,7 +182,6 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeOpenRouter,
 			Model:        "meta-llama/llama-3.2-3b-instruct:free",
 			Messages: []llm.Message{
 				{Role: "user", Content: "Count from 1 to 5 slowly, one number per line."},
@@ -194,7 +189,6 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 			MaxTokens:   100,
 			Temperature: 0.1,
 			Stream:      true,
-			CreatedAt:   time.Now(),
 		}
 
 		ch := make(chan llm.LLMResponse, 50)
@@ -246,14 +240,12 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeOpenRouter,
 			Model:        "invalid-model-name",
 			Messages: []llm.Message{
 				{Role: "user", Content: "Hello"},
 			},
 			MaxTokens:   10,
 			Temperature: 0.1,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(ctx, request)
@@ -274,14 +266,12 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 			go func(requestNum int) {
 				request := &llm.LLMRequest{
 					ID:           uuid.New(),
-					ProviderType: llm.ProviderTypeOpenRouter,
 					Model:        "deepseek-r1-free",
 					Messages: []llm.Message{
 						{Role: "user", Content: fmt.Sprintf("Say 'Request %d completed'", requestNum)},
 					},
 					MaxTokens:   20,
 					Temperature: 0.1,
-					CreatedAt:   time.Now(),
 				}
 
 				_, err := provider.Generate(ctx, request)
@@ -340,14 +330,12 @@ func TestOpenRouterProviderLoadTest(t *testing.T) {
 
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				ProviderType: llm.ProviderTypeOpenRouter,
 				Model:        "deepseek-r1-free",
 				Messages: []llm.Message{
 					{Role: "user", Content: fmt.Sprintf("Generate a random number between 1 and 100 for request %d", requestNum)},
 				},
 				MaxTokens:   50,
 				Temperature: 0.5,
-				CreatedAt:   time.Now(),
 			}
 
 			_, err := provider.Generate(ctx, request)
@@ -444,14 +432,12 @@ func TestOpenRouterProviderModelCompatibility(t *testing.T) {
 
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				ProviderType: llm.ProviderTypeOpenRouter,
 				Model:        model.Name,
 				Messages: []llm.Message{
 					{Role: "user", Content: fmt.Sprintf("Hello from model %s! Please respond briefly.", model.Name)},
 				},
 				MaxTokens:   50,
 				Temperature: 0.1,
-				CreatedAt:   time.Now(),
 			}
 
 			response, err := provider.Generate(ctx, request)
@@ -502,14 +488,12 @@ func TestOpenRouterProviderRateLimits(t *testing.T) {
 		go func(requestNum int) {
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				ProviderType: llm.ProviderTypeOpenRouter,
 				Model:        "deepseek-r1-free",
 				Messages: []llm.Message{
 					{Role: "user", Content: fmt.Sprintf("Request %d: Say 'ok'", requestNum)},
 				},
 				MaxTokens:   10,
 				Temperature: 0.1,
-				CreatedAt:   time.Now(),
 			}
 
 			_, err := provider.Generate(ctx, request)

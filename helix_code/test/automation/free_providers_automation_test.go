@@ -96,14 +96,14 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 
 			// Test provider creation
 			t.Run("Creation", func(t *testing.T) {
-				p, err := llm.NewProviderFactory().CreateProvider(config)
+				p, err := llm.NewProvider(config)
 				require.NoError(t, err)
 				assert.NotNil(t, p)
 				assert.Equal(t, config.Type, p.GetType())
 				assert.Contains(t, p.GetName(), provider.name)
 			})
 
-			p, err := llm.NewProviderFactory().CreateProvider(config)
+			p, err := llm.NewProvider(config)
 			require.NoError(t, err)
 
 			// Test provider capabilities
@@ -144,14 +144,12 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 
 				request := &llm.LLMRequest{
 					ID:           uuid.New(),
-					ProviderType: config.Type,
 					Model:        provider.model,
 					Messages: []llm.Message{
 						{Role: "user", Content: fmt.Sprintf("Hello from %s! Respond with exactly 'Hello from %s!'", provider.name, provider.name)},
 					},
 					MaxTokens:   50,
 					Temperature: 0.1,
-					CreatedAt:   time.Now(),
 				}
 
 				response, err := p.Generate(ctx, request)
@@ -168,7 +166,6 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 
 				request := &llm.LLMRequest{
 					ID:           uuid.New(),
-					ProviderType: config.Type,
 					Model:        provider.model,
 					Messages: []llm.Message{
 						{Role: "user", Content: "Count from 1 to 3 slowly."},
@@ -176,7 +173,6 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 					MaxTokens:   100,
 					Temperature: 0.1,
 					Stream:      true,
-					CreatedAt:   time.Now(),
 				}
 
 				ch := make(chan llm.LLMResponse, 50)
@@ -212,14 +208,12 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 
 				request := &llm.LLMRequest{
 					ID:           uuid.New(),
-					ProviderType: config.Type,
 					Model:        provider.model,
 					Messages: []llm.Message{
 						{Role: "user", Content: "Write a simple function in any language that adds two numbers. Include a comment."},
 					},
 					MaxTokens:   200,
 					Temperature: 0.3,
-					CreatedAt:   time.Now(),
 				}
 
 				response, err := p.Generate(ctx, request)
@@ -297,7 +291,7 @@ func TestFreeProvidersLoadTest(t *testing.T) {
 				return
 			}
 
-			p, err := llm.NewProviderFactory().CreateProvider(config)
+			p, err := llm.NewProvider(config)
 			require.NoError(t, err)
 			defer p.Close()
 
@@ -317,14 +311,12 @@ func TestFreeProvidersLoadTest(t *testing.T) {
 
 					request := &llm.LLMRequest{
 						ID:           uuid.New(),
-						ProviderType: config.Type,
 						Model:        provider.model,
 						Messages: []llm.Message{
 							{Role: "user", Content: fmt.Sprintf("Say 'test %d'", requestNum)},
 						},
 						MaxTokens:   20,
 						Temperature: 0.1,
-						CreatedAt:   time.Now(),
 					}
 
 					_, err := p.Generate(ctx, request)
@@ -446,7 +438,7 @@ func TestFreeProvidersFeatureComparison(t *testing.T) {
 				return
 			}
 
-			p, err := llm.NewProviderFactory().CreateProvider(config)
+			p, err := llm.NewProvider(config)
 			require.NoError(t, err)
 			defer p.Close()
 
@@ -464,14 +456,12 @@ func TestFreeProvidersFeatureComparison(t *testing.T) {
 			if len(models) > 0 {
 				request := &llm.LLMRequest{
 					ID:           uuid.New(),
-					ProviderType: config.Type,
 					Model:        models[0].Name,
 					Messages: []llm.Message{
 						{Role: "user", Content: "Say 'OK'"},
 					},
 					MaxTokens:   10,
 					Temperature: 0.1,
-					CreatedAt:   time.Now(),
 				}
 
 				response, err := p.Generate(ctx, request)

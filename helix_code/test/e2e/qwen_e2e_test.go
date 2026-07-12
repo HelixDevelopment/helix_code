@@ -3,7 +3,6 @@
 package e2e
 
 import (
-	"context"
 	"os"
 	"testing"
 	"time"
@@ -25,7 +24,7 @@ func TestQwenProviderEndToEnd(t *testing.T) {
 
 	// Setup test environment
 	env := SetupTestEnvironment(t)
-	defer env.Teardown(t)
+	defer env.TeardownTestEnvironment(t)
 
 	// Create Qwen provider
 	config := llm.ProviderConfigEntry{
@@ -92,7 +91,6 @@ func TestQwenProviderEndToEnd(t *testing.T) {
 		// Generate code using the provider
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeQwen,
 			Model:        model.Name,
 			Messages: []llm.Message{
 				{
@@ -113,7 +111,6 @@ The cache should have a maximum capacity and evict the least recently used items
 			},
 			MaxTokens:   1500,
 			Temperature: 0.3,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(env.ctx, request)
@@ -141,7 +138,6 @@ The cache should have a maximum capacity and evict the least recently used items
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeQwen,
 			Model:        model.Name,
 			Messages: []llm.Message{
 				{Role: "user", Content: "Write a short story about a robot learning to paint. Make it exactly 3 paragraphs."},
@@ -149,7 +145,6 @@ The cache should have a maximum capacity and evict the least recently used items
 			MaxTokens:   800,
 			Temperature: 0.7,
 			Stream:      true,
-			CreatedAt:   time.Now(),
 		}
 
 		ch := make(chan llm.LLMResponse, 100)
@@ -202,14 +197,12 @@ The cache should have a maximum capacity and evict the least recently used items
 		for _, model := range qwenModels[:2] { // Test first 2 models
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				ProviderType: llm.ProviderTypeQwen,
 				Model:        model.Name,
 				Messages: []llm.Message{
 					{Role: "user", Content: testPrompt},
 				},
 				MaxTokens:   300,
 				Temperature: 0.5,
-				CreatedAt:   time.Now(),
 			}
 
 			response, err := provider.Generate(env.ctx, request)
@@ -231,13 +224,11 @@ The cache should have a maximum capacity and evict the least recently used items
 		// Test with invalid model
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeQwen,
 			Model:        "nonexistent-model-12345",
 			Messages: []llm.Message{
 				{Role: "user", Content: "Hello"},
 			},
 			MaxTokens: 10,
-			CreatedAt: time.Now(),
 		}
 
 		response, err := provider.Generate(env.ctx, request)
@@ -269,7 +260,7 @@ func TestQwenProviderDistributedWorkflow(t *testing.T) {
 	}
 
 	env := SetupTestEnvironment(t)
-	defer env.Teardown(t)
+	defer env.TeardownTestEnvironment(t)
 
 	// Setup would include:
 	// 1. Register Qwen provider

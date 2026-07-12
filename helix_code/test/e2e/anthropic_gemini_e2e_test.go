@@ -3,7 +3,6 @@
 package e2e
 
 import (
-	"context"
 	"os"
 	"strings"
 	"testing"
@@ -26,7 +25,7 @@ func TestAnthropicProviderEndToEnd(t *testing.T) {
 
 	// Setup test environment
 	env := SetupTestEnvironment(t)
-	defer env.Teardown(t)
+	defer env.TeardownTestEnvironment(t)
 
 	// Create Anthropic provider
 	config := llm.ProviderConfigEntry{
@@ -90,7 +89,6 @@ Always write clean, idiomatic, well-documented Go code with proper error handlin
 		// First request - creates cache
 		request1 := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeAnthropic,
 			Model:        "claude-3-5-haiku-latest",
 			Messages: []llm.Message{
 				{Role: "system", Content: systemPrompt},
@@ -98,7 +96,6 @@ Always write clean, idiomatic, well-documented Go code with proper error handlin
 			},
 			MaxTokens:   500,
 			Temperature: 0.3,
-			CreatedAt:   time.Now(),
 		}
 
 		response1, err := provider.Generate(env.ctx, request1)
@@ -114,7 +111,6 @@ Always write clean, idiomatic, well-documented Go code with proper error handlin
 
 		request2 := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeAnthropic,
 			Model:        "claude-3-5-haiku-latest",
 			Messages: []llm.Message{
 				{Role: "system", Content: systemPrompt}, // Same system message
@@ -122,7 +118,6 @@ Always write clean, idiomatic, well-documented Go code with proper error handlin
 			},
 			MaxTokens:   500,
 			Temperature: 0.3,
-			CreatedAt:   time.Now(),
 		}
 
 		response2, err := provider.Generate(env.ctx, request2)
@@ -130,7 +125,7 @@ Always write clean, idiomatic, well-documented Go code with proper error handlin
 		assert.NotEmpty(t, response2.Content)
 
 		// Check cache metadata
-		if metadata, ok := response2.ProviderMetadata.(map[string]interface{}); ok {
+		if metadata := response2.ProviderMetadata; metadata != nil {
 			if cacheRead, ok := metadata["cache_read_tokens"].(int); ok && cacheRead > 0 {
 				t.Logf("✅ Prompt caching working! Read %d tokens from cache", cacheRead)
 				t.Logf("Second request usage: %d prompt + %d completion tokens (with caching)",
@@ -143,7 +138,6 @@ Always write clean, idiomatic, well-documented Go code with proper error handlin
 	t.Run("ExtendedThinking_ComplexProblem", func(t *testing.T) {
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeAnthropic,
 			Model:        "claude-3-5-sonnet-latest",
 			Messages: []llm.Message{
 				{
@@ -156,7 +150,6 @@ Provide a detailed architectural design.`,
 			},
 			MaxTokens:   4000,
 			Temperature: 0.7,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(env.ctx, request)
@@ -176,7 +169,7 @@ Provide a detailed architectural design.`,
 		tools := []llm.Tool{
 			{
 				Type: "function",
-				Function: llm.FunctionDefinition{
+				Function: llm.ToolFunction{
 					Name:        "search_documentation",
 					Description: "Search through Go documentation for specific topics",
 					Parameters: map[string]interface{}{
@@ -199,7 +192,6 @@ Provide a detailed architectural design.`,
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeAnthropic,
 			Model:        "claude-3-5-haiku-latest",
 			Messages: []llm.Message{
 				{Role: "user", Content: "How do I use channels in Go? Search the documentation."},
@@ -207,7 +199,6 @@ Provide a detailed architectural design.`,
 			MaxTokens:   500,
 			Temperature: 0.1,
 			Tools:       tools,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(env.ctx, request)
@@ -228,14 +219,12 @@ Provide a detailed architectural design.`,
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeAnthropic,
 			Model:        "claude-3-5-sonnet-latest",
 			Messages: []llm.Message{
 				{Role: "user", Content: prompt},
 			},
 			MaxTokens:   300,
 			Temperature: 0.3,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(env.ctx, request)
@@ -255,7 +244,7 @@ Provide a detailed architectural design.`,
 		tools := []llm.Tool{
 			{
 				Type: "function",
-				Function: llm.FunctionDefinition{
+				Function: llm.ToolFunction{
 					Name:        "calculate",
 					Description: "Perform mathematical calculations",
 					Parameters: map[string]interface{}{
@@ -273,7 +262,6 @@ Provide a detailed architectural design.`,
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeAnthropic,
 			Model:        "claude-3-5-haiku-latest",
 			Messages: []llm.Message{
 				{Role: "user", Content: "Calculate the factorial of 5 and explain it."},
@@ -282,7 +270,6 @@ Provide a detailed architectural design.`,
 			Temperature: 0.1,
 			Tools:       tools,
 			Stream:      true,
-			CreatedAt:   time.Now(),
 		}
 
 		ch := make(chan llm.LLMResponse, 10)
@@ -323,7 +310,7 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 
 	// Setup test environment
 	env := SetupTestEnvironment(t)
-	defer env.Teardown(t)
+	defer env.TeardownTestEnvironment(t)
 
 	// Create Gemini provider
 	config := llm.ProviderConfigEntry{
@@ -385,7 +372,6 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeGemini,
 			Model:        "gemini-2.5-flash", // 1M context
 			Messages: []llm.Message{
 				{Role: "system", Content: "You are analyzing a complete codebase. Provide architectural insights."},
@@ -393,7 +379,6 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 			},
 			MaxTokens:   1000,
 			Temperature: 0.3,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(env.ctx, request)
@@ -415,14 +400,12 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				ProviderType: llm.ProviderTypeGemini,
 				Model:        "gemini-2.5-flash-lite", // Fastest model
 				Messages: []llm.Message{
 					{Role: "user", Content: "Write a one-line description of Go."},
 				},
 				MaxTokens:   50,
 				Temperature: 0.1,
-				CreatedAt:   time.Now(),
 			}
 
 			response, err := provider.Generate(env.ctx, request)
@@ -448,7 +431,7 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 		tools := []llm.Tool{
 			{
 				Type: "function",
-				Function: llm.FunctionDefinition{
+				Function: llm.ToolFunction{
 					Name:        "read_file",
 					Description: "Read contents of a file",
 					Parameters: map[string]interface{}{
@@ -465,7 +448,7 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 			},
 			{
 				Type: "function",
-				Function: llm.FunctionDefinition{
+				Function: llm.ToolFunction{
 					Name:        "write_file",
 					Description: "Write contents to a file",
 					Parameters: map[string]interface{}{
@@ -488,7 +471,6 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeGemini,
 			Model:        "gemini-2.5-flash-lite",
 			Messages: []llm.Message{
 				{Role: "user", Content: "Read the config file at /etc/config.yaml"},
@@ -496,7 +478,6 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 			MaxTokens:   200,
 			Temperature: 0.1,
 			Tools:       tools,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(env.ctx, request)
@@ -514,14 +495,12 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 		// Turn 1
 		request1 := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeGemini,
 			Model:        "gemini-2.5-flash-lite",
 			Messages: []llm.Message{
 				{Role: "user", Content: "I'm working on a web server in Go."},
 			},
 			MaxTokens:   100,
 			Temperature: 0.3,
-			CreatedAt:   time.Now(),
 		}
 
 		response1, err := provider.Generate(env.ctx, request1)
@@ -530,7 +509,6 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 		// Turn 2 - reference previous conversation
 		request2 := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeGemini,
 			Model:        "gemini-2.5-flash-lite",
 			Messages: []llm.Message{
 				{Role: "user", Content: "I'm working on a web server in Go."},
@@ -539,7 +517,6 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 			},
 			MaxTokens:   200,
 			Temperature: 0.3,
-			CreatedAt:   time.Now(),
 		}
 
 		response2, err := provider.Generate(env.ctx, request2)
@@ -561,7 +538,6 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 	t.Run("Streaming_Workflow", func(t *testing.T) {
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeGemini,
 			Model:        "gemini-2.5-flash-lite",
 			Messages: []llm.Message{
 				{Role: "user", Content: "List 5 best practices for writing Go code."},
@@ -569,7 +545,6 @@ func TestGeminiProviderEndToEnd(t *testing.T) {
 			MaxTokens:   500,
 			Temperature: 0.3,
 			Stream:      true,
-			CreatedAt:   time.Now(),
 		}
 
 		ch := make(chan llm.LLMResponse, 10)
@@ -613,10 +588,9 @@ func generateLargeCodebase(numFiles int) string {
 	return codebase.String()
 }
 
-// Helper function to get environment variable with default
-func getEnvOrDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
-}
+// NOTE (HXC-143 infra-retest, 2026-07-12): getEnvOrDefault was duplicated
+// byte-for-byte in qwen_e2e_test.go, which broke
+// `go vet -tags=e2e ./test/e2e/...` with "getEnvOrDefault redeclared in
+// this block" and made the whole `e2e`-tagged package uncompilable.
+// Removed the duplicate here; the shared helper now lives solely in
+// qwen_e2e_test.go.

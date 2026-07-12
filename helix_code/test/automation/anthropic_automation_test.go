@@ -1,4 +1,4 @@
-// go:build automation
+//go:build automation
 
 package automation
 

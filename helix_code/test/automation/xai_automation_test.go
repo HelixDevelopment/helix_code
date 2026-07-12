@@ -128,14 +128,12 @@ func TestXAIProviderFullAutomation(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeXAI,
 			Model:        "grok-3-mini-fast-beta", // Use lightweight model for testing
 			Messages: []llm.Message{
 				{Role: "user", Content: "Hello! Please respond with exactly 'Hello from Grok!'"},
 			},
 			MaxTokens:   50,
 			Temperature: 0.1,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(ctx, request)
@@ -159,14 +157,12 @@ func TestXAIProviderFullAutomation(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeXAI,
 			Model:        "grok-3-fast-beta", // Use coding model
 			Messages: []llm.Message{
 				{Role: "user", Content: "Write a simple Go function that adds two numbers and includes proper documentation."},
 			},
 			MaxTokens:   200,
 			Temperature: 0.3,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(ctx, request)
@@ -186,7 +182,6 @@ func TestXAIProviderFullAutomation(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeXAI,
 			Model:        "grok-3-mini-fast-beta",
 			Messages: []llm.Message{
 				{Role: "user", Content: "Count from 1 to 5 slowly, one number per line."},
@@ -194,7 +189,6 @@ func TestXAIProviderFullAutomation(t *testing.T) {
 			MaxTokens:   100,
 			Temperature: 0.1,
 			Stream:      true,
-			CreatedAt:   time.Now(),
 		}
 
 		ch := make(chan llm.LLMResponse, 50)
@@ -246,14 +240,12 @@ func TestXAIProviderFullAutomation(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			ProviderType: llm.ProviderTypeXAI,
 			Model:        "invalid-model-name",
 			Messages: []llm.Message{
 				{Role: "user", Content: "Hello"},
 			},
 			MaxTokens:   10,
 			Temperature: 0.1,
-			CreatedAt:   time.Now(),
 		}
 
 		response, err := provider.Generate(ctx, request)
@@ -274,14 +266,12 @@ func TestXAIProviderFullAutomation(t *testing.T) {
 			go func(requestNum int) {
 				request := &llm.LLMRequest{
 					ID:           uuid.New(),
-					ProviderType: llm.ProviderTypeXAI,
 					Model:        "grok-3-mini-fast-beta",
 					Messages: []llm.Message{
 						{Role: "user", Content: fmt.Sprintf("Say 'Request %d completed'", requestNum)},
 					},
 					MaxTokens:   20,
 					Temperature: 0.1,
-					CreatedAt:   time.Now(),
 				}
 
 				_, err := provider.Generate(ctx, request)
@@ -340,14 +330,12 @@ func TestXAIProviderLoadTest(t *testing.T) {
 
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				ProviderType: llm.ProviderTypeXAI,
 				Model:        "grok-3-mini-fast-beta",
 				Messages: []llm.Message{
 					{Role: "user", Content: fmt.Sprintf("Generate a random number between 1 and 100 for request %d", requestNum)},
 				},
 				MaxTokens:   50,
 				Temperature: 0.5,
-				CreatedAt:   time.Now(),
 			}
 
 			_, err := provider.Generate(ctx, request)
@@ -444,14 +432,12 @@ func TestXAIProviderModelCompatibility(t *testing.T) {
 
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				ProviderType: llm.ProviderTypeXAI,
 				Model:        model.Name,
 				Messages: []llm.Message{
 					{Role: "user", Content: fmt.Sprintf("Hello from model %s! Please respond briefly.", model.Name)},
 				},
 				MaxTokens:   50,
 				Temperature: 0.1,
-				CreatedAt:   time.Now(),
 			}
 
 			response, err := provider.Generate(ctx, request)
@@ -502,14 +488,12 @@ func TestXAIProviderRateLimits(t *testing.T) {
 		go func(requestNum int) {
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				ProviderType: llm.ProviderTypeXAI,
 				Model:        "grok-3-mini-fast-beta",
 				Messages: []llm.Message{
 					{Role: "user", Content: fmt.Sprintf("Request %d: Say 'ok'", requestNum)},
 				},
 				MaxTokens:   10,
 				Temperature: 0.1,
-				CreatedAt:   time.Now(),
 			}
 
 			_, err := provider.Generate(ctx, request)
@@ -542,21 +526,10 @@ func TestXAIProviderRateLimits(t *testing.T) {
 	assert.Greater(t, successful, 0, "Should have at least some successful requests")
 }
 
-// Helper function to detect rate limit errors
-func isRateLimitError(err error) bool {
-	if err == nil {
-		return false
-	}
-	errStr := err.Error()
-	return contains(errStr, "rate limit") ||
-		contains(errStr, "429") ||
-		contains(errStr, "too many requests")
-}
-
-// Helper function for case-insensitive contains
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) &&
-		(s == substr ||
-			contains(s[1:], substr) ||
-			(len(s) > len(substr) && contains(s[:len(s)-1], substr)))
-}
+// NOTE (HXC-122 infra-retest, 2026-07-12): isRateLimitError/contains were
+// duplicated byte-for-byte in qwen_automation_test.go, which broke
+// `go vet -tags=automation ./test/automation/...` with
+// "isRateLimitError redeclared in this block" and made the whole
+// `automation`-tagged package uncompilable (so these suites could never
+// execute, let alone skip meaningfully). Removed the duplicate here;
+// the shared helpers now live solely in qwen_automation_test.go.

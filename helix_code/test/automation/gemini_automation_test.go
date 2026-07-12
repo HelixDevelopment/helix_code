@@ -221,7 +221,7 @@ func TestGeminiProviderFullAutomation(t *testing.T) {
 		tools := []llm.Tool{
 			{
 				Type: "function",
-				Function: llm.FunctionDefinition{
+				Function: llm.ToolFunction{
 					Name:        "get_current_temperature",
 					Description: "Get the current temperature for a location",
 					Parameters: map[string]interface{}{
