@@ -1,6 +1,14 @@
 # Morning Resumption — helix_code overnight autonomous session (2026-07-12)
 
-**Short resume prompt:** Read this file + `.superpowers/sdd/discovery_sweep_progress.md` (host-local ledger), then `git fetch --all`. HEAD = `d0be2462` on `feature/helixllm-full-extension` (5 commits tonight, all pushed to all 3 mirrors), build STABLE (verify-compile GREEN + 159-pkg unit sweep 0-fail). Continue the discovery/hardening loop: (a) land F-DBTOOL via the MORNING STEPS below (fix already validated), then close HXC-125/127/128/129 in the DB; (b) advance HXC-117/118/119 Phase-2+ as gated source increments; (c) each commit gated by full `make verify-compile` + tests + independent review, ff-only no-force.
+**Short resume prompt:** Read this file + `.superpowers/sdd/discovery_sweep_progress.md`, then `git fetch --all`. HEAD = `edbd5a49` on `feature/helixllm-full-extension` (all pushed, all 3 mirrors), build STABLE (make verify-compile GREEN, unit 159-pkg + integ/security/regression suites 0-fail). Remaining: fix **F-DBTOOL-2** then close HXC-128/126; fold in the infra full-suite results (HXC-122/124); each commit gated by full `make verify-compile` + tests + review, ff-only no-force.
+
+## LATEST STATE (operator returned mid-session + authorized unblocks — 2026-07-12 later)
+The F-DBTOOL "morning steps" section below is now MOSTLY DONE — superseded by this:
+- **F-DBTOOL-1 LANDED cross-repo:** constitution `3302587` (representation-scoping fix + regression test) pushed to all 7 mirrors; helix_code `7ce471ee` bumped the pointer + applied the copy-validated hygiene subset → **closed HXC-125/127/129 + backfilled 79 severities**, DB `diff=0`/`validate OK`.
+- **F-DBTOOL-2 (still open):** the `update --description` path desyncs body_md vs rendered/columns (81 diffs). So **HXC-128 (31 descriptions) + HXC-126 (move-drift) remain Queued** — need this second tool fix (severity + close paths are already clean). W2C descriptions saved at `scratch/discovery/fixes/W2C_hygiene_proposals.jsonl`.
+- **CONST-040 Phase-2 LANDED** (`edbd5a49`): HXC-117 (verifier caps from real LLMsVerifier path; honest: live service doesn't emit keys yet), HXC-118 (real Ollama-embedder RAG retriever + default-OFF handleGenerate hook), HXC-119 (ACP Prompt→real GenerateStream). All additive/opt-in, full build green. **HXC-117/118/119 stay Queued** (Phase-2 landed; full user-visibility needs: LLMsVerifier service to emit caps / a durable vector index / ACP Phase-5 permission-map).
+- **Infra full-suite** running (memory 3P/11-SKIP so far; automation/integration/security/e2e + teardown pending) — will resolve HXC-122 + surface HXC-124 (HelixQA JWT).
+- **HXC-108 correction:** it's a *Completed Video-QA task*, NOT the Aurora/Harmony item the old prompt claimed — took no action; Aurora/Harmony has no formal open item (scaffolds only under applications/{aurora_os,harmony_os}).
 
 ---
 
