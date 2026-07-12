@@ -1,0 +1,12 @@
+{
+  "name": "meta-positive_latency",
+  "n": 100,
+  "p50_ms": 0.103,
+  "p95_ms": 0.135,
+  "p99_ms": 0.181,
+  "min_ms": 0.077,
+  "max_ms": 0.259,
+  "error_rate": 0,
+  "duration_ms": 10.812,
+  "timestamp": "2026-07-12T16:25:17.873682469Z"
+}

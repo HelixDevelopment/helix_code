@@ -1,0 +1,13 @@
+{
+  "name": "scaling_worker_pool_concurrency_guard",
+  "parallelism": 16,
+  "iterations_per_goroutine": 20,
+  "total_calls": 320,
+  "goroutines_before": 2,
+  "goroutines_after": 2,
+  "goroutine_delta": 0,
+  "deadlock": false,
+  "error_count": 0,
+  "duration_ms": 91.679,
+  "timestamp": "2026-07-12T16:23:59.731895854Z"
+}

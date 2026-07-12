@@ -1,0 +1,28 @@
+{
+  "name": "ui_tui_list",
+  "width": 80,
+  "height": 25,
+  "asserted_strings": [
+    {
+      "text": "Main Menu",
+      "found": true
+    },
+    {
+      "text": "Add Worker",
+      "found": true
+    },
+    {
+      "text": "List Models",
+      "found": true
+    },
+    {
+      "text": "Generate",
+      "found": true
+    },
+    {
+      "text": "Run Command",
+      "found": true
+    }
+  ],
+  "timestamp": "2026-07-12T16:24:13.29936102Z"
+}

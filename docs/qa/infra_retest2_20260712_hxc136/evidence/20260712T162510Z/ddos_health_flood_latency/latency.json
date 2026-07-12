@@ -1,0 +1,12 @@
+{
+  "name": "ddos_health_flood_latency",
+  "n": 100,
+  "p50_ms": 0.203,
+  "p95_ms": 0.236,
+  "p99_ms": 0.283,
+  "min_ms": 0.183,
+  "max_ms": 0.552,
+  "error_rate": 0,
+  "duration_ms": 21.211,
+  "timestamp": "2026-07-12T16:25:10.873894064Z"
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "sample": "auth_required",
+    "top_keys": [
+      "error"
+    ]
+  },
+  {
+    "sample": "invalid_task",
+    "top_keys": [
+      "error"
+    ]
+  },
+  {
+    "sample": "qa_disabled",
+    "top_keys": [
+      "error"
+    ]
+  }
+]

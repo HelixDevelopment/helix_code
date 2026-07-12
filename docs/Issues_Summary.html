@@ -192,7 +192,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Queued</td>
-<td>3</td>
+<td>4</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -202,12 +202,12 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Task</td>
 <td>Queued</td>
-<td>4</td>
+<td>2</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>8</strong></td>
+<td><strong>7</strong></td>
 </tr>
 </tbody>
 </table>
@@ -242,31 +242,6 @@ currently cannot use it. The work is to design and implement real ACP
 support, or, if it proves structurally infeasible, to document that with
 cited evidence. The platform will then either genuinely support ACP or
 hold an honest, evidenced position instead of an unmet claim.</td>
-</tr>
-<tr>
-<td>HXC-136</td>
-<td>Task</td>
-<td>Queued</td>
-<td>Medium</td>
-<td>Several mandated automated test categories — load/denial-of-service,
-scaling, stress and chaos, and user-interface/experience — were not
-exercised in the latest real-infrastructure run, so their current health
-is unconfirmed. The work is to run each of these test types against real
-infrastructure and capture proof of the results. This completes the
-promised full test-type coverage and confirms the product holds up under
-load and adverse conditions.</td>
-</tr>
-<tr>
-<td>HXC-138</td>
-<td>Task</td>
-<td>Queued</td>
-<td>Low</td>
-<td>The end-to-end challenge runner can now launch all its scenarios (a
-missing option was just fixed), but the scenarios still need to be
-executed against a live server with a real model to confirm the complete
-user journeys work. The work is to stand up a server and run the
-challenges, capturing the results. This provides real proof that the
-headline user workflows function end to end.</td>
 </tr>
 <tr>
 <td>HXC-145</td>
@@ -347,6 +322,22 @@ consistent with .gitmodules and submodule-walking tooling completes.
 Found by the 2026-07-12 release-readiness survey. Low runtime risk but
 blocks release automation; the fix is a git-index-only change,
 reversible.</td>
+</tr>
+<tr>
+<td>HXC-150</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>Low</td>
+<td>The load/DDoS test harness (tests/ddos, -tags=integration) reads
+TEST_PG_* and TEST_REDIS_* environment variables to reach the real
+Postgres and Redis, but the projects .env.full-test only exports
+HELIX_DATABASE_* and HELIX_REDIS_*, and the defaults do not match the
+container credentials. So under the normal make test-load-full workflow
+the suite falsely SKIPs even when infra is fully healthy (it only ran
+once the correct credentials were passed manually during the 2026-07-12
+retest). The work is to align the harness env-var names/defaults with
+.env.full-test so load/DDoS executes out of the box. Low severity,
+test-harness only.</td>
 </tr>
 </tbody>
 </table>

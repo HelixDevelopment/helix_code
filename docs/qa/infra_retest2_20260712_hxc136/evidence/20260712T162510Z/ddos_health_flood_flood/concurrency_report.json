@@ -1,0 +1,13 @@
+{
+  "name": "ddos_health_flood_flood",
+  "parallelism": 32,
+  "iterations_per_goroutine": 50,
+  "total_calls": 1600,
+  "goroutines_before": 4,
+  "goroutines_after": 4,
+  "goroutine_delta": 0,
+  "deadlock": false,
+  "error_count": 0,
+  "duration_ms": 286.909,
+  "timestamp": "2026-07-12T16:25:10.852404803Z"
+}

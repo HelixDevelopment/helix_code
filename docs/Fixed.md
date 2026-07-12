@@ -1797,3 +1797,23 @@ Under the sustained request-flood chaos test against the real running server, th
 
 Two categories of tests, memory-usage and end-to-end automation, skip most of their cases by default because they require a live server or special environment flags not set in normal runs. In practice these areas are largely unverified even though the tests appear to exist. The work provides a documented, repeatable way to run them against real infrastructure so they actually execute and prove the behavior. Memory and automation behavior then becomes genuinely tested rather than merely scaffolded.
 
+## HXC-136 — Verify the remaining automated test types run with real captured evidence
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/infra_retest2_20260712_hxc136/EVIDENCE.md
+**Severity:** Medium
+**Created-By:** Claude
+
+Several mandated automated test categories — load/denial-of-service, scaling, stress and chaos, and user-interface/experience — were not exercised in the latest real-infrastructure run, so their current health is unconfirmed. The work is to run each of these test types against real infrastructure and capture proof of the results. This completes the promised full test-type coverage and confirms the product holds up under load and adverse conditions.
+
+## HXC-138 — Run the end-to-end challenge suite against a running server
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md
+**Severity:** Low
+**Created-By:** Claude
+
+The end-to-end challenge runner can now launch all its scenarios (a missing option was just fixed), but the scenarios still need to be executed against a live server with a real model to confirm the complete user journeys work. The work is to stand up a server and run the challenges, capturing the results. This provides real proof that the headline user workflows function end to end.
+

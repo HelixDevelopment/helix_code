@@ -1,0 +1,13 @@
+{
+  "name": "meta-limiter-no-refusal_flood",
+  "parallelism": 10,
+  "iterations_per_goroutine": 10,
+  "total_calls": 100,
+  "goroutines_before": 3,
+  "goroutines_after": 3,
+  "goroutine_delta": 0,
+  "deadlock": false,
+  "error_count": 0,
+  "duration_ms": 5.052,
+  "timestamp": "2026-07-12T16:25:17.789430675Z"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "meta-positive_concurrency_guard",
+  "parallelism": 12,
+  "iterations_per_goroutine": 20,
+  "total_calls": 240,
+  "goroutines_before": 2,
+  "goroutines_after": 2,
+  "goroutine_delta": 0,
+  "deadlock": false,
+  "error_count": 0,
+  "duration_ms": 79.601,
+  "timestamp": "2026-07-12T16:23:58.275422693Z"
+}

@@ -474,31 +474,6 @@ support, or, if it proves structurally infeasible, to document that with
 cited evidence. The platform will then either genuinely support ACP or
 hold an honest, evidenced position instead of an unmet claim.</p>
 <h2
-id="hxc-136-verify-the-remaining-automated-test-types-run-with-real-captured-evidence">HXC-136
-— Verify the remaining automated test types run with real captured
-evidence</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Severity:</strong> Medium <strong>Created-By:</strong>
-Claude</p>
-<p>Several mandated automated test categories — load/denial-of-service,
-scaling, stress and chaos, and user-interface/experience — were not
-exercised in the latest real-infrastructure run, so their current health
-is unconfirmed. The work is to run each of these test types against real
-infrastructure and capture proof of the results. This completes the
-promised full test-type coverage and confirms the product holds up under
-load and adverse conditions.</p>
-<h2
-id="hxc-138-run-the-end-to-end-challenge-suite-against-a-running-server">HXC-138
-— Run the end-to-end challenge suite against a running server</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude</p>
-<p>The end-to-end challenge runner can now launch all its scenarios (a
-missing option was just fixed), but the scenarios still need to be
-executed against a live server with a real model to confirm the complete
-user journeys work. The work is to stand up a server and run the
-challenges, capturing the results. This provides real proof that the
-headline user workflows function end to end.</p>
-<h2
 id="hxc-145-configured-xiaomi-model-mimo-v2-flash-is-rejected-by-the-real-xiaomi-api">HXC-145
 — Configured Xiaomi model mimo-v2-flash is rejected by the real Xiaomi
 API</h2>
@@ -581,5 +556,21 @@ consistent with .gitmodules and submodule-walking tooling completes.
 Found by the 2026-07-12 release-readiness survey. Low runtime risk but
 blocks release automation; the fix is a git-index-only change,
 reversible.</p>
+<h2
+id="hxc-150-testsddos-env-var-names-test_pg_test_redis_-mismatch-.env.full-test-causing-false-skip">HXC-150
+— tests/ddos env-var names (TEST_PG_/TEST_REDIS_) mismatch
+.env.full-test causing false SKIP</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude</p>
+<p>The load/DDoS test harness (tests/ddos, -tags=integration) reads
+TEST_PG_* and TEST_REDIS_* environment variables to reach the real
+Postgres and Redis, but the projects .env.full-test only exports
+HELIX_DATABASE_* and HELIX_REDIS_*, and the defaults do not match the
+container credentials. So under the normal make test-load-full workflow
+the suite falsely SKIPs even when infra is fully healthy (it only ran
+once the correct credentials were passed manually during the 2026-07-12
+retest). The work is to align the harness env-var names/defaults with
+.env.full-test so load/DDoS executes out of the box. Low severity,
+test-harness only.</p>
 </body>
 </html>

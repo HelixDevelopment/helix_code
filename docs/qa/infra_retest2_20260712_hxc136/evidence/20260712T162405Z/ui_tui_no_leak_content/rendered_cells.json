@@ -1,0 +1,20 @@
+{
+  "name": "ui_tui_no_leak_content",
+  "width": 80,
+  "height": 25,
+  "asserted_strings": [
+    {
+      "text": "Add Worker",
+      "found": true
+    },
+    {
+      "text": "List Models",
+      "found": true
+    },
+    {
+      "text": "Run Command",
+      "found": true
+    }
+  ],
+  "timestamp": "2026-07-12T16:24:05.896816725Z"
+}

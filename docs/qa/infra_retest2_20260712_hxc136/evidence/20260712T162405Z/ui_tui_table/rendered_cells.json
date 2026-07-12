@@ -1,0 +1,36 @@
+{
+  "name": "ui_tui_table",
+  "width": 80,
+  "height": 25,
+  "asserted_strings": [
+    {
+      "text": "Provider",
+      "found": true
+    },
+    {
+      "text": "Model",
+      "found": true
+    },
+    {
+      "text": "Context",
+      "found": true
+    },
+    {
+      "text": "ollama",
+      "found": true
+    },
+    {
+      "text": "llama3.2",
+      "found": true
+    },
+    {
+      "text": "openai",
+      "found": true
+    },
+    {
+      "text": "gpt-4o",
+      "found": true
+    }
+  ],
+  "timestamp": "2026-07-12T16:24:05.893169427Z"
+}

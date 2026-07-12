@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "internal_server_qa_engine_disabled",
+    "locale": "en",
+    "resolved_text": "QA engine is disabled",
+    "leaked_id": false
+  },
+  {
+    "message_id": "internal_server_invalid_task_id",
+    "locale": "en",
+    "resolved_text": "Invalid task ID format",
+    "leaked_id": false
+  },
+  {
+    "message_id": "internal_server_authentication_required",
+    "locale": "en",
+    "resolved_text": "Authentication required",
+    "leaked_id": false
+  },
+  {
+    "message_id": "internal_server_invalid_project_id",
+    "locale": "en",
+    "resolved_text": "Invalid project ID format",
+    "leaked_id": false
+  }
+]

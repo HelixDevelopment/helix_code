@@ -1,0 +1,12 @@
+{
+  "name": "meta-limiter-no-refusal_latency",
+  "n": 100,
+  "p50_ms": 0.102,
+  "p95_ms": 0.222,
+  "p99_ms": 0.301,
+  "min_ms": 0.084,
+  "max_ms": 0.399,
+  "error_rate": 0,
+  "duration_ms": 11.453,
+  "timestamp": "2026-07-12T16:25:17.801060019Z"
+}

@@ -1,0 +1,11 @@
+<canvas padded size="148x81">
+	<content>
+		<widget pos="4,4" size="140x73" type="*widget.Label">
+			<widget size="140x73" type="*widget.RichText">
+				<text pos="8,8" size="124x19">HelixCode Desktop</text>
+				<text pos="8,27" size="60x19">Generate</text>
+				<text pos="8,46" size="88x19">Status: Ready</text>
+			</widget>
+		</widget>
+	</content>
+</canvas>

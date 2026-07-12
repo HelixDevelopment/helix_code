@@ -6117,6 +6117,35 @@ work provides a documented, repeatable way to run them against real
 infrastructure so they actually execute and prove the behavior. Memory
 and automation behavior then becomes genuinely tested rather than merely
 scaffolded.</p>
+<h2
+id="hxc-136-verify-the-remaining-automated-test-types-run-with-real-captured-evidence">HXC-136
+— Verify the remaining automated test types run with real captured
+evidence</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/infra_retest2_20260712_hxc136/EVIDENCE.md
+<strong>Severity:</strong> Medium <strong>Created-By:</strong>
+Claude</p>
+<p>Several mandated automated test categories — load/denial-of-service,
+scaling, stress and chaos, and user-interface/experience — were not
+exercised in the latest real-infrastructure run, so their current health
+is unconfirmed. The work is to run each of these test types against real
+infrastructure and capture proof of the results. This completes the
+promised full test-type coverage and confirms the product holds up under
+load and adverse conditions.</p>
+<h2
+id="hxc-138-run-the-end-to-end-challenge-suite-against-a-running-server">HXC-138
+— Run the end-to-end challenge suite against a running server</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude</p>
+<p>The end-to-end challenge runner can now launch all its scenarios (a
+missing option was just fixed), but the scenarios still need to be
+executed against a live server with a real model to confirm the complete
+user journeys work. The work is to stand up a server and run the
+challenges, capturing the results. This provides real proof that the
+headline user workflows function end to end.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />

@@ -207,7 +207,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>78</td>
+<td>80</td>
 </tr>
 <tr>
 <td>Task</td>
@@ -217,7 +217,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>335</strong></td>
+<td><strong>337</strong></td>
 </tr>
 </tbody>
 </table>
@@ -3297,6 +3297,21 @@ information across the product.</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
 <td>—</td>
+<td>HXC-136 — Several mandated automated test categories —
+load/denial-of-service, scaling, stress and chaos, and
+user-interface/experience — were not exercised in the latest
+real-infrastructure run, so their current health is unconfirmed. The
+work is to run each of these test types against real infrastructure and
+capture proof of the results. This completes the promised full test-type
+coverage and confirms the product holds up under load and adverse
+conditions.</td>
+</tr>
+<tr>
+<td>312</td>
+<td>Medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
 <td>HXC-137 — The project depends on many owned code modules, and a full
 health check of all of them (does each build, pass static checks, and
 pass its tests) did not finish in the latest session. The work is to run
@@ -3305,7 +3320,20 @@ assures that the whole codebase, not just the main application, is in
 good shape.</td>
 </tr>
 <tr>
-<td>312</td>
+<td>313</td>
+<td>Low</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-138 — The end-to-end challenge runner can now launch all its
+scenarios (a missing option was just fixed), but the scenarios still
+need to be executed against a live server with a real model to confirm
+the complete user journeys work. The work is to stand up a server and
+run the challenges, capturing the results. This provides real proof that
+the headline user workflows function end to end.</td>
+</tr>
+<tr>
+<td>314</td>
 <td>High</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3321,7 +3349,7 @@ build-ignore or nested module marker). Developers regain a clean,
 buildable agent module.</td>
 </tr>
 <tr>
-<td>313</td>
+<td>315</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3335,7 +3363,7 @@ fix or reconcile the failing test-bank test. This makes the QA module
 concurrency-safe and its tests green.</td>
 </tr>
 <tr>
-<td>314</td>
+<td>316</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3349,7 +3377,7 @@ becomes robust against stop-before-start and missing-container
 situations.</td>
 </tr>
 <tr>
-<td>315</td>
+<td>317</td>
 <td>High</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3366,7 +3394,7 @@ runs against real infrastructure. Evidence:
 docs/qa/infra_retest_20260712_hxc122_138/automation_tests.log.</td>
 </tr>
 <tr>
-<td>316</td>
+<td>318</td>
 <td>High</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3380,7 +3408,7 @@ the 2026-07-12 real-infra retest. Evidence:
 docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md.</td>
 </tr>
 <tr>
-<td>317</td>
+<td>319</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3395,7 +3423,7 @@ and fix it so the count stays within tolerance under flood. Evidence:
 docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Server 7/8).</td>
 </tr>
 <tr>
-<td>318</td>
+<td>320</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3405,7 +3433,7 @@ docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Server 7/8).</td>
 path</td>
 </tr>
 <tr>
-<td>319</td>
+<td>321</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3414,7 +3442,7 @@ path</td>
 hardcoded path</td>
 </tr>
 <tr>
-<td>320</td>
+<td>322</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3423,7 +3451,7 @@ hardcoded path</td>
 <code>WriteTOON</code> returns 500</td>
 </tr>
 <tr>
-<td>321</td>
+<td>323</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3431,7 +3459,7 @@ hardcoded path</td>
 <td>HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
 </tr>
 <tr>
-<td>322</td>
+<td>324</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3440,7 +3468,7 @@ hardcoded path</td>
 (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>323</td>
+<td>325</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3449,7 +3477,7 @@ hardcoded path</td>
 <code>TestPerformance</code> flake (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>324</td>
+<td>326</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3459,7 +3487,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 <code>tests/integration</code> compile</td>
 </tr>
 <tr>
-<td>325</td>
+<td>327</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3468,7 +3496,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 failures (CLI-integration + verification/scoring)</td>
 </tr>
 <tr>
-<td>326</td>
+<td>328</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3477,7 +3505,7 @@ failures (CLI-integration + verification/scoring)</td>
 pre-existing test failures</td>
 </tr>
 <tr>
-<td>327</td>
+<td>329</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3486,7 +3514,7 @@ pre-existing test failures</td>
 10 pre-existing test failures</td>
 </tr>
 <tr>
-<td>328</td>
+<td>330</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3496,7 +3524,7 @@ pre-existing test failures</td>
 production mock-bluff</td>
 </tr>
 <tr>
-<td>329</td>
+<td>331</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3505,7 +3533,7 @@ production mock-bluff</td>
 <code>CreatePromptExperiment</code> test failures</td>
 </tr>
 <tr>
-<td>330</td>
+<td>332</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3515,7 +3543,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>331</td>
+<td>333</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3525,7 +3553,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>332</td>
+<td>334</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3534,7 +3562,7 @@ corrupts non-ASCII)</td>
 (404) — CLOSED (→ Fixed.md)</td>
 </tr>
 <tr>
-<td>333</td>
+<td>335</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3543,7 +3571,7 @@ corrupts non-ASCII)</td>
 <code>helix-gitlab</code> URL fix (was misconfigured, not missing)</td>
 </tr>
 <tr>
-<td>334</td>
+<td>336</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3553,7 +3581,7 @@ corrupts non-ASCII)</td>
 93c830a</td>
 </tr>
 <tr>
-<td>335</td>
+<td>337</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
