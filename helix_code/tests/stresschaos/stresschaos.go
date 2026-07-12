@@ -24,6 +24,7 @@ package stresschaos
 
 import (
 	"encoding/json"
+	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -53,6 +54,67 @@ const defaultErrorRateThreshold = 0.0
 // after a concurrency run. Concurrency runs settle asynchronously, so a small
 // non-negative slack avoids flakiness while still catching real leaks.
 const goroutineLeakTolerance = 4
+
+// settlePollInterval is the sleep between goroutine-count polls in
+// settleGoroutines(). It is well below the smallest realistic net/http
+// connection-teardown latency so a genuine drop is noticed quickly.
+const settlePollInterval = 25 * time.Millisecond
+
+// settlePollBudget bounds how long settleGoroutines() will wait for the
+// goroutine count to stabilize before giving up and returning the last sample.
+// This replaces a single fixed-sleep snapshot (HXC-144): net/http client/server
+// connection-teardown goroutines (persistConn.readLoop/writeLoop) exit
+// asynchronously — their exit is scheduler-timed, not synchronous with
+// Close() — so a single fixed delay is a well-documented flaky-measurement
+// pattern (see golang/go#25621, golang/go#9092). A bounded poll-until-stable
+// loop is the standard mitigation (mirrors what go.uber.org/goleak does
+// internally: retry with backoff rather than sample once).
+const settlePollBudget = 2 * time.Second
+
+// settleStableStreak is how many consecutive equal samples settleGoroutines()
+// requires before declaring the goroutine count "stable".
+const settleStableStreak = 3
+
+// closeIdleHTTPConnections proactively tears down idle connections on the
+// shared, process-wide http.DefaultTransport. Concurrency tests that hammer an
+// HTTP endpoint (e.g. server_stress_test.go's ConcurrentDDoSFlood) construct a
+// fresh *http.Client per call but never set Client.Transport, so every call in
+// the whole test binary shares this one singleton connection pool. Forcing
+// idle connections closed here deterministically kicks off transport teardown
+// instead of waiting on the OS/runtime scheduler to notice on its own. This is
+// a safe no-op for concurrency tests that never touch net/http.
+func closeIdleHTTPConnections() {
+	if t, ok := http.DefaultTransport.(*http.Transport); ok {
+		t.CloseIdleConnections()
+	}
+}
+
+// settleGoroutines polls runtime.NumGoroutine(), interleaved with GC and an
+// idle-HTTP-connection sweep, until the count stabilizes (settleStableStreak
+// consecutive equal samples) or settlePollBudget elapses — whichever comes
+// first. See goroutineLeakTolerance / settlePollBudget doc comments for why
+// this replaces a single fixed-sleep sample (HXC-144). Returns the final
+// stable (or last-sampled, if the budget expired without stabilizing)
+// goroutine count.
+func settleGoroutines() int {
+	closeIdleHTTPConnections()
+	runtime.GC()
+	last := runtime.NumGoroutine()
+	stable := 1
+	deadline := time.Now().Add(settlePollBudget)
+	for stable < settleStableStreak && time.Now().Before(deadline) {
+		time.Sleep(settlePollInterval)
+		runtime.GC()
+		cur := runtime.NumGoroutine()
+		if cur == last {
+			stable++
+		} else {
+			stable = 1
+			last = cur
+		}
+	}
+	return last
+}
 
 // LatencyReport is the §11.4.85 `latency.json` closed-set evidence shape.
 type LatencyReport struct {
@@ -369,12 +431,14 @@ func RunConcurrent(t testing.TB, name string, cfg ConcurrencyConfig, fn func(gor
 	durMs := float64(time.Since(start).Microseconds()) / 1000.0
 
 	// Let scheduled goroutines wind down before snapshotting (only meaningful if
-	// the run actually completed).
+	// the run actually completed). Poll-until-stable rather than a single fixed
+	// sleep: see settleGoroutines() doc comment (HXC-144).
+	var gAfter int
 	if !deadlock {
-		time.Sleep(50 * time.Millisecond)
-		runtime.GC()
+		gAfter = settleGoroutines()
+	} else {
+		gAfter = runtime.NumGoroutine()
 	}
-	gAfter := runtime.NumGoroutine()
 
 	rep := ConcurrencyReport{
 		Name:             name,
