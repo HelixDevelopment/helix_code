@@ -202,7 +202,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Feature</td>
 <td>Implemented (→ Fixed.md)</td>
-<td>89</td>
+<td>90</td>
 </tr>
 <tr>
 <td>Task</td>
@@ -212,7 +212,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>286</strong></td>
+<td><strong>287</strong></td>
 </tr>
 </tbody>
 </table>
@@ -2887,6 +2887,20 @@ for users.</td>
 <tr>
 <td>271</td>
 <td>Medium</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-135 — HelixCode is now wired to read six advanced capability
+indicators (tool protocols, code intelligence, retrieval, skills,
+plugins) from the central verifier, but the verifier’s live responses do
+not yet include those fields, so the flags always read as unsupported.
+The work is to have the verifier publish these capability values it
+already computes. Then users see accurate per-model capability
+information across the product.</td>
+</tr>
+<tr>
+<td>272</td>
+<td>Medium</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
 <td>—</td>
@@ -2898,7 +2912,7 @@ assures that the whole codebase, not just the main application, is in
 good shape.</td>
 </tr>
 <tr>
-<td>272</td>
+<td>273</td>
 <td>High</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2914,7 +2928,7 @@ build-ignore or nested module marker). Developers regain a clean,
 buildable agent module.</td>
 </tr>
 <tr>
-<td>273</td>
+<td>274</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2928,7 +2942,7 @@ fix or reconcile the failing test-bank test. This makes the QA module
 concurrency-safe and its tests green.</td>
 </tr>
 <tr>
-<td>274</td>
+<td>275</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2942,7 +2956,7 @@ becomes robust against stop-before-start and missing-container
 situations.</td>
 </tr>
 <tr>
-<td>275</td>
+<td>276</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2951,7 +2965,7 @@ situations.</td>
 hardcoded path</td>
 </tr>
 <tr>
-<td>276</td>
+<td>277</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2959,7 +2973,7 @@ hardcoded path</td>
 <td>HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
 </tr>
 <tr>
-<td>277</td>
+<td>278</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2968,7 +2982,7 @@ hardcoded path</td>
 <code>TestPerformance</code> flake (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>278</td>
+<td>279</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2978,7 +2992,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 <code>tests/integration</code> compile</td>
 </tr>
 <tr>
-<td>279</td>
+<td>280</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2987,7 +3001,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 failures (CLI-integration + verification/scoring)</td>
 </tr>
 <tr>
-<td>280</td>
+<td>281</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2996,7 +3010,7 @@ failures (CLI-integration + verification/scoring)</td>
 10 pre-existing test failures</td>
 </tr>
 <tr>
-<td>281</td>
+<td>282</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3006,7 +3020,7 @@ failures (CLI-integration + verification/scoring)</td>
 production mock-bluff</td>
 </tr>
 <tr>
-<td>282</td>
+<td>283</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3015,7 +3029,7 @@ production mock-bluff</td>
 <code>CreatePromptExperiment</code> test failures</td>
 </tr>
 <tr>
-<td>283</td>
+<td>284</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3025,7 +3039,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>284</td>
+<td>285</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3034,7 +3048,7 @@ corrupts non-ASCII)</td>
 <code>helix-gitlab</code> URL fix (was misconfigured, not missing)</td>
 </tr>
 <tr>
-<td>285</td>
+<td>286</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3044,7 +3058,7 @@ corrupts non-ASCII)</td>
 93c830a</td>
 </tr>
 <tr>
-<td>286</td>
+<td>287</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>

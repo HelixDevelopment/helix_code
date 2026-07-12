@@ -1220,3 +1220,13 @@ The central model-verifier service reports each model's id as a numeric value, w
 
 The quality-assurance module has code that copies a value containing a lock (a mutex) instead of sharing it, which the Go checker flags as unsafe and can cause subtle concurrency bugs; separately, one test that loads real test banks is failing. The work is to pass the lock-bearing value by reference (pointer) instead of copying it, and to fix or reconcile the failing test-bank test. This makes the QA module concurrency-safe and its tests green.
 
+## HXC-135 — Model verifier should publish the six advanced-capability flags so the platform can show them
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** docs/qa/hxc135_20260712T130921Z/EVIDENCE.md
+**Severity:** Medium
+**Created-By:** Claude
+
+HelixCode is now wired to read six advanced capability indicators (tool protocols, code intelligence, retrieval, skills, plugins) from the central verifier, but the verifier's live responses do not yet include those fields, so the flags always read as unsupported. The work is to have the verifier publish these capability values it already computes. Then users see accurate per-model capability information across the product.
+

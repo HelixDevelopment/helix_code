@@ -255,21 +255,22 @@ func unmarshalModelArray(raw json.RawMessage) ([]*VerifiedModel, error) {
 // already applied above for the same real-vs-embedded-server shape mismatch
 // reason.
 //
-// Honest boundary (§11.4.6 / §11.4.123): as of this session, NEITHER the
-// singular NOR the plural keys are actually emitted by the real LLMsVerifier
-// service's live /api/models, /api/models/{id}, or /api/models/{id}/verify
-// HTTP handlers (submodules/llms_verifier/llm-verifier/api/handlers.go
-// ListModelsHandler/GetModelHandler/VerifyModelHandler all hand-roll a
-// map[string]any response that does not include any of the six CONST-040
-// capability keys, even though the underlying database.VerificationResult
-// struct and probe engine already compute and persist them) — so today this
-// reconciliation is a documented no-op on the live wire and every capability
-// flag legitimately stays false ("not verified as supporting"). This is
-// forward-compatible plumbing for the day those handlers start emitting
-// either key convention, proven correct now (not merely asserted) by
-// TestClient_GetModels_CapabilityFlags_* / TestClient_VerifyModel_CapabilityFlags_*
-// in capability_flags_test.go, which exercise this exact decode path against
-// synthetic real-server-shaped responses.
+// Live wire state (§11.4.6 / §11.4.123): as of HXC-135 (llms_verifier
+// commit 1096057f, 2026-07-12) the real LLMsVerifier service's live
+// /api/models, /api/models/{id}, and /api/models/{id}/verify HTTP handlers
+// (submodules/llms_verifier/llm-verifier/api/handlers.go
+// ListModelsHandler/GetModelHandler/VerifyModelHandler) NOW emit all six
+// CONST-040 capability keys, sourced from the computed
+// database.VerificationResult (plural tags "supports_mcps"/"supports_lsps"/
+// "supports_acps" + "supports_rag"/"supports_skills"/"supports_plugins",
+// honest-false when no verification result). So this plural-alias
+// reconciliation is now LIVE on the wire — it promotes the verifier's real
+// computed MCP/LSP/ACP result onto the singular fields HelixCode uses; a
+// capability that stays false does so because the verifier genuinely did not
+// verify it, not because the field was absent. Correctness proven (not merely
+// asserted) by TestClient_GetModels_CapabilityFlags_* /
+// TestClient_VerifyModel_CapabilityFlags_* in capability_flags_test.go, which
+// exercise this exact decode path against real-server-shaped responses.
 type capabilityAliasFields struct {
 	SupportsMCPAlias *bool `json:"supports_mcps"`
 	SupportsLSPAlias *bool `json:"supports_lsps"`

@@ -611,15 +611,6 @@ Two categories of tests, memory-usage and end-to-end automation, skip most of th
 
 Eleven work items marked finished still appear in the open-issues document and are missing from the resolved-items document, so the two views disagree about their state and become untrustworthy. The work regenerates the tracker documents from the authoritative database so finished items appear only in the resolved view. The human-readable trackers then accurately reflect the true state.
 
-## HXC-135 — Model verifier should publish the six advanced-capability flags so the platform can show them
-
-**Status:** Queued
-**Type:** Feature
-**Severity:** Medium
-**Created-By:** Claude
-
-HelixCode is now wired to read six advanced capability indicators (tool protocols, code intelligence, retrieval, skills, plugins) from the central verifier, but the verifier's live responses do not yet include those fields, so the flags always read as unsupported. The work is to have the verifier publish these capability values it already computes. Then users see accurate per-model capability information across the product.
-
 ## HXC-136 — Verify the remaining automated test types run with real captured evidence
 
 **Status:** Queued

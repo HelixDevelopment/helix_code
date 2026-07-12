@@ -4125,6 +4125,21 @@ loads real test banks is failing. The work is to pass the lock-bearing
 value by reference (pointer) instead of copying it, and to fix or
 reconcile the failing test-bank test. This makes the QA module
 concurrency-safe and its tests green.</p>
+<h2
+id="hxc-135-model-verifier-should-publish-the-six-advanced-capability-flags-so-the-platform-can-show-them">HXC-135
+— Model verifier should publish the six advanced-capability flags so the
+platform can show them</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+docs/qa/hxc135_20260712T130921Z/EVIDENCE.md <strong>Severity:</strong>
+Medium <strong>Created-By:</strong> Claude</p>
+<p>HelixCode is now wired to read six advanced capability indicators
+(tool protocols, code intelligence, retrieval, skills, plugins) from the
+central verifier, but the verifier’s live responses do not yet include
+those fields, so the flags always read as unsupported. The work is to
+have the verifier publish these capability values it already computes.
+Then users see accurate per-model capability information across the
+product.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />
