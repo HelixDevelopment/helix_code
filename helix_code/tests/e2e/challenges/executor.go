@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -128,17 +129,36 @@ func (e *ChallengeExecutor) Execute(ctx context.Context, spec *ChallengeSpec, if
 		execErr = fmt.Errorf("unsupported interface: %s", iface)
 	}
 
-	if execErr != nil {
+	switch {
+	case execErr != nil && errors.Is(execErr, ErrHelixCodeServerUnreachable):
+		// Honest §11.4.3 SKIP: a required runtime dependency (the HelixCode
+		// server) was not reachable. This is a precondition-not-met, not a
+		// bug — never report it as StatusFailed (which would look like a
+		// real defect) and never fabricate a result.
+		execution.Status = StatusSkipped
+		execution.Error = execErr.Error()
+		e.log(logFile, fmt.Sprintf("Execution skipped: %v", execErr))
+	case execErr != nil:
 		execution.Status = StatusFailed
 		execution.Error = execErr.Error()
 		e.log(logFile, fmt.Sprintf("Execution failed: %v", execErr))
-	} else {
+	default:
 		execution.Status = StatusCompleted
 		e.log(logFile, "Execution completed successfully")
 	}
 
 	execution.EndTime = time.Now()
 	execution.Duration = execution.EndTime.Sub(execution.StartTime)
+
+	if execution.Status == StatusSkipped {
+		// Nothing was generated, so there is nothing to validate.
+		e.log(logFile, "Skipping validations (execution skipped)")
+		e.saveValidationResults(execution.ValidationLog, nil)
+		e.log(logFile, fmt.Sprintf("Final status: %s", execution.Status))
+		e.log(logFile, fmt.Sprintf("Duration: %v", execution.Duration))
+		e.saveExecutionMetadata(execution)
+		return execution, nil
+	}
 
 	// Run validations
 	e.log(logFile, "Running validations...")
@@ -496,7 +516,18 @@ func (e *ChallengeExecutor) executeTUI(ctx context.Context, spec *ChallengeSpec,
 	return nil
 }
 
-// executeREST executes challenge via REST API
+// executeREST executes challenge via REST API.
+//
+// HXC-146: the REST interface now genuinely drives the deployed HelixCode
+// server's own HTTP API (POST /api/v1/llm/generate — Server.generateLLM in
+// internal/server/llm_generate.go), using the ChallengeConfig
+// HelixCodeHost/HelixCodePort/HelixCodeAuth fields. It does NOT call the raw
+// LLM provider API directly (that would just be re-testing the provider a
+// fourth time under a different interface label — see the HXC-146
+// investigation report). Because this requires a running HelixCode server as
+// a precondition, an unreachable server results in an honest §11.4.3 SKIP
+// (ErrHelixCodeServerUnreachable), never a silent stub-pass and never a
+// generic failure that would look like a real defect.
 func (e *ChallengeExecutor) executeREST(ctx context.Context, spec *ChallengeSpec, execution *ChallengeExecution, logFile, requestLog *os.File) error {
 	e.log(logFile, "Executing via REST API")
 
@@ -513,41 +544,41 @@ func (e *ChallengeExecutor) executeREST(ctx context.Context, spec *ChallengeSpec
 	// Add REST-specific requirements to prompt
 	restPrompt := fmt.Sprintf("%s\n\nIMPORTANT: This must be a REST API application with:\n- HTTP endpoints using frameworks like Gin, Echo, Fiber, or Chi\n- RESTful route handlers (GET, POST, PUT, DELETE)\n- JSON request/response handling\n- Proper error handling and status codes\n- API documentation (OpenAPI/Swagger comments)\n- Middleware support (CORS, logging, etc.)\n", prompt)
 
-	e.log(logFile, "Using REAL LLM API for REST API code generation")
+	serverURL := e.helixCodeServerBaseURL()
+	generateURL := serverURL + "/api/v1/llm/generate"
+
+	if err := e.checkHelixCodeServerReachable(ctx); err != nil {
+		e.log(logFile, fmt.Sprintf("SKIP-OK: HelixCode server at %s is not reachable — the REST interface requires a running server (§11.4.3): %v", serverURL, err))
+		return err
+	}
+
+	e.log(logFile, fmt.Sprintf("Using REAL HelixCode server API at %s for REST API code generation", generateURL))
 	e.log(logFile, fmt.Sprintf("Prompt length: %d characters", len(restPrompt)))
 	e.log(logFile, fmt.Sprintf("Provider: %s, Model: %s", execution.Provider, execution.Model))
 
+	systemPrompt := "You are an expert software engineer specializing in REST API development. Generate complete, production-ready REST API applications using modern frameworks like Gin, Echo, Fiber, or Chi. The application must have proper HTTP handlers, JSON serialization, error handling, middleware, and follow REST best practices. Include OpenAPI/Swagger documentation comments. Output ONLY valid code files in a structured format with proper imports."
+
 	// Log request
 	e.logRequest(requestLog, "REST", map[string]interface{}{
-		"prompt":   restPrompt[:min(len(restPrompt), 500)],
-		"provider": execution.Provider,
-		"model":    execution.Model,
-		"output":   execution.ResultDir,
+		"server_url": generateURL,
+		"prompt":     restPrompt[:min(len(restPrompt), 500)],
+		"provider":   execution.Provider,
+		"model":      execution.Model,
+		"output":     execution.ResultDir,
 	})
 
 	startTime := time.Now()
 
-	// Create LLM client with REAL API
-	client := NewLLMClient(execution.Provider, execution.Model, e.apiKeys, e.config.DefaultTimeout)
-	e.log(logFile, "LLM client created successfully")
-
-	// Call REAL LLM API with REST-specific system prompt
-	e.log(logFile, "Calling real LLM API...")
-	req := &CompletionRequest{
-		Prompt:       restPrompt,
-		SystemPrompt: "You are an expert software engineer specializing in REST API development. Generate complete, production-ready REST API applications using modern frameworks like Gin, Echo, Fiber, or Chi. The application must have proper HTTP handlers, JSON serialization, error handling, middleware, and follow REST best practices. Include OpenAPI/Swagger documentation comments. Output ONLY valid code files in a structured format with proper imports.",
-		MaxTokens:    8000,
-		Temperature:  0.7,
-	}
-
-	resp, err := client.Complete(ctx, req)
+	// Call the REAL HelixCode server (not the raw LLM provider API).
+	e.log(logFile, "Calling real HelixCode server API...")
+	resp, err := e.callHelixCodeGenerate(ctx, restPrompt, systemPrompt, execution.Provider, execution.Model, 8000, 0.7)
 	if err != nil {
-		e.log(logFile, fmt.Sprintf("LLM API call failed: %v", err))
-		return fmt.Errorf("LLM API call failed: %w", err)
+		e.log(logFile, fmt.Sprintf("HelixCode server API call failed: %v", err))
+		return fmt.Errorf("HelixCode server API call failed: %w", err)
 	}
 
 	duration := time.Since(startTime)
-	e.log(logFile, fmt.Sprintf("LLM API call completed in %v", duration))
+	e.log(logFile, fmt.Sprintf("HelixCode server API call completed in %v", duration))
 	e.log(logFile, fmt.Sprintf("Tokens used: %d", resp.TokensUsed))
 	e.log(logFile, fmt.Sprintf("Response length: %d characters", len(resp.Content)))
 
@@ -566,6 +597,8 @@ func (e *ChallengeExecutor) executeREST(ctx context.Context, spec *ChallengeSpec
 		"tokens_used":   resp.TokensUsed,
 		"finish_reason": resp.FinishReason,
 		"real_api":      true,
+		"real_server":   true,
+		"server_url":    generateURL,
 		"interface":     "rest",
 	})
 

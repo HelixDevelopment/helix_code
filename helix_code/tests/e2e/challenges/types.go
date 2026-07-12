@@ -175,6 +175,13 @@ const (
 	StatusFailed           ExecutionStatus = "failed"
 	StatusTimeout          ExecutionStatus = "timeout"
 	StatusValidationFailed ExecutionStatus = "validation_failed"
+	// StatusSkipped marks an execution that was honestly skipped because a
+	// required runtime dependency was not available (e.g. the "rest"
+	// interface's HelixCode server precondition — see
+	// ErrHelixCodeServerUnreachable). Distinct from StatusFailed: a skip is
+	// not a bug in the challenge or the harness, it is an unmet
+	// precondition (§11.4.3 — never fail or fake, honestly SKIP instead).
+	StatusSkipped ExecutionStatus = "skipped"
 )
 
 // ValidationResult represents the result of a validation check
