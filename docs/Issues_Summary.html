@@ -222,12 +222,12 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Task</td>
 <td>Queued</td>
-<td>6</td>
+<td>5</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>52</strong></td>
+<td><strong>51</strong></td>
 </tr>
 </tbody>
 </table>
@@ -599,20 +599,6 @@ views disagree about their state and become untrustworthy. The work
 regenerates the tracker documents from the authoritative database so
 finished items appear only in the resolved view. The human-readable
 trackers then accurately reflect the true state.</td>
-</tr>
-<tr>
-<td>HXC-132</td>
-<td>Task</td>
-<td>Queued</td>
-<td>Medium</td>
-<td>The full-infrastructure test stack fails to build the HelixCode
-server container because its build recipe points at a Dockerfile path
-that does not exist, and many memory and security tests skip themselves
-because they look for a server on a fixed port 8080 with no way to
-override it. As a result a whole class of tests never run against a real
-server. The work is to fix the container build path and make the server
-URL configurable so those tests execute. This unlocks real end-to-end
-coverage of server-dependent features.</td>
 </tr>
 <tr>
 <td>HXC-134</td>

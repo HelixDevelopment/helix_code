@@ -9,8 +9,8 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | Bug | Fixed (→ Fixed.md) | 132 |
 | Bug | Obsolete (→ Fixed.md) | 3 |
 | Feature | Implemented (→ Fixed.md) | 89 |
-| Task | Completed (→ Fixed.md) | 56 |
-| **TOTAL** | | **280** |
+| Task | Completed (→ Fixed.md) | 57 |
+| **TOTAL** | | **281** |
 
 ## Items
 
@@ -283,16 +283,17 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 265 | Low | Completed (→ Fixed.md) | Task | — | HXC-129 — Seventy-nine finished feature items have no severity recorded, so risk-ordered validation and reporting cannot rank them by importance. The work backfills an appropriate severity for each item based on its content and impact. Risk-based ordering and reporting then work correctly across the full item set. |
 | 266 | Medium | Completed (→ Fixed.md) | Task | — | HXC-130 — A full build fails on a clean machine because the desktop and mobile graphical apps need system graphics libraries (X11 and OpenGL) that are neither installed nor documented, so newcomers hit a confusing build error with no guidance. The work documents the exact system packages required, the command to install them, and the headless no-graphics build path used for development and continuous integration. Anyone can then build the project or knowingly choose the headless path without surprise failures. |
 | 267 | Medium | Obsolete (→ Fixed.md) | Bug | — | HXC-131 — The client that talks to the Cognee memory service stopped completing its login and caching the access token — its tests show the login endpoint is never called and no bearer token is stored, so authenticated calls would fail. This means memory features that rely on Cognee cannot authenticate reliably. The work is to restore the login-then-cache-token flow and prove it with the existing auth tests. Users regain dependable access to Cognee-backed memory. |
-| 268 | Low | Fixed (→ Fixed.md) | Bug | — | HXC-133 — One Azure-provider test quietly depends on an endpoint value being present in the environment; when that value is injected by the full-test setup the test's assumptions no longer hold. It does not crash, but it is fragile and can give misleading results depending on the environment. The work is to make the test hermetic (control its own environment) like the sibling test already fixed. This makes the Azure test suite reliable regardless of how it is run. |
-| 269 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
-| 270 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
-| 271 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
-| 272 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
-| 273 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
-| 274 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
-| 275 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
-| 276 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
-| 277 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
-| 278 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
-| 279 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
-| 280 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 268 | Medium | Completed (→ Fixed.md) | Task | — | HXC-132 — The full-infrastructure test stack fails to build the HelixCode server container because its build recipe points at a Dockerfile path that does not exist, and many memory and security tests skip themselves because they look for a server on a fixed port 8080 with no way to override it. As a result a whole class of tests never run against a real server. The work is to fix the container build path and make the server URL configurable so those tests execute. This unlocks real end-to-end coverage of server-dependent features. |
+| 269 | Low | Fixed (→ Fixed.md) | Bug | — | HXC-133 — One Azure-provider test quietly depends on an endpoint value being present in the environment; when that value is injected by the full-test setup the test's assumptions no longer hold. It does not crash, but it is fragile and can give misleading results depending on the environment. The work is to make the test hermetic (control its own environment) like the sibling test already fixed. This makes the Azure test suite reliable regardless of how it is run. |
+| 270 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
+| 271 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
+| 272 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
+| 273 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
+| 274 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
+| 275 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
+| 276 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
+| 277 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
+| 278 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
+| 279 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
+| 280 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 281 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |

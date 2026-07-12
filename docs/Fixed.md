@@ -1160,3 +1160,13 @@ One automated quality-assurance test bank that drives real server workflows has 
 
 The client that talks to the Cognee memory service stopped completing its login and caching the access token — its tests show the login endpoint is never called and no bearer token is stored, so authenticated calls would fail. This means memory features that rely on Cognee cannot authenticate reliably. The work is to restore the login-then-cache-token flow and prove it with the existing auth tests. Users regain dependable access to Cognee-backed memory.
 
+## HXC-132 — Full-test container stack cannot build the HelixCode server and tests hardcode port 8080
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/hxc132_20260712T090048Z/HXC132_evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+
+The full-infrastructure test stack fails to build the HelixCode server container because its build recipe points at a Dockerfile path that does not exist, and many memory and security tests skip themselves because they look for a server on a fixed port 8080 with no way to override it. As a result a whole class of tests never run against a real server. The work is to fix the container build path and make the server URL configurable so those tests execute. This unlocks real end-to-end coverage of server-dependent features.
+

@@ -207,12 +207,12 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>56</td>
+<td>57</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>280</strong></td>
+<td><strong>281</strong></td>
 </tr>
 </tbody>
 </table>
@@ -2844,6 +2844,21 @@ Users regain dependable access to Cognee-backed memory.</td>
 </tr>
 <tr>
 <td>268</td>
+<td>Medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>HXC-132 — The full-infrastructure test stack fails to build the
+HelixCode server container because its build recipe points at a
+Dockerfile path that does not exist, and many memory and security tests
+skip themselves because they look for a server on a fixed port 8080 with
+no way to override it. As a result a whole class of tests never run
+against a real server. The work is to fix the container build path and
+make the server URL configurable so those tests execute. This unlocks
+real end-to-end coverage of server-dependent features.</td>
+</tr>
+<tr>
+<td>269</td>
 <td>Low</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2857,7 +2872,7 @@ environment) like the sibling test already fixed. This makes the Azure
 test suite reliable regardless of how it is run.</td>
 </tr>
 <tr>
-<td>269</td>
+<td>270</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2866,7 +2881,7 @@ test suite reliable regardless of how it is run.</td>
 hardcoded path</td>
 </tr>
 <tr>
-<td>270</td>
+<td>271</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2874,7 +2889,7 @@ hardcoded path</td>
 <td>HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
 </tr>
 <tr>
-<td>271</td>
+<td>272</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2883,7 +2898,7 @@ hardcoded path</td>
 <code>TestPerformance</code> flake (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>272</td>
+<td>273</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2893,7 +2908,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 <code>tests/integration</code> compile</td>
 </tr>
 <tr>
-<td>273</td>
+<td>274</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2902,7 +2917,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 failures (CLI-integration + verification/scoring)</td>
 </tr>
 <tr>
-<td>274</td>
+<td>275</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2911,7 +2926,7 @@ failures (CLI-integration + verification/scoring)</td>
 10 pre-existing test failures</td>
 </tr>
 <tr>
-<td>275</td>
+<td>276</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2921,7 +2936,7 @@ failures (CLI-integration + verification/scoring)</td>
 production mock-bluff</td>
 </tr>
 <tr>
-<td>276</td>
+<td>277</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2930,7 +2945,7 @@ production mock-bluff</td>
 <code>CreatePromptExperiment</code> test failures</td>
 </tr>
 <tr>
-<td>277</td>
+<td>278</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2940,7 +2955,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>278</td>
+<td>279</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -2949,7 +2964,7 @@ corrupts non-ASCII)</td>
 <code>helix-gitlab</code> URL fix (was misconfigured, not missing)</td>
 </tr>
 <tr>
-<td>279</td>
+<td>280</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2959,7 +2974,7 @@ corrupts non-ASCII)</td>
 93c830a</td>
 </tr>
 <tr>
-<td>280</td>
+<td>281</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
