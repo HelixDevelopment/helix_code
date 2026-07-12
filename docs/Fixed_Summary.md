@@ -6,12 +6,12 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 
 | Type | Status | Count |
 |---|---|---|
-| Bug | Fixed (→ Fixed.md) | 158 |
+| Bug | Fixed (→ Fixed.md) | 159 |
 | Bug | Obsolete (→ Fixed.md) | 3 |
 | Feature | Implemented (→ Fixed.md) | 94 |
 | Task | Completed (→ Fixed.md) | 77 |
 | Task | Fixed (→ Fixed.md) | 1 |
-| **TOTAL** | | **333** |
+| **TOTAL** | | **334** |
 
 ## Items
 
@@ -332,21 +332,22 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 313 | Medium | Fixed (→ Fixed.md) | Bug | — | HXC-141 — The MCP module's Docker adapter crashes with a null-pointer error when asked to stop a container that was never started or does not exist, instead of returning cleanly. This can bring down callers that expect a safe no-op. The work is to guard the stop path so a not-started or missing container is handled gracefully. The adapter becomes robust against stop-before-start and missing-container situations. |
 | 314 | High | Fixed (→ Fixed.md) | Bug | — | HXC-142 — The automation-tagged test package fails to build, so an entire mandated test type cannot execute at all. Two real causes were found during the 2026-07-12 real-infra retest: a duplicate symbol (isRateLimitError/contains declared in both xai and qwen automation test files) and deeper API drift where the tests reference llm.ProviderConfig and NewProviderManager which no longer exist in the current provider package. The work is to reconcile the automation tests with the current provider API and remove the duplicate helpers so the suite compiles and runs against real infrastructure. Evidence: docs/qa/infra_retest_20260712_hxc122_138/automation_tests.log. |
 | 315 | High | Fixed (→ Fixed.md) | Bug | — | HXC-143 — The e2e-tagged test package fails to build because getEnvOrDefault is declared more than once in the package, so another mandated test type cannot execute. The work is to remove the duplicate declaration (consolidate to a single shared helper) so the e2e suite compiles and can run end-to-end against a real server. Discovered during the 2026-07-12 real-infra retest. Evidence: docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md. |
-| 316 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HelixLLM `internal/agents/tools/analysis_test.go` hardcoded absolute path |
-| 317 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
-| 318 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HelixLLM `internal/gateway/middleware` TOON `WriteTOON` returns 500 |
-| 319 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
-| 320 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — helix_qa intermittent TestPerformance flake (host-load-sensitive) |
-| 321 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
-| 322 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
-| 323 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
-| 324 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — LLMsVerifier `verification/` package 10 pre-existing test failures |
-| 325 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
-| 326 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
-| 327 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
-| 328 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
-| 329 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
-| 330 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VisionEngine `helix-gitlab` remote repo missing (404) — CLOSED (→ Fixed.md) |
-| 331 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
-| 332 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
-| 333 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 316 | Medium | Fixed (→ Fixed.md) | Bug | — | HXC-144 — Under the sustained request-flood chaos test against the real running server, the goroutine count grew by 5 which exceeds the tolerance of 4, signalling a goroutine leak in a request-handling path when the server is hammered. Left unaddressed this degrades long-running server stability under load. The work is to find the leaking goroutine (likely an unclosed channel, context, or connection in a hot handler) and fix it so the count stays within tolerance under flood. Evidence: docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Server 7/8). |
+| 317 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HelixLLM `internal/agents/tools/analysis_test.go` hardcoded absolute path |
+| 318 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
+| 319 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HelixLLM `internal/gateway/middleware` TOON `WriteTOON` returns 500 |
+| 320 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
+| 321 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — helix_qa intermittent TestPerformance flake (host-load-sensitive) |
+| 322 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
+| 323 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
+| 324 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
+| 325 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — LLMsVerifier `verification/` package 10 pre-existing test failures |
+| 326 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
+| 327 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
+| 328 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
+| 329 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
+| 330 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
+| 331 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VisionEngine `helix-gitlab` remote repo missing (404) — CLOSED (→ Fixed.md) |
+| 332 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
+| 333 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 334 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |

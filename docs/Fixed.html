@@ -6084,6 +6084,22 @@ users despite the code existing. The work integrates the existing RAG
 module into the application, wires it into the request flow, and exposes
 its capability flag. Users gain working document-grounded answers
 instead of an orphaned, unused component.</p>
+<h2
+id="hxc-144-server-leaks-goroutines-under-sustained-ddos-flood-load-chaos-test">HXC-144
+— Server leaks goroutines under sustained DDoS-flood load (chaos
+test)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+docs/qa/hxc144_20260712T152500Z/EVIDENCE.md <strong>Severity:</strong>
+Medium <strong>Created-By:</strong> Claude</p>
+<p>Under the sustained request-flood chaos test against the real running
+server, the goroutine count grew by 5 which exceeds the tolerance of 4,
+signalling a goroutine leak in a request-handling path when the server
+is hammered. Left unaddressed this degrades long-running server
+stability under load. The work is to find the leaking goroutine (likely
+an unclosed channel, context, or connection in a hot handler) and fix it
+so the count stays within tolerance under flood. Evidence:
+docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Server 7/8).</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />
