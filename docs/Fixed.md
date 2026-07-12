@@ -1129,3 +1129,34 @@ Seventy-nine finished feature items have no severity recorded, so risk-ordered v
 
 Thirty-six tracked items have descriptions shorter than the minimum length needed to convey what they are about, so a reader cannot understand them without reading code. The work rewrites these into clear plain-language descriptions explaining what each item is and why it matters. Every item then becomes understandable to non-developers and stakeholders.
 
+## HXC-133 — Azure provider factory test assumes an ambient endpoint environment variable
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/followup_fixes_20260712T085616Z/HXC133_evidence.md
+**Severity:** Low
+**Created-By:** Claude
+
+One Azure-provider test quietly depends on an endpoint value being present in the environment; when that value is injected by the full-test setup the test's assumptions no longer hold. It does not crash, but it is fragile and can give misleading results depending on the environment. The work is to make the test hermetic (control its own environment) like the sibling test already fixed. This makes the Azure test suite reliable regardless of how it is run.
+
+## HXC-124 — HelixQA task-workflow bank cannot fully self-run due to a JWT token-minting gap
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/followup_fixes_20260712T085616Z/HXC124_evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+
+One automated quality-assurance test bank that drives real server workflows has a documented gap: it cannot mint the authentication token needed to finish the workflow end-to-end without manual help, so it does not meet the fully-automated no-human-intervention standard. The work provides an automated way to obtain a valid token during the test so the workflow runs unattended. The QA bank then becomes fully automated and re-runnable.
+
+## HXC-131 — Cognee client authentication and bearer-token caching regressed
+
+**Status:** Obsolete (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/followup_fixes_20260712T085616Z/HXC131_evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+**Obsolete-Details:** Since: 2026-07-12; Reason: duplicate-of; Superseding-item: b058c7c2; Triple-check evidence: docs/qa/followup_fixes_20260712T085616Z/HXC131_evidence.md
+
+The client that talks to the Cognee memory service stopped completing its login and caching the access token — its tests show the login endpoint is never called and no bearer token is stored, so authenticated calls would fail. This means memory features that rely on Cognee cannot authenticate reliably. The work is to restore the login-then-cache-token flow and prove it with the existing auth tests. Users regain dependable access to Cognee-backed memory.
+

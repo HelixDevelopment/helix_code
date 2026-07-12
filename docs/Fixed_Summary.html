@@ -192,12 +192,12 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>130</td>
+<td>132</td>
 </tr>
 <tr>
 <td>Bug</td>
 <td>Obsolete (→ Fixed.md)</td>
-<td>2</td>
+<td>3</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -212,7 +212,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>277</strong></td>
+<td><strong>280</strong></td>
 </tr>
 </tbody>
 </table>
@@ -2749,6 +2749,20 @@ becomes protected against silent breakage.</td>
 </tr>
 <tr>
 <td>261</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-124 — One automated quality-assurance test bank that drives real
+server workflows has a documented gap: it cannot mint the authentication
+token needed to finish the workflow end-to-end without manual help, so
+it does not meet the fully-automated no-human-intervention standard. The
+work provides an automated way to obtain a valid token during the test
+so the workflow runs unattended. The QA bank then becomes fully
+automated and re-runnable.</td>
+</tr>
+<tr>
+<td>262</td>
 <td>Low</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -2762,7 +2776,7 @@ their status is always visible. Everyday test results then reflect
 integration coverage.</td>
 </tr>
 <tr>
-<td>262</td>
+<td>263</td>
 <td>Low</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -2775,7 +2789,7 @@ The work populates the required justification details for obsolete items
 so every retired item carries an auditable reason.</td>
 </tr>
 <tr>
-<td>263</td>
+<td>264</td>
 <td>Low</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -2788,7 +2802,7 @@ why it matters. Every item then becomes understandable to non-developers
 and stakeholders.</td>
 </tr>
 <tr>
-<td>264</td>
+<td>265</td>
 <td>Low</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -2800,7 +2814,7 @@ based on its content and impact. Risk-based ordering and reporting then
 work correctly across the full item set.</td>
 </tr>
 <tr>
-<td>265</td>
+<td>266</td>
 <td>Medium</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -2815,7 +2829,35 @@ Anyone can then build the project or knowingly choose the headless path
 without surprise failures.</td>
 </tr>
 <tr>
-<td>266</td>
+<td>267</td>
+<td>Medium</td>
+<td>Obsolete (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-131 — The client that talks to the Cognee memory service stopped
+completing its login and caching the access token — its tests show the
+login endpoint is never called and no bearer token is stored, so
+authenticated calls would fail. This means memory features that rely on
+Cognee cannot authenticate reliably. The work is to restore the
+login-then-cache-token flow and prove it with the existing auth tests.
+Users regain dependable access to Cognee-backed memory.</td>
+</tr>
+<tr>
+<td>268</td>
+<td>Low</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-133 — One Azure-provider test quietly depends on an endpoint
+value being present in the environment; when that value is injected by
+the full-test setup the test’s assumptions no longer hold. It does not
+crash, but it is fragile and can give misleading results depending on
+the environment. The work is to make the test hermetic (control its own
+environment) like the sibling test already fixed. This makes the Azure
+test suite reliable regardless of how it is run.</td>
+</tr>
+<tr>
+<td>269</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2824,7 +2866,7 @@ without surprise failures.</td>
 hardcoded path</td>
 </tr>
 <tr>
-<td>267</td>
+<td>270</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2832,7 +2874,7 @@ hardcoded path</td>
 <td>HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
 </tr>
 <tr>
-<td>268</td>
+<td>271</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2841,7 +2883,7 @@ hardcoded path</td>
 <code>TestPerformance</code> flake (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>269</td>
+<td>272</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2851,7 +2893,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 <code>tests/integration</code> compile</td>
 </tr>
 <tr>
-<td>270</td>
+<td>273</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2860,7 +2902,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 failures (CLI-integration + verification/scoring)</td>
 </tr>
 <tr>
-<td>271</td>
+<td>274</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2869,7 +2911,7 @@ failures (CLI-integration + verification/scoring)</td>
 10 pre-existing test failures</td>
 </tr>
 <tr>
-<td>272</td>
+<td>275</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2879,7 +2921,7 @@ failures (CLI-integration + verification/scoring)</td>
 production mock-bluff</td>
 </tr>
 <tr>
-<td>273</td>
+<td>276</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2888,7 +2930,7 @@ production mock-bluff</td>
 <code>CreatePromptExperiment</code> test failures</td>
 </tr>
 <tr>
-<td>274</td>
+<td>277</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2898,7 +2940,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>275</td>
+<td>278</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -2907,7 +2949,7 @@ corrupts non-ASCII)</td>
 <code>helix-gitlab</code> URL fix (was misconfigured, not missing)</td>
 </tr>
 <tr>
-<td>276</td>
+<td>279</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2917,7 +2959,7 @@ corrupts non-ASCII)</td>
 93c830a</td>
 </tr>
 <tr>
-<td>277</td>
+<td>280</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>

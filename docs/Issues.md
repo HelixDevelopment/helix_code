@@ -602,15 +602,6 @@ Governance rule CONST-040 lists the Agent Client Protocol among required capabil
 
 Two categories of tests, memory-usage and end-to-end automation, skip most of their cases by default because they require a live server or special environment flags not set in normal runs. In practice these areas are largely unverified even though the tests appear to exist. The work provides a documented, repeatable way to run them against real infrastructure so they actually execute and prove the behavior. Memory and automation behavior then becomes genuinely tested rather than merely scaffolded.
 
-## HXC-124 — HelixQA task-workflow bank cannot fully self-run due to a JWT token-minting gap
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-
-One automated quality-assurance test bank that drives real server workflows has a documented gap: it cannot mint the authentication token needed to finish the workflow end-to-end without manual help, so it does not meet the fully-automated no-human-intervention standard. The work provides an automated way to obtain a valid token during the test so the workflow runs unattended. The QA bank then becomes fully automated and re-runnable.
-
 ## HXC-126 — Eleven closed items still appear in the open-issues tracker instead of the resolved tracker
 
 **Status:** Queued
@@ -620,15 +611,6 @@ One automated quality-assurance test bank that drives real server workflows has 
 
 Eleven work items marked finished still appear in the open-issues document and are missing from the resolved-items document, so the two views disagree about their state and become untrustworthy. The work regenerates the tracker documents from the authoritative database so finished items appear only in the resolved view. The human-readable trackers then accurately reflect the true state.
 
-## HXC-131 — Cognee client authentication and bearer-token caching regressed
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-
-The client that talks to the Cognee memory service stopped completing its login and caching the access token — its tests show the login endpoint is never called and no bearer token is stored, so authenticated calls would fail. This means memory features that rely on Cognee cannot authenticate reliably. The work is to restore the login-then-cache-token flow and prove it with the existing auth tests. Users regain dependable access to Cognee-backed memory.
-
 ## HXC-132 — Full-test container stack cannot build the HelixCode server and tests hardcode port 8080
 
 **Status:** Queued
@@ -637,15 +619,6 @@ The client that talks to the Cognee memory service stopped completing its login 
 **Created-By:** Claude
 
 The full-infrastructure test stack fails to build the HelixCode server container because its build recipe points at a Dockerfile path that does not exist, and many memory and security tests skip themselves because they look for a server on a fixed port 8080 with no way to override it. As a result a whole class of tests never run against a real server. The work is to fix the container build path and make the server URL configurable so those tests execute. This unlocks real end-to-end coverage of server-dependent features.
-
-## HXC-133 — Azure provider factory test assumes an ambient endpoint environment variable
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Low
-**Created-By:** Claude
-
-One Azure-provider test quietly depends on an endpoint value being present in the environment; when that value is injected by the full-test setup the test's assumptions no longer hold. It does not crash, but it is fragile and can give misleading results depending on the environment. The work is to make the test hermetic (control its own environment) like the sibling test already fixed. This makes the Azure test suite reliable regardless of how it is run.
 
 ## HXC-134 — Model verifier returns the model id as a number but the platform expects text
 
