@@ -1767,3 +1767,13 @@ The automation-tagged test package fails to build, so an entire mandated test ty
 
 The e2e-tagged test package fails to build because getEnvOrDefault is declared more than once in the package, so another mandated test type cannot execute. The work is to remove the duplicate declaration (consolidate to a single shared helper) so the e2e suite compiles and can run end-to-end against a real server. Discovered during the 2026-07-12 real-infra retest. Evidence: docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md.
 
+## HXC-118 — Retrieval-Augmented-Generation (RAG) module exists but is not connected to the application
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** docs/qa/hxc118_20260712T151500Z/EVIDENCE.md
+**Severity:** High
+**Created-By:** Claude
+
+A dedicated Retrieval-Augmented-Generation component is maintained as its own reusable module, but the main application does not import or use it anywhere. A capability the product is expected to offer (answering using retrieved documents) is therefore effectively unavailable to end users despite the code existing. The work integrates the existing RAG module into the application, wires it into the request flow, and exposes its capability flag. Users gain working document-grounded answers instead of an orphaned, unused component.
+

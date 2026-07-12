@@ -462,20 +462,6 @@ use.</p>
 </table>
 <hr />
 <h2
-id="hxc-118-retrieval-augmented-generation-rag-module-exists-but-is-not-connected-to-the-application">HXC-118
-— Retrieval-Augmented-Generation (RAG) module exists but is not
-connected to the application</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Feature
-<strong>Severity:</strong> High <strong>Created-By:</strong> Claude</p>
-<p>A dedicated Retrieval-Augmented-Generation component is maintained as
-its own reusable module, but the main application does not import or use
-it anywhere. A capability the product is expected to offer (answering
-using retrieved documents) is therefore effectively unavailable to end
-users despite the code existing. The work integrates the existing RAG
-module into the application, wires it into the request flow, and exposes
-its capability flag. Users gain working document-grounded answers
-instead of an orphaned, unused component.</p>
-<h2
 id="hxc-119-agent-client-protocol-acp-support-is-absent-from-the-platform">HXC-119
 — Agent Client Protocol (ACP) support is absent from the platform</h2>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Feature
@@ -591,5 +577,20 @@ as single source of truth) and add the missing nil-check so a rejected
 model degrades gracefully instead of panicking. NOTE this environment
 has live provider API keys set so provider tests spend real money;
 guard/skip accordingly. Found 2026-07-12.</p>
+<h2
+id="hxc-148-wire-rag-retrieval-augmentation-into-the-openaianthropic-wire-facade-endpoints">HXC-148
+— Wire RAG retrieval-augmentation into the OpenAI/Anthropic wire-facade
+endpoints</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude</p>
+<p>HXC-118 wired Retrieval-Augmented-Generation into the native server
+generate and stream endpoints and the CLI, but the OpenAI-compatible and
+Anthropic-compatible wire-facade endpoints (/v1/chat/completions and
+/v1/messages) still bypass RAG entirely, so clients using those
+compatibility surfaces do not get retrieval-augmentation even when it is
+enabled. The work is to apply the same applyRAGContext wiring to those
+facade handlers so RAG behaves consistently across every generate
+surface. This is a smaller secondary surface than the native path
+already fixed. Found during HXC-118 review 2026-07-12.</p>
 </body>
 </html>

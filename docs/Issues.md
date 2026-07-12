@@ -69,15 +69,6 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 ---
 
-## HXC-118 — Retrieval-Augmented-Generation (RAG) module exists but is not connected to the application
-
-**Status:** Queued
-**Type:** Feature
-**Severity:** High
-**Created-By:** Claude
-
-A dedicated Retrieval-Augmented-Generation component is maintained as its own reusable module, but the main application does not import or use it anywhere. A capability the product is expected to offer (answering using retrieved documents) is therefore effectively unavailable to end users despite the code existing. The work integrates the existing RAG module into the application, wires it into the request flow, and exposes its capability flag. Users gain working document-grounded answers instead of an orphaned, unused component.
-
 ## HXC-119 — Agent Client Protocol (ACP) support is absent from the platform
 
 **Status:** Queued
@@ -149,4 +140,13 @@ The e2e challenge runner advertises multiple interface modes (cli, rest, tui, we
 **Created-By:** Claude
 
 Running the (now-compilable) automation test binary against the live OpenRouter API, TestAllFreeProvidersAutomation Provider_OpenRouter BasicGeneration panics with a nil-pointer dereference: the configured free model id deepseek-r1-free is stale/rejected and the code path is missing a nil-check on the error before using the response. Users of the OpenRouter free provider with that model would hit the same crash. The work is to correct the free-provider model id (sourced from the verifier as single source of truth) and add the missing nil-check so a rejected model degrades gracefully instead of panicking. NOTE this environment has live provider API keys set so provider tests spend real money; guard/skip accordingly. Found 2026-07-12.
+
+## HXC-148 — Wire RAG retrieval-augmentation into the OpenAI/Anthropic wire-facade endpoints
+
+**Status:** Queued
+**Type:** Task
+**Severity:** Low
+**Created-By:** Claude
+
+HXC-118 wired Retrieval-Augmented-Generation into the native server generate and stream endpoints and the CLI, but the OpenAI-compatible and Anthropic-compatible wire-facade endpoints (/v1/chat/completions and /v1/messages) still bypass RAG entirely, so clients using those compatibility surfaces do not get retrieval-augmentation even when it is enabled. The work is to apply the same applyRAGContext wiring to those facade handlers so RAG behaves consistently across every generate surface. This is a smaller secondary surface than the native path already fixed. Found during HXC-118 review 2026-07-12.
 

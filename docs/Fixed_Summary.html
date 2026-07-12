@@ -202,7 +202,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Feature</td>
 <td>Implemented (→ Fixed.md)</td>
-<td>93</td>
+<td>94</td>
 </tr>
 <tr>
 <td>Task</td>
@@ -217,7 +217,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>332</strong></td>
+<td><strong>333</strong></td>
 </tr>
 </tbody>
 </table>
@@ -3058,6 +3058,21 @@ accurate, single-source-of-truth capability information.</td>
 </tr>
 <tr>
 <td>294</td>
+<td>High</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>HXC-118 — A dedicated Retrieval-Augmented-Generation component is
+maintained as its own reusable module, but the main application does not
+import or use it anywhere. A capability the product is expected to offer
+(answering using retrieved documents) is therefore effectively
+unavailable to end users despite the code existing. The work integrates
+the existing RAG module into the application, wires it into the request
+flow, and exposes its capability flag. Users gain working
+document-grounded answers instead of an orphaned, unused component.</td>
+</tr>
+<tr>
+<td>295</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3072,7 +3087,7 @@ reintroducing the wildcard. The test suite now protects the secure
 behavior instead of demanding an insecure one.</td>
 </tr>
 <tr>
-<td>295</td>
+<td>296</td>
 <td>Medium</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3086,7 +3101,7 @@ outgoing request, the parsed reply, and error handling. These two
 integrations become protected against silent regressions.</td>
 </tr>
 <tr>
-<td>296</td>
+<td>297</td>
 <td>Low</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3098,7 +3113,7 @@ tool’s core scanning and reporting logic. The security-scan tool then
 becomes protected against silent breakage.</td>
 </tr>
 <tr>
-<td>297</td>
+<td>298</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3112,7 +3127,7 @@ so the workflow runs unattended. The QA bank then becomes fully
 automated and re-runnable.</td>
 </tr>
 <tr>
-<td>298</td>
+<td>299</td>
 <td>Low</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3126,7 +3141,7 @@ their status is always visible. Everyday test results then reflect
 integration coverage.</td>
 </tr>
 <tr>
-<td>299</td>
+<td>300</td>
 <td>Medium</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3139,7 +3154,7 @@ database so finished items appear only in the resolved view. The
 human-readable trackers then accurately reflect the true state.</td>
 </tr>
 <tr>
-<td>300</td>
+<td>301</td>
 <td>Low</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3152,7 +3167,7 @@ The work populates the required justification details for obsolete items
 so every retired item carries an auditable reason.</td>
 </tr>
 <tr>
-<td>301</td>
+<td>302</td>
 <td>Low</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3165,7 +3180,7 @@ why it matters. Every item then becomes understandable to non-developers
 and stakeholders.</td>
 </tr>
 <tr>
-<td>302</td>
+<td>303</td>
 <td>Low</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3177,7 +3192,7 @@ based on its content and impact. Risk-based ordering and reporting then
 work correctly across the full item set.</td>
 </tr>
 <tr>
-<td>303</td>
+<td>304</td>
 <td>Medium</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3192,7 +3207,7 @@ Anyone can then build the project or knowingly choose the headless path
 without surprise failures.</td>
 </tr>
 <tr>
-<td>304</td>
+<td>305</td>
 <td>Medium</td>
 <td>Obsolete (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3206,7 +3221,7 @@ login-then-cache-token flow and prove it with the existing auth tests.
 Users regain dependable access to Cognee-backed memory.</td>
 </tr>
 <tr>
-<td>305</td>
+<td>306</td>
 <td>Medium</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3221,7 +3236,7 @@ make the server URL configurable so those tests execute. This unlocks
 real end-to-end coverage of server-dependent features.</td>
 </tr>
 <tr>
-<td>306</td>
+<td>307</td>
 <td>Low</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3235,7 +3250,7 @@ environment) like the sibling test already fixed. This makes the Azure
 test suite reliable regardless of how it is run.</td>
 </tr>
 <tr>
-<td>307</td>
+<td>308</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3248,7 +3263,7 @@ Correct model identity keeps verification, listing, and status accurate
 for users.</td>
 </tr>
 <tr>
-<td>308</td>
+<td>309</td>
 <td>Medium</td>
 <td>Implemented (→ Fixed.md)</td>
 <td>Feature</td>
@@ -3262,7 +3277,7 @@ already computes. Then users see accurate per-model capability
 information across the product.</td>
 </tr>
 <tr>
-<td>309</td>
+<td>310</td>
 <td>Medium</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3275,7 +3290,7 @@ assures that the whole codebase, not just the main application, is in
 good shape.</td>
 </tr>
 <tr>
-<td>310</td>
+<td>311</td>
 <td>High</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3291,7 +3306,7 @@ build-ignore or nested module marker). Developers regain a clean,
 buildable agent module.</td>
 </tr>
 <tr>
-<td>311</td>
+<td>312</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3305,7 +3320,7 @@ fix or reconcile the failing test-bank test. This makes the QA module
 concurrency-safe and its tests green.</td>
 </tr>
 <tr>
-<td>312</td>
+<td>313</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3319,7 +3334,7 @@ becomes robust against stop-before-start and missing-container
 situations.</td>
 </tr>
 <tr>
-<td>313</td>
+<td>314</td>
 <td>High</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3336,7 +3351,7 @@ runs against real infrastructure. Evidence:
 docs/qa/infra_retest_20260712_hxc122_138/automation_tests.log.</td>
 </tr>
 <tr>
-<td>314</td>
+<td>315</td>
 <td>High</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3350,7 +3365,7 @@ the 2026-07-12 real-infra retest. Evidence:
 docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md.</td>
 </tr>
 <tr>
-<td>315</td>
+<td>316</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3360,7 +3375,7 @@ docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md.</td>
 path</td>
 </tr>
 <tr>
-<td>316</td>
+<td>317</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3369,7 +3384,7 @@ path</td>
 hardcoded path</td>
 </tr>
 <tr>
-<td>317</td>
+<td>318</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3378,7 +3393,7 @@ hardcoded path</td>
 <code>WriteTOON</code> returns 500</td>
 </tr>
 <tr>
-<td>318</td>
+<td>319</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3386,7 +3401,7 @@ hardcoded path</td>
 <td>HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
 </tr>
 <tr>
-<td>319</td>
+<td>320</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3395,7 +3410,7 @@ hardcoded path</td>
 (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>320</td>
+<td>321</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3404,7 +3419,7 @@ hardcoded path</td>
 <code>TestPerformance</code> flake (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>321</td>
+<td>322</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3414,7 +3429,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 <code>tests/integration</code> compile</td>
 </tr>
 <tr>
-<td>322</td>
+<td>323</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3423,7 +3438,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 failures (CLI-integration + verification/scoring)</td>
 </tr>
 <tr>
-<td>323</td>
+<td>324</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3432,7 +3447,7 @@ failures (CLI-integration + verification/scoring)</td>
 pre-existing test failures</td>
 </tr>
 <tr>
-<td>324</td>
+<td>325</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3441,7 +3456,7 @@ pre-existing test failures</td>
 10 pre-existing test failures</td>
 </tr>
 <tr>
-<td>325</td>
+<td>326</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3451,7 +3466,7 @@ pre-existing test failures</td>
 production mock-bluff</td>
 </tr>
 <tr>
-<td>326</td>
+<td>327</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3460,7 +3475,7 @@ production mock-bluff</td>
 <code>CreatePromptExperiment</code> test failures</td>
 </tr>
 <tr>
-<td>327</td>
+<td>328</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3470,7 +3485,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>328</td>
+<td>329</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3480,7 +3495,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>329</td>
+<td>330</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3489,7 +3504,7 @@ corrupts non-ASCII)</td>
 (404) — CLOSED (→ Fixed.md)</td>
 </tr>
 <tr>
-<td>330</td>
+<td>331</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3498,7 +3513,7 @@ corrupts non-ASCII)</td>
 <code>helix-gitlab</code> URL fix (was misconfigured, not missing)</td>
 </tr>
 <tr>
-<td>331</td>
+<td>332</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3508,7 +3523,7 @@ corrupts non-ASCII)</td>
 93c830a</td>
 </tr>
 <tr>
-<td>332</td>
+<td>333</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>

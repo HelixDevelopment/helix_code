@@ -6068,6 +6068,22 @@ cannot execute. The work is to remove the duplicate declaration
 can run end-to-end against a real server. Discovered during the
 2026-07-12 real-infra retest. Evidence:
 docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md.</p>
+<h2
+id="hxc-118-retrieval-augmented-generation-rag-module-exists-but-is-not-connected-to-the-application">HXC-118
+— Retrieval-Augmented-Generation (RAG) module exists but is not
+connected to the application</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Evidence:</strong>
+docs/qa/hxc118_20260712T151500Z/EVIDENCE.md <strong>Severity:</strong>
+High <strong>Created-By:</strong> Claude</p>
+<p>A dedicated Retrieval-Augmented-Generation component is maintained as
+its own reusable module, but the main application does not import or use
+it anywhere. A capability the product is expected to offer (answering
+using retrieved documents) is therefore effectively unavailable to end
+users despite the code existing. The work integrates the existing RAG
+module into the application, wires it into the request flow, and exposes
+its capability flag. Users gain working document-grounded answers
+instead of an orphaned, unused component.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />
