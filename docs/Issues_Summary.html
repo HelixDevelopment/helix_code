@@ -192,7 +192,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Queued</td>
-<td>4</td>
+<td>3</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -207,7 +207,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>10</strong></td>
+<td><strong>9</strong></td>
 </tr>
 </tbody>
 </table>
@@ -297,35 +297,6 @@ challenges, capturing the results. This provides real proof that the
 headline user workflows function end to end.</td>
 </tr>
 <tr>
-<td>HXC-142</td>
-<td>Bug</td>
-<td>Queued</td>
-<td>High</td>
-<td>The automation-tagged test package fails to build, so an entire
-mandated test type cannot execute at all. Two real causes were found
-during the 2026-07-12 real-infra retest: a duplicate symbol
-(isRateLimitError/contains declared in both xai and qwen automation test
-files) and deeper API drift where the tests reference llm.ProviderConfig
-and NewProviderManager which no longer exist in the current provider
-package. The work is to reconcile the automation tests with the current
-provider API and remove the duplicate helpers so the suite compiles and
-runs against real infrastructure. Evidence:
-docs/qa/infra_retest_20260712_hxc122_138/automation_tests.log.</td>
-</tr>
-<tr>
-<td>HXC-143</td>
-<td>Bug</td>
-<td>Queued</td>
-<td>High</td>
-<td>The e2e-tagged test package fails to build because getEnvOrDefault
-is declared more than once in the package, so another mandated test type
-cannot execute. The work is to remove the duplicate declaration
-(consolidate to a single shared helper) so the e2e suite compiles and
-can run end-to-end against a real server. Discovered during the
-2026-07-12 real-infra retest. Evidence:
-docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md.</td>
-</tr>
-<tr>
 <td>HXC-144</td>
 <td>Bug</td>
 <td>Queued</td>
@@ -368,6 +339,23 @@ genuinely call the running server’s HTTP API so the challenges prove the
 real user-facing endpoints work. Discovered 2026-07-12 real-infra
 retest. Evidence:
 docs/qa/infra_retest_20260712_hxc122_138/hxc138_challenge_report.json.</td>
+</tr>
+<tr>
+<td>HXC-147</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>Running the (now-compilable) automation test binary against the live
+OpenRouter API, TestAllFreeProvidersAutomation Provider_OpenRouter
+BasicGeneration panics with a nil-pointer dereference: the configured
+free model id deepseek-r1-free is stale/rejected and the code path is
+missing a nil-check on the error before using the response. Users of the
+OpenRouter free provider with that model would hit the same crash. The
+work is to correct the free-provider model id (sourced from the verifier
+as single source of truth) and add the missing nil-check so a rejected
+model degrades gracefully instead of panicking. NOTE this environment
+has live provider API keys set so provider tests spend real money;
+guard/skip accordingly. Found 2026-07-12.</td>
 </tr>
 </tbody>
 </table>

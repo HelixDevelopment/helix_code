@@ -528,35 +528,6 @@ user journeys work. The work is to stand up a server and run the
 challenges, capturing the results. This provides real proof that the
 headline user workflows function end to end.</p>
 <h2
-id="hxc-142-automation-test-suite-testautomation--tagsautomation-does-not-compile">HXC-142
-— Automation test suite (test/automation, -tags=automation) does not
-compile</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Severity:</strong> High <strong>Created-By:</strong> Claude</p>
-<p>The automation-tagged test package fails to build, so an entire
-mandated test type cannot execute at all. Two real causes were found
-during the 2026-07-12 real-infra retest: a duplicate symbol
-(isRateLimitError/contains declared in both xai and qwen automation test
-files) and deeper API drift where the tests reference llm.ProviderConfig
-and NewProviderManager which no longer exist in the current provider
-package. The work is to reconcile the automation tests with the current
-provider API and remove the duplicate helpers so the suite compiles and
-runs against real infrastructure. Evidence:
-docs/qa/infra_retest_20260712_hxc122_138/automation_tests.log.</p>
-<h2
-id="hxc-143-e2e-test-suite-teste2e--tagse2e-does-not-compile-due-to-redeclared-getenvordefault">HXC-143
-— E2E test suite (test/e2e, -tags=e2e) does not compile due to
-redeclared getEnvOrDefault</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Severity:</strong> High <strong>Created-By:</strong> Claude</p>
-<p>The e2e-tagged test package fails to build because getEnvOrDefault is
-declared more than once in the package, so another mandated test type
-cannot execute. The work is to remove the duplicate declaration
-(consolidate to a single shared helper) so the e2e suite compiles and
-can run end-to-end against a real server. Discovered during the
-2026-07-12 real-infra retest. Evidence:
-docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md.</p>
-<h2
 id="hxc-144-server-leaks-goroutines-under-sustained-ddos-flood-load-chaos-test">HXC-144
 — Server leaks goroutines under sustained DDoS-flood load (chaos
 test)</h2>
@@ -602,5 +573,23 @@ genuinely call the running server’s HTTP API so the challenges prove the
 real user-facing endpoints work. Discovered 2026-07-12 real-infra
 retest. Evidence:
 docs/qa/infra_retest_20260712_hxc122_138/hxc138_challenge_report.json.</p>
+<h2
+id="hxc-147-openrouter-provider-automation-test-nil-pointer-panics-on-stale-model-deepseek-r1-free">HXC-147
+— OpenRouter provider automation test nil-pointer panics on stale model
+deepseek-r1-free</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Severity:</strong> Medium <strong>Created-By:</strong>
+Claude</p>
+<p>Running the (now-compilable) automation test binary against the live
+OpenRouter API, TestAllFreeProvidersAutomation Provider_OpenRouter
+BasicGeneration panics with a nil-pointer dereference: the configured
+free model id deepseek-r1-free is stale/rejected and the code path is
+missing a nil-check on the error before using the response. Users of the
+OpenRouter free provider with that model would hit the same crash. The
+work is to correct the free-provider model id (sourced from the verifier
+as single source of truth) and add the missing nil-check so a rejected
+model degrades gracefully instead of panicking. NOTE this environment
+has live provider API keys set so provider tests spend real money;
+guard/skip accordingly. Found 2026-07-12.</p>
 </body>
 </html>
