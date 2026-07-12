@@ -6203,6 +6203,42 @@ consistent with .gitmodules and submodule-walking tooling completes.
 This is a git-index-only change, reversible via git reset. Found by the
 2026-07-12 release-readiness survey. Low runtime risk but blocks release
 automation.</p>
+<h2
+id="hxc-145-configured-xiaomi-model-mimo-v2-flash-is-rejected-by-the-real-xiaomi-api">HXC-145
+— Configured Xiaomi model mimo-v2-flash is rejected by the real Xiaomi
+API</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+docs/qa/hxc145_147_20260712T190000Z/EVIDENCE.md
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude</p>
+<p>During the real-infra retest the Xiaomi provider chaos tests failed 2
+of 5 because the model id configured for Xiaomi (mimo-v2-flash) is
+rejected by the live Xiaomi API, indicating the configured model name is
+stale or wrong. Users selecting the Xiaomi provider with that model
+would get errors. The work is to determine the correct current Xiaomi
+model id (from the provider or the verifier as single source of truth)
+and update the configuration so Xiaomi requests succeed. Evidence:
+docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Xiaomi 3/5).</p>
+<h2
+id="hxc-147-openrouter-provider-automation-test-nil-pointer-panics-on-stale-model-deepseek-r1-free">HXC-147
+— OpenRouter provider automation test nil-pointer panics on stale model
+deepseek-r1-free</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+docs/qa/hxc145_147_20260712T190000Z/EVIDENCE.md
+<strong>Severity:</strong> Medium <strong>Created-By:</strong>
+Claude</p>
+<p>Running the (now-compilable) automation test binary against the live
+OpenRouter API, TestAllFreeProvidersAutomation Provider_OpenRouter
+BasicGeneration panics with a nil-pointer dereference: the configured
+free model id deepseek-r1-free is stale/rejected and the code path is
+missing a nil-check on the error before using the response. Users of the
+OpenRouter free provider with that model would hit the same crash. The
+work is to correct the free-provider model id (sourced from the verifier
+as single source of truth) and add the missing nil-check so a rejected
+model degrades gracefully instead of panicking. NOTE this environment
+has live provider API keys set so provider tests spend real money;
+guard/skip accordingly. Found 2026-07-12.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />
