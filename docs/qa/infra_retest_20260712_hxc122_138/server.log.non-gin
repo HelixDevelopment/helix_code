@@ -1,0 +1,16 @@
+🚀 Starting HelixCode Server v3.0.0
+📅 Build: 2026-07-12_19:32:40
+🔧 Commit: 68722674
+
+INFO: Using config file: /tmp/.private/milos/claude-1000/-home-milos-Factory-projects-tools-and-research-helix-code/05f694f0-f83a-43d2-9e63-38d60da76b66/scratchpad/infra-retest-config.yaml
+2026/07/12 19:34:41 ✅ Database connection established successfully
+2026/07/12 19:34:41 ✅ Database connection pool closed
+2026/07/12 19:34:41 ✅ Infra auto-boot:  endpoints already healthy (postgres:55432 redis:56379)
+2026/07/12 19:34:41 ✅ Database connection established successfully
+2026/07/12 19:34:41 ✅ Database schema already exists
+2026/07/12 19:34:41 ✅ Loaded 1 plugin(s) into the server plugin registry
+2026/07/12 19:34:41 🌐 Starting HTTP server on 0.0.0.0
+2026/07/12 19:34:41 🚀 Starting HelixCode server on 0.0.0.0:18080
+2026/07/12 19:50:01 🛑 Shutting down server...
+2026/07/12 19:50:01 ✅ Server exited properly
+2026/07/12 19:50:01 ✅ Database connection pool closed

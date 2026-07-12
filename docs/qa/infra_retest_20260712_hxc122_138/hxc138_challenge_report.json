@@ -1,0 +1,651 @@
+{
+  "batch": {
+    "id": "c09b255a-87d2-462a-add3-16ed10b0cfdf",
+    "name": "hxc138-real-server-real-model",
+    "description": "Challenge test batch",
+    "challenges": [
+      "ascii-art-generator-001",
+      "cli-task-manager-001",
+      "json-validator-cli-001",
+      "notes-project-001",
+      "tic-tac-toe-tui-001",
+      "url-shortener-001"
+    ],
+    "interfaces": [
+      "cli"
+    ],
+    "distributions": [
+      "single"
+    ],
+    "providers": [
+      "ollama"
+    ],
+    "models": [
+      "qwen2:0.5b"
+    ],
+    "start_time": "2026-07-12T19:40:03.611657272+05:00",
+    "end_time": "2026-07-12T19:41:20.292070279+05:00",
+    "duration": 76680413008,
+    "status": "completed",
+    "executions": [
+      "6f4fcd9f-74cd-4813-8c3b-9f7b528e4afb",
+      "92259891-2d90-4df6-a028-b44581494058",
+      "abccaa48-6560-42d7-beb2-5afea2a5da9a",
+      "a428c2dd-1da7-4837-b809-f5a3783565e5",
+      "92318aa8-03b5-408d-863a-69a086217ac4",
+      "c75503a4-fc76-43c2-a78b-d1450d7d332f"
+    ],
+    "summary": {
+      "total_executions": 6,
+      "completed": 0,
+      "failed": 0,
+      "timeout": 0,
+      "validation_failed": 6,
+      "success_rate": 0,
+      "avg_duration": 25862635614,
+      "total_tokens": 0,
+      "total_files_generated": 18,
+      "total_loc": 777
+    }
+  },
+  "executions": [
+    {
+      "id": "6f4fcd9f-74cd-4813-8c3b-9f7b528e4afb",
+      "challenge_id": "url-shortener-001",
+      "interface": "cli",
+      "distribution": "single",
+      "provider": "ollama",
+      "model": "qwen2:0.5b",
+      "start_time": "2026-07-12T19:40:03.611676552+05:00",
+      "end_time": "2026-07-12T19:40:09.549524069+05:00",
+      "duration": 5937847517,
+      "status": "validation_failed",
+      "result_dir": "test-results/challenges/url-shortener-001/cli_ollama_qwen2_0.5b_20260712_194003_6f4fcd9f",
+      "log_file": "test-results/logs/6f4fcd9f-74cd-4813-8c3b-9f7b528e4afb/execution.log",
+      "request_log": "test-results/logs/6f4fcd9f-74cd-4813-8c3b-9f7b528e4afb/requests.log",
+      "validation_log": "test-results/logs/6f4fcd9f-74cd-4813-8c3b-9f7b528e4afb/validation.log",
+      "validation_results": [
+        {
+          "check_name": "directory_exists",
+          "passed": true,
+          "message": "Directory exists with 1 entries",
+          "timestamp": "2026-07-12T19:40:09.549526903+05:00"
+        },
+        {
+          "check_name": "no_placeholders",
+          "passed": true,
+          "message": "No placeholders found",
+          "timestamp": "2026-07-12T19:40:09.549543198+05:00"
+        },
+        {
+          "check_name": "no_empty_implementations",
+          "passed": true,
+          "message": "No empty implementations found",
+          "timestamp": "2026-07-12T19:40:09.55041067+05:00"
+        },
+        {
+          "check_name": "file_exists_README.md",
+          "passed": false,
+          "message": "Required file README.md not found",
+          "timestamp": "2026-07-12T19:40:09.55087349+05:00"
+        },
+        {
+          "check_name": "file_exists_Dockerfile",
+          "passed": false,
+          "message": "Required file Dockerfile not found",
+          "timestamp": "2026-07-12T19:40:09.550878868+05:00"
+        },
+        {
+          "check_name": "compilation",
+          "passed": false,
+          "error": "no go.mod found",
+          "timestamp": "2026-07-12T19:40:09.550884306+05:00"
+        },
+        {
+          "check_name": "tests_pass",
+          "passed": false,
+          "error": "Tests failed: exit status 1",
+          "details": "STDOUT:\nFAIL\tdev.helix.code/tests/e2e/challenges/test-results/challenges/url-shortener-001/cli_ollama_qwen2_0.5b_20260712_194003_6f4fcd9f [setup failed]\nFAIL\n\n\nSTDERR:\n# dev.helix.code/tests/e2e/challenges/test-results/challenges/url-shortener-001/cli_ollama_qwen2_0.5b_20260712_194003_6f4fcd9f\nmain.go:1:1: expected 'package', found To\n",
+          "timestamp": "2026-07-12T19:40:09.550887762+05:00"
+        },
+        {
+          "check_name": "use_case_documentation",
+          "passed": false,
+          "error": "README.md not found",
+          "details": "Use cases should be documented in README.md",
+          "timestamp": "2026-07-12T19:40:09.557789431+05:00"
+        },
+        {
+          "check_name": "required_file_main.go",
+          "passed": true,
+          "message": "Found required file: main.go",
+          "timestamp": "2026-07-12T19:40:09.557794339+05:00"
+        },
+        {
+          "check_name": "required_file_README.md",
+          "passed": false,
+          "message": "Missing required file: README.md",
+          "timestamp": "2026-07-12T19:40:09.557796903+05:00"
+        },
+        {
+          "check_name": "http_server",
+          "passed": false,
+          "message": "HTTP server implementation: false",
+          "timestamp": "2026-07-12T19:40:09.557822992+05:00"
+        },
+        {
+          "check_name": "url_storage",
+          "passed": true,
+          "message": "URL storage mechanism: true",
+          "timestamp": "2026-07-12T19:40:09.557824885+05:00"
+        }
+      ],
+      "metrics": {
+        "files_generated": 1,
+        "lines_of_code": 25,
+        "requests": 0,
+        "tokens_used": 0,
+        "compilation_time": 0,
+        "test_execution_time": 0,
+        "placeholders_found": 0,
+        "empty_functions": 0,
+        "coverage_percent": 0
+      }
+    },
+    {
+      "id": "92259891-2d90-4df6-a028-b44581494058",
+      "challenge_id": "ascii-art-generator-001",
+      "interface": "cli",
+      "distribution": "single",
+      "provider": "ollama",
+      "model": "qwen2:0.5b",
+      "start_time": "2026-07-12T19:40:03.612074283+05:00",
+      "end_time": "2026-07-12T19:40:18.599790485+05:00",
+      "duration": 14987716202,
+      "status": "validation_failed",
+      "result_dir": "test-results/challenges/ascii-art-generator-001/cli_ollama_qwen2_0.5b_20260712_194003_92259891",
+      "log_file": "test-results/logs/92259891-2d90-4df6-a028-b44581494058/execution.log",
+      "request_log": "test-results/logs/92259891-2d90-4df6-a028-b44581494058/requests.log",
+      "validation_log": "test-results/logs/92259891-2d90-4df6-a028-b44581494058/validation.log",
+      "validation_results": [
+        {
+          "check_name": "directory_exists",
+          "passed": true,
+          "message": "Directory exists with 4 entries",
+          "timestamp": "2026-07-12T19:40:18.599793369+05:00"
+        },
+        {
+          "check_name": "no_placeholders",
+          "passed": true,
+          "message": "No placeholders found",
+          "timestamp": "2026-07-12T19:40:18.59982013+05:00"
+        },
+        {
+          "check_name": "no_empty_implementations",
+          "passed": true,
+          "message": "No empty implementations found",
+          "timestamp": "2026-07-12T19:40:18.599841722+05:00"
+        },
+        {
+          "check_name": "file_exists_README.md",
+          "passed": true,
+          "message": "File README.md exists",
+          "timestamp": "2026-07-12T19:40:18.599860501+05:00"
+        },
+        {
+          "check_name": "compilation",
+          "passed": true,
+          "message": "Compilation successful (took 4.731527ms)",
+          "timestamp": "2026-07-12T19:40:18.599862704+05:00"
+        },
+        {
+          "check_name": "tests_pass",
+          "passed": false,
+          "error": "Tests failed: exit status 1",
+          "details": "STDOUT:\n\n\nSTDERR:\ngo: warning: \"./...\" matched no packages\nno packages to test\n",
+          "timestamp": "2026-07-12T19:40:18.604598578+05:00"
+        },
+        {
+          "check_name": "documentation_sections",
+          "passed": false,
+          "error": "Missing required documentation sections",
+          "details": "Missing sections: features, setup, usage",
+          "timestamp": "2026-07-12T19:40:18.608563776+05:00"
+        },
+        {
+          "check_name": "use_case_examples",
+          "passed": false,
+          "error": "No CLI usage examples found",
+          "details": "README should include examples of CLI commands",
+          "timestamp": "2026-07-12T19:40:18.608564808+05:00"
+        },
+        {
+          "check_name": "setup_instructions",
+          "passed": false,
+          "error": "No numbered or bulleted setup steps found",
+          "details": "README should have clear step-by-step setup instructions",
+          "timestamp": "2026-07-12T19:40:18.608565839+05:00"
+        },
+        {
+          "check_name": "testing_instructions",
+          "passed": false,
+          "error": "No testing section found",
+          "details": "README should include instructions on how to run tests",
+          "timestamp": "2026-07-12T19:40:18.60856665+05:00"
+        }
+      ],
+      "metrics": {
+        "files_generated": 4,
+        "lines_of_code": 0,
+        "requests": 0,
+        "tokens_used": 0,
+        "compilation_time": 0,
+        "test_execution_time": 0,
+        "placeholders_found": 0,
+        "empty_functions": 0,
+        "coverage_percent": 0
+      }
+    },
+    {
+      "id": "abccaa48-6560-42d7-beb2-5afea2a5da9a",
+      "challenge_id": "json-validator-cli-001",
+      "interface": "cli",
+      "distribution": "single",
+      "provider": "ollama",
+      "model": "qwen2:0.5b",
+      "start_time": "2026-07-12T19:40:03.611711274+05:00",
+      "end_time": "2026-07-12T19:40:31.766772552+05:00",
+      "duration": 28155061238,
+      "status": "validation_failed",
+      "result_dir": "test-results/challenges/json-validator-cli-001/cli_ollama_qwen2_0.5b_20260712_194003_abccaa48",
+      "log_file": "test-results/logs/abccaa48-6560-42d7-beb2-5afea2a5da9a/execution.log",
+      "request_log": "test-results/logs/abccaa48-6560-42d7-beb2-5afea2a5da9a/requests.log",
+      "validation_log": "test-results/logs/abccaa48-6560-42d7-beb2-5afea2a5da9a/validation.log",
+      "validation_results": [
+        {
+          "check_name": "directory_exists",
+          "passed": true,
+          "message": "Directory exists with 4 entries",
+          "timestamp": "2026-07-12T19:40:31.766775427+05:00"
+        },
+        {
+          "check_name": "no_placeholders",
+          "passed": true,
+          "message": "No placeholders found",
+          "timestamp": "2026-07-12T19:40:31.766792422+05:00"
+        },
+        {
+          "check_name": "no_empty_implementations",
+          "passed": true,
+          "message": "No empty implementations found",
+          "timestamp": "2026-07-12T19:40:31.770720775+05:00"
+        },
+        {
+          "check_name": "file_exists_README.md",
+          "passed": true,
+          "message": "File README.md exists",
+          "timestamp": "2026-07-12T19:40:31.772163537+05:00"
+        },
+        {
+          "check_name": "compilation",
+          "passed": false,
+          "error": "Compilation failed: exit status 1",
+          "details": "STDOUT:\n\n\nSTDERR:\n# json-validator-cli\n./main.go:44:13: assignment mismatch: 1 variable but formatFile returns 2 values\n./main.go:47:15: undefined: schemaValidate\n./main.go:47:30: undefined: data\n./main.go:50:15: undefined: schemaValidate\n./main.go:50:30: undefined: schema\n./main.go:66:14: undefined: schemaValidate\n./main.go:66:29: undefined: data\n./main.go:69:14: undefined: schemaValidate\n./main.go:69:29: undefined: schema\n./main.go:78:10: f1.Equal undefined (type string has no field or method Equal)\n./main.go:78:10: too many errors\n",
+          "timestamp": "2026-07-12T19:40:31.772169837+05:00"
+        },
+        {
+          "check_name": "tests_pass",
+          "passed": false,
+          "error": "Tests failed: exit status 1",
+          "details": "STDOUT:\nFAIL\tjson-validator-cli [build failed]\nFAIL\n\n\nSTDERR:\n# json-validator-cli\n./main.go:44:13: assignment mismatch: 1 variable but formatFile returns 2 values\n./main.go:47:15: undefined: schemaValidate\n./main.go:47:30: undefined: data\n./main.go:50:15: undefined: schemaValidate\n./main.go:50:30: undefined: schema\n./main.go:66:14: undefined: schemaValidate\n./main.go:66:29: undefined: data\n./main.go:69:14: undefined: schemaValidate\n./main.go:69:29: undefined: schema\n./main.go:78:10: f1.Equal undefined (type string has no field or method Equal)\n./main.go:78:10: too many errors\n",
+          "timestamp": "2026-07-12T19:40:34.850708125+05:00"
+        },
+        {
+          "check_name": "documentation_sections",
+          "passed": false,
+          "error": "Missing required documentation sections",
+          "details": "Missing sections: features, setup, usage",
+          "timestamp": "2026-07-12T19:40:34.927567128+05:00"
+        },
+        {
+          "check_name": "use_case_examples",
+          "passed": false,
+          "error": "No CLI usage examples found",
+          "details": "README should include examples of CLI commands",
+          "timestamp": "2026-07-12T19:40:34.927569732+05:00"
+        },
+        {
+          "check_name": "setup_instructions",
+          "passed": false,
+          "error": "No numbered or bulleted setup steps found",
+          "details": "README should have clear step-by-step setup instructions",
+          "timestamp": "2026-07-12T19:40:34.927571785+05:00"
+        },
+        {
+          "check_name": "testing_instructions",
+          "passed": false,
+          "error": "No testing section found",
+          "details": "README should include instructions on how to run tests",
+          "timestamp": "2026-07-12T19:40:34.927577103+05:00"
+        }
+      ],
+      "metrics": {
+        "files_generated": 4,
+        "lines_of_code": 184,
+        "requests": 0,
+        "tokens_used": 0,
+        "compilation_time": 0,
+        "test_execution_time": 0,
+        "placeholders_found": 0,
+        "empty_functions": 0,
+        "coverage_percent": 0
+      }
+    },
+    {
+      "id": "a428c2dd-1da7-4837-b809-f5a3783565e5",
+      "challenge_id": "notes-project-001",
+      "interface": "cli",
+      "distribution": "single",
+      "provider": "ollama",
+      "model": "qwen2:0.5b",
+      "start_time": "2026-07-12T19:40:09.558073+05:00",
+      "end_time": "2026-07-12T19:40:39.552984979+05:00",
+      "duration": 29994911968,
+      "status": "validation_failed",
+      "result_dir": "test-results/challenges/notes-project-001/cli_ollama_qwen2_0.5b_20260712_194009_a428c2dd",
+      "log_file": "test-results/logs/a428c2dd-1da7-4837-b809-f5a3783565e5/execution.log",
+      "request_log": "test-results/logs/a428c2dd-1da7-4837-b809-f5a3783565e5/requests.log",
+      "validation_log": "test-results/logs/a428c2dd-1da7-4837-b809-f5a3783565e5/validation.log",
+      "validation_results": [
+        {
+          "check_name": "directory_exists",
+          "passed": true,
+          "message": "Directory exists with 4 entries",
+          "timestamp": "2026-07-12T19:40:39.552987663+05:00"
+        },
+        {
+          "check_name": "no_placeholders",
+          "passed": true,
+          "message": "No placeholders found",
+          "timestamp": "2026-07-12T19:40:39.553004889+05:00"
+        },
+        {
+          "check_name": "no_empty_implementations",
+          "passed": true,
+          "message": "No empty implementations found",
+          "timestamp": "2026-07-12T19:40:39.588646724+05:00"
+        },
+        {
+          "check_name": "file_exists_README.md",
+          "passed": true,
+          "message": "File README.md exists",
+          "timestamp": "2026-07-12T19:40:39.590149397+05:00"
+        },
+        {
+          "check_name": "file_exists_Dockerfile",
+          "passed": false,
+          "message": "Required file Dockerfile not found",
+          "timestamp": "2026-07-12T19:40:39.590157729+05:00"
+        },
+        {
+          "check_name": "compilation",
+          "passed": true,
+          "message": "Compilation successful (took 7.291139ms)",
+          "timestamp": "2026-07-12T19:40:39.590170629+05:00"
+        },
+        {
+          "check_name": "tests_pass",
+          "passed": false,
+          "error": "Tests failed: exit status 1",
+          "details": "STDOUT:\nFAIL\tsimple-notes-application [setup failed]\nFAIL\n\n\nSTDERR:\n# simple-notes-application\nmain_test.go:9:2: no required module provides package github.com/gin-gonic/gin; to add it:\n\tgo get github.com/gin-gonic/gin\n",
+          "timestamp": "2026-07-12T19:40:39.597477011+05:00"
+        },
+        {
+          "check_name": "documentation_sections",
+          "passed": false,
+          "error": "Missing required documentation sections",
+          "details": "Missing sections: features, setup, usage",
+          "timestamp": "2026-07-12T19:40:39.696264374+05:00"
+        },
+        {
+          "check_name": "setup_instructions",
+          "passed": false,
+          "error": "No numbered or bulleted setup steps found",
+          "details": "README should have clear step-by-step setup instructions",
+          "timestamp": "2026-07-12T19:40:39.696266677+05:00"
+        },
+        {
+          "check_name": "testing_instructions",
+          "passed": false,
+          "error": "No testing section found",
+          "details": "README should include instructions on how to run tests",
+          "timestamp": "2026-07-12T19:40:39.696267608+05:00"
+        },
+        {
+          "check_name": "common_sense_crud_operations",
+          "passed": false,
+          "error": "Missing common CRUD operations",
+          "details": "Missing operations: delete, list, search, create, read, update",
+          "timestamp": "2026-07-12T19:40:39.696316502+05:00"
+        },
+        {
+          "check_name": "common_sense_data_model",
+          "passed": false,
+          "error": "Note model missing essential fields",
+          "details": "Note model should have at minimum: ID, Title, Content fields",
+          "timestamp": "2026-07-12T19:40:39.696336222+05:00"
+        },
+        {
+          "check_name": "common_sense_database",
+          "passed": false,
+          "error": "No database package found",
+          "details": "Project should have database connection setup",
+          "timestamp": "2026-07-12T19:40:39.69635426+05:00"
+        }
+      ],
+      "metrics": {
+        "files_generated": 4,
+        "lines_of_code": 119,
+        "requests": 0,
+        "tokens_used": 0,
+        "compilation_time": 0,
+        "test_execution_time": 0,
+        "placeholders_found": 0,
+        "empty_functions": 0,
+        "coverage_percent": 0
+      }
+    },
+    {
+      "id": "92318aa8-03b5-408d-863a-69a086217ac4",
+      "challenge_id": "tic-tac-toe-tui-001",
+      "interface": "cli",
+      "distribution": "single",
+      "provider": "ollama",
+      "model": "qwen2:0.5b",
+      "start_time": "2026-07-12T19:40:18.608725831+05:00",
+      "end_time": "2026-07-12T19:40:49.361391783+05:00",
+      "duration": 30752665952,
+      "status": "validation_failed",
+      "result_dir": "test-results/challenges/tic-tac-toe-tui-001/cli_ollama_qwen2_0.5b_20260712_194018_92318aa8",
+      "log_file": "test-results/logs/92318aa8-03b5-408d-863a-69a086217ac4/execution.log",
+      "request_log": "test-results/logs/92318aa8-03b5-408d-863a-69a086217ac4/requests.log",
+      "validation_log": "test-results/logs/92318aa8-03b5-408d-863a-69a086217ac4/validation.log",
+      "validation_results": [
+        {
+          "check_name": "directory_exists",
+          "passed": true,
+          "message": "Directory exists with 4 entries",
+          "timestamp": "2026-07-12T19:40:49.361394487+05:00"
+        },
+        {
+          "check_name": "no_placeholders",
+          "passed": true,
+          "message": "No placeholders found",
+          "timestamp": "2026-07-12T19:40:49.361410802+05:00"
+        },
+        {
+          "check_name": "no_empty_implementations",
+          "passed": true,
+          "message": "No empty implementations found",
+          "timestamp": "2026-07-12T19:40:49.361431834+05:00"
+        },
+        {
+          "check_name": "file_exists_README.md",
+          "passed": true,
+          "message": "File README.md exists",
+          "timestamp": "2026-07-12T19:40:49.361457172+05:00"
+        },
+        {
+          "check_name": "compilation",
+          "passed": true,
+          "message": "Compilation successful (took 4.639428ms)",
+          "timestamp": "2026-07-12T19:40:49.361460016+05:00"
+        },
+        {
+          "check_name": "tests_pass",
+          "passed": false,
+          "error": "Tests failed: exit status 1",
+          "details": "STDOUT:\n\n\nSTDERR:\ngo: warning: \"./...\" matched no packages\nno packages to test\n",
+          "timestamp": "2026-07-12T19:40:49.366107867+05:00"
+        },
+        {
+          "check_name": "documentation_sections",
+          "passed": false,
+          "error": "Missing required documentation sections",
+          "details": "Missing sections: features, setup, usage",
+          "timestamp": "2026-07-12T19:40:49.370704751+05:00"
+        },
+        {
+          "check_name": "use_case_examples",
+          "passed": false,
+          "error": "No CLI usage examples found",
+          "details": "README should include examples of CLI commands",
+          "timestamp": "2026-07-12T19:40:49.370706123+05:00"
+        },
+        {
+          "check_name": "setup_instructions",
+          "passed": false,
+          "error": "No numbered or bulleted setup steps found",
+          "details": "README should have clear step-by-step setup instructions",
+          "timestamp": "2026-07-12T19:40:49.370707244+05:00"
+        },
+        {
+          "check_name": "testing_instructions",
+          "passed": false,
+          "error": "No testing section found",
+          "details": "README should include instructions on how to run tests",
+          "timestamp": "2026-07-12T19:40:49.370708046+05:00"
+        }
+      ],
+      "metrics": {
+        "files_generated": 4,
+        "lines_of_code": 0,
+        "requests": 0,
+        "tokens_used": 0,
+        "compilation_time": 0,
+        "test_execution_time": 0,
+        "placeholders_found": 0,
+        "empty_functions": 0,
+        "coverage_percent": 0
+      }
+    },
+    {
+      "id": "c75503a4-fc76-43c2-a78b-d1450d7d332f",
+      "challenge_id": "cli-task-manager-001",
+      "interface": "cli",
+      "distribution": "single",
+      "provider": "ollama",
+      "model": "qwen2:0.5b",
+      "start_time": "2026-07-12T19:40:34.928018501+05:00",
+      "end_time": "2026-07-12T19:41:20.27562931+05:00",
+      "duration": 45347610809,
+      "status": "validation_failed",
+      "result_dir": "test-results/challenges/cli-task-manager-001/cli_ollama_qwen2_0.5b_20260712_194034_c75503a4",
+      "log_file": "test-results/logs/c75503a4-fc76-43c2-a78b-d1450d7d332f/execution.log",
+      "request_log": "test-results/logs/c75503a4-fc76-43c2-a78b-d1450d7d332f/requests.log",
+      "validation_log": "test-results/logs/c75503a4-fc76-43c2-a78b-d1450d7d332f/validation.log",
+      "validation_results": [
+        {
+          "check_name": "directory_exists",
+          "passed": true,
+          "message": "Directory exists with 1 entries",
+          "timestamp": "2026-07-12T19:41:20.275632154+05:00"
+        },
+        {
+          "check_name": "no_placeholders",
+          "passed": true,
+          "message": "No placeholders found",
+          "timestamp": "2026-07-12T19:41:20.27564913+05:00"
+        },
+        {
+          "check_name": "no_empty_implementations",
+          "passed": true,
+          "message": "No empty implementations found",
+          "timestamp": "2026-07-12T19:41:20.281510085+05:00"
+        },
+        {
+          "check_name": "file_exists_README.md",
+          "passed": false,
+          "message": "Required file README.md not found",
+          "timestamp": "2026-07-12T19:41:20.28460671+05:00"
+        },
+        {
+          "check_name": "compilation",
+          "passed": false,
+          "error": "no go.mod found",
+          "timestamp": "2026-07-12T19:41:20.284615143+05:00"
+        },
+        {
+          "check_name": "tests_pass",
+          "passed": false,
+          "error": "Tests failed: exit status 1",
+          "details": "STDOUT:\nFAIL\tdev.helix.code/tests/e2e/challenges/test-results/challenges/cli-task-manager-001/cli_ollama_qwen2_0.5b_20260712_194034_c75503a4 [setup failed]\nFAIL\n\n\nSTDERR:\n# dev.helix.code/tests/e2e/challenges/test-results/challenges/cli-task-manager-001/cli_ollama_qwen2_0.5b_20260712_194034_c75503a4\nmain.go:1:1: expected 'package', found The\n",
+          "timestamp": "2026-07-12T19:41:20.284619229+05:00"
+        },
+        {
+          "check_name": "use_case_documentation",
+          "passed": false,
+          "error": "README.md not found",
+          "details": "Use cases should be documented in README.md",
+          "timestamp": "2026-07-12T19:41:20.291718207+05:00"
+        },
+        {
+          "check_name": "common_sense_cli_commands",
+          "passed": true,
+          "message": "CLI has 6/6 expected commands",
+          "timestamp": "2026-07-12T19:41:20.291816716+05:00"
+        },
+        {
+          "check_name": "common_sense_task_model",
+          "passed": true,
+          "message": "Task model has 5/6 expected attributes",
+          "timestamp": "2026-07-12T19:41:20.291817307+05:00"
+        },
+        {
+          "check_name": "cobra_framework",
+          "passed": false,
+          "error": "Could not read go.mod",
+          "timestamp": "2026-07-12T19:41:20.291819851+05:00"
+        },
+        {
+          "check_name": "data_persistence",
+          "passed": false,
+          "error": "No data persistence found",
+          "details": "Expected JSON file or SQLite database for task storage",
+          "timestamp": "2026-07-12T19:41:20.291888234+05:00"
+        }
+      ],
+      "metrics": {
+        "files_generated": 1,
+        "lines_of_code": 449,
+        "requests": 0,
+        "tokens_used": 0,
+        "compilation_time": 0,
+        "test_execution_time": 0,
+        "placeholders_found": 0,
+        "empty_functions": 0,
+        "coverage_percent": 0
+      }
+    }
+  ]
+}
