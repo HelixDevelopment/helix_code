@@ -4140,6 +4140,23 @@ those fields, so the flags always read as unsupported. The work is to
 have the verifier publish these capability values it already computes.
 Then users see accurate per-model capability information across the
 product.</p>
+<h2
+id="hxc-117-model-capability-flags-mcp-lsp-acp-rag-skills-plugins-are-not-sourced-from-the-verifier-as-required">HXC-117
+— Model capability flags (MCP, LSP, ACP, RAG, Skills, Plugins) are not
+sourced from the verifier as required</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+docs/qa/hxc117_20260712T140900Z/EVIDENCE.md <strong>Severity:</strong>
+High <strong>Created-By:</strong> Claude</p>
+<p>Governance rule CONST-040 requires that every advanced capability a
+model supports be reported by the central verifier component rather than
+hardcoded. Today the verifier only records whether a model supports
+embeddings; the other six capabilities are documented as
+verifier-sourced but are not implemented there. As a result the product
+cannot truthfully tell users which models support which capabilities.
+The work adds these capability fields to the verifier’s results and has
+the product read them from there. Users then receive accurate,
+single-source-of-truth capability information.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />

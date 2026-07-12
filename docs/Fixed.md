@@ -1230,3 +1230,13 @@ The quality-assurance module has code that copies a value containing a lock (a m
 
 HelixCode is now wired to read six advanced capability indicators (tool protocols, code intelligence, retrieval, skills, plugins) from the central verifier, but the verifier's live responses do not yet include those fields, so the flags always read as unsupported. The work is to have the verifier publish these capability values it already computes. Then users see accurate per-model capability information across the product.
 
+## HXC-117 — Model capability flags (MCP, LSP, ACP, RAG, Skills, Plugins) are not sourced from the verifier as required
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/hxc117_20260712T140900Z/EVIDENCE.md
+**Severity:** High
+**Created-By:** Claude
+
+Governance rule CONST-040 requires that every advanced capability a model supports be reported by the central verifier component rather than hardcoded. Today the verifier only records whether a model supports embeddings; the other six capabilities are documented as verifier-sourced but are not implemented there. As a result the product cannot truthfully tell users which models support which capabilities. The work adds these capability fields to the verifier's results and has the product read them from there. Users then receive accurate, single-source-of-truth capability information.
+

@@ -2327,23 +2327,8 @@ closed <code>Implemented (→ Fixed.md)</code>. To update
 Issues_Summary.md mechanically, run
 <code>scripts/generate_issues_summary.sh</code> (TODO: create —
 currently this Issues.md is the source of truth and Summary is
-hand-maintained).* ## HXC-117 — Model capability flags (MCP, LSP, ACP,
-RAG, Skills, Plugins) are not sourced from the verifier as required</p>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Severity:</strong> High <strong>Created-By:</strong> Claude</p>
-<p>Governance rule CONST-040 requires that every advanced capability a
-model supports be reported by the central verifier component rather than
-hardcoded. Today the verifier only records whether a model supports
-embeddings; the other six capabilities are documented as
-verifier-sourced but are not implemented there. As a result the product
-cannot truthfully tell users which models support which capabilities.
-The work adds these capability fields to the verifier’s results and has
-the product read them from there. Users then receive accurate,
-single-source-of-truth capability information.</p>
-<h2
-id="hxc-118-retrieval-augmented-generation-rag-module-exists-but-is-not-connected-to-the-application">HXC-118
-— Retrieval-Augmented-Generation (RAG) module exists but is not
-connected to the application</h2>
+hand-maintained).* ## HXC-118 — Retrieval-Augmented-Generation (RAG)
+module exists but is not connected to the application</p>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Feature
 <strong>Severity:</strong> High <strong>Created-By:</strong> Claude</p>
 <p>A dedicated Retrieval-Augmented-Generation component is maintained as

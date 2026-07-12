@@ -195,11 +195,6 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <td>19</td>
 </tr>
 <tr>
-<td>Bug</td>
-<td>Queued</td>
-<td>1</td>
-</tr>
-<tr>
 <td>Feature</td>
 <td>Implemented (→ Fixed.md)</td>
 <td>3</td>
@@ -227,7 +222,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>48</strong></td>
+<td><strong>47</strong></td>
 </tr>
 </tbody>
 </table>
@@ -531,21 +526,6 @@ all authenticated flows) — CLOSED (→ Fixed.md)</td>
 <td>Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID
 keys because boot-time translator wiring was never implemented — CLOSED
 (→ Fixed.md)</td>
-</tr>
-<tr>
-<td>HXC-117</td>
-<td>Bug</td>
-<td>Queued</td>
-<td>High</td>
-<td>Governance rule CONST-040 requires that every advanced capability a
-model supports be reported by the central verifier component rather than
-hardcoded. Today the verifier only records whether a model supports
-embeddings; the other six capabilities are documented as
-verifier-sourced but are not implemented there. As a result the product
-cannot truthfully tell users which models support which capabilities.
-The work adds these capability fields to the verifier’s results and has
-the product read them from there. Users then receive accurate,
-single-source-of-truth capability information.</td>
 </tr>
 <tr>
 <td>HXC-118</td>
