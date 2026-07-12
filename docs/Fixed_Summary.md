@@ -9,8 +9,8 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | Bug | Fixed (→ Fixed.md) | 130 |
 | Bug | Obsolete (→ Fixed.md) | 2 |
 | Feature | Implemented (→ Fixed.md) | 89 |
-| Task | Completed (→ Fixed.md) | 55 |
-| **TOTAL** | | **276** |
+| Task | Completed (→ Fixed.md) | 56 |
+| **TOTAL** | | **277** |
 
 ## Items
 
@@ -18,41 +18,41 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 |---|---|---|---|---|---|
 | 1 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19 — CONST-046 i18n architecture design doc — 368 LOC design; Option D (nicksnyder/go-i18n/v2) selected |
 | 2 | High | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#1 — pkg/i18n core foundation — 11 tests + mutation; Bundle/Localizer + sentinel errors |
-| 3 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#10 — panoptic × 5 cobra Short descriptions migration |
+| 3 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#10 — This task added translation support to five short help texts shown in the command-line tool for the panoptic component, so those brief descriptions can eventually be displayed in different languages instead of being locked to English. |
 | 4 | Medium | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#11 — challenges/pkg/i18n/ Phase 4 infrastructure + evaluators.go migration |
 | 5 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#12 — challenges/pkg/userflow/challenge_recorded_ai_testgen.go × 10 of 25 migration |
 | 6 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#13 — challenges/pkg/userflow/challenge_desktop.go migration |
 | 7 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#14 — challenges/pkg/userflow/challenge_ai_testgen.go × 10 user-facing migration |
 | 8 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#15 — challenges/pkg/userflow/challenge_recorded_mobile.go × 7 unique × 14 call sites |
 | 9 | — | Completed (→ Fixed.md) | Task | — | FIX-2026-05-19#16 — CONST-046 i18n implemented-architecture overview doc |
-| 10 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#17 — Tracker HTML + PDF exports per §11.4.19 |
+| 10 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#17 — This task added the ability to automatically export the project's tracking document into easy-to-read HTML web pages and PDF files, using standard document-conversion tools. This makes it easier for team members and stakeholders to review project status without needing to open raw text files. |
 | 11 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#18 — helix_code/cmd/helix_config/main.go × 10 migration |
-| 12 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#19 — helix_qa i18n kickoff (Phase 4 round 7) |
+| 12 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#19 — This task began the work of adding multi-language (translation) support to the helix_qa testing and quality-assurance component, so any text it shows to users can eventually be translated into other languages instead of only English. |
 | 13 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#2 — CONST-046 audit script (soft-warn) — 5 tests; real-tree scan 57,345 violations across 21,937 files |
 | 14 | — | Completed (→ Fixed.md) | Task | — | FIX-2026-05-19#20 — CONST-052 rename programme phased plan (HXC-001 plan, ex-ISSUE-005) |
-| 15 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#21 — LLMOrchestrator i18n kickoff (Phase 4 round 9) |
-| 16 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#22 — LLMsVerifier i18n kickoff (Phase 4 round 8) |
-| 17 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#23 — HelixSpecifier i18n kickoff (Phase 4 round 10) |
-| 18 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#24 — Storage i18n kickoff (Phase 4 round 11) |
-| 19 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#25 — LLMOps i18n kickoff (Phase 4 round 12) |
-| 20 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#26 — VectorDB i18n kickoff (Phase 4 round 13) |
-| 21 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#27 — Observability i18n kickoff (Phase 4 round 14) |
-| 22 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#28 — MCP_Module i18n kickoff (Phase 4 round 15) |
-| 23 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#29 — Messaging i18n kickoff (Phase 4 round 16) |
-| 24 | Medium | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#3 — Per-submodule i18n injection wiring + i18nadapter |
-| 25 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#30 — Middleware i18n kickoff (Phase 4 round 17) |
-| 26 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#31 — Plugins i18n kickoff (Phase 4 round 18) |
-| 27 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#32 — Streaming i18n kickoff (Phase 4 round 19) |
-| 28 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#33 — Watcher i18n kickoff (Phase 4 round 20) |
-| 29 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#34 — conversation i18n kickoff (Phase 4 round 21) |
-| 30 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#35 — containers i18n kickoff (Phase 4 round 22) |
-| 31 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#36 — security i18n kickoff (Phase 4 round 23) |
+| 15 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#21 — This task started adding multi-language support to the LLMOrchestrator component, which coordinates requests across several different AI language models. A handful of its hardcoded English error messages were converted into a translatable format as a first step. |
+| 16 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#22 — This task began converting some of the command-line text shown by the LLMsVerifier tool (which checks and validates AI model providers) into a translatable format, so it can eventually support multiple languages. Only a small number of the many text strings in this tool were converted in this first pass. |
+| 17 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#23 — This task started adding translation support to the HelixSpecifier tool so that its user-facing text can eventually work in languages other than English. |
+| 18 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#24 — This task started adding translation support to the Storage component of the system, which is responsible for saving and retrieving data, so its messages can eventually be shown in multiple languages. |
+| 19 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#25 — This task started adding translation support to the LLMOps component, which manages the day-to-day operation of the AI language models the system relies on, so its messages can eventually be shown in multiple languages. |
+| 20 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#26 — This task started adding translation support to the VectorDB component, which is the database used to store and search specialized AI-related data, so its messages can eventually be shown in multiple languages. |
+| 21 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#27 — This task started adding translation support to the Observability component, the part of the system that monitors overall health and performance, so its messages can eventually be shown in multiple languages. |
+| 22 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#28 — This task added translation support to the MCP module, the part of the system that connects to external tool servers. Five hardcoded English error and status messages were converted into a translatable format, fully completing this module's conversion with none left over. |
+| 23 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#29 — This task added translation support to the Messaging component, converting five hardcoded English messages into a translatable format so the messaging system's text can eventually work in different languages for users. |
+| 24 | Medium | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#3 — This task built the underlying plumbing that lets each individual sub-component of the system plug into the shared translation system, including a working example already supporting both English and Serbian. This lays the groundwork so future work can translate all remaining user-facing text across the whole project. |
+| 25 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#30 — This task added translation support to the Middleware component, converting three hardcoded English error messages about authentication and rate-limiting problems into a translatable format. |
+| 26 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#31 — This task added translation support to the Plugins component, the part of the system that loads optional add-on extensions, converting five hardcoded messages about plugin checks and safety sandboxing into a translatable format. |
+| 27 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#32 — This task added translation support to the Streaming component, which handles live, real-time data flowing to and from users, converting five hardcoded connection-related messages into a translatable format. |
+| 28 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#33 — This task added the underlying translation groundwork to the Watcher component, which monitors the system for file and event changes. This was a behind-the-scenes setup step, since this component's outward labels are internal codes rather than text users directly read. |
+| 29 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#34 — This task started adding translation support to the conversation component, which manages chat and dialogue interactions with users, so its messages can eventually be shown in multiple languages. |
+| 30 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#35 — This task added translation support to the containers component, the part of the system that manages application containers, converting nine hardcoded status and error messages into a translatable format and reducing the number of remaining untranslated messages in that area from 73 to 64. |
+| 31 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#36 — This task added translation support to the security component's privilege-check feature, converting twenty-seven hardcoded warning and description messages into a translatable format, a 92 percent reduction in the untranslated messages that remained in that area. |
 | 32 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#37 — helix_code/cmd/cli/main.go × 10 migration (Phase 4 round 24) |
-| 33 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#38 — AutoTemp i18n kickoff (Phase 4 round 25) |
-| 34 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#39 — Auth i18n kickoff (Phase 4 round 26) |
-| 35 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#4 — SelfImprove × 8 hardcoded-content migration |
+| 33 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#38 — This task started adding translation support to the AutoTemp component so its messages can eventually be shown in multiple languages. |
+| 34 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#39 — This task started adding translation support to the Auth (login and authentication) component so its messages can eventually be shown in multiple languages. |
+| 35 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#4 — This task converted eight hardcoded English text templates used by the SelfImprove component, which builds prompts asking the AI model to review and improve its own code, into a translatable format. |
 | 36 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#40 — helix_code/cmd/server/main.go × 10 migration (Phase 4 round 27) |
-| 37 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#41 — PliniusCommon i18n kickoff (Phase 4 round 28) |
+| 37 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#41 — This task added the underlying translation groundwork, including 36 translation entries, to the shared PliniusCommon library, so that any text it produces can later be translated and can safely support many people using the system at the same time. |
 | 38 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#42 — helix_code/applications/terminal_ui × up to 10 migration (Phase 4 round 30) |
 | 39 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#43 — helix_code/applications/desktop i18n (Phase 4 round 29) |
 | 40 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#44 — helix_code/applications/ios infrastructure-only (Phase 4 round 31) |
@@ -61,7 +61,7 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 43 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#47 — helix_code/cmd/config_test × 12 migration (Phase 4 round 34) |
 | 44 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#48 — helix_code/cmd/security_test × 10 migration (Phase 4 round 35) |
 | 45 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#49 — helix_code/cmd/security_fix × 10 migration (Phase 4 round 36) |
-| 46 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#5 — HelixLLM × 2 CLI strings migration |
+| 46 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#5 — This task converted two hardcoded command-line messages in the HelixLLM tool into a translatable format, and added a small new capability that other parts of the system can reuse to do the same kind of translation work. |
 | 47 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#50 — helix_code/cmd/performance_optimization × 10 migration (Phase 4 round 37) |
 | 48 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#51 — helix_code/cmd/security_fix_standalone × 10 of 27 migration (Phase 4 round 38) |
 | 49 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#52 — helix_code/internal/auth × up to 10 migration (Phase 4 round 39) |
@@ -72,22 +72,22 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 54 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#57 — helix_code/internal/context × 8 sites / 5 IDs (Phase 4 round 44) |
 | 55 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#58 — helix_code/internal/database × 8 migration (Phase 4 round 45) |
 | 56 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#59 — helix_code/internal/discovery migration (Phase 4 round 47) |
-| 57 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#6 — harmony_os × 5 CLI headers migration |
+| 57 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#6 — This task converted five hardcoded header messages shown in the command-line interface of the HarmonyOS platform build into a translatable format, so users on that platform see properly localized headers. |
 | 58 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#60 — helix_code/internal/deployment × 10 migration (Phase 4 round 46) |
 | 59 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#61 — helix_code/internal/editor migration (Phase 4 round 48) |
 | 60 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#62 — helix_code/internal/event migration (Phase 4 round 49) |
 | 61 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#63 — helix_code/internal/focus migration (Phase 4 round 50) |
 | 62 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#64 — helix_code/internal/hardware migration (Phase 4 round 51) |
 | 63 | — | Completed (→ Fixed.md) | Task | — | FIX-2026-05-19#65 — Round 74-87 release-gate stabilization — 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
-| 64 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#66 — release-gate-test.sh --skip-env-failures filter |
-| 65 | — | Completed (→ Fixed.md) | Task | — | FIX-2026-05-19#67 — CONST-052 reference-drift sweep (73 submodules) |
+| 64 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#66 — This task added a new option to the project's pre-release testing script that lets it skip test failures caused only by a missing local setup, such as a missing tool or network access, rather than a genuine problem in the code. This keeps release checks from being blocked by environment issues outside the code itself. |
+| 65 | — | Completed (→ Fixed.md) | Task | — | FIX-2026-05-19#67 — This task checked all 73 sub-components of the project to confirm their names followed the project's lowercase naming rules and that every reference to them elsewhere was still accurate, finding and correcting three sub-components where the references had drifted out of sync. |
 | 66 | — | Fixed (→ Fixed.md) | Bug | — | FIX-2026-05-19#68 — challenges go.mod path fix `../Containers`→`../containers` |
 | 67 | High | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#69 — LLMOrchestrator builders × 5 wired — gemini/junie/opencode/claudecode/qwencode CLI binaries |
 | 68 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#7 — DocProcessor CLI × 8 migration — Refactored to runCLI(); 6 tests + mutation; Upstreams recipe fix bonus |
 | 69 | High | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#70 — 4-vendor GPU telemetry chain (NVIDIA+AMD+Apple+Intel) |
-| 70 | High | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#71 — LLM Err coverage 100% across 17 providers |
-| 71 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#8 — Planning × 3 + VisionEngine × 4 migration |
-| 72 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#9 — CONST-046 audit-gate fail-on-new + baseline |
+| 70 | High | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#71 — This task made sure that every one of the 17 different AI-model providers the system can connect to, such as major cloud AI services, correctly reports detailed error information when something goes wrong, instead of failing silently or giving an incomplete error message. |
+| 71 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#8 — This task converted seven hardcoded text messages across the Planning component, which breaks tasks into smaller steps, and the VisionEngine component, which processes images, into a translatable format. Two additional issues were discovered and logged along the way for later attention. |
+| 72 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#9 — This task built an automated check that scans the codebase for any newly added hardcoded English text that bypasses the translation system, and blocks the change if any is found. It starts from a recorded baseline of roughly 55,000 existing text strings still to be migrated over time. |
 | 73 | — | Fixed (→ Fixed.md) | Bug | — | HXA-001 — HXA-001 (ex-ISSUE-009): helix_agent 4 handler tests |
 | 74 | — | Fixed (→ Fixed.md) | Bug | — | HXA-002 — HXA-002 (ex-ISSUE-010): helix_agent debate/llmprovider sibling-submodule API drift |
 | 75 | — | Fixed (→ Fixed.md) | Bug | — | HXA-003 — HXA-003 (ex-ISSUE-011): venice `TestGetCapabilities` CONST-037 model-list drift |
@@ -191,7 +191,7 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 173 | — | Completed (→ Fixed.md) | Task | — | HXC-071 — HXC-071: Web LLM handler httptest coverage for generate and stream |
 | 174 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-072 — CLI /undo and /diff slash commands over autocommit substrate |
 | 175 | — | Implemented (→ Fixed.md) | Feature | — | HXC-072 — HXC-072: CLI /undo and /diff slash commands over autocommit substrate |
-| 176 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-073 — Autocommit git substrate backing CLI edit history |
+| 176 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-073 — The CLI keeps an automatic git-backed history of every edit it makes so users can review and safely roll back changes; this item established that autocommit substrate underneath the edit history. |
 | 177 | — | Implemented (→ Fixed.md) | Feature | — | HXC-073 — HXC-073: Autocommit git substrate backing CLI edit history |
 | 178 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-074 — Mobile gomobile Generate binding for on-device LLM calls |
 | 179 | — | Implemented (→ Fixed.md) | Feature | — | HXC-074 — HXC-074: Mobile gomobile Generate binding for on-device LLM calls |
@@ -278,17 +278,18 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 260 | Low | Completed (→ Fixed.md) | Task | — | HXC-123 — The command-line security-scan helper ships without automated tests covering its behavior, so bugs could go unnoticed until a real scan produces wrong results. The work adds tests verifying the tool's core scanning and reporting logic. The security-scan tool then becomes protected against silent breakage. |
 | 261 | Low | Completed (→ Fixed.md) | Task | — | HXC-125 — A large set of integration tests is hidden behind a build tag, so an ordinary test run never compiles or executes them and their pass/fail signal is absent from routine checks. They pass when the tag is supplied, so this is a visibility gap, not a broken feature. The work makes the standard test command or a documented target include them so their status is always visible. Everyday test results then reflect integration coverage. |
 | 262 | Low | Completed (→ Fixed.md) | Task | — | HXC-127 — When an item is retired as obsolete, governance requires a recorded reason, date, and superseding reference, but the table holding these details is completely empty, including for the one currently obsolete item. This leaves retirements unexplained and non-compliant. The work populates the required justification details for obsolete items so every retired item carries an auditable reason. |
-| 263 | Low | Completed (→ Fixed.md) | Task | — | HXC-129 — Seventy-nine finished feature items have no severity recorded, so risk-ordered validation and reporting cannot rank them by importance. The work backfills an appropriate severity for each item based on its content and impact. Risk-based ordering and reporting then work correctly across the full item set. |
-| 264 | Medium | Completed (→ Fixed.md) | Task | — | HXC-130 — A full build fails on a clean machine because the desktop and mobile graphical apps need system graphics libraries (X11 and OpenGL) that are neither installed nor documented, so newcomers hit a confusing build error with no guidance. The work documents the exact system packages required, the command to install them, and the headless no-graphics build path used for development and continuous integration. Anyone can then build the project or knowingly choose the headless path without surprise failures. |
-| 265 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
-| 266 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
-| 267 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
-| 268 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
-| 269 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
-| 270 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
-| 271 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
-| 272 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
-| 273 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
-| 274 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
-| 275 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
-| 276 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 263 | Low | Completed (→ Fixed.md) | Task | — | HXC-128 — Thirty-six tracked items have descriptions shorter than the minimum length needed to convey what they are about, so a reader cannot understand them without reading code. The work rewrites these into clear plain-language descriptions explaining what each item is and why it matters. Every item then becomes understandable to non-developers and stakeholders. |
+| 264 | Low | Completed (→ Fixed.md) | Task | — | HXC-129 — Seventy-nine finished feature items have no severity recorded, so risk-ordered validation and reporting cannot rank them by importance. The work backfills an appropriate severity for each item based on its content and impact. Risk-based ordering and reporting then work correctly across the full item set. |
+| 265 | Medium | Completed (→ Fixed.md) | Task | — | HXC-130 — A full build fails on a clean machine because the desktop and mobile graphical apps need system graphics libraries (X11 and OpenGL) that are neither installed nor documented, so newcomers hit a confusing build error with no guidance. The work documents the exact system packages required, the command to install them, and the headless no-graphics build path used for development and continuous integration. Anyone can then build the project or knowingly choose the headless path without surprise failures. |
+| 266 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
+| 267 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
+| 268 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
+| 269 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
+| 270 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
+| 271 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
+| 272 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
+| 273 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
+| 274 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
+| 275 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
+| 276 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 277 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |

@@ -583,12 +583,11 @@ Implement CLI /undo and /diff commands that revert and show changes against the 
 
 **Status:** Implemented (→ Fixed.md)
 **Type:** Feature
-**Evidence:** commit:61d7167e autocommit git substrate
-**Severity:** High
+**Severity:** Medium
 **Created-By:** Claude
 **Assigned-To:** Claude
 
-Add an autocommit git substrate that snapshots edits so /undo and /diff operate on real commits rather than in-memory state (commit 61d7167e).
+The CLI keeps an automatic git-backed history of every edit it makes so users can review and safely roll back changes; this item established that autocommit substrate underneath the edit history.
 
 ## HXC-074 — Mobile gomobile Generate binding for on-device LLM calls
 
@@ -1119,4 +1118,14 @@ When an item is retired as obsolete, governance requires a recorded reason, date
 **Created-By:** Claude
 
 Seventy-nine finished feature items have no severity recorded, so risk-ordered validation and reporting cannot rank them by importance. The work backfills an appropriate severity for each item based on its content and impact. Risk-based ordering and reporting then work correctly across the full item set.
+
+## HXC-128 — Thirty-six work items have descriptions too short to be understandable
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/fdbtool_hygiene_20260712T071056Z/W2C_hygiene_proposals.jsonl
+**Severity:** Low
+**Created-By:** Claude
+
+Thirty-six tracked items have descriptions shorter than the minimum length needed to convey what they are about, so a reader cannot understand them without reading code. The work rewrites these into clear plain-language descriptions explaining what each item is and why it matters. Every item then becomes understandable to non-developers and stakeholders.
 

@@ -620,12 +620,3 @@ One automated quality-assurance test bank that drives real server workflows has 
 
 Eleven work items marked finished still appear in the open-issues document and are missing from the resolved-items document, so the two views disagree about their state and become untrustworthy. The work regenerates the tracker documents from the authoritative database so finished items appear only in the resolved view. The human-readable trackers then accurately reflect the true state.
 
-## HXC-128 — Thirty-six work items have descriptions too short to be understandable
-
-**Status:** Queued
-**Type:** Task
-**Severity:** Low
-**Created-By:** Claude
-
-Thirty-six tracked items have descriptions shorter than the minimum length needed to convey what they are about, so a reader cannot understand them without reading code. The work rewrites these into clear plain-language descriptions explaining what each item is and why it matters. Every item then becomes understandable to non-developers and stakeholders.
-

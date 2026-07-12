@@ -3070,13 +3070,12 @@ control (commit bd5228f8).</p>
 id="hxc-073-autocommit-git-substrate-backing-cli-edit-history">HXC-073 —
 Autocommit git substrate backing CLI edit history</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
-<strong>Type:</strong> Feature <strong>Evidence:</strong>
-commit:61d7167e autocommit git substrate <strong>Severity:</strong> High
+<strong>Type:</strong> Feature <strong>Severity:</strong> Medium
 <strong>Created-By:</strong> Claude <strong>Assigned-To:</strong>
 Claude</p>
-<p>Add an autocommit git substrate that snapshots edits so /undo and
-/diff operate on real commits rather than in-memory state (commit
-61d7167e).</p>
+<p>The CLI keeps an automatic git-backed history of every edit it makes
+so users can review and safely roll back changes; this item established
+that autocommit substrate underneath the edit history.</p>
 <h2
 id="hxc-074-mobile-gomobile-generate-binding-for-on-device-llm-calls">HXC-074
 — Mobile gomobile Generate binding for on-device LLM calls</h2>
@@ -3971,6 +3970,20 @@ risk-ordered validation and reporting cannot rank them by importance.
 The work backfills an appropriate severity for each item based on its
 content and impact. Risk-based ordering and reporting then work
 correctly across the full item set.</p>
+<h2
+id="hxc-128-thirty-six-work-items-have-descriptions-too-short-to-be-understandable">HXC-128
+— Thirty-six work items have descriptions too short to be
+understandable</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/qa/fdbtool_hygiene_20260712T071056Z/W2C_hygiene_proposals.jsonl
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude</p>
+<p>Thirty-six tracked items have descriptions shorter than the minimum
+length needed to convey what they are about, so a reader cannot
+understand them without reading code. The work rewrites these into clear
+plain-language descriptions explaining what each item is and why it
+matters. Every item then becomes understandable to non-developers and
+stakeholders.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />

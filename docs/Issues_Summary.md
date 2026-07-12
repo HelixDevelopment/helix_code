@@ -12,8 +12,8 @@ Open workable items (current_location = Issues), regenerated from the SQLite sin
 | Feature | Queued | 2 |
 | Task | Completed (→ Fixed.md) | 18 |
 | Task | Fixed (→ Fixed.md) | 1 |
-| Task | Queued | 3 |
-| **TOTAL** | | **48** |
+| Task | Queued | 2 |
+| **TOTAL** | | **47** |
 
 ## Items
 
@@ -60,7 +60,6 @@ Open workable items (current_location = Issues), regenerated from the SQLite sin
 | HXC-122 | Task | Queued | Medium | Two categories of tests, memory-usage and end-to-end automation, skip most of their cases by default because they require a live server or special environment flags not set in normal runs. In practice these areas are largely unverified even though the tests appear to exist. The work provides a documented, repeatable way to run them against real infrastructure so they actually execute and prove the behavior. Memory and automation behavior then becomes genuinely tested rather than merely scaffolded. |
 | HXC-124 | Bug | Queued | Medium | One automated quality-assurance test bank that drives real server workflows has a documented gap: it cannot mint the authentication token needed to finish the workflow end-to-end without manual help, so it does not meet the fully-automated no-human-intervention standard. The work provides an automated way to obtain a valid token during the test so the workflow runs unattended. The QA bank then becomes fully automated and re-runnable. |
 | HXC-126 | Task | Queued | Medium | Eleven work items marked finished still appear in the open-issues document and are missing from the resolved-items document, so the two views disagree about their state and become untrustworthy. The work regenerates the tracker documents from the authoritative database so finished items appear only in the resolved view. The human-readable trackers then accurately reflect the true state. |
-| HXC-128 | Task | Queued | Low | Thirty-six tracked items have descriptions shorter than the minimum length needed to convey what they are about, so a reader cannot understand them without reading code. The work rewrites these into clear plain-language descriptions explaining what each item is and why it matters. Every item then becomes understandable to non-developers and stakeholders. |
 | HXL-001 | Bug | Fixed (→ Fixed.md) | — | HelixLLM `internal/agents/tools/analysis_test.go` hardcoded absolute path |
 | HXL-002 | Bug | Fixed (→ Fixed.md) | — | HelixLLM `internal/gateway/middleware` TOON `WriteTOON` returns 500 |
 | HXQ-001 | Bug | Fixed (→ Fixed.md) | — | helix_qa intermittent TestPerformance flake (host-load-sensitive) |
