@@ -1200,3 +1200,23 @@ A vendored copy of a third-party reference coding-agent (the Continue project) i
 
 The MCP module's Docker adapter crashes with a null-pointer error when asked to stop a container that was never started or does not exist, instead of returning cleanly. This can bring down callers that expect a safe no-op. The work is to guard the stop path so a not-started or missing container is handled gracefully. The adapter becomes robust against stop-before-start and missing-container situations.
 
+## HXC-134 — Model verifier returns the model id as a number but the platform expects text
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/hxc134_20260712T124602Z/EVIDENCE.md
+**Severity:** Medium
+**Created-By:** Claude
+
+The central model-verifier service reports each model's id as a numeric value, while HelixCode expects the id as text — a type mismatch that can break how verified models are matched and displayed. The work is to align the two so the id is consistently text end to end. Correct model identity keeps verification, listing, and status accurate for users.
+
+## HXC-140 — helix_qa copies a lock by value and one test-bank test fails
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/hxc140_20260712T124724Z/EVIDENCE.md
+**Severity:** Medium
+**Created-By:** Claude
+
+The quality-assurance module has code that copies a value containing a lock (a mutex) instead of sharing it, which the Go checker flags as unsafe and can cause subtle concurrency bugs; separately, one test that loads real test banks is failing. The work is to pass the lock-bearing value by reference (pointer) instead of copying it, and to fix or reconcile the failing test-bank test. This makes the QA module concurrency-safe and its tests green.
+

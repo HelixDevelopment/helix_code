@@ -197,7 +197,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Queued</td>
-<td>3</td>
+<td>1</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -227,7 +227,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>51</strong></td>
+<td><strong>49</strong></td>
 </tr>
 </tbody>
 </table>
@@ -601,18 +601,6 @@ finished items appear only in the resolved view. The human-readable
 trackers then accurately reflect the true state.</td>
 </tr>
 <tr>
-<td>HXC-134</td>
-<td>Bug</td>
-<td>Queued</td>
-<td>Medium</td>
-<td>The central model-verifier service reports each model’s id as a
-numeric value, while HelixCode expects the id as text — a type mismatch
-that can break how verified models are matched and displayed. The work
-is to align the two so the id is consistently text end to end. Correct
-model identity keeps verification, listing, and status accurate for
-users.</td>
-</tr>
-<tr>
 <td>HXC-135</td>
 <td>Feature</td>
 <td>Queued</td>
@@ -649,19 +637,6 @@ executed against a live server with a real model to confirm the complete
 user journeys work. The work is to stand up a server and run the
 challenges, capturing the results. This provides real proof that the
 headline user workflows function end to end.</td>
-</tr>
-<tr>
-<td>HXC-140</td>
-<td>Bug</td>
-<td>Queued</td>
-<td>Medium</td>
-<td>The quality-assurance module has code that copies a value containing
-a lock (a mutex) instead of sharing it, which the Go checker flags as
-unsafe and can cause subtle concurrency bugs; separately, one test that
-loads real test banks is failing. The work is to pass the lock-bearing
-value by reference (pointer) instead of copying it, and to fix or
-reconcile the failing test-bank test. This makes the QA module
-concurrency-safe and its tests green.</td>
 </tr>
 <tr>
 <td>HXL-001</td>

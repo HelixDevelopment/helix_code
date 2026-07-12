@@ -192,7 +192,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>134</td>
+<td>136</td>
 </tr>
 <tr>
 <td>Bug</td>
@@ -212,7 +212,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>284</strong></td>
+<td><strong>286</strong></td>
 </tr>
 </tbody>
 </table>
@@ -2874,6 +2874,19 @@ test suite reliable regardless of how it is run.</td>
 <tr>
 <td>270</td>
 <td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-134 — The central model-verifier service reports each model’s id
+as a numeric value, while HelixCode expects the id as text — a type
+mismatch that can break how verified models are matched and displayed.
+The work is to align the two so the id is consistently text end to end.
+Correct model identity keeps verification, listing, and status accurate
+for users.</td>
+</tr>
+<tr>
+<td>271</td>
+<td>Medium</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
 <td>—</td>
@@ -2885,7 +2898,7 @@ assures that the whole codebase, not just the main application, is in
 good shape.</td>
 </tr>
 <tr>
-<td>271</td>
+<td>272</td>
 <td>High</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2901,7 +2914,21 @@ build-ignore or nested module marker). Developers regain a clean,
 buildable agent module.</td>
 </tr>
 <tr>
-<td>272</td>
+<td>273</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-140 — The quality-assurance module has code that copies a value
+containing a lock (a mutex) instead of sharing it, which the Go checker
+flags as unsafe and can cause subtle concurrency bugs; separately, one
+test that loads real test banks is failing. The work is to pass the
+lock-bearing value by reference (pointer) instead of copying it, and to
+fix or reconcile the failing test-bank test. This makes the QA module
+concurrency-safe and its tests green.</td>
+</tr>
+<tr>
+<td>274</td>
 <td>Medium</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2915,7 +2942,7 @@ becomes robust against stop-before-start and missing-container
 situations.</td>
 </tr>
 <tr>
-<td>273</td>
+<td>275</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2924,7 +2951,7 @@ situations.</td>
 hardcoded path</td>
 </tr>
 <tr>
-<td>274</td>
+<td>276</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2932,7 +2959,7 @@ hardcoded path</td>
 <td>HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
 </tr>
 <tr>
-<td>275</td>
+<td>277</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2941,7 +2968,7 @@ hardcoded path</td>
 <code>TestPerformance</code> flake (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>276</td>
+<td>278</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2951,7 +2978,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 <code>tests/integration</code> compile</td>
 </tr>
 <tr>
-<td>277</td>
+<td>279</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2960,7 +2987,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 failures (CLI-integration + verification/scoring)</td>
 </tr>
 <tr>
-<td>278</td>
+<td>280</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2969,7 +2996,7 @@ failures (CLI-integration + verification/scoring)</td>
 10 pre-existing test failures</td>
 </tr>
 <tr>
-<td>279</td>
+<td>281</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2979,7 +3006,7 @@ failures (CLI-integration + verification/scoring)</td>
 production mock-bluff</td>
 </tr>
 <tr>
-<td>280</td>
+<td>282</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2988,7 +3015,7 @@ production mock-bluff</td>
 <code>CreatePromptExperiment</code> test failures</td>
 </tr>
 <tr>
-<td>281</td>
+<td>283</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2998,7 +3025,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>282</td>
+<td>284</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3007,7 +3034,7 @@ corrupts non-ASCII)</td>
 <code>helix-gitlab</code> URL fix (was misconfigured, not missing)</td>
 </tr>
 <tr>
-<td>283</td>
+<td>285</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3017,7 +3044,7 @@ corrupts non-ASCII)</td>
 93c830a</td>
 </tr>
 <tr>
-<td>284</td>
+<td>286</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>

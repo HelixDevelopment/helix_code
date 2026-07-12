@@ -611,15 +611,6 @@ Two categories of tests, memory-usage and end-to-end automation, skip most of th
 
 Eleven work items marked finished still appear in the open-issues document and are missing from the resolved-items document, so the two views disagree about their state and become untrustworthy. The work regenerates the tracker documents from the authoritative database so finished items appear only in the resolved view. The human-readable trackers then accurately reflect the true state.
 
-## HXC-134 — Model verifier returns the model id as a number but the platform expects text
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-
-The central model-verifier service reports each model's id as a numeric value, while HelixCode expects the id as text — a type mismatch that can break how verified models are matched and displayed. The work is to align the two so the id is consistently text end to end. Correct model identity keeps verification, listing, and status accurate for users.
-
 ## HXC-135 — Model verifier should publish the six advanced-capability flags so the platform can show them
 
 **Status:** Queued
@@ -646,13 +637,4 @@ Several mandated automated test categories — load/denial-of-service, scaling, 
 **Created-By:** Claude
 
 The end-to-end challenge runner can now launch all its scenarios (a missing option was just fixed), but the scenarios still need to be executed against a live server with a real model to confirm the complete user journeys work. The work is to stand up a server and run the challenges, capturing the results. This provides real proof that the headline user workflows function end to end.
-
-## HXC-140 — helix_qa copies a lock by value and one test-bank test fails
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-
-The quality-assurance module has code that copies a value containing a lock (a mutex) instead of sharing it, which the Go checker flags as unsafe and can cause subtle concurrency bugs; separately, one test that loads real test banks is failing. The work is to pass the lock-bearing value by reference (pointer) instead of copying it, and to fix or reconcile the failing test-bank test. This makes the QA module concurrency-safe and its tests green.
 
