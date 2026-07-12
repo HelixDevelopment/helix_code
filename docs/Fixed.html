@@ -6181,6 +6181,28 @@ enabled. The work is to apply the same applyRAGContext wiring to those
 facade handlers so RAG behaves consistently across every generate
 surface. This is a smaller secondary surface than the native path
 already fixed. Found during HXC-118 review 2026-07-12.</p>
+<h2
+id="hxc-149-stale-git-gitlink-at-pre-rename-path-containers-breaks-git-submodule-walk">HXC-149
+— Stale git gitlink at pre-rename path containers breaks git submodule
+walk</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+docs/qa/hxc149_20260712T173500Z/EVIDENCE.md <strong>Severity:</strong>
+Medium <strong>Created-By:</strong> Claude</p>
+<p>The main repository git index carries approximately 70 stale
+submodule gitlinks at pre-rename paths
+(dependencies/HelixDevelopment/<em>, dependencies/vasic-digital/</em>,
+and top-level helix_agent/helix_qa/panoptic/security) with no
+.gitmodules mapping, left over from a historical path-rename to the
+submodules/ layout. As a result git submodule status and git submodule
+foreach abort mid-walk with no submodule mapping found in .gitmodules
+for path …, so any release or maintenance script that walks all
+submodules unfiltered fails partway. The work is to remove ALL stale
+cached gitlinks (git rm –cached on each) so the submodule set is
+consistent with .gitmodules and submodule-walking tooling completes.
+This is a git-index-only change, reversible via git reset. Found by the
+2026-07-12 release-readiness survey. Low runtime risk but blocks release
+automation.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />

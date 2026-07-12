@@ -192,7 +192,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>160</td>
+<td>161</td>
 </tr>
 <tr>
 <td>Bug</td>
@@ -217,7 +217,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>339</strong></td>
+<td><strong>340</strong></td>
 </tr>
 </tbody>
 </table>
@@ -3441,6 +3441,27 @@ surface than the native path already fixed. Found during HXC-118 review
 </tr>
 <tr>
 <td>321</td>
+<td>Medium</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-149 — The main repository git index carries approximately 70
+stale submodule gitlinks at pre-rename paths
+(dependencies/HelixDevelopment/<em>, dependencies/vasic-digital/</em>,
+and top-level helix_agent/helix_qa/panoptic/security) with no
+.gitmodules mapping, left over from a historical path-rename to the
+submodules/ layout. As a result git submodule status and git submodule
+foreach abort mid-walk with no submodule mapping found in .gitmodules
+for path …, so any release or maintenance script that walks all
+submodules unfiltered fails partway. The work is to remove ALL stale
+cached gitlinks (git rm –cached on each) so the submodule set is
+consistent with .gitmodules and submodule-walking tooling completes.
+This is a git-index-only change, reversible via git reset. Found by the
+2026-07-12 release-readiness survey. Low runtime risk but blocks release
+automation.</td>
+</tr>
+<tr>
+<td>322</td>
 <td>Low</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3457,7 +3478,7 @@ retest). The work is to align the harness env-var names/defaults with
 test-harness only.</td>
 </tr>
 <tr>
-<td>322</td>
+<td>323</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3467,7 +3488,7 @@ test-harness only.</td>
 path</td>
 </tr>
 <tr>
-<td>323</td>
+<td>324</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3476,7 +3497,7 @@ path</td>
 hardcoded path</td>
 </tr>
 <tr>
-<td>324</td>
+<td>325</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3485,7 +3506,7 @@ hardcoded path</td>
 <code>WriteTOON</code> returns 500</td>
 </tr>
 <tr>
-<td>325</td>
+<td>326</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3493,7 +3514,7 @@ hardcoded path</td>
 <td>HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
 </tr>
 <tr>
-<td>326</td>
+<td>327</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3502,7 +3523,7 @@ hardcoded path</td>
 (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>327</td>
+<td>328</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3511,7 +3532,7 @@ hardcoded path</td>
 <code>TestPerformance</code> flake (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>328</td>
+<td>329</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3521,7 +3542,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 <code>tests/integration</code> compile</td>
 </tr>
 <tr>
-<td>329</td>
+<td>330</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3530,7 +3551,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 failures (CLI-integration + verification/scoring)</td>
 </tr>
 <tr>
-<td>330</td>
+<td>331</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3539,7 +3560,7 @@ failures (CLI-integration + verification/scoring)</td>
 pre-existing test failures</td>
 </tr>
 <tr>
-<td>331</td>
+<td>332</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3548,7 +3569,7 @@ pre-existing test failures</td>
 10 pre-existing test failures</td>
 </tr>
 <tr>
-<td>332</td>
+<td>333</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3558,7 +3579,7 @@ pre-existing test failures</td>
 production mock-bluff</td>
 </tr>
 <tr>
-<td>333</td>
+<td>334</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3567,7 +3588,7 @@ production mock-bluff</td>
 <code>CreatePromptExperiment</code> test failures</td>
 </tr>
 <tr>
-<td>334</td>
+<td>335</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3577,7 +3598,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>335</td>
+<td>336</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3587,7 +3608,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>336</td>
+<td>337</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3596,7 +3617,7 @@ corrupts non-ASCII)</td>
 (404) — CLOSED (→ Fixed.md)</td>
 </tr>
 <tr>
-<td>337</td>
+<td>338</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -3605,7 +3626,7 @@ corrupts non-ASCII)</td>
 <code>helix-gitlab</code> URL fix (was misconfigured, not missing)</td>
 </tr>
 <tr>
-<td>338</td>
+<td>339</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -3615,7 +3636,7 @@ corrupts non-ASCII)</td>
 93c830a</td>
 </tr>
 <tr>
-<td>339</td>
+<td>340</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>

@@ -1837,3 +1837,13 @@ The load/DDoS test harness (tests/ddos, -tags=integration) reads TEST_PG_* and T
 
 HXC-118 wired Retrieval-Augmented-Generation into the native server generate and stream endpoints and the CLI, but the OpenAI-compatible and Anthropic-compatible wire-facade endpoints (/v1/chat/completions and /v1/messages) still bypass RAG entirely, so clients using those compatibility surfaces do not get retrieval-augmentation even when it is enabled. The work is to apply the same applyRAGContext wiring to those facade handlers so RAG behaves consistently across every generate surface. This is a smaller secondary surface than the native path already fixed. Found during HXC-118 review 2026-07-12.
 
+## HXC-149 — Stale git gitlink at pre-rename path containers breaks git submodule walk
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/hxc149_20260712T173500Z/EVIDENCE.md
+**Severity:** Medium
+**Created-By:** Claude
+
+The main repository git index carries approximately 70 stale submodule gitlinks at pre-rename paths (dependencies/HelixDevelopment/*, dependencies/vasic-digital/*, and top-level helix_agent/helix_qa/panoptic/security) with no .gitmodules mapping, left over from a historical path-rename to the submodules/ layout. As a result git submodule status and git submodule foreach abort mid-walk with no submodule mapping found in .gitmodules for path ..., so any release or maintenance script that walks all submodules unfiltered fails partway. The work is to remove ALL stale cached gitlinks (git rm --cached on each) so the submodule set is consistent with .gitmodules and submodule-walking tooling completes. This is a git-index-only change, reversible via git reset. Found by the 2026-07-12 release-readiness survey. Low runtime risk but blocks release automation.
+

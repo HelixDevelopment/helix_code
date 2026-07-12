@@ -105,12 +105,3 @@ The e2e challenge runner advertises multiple interface modes (cli, rest, tui, we
 
 Running the (now-compilable) automation test binary against the live OpenRouter API, TestAllFreeProvidersAutomation Provider_OpenRouter BasicGeneration panics with a nil-pointer dereference: the configured free model id deepseek-r1-free is stale/rejected and the code path is missing a nil-check on the error before using the response. Users of the OpenRouter free provider with that model would hit the same crash. The work is to correct the free-provider model id (sourced from the verifier as single source of truth) and add the missing nil-check so a rejected model degrades gracefully instead of panicking. NOTE this environment has live provider API keys set so provider tests spend real money; guard/skip accordingly. Found 2026-07-12.
 
-## HXC-149 — Stale git gitlink at pre-rename path containers breaks git submodule walk
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-**Created-By:** Claude
-
-The main repository git index carries a stale submodule gitlink at the old top-level path containers (from before the rename to submodules/containers), but .gitmodules only maps submodules/containers. As a result git submodule status and git submodule foreach abort mid-walk with 'no submodule mapping found in .gitmodules for path containers', so any release or maintenance script that walks all submodules unfiltered fails partway. The work is to remove the stale cached gitlink (git rm --cached containers) so the submodule set is consistent with .gitmodules and submodule-walking tooling completes. Found by the 2026-07-12 release-readiness survey. Low runtime risk but blocks release automation; the fix is a git-index-only change, reversible.
-

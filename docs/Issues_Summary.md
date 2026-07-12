@@ -6,10 +6,10 @@ Open workable items (current_location = Issues), regenerated from the SQLite sin
 
 | Type | Status | Count |
 |---|---|---|
-| Bug | Queued | 3 |
+| Bug | Queued | 2 |
 | Feature | Queued | 1 |
 | Task | Queued | 1 |
-| **TOTAL** | | **5** |
+| **TOTAL** | | **4** |
 
 ## Items
 
@@ -19,4 +19,3 @@ Open workable items (current_location = Issues), regenerated from the SQLite sin
 | HXC-145 | Bug | Queued | Low | During the real-infra retest the Xiaomi provider chaos tests failed 2 of 5 because the model id configured for Xiaomi (mimo-v2-flash) is rejected by the live Xiaomi API, indicating the configured model name is stale or wrong. Users selecting the Xiaomi provider with that model would get errors. The work is to determine the correct current Xiaomi model id (from the provider or the verifier as single source of truth) and update the configuration so Xiaomi requests succeed. Evidence: docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Xiaomi 3/5). |
 | HXC-146 | Task | Queued | Medium | The e2e challenge runner advertises multiple interface modes (cli, rest, tui, websocket) but none of them actually exercises the HelixCode server's real HTTP API during a run, so the challenges validate the runner's own logic rather than the shipped server endpoints. This is a documentation-versus-implementation gap that weakens the end-to-end proof. The work is to wire the challenge runner's interfaces to genuinely call the running server's HTTP API so the challenges prove the real user-facing endpoints work. Discovered 2026-07-12 real-infra retest. Evidence: docs/qa/infra_retest_20260712_hxc122_138/hxc138_challenge_report.json. |
 | HXC-147 | Bug | Queued | Medium | Running the (now-compilable) automation test binary against the live OpenRouter API, TestAllFreeProvidersAutomation Provider_OpenRouter BasicGeneration panics with a nil-pointer dereference: the configured free model id deepseek-r1-free is stale/rejected and the code path is missing a nil-check on the error before using the response. Users of the OpenRouter free provider with that model would hit the same crash. The work is to correct the free-provider model id (sourced from the verifier as single source of truth) and add the missing nil-check so a rejected model degrades gracefully instead of panicking. NOTE this environment has live provider API keys set so provider tests spend real money; guard/skip accordingly. Found 2026-07-12. |
-| HXC-149 | Bug | Queued | Medium | The main repository git index carries approximately 70 stale submodule gitlinks at pre-rename paths (dependencies/HelixDevelopment/*, dependencies/vasic-digital/*, and top-level helix_agent/helix_qa/panoptic/security) with no .gitmodules mapping, left over from a historical path-rename to the submodules/ layout. As a result git submodule status and git submodule foreach abort mid-walk with no submodule mapping found in .gitmodules for path ..., so any release or maintenance script that walks all submodules unfiltered fails partway. The work is to remove ALL stale cached gitlinks (git rm --cached on each) so the submodule set is consistent with .gitmodules and submodule-walking tooling completes. This is a git-index-only change, reversible via git reset. Found by the 2026-07-12 release-readiness survey. Low runtime risk but blocks release automation. |
