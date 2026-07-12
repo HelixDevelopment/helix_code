@@ -1787,3 +1787,13 @@ A dedicated Retrieval-Augmented-Generation component is maintained as its own re
 
 Under the sustained request-flood chaos test against the real running server, the goroutine count grew by 5 which exceeds the tolerance of 4, signalling a goroutine leak in a request-handling path when the server is hammered. Left unaddressed this degrades long-running server stability under load. The work is to find the leaking goroutine (likely an unclosed channel, context, or connection in a hot handler) and fix it so the count stays within tolerance under flood. Evidence: docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md (Server 7/8).
 
+## HXC-122 — Memory and automation test suites mostly skip themselves without a running server
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/infra_retest_20260712_hxc122_138/EVIDENCE.md
+**Severity:** Medium
+**Created-By:** Claude
+
+Two categories of tests, memory-usage and end-to-end automation, skip most of their cases by default because they require a live server or special environment flags not set in normal runs. In practice these areas are largely unverified even though the tests appear to exist. The work provides a documented, repeatable way to run them against real infrastructure so they actually execute and prove the behavior. Memory and automation behavior then becomes genuinely tested rather than merely scaffolded.
+

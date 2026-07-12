@@ -78,15 +78,6 @@ For submodules not listed above, default to the first 3 letters of the submodule
 
 Governance rule CONST-040 lists the Agent Client Protocol among required capabilities, but there is no implementation of it anywhere in the codebase. Any user or integration expecting ACP connectivity currently cannot use it. The work is to design and implement real ACP support, or, if it proves structurally infeasible, to document that with cited evidence. The platform will then either genuinely support ACP or hold an honest, evidenced position instead of an unmet claim.
 
-## HXC-122 — Memory and automation test suites mostly skip themselves without a running server
-
-**Status:** Queued
-**Type:** Task
-**Severity:** Medium
-**Created-By:** Claude
-
-Two categories of tests, memory-usage and end-to-end automation, skip most of their cases by default because they require a live server or special environment flags not set in normal runs. In practice these areas are largely unverified even though the tests appear to exist. The work provides a documented, repeatable way to run them against real infrastructure so they actually execute and prove the behavior. Memory and automation behavior then becomes genuinely tested rather than merely scaffolded.
-
 ## HXC-136 — Verify the remaining automated test types run with real captured evidence
 
 **Status:** Queued
@@ -140,4 +131,13 @@ Running the (now-compilable) automation test binary against the live OpenRouter 
 **Created-By:** Claude
 
 HXC-118 wired Retrieval-Augmented-Generation into the native server generate and stream endpoints and the CLI, but the OpenAI-compatible and Anthropic-compatible wire-facade endpoints (/v1/chat/completions and /v1/messages) still bypass RAG entirely, so clients using those compatibility surfaces do not get retrieval-augmentation even when it is enabled. The work is to apply the same applyRAGContext wiring to those facade handlers so RAG behaves consistently across every generate surface. This is a smaller secondary surface than the native path already fixed. Found during HXC-118 review 2026-07-12.
+
+## HXC-149 — Stale git gitlink at pre-rename path containers breaks git submodule walk
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** Medium
+**Created-By:** Claude
+
+The main repository git index carries a stale submodule gitlink at the old top-level path containers (from before the rename to submodules/containers), but .gitmodules only maps submodules/containers. As a result git submodule status and git submodule foreach abort mid-walk with 'no submodule mapping found in .gitmodules for path containers', so any release or maintenance script that walks all submodules unfiltered fails partway. The work is to remove the stale cached gitlink (git rm --cached containers) so the submodule set is consistent with .gitmodules and submodule-walking tooling completes. Found by the 2026-07-12 release-readiness survey. Low runtime risk but blocks release automation; the fix is a git-index-only change, reversible.
 

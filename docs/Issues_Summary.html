@@ -192,7 +192,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Queued</td>
-<td>2</td>
+<td>3</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -202,7 +202,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Task</td>
 <td>Queued</td>
-<td>5</td>
+<td>4</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
@@ -242,20 +242,6 @@ currently cannot use it. The work is to design and implement real ACP
 support, or, if it proves structurally infeasible, to document that with
 cited evidence. The platform will then either genuinely support ACP or
 hold an honest, evidenced position instead of an unmet claim.</td>
-</tr>
-<tr>
-<td>HXC-122</td>
-<td>Task</td>
-<td>Queued</td>
-<td>Medium</td>
-<td>Two categories of tests, memory-usage and end-to-end automation,
-skip most of their cases by default because they require a live server
-or special environment flags not set in normal runs. In practice these
-areas are largely unverified even though the tests appear to exist. The
-work provides a documented, repeatable way to run them against real
-infrastructure so they actually execute and prove the behavior. Memory
-and automation behavior then becomes genuinely tested rather than merely
-scaffolded.</td>
 </tr>
 <tr>
 <td>HXC-136</td>
@@ -343,6 +329,24 @@ enabled. The work is to apply the same applyRAGContext wiring to those
 facade handlers so RAG behaves consistently across every generate
 surface. This is a smaller secondary surface than the native path
 already fixed. Found during HXC-118 review 2026-07-12.</td>
+</tr>
+<tr>
+<td>HXC-149</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>The main repository git index carries a stale submodule gitlink at
+the old top-level path containers (from before the rename to
+submodules/containers), but .gitmodules only maps submodules/containers.
+As a result git submodule status and git submodule foreach abort
+mid-walk with ‘no submodule mapping found in .gitmodules for path
+containers’, so any release or maintenance script that walks all
+submodules unfiltered fails partway. The work is to remove the stale
+cached gitlink (git rm –cached containers) so the submodule set is
+consistent with .gitmodules and submodule-walking tooling completes.
+Found by the 2026-07-12 release-readiness survey. Low runtime risk but
+blocks release automation; the fix is a git-index-only change,
+reversible.</td>
 </tr>
 </tbody>
 </table>
