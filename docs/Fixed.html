@@ -6239,6 +6239,24 @@ as single source of truth) and add the missing nil-check so a rejected
 model degrades gracefully instead of panicking. NOTE this environment
 has live provider API keys set so provider tests spend real money;
 guard/skip accordingly. Found 2026-07-12.</p>
+<h2
+id="hxc-146-e2e-challenge-runner-interfaces-cliresttuiwebsocket-do-not-drive-the-real-server-http-api">HXC-146
+— E2E challenge runner interfaces (cli/rest/tui/websocket) do not drive
+the real server HTTP API</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Task <strong>Evidence:</strong>
+docs/qa/hxc146_20260712T191000Z/EVIDENCE.md <strong>Severity:</strong>
+Medium <strong>Created-By:</strong> Claude</p>
+<p>The e2e challenge runner advertises multiple interface modes (cli,
+rest, tui, websocket) but none of them actually exercises the HelixCode
+server’s real HTTP API during a run, so the challenges validate the
+runner’s own logic rather than the shipped server endpoints. This is a
+documentation-versus-implementation gap that weakens the end-to-end
+proof. The work is to wire the challenge runner’s interfaces to
+genuinely call the running server’s HTTP API so the challenges prove the
+real user-facing endpoints work. Discovered 2026-07-12 real-infra
+retest. Evidence:
+docs/qa/infra_retest_20260712_hxc122_138/hxc138_challenge_report.json.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />
