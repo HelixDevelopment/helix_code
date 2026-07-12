@@ -197,7 +197,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Queued</td>
-<td>2</td>
+<td>5</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -207,7 +207,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Feature</td>
 <td>Queued</td>
-<td>2</td>
+<td>3</td>
 </tr>
 <tr>
 <td>Task</td>
@@ -222,12 +222,12 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Task</td>
 <td>Queued</td>
-<td>2</td>
+<td>6</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>47</strong></td>
+<td><strong>55</strong></td>
 </tr>
 </tbody>
 </table>
@@ -612,6 +612,108 @@ views disagree about their state and become untrustworthy. The work
 regenerates the tracker documents from the authoritative database so
 finished items appear only in the resolved view. The human-readable
 trackers then accurately reflect the true state.</td>
+</tr>
+<tr>
+<td>HXC-131</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>The client that talks to the Cognee memory service stopped
+completing its login and caching the access token — its tests show the
+login endpoint is never called and no bearer token is stored, so
+authenticated calls would fail. This means memory features that rely on
+Cognee cannot authenticate reliably. The work is to restore the
+login-then-cache-token flow and prove it with the existing auth tests.
+Users regain dependable access to Cognee-backed memory.</td>
+</tr>
+<tr>
+<td>HXC-132</td>
+<td>Task</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>The full-infrastructure test stack fails to build the HelixCode
+server container because its build recipe points at a Dockerfile path
+that does not exist, and many memory and security tests skip themselves
+because they look for a server on a fixed port 8080 with no way to
+override it. As a result a whole class of tests never run against a real
+server. The work is to fix the container build path and make the server
+URL configurable so those tests execute. This unlocks real end-to-end
+coverage of server-dependent features.</td>
+</tr>
+<tr>
+<td>HXC-133</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>Low</td>
+<td>One Azure-provider test quietly depends on an endpoint value being
+present in the environment; when that value is injected by the full-test
+setup the test’s assumptions no longer hold. It does not crash, but it
+is fragile and can give misleading results depending on the environment.
+The work is to make the test hermetic (control its own environment) like
+the sibling test already fixed. This makes the Azure test suite reliable
+regardless of how it is run.</td>
+</tr>
+<tr>
+<td>HXC-134</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>The central model-verifier service reports each model’s id as a
+numeric value, while HelixCode expects the id as text — a type mismatch
+that can break how verified models are matched and displayed. The work
+is to align the two so the id is consistently text end to end. Correct
+model identity keeps verification, listing, and status accurate for
+users.</td>
+</tr>
+<tr>
+<td>HXC-135</td>
+<td>Feature</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>HelixCode is now wired to read six advanced capability indicators
+(tool protocols, code intelligence, retrieval, skills, plugins) from the
+central verifier, but the verifier’s live responses do not yet include
+those fields, so the flags always read as unsupported. The work is to
+have the verifier publish these capability values it already computes.
+Then users see accurate per-model capability information across the
+product.</td>
+</tr>
+<tr>
+<td>HXC-136</td>
+<td>Task</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>Several mandated automated test categories — load/denial-of-service,
+scaling, stress and chaos, and user-interface/experience — were not
+exercised in the latest real-infrastructure run, so their current health
+is unconfirmed. The work is to run each of these test types against real
+infrastructure and capture proof of the results. This completes the
+promised full test-type coverage and confirms the product holds up under
+load and adverse conditions.</td>
+</tr>
+<tr>
+<td>HXC-137</td>
+<td>Task</td>
+<td>Queued</td>
+<td>Medium</td>
+<td>The project depends on many owned code modules, and a full health
+check of all of them (does each build, pass static checks, and pass its
+tests) did not finish in the latest session. The work is to run that
+complete health sweep and record the result for every module. This
+assures that the whole codebase, not just the main application, is in
+good shape.</td>
+</tr>
+<tr>
+<td>HXC-138</td>
+<td>Task</td>
+<td>Queued</td>
+<td>Low</td>
+<td>The end-to-end challenge runner can now launch all its scenarios (a
+missing option was just fixed), but the scenarios still need to be
+executed against a live server with a real model to confirm the complete
+user journeys work. The work is to stand up a server and run the
+challenges, capturing the results. This provides real proof that the
+headline user workflows function end to end.</td>
 </tr>
 <tr>
 <td>HXL-001</td>
