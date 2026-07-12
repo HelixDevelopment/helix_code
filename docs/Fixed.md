@@ -1817,3 +1817,13 @@ Several mandated automated test categories — load/denial-of-service, scaling, 
 
 The end-to-end challenge runner can now launch all its scenarios (a missing option was just fixed), but the scenarios still need to be executed against a live server with a real model to confirm the complete user journeys work. The work is to stand up a server and run the challenges, capturing the results. This provides real proof that the headline user workflows function end to end.
 
+## HXC-150 — tests/ddos env-var names (TEST_PG_/TEST_REDIS_) mismatch .env.full-test causing false SKIP
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/hxc150_20260712T172000Z/EVIDENCE.md
+**Severity:** Low
+**Created-By:** Claude
+
+The load/DDoS test harness (tests/ddos, -tags=integration) reads TEST_PG_* and TEST_REDIS_* environment variables to reach the real Postgres and Redis, but the projects .env.full-test only exports HELIX_DATABASE_* and HELIX_REDIS_*, and the defaults do not match the container credentials. So under the normal make test-load-full workflow the suite falsely SKIPs even when infra is fully healthy (it only ran once the correct credentials were passed manually during the 2026-07-12 retest). The work is to align the harness env-var names/defaults with .env.full-test so load/DDoS executes out of the box. Low severity, test-harness only.
+

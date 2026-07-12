@@ -192,7 +192,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Queued</td>
-<td>4</td>
+<td>3</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -207,7 +207,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>7</strong></td>
+<td><strong>6</strong></td>
 </tr>
 </tbody>
 </table>
@@ -310,34 +310,20 @@ already fixed. Found during HXC-118 review 2026-07-12.</td>
 <td>Bug</td>
 <td>Queued</td>
 <td>Medium</td>
-<td>The main repository git index carries a stale submodule gitlink at
-the old top-level path containers (from before the rename to
-submodules/containers), but .gitmodules only maps submodules/containers.
-As a result git submodule status and git submodule foreach abort
-mid-walk with ‘no submodule mapping found in .gitmodules for path
-containers’, so any release or maintenance script that walks all
-submodules unfiltered fails partway. The work is to remove the stale
-cached gitlink (git rm –cached containers) so the submodule set is
+<td>The main repository git index carries approximately 70 stale
+submodule gitlinks at pre-rename paths
+(dependencies/HelixDevelopment/<em>, dependencies/vasic-digital/</em>,
+and top-level helix_agent/helix_qa/panoptic/security) with no
+.gitmodules mapping, left over from a historical path-rename to the
+submodules/ layout. As a result git submodule status and git submodule
+foreach abort mid-walk with no submodule mapping found in .gitmodules
+for path …, so any release or maintenance script that walks all
+submodules unfiltered fails partway. The work is to remove ALL stale
+cached gitlinks (git rm –cached on each) so the submodule set is
 consistent with .gitmodules and submodule-walking tooling completes.
-Found by the 2026-07-12 release-readiness survey. Low runtime risk but
-blocks release automation; the fix is a git-index-only change,
-reversible.</td>
-</tr>
-<tr>
-<td>HXC-150</td>
-<td>Bug</td>
-<td>Queued</td>
-<td>Low</td>
-<td>The load/DDoS test harness (tests/ddos, -tags=integration) reads
-TEST_PG_* and TEST_REDIS_* environment variables to reach the real
-Postgres and Redis, but the projects .env.full-test only exports
-HELIX_DATABASE_* and HELIX_REDIS_*, and the defaults do not match the
-container credentials. So under the normal make test-load-full workflow
-the suite falsely SKIPs even when infra is fully healthy (it only ran
-once the correct credentials were passed manually during the 2026-07-12
-retest). The work is to align the harness env-var names/defaults with
-.env.full-test so load/DDoS executes out of the box. Low severity,
-test-harness only.</td>
+This is a git-index-only change, reversible via git reset. Found by the
+2026-07-12 release-readiness survey. Low runtime risk but blocks release
+automation.</td>
 </tr>
 </tbody>
 </table>

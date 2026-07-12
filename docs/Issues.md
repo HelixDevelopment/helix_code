@@ -123,12 +123,3 @@ HXC-118 wired Retrieval-Augmented-Generation into the native server generate and
 
 The main repository git index carries a stale submodule gitlink at the old top-level path containers (from before the rename to submodules/containers), but .gitmodules only maps submodules/containers. As a result git submodule status and git submodule foreach abort mid-walk with 'no submodule mapping found in .gitmodules for path containers', so any release or maintenance script that walks all submodules unfiltered fails partway. The work is to remove the stale cached gitlink (git rm --cached containers) so the submodule set is consistent with .gitmodules and submodule-walking tooling completes. Found by the 2026-07-12 release-readiness survey. Low runtime risk but blocks release automation; the fix is a git-index-only change, reversible.
 
-## HXC-150 — tests/ddos env-var names (TEST_PG_/TEST_REDIS_) mismatch .env.full-test causing false SKIP
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Low
-**Created-By:** Claude
-
-The load/DDoS test harness (tests/ddos, -tags=integration) reads TEST_PG_* and TEST_REDIS_* environment variables to reach the real Postgres and Redis, but the projects .env.full-test only exports HELIX_DATABASE_* and HELIX_REDIS_*, and the defaults do not match the container credentials. So under the normal make test-load-full workflow the suite falsely SKIPs even when infra is fully healthy (it only ran once the correct credentials were passed manually during the 2026-07-12 retest). The work is to align the harness env-var names/defaults with .env.full-test so load/DDoS executes out of the box. Low severity, test-harness only.
-
