@@ -2396,18 +2396,6 @@ provides an automated way to obtain a valid token during the test so the
 workflow runs unattended. The QA bank then becomes fully automated and
 re-runnable.</p>
 <h2
-id="hxc-125-integration-tagged-tests-are-invisible-to-the-default-test-run">HXC-125
-— Integration-tagged tests are invisible to the default test run</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude</p>
-<p>A large set of integration tests is hidden behind a build tag, so an
-ordinary test run never compiles or executes them and their pass/fail
-signal is absent from routine checks. They pass when the tag is
-supplied, so this is a visibility gap, not a broken feature. The work
-makes the standard test command or a documented target include them so
-their status is always visible. Everyday test results then reflect
-integration coverage.</p>
-<h2
 id="hxc-126-eleven-closed-items-still-appear-in-the-open-issues-tracker-instead-of-the-resolved-tracker">HXC-126
 — Eleven closed items still appear in the open-issues tracker instead of
 the resolved tracker</h2>
@@ -2421,18 +2409,6 @@ regenerates the tracker documents from the authoritative database so
 finished items appear only in the resolved view. The human-readable
 trackers then accurately reflect the true state.</p>
 <h2
-id="hxc-127-the-obsolete-items-detail-table-is-empty-so-retired-items-lack-required-justification">HXC-127
-— The obsolete-items detail table is empty, so retired items lack
-required justification</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude</p>
-<p>When an item is retired as obsolete, governance requires a recorded
-reason, date, and superseding reference, but the table holding these
-details is completely empty, including for the one currently obsolete
-item. This leaves retirements unexplained and non-compliant. The work
-populates the required justification details for obsolete items so every
-retired item carries an auditable reason.</p>
-<h2
 id="hxc-128-thirty-six-work-items-have-descriptions-too-short-to-be-understandable">HXC-128
 — Thirty-six work items have descriptions too short to be
 understandable</h2>
@@ -2444,16 +2420,5 @@ understand them without reading code. The work rewrites these into clear
 plain-language descriptions explaining what each item is and why it
 matters. Every item then becomes understandable to non-developers and
 stakeholders.</p>
-<h2
-id="hxc-129-severity-is-blank-on-79-closed-feature-items-blocking-risk-based-prioritization">HXC-129
-— Severity is blank on 79 closed feature items, blocking risk-based
-prioritization</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude</p>
-<p>Seventy-nine finished feature items have no severity recorded, so
-risk-ordered validation and reporting cannot rank them by importance.
-The work backfills an appropriate severity for each item based on its
-content and impact. Risk-based ordering and reporting then work
-correctly across the full item set.</p>
 </body>
 </html>

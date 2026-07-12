@@ -611,15 +611,6 @@ Two categories of tests, memory-usage and end-to-end automation, skip most of th
 
 One automated quality-assurance test bank that drives real server workflows has a documented gap: it cannot mint the authentication token needed to finish the workflow end-to-end without manual help, so it does not meet the fully-automated no-human-intervention standard. The work provides an automated way to obtain a valid token during the test so the workflow runs unattended. The QA bank then becomes fully automated and re-runnable.
 
-## HXC-125 — Integration-tagged tests are invisible to the default test run
-
-**Status:** Queued
-**Type:** Task
-**Severity:** Low
-**Created-By:** Claude
-
-A large set of integration tests is hidden behind a build tag, so an ordinary test run never compiles or executes them and their pass/fail signal is absent from routine checks. They pass when the tag is supplied, so this is a visibility gap, not a broken feature. The work makes the standard test command or a documented target include them so their status is always visible. Everyday test results then reflect integration coverage.
-
 ## HXC-126 — Eleven closed items still appear in the open-issues tracker instead of the resolved tracker
 
 **Status:** Queued
@@ -629,15 +620,6 @@ A large set of integration tests is hidden behind a build tag, so an ordinary te
 
 Eleven work items marked finished still appear in the open-issues document and are missing from the resolved-items document, so the two views disagree about their state and become untrustworthy. The work regenerates the tracker documents from the authoritative database so finished items appear only in the resolved view. The human-readable trackers then accurately reflect the true state.
 
-## HXC-127 — The obsolete-items detail table is empty, so retired items lack required justification
-
-**Status:** Queued
-**Type:** Task
-**Severity:** Low
-**Created-By:** Claude
-
-When an item is retired as obsolete, governance requires a recorded reason, date, and superseding reference, but the table holding these details is completely empty, including for the one currently obsolete item. This leaves retirements unexplained and non-compliant. The work populates the required justification details for obsolete items so every retired item carries an auditable reason.
-
 ## HXC-128 — Thirty-six work items have descriptions too short to be understandable
 
 **Status:** Queued
@@ -646,13 +628,4 @@ When an item is retired as obsolete, governance requires a recorded reason, date
 **Created-By:** Claude
 
 Thirty-six tracked items have descriptions shorter than the minimum length needed to convey what they are about, so a reader cannot understand them without reading code. The work rewrites these into clear plain-language descriptions explaining what each item is and why it matters. Every item then becomes understandable to non-developers and stakeholders.
-
-## HXC-129 — Severity is blank on 79 closed feature items, blocking risk-based prioritization
-
-**Status:** Queued
-**Type:** Task
-**Severity:** Low
-**Created-By:** Claude
-
-Seventy-nine finished feature items have no severity recorded, so risk-ordered validation and reporting cannot rank them by importance. The work backfills an appropriate severity for each item based on its content and impact. Risk-based ordering and reporting then work correctly across the full item set.
 

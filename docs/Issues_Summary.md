@@ -12,8 +12,8 @@ Open workable items (current_location = Issues), regenerated from the SQLite sin
 | Feature | Queued | 2 |
 | Task | Completed (→ Fixed.md) | 18 |
 | Task | Fixed (→ Fixed.md) | 1 |
-| Task | Queued | 6 |
-| **TOTAL** | | **51** |
+| Task | Queued | 3 |
+| **TOTAL** | | **48** |
 
 ## Items
 
@@ -24,10 +24,10 @@ Open workable items (current_location = Issues), regenerated from the SQLite sin
 | HXA-003 | Bug | Fixed (→ Fixed.md) | — | venice `TestGetCapabilities` model-list drift (CONST-037) |
 | HXC-001 | Task | Completed (→ Fixed.md) | — | CONST-052 rename programme: meta-repo directories still PascalCase — CLOSED (→ Fixed.md) |
 | HXC-002 | Bug | Fixed (→ Fixed.md) | — | Round-74 residual LOGIC-class FAILs (CLOSED) |
-| HXC-003 | Feature | Implemented (→ Fixed.md) | — | CONST-046 i18n migration backlog — CLOSED (migrated to docs/Fixed.md) |
+| HXC-003 | Feature | Implemented (→ Fixed.md) | High | CONST-046 i18n migration backlog — CLOSED (migrated to docs/Fixed.md) |
 | HXC-004 | Bug | Fixed (→ Fixed.md) | — | Recovery-batch under-verification (40% FAIL rate per round-193 audit) |
 | HXC-005 | Bug | Fixed (→ Fixed.md) | — | `cmd/performance_optimization_standalone/main.go` is a CONST-035 simulation bluff |
-| HXC-006 | Feature | Implemented (→ Fixed.md) | — | HelixCode Speed Programme — CLOSED (migrated to docs/Fixed.md) |
+| HXC-006 | Feature | Implemented (→ Fixed.md) | High | HelixCode Speed Programme — CLOSED (migrated to docs/Fixed.md) |
 | HXC-007 | Task | Completed (→ Fixed.md) | — | Constitution §11.4.68/70-74 cascade + meta-pointer bump — CLOSED (migrated to docs/Fixed.md) |
 | HXC-008 | Bug | Fixed (→ Fixed.md) | — | CONST-055 G1 governance gaps surfaced by post-constitution-pull validation sweep — CLOSED (migrated to docs/Fixed.md) |
 | HXC-009 | Task | Completed (→ Fixed.md) | — | Owned-submodule GitHub ↔ GitLab mirror-divergence reconciliation — CLOSED (migrated to docs/Fixed.md) |
@@ -59,11 +59,8 @@ Open workable items (current_location = Issues), regenerated from the SQLite sin
 | HXC-119 | Feature | Queued | High | Governance rule CONST-040 lists the Agent Client Protocol among required capabilities, but there is no implementation of it anywhere in the codebase. Any user or integration expecting ACP connectivity currently cannot use it. The work is to design and implement real ACP support, or, if it proves structurally infeasible, to document that with cited evidence. The platform will then either genuinely support ACP or hold an honest, evidenced position instead of an unmet claim. |
 | HXC-122 | Task | Queued | Medium | Two categories of tests, memory-usage and end-to-end automation, skip most of their cases by default because they require a live server or special environment flags not set in normal runs. In practice these areas are largely unverified even though the tests appear to exist. The work provides a documented, repeatable way to run them against real infrastructure so they actually execute and prove the behavior. Memory and automation behavior then becomes genuinely tested rather than merely scaffolded. |
 | HXC-124 | Bug | Queued | Medium | One automated quality-assurance test bank that drives real server workflows has a documented gap: it cannot mint the authentication token needed to finish the workflow end-to-end without manual help, so it does not meet the fully-automated no-human-intervention standard. The work provides an automated way to obtain a valid token during the test so the workflow runs unattended. The QA bank then becomes fully automated and re-runnable. |
-| HXC-125 | Task | Queued | Low | A large set of integration tests is hidden behind a build tag, so an ordinary test run never compiles or executes them and their pass/fail signal is absent from routine checks. They pass when the tag is supplied, so this is a visibility gap, not a broken feature. The work makes the standard test command or a documented target include them so their status is always visible. Everyday test results then reflect integration coverage. |
 | HXC-126 | Task | Queued | Medium | Eleven work items marked finished still appear in the open-issues document and are missing from the resolved-items document, so the two views disagree about their state and become untrustworthy. The work regenerates the tracker documents from the authoritative database so finished items appear only in the resolved view. The human-readable trackers then accurately reflect the true state. |
-| HXC-127 | Task | Queued | Low | When an item is retired as obsolete, governance requires a recorded reason, date, and superseding reference, but the table holding these details is completely empty, including for the one currently obsolete item. This leaves retirements unexplained and non-compliant. The work populates the required justification details for obsolete items so every retired item carries an auditable reason. |
 | HXC-128 | Task | Queued | Low | Thirty-six tracked items have descriptions shorter than the minimum length needed to convey what they are about, so a reader cannot understand them without reading code. The work rewrites these into clear plain-language descriptions explaining what each item is and why it matters. Every item then becomes understandable to non-developers and stakeholders. |
-| HXC-129 | Task | Queued | Low | Seventy-nine finished feature items have no severity recorded, so risk-ordered validation and reporting cannot rank them by importance. The work backfills an appropriate severity for each item based on its content and impact. Risk-based ordering and reporting then work correctly across the full item set. |
 | HXL-001 | Bug | Fixed (→ Fixed.md) | — | HelixLLM `internal/agents/tools/analysis_test.go` hardcoded absolute path |
 | HXL-002 | Bug | Fixed (→ Fixed.md) | — | HelixLLM `internal/gateway/middleware` TOON `WriteTOON` returns 500 |
 | HXQ-001 | Bug | Fixed (→ Fixed.md) | — | helix_qa intermittent TestPerformance flake (host-load-sensitive) |

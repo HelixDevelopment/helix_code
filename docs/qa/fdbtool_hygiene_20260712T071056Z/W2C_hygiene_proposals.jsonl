@@ -1,0 +1,110 @@
+{"atm_id": "FIX-2026-05-19#10", "field": "description", "value": "This task added translation support to five short help texts shown in the command-line tool for the panoptic component, so those brief descriptions can eventually be displayed in different languages instead of being locked to English."}
+{"atm_id": "FIX-2026-05-19#17", "field": "description", "value": "This task added the ability to automatically export the project's tracking document into easy-to-read HTML web pages and PDF files, using standard document-conversion tools. This makes it easier for team members and stakeholders to review project status without needing to open raw text files."}
+{"atm_id": "FIX-2026-05-19#19", "field": "description", "value": "This task began the work of adding multi-language (translation) support to the helix_qa testing and quality-assurance component, so any text it shows to users can eventually be translated into other languages instead of only English."}
+{"atm_id": "FIX-2026-05-19#21", "field": "description", "value": "This task started adding multi-language support to the LLMOrchestrator component, which coordinates requests across several different AI language models. A handful of its hardcoded English error messages were converted into a translatable format as a first step."}
+{"atm_id": "FIX-2026-05-19#22", "field": "description", "value": "This task began converting some of the command-line text shown by the LLMsVerifier tool (which checks and validates AI model providers) into a translatable format, so it can eventually support multiple languages. Only a small number of the many text strings in this tool were converted in this first pass."}
+{"atm_id": "FIX-2026-05-19#23", "field": "description", "value": "This task started adding translation support to the HelixSpecifier tool so that its user-facing text can eventually work in languages other than English."}
+{"atm_id": "FIX-2026-05-19#24", "field": "description", "value": "This task started adding translation support to the Storage component of the system, which is responsible for saving and retrieving data, so its messages can eventually be shown in multiple languages."}
+{"atm_id": "FIX-2026-05-19#25", "field": "description", "value": "This task started adding translation support to the LLMOps component, which manages the day-to-day operation of the AI language models the system relies on, so its messages can eventually be shown in multiple languages."}
+{"atm_id": "FIX-2026-05-19#26", "field": "description", "value": "This task started adding translation support to the VectorDB component, which is the database used to store and search specialized AI-related data, so its messages can eventually be shown in multiple languages."}
+{"atm_id": "FIX-2026-05-19#27", "field": "description", "value": "This task started adding translation support to the Observability component, the part of the system that monitors overall health and performance, so its messages can eventually be shown in multiple languages."}
+{"atm_id": "FIX-2026-05-19#28", "field": "description", "value": "This task added translation support to the MCP module, the part of the system that connects to external tool servers. Five hardcoded English error and status messages were converted into a translatable format, fully completing this module's conversion with none left over."}
+{"atm_id": "FIX-2026-05-19#29", "field": "description", "value": "This task added translation support to the Messaging component, converting five hardcoded English messages into a translatable format so the messaging system's text can eventually work in different languages for users."}
+{"atm_id": "FIX-2026-05-19#3", "field": "description", "value": "This task built the underlying plumbing that lets each individual sub-component of the system plug into the shared translation system, including a working example already supporting both English and Serbian. This lays the groundwork so future work can translate all remaining user-facing text across the whole project."}
+{"atm_id": "FIX-2026-05-19#30", "field": "description", "value": "This task added translation support to the Middleware component, converting three hardcoded English error messages about authentication and rate-limiting problems into a translatable format."}
+{"atm_id": "FIX-2026-05-19#31", "field": "description", "value": "This task added translation support to the Plugins component, the part of the system that loads optional add-on extensions, converting five hardcoded messages about plugin checks and safety sandboxing into a translatable format."}
+{"atm_id": "FIX-2026-05-19#32", "field": "description", "value": "This task added translation support to the Streaming component, which handles live, real-time data flowing to and from users, converting five hardcoded connection-related messages into a translatable format."}
+{"atm_id": "FIX-2026-05-19#33", "field": "description", "value": "This task added the underlying translation groundwork to the Watcher component, which monitors the system for file and event changes. This was a behind-the-scenes setup step, since this component's outward labels are internal codes rather than text users directly read."}
+{"atm_id": "FIX-2026-05-19#34", "field": "description", "value": "This task started adding translation support to the conversation component, which manages chat and dialogue interactions with users, so its messages can eventually be shown in multiple languages."}
+{"atm_id": "FIX-2026-05-19#35", "field": "description", "value": "This task added translation support to the containers component, the part of the system that manages application containers, converting nine hardcoded status and error messages into a translatable format and reducing the number of remaining untranslated messages in that area from 73 to 64."}
+{"atm_id": "FIX-2026-05-19#36", "field": "description", "value": "This task added translation support to the security component's privilege-check feature, converting twenty-seven hardcoded warning and description messages into a translatable format, a 92 percent reduction in the untranslated messages that remained in that area."}
+{"atm_id": "FIX-2026-05-19#38", "field": "description", "value": "This task started adding translation support to the AutoTemp component so its messages can eventually be shown in multiple languages."}
+{"atm_id": "FIX-2026-05-19#39", "field": "description", "value": "This task started adding translation support to the Auth (login and authentication) component so its messages can eventually be shown in multiple languages."}
+{"atm_id": "FIX-2026-05-19#4", "field": "description", "value": "This task converted eight hardcoded English text templates used by the SelfImprove component, which builds prompts asking the AI model to review and improve its own code, into a translatable format."}
+{"atm_id": "FIX-2026-05-19#41", "field": "description", "value": "This task added the underlying translation groundwork, including 36 translation entries, to the shared PliniusCommon library, so that any text it produces can later be translated and can safely support many people using the system at the same time."}
+{"atm_id": "FIX-2026-05-19#5", "field": "description", "value": "This task converted two hardcoded command-line messages in the HelixLLM tool into a translatable format, and added a small new capability that other parts of the system can reuse to do the same kind of translation work."}
+{"atm_id": "FIX-2026-05-19#6", "field": "description", "value": "This task converted five hardcoded header messages shown in the command-line interface of the HarmonyOS platform build into a translatable format, so users on that platform see properly localized headers."}
+{"atm_id": "FIX-2026-05-19#66", "field": "description", "value": "This task added a new option to the project's pre-release testing script that lets it skip test failures caused only by a missing local setup, such as a missing tool or network access, rather than a genuine problem in the code. This keeps release checks from being blocked by environment issues outside the code itself."}
+{"atm_id": "FIX-2026-05-19#67", "field": "description", "value": "This task checked all 73 sub-components of the project to confirm their names followed the project's lowercase naming rules and that every reference to them elsewhere was still accurate, finding and correcting three sub-components where the references had drifted out of sync."}
+{"atm_id": "FIX-2026-05-19#71", "field": "description", "value": "This task made sure that every one of the 17 different AI-model providers the system can connect to, such as major cloud AI services, correctly reports detailed error information when something goes wrong, instead of failing silently or giving an incomplete error message."}
+{"atm_id": "FIX-2026-05-19#8", "field": "description", "value": "This task converted seven hardcoded text messages across the Planning component, which breaks tasks into smaller steps, and the VisionEngine component, which processes images, into a translatable format. Two additional issues were discovered and logged along the way for later attention."}
+{"atm_id": "FIX-2026-05-19#9", "field": "description", "value": "This task built an automated check that scans the codebase for any newly added hardcoded English text that bypasses the translation system, and blocks the change if any is found. It starts from a recorded baseline of roughly 55,000 existing text strings still to be migrated over time."}
+{"atm_id": "FIX-2026-05-19", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#1", "field": "severity", "value": "High"}
+{"atm_id": "FIX-2026-05-19#10", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#11", "field": "severity", "value": "Medium"}
+{"atm_id": "FIX-2026-05-19#12", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#13", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#14", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#15", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#17", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#18", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#19", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#2", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#21", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#22", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#23", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#24", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#25", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#26", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#27", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#28", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#29", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#3", "field": "severity", "value": "Medium"}
+{"atm_id": "FIX-2026-05-19#30", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#31", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#32", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#33", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#34", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#35", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#36", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#37", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#38", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#39", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#4", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#40", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#41", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#42", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#43", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#44", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#45", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#46", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#47", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#48", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#49", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#5", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#50", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#51", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#52", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#53", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#54", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#55", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#56", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#57", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#58", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#59", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#6", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#60", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#61", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#62", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#63", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#64", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#66", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#69", "field": "severity", "value": "High"}
+{"atm_id": "FIX-2026-05-19#7", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#70", "field": "severity", "value": "High"}
+{"atm_id": "FIX-2026-05-19#71", "field": "severity", "value": "High"}
+{"atm_id": "FIX-2026-05-19#8", "field": "severity", "value": "Low"}
+{"atm_id": "FIX-2026-05-19#9", "field": "severity", "value": "Low"}
+{"atm_id": "HXC-003", "field": "severity", "value": "High"}
+{"atm_id": "HXC-006", "field": "severity", "value": "High"}
+{"atm_id": "HXC-041", "field": "severity", "value": "Medium"}
+{"atm_id": "HXC-048", "field": "severity", "value": "Medium"}
+{"atm_id": "HXC-068", "field": "severity", "value": "Medium"}
+{"atm_id": "HXC-069", "field": "severity", "value": "High"}
+{"atm_id": "HXC-072", "field": "severity", "value": "Medium"}
+{"atm_id": "HXC-073", "field": "severity", "value": "Medium"}
+{"atm_id": "HXC-074", "field": "severity", "value": "Medium"}
+{"atm_id": "HXC-076", "field": "severity", "value": "High"}
+{"atm_id": "HXC-077", "field": "severity", "value": "Low"}
+{"atm_id": "HXC-094", "field": "severity", "value": "High"}

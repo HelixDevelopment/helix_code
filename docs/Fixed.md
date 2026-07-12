@@ -291,7 +291,7 @@ Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95
 **Severity:** Medium
 **Created-By:** Claude
 **Assigned-To:** Claude
-**Obsolete-Details:** Since: 2026-06-09; Reason: not-reproducible; Superseding-item: none; Triple-check: 10/10 canonical-tree non-reproduction at HEAD 54ab4e95 — see docs/qa/HXC-044/evidence.md
+**Obsolete-Details:** Since: 2026-06-09; Reason: not-reproducible; Superseding-item: none; Triple-check evidence: docs/qa/HXC-044/evidence.md
 
 Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
 
@@ -1089,4 +1089,34 @@ The command-line security-scan helper ships without automated tests covering its
 **Created-By:** Claude
 
 A full build fails on a clean machine because the desktop and mobile graphical apps need system graphics libraries (X11 and OpenGL) that are neither installed nor documented, so newcomers hit a confusing build error with no guidance. The work documents the exact system packages required, the command to install them, and the headless no-graphics build path used for development and continuous integration. Anyone can then build the project or knowingly choose the headless path without surprise failures.
+
+## HXC-125 — Integration-tagged tests are invisible to the default test run
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/discovery_hardening_wave2src_20260711T220325Z/W2B_integration_tag_evidence.md
+**Severity:** Low
+**Created-By:** Claude
+
+A large set of integration tests is hidden behind a build tag, so an ordinary test run never compiles or executes them and their pass/fail signal is absent from routine checks. They pass when the tag is supplied, so this is a visibility gap, not a broken feature. The work makes the standard test command or a documented target include them so their status is always visible. Everyday test results then reflect integration coverage.
+
+## HXC-127 — The obsolete-items detail table is empty, so retired items lack required justification
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/HXC-044/evidence.md
+**Severity:** Low
+**Created-By:** Claude
+
+When an item is retired as obsolete, governance requires a recorded reason, date, and superseding reference, but the table holding these details is completely empty, including for the one currently obsolete item. This leaves retirements unexplained and non-compliant. The work populates the required justification details for obsolete items so every retired item carries an auditable reason.
+
+## HXC-129 — Severity is blank on 79 closed feature items, blocking risk-based prioritization
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/fdbtool_hygiene_20260712T071056Z/W2C_hygiene_proposals.jsonl
+**Severity:** Low
+**Created-By:** Claude
+
+Seventy-nine finished feature items have no severity recorded, so risk-ordered validation and reporting cannot rank them by importance. The work backfills an appropriate severity for each item based on its content and impact. Risk-based ordering and reporting then work correctly across the full item set.
 

@@ -222,12 +222,12 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Task</td>
 <td>Queued</td>
-<td>6</td>
+<td>3</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>51</strong></td>
+<td><strong>48</strong></td>
 </tr>
 </tbody>
 </table>
@@ -291,7 +291,7 @@ CLOSED (→ Fixed.md)</td>
 <td>HXC-003</td>
 <td>Feature</td>
 <td>Implemented (→ Fixed.md)</td>
-<td>—</td>
+<td>High</td>
 <td>CONST-046 i18n migration backlog — CLOSED (migrated to
 docs/Fixed.md)</td>
 </tr>
@@ -315,7 +315,7 @@ CONST-035 simulation bluff</td>
 <td>HXC-006</td>
 <td>Feature</td>
 <td>Implemented (→ Fixed.md)</td>
-<td>—</td>
+<td>High</td>
 <td>HelixCode Speed Programme — CLOSED (migrated to docs/Fixed.md)</td>
 </tr>
 <tr>
@@ -602,19 +602,6 @@ workflow runs unattended. The QA bank then becomes fully automated and
 re-runnable.</td>
 </tr>
 <tr>
-<td>HXC-125</td>
-<td>Task</td>
-<td>Queued</td>
-<td>Low</td>
-<td>A large set of integration tests is hidden behind a build tag, so an
-ordinary test run never compiles or executes them and their pass/fail
-signal is absent from routine checks. They pass when the tag is
-supplied, so this is a visibility gap, not a broken feature. The work
-makes the standard test command or a documented target include them so
-their status is always visible. Everyday test results then reflect
-integration coverage.</td>
-</tr>
-<tr>
 <td>HXC-126</td>
 <td>Task</td>
 <td>Queued</td>
@@ -627,18 +614,6 @@ finished items appear only in the resolved view. The human-readable
 trackers then accurately reflect the true state.</td>
 </tr>
 <tr>
-<td>HXC-127</td>
-<td>Task</td>
-<td>Queued</td>
-<td>Low</td>
-<td>When an item is retired as obsolete, governance requires a recorded
-reason, date, and superseding reference, but the table holding these
-details is completely empty, including for the one currently obsolete
-item. This leaves retirements unexplained and non-compliant. The work
-populates the required justification details for obsolete items so every
-retired item carries an auditable reason.</td>
-</tr>
-<tr>
 <td>HXC-128</td>
 <td>Task</td>
 <td>Queued</td>
@@ -649,17 +624,6 @@ understand them without reading code. The work rewrites these into clear
 plain-language descriptions explaining what each item is and why it
 matters. Every item then becomes understandable to non-developers and
 stakeholders.</td>
-</tr>
-<tr>
-<td>HXC-129</td>
-<td>Task</td>
-<td>Queued</td>
-<td>Low</td>
-<td>Seventy-nine finished feature items have no severity recorded, so
-risk-ordered validation and reporting cannot rank them by importance.
-The work backfills an appropriate severity for each item based on its
-content and impact. Risk-based ordering and reporting then work
-correctly across the full item set.</td>
 </tr>
 <tr>
 <td>HXL-001</td>

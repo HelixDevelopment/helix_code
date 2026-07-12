@@ -9,85 +9,85 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | Bug | Fixed (→ Fixed.md) | 130 |
 | Bug | Obsolete (→ Fixed.md) | 2 |
 | Feature | Implemented (→ Fixed.md) | 89 |
-| Task | Completed (→ Fixed.md) | 52 |
-| **TOTAL** | | **273** |
+| Task | Completed (→ Fixed.md) | 55 |
+| **TOTAL** | | **276** |
 
 ## Items
 
 | # | Level | Status | Type | Fixed-In Tag(s) | One-line description |
 |---|---|---|---|---|---|
-| 1 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19 — CONST-046 i18n architecture design doc — 368 LOC design; Option D (nicksnyder/go-i18n/v2) selected |
-| 2 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#1 — pkg/i18n core foundation — 11 tests + mutation; Bundle/Localizer + sentinel errors |
-| 3 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#10 — panoptic × 5 cobra Short descriptions migration |
-| 4 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#11 — challenges/pkg/i18n/ Phase 4 infrastructure + evaluators.go migration |
-| 5 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#12 — challenges/pkg/userflow/challenge_recorded_ai_testgen.go × 10 of 25 migration |
-| 6 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#13 — challenges/pkg/userflow/challenge_desktop.go migration |
-| 7 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#14 — challenges/pkg/userflow/challenge_ai_testgen.go × 10 user-facing migration |
-| 8 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#15 — challenges/pkg/userflow/challenge_recorded_mobile.go × 7 unique × 14 call sites |
+| 1 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19 — CONST-046 i18n architecture design doc — 368 LOC design; Option D (nicksnyder/go-i18n/v2) selected |
+| 2 | High | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#1 — pkg/i18n core foundation — 11 tests + mutation; Bundle/Localizer + sentinel errors |
+| 3 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#10 — panoptic × 5 cobra Short descriptions migration |
+| 4 | Medium | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#11 — challenges/pkg/i18n/ Phase 4 infrastructure + evaluators.go migration |
+| 5 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#12 — challenges/pkg/userflow/challenge_recorded_ai_testgen.go × 10 of 25 migration |
+| 6 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#13 — challenges/pkg/userflow/challenge_desktop.go migration |
+| 7 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#14 — challenges/pkg/userflow/challenge_ai_testgen.go × 10 user-facing migration |
+| 8 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#15 — challenges/pkg/userflow/challenge_recorded_mobile.go × 7 unique × 14 call sites |
 | 9 | — | Completed (→ Fixed.md) | Task | — | FIX-2026-05-19#16 — CONST-046 i18n implemented-architecture overview doc |
-| 10 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#17 — Tracker HTML + PDF exports per §11.4.19 |
-| 11 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#18 — helix_code/cmd/helix_config/main.go × 10 migration |
-| 12 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#19 — helix_qa i18n kickoff (Phase 4 round 7) |
-| 13 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#2 — CONST-046 audit script (soft-warn) — 5 tests; real-tree scan 57,345 violations across 21,937 files |
+| 10 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#17 — Tracker HTML + PDF exports per §11.4.19 |
+| 11 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#18 — helix_code/cmd/helix_config/main.go × 10 migration |
+| 12 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#19 — helix_qa i18n kickoff (Phase 4 round 7) |
+| 13 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#2 — CONST-046 audit script (soft-warn) — 5 tests; real-tree scan 57,345 violations across 21,937 files |
 | 14 | — | Completed (→ Fixed.md) | Task | — | FIX-2026-05-19#20 — CONST-052 rename programme phased plan (HXC-001 plan, ex-ISSUE-005) |
-| 15 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#21 — LLMOrchestrator i18n kickoff (Phase 4 round 9) |
-| 16 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#22 — LLMsVerifier i18n kickoff (Phase 4 round 8) |
-| 17 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#23 — HelixSpecifier i18n kickoff (Phase 4 round 10) |
-| 18 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#24 — Storage i18n kickoff (Phase 4 round 11) |
-| 19 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#25 — LLMOps i18n kickoff (Phase 4 round 12) |
-| 20 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#26 — VectorDB i18n kickoff (Phase 4 round 13) |
-| 21 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#27 — Observability i18n kickoff (Phase 4 round 14) |
-| 22 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#28 — MCP_Module i18n kickoff (Phase 4 round 15) |
-| 23 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#29 — Messaging i18n kickoff (Phase 4 round 16) |
-| 24 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#3 — Per-submodule i18n injection wiring + i18nadapter |
-| 25 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#30 — Middleware i18n kickoff (Phase 4 round 17) |
-| 26 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#31 — Plugins i18n kickoff (Phase 4 round 18) |
-| 27 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#32 — Streaming i18n kickoff (Phase 4 round 19) |
-| 28 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#33 — Watcher i18n kickoff (Phase 4 round 20) |
-| 29 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#34 — conversation i18n kickoff (Phase 4 round 21) |
-| 30 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#35 — containers i18n kickoff (Phase 4 round 22) |
-| 31 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#36 — security i18n kickoff (Phase 4 round 23) |
-| 32 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#37 — helix_code/cmd/cli/main.go × 10 migration (Phase 4 round 24) |
-| 33 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#38 — AutoTemp i18n kickoff (Phase 4 round 25) |
-| 34 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#39 — Auth i18n kickoff (Phase 4 round 26) |
-| 35 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#4 — SelfImprove × 8 hardcoded-content migration |
-| 36 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#40 — helix_code/cmd/server/main.go × 10 migration (Phase 4 round 27) |
-| 37 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#41 — PliniusCommon i18n kickoff (Phase 4 round 28) |
-| 38 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#42 — helix_code/applications/terminal_ui × up to 10 migration (Phase 4 round 30) |
-| 39 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#43 — helix_code/applications/desktop i18n (Phase 4 round 29) |
-| 40 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#44 — helix_code/applications/ios infrastructure-only (Phase 4 round 31) |
-| 41 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#45 — helix_code/applications/android infrastructure-only (Phase 4 round 32) |
-| 42 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#46 — helix_code/applications/aurora_os × up to 10 migration (Phase 4 round 33) |
-| 43 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#47 — helix_code/cmd/config_test × 12 migration (Phase 4 round 34) |
-| 44 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#48 — helix_code/cmd/security_test × 10 migration (Phase 4 round 35) |
-| 45 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#49 — helix_code/cmd/security_fix × 10 migration (Phase 4 round 36) |
-| 46 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#5 — HelixLLM × 2 CLI strings migration |
-| 47 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#50 — helix_code/cmd/performance_optimization × 10 migration (Phase 4 round 37) |
-| 48 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#51 — helix_code/cmd/security_fix_standalone × 10 of 27 migration (Phase 4 round 38) |
-| 49 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#52 — helix_code/internal/auth × up to 10 migration (Phase 4 round 39) |
-| 50 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#53 — helix_code/internal/agent × 10 of 64 migration (Phase 4 round 40) |
-| 51 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#54 — helix_code/internal/cognee × migration (Phase 4 round 41) |
-| 52 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#55 — helix_code/internal/commands × 10 migration (Phase 4 round 42) |
-| 53 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#56 — helix_code/internal/config × 10 migration (Phase 4 round 43) |
-| 54 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#57 — helix_code/internal/context × 8 sites / 5 IDs (Phase 4 round 44) |
-| 55 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#58 — helix_code/internal/database × 8 migration (Phase 4 round 45) |
-| 56 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#59 — helix_code/internal/discovery migration (Phase 4 round 47) |
-| 57 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#6 — harmony_os × 5 CLI headers migration |
-| 58 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#60 — helix_code/internal/deployment × 10 migration (Phase 4 round 46) |
-| 59 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#61 — helix_code/internal/editor migration (Phase 4 round 48) |
-| 60 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#62 — helix_code/internal/event migration (Phase 4 round 49) |
-| 61 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#63 — helix_code/internal/focus migration (Phase 4 round 50) |
-| 62 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#64 — helix_code/internal/hardware migration (Phase 4 round 51) |
+| 15 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#21 — LLMOrchestrator i18n kickoff (Phase 4 round 9) |
+| 16 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#22 — LLMsVerifier i18n kickoff (Phase 4 round 8) |
+| 17 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#23 — HelixSpecifier i18n kickoff (Phase 4 round 10) |
+| 18 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#24 — Storage i18n kickoff (Phase 4 round 11) |
+| 19 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#25 — LLMOps i18n kickoff (Phase 4 round 12) |
+| 20 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#26 — VectorDB i18n kickoff (Phase 4 round 13) |
+| 21 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#27 — Observability i18n kickoff (Phase 4 round 14) |
+| 22 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#28 — MCP_Module i18n kickoff (Phase 4 round 15) |
+| 23 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#29 — Messaging i18n kickoff (Phase 4 round 16) |
+| 24 | Medium | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#3 — Per-submodule i18n injection wiring + i18nadapter |
+| 25 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#30 — Middleware i18n kickoff (Phase 4 round 17) |
+| 26 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#31 — Plugins i18n kickoff (Phase 4 round 18) |
+| 27 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#32 — Streaming i18n kickoff (Phase 4 round 19) |
+| 28 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#33 — Watcher i18n kickoff (Phase 4 round 20) |
+| 29 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#34 — conversation i18n kickoff (Phase 4 round 21) |
+| 30 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#35 — containers i18n kickoff (Phase 4 round 22) |
+| 31 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#36 — security i18n kickoff (Phase 4 round 23) |
+| 32 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#37 — helix_code/cmd/cli/main.go × 10 migration (Phase 4 round 24) |
+| 33 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#38 — AutoTemp i18n kickoff (Phase 4 round 25) |
+| 34 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#39 — Auth i18n kickoff (Phase 4 round 26) |
+| 35 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#4 — SelfImprove × 8 hardcoded-content migration |
+| 36 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#40 — helix_code/cmd/server/main.go × 10 migration (Phase 4 round 27) |
+| 37 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#41 — PliniusCommon i18n kickoff (Phase 4 round 28) |
+| 38 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#42 — helix_code/applications/terminal_ui × up to 10 migration (Phase 4 round 30) |
+| 39 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#43 — helix_code/applications/desktop i18n (Phase 4 round 29) |
+| 40 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#44 — helix_code/applications/ios infrastructure-only (Phase 4 round 31) |
+| 41 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#45 — helix_code/applications/android infrastructure-only (Phase 4 round 32) |
+| 42 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#46 — helix_code/applications/aurora_os × up to 10 migration (Phase 4 round 33) |
+| 43 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#47 — helix_code/cmd/config_test × 12 migration (Phase 4 round 34) |
+| 44 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#48 — helix_code/cmd/security_test × 10 migration (Phase 4 round 35) |
+| 45 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#49 — helix_code/cmd/security_fix × 10 migration (Phase 4 round 36) |
+| 46 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#5 — HelixLLM × 2 CLI strings migration |
+| 47 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#50 — helix_code/cmd/performance_optimization × 10 migration (Phase 4 round 37) |
+| 48 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#51 — helix_code/cmd/security_fix_standalone × 10 of 27 migration (Phase 4 round 38) |
+| 49 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#52 — helix_code/internal/auth × up to 10 migration (Phase 4 round 39) |
+| 50 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#53 — helix_code/internal/agent × 10 of 64 migration (Phase 4 round 40) |
+| 51 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#54 — helix_code/internal/cognee × migration (Phase 4 round 41) |
+| 52 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#55 — helix_code/internal/commands × 10 migration (Phase 4 round 42) |
+| 53 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#56 — helix_code/internal/config × 10 migration (Phase 4 round 43) |
+| 54 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#57 — helix_code/internal/context × 8 sites / 5 IDs (Phase 4 round 44) |
+| 55 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#58 — helix_code/internal/database × 8 migration (Phase 4 round 45) |
+| 56 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#59 — helix_code/internal/discovery migration (Phase 4 round 47) |
+| 57 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#6 — harmony_os × 5 CLI headers migration |
+| 58 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#60 — helix_code/internal/deployment × 10 migration (Phase 4 round 46) |
+| 59 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#61 — helix_code/internal/editor migration (Phase 4 round 48) |
+| 60 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#62 — helix_code/internal/event migration (Phase 4 round 49) |
+| 61 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#63 — helix_code/internal/focus migration (Phase 4 round 50) |
+| 62 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#64 — helix_code/internal/hardware migration (Phase 4 round 51) |
 | 63 | — | Completed (→ Fixed.md) | Task | — | FIX-2026-05-19#65 — Round 74-87 release-gate stabilization — 19 of 26 round-74 FAILs closed (helix_qa+panoptic+LLMsVerifier+Observability+Optimization+challenges) |
-| 64 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#66 — release-gate-test.sh --skip-env-failures filter |
+| 64 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#66 — release-gate-test.sh --skip-env-failures filter |
 | 65 | — | Completed (→ Fixed.md) | Task | — | FIX-2026-05-19#67 — CONST-052 reference-drift sweep (73 submodules) |
 | 66 | — | Fixed (→ Fixed.md) | Bug | — | FIX-2026-05-19#68 — challenges go.mod path fix `../Containers`→`../containers` |
-| 67 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#69 — LLMOrchestrator builders × 5 wired — gemini/junie/opencode/claudecode/qwencode CLI binaries |
-| 68 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#7 — DocProcessor CLI × 8 migration — Refactored to runCLI(); 6 tests + mutation; Upstreams recipe fix bonus |
-| 69 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#70 — 4-vendor GPU telemetry chain (NVIDIA+AMD+Apple+Intel) |
-| 70 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#71 — LLM Err coverage 100% across 17 providers |
-| 71 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#8 — Planning × 3 + VisionEngine × 4 migration |
-| 72 | — | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#9 — CONST-046 audit-gate fail-on-new + baseline |
+| 67 | High | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#69 — LLMOrchestrator builders × 5 wired — gemini/junie/opencode/claudecode/qwencode CLI binaries |
+| 68 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#7 — DocProcessor CLI × 8 migration — Refactored to runCLI(); 6 tests + mutation; Upstreams recipe fix bonus |
+| 69 | High | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#70 — 4-vendor GPU telemetry chain (NVIDIA+AMD+Apple+Intel) |
+| 70 | High | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#71 — LLM Err coverage 100% across 17 providers |
+| 71 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#8 — Planning × 3 + VisionEngine × 4 migration |
+| 72 | Low | Implemented (→ Fixed.md) | Feature | — | FIX-2026-05-19#9 — CONST-046 audit-gate fail-on-new + baseline |
 | 73 | — | Fixed (→ Fixed.md) | Bug | — | HXA-001 — HXA-001 (ex-ISSUE-009): helix_agent 4 handler tests |
 | 74 | — | Fixed (→ Fixed.md) | Bug | — | HXA-002 — HXA-002 (ex-ISSUE-010): helix_agent debate/llmprovider sibling-submodule API drift |
 | 75 | — | Fixed (→ Fixed.md) | Bug | — | HXA-003 — HXA-003 (ex-ISSUE-011): venice `TestGetCapabilities` CONST-037 model-list drift |
@@ -95,10 +95,10 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 77 | — | Fixed (→ Fixed.md) | Bug | — | HXC-002 — HXC-002 (ex-ISSUE-006) (partial): HelixMemory LOGIC-class FAIL cleanup |
 | 78 | — | Completed (→ Fixed.md) | Task | — | HXC-002#1 — HXC-002 (ex-ISSUE-006) (partial): Planning LOGIC FAIL audit confirms clean |
 | 79 | — | Fixed (→ Fixed.md) | Bug | — | HXC-002#2 — HXC-002 (ex-ISSUE-006) (final): helix_agent inner LOGIC FAIL cleanup |
-| 80 | — | Implemented (→ Fixed.md) | Feature | — | HXC-003 — HXC-003: CONST-046 i18n migration backlog (no user-facing text hardcoded as static string literals) |
+| 80 | High | Implemented (→ Fixed.md) | Feature | — | HXC-003 — HXC-003: CONST-046 i18n migration backlog (no user-facing text hardcoded as static string literals) |
 | 81 | — | Fixed (→ Fixed.md) | Bug | — | HXC-004 — HXC-004: recovery-batch 4-package under-verification (llm + logo + notification test-assertion drift + performance translator.go build break) |
 | 82 | — | Fixed (→ Fixed.md) | Bug | — | HXC-005 — HXC-005: `cmd/performance_optimization_standalone/main.go` is a CONST-035 simulation bluff |
-| 83 | — | Implemented (→ Fixed.md) | Feature | — | HXC-006 — HXC-006: HelixCode Speed Programme — 3-5× faster than competitor AI CLI agents (6-phase / 31-task) |
+| 83 | High | Implemented (→ Fixed.md) | Feature | — | HXC-006 — HXC-006: HelixCode Speed Programme — 3-5× faster than competitor AI CLI agents (6-phase / 31-task) |
 | 84 | — | Completed (→ Fixed.md) | Task | — | HXC-007 — HXC-007: Constitution §11.4.68/70-74 cascade + meta-pointer bump |
 | 85 | — | Fixed (→ Fixed.md) | Bug | — | HXC-008 — HXC-008: CONST-055 G1 governance gaps surfaced by post-constitution-pull validation sweep |
 | 86 | — | Completed (→ Fixed.md) | Task | — | HXC-009 — HXC-009: Owned-submodule GitHub ↔ GitLab mirror-divergence reconciliation |
@@ -141,7 +141,7 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 123 | — | Fixed (→ Fixed.md) | Bug | — | HXC-046 — HXC-046: internal/memory/providers: generateThreadID() non-unique under fast back-to-back calls (timestamp-only, same-nanosecond collision) |
 | 124 | Low | Completed (→ Fixed.md) | Task | — | HXC-047 — internal/redis TestNewClient_WithDatabase needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer contains literal Redis |
 | 125 | — | Completed (→ Fixed.md) | Task | — | HXC-047 — HXC-047: internal/redis TestNewClient_WithDatabase needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer contains literal Redis |
-| 126 | Low | Implemented (→ Fixed.md) | Feature | — | HXC-048 — helixcode-system.yaml HelixQA bank: 11 self-driving http cases for the non-auth server surface (health/server-info/system-status/llm-providers + negatives) |
+| 126 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-048 — helixcode-system.yaml HelixQA bank: 11 self-driving http cases for the non-auth server surface (health/server-info/system-status/llm-providers + negatives) |
 | 127 | — | Implemented (→ Fixed.md) | Feature | — | HXC-048 — HXC-048: helixcode-system.yaml HelixQA bank: 11 self-driving http cases for the non-auth server surface (health/server-info/system-status/llm-providers + negatives) |
 | 128 | Low | Fixed (→ Fixed.md) | Bug | — | HXC-049 — doc_processor TestAutomation_UpstreamsExist reads capital 'Upstreams' but canonical dir is lowercase 'upstreams' (CONST-052 case drift, deterministic FAIL) |
 | 129 | — | Fixed (→ Fixed.md) | Bug | — | HXC-049 — HXC-049: doc_processor TestAutomation_UpstreamsExist reads capital 'Upstreams' but canonical dir is lowercase 'upstreams' (CONST-052 case drift, deterministic FAIL) |
@@ -181,7 +181,7 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 163 | — | Fixed (→ Fixed.md) | Bug | — | HXC-066 — HXC-066: inner internal/database integration tests hardcode localhost:5433/helix_test, never read HELIX_DATABASE_* env |
 | 164 | Low | Fixed (→ Fixed.md) | Bug | — | HXC-067 — inner internal/redis stress suite reads TEST_REDIS_HOST/PORT (default :6379) not HELIX_REDIS_HOST/PORT |
 | 165 | — | Fixed (→ Fixed.md) | Bug | — | HXC-067 — HXC-067: inner internal/redis stress suite reads TEST_REDIS_HOST/PORT (default :6379) not HELIX_REDIS_HOST/PORT |
-| 166 | High | Implemented (→ Fixed.md) | Feature | — | HXC-068 — speckit debate adapter wireable into agentic debate flow |
+| 166 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-068 — speckit debate adapter wireable into agentic debate flow |
 | 167 | — | Implemented (→ Fixed.md) | Feature | — | HXC-068 — HXC-068: speckit debate adapter wireable into agentic debate flow |
 | 168 | High | Implemented (→ Fixed.md) | Feature | — | HXC-069 — HelixMemory default-on durable persistence with graceful fallback |
 | 169 | — | Implemented (→ Fixed.md) | Feature | — | HXC-069 — HXC-069: HelixMemory default-on durable persistence with graceful fallback |
@@ -189,9 +189,9 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 171 | — | Fixed (→ Fixed.md) | Bug | — | HXC-070 — HXC-070: HelixMemory persist log no longer misreports success on failure |
 | 172 | Medium | Completed (→ Fixed.md) | Task | — | HXC-071 — Web LLM handler httptest coverage for generate and stream |
 | 173 | — | Completed (→ Fixed.md) | Task | — | HXC-071 — HXC-071: Web LLM handler httptest coverage for generate and stream |
-| 174 | High | Implemented (→ Fixed.md) | Feature | — | HXC-072 — CLI /undo and /diff slash commands over autocommit substrate |
+| 174 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-072 — CLI /undo and /diff slash commands over autocommit substrate |
 | 175 | — | Implemented (→ Fixed.md) | Feature | — | HXC-072 — HXC-072: CLI /undo and /diff slash commands over autocommit substrate |
-| 176 | High | Implemented (→ Fixed.md) | Feature | — | HXC-073 — Autocommit git substrate backing CLI edit history |
+| 176 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-073 — Autocommit git substrate backing CLI edit history |
 | 177 | — | Implemented (→ Fixed.md) | Feature | — | HXC-073 — HXC-073: Autocommit git substrate backing CLI edit history |
 | 178 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-074 — Mobile gomobile Generate binding for on-device LLM calls |
 | 179 | — | Implemented (→ Fixed.md) | Feature | — | HXC-074 — HXC-074: Mobile gomobile Generate binding for on-device LLM calls |
@@ -199,7 +199,7 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 181 | — | Completed (→ Fixed.md) | Task | — | HXC-075 — HXC-075: Phase-1 CLI-Agent Fusion plan reconciliation with delivered state |
 | 182 | High | Implemented (→ Fixed.md) | Feature | — | HXC-076 — Web /llm/generate + /llm/stream endpoints with frontend (partial — e2e pending) |
 | 183 | — | Implemented (→ Fixed.md) | Feature | — | HXC-076 — HXC-076: Web /llm/generate + /llm/stream endpoints with frontend (partial — e2e pending) |
-| 184 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-077 — T1.5 context-window percentage indicator (partial) |
+| 184 | Low | Implemented (→ Fixed.md) | Feature | — | HXC-077 — T1.5 context-window percentage indicator (partial) |
 | 185 | — | Implemented (→ Fixed.md) | Feature | — | HXC-077 — HXC-077: T1.5 context-window percentage indicator (partial) |
 | 186 | Medium | Completed (→ Fixed.md) | Task | — | HXC-078 — T1.6 SKILL.md precedence resolution (partial) |
 | 187 | — | Completed (→ Fixed.md) | Task | — | HXC-078 — HXC-078: T1.6 SKILL.md precedence resolution (partial) |
@@ -233,7 +233,7 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 215 | — | Fixed (→ Fixed.md) | Bug | — | HXC-092 — HXC-092: debate_orchestrator 30s DefaultTimeout too short for capable models on multi-round /specify |
 | 216 | Medium | Fixed (→ Fixed.md) | Bug | — | HXC-093 — helix_code module graph has phantom digital.vasic.* requires + private transitive blocking go list -m all / gomobile bind |
 | 217 | — | Fixed (→ Fixed.md) | Bug | — | HXC-093 — HXC-093: helix_code module graph has phantom digital.vasic.* requires + private transitive blocking go list -m all / gomobile bind |
-| 218 | Medium | Implemented (→ Fixed.md) | Feature | — | HXC-094 — F12 workspace checkpoints — file snapshot + restore/undo safety net |
+| 218 | High | Implemented (→ Fixed.md) | Feature | — | HXC-094 — F12 workspace checkpoints — file snapshot + restore/undo safety net |
 | 219 | — | Implemented (→ Fixed.md) | Feature | — | HXC-094 — HXC-094: F12 workspace checkpoints — file snapshot + restore/undo safety net |
 | 220 | High | Fixed (→ Fixed.md) | Bug | — | HXC-095 — CLI binary generate/debate/specify return 404 against live local ollama |
 | 221 | — | Fixed (→ Fixed.md) | Bug | — | HXC-095 — HXC-095: CLI binary generate/debate/specify return 404 against live local ollama |
@@ -276,16 +276,19 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 258 | Medium | Fixed (→ Fixed.md) | Bug | — | HXC-120 — A safety test for the web server checked that cross-origin browser requests are answered with a permissive wildcard allowing any website to call the API. The server was correctly hardened to allow only an explicit list of trusted sites, so the old test failed and encoded an insecure expectation. The fix updates the test to verify the secure behavior (only listed sites allowed, others refused) without reintroducing the wildcard. The test suite now protects the secure behavior instead of demanding an insecure one. |
 | 259 | Medium | Completed (→ Fixed.md) | Task | — | HXC-121 — The code connecting the platform to the HuggingFace and Together AI model services shipped with no automated tests. A future change could silently break how requests are built or responses parsed and nothing would catch it. The work adds real tests exercising the actual client code against a simulated provider endpoint, checking the outgoing request, the parsed reply, and error handling. These two integrations become protected against silent regressions. |
 | 260 | Low | Completed (→ Fixed.md) | Task | — | HXC-123 — The command-line security-scan helper ships without automated tests covering its behavior, so bugs could go unnoticed until a real scan produces wrong results. The work adds tests verifying the tool's core scanning and reporting logic. The security-scan tool then becomes protected against silent breakage. |
-| 261 | Medium | Completed (→ Fixed.md) | Task | — | HXC-130 — A full build fails on a clean machine because the desktop and mobile graphical apps need system graphics libraries (X11 and OpenGL) that are neither installed nor documented, so newcomers hit a confusing build error with no guidance. The work documents the exact system packages required, the command to install them, and the headless no-graphics build path used for development and continuous integration. Anyone can then build the project or knowingly choose the headless path without surprise failures. |
-| 262 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
-| 263 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
-| 264 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
-| 265 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
-| 266 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
-| 267 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
-| 268 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
-| 269 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
-| 270 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
-| 271 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
-| 272 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
-| 273 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 261 | Low | Completed (→ Fixed.md) | Task | — | HXC-125 — A large set of integration tests is hidden behind a build tag, so an ordinary test run never compiles or executes them and their pass/fail signal is absent from routine checks. They pass when the tag is supplied, so this is a visibility gap, not a broken feature. The work makes the standard test command or a documented target include them so their status is always visible. Everyday test results then reflect integration coverage. |
+| 262 | Low | Completed (→ Fixed.md) | Task | — | HXC-127 — When an item is retired as obsolete, governance requires a recorded reason, date, and superseding reference, but the table holding these details is completely empty, including for the one currently obsolete item. This leaves retirements unexplained and non-compliant. The work populates the required justification details for obsolete items so every retired item carries an auditable reason. |
+| 263 | Low | Completed (→ Fixed.md) | Task | — | HXC-129 — Seventy-nine finished feature items have no severity recorded, so risk-ordered validation and reporting cannot rank them by importance. The work backfills an appropriate severity for each item based on its content and impact. Risk-based ordering and reporting then work correctly across the full item set. |
+| 264 | Medium | Completed (→ Fixed.md) | Task | — | HXC-130 — A full build fails on a clean machine because the desktop and mobile graphical apps need system graphics libraries (X11 and OpenGL) that are neither installed nor documented, so newcomers hit a confusing build error with no guidance. The work documents the exact system packages required, the command to install them, and the headless no-graphics build path used for development and continuous integration. Anyone can then build the project or knowingly choose the headless path without surprise failures. |
+| 265 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
+| 266 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
+| 267 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
+| 268 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
+| 269 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
+| 270 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
+| 271 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
+| 272 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
+| 273 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
+| 274 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
+| 275 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 276 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
