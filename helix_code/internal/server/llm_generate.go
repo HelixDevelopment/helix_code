@@ -5,12 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/rag"
 	"github.com/gin-gonic/gin"
 )
 
@@ -96,6 +98,69 @@ func (r *llmGenerateRequest) buildLLMRequest(stream bool) (*llm.LLMRequest, stri
 // channel-ownership behaviour without a live network/Ollama — production code
 // never reassigns it, so the default real path is always what ships.
 var llmProviderResolver = resolveLLMProvider
+
+// ragAdapterResolver constructs the RAG (Retrieval-Augmented Generation)
+// adapter for a request. It defaults to rag.NewFromEnv(os.Getenv) — a
+// fresh Adapter per request, default-OFF unless HELIXCODE_RAG_ENABLED is
+// truthy — mirroring cmd/cli/main.go handleGenerate's HXC-118 RAG wiring
+// exactly (see applyRAGContext below). It is a package-level var — the
+// same test-injection pattern as llmProviderResolver above — ONLY so unit
+// tests can substitute a deterministic, enabled Adapter (backed by a
+// fixture retriever.Retriever) without a live Ollama embeddings endpoint;
+// production code never reassigns it, so the default rag.NewFromEnv path
+// is always what ships.
+var ragAdapterResolver = func() *rag.Adapter {
+	return rag.NewFromEnv(os.Getenv)
+}
+
+// applyRAGContext wires HXC-118 Retrieval-Augmented Generation into the
+// HTTP server's generate/stream endpoints, mirroring cmd/cli/main.go
+// handleGenerate's RAG wiring (Phase 2/3) so a user calling
+// POST /api/v1/llm/generate or /api/v1/llm/stream gets the SAME
+// retrieval-augmentation an equivalent CLI `helix generate` invocation
+// gets — closing the confirmed HXC-118 gap (internal/server had ZERO RAG
+// integration prior to this change).
+//
+// When the adapter is DISABLED (the default — HELIXCODE_RAG_ENABLED unset
+// or falsy), this is a documented no-op: Adapter.Enabled() short-circuits
+// BEFORE Adapter.Retrieve is ever called, so llmReq is left byte-identical
+// to the request buildLLMRequest produced — no HTTP call, no allocation,
+// no behavior change versus a server that never imported internal/rag.
+//
+// When ENABLED, the query used for retrieval is the content of the LAST
+// message in llmReq.Messages — the message that carries the request's
+// `prompt` field per buildLLMRequest (or the trailing turn of a supplied
+// `messages` transcript), i.e. the user's current turn. On a successful,
+// non-empty retrieval that message's Content is replaced with the
+// rag.PrependContext-augmented version, so the provider call the caller
+// (generateLLM / streamLLM) makes next sees the retrieved context
+// verbatim ahead of the original prompt — identical in shape to the CLI's
+// effectivePrompt substitution.
+//
+// ANTI-BLUFF graceful degrade (§11.4.6): a retrieval error is logged and
+// the request proceeds on the ORIGINAL, unaugmented prompt. RAG failure
+// MUST NEVER fail — or silently corrupt — the user's generate/stream
+// request; the worst case of a broken retriever is "no RAG context this
+// turn," never a 5xx the user did not cause and never a degraded/garbled
+// prompt reaching the provider.
+func applyRAGContext(ctx context.Context, adapter *rag.Adapter, llmReq *llm.LLMRequest) {
+	if adapter == nil || !adapter.Enabled() || llmReq == nil || len(llmReq.Messages) == 0 {
+		return
+	}
+	last := len(llmReq.Messages) - 1
+	query := llmReq.Messages[last].Content
+	if strings.TrimSpace(query) == "" {
+		return
+	}
+	ragDocs, ragRan, ragErr := adapter.Retrieve(ctx, query, rag.RetrieveOptionsFromEnv(os.Getenv))
+	if ragErr != nil {
+		log.Printf("rag: retrieval failed, continuing without RAG context: %v", ragErr)
+		return
+	}
+	if ragRan && len(ragDocs) > 0 {
+		llmReq.Messages[last].Content = rag.PrependContext(query, ragDocs)
+	}
+}
 
 // resolveLLMProvider constructs a real llm.Provider for this request.
 //
@@ -262,6 +327,9 @@ func (s *Server) generateLLM(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
 	defer cancel()
 
+	// HXC-118: mirror the CLI's RAG wiring — no-op unless HELIXCODE_RAG_ENABLED.
+	applyRAGContext(ctx, ragAdapterResolver(), llmReq)
+
 	resp, genErr := provider.Generate(ctx, llmReq)
 	if genErr != nil {
 		// Real provider error (auth failure, model not found, network) —
@@ -325,6 +393,9 @@ func (s *Server) streamLLM(c *gin.Context) {
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
 	defer cancel()
+
+	// HXC-118: mirror the CLI's RAG wiring — no-op unless HELIXCODE_RAG_ENABLED.
+	applyRAGContext(ctx, ragAdapterResolver(), llmReq)
 
 	// CHANNEL-OWNERSHIP CONTRACT (see llm.Provider.GenerateStream interface doc):
 	// the PROVIDER is the SENDER and the SOLE closer of chunkChan — it closes the
