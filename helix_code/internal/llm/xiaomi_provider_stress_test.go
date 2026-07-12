@@ -42,7 +42,7 @@ func TestXiaomiStress_SequentialCalls(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		req := &LLMRequest{
 			ID:    uuid.New(),
-			Model: "mimo-v2-flash",
+			Model: "mimo-v2.5-pro",
 			Messages: []Message{
 				{Role: "user", Content: "Say OK"},
 			},
@@ -102,7 +102,7 @@ func TestXiaomiStress_ConcurrentCalls(t *testing.T) {
 
 			req := &LLMRequest{
 				ID:    uuid.New(),
-				Model: "mimo-v2-flash",
+				Model: "mimo-v2.5-pro",
 				Messages: []Message{
 					{Role: "user", Content: "Say OK"},
 				},
@@ -151,7 +151,7 @@ func TestXiaomiStress_RapidFire(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		req := &LLMRequest{
 			ID:    uuid.New(),
-			Model: "mimo-v2-flash",
+			Model: "mimo-v2.5-pro",
 			Messages: []Message{
 				{Role: "user", Content: "Reply with just the word yes"},
 			},

@@ -35,7 +35,7 @@ func TestXiaomiChaos_InvalidAPIKey(t *testing.T) {
 
 	req := &LLMRequest{
 		ID:    uuid.New(),
-		Model: "mimo-v2-flash",
+		Model: "mimo-v2.5-pro",
 		Messages: []Message{
 			{Role: "user", Content: "test"},
 		},
@@ -102,7 +102,7 @@ func TestXiaomiChaos_ContextCancellation(t *testing.T) {
 
 	req := &LLMRequest{
 		ID:    uuid.New(),
-		Model: "mimo-v2-flash",
+		Model: "mimo-v2.5-pro",
 		Messages: []Message{
 			{Role: "user", Content: "Write a very long essay about everything."},
 		},
@@ -136,7 +136,7 @@ func TestXiaomiChaos_EmptyMessages(t *testing.T) {
 
 	req := &LLMRequest{
 		ID:         uuid.New(),
-		Model:      "mimo-v2-flash",
+		Model:      "mimo-v2.5-pro",
 		Messages:   []Message{},
 		MaxTokens:  5,
 	}
@@ -168,7 +168,7 @@ func TestXiaomiChaos_ZeroMaxTokens(t *testing.T) {
 
 	req := &LLMRequest{
 		ID:    uuid.New(),
-		Model: "mimo-v2-flash",
+		Model: "mimo-v2.5-pro",
 		Messages: []Message{
 			{Role: "user", Content: "Say hello"},
 		},
@@ -200,7 +200,7 @@ func TestXiaomiChaos_NilContext(t *testing.T) {
 	// Passing nil context should not panic — the provider must handle it gracefully.
 	req := &LLMRequest{
 		ID:    uuid.New(),
-		Model: "mimo-v2-flash",
+		Model: "mimo-v2.5-pro",
 		Messages: []Message{
 			{Role: "user", Content: "Say OK"},
 		},

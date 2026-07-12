@@ -51,7 +51,7 @@ test_bank:
     - id: XM-003
       name: "Chat Completion"
       type: integration
-      description: "Verify chat completions work with mimo-v2-flash"
+      description: "Verify chat completions work with mimo-v2.5-pro"
       steps:
         - action: api_call
           method: POST
@@ -60,7 +60,7 @@ test_bank:
             Authorization: "Bearer ${API_KEY}"
             Content-Type: "application/json"
           body:
-            model: "mimo-v2-flash"
+            model: "mimo-v2.5-pro"
             messages:
               - role: user
                 content: "What is 2+2? Reply with just the number."
@@ -85,7 +85,7 @@ test_bank:
             Authorization: "Bearer ${API_KEY}"
             Content-Type: "application/json"
           body:
-            model: "mimo-v2-flash"
+            model: "mimo-v2.5-pro"
             messages:
               - role: user
                 content: "Count from 1 to 5."
@@ -108,7 +108,7 @@ test_bank:
             Authorization: "Bearer ${API_KEY}"
             Content-Type: "application/json"
           body:
-            model: "mimo-v2-flash"
+            model: "mimo-v2.5-pro"
             messages:
               - role: user
                 content: "What is the weather in Tokyo? Use get_weather tool."
@@ -142,7 +142,7 @@ test_bank:
             Authorization: "Bearer sk-invalid-key-12345"
             Content-Type: "application/json"
           body:
-            model: "mimo-v2-flash"
+            model: "mimo-v2.5-pro"
             messages:
               - role: user
                 content: "test"
@@ -190,7 +190,7 @@ test_bank:
                 Authorization: "Bearer ${API_KEY}"
                 Content-Type: "application/json"
               body:
-                model: "mimo-v2-flash"
+                model: "mimo-v2.5-pro"
                 messages:
                   - role: user
                     content: "Say OK"

@@ -87,7 +87,7 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 		}
 
 		expectedModels := []string{
-			"deepseek-r1-free",
+			"openai/gpt-oss-20b:free",
 			"meta-llama/llama-3.2-3b-instruct:free",
 			"microsoft/wizardlm-2-8x22b:free",
 		}
@@ -128,7 +128,7 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 
 		request := &llm.LLMRequest{
 			ID:           uuid.New(),
-			Model:        "deepseek-r1-free", // Use free model for testing
+			Model:        "openai/gpt-oss-20b:free", // Use free model for testing
 			Messages: []llm.Message{
 				{Role: "user", Content: "Hello! Please respond with exactly 'Hello from OpenRouter!'"},
 			},
@@ -137,8 +137,8 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 		}
 
 		response, err := provider.Generate(ctx, request)
-		assert.NoError(t, err)
-		assert.NotNil(t, response)
+		require.NoError(t, err)
+		require.NotNil(t, response)
 		assert.Equal(t, request.ID, response.RequestID)
 		assert.NotEmpty(t, response.Content)
 		assert.Greater(t, response.Usage.TotalTokens, 0)
@@ -266,7 +266,7 @@ func TestOpenRouterProviderFullAutomation(t *testing.T) {
 			go func(requestNum int) {
 				request := &llm.LLMRequest{
 					ID:           uuid.New(),
-					Model:        "deepseek-r1-free",
+					Model:        "openai/gpt-oss-20b:free",
 					Messages: []llm.Message{
 						{Role: "user", Content: fmt.Sprintf("Say 'Request %d completed'", requestNum)},
 					},
@@ -330,7 +330,7 @@ func TestOpenRouterProviderLoadTest(t *testing.T) {
 
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				Model:        "deepseek-r1-free",
+				Model:        "openai/gpt-oss-20b:free",
 				Messages: []llm.Message{
 					{Role: "user", Content: fmt.Sprintf("Generate a random number between 1 and 100 for request %d", requestNum)},
 				},
@@ -488,7 +488,7 @@ func TestOpenRouterProviderRateLimits(t *testing.T) {
 		go func(requestNum int) {
 			request := &llm.LLMRequest{
 				ID:           uuid.New(),
-				Model:        "deepseek-r1-free",
+				Model:        "openai/gpt-oss-20b:free",
 				Messages: []llm.Message{
 					{Role: "user", Content: fmt.Sprintf("Request %d: Say 'ok'", requestNum)},
 				},

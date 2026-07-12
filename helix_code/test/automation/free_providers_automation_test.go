@@ -49,7 +49,7 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 					APIKey: apiKey,
 				}, true
 			},
-			model: "deepseek-r1-free",
+			model: "openai/gpt-oss-20b:free",
 		},
 		{
 			name: "GitHub Copilot",
@@ -153,8 +153,8 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 				}
 
 				response, err := p.Generate(ctx, request)
-				assert.NoError(t, err)
-				assert.NotNil(t, response)
+				require.NoError(t, err)
+				require.NotNil(t, response)
 				assert.NotEmpty(t, response.Content)
 				assert.Greater(t, response.Usage.TotalTokens, 0)
 			})
@@ -217,8 +217,8 @@ func TestAllFreeProvidersAutomation(t *testing.T) {
 				}
 
 				response, err := p.Generate(ctx, request)
-				assert.NoError(t, err)
-				assert.NotNil(t, response)
+				require.NoError(t, err)
+				require.NotNil(t, response)
 				assert.NotEmpty(t, response.Content)
 				assert.Greater(t, response.Usage.TotalTokens, 0)
 			})
@@ -279,7 +279,7 @@ func TestFreeProvidersLoadTest(t *testing.T) {
 					APIKey: apiKey,
 				}, true
 			},
-			model: "deepseek-r1-free",
+			model: "openai/gpt-oss-20b:free",
 		},
 	}
 

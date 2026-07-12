@@ -38,7 +38,7 @@ func TestXiaomiIntegration_ChatCompletion(t *testing.T) {
 
 	req := &LLMRequest{
 		ID:    uuid.New(),
-		Model: "mimo-v2-flash",
+		Model: "mimo-v2.5-pro",
 		Messages: []Message{
 			{Role: "user", Content: "What is 2+2? Reply with just the number."},
 		},
@@ -51,7 +51,7 @@ func TestXiaomiIntegration_ChatCompletion(t *testing.T) {
 	require.NotNil(t, resp, "response should not be nil")
 
 	// The API succeeded if we got a non-error response with token usage.
-	// mimo-v2-flash is a reasoning model whose thinking output lands in a
+	// mimo-v2.5-pro is a reasoning model whose thinking output lands in a
 	// reasoning_content wire field the OpenAICompatibleMessage struct does
 	// not yet capture — so Content may be empty while the API genuinely
 	// responded (proven by non-zero completion tokens).
@@ -116,7 +116,7 @@ func TestXiaomiIntegration_Streaming(t *testing.T) {
 
 	req := &LLMRequest{
 		ID:    uuid.New(),
-		Model: "mimo-v2-flash",
+		Model: "mimo-v2.5-pro",
 		Messages: []Message{
 			{Role: "user", Content: "Count from 1 to 5."},
 		},
@@ -176,7 +176,7 @@ func TestXiaomiIntegration_ToolCalling(t *testing.T) {
 
 	req := &LLMRequest{
 		ID:    uuid.New(),
-		Model: "mimo-v2-flash",
+		Model: "mimo-v2.5-pro",
 		Messages: []Message{
 			{
 				Role:    "user",
