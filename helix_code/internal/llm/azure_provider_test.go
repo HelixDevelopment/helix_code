@@ -75,6 +75,18 @@ func TestAzureProvider_NewWithEntraID(t *testing.T) {
 
 // Test 3: Provider initialization without endpoint
 func TestAzureProvider_NewWithoutEndpoint(t *testing.T) {
+	// Anti-bluff (W5 / §11.4.115): make this test hermetic against the
+	// ambient environment. AZURE_OPENAI_ENDPOINT is exported by
+	// .env.full-test for the full-infra test stack (test-infra-up /
+	// test-full); without this isolation, NewAzureProvider legitimately
+	// picks up that env-var fallback (see
+	// TestAzureProvider_EndpointPrecedence_EnvWinsOverError in
+	// azure_provider_audit_test.go — that IS intended behavior), so err
+	// comes back nil and the unconditional err.Error() call below used to
+	// SIGSEGV the whole internal/llm test binary. t.Setenv clears the var
+	// for this test only and auto-restores it afterward.
+	t.Setenv("AZURE_OPENAI_ENDPOINT", "")
+
 	config := ProviderConfigEntry{
 		Type:       "azure",
 		APIKey:     "test-key",
@@ -82,7 +94,7 @@ func TestAzureProvider_NewWithoutEndpoint(t *testing.T) {
 	}
 
 	_, err := NewAzureProvider(config)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "endpoint is required")
 }
 

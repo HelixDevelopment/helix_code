@@ -30,6 +30,7 @@ func main() {
 		maxConcurrent  = flag.Int("max-concurrent", 3, "Maximum concurrent executions")
 		timeout        = flag.Duration("timeout", 45*time.Minute, "Default timeout for challenges")
 		listChallenges = flag.Bool("list", false, "List all available challenges")
+		runAll         = flag.Bool("all", false, "Run every loaded challenge (mutually exclusive with -challenge; this is also the default when neither is given)")
 		verbose        = flag.Bool("verbose", false, "Enable verbose logging")
 		saveState      = flag.Bool("save-state", true, "Save execution state to disk")
 		stateDir       = flag.String("state-dir", "./test-results/state", "Directory to save state")
@@ -73,12 +74,20 @@ func main() {
 		return
 	}
 
+	// -all and -challenge are mutually exclusive selection modes.
+	if *runAll && *challengeID != "" {
+		log.Fatal("cannot specify both -all and -challenge")
+	}
+
 	// Determine which challenges to run
 	var challengeIDs []string
 	if *challengeID != "" {
 		challengeIDs = []string{*challengeID}
 	} else {
-		// Run all challenges
+		// Run all loaded challenges. This is the explicit behavior when
+		// -all is passed (e.g. `make test-e2e-full` invokes
+		// `cmd/runner/main.go -all`), and is also the default fallback
+		// when neither -challenge nor -all is specified.
 		allChallenges := manager.ListChallenges()
 		for _, c := range allChallenges {
 			challengeIDs = append(challengeIDs, c.ID)

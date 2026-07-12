@@ -192,9 +192,12 @@ func (etp *EntraTokenProvider) GetToken(ctx context.Context) (string, error) {
 func NewAzureProvider(config ProviderConfigEntry) (*AzureProvider, error) {
 	// Get endpoint (required)
 	endpoint, ok := config.Parameters["endpoint"].(string)
-	if !ok || endpoint == "" {
+	if !ok || strings.TrimSpace(endpoint) == "" {
 		endpoint = os.Getenv("AZURE_OPENAI_ENDPOINT")
 	}
+	// Defensive trim: a whitespace-only endpoint (config or env) must be
+	// treated as missing, never silently accepted as a valid resource URL.
+	endpoint = strings.TrimSpace(endpoint)
 	if endpoint == "" {
 		return nil, fmt.Errorf("azure endpoint is required (set in config or AZURE_OPENAI_ENDPOINT env var)")
 	}
