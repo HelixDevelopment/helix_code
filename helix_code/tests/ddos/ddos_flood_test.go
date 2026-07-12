@@ -16,8 +16,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
-	"strconv"
 	"testing"
 	"time"
 
@@ -28,22 +26,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-func envOr(key, def string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return def
-}
-
-func envOrInt(key string, def int) int {
-	if v := os.Getenv(key); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
-			return n
-		}
-	}
-	return def
-}
 
 // freePort grabs an ephemeral TCP port from the kernel and immediately frees it so
 // the real server can bind it. There is an inherent tiny race window, but the
@@ -68,12 +50,12 @@ func bootRealServer(t *testing.T) (baseURL string) {
 	gin.SetMode(gin.ReleaseMode)
 
 	dbCfg := database.Config{
-		Host:     envOr("TEST_PG_HOST", "localhost"),
-		Port:     envOrInt("TEST_PG_PORT", 5432),
-		User:     envOr("TEST_PG_USER", "helix"),
-		Password: envOr("TEST_PG_PASSWORD", "helix"),
-		DBName:   envOr("TEST_PG_DB", "helix_test"),
-		SSLMode:  envOr("TEST_PG_SSLMODE", "disable"),
+		Host:     envOrHelix("HELIX_DATABASE_HOST", "TEST_PG_HOST", "localhost"),
+		Port:     envOrIntHelix("HELIX_DATABASE_PORT", "TEST_PG_PORT", 5432),
+		User:     envOrHelix("HELIX_DATABASE_USER", "TEST_PG_USER", "helixcode"),
+		Password: envOrHelix("HELIX_DATABASE_PASSWORD", "TEST_PG_PASSWORD", "helixcode_test_password"),
+		DBName:   envOrHelix("HELIX_DATABASE_NAME", "TEST_PG_DB", "helixcode_test"),
+		SSLMode:  envOrHelix("HELIX_DATABASE_SSL_MODE", "TEST_PG_SSLMODE", "disable"),
 	}
 	db, err := database.New(dbCfg)
 	if err != nil {
@@ -84,10 +66,10 @@ func bootRealServer(t *testing.T) (baseURL string) {
 
 	rdsCfg := &config.RedisConfig{
 		Enabled:  true,
-		Host:     envOr("TEST_REDIS_HOST", "localhost"),
-		Port:     envOrInt("TEST_REDIS_PORT", 6379),
-		Password: envOr("TEST_REDIS_PASSWORD", ""),
-		Database: envOrInt("TEST_REDIS_DB", 0),
+		Host:     envOrHelix("HELIX_REDIS_HOST", "TEST_REDIS_HOST", "localhost"),
+		Port:     envOrIntHelix("HELIX_REDIS_PORT", "TEST_REDIS_PORT", 6379),
+		Password: envOrHelix("HELIX_REDIS_PASSWORD", "TEST_REDIS_PASSWORD", ""),
+		Database: envOrIntHelix("HELIX_REDIS_DB", "TEST_REDIS_DB", 0),
 	}
 	rds, err := redis.NewClient(rdsCfg)
 	if err != nil {

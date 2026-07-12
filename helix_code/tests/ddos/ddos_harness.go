@@ -125,6 +125,46 @@ func writeJSON(t testing.TB, path string, v interface{}) {
 	}
 }
 
+// envOr reads an env var or returns the default. Shared across all test types
+// (unit + integration) so env-dependent helpers work without build tags.
+func envOr(key, def string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return def
+}
+
+func envOrInt(key string, def int) int {
+	if v := os.Getenv(key); v != "" {
+		var n int
+		if _, err := fmt.Sscanf(v, "%d", &n); err == nil {
+			return n
+		}
+	}
+	return def
+}
+
+// envOrHelix reads from the HELIX_* var first (.env.full-test convention),
+// then falls back to the legacy TEST_* var, then to the hardcoded default.
+// HXC-150: aligns ddos harness with .env.full-test so tests execute out of
+// the box under the standard make test-infra-up / make test-load-full workflow.
+func envOrHelix(helixKey, legacyKey, def string) string {
+	if v := os.Getenv(helixKey); v != "" {
+		return v
+	}
+	return envOr(legacyKey, def)
+}
+
+func envOrIntHelix(helixKey, legacyKey string, def int) int {
+	if v := os.Getenv(helixKey); v != "" {
+		var n int
+		if _, err := fmt.Sscanf(v, "%d", &n); err == nil {
+			return n
+		}
+	}
+	return envOrInt(legacyKey, def)
+}
+
 // FloodConfig tunes a flood run.
 type FloodConfig struct {
 	// URL is the full target endpoint URL (real HTTP listener).
