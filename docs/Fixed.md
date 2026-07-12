@@ -1827,3 +1827,13 @@ The end-to-end challenge runner can now launch all its scenarios (a missing opti
 
 The load/DDoS test harness (tests/ddos, -tags=integration) reads TEST_PG_* and TEST_REDIS_* environment variables to reach the real Postgres and Redis, but the projects .env.full-test only exports HELIX_DATABASE_* and HELIX_REDIS_*, and the defaults do not match the container credentials. So under the normal make test-load-full workflow the suite falsely SKIPs even when infra is fully healthy (it only ran once the correct credentials were passed manually during the 2026-07-12 retest). The work is to align the harness env-var names/defaults with .env.full-test so load/DDoS executes out of the box. Low severity, test-harness only.
 
+## HXC-148 — Wire RAG retrieval-augmentation into the OpenAI/Anthropic wire-facade endpoints
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/hxc148_20260712T173000Z/EVIDENCE.md
+**Severity:** Low
+**Created-By:** Claude
+
+HXC-118 wired Retrieval-Augmented-Generation into the native server generate and stream endpoints and the CLI, but the OpenAI-compatible and Anthropic-compatible wire-facade endpoints (/v1/chat/completions and /v1/messages) still bypass RAG entirely, so clients using those compatibility surfaces do not get retrieval-augmentation even when it is enabled. The work is to apply the same applyRAGContext wiring to those facade handlers so RAG behaves consistently across every generate surface. This is a smaller secondary surface than the native path already fixed. Found during HXC-118 review 2026-07-12.
+

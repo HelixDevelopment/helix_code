@@ -6164,6 +6164,23 @@ once the correct credentials were passed manually during the 2026-07-12
 retest). The work is to align the harness env-var names/defaults with
 .env.full-test so load/DDoS executes out of the box. Low severity,
 test-harness only.</p>
+<h2
+id="hxc-148-wire-rag-retrieval-augmentation-into-the-openaianthropic-wire-facade-endpoints">HXC-148
+— Wire RAG retrieval-augmentation into the OpenAI/Anthropic wire-facade
+endpoints</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Task <strong>Evidence:</strong>
+docs/qa/hxc148_20260712T173000Z/EVIDENCE.md <strong>Severity:</strong>
+Low <strong>Created-By:</strong> Claude</p>
+<p>HXC-118 wired Retrieval-Augmented-Generation into the native server
+generate and stream endpoints and the CLI, but the OpenAI-compatible and
+Anthropic-compatible wire-facade endpoints (/v1/chat/completions and
+/v1/messages) still bypass RAG entirely, so clients using those
+compatibility surfaces do not get retrieval-augmentation even when it is
+enabled. The work is to apply the same applyRAGContext wiring to those
+facade handlers so RAG behaves consistently across every generate
+surface. This is a smaller secondary surface than the native path
+already fixed. Found during HXC-118 review 2026-07-12.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />

@@ -202,12 +202,12 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Task</td>
 <td>Queued</td>
-<td>2</td>
+<td>1</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>6</strong></td>
+<td><strong>5</strong></td>
 </tr>
 </tbody>
 </table>
@@ -289,21 +289,6 @@ as single source of truth) and add the missing nil-check so a rejected
 model degrades gracefully instead of panicking. NOTE this environment
 has live provider API keys set so provider tests spend real money;
 guard/skip accordingly. Found 2026-07-12.</td>
-</tr>
-<tr>
-<td>HXC-148</td>
-<td>Task</td>
-<td>Queued</td>
-<td>Low</td>
-<td>HXC-118 wired Retrieval-Augmented-Generation into the native server
-generate and stream endpoints and the CLI, but the OpenAI-compatible and
-Anthropic-compatible wire-facade endpoints (/v1/chat/completions and
-/v1/messages) still bypass RAG entirely, so clients using those
-compatibility surfaces do not get retrieval-augmentation even when it is
-enabled. The work is to apply the same applyRAGContext wiring to those
-facade handlers so RAG behaves consistently across every generate
-surface. This is a smaller secondary surface than the native path
-already fixed. Found during HXC-118 review 2026-07-12.</td>
 </tr>
 <tr>
 <td>HXC-149</td>
