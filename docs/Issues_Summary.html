@@ -197,7 +197,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Queued</td>
-<td>5</td>
+<td>4</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -227,7 +227,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>53</strong></td>
+<td><strong>52</strong></td>
 </tr>
 </tbody>
 </table>
@@ -649,21 +649,6 @@ executed against a live server with a real model to confirm the complete
 user journeys work. The work is to stand up a server and run the
 challenges, capturing the results. This provides real proof that the
 headline user workflows function end to end.</td>
-</tr>
-<tr>
-<td>HXC-139</td>
-<td>Bug</td>
-<td>Queued</td>
-<td>High</td>
-<td>A vendored copy of a third-party reference coding-agent (the
-Continue project) includes a Go source file that imports a path that
-does not exist, and because that file has no separate module marker it
-gets swept into the helix_agent module’s build — breaking the build and
-static checks for the whole module. This blocks reliable building and
-testing of the agent module. The work is to isolate those vendored
-reference files so they are not compiled as part of our module (a
-build-ignore or nested module marker). Developers regain a clean,
-buildable agent module.</td>
 </tr>
 <tr>
 <td>HXC-140</td>

@@ -4063,6 +4063,23 @@ tests) did not finish in the latest session. The work is to run that
 complete health sweep and record the result for every module. This
 assures that the whole codebase, not just the main application, is in
 good shape.</p>
+<h2
+id="hxc-139-a-vendored-reference-agent-fixture-breaks-the-helix_agent-module-build">HXC-139
+— A vendored reference-agent fixture breaks the helix_agent module
+build</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+/home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/hxc139_20260712T102230Z/EVIDENCE.md
+<strong>Severity:</strong> High <strong>Created-By:</strong> Claude</p>
+<p>A vendored copy of a third-party reference coding-agent (the Continue
+project) includes a Go source file that imports a path that does not
+exist, and because that file has no separate module marker it gets swept
+into the helix_agent module’s build — breaking the build and static
+checks for the whole module. This blocks reliable building and testing
+of the agent module. The work is to isolate those vendored reference
+files so they are not compiled as part of our module (a build-ignore or
+nested module marker). Developers regain a clean, buildable agent
+module.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />

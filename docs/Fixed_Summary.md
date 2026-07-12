@@ -6,11 +6,11 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 
 | Type | Status | Count |
 |---|---|---|
-| Bug | Fixed (→ Fixed.md) | 132 |
+| Bug | Fixed (→ Fixed.md) | 133 |
 | Bug | Obsolete (→ Fixed.md) | 3 |
 | Feature | Implemented (→ Fixed.md) | 89 |
 | Task | Completed (→ Fixed.md) | 58 |
-| **TOTAL** | | **282** |
+| **TOTAL** | | **283** |
 
 ## Items
 
@@ -286,15 +286,16 @@ Closed workable items (current_location = Fixed), regenerated from the SQLite si
 | 268 | Medium | Completed (→ Fixed.md) | Task | — | HXC-132 — The full-infrastructure test stack fails to build the HelixCode server container because its build recipe points at a Dockerfile path that does not exist, and many memory and security tests skip themselves because they look for a server on a fixed port 8080 with no way to override it. As a result a whole class of tests never run against a real server. The work is to fix the container build path and make the server URL configurable so those tests execute. This unlocks real end-to-end coverage of server-dependent features. |
 | 269 | Low | Fixed (→ Fixed.md) | Bug | — | HXC-133 — One Azure-provider test quietly depends on an endpoint value being present in the environment; when that value is injected by the full-test setup the test's assumptions no longer hold. It does not crash, but it is fragile and can give misleading results depending on the environment. The work is to make the test hermetic (control its own environment) like the sibling test already fixed. This makes the Azure test suite reliable regardless of how it is run. |
 | 270 | Medium | Completed (→ Fixed.md) | Task | — | HXC-137 — The project depends on many owned code modules, and a full health check of all of them (does each build, pass static checks, and pass its tests) did not finish in the latest session. The work is to run that complete health sweep and record the result for every module. This assures that the whole codebase, not just the main application, is in good shape. |
-| 271 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
-| 272 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
-| 273 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
-| 274 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
-| 275 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
-| 276 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
-| 277 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
-| 278 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
-| 279 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
-| 280 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
-| 281 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
-| 282 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 271 | High | Fixed (→ Fixed.md) | Bug | — | HXC-139 — A vendored copy of a third-party reference coding-agent (the Continue project) includes a Go source file that imports a path that does not exist, and because that file has no separate module marker it gets swept into the helix_agent module's build — breaking the build and static checks for the whole module. This blocks reliable building and testing of the agent module. The work is to isolate those vendored reference files so they are not compiled as part of our module (a build-ignore or nested module marker). Developers regain a clean, buildable agent module. |
+| 272 | — | Fixed (→ Fixed.md) | Bug | — | HXL-001 — HXL-001 (ex-ISSUE-003): HelixLLM analysis_test.go hardcoded path |
+| 273 | — | Fixed (→ Fixed.md) | Bug | — | HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500 |
+| 274 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-001 — HXQ-001 (ex-ISSUE-008): helix_qa intermittent `TestPerformance` flake (host-load-sensitive) |
+| 275 | — | Fixed (→ Fixed.md) | Bug | — | HXQ-002 — HXQ-002: helix_qa `pkg/autonomous` ↔ VisionEngine `remote` API drift blocks helix_agent `tests/integration` compile |
+| 276 | — | Fixed (→ Fixed.md) | Bug | — | HXV-001 — HXV-001: LLMsVerifier 18 pre-existing `tests/` failures (CLI-integration + verification/scoring) |
+| 277 | — | Fixed (→ Fixed.md) | Bug | — | HXV-002 — HXV-002: LLMsVerifier `verification/` package 10 pre-existing test failures |
+| 278 | — | Fixed (→ Fixed.md) | Bug | — | HXV-003 — HXV-003: LLMsVerifier `ProviderAdapterForBenchmark.Complete` is a CONST-050(A) production mock-bluff |
+| 279 | — | Fixed (→ Fixed.md) | Bug | — | OPS-001 — OPS-001: LLMOps 2 pre-existing `CreatePromptExperiment` test failures |
+| 280 | — | Fixed (→ Fixed.md) | Bug | — | PAN-001 — PAN-001: panoptic `appendJSONString` truncates multi-byte UTF-8 runes to bytes (`TestResult.MarshalJSON` corrupts non-ASCII) |
+| 281 | — | Completed (→ Fixed.md) | Task | — | VEN-001 — VEN-001 (ex-ISSUE-001): VisionEngine `helix-gitlab` URL fix (was misconfigured, not missing) |
+| 282 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |
+| 283 | — | Fixed (→ Fixed.md) | Bug | — | VEN-002#1 — VEN-002 (ex-ISSUE-002): VisionEngine `vasic-digital-github` fork lineage divergent at SHA 93c830a |

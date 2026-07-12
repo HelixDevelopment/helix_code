@@ -647,15 +647,6 @@ Several mandated automated test categories — load/denial-of-service, scaling, 
 
 The end-to-end challenge runner can now launch all its scenarios (a missing option was just fixed), but the scenarios still need to be executed against a live server with a real model to confirm the complete user journeys work. The work is to stand up a server and run the challenges, capturing the results. This provides real proof that the headline user workflows function end to end.
 
-## HXC-139 — A vendored reference-agent fixture breaks the helix_agent module build
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** High
-**Created-By:** Claude
-
-A vendored copy of a third-party reference coding-agent (the Continue project) includes a Go source file that imports a path that does not exist, and because that file has no separate module marker it gets swept into the helix_agent module's build — breaking the build and static checks for the whole module. This blocks reliable building and testing of the agent module. The work is to isolate those vendored reference files so they are not compiled as part of our module (a build-ignore or nested module marker). Developers regain a clean, buildable agent module.
-
 ## HXC-140 — helix_qa copies a lock by value and one test-bank test fails
 
 **Status:** Queued

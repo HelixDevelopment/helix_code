@@ -1180,3 +1180,13 @@ The full-infrastructure test stack fails to build the HelixCode server container
 
 The project depends on many owned code modules, and a full health check of all of them (does each build, pass static checks, and pass its tests) did not finish in the latest session. The work is to run that complete health sweep and record the result for every module. This assures that the whole codebase, not just the main application, is in good shape.
 
+## HXC-139 — A vendored reference-agent fixture breaks the helix_agent module build
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** /home/milos/Factory/projects/tools_and_research/helix_code/docs/qa/hxc139_20260712T102230Z/EVIDENCE.md
+**Severity:** High
+**Created-By:** Claude
+
+A vendored copy of a third-party reference coding-agent (the Continue project) includes a Go source file that imports a path that does not exist, and because that file has no separate module marker it gets swept into the helix_agent module's build — breaking the build and static checks for the whole module. This blocks reliable building and testing of the agent module. The work is to isolate those vendored reference files so they are not compiled as part of our module (a build-ignore or nested module marker). Developers regain a clean, buildable agent module.
+

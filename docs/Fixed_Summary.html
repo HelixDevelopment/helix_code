@@ -192,7 +192,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>132</td>
+<td>133</td>
 </tr>
 <tr>
 <td>Bug</td>
@@ -212,7 +212,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>282</strong></td>
+<td><strong>283</strong></td>
 </tr>
 </tbody>
 </table>
@@ -2886,6 +2886,22 @@ good shape.</td>
 </tr>
 <tr>
 <td>271</td>
+<td>High</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>HXC-139 — A vendored copy of a third-party reference coding-agent
+(the Continue project) includes a Go source file that imports a path
+that does not exist, and because that file has no separate module marker
+it gets swept into the helix_agent module’s build — breaking the build
+and static checks for the whole module. This blocks reliable building
+and testing of the agent module. The work is to isolate those vendored
+reference files so they are not compiled as part of our module (a
+build-ignore or nested module marker). Developers regain a clean,
+buildable agent module.</td>
+</tr>
+<tr>
+<td>272</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2894,7 +2910,7 @@ good shape.</td>
 hardcoded path</td>
 </tr>
 <tr>
-<td>272</td>
+<td>273</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2902,7 +2918,7 @@ hardcoded path</td>
 <td>HXL-002 — HXL-002 (ex-ISSUE-004): HelixLLM TOON WriteTOON 500</td>
 </tr>
 <tr>
-<td>273</td>
+<td>274</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2911,7 +2927,7 @@ hardcoded path</td>
 <code>TestPerformance</code> flake (host-load-sensitive)</td>
 </tr>
 <tr>
-<td>274</td>
+<td>275</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2921,7 +2937,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 <code>tests/integration</code> compile</td>
 </tr>
 <tr>
-<td>275</td>
+<td>276</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2930,7 +2946,7 @@ VisionEngine <code>remote</code> API drift blocks helix_agent
 failures (CLI-integration + verification/scoring)</td>
 </tr>
 <tr>
-<td>276</td>
+<td>277</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2939,7 +2955,7 @@ failures (CLI-integration + verification/scoring)</td>
 10 pre-existing test failures</td>
 </tr>
 <tr>
-<td>277</td>
+<td>278</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2949,7 +2965,7 @@ failures (CLI-integration + verification/scoring)</td>
 production mock-bluff</td>
 </tr>
 <tr>
-<td>278</td>
+<td>279</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2958,7 +2974,7 @@ production mock-bluff</td>
 <code>CreatePromptExperiment</code> test failures</td>
 </tr>
 <tr>
-<td>279</td>
+<td>280</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2968,7 +2984,7 @@ multi-byte UTF-8 runes to bytes (<code>TestResult.MarshalJSON</code>
 corrupts non-ASCII)</td>
 </tr>
 <tr>
-<td>280</td>
+<td>281</td>
 <td>—</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -2977,7 +2993,7 @@ corrupts non-ASCII)</td>
 <code>helix-gitlab</code> URL fix (was misconfigured, not missing)</td>
 </tr>
 <tr>
-<td>281</td>
+<td>282</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -2987,7 +3003,7 @@ corrupts non-ASCII)</td>
 93c830a</td>
 </tr>
 <tr>
-<td>282</td>
+<td>283</td>
 <td>—</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>

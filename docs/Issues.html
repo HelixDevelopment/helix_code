@@ -2447,21 +2447,6 @@ user journeys work. The work is to stand up a server and run the
 challenges, capturing the results. This provides real proof that the
 headline user workflows function end to end.</p>
 <h2
-id="hxc-139-a-vendored-reference-agent-fixture-breaks-the-helix_agent-module-build">HXC-139
-— A vendored reference-agent fixture breaks the helix_agent module
-build</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Severity:</strong> High <strong>Created-By:</strong> Claude</p>
-<p>A vendored copy of a third-party reference coding-agent (the Continue
-project) includes a Go source file that imports a path that does not
-exist, and because that file has no separate module marker it gets swept
-into the helix_agent module’s build — breaking the build and static
-checks for the whole module. This blocks reliable building and testing
-of the agent module. The work is to isolate those vendored reference
-files so they are not compiled as part of our module (a build-ignore or
-nested module marker). Developers regain a clean, buildable agent
-module.</p>
-<h2
 id="hxc-140-helix_qa-copies-a-lock-by-value-and-one-test-bank-test-fails">HXC-140
 — helix_qa copies a lock by value and one test-bank test fails</h2>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
