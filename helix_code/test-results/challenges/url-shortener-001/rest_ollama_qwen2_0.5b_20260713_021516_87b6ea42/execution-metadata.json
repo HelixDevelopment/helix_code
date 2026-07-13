@@ -1,0 +1,92 @@
+{
+  "id": "87b6ea42-8e06-487f-97d2-6bf114d4ed21",
+  "challenge_id": "url-shortener-001",
+  "interface": "rest",
+  "distribution": "single",
+  "provider": "ollama",
+  "model": "qwen2:0.5b",
+  "start_time": "2026-07-13T02:15:16.016352735+05:00",
+  "end_time": "2026-07-13T02:15:16.019229717+05:00",
+  "duration": 2876982,
+  "status": "failed",
+  "result_dir": "test-results/challenges/url-shortener-001/rest_ollama_qwen2_0.5b_20260713_021516_87b6ea42",
+  "log_file": "test-results/logs/87b6ea42-8e06-487f-97d2-6bf114d4ed21/execution.log",
+  "request_log": "test-results/logs/87b6ea42-8e06-487f-97d2-6bf114d4ed21/requests.log",
+  "validation_log": "test-results/logs/87b6ea42-8e06-487f-97d2-6bf114d4ed21/validation.log",
+  "error": "HelixCode server API call failed: HelixCode server generation failed (status 401): {\"message\":\"Authorization header required\",\"status\":\"error\"}",
+  "validation_results": [
+    {
+      "check_name": "directory_exists",
+      "passed": false,
+      "message": "Directory is empty",
+      "timestamp": "2026-07-13T02:15:16.019232601+05:00"
+    },
+    {
+      "check_name": "no_placeholders",
+      "passed": true,
+      "message": "No placeholders found",
+      "timestamp": "2026-07-13T02:15:16.019253102+05:00"
+    },
+    {
+      "check_name": "no_empty_implementations",
+      "passed": true,
+      "message": "No empty implementations found",
+      "timestamp": "2026-07-13T02:15:16.019266072+05:00"
+    },
+    {
+      "check_name": "file_exists_README.md",
+      "passed": false,
+      "message": "Required file README.md not found",
+      "timestamp": "2026-07-13T02:15:16.019277499+05:00"
+    },
+    {
+      "check_name": "file_exists_Dockerfile",
+      "passed": false,
+      "message": "Required file Dockerfile not found",
+      "timestamp": "2026-07-13T02:15:16.019282557+05:00"
+    },
+    {
+      "check_name": "compilation",
+      "passed": false,
+      "error": "no go.mod found",
+      "timestamp": "2026-07-13T02:15:16.019286092+05:00"
+    },
+    {
+      "check_name": "tests_pass",
+      "passed": false,
+      "error": "Tests failed: exit status 1",
+      "details": "STDOUT:\n\n\nSTDERR:\ngo: warning: \"./...\" matched no packages\nno packages to test\n",
+      "timestamp": "2026-07-13T02:15:16.019289227+05:00"
+    },
+    {
+      "check_name": "use_case_documentation",
+      "passed": false,
+      "error": "README.md not found",
+      "details": "Use cases should be documented in README.md",
+      "timestamp": "2026-07-13T02:15:16.024471557+05:00"
+    },
+    {
+      "check_name": "required_file_main.go",
+      "passed": false,
+      "message": "Missing required file: main.go",
+      "timestamp": "2026-07-13T02:15:16.024482413+05:00"
+    },
+    {
+      "check_name": "required_file_README.md",
+      "passed": false,
+      "message": "Missing required file: README.md",
+      "timestamp": "2026-07-13T02:15:16.02448703+05:00"
+    }
+  ],
+  "metrics": {
+    "files_generated": 0,
+    "lines_of_code": 0,
+    "requests": 0,
+    "tokens_used": 0,
+    "compilation_time": 0,
+    "test_execution_time": 0,
+    "placeholders_found": 0,
+    "empty_functions": 0,
+    "coverage_percent": 0
+  }
+}

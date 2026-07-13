@@ -1,0 +1,5 @@
+provider_live_proof verdict
+run_id: provider_live_proof_20260711T104843Z
+timestamp_utc: 2026-07-11T10:48:46Z
+verdict: PASS
+detail: real HTTP call to deepseek (model=deepseek-v4-flash, source=catalogue:cheap-match) echoed fresh nonce "LIVEPROOF-dca3761d6ae9" — genuine live completion

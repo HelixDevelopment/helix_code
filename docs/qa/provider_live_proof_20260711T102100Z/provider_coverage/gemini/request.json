@@ -1,0 +1,9 @@
+{
+  "provider": "gemini",
+  "provider_type": "gemini",
+  "model": "gemini-2.5-pro",
+  "model_source": "catalogue:cheap-match",
+  "nonce": "LIVEPROOF-249dfdf909a9",
+  "prompt": "This is an automated liveness probe. Reply with EXACTLY this token and nothing else: LIVEPROOF-249dfdf909a9",
+  "requested_at_utc": "2026-07-11T10:21:00.115036003Z"
+}

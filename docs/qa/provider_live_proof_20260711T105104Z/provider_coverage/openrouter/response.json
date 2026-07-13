@@ -1,0 +1,14 @@
+{
+  "provider": "openrouter",
+  "content": "LIVEPROOF-a62120299830",
+  "nonce_echoed": true,
+  "truncated": false,
+  "finish_reason": "stop",
+  "processing_time": "4.918169952s",
+  "usage": {
+    "prompt_tokens": 107,
+    "completion_tokens": 71,
+    "total_tokens": 178
+  },
+  "responded_at_utc": "2026-07-11T10:51:12.490810452Z"
+}

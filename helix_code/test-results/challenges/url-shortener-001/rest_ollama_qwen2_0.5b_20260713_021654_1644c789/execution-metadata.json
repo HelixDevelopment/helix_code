@@ -1,0 +1,138 @@
+{
+  "id": "1644c789-2f21-4dfd-a8ed-bfabd5d4e6b7",
+  "challenge_id": "url-shortener-001",
+  "interface": "rest",
+  "distribution": "single",
+  "provider": "ollama",
+  "model": "qwen2:0.5b",
+  "start_time": "2026-07-13T02:16:54.891346585+05:00",
+  "end_time": "2026-07-13T02:17:16.805734983+05:00",
+  "duration": 21914388398,
+  "status": "validation_failed",
+  "result_dir": "test-results/challenges/url-shortener-001/rest_ollama_qwen2_0.5b_20260713_021654_1644c789",
+  "log_file": "test-results/logs/1644c789-2f21-4dfd-a8ed-bfabd5d4e6b7/execution.log",
+  "request_log": "test-results/logs/1644c789-2f21-4dfd-a8ed-bfabd5d4e6b7/requests.log",
+  "validation_log": "test-results/logs/1644c789-2f21-4dfd-a8ed-bfabd5d4e6b7/validation.log",
+  "validation_results": [
+    {
+      "check_name": "directory_exists",
+      "passed": true,
+      "message": "Directory exists with 4 entries",
+      "timestamp": "2026-07-13T02:17:16.805737767+05:00"
+    },
+    {
+      "check_name": "no_placeholders",
+      "passed": true,
+      "message": "No placeholders found",
+      "timestamp": "2026-07-13T02:17:16.805753461+05:00"
+    },
+    {
+      "check_name": "no_empty_implementations",
+      "passed": true,
+      "message": "No empty implementations found",
+      "timestamp": "2026-07-13T02:17:16.811388686+05:00"
+    },
+    {
+      "check_name": "file_exists_README.md",
+      "passed": true,
+      "message": "File README.md exists",
+      "timestamp": "2026-07-13T02:17:16.813419969+05:00"
+    },
+    {
+      "check_name": "file_exists_Dockerfile",
+      "passed": false,
+      "message": "Required file Dockerfile not found",
+      "timestamp": "2026-07-13T02:17:16.813425417+05:00"
+    },
+    {
+      "check_name": "compilation",
+      "passed": false,
+      "error": "Compilation failed: exit status 1",
+      "details": "STDOUT:\n\n\nSTDERR:\n# url-shortener-service\n./main.go:367:1: syntax error: unexpected EOF, expected }\n",
+      "timestamp": "2026-07-13T02:17:16.813435051+05:00"
+    },
+    {
+      "check_name": "tests_pass",
+      "passed": false,
+      "error": "Tests failed: exit status 1",
+      "details": "STDOUT:\nFAIL\turl-shortener-service [build failed]\nFAIL\n\n\nSTDERR:\n# url-shortener-service\n./main.go:367:1: syntax error: unexpected EOF, expected }\n",
+      "timestamp": "2026-07-13T02:17:19.11401635+05:00"
+    },
+    {
+      "check_name": "documentation_sections",
+      "passed": false,
+      "error": "Missing required documentation sections",
+      "details": "Missing sections: features, setup, usage",
+      "timestamp": "2026-07-13T02:17:19.321256614+05:00"
+    },
+    {
+      "check_name": "use_case_examples",
+      "passed": false,
+      "error": "No API usage examples found",
+      "details": "README should include examples of how to use API endpoints (e.g., curl commands)",
+      "timestamp": "2026-07-13T02:17:19.321257696+05:00"
+    },
+    {
+      "check_name": "api_documentation",
+      "passed": false,
+      "error": "Insufficient API endpoint documentation",
+      "details": "README should document all API endpoints with HTTP methods",
+      "timestamp": "2026-07-13T02:17:19.321258958+05:00"
+    },
+    {
+      "check_name": "setup_instructions",
+      "passed": false,
+      "error": "No numbered or bulleted setup steps found",
+      "details": "README should have clear step-by-step setup instructions",
+      "timestamp": "2026-07-13T02:17:19.32126078+05:00"
+    },
+    {
+      "check_name": "testing_instructions",
+      "passed": false,
+      "error": "No testing section found",
+      "details": "README should include instructions on how to run tests",
+      "timestamp": "2026-07-13T02:17:19.321261612+05:00"
+    },
+    {
+      "check_name": "required_file_main.go",
+      "passed": true,
+      "message": "Found required file: main.go",
+      "timestamp": "2026-07-13T02:17:19.321267601+05:00"
+    },
+    {
+      "check_name": "required_file_README.md",
+      "passed": true,
+      "message": "Found required file: README.md",
+      "timestamp": "2026-07-13T02:17:19.321270114+05:00"
+    },
+    {
+      "check_name": "http_server",
+      "passed": true,
+      "message": "HTTP server implementation: true",
+      "timestamp": "2026-07-13T02:17:19.321288312+05:00"
+    },
+    {
+      "check_name": "url_storage",
+      "passed": true,
+      "message": "URL storage mechanism: true",
+      "timestamp": "2026-07-13T02:17:19.321289594+05:00"
+    },
+    {
+      "check_name": "documentation",
+      "passed": false,
+      "message": "README documentation: false",
+      "timestamp": "2026-07-13T02:17:19.321301933+05:00"
+    }
+  ],
+  "metrics": {
+    "files_generated": 4,
+    "lines_of_code": 281,
+    "requests": 0,
+    "tokens_used": 0,
+    "compilation_time": 0,
+    "test_execution_time": 0,
+    "placeholders_found": 0,
+    "empty_functions": 0,
+    "coverage_percent": 0
+  }
+}

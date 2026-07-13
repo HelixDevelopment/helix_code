@@ -1,0 +1,51 @@
+{
+  "0621147c-b720-4f36-abe7-6657e1482b83": {
+    "id": "0621147c-b720-4f36-abe7-6657e1482b83",
+    "name": "challenge-test-run",
+    "description": "Challenge test batch",
+    "challenges": [
+      "ascii-art-generator-001",
+      "cli-task-manager-001",
+      "json-validator-cli-001",
+      "notes-project-001",
+      "tic-tac-toe-tui-001",
+      "url-shortener-001"
+    ],
+    "interfaces": [
+      "rest"
+    ],
+    "distributions": [
+      "single"
+    ],
+    "providers": [
+      "ollama"
+    ],
+    "models": [
+      "qwen2:0.5b"
+    ],
+    "start_time": "2026-07-13T02:16:54.891335138+05:00",
+    "end_time": "2026-07-13T02:20:08.022631455+05:00",
+    "duration": 193131296307,
+    "status": "completed",
+    "executions": [
+      "1644c789-2f21-4dfd-a8ed-bfabd5d4e6b7",
+      "54cc435e-4e21-41ec-a795-4cc8ae56dc52",
+      "460fa596-67c8-4828-b091-0c8efbd05b78",
+      "e4359874-bae7-4b27-9103-dce733bfa1a3",
+      "7e152a6e-1a22-4df4-b49e-500f2c9d2514",
+      "8ae5817e-1bf5-43ee-a6dd-a23324654838"
+    ],
+    "summary": {
+      "total_executions": 6,
+      "completed": 0,
+      "failed": 0,
+      "timeout": 0,
+      "validation_failed": 1,
+      "success_rate": 0,
+      "avg_duration": 86168678191,
+      "total_tokens": 0,
+      "total_files_generated": 4,
+      "total_loc": 281
+    }
+  }
+}

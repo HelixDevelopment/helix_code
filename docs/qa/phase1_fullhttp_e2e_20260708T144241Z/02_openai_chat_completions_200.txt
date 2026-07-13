@@ -1,0 +1,10 @@
+=== REQUEST ===
+POST http://127.0.0.1:41789/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer test-only-fullhttp-e2e-wire-facade-key-not-a-real-secret
+
+{"messages":[{"role":"user","content":"This is an automated full-HTTP e2e liveness probe. Reply with EXACTLY this token and nothing else: HELIXCODE-FULLHTTP-E2E-7e6bc0b45cb7"}],"max_tokens":32,"temperature":0}
+
+=== RESPONSE ===
+HTTP 200
+{"id":"chatcmpl-ad63ffeb-31b7-46e9-b6a2-4d48af9ab144","object":"chat.completion","created":1783521761,"model":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","choices":[{"index":0,"message":{"role":"assistant","content":"HELIXCODE-FULLHTTP-E2E-7e6bc0b45cb7"},"finish_reason":"stop"}],"usage":{"prompt_tokens":53,"completion_tokens":21,"total_tokens":74}}

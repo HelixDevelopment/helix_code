@@ -22,6 +22,10 @@ logs/
 *.bak
 *.backup
 
+# Build derivatives — regenerate from source (§11.4.77, CONST-053)
+scratchpad/
+.git-backups/
+
 # IDE files
 .vscode/
 .idea/

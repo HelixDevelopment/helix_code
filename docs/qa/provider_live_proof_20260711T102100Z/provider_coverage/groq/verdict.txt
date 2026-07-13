@@ -1,0 +1,5 @@
+provider_live_proof verdict
+run_id: provider_live_proof_20260711T102100Z
+timestamp_utc: 2026-07-11T10:21:02Z
+verdict: PASS
+detail: real HTTP call to groq (model=llama-3.1-8b-instant, source=catalogue:cheap-match) echoed fresh nonce "LIVEPROOF-728365b040cd" — genuine live completion

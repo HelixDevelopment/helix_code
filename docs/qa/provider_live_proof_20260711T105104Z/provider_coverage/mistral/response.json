@@ -1,0 +1,14 @@
+{
+  "provider": "mistral",
+  "content": "LIVEPROOF-2700a48a202d",
+  "nonce_echoed": true,
+  "truncated": false,
+  "finish_reason": "stop",
+  "processing_time": "564.370098ms",
+  "usage": {
+    "prompt_tokens": 62,
+    "completion_tokens": 17,
+    "total_tokens": 79
+  },
+  "responded_at_utc": "2026-07-11T10:51:07.328341258Z"
+}

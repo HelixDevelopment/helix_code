@@ -1,0 +1,5 @@
+provider_live_proof verdict
+run_id: provider_live_proof_20260711T104843Z
+timestamp_utc: 2026-07-11T10:48:55Z
+verdict: PASS
+detail: real HTTP call to openrouter (model=openai/gpt-oss-20b:free, source=catalogue:cheap-match) echoed fresh nonce "LIVEPROOF-e72693198bc5" — genuine live completion

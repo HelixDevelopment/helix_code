@@ -1,0 +1,6 @@
+{
+  "model": "command-r-08-2024",
+  "messages": [{"role":"user","content":"Reply with EXACTLY this token and nothing else: LIVEPROOF-46e13018e452"}],
+  "max_tokens": 32,
+  "temperature": 0
+}

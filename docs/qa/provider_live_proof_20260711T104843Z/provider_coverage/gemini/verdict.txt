@@ -1,0 +1,5 @@
+provider_live_proof verdict
+run_id: provider_live_proof_20260711T104843Z
+timestamp_utc: 2026-07-11T10:48:44Z
+verdict: FAIL
+detail: key present but real Generate() call errored: gemini API error (400): INVALID_ARGUMENT - API key not valid. Please pass a valid API key.

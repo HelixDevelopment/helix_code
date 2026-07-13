@@ -1,0 +1,10 @@
+=== REQUEST ===
+POST http://127.0.0.1:36969/v1/messages
+Content-Type: application/json
+x-api-key: test-only-fullhttp-e2e-wire-facade-key-not-a-real-secret
+
+{"messages":[{"role":"user","content":"What is the weather in the city named exactly \"HELIXCODE-FULLHTTP-E2E-98425948f3ba\"? You MUST call the get_weather tool with that exact city string."}],"tools":[{"name":"get_weather","description":"Get the current weather for a city","input_schema":{"type":"object","properties":{"city":{"type":"string"}},"required":["city"]}}],"max_tokens":64,"temperature":0}
+
+=== RESPONSE ===
+HTTP 200
+{"id":"msg_c487ede9-50d1-4ec9-a5d4-8324e259626b","type":"message","role":"assistant","model":"/models/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf","content":[{"type":"tool_use","id":"hmn10kFs4T6LfrXWbBOlZaOzopCaj1Xi","name":"get_weather","input":{"city":"HELIXCODE-FULLHTTP-E2E-98425948f3ba"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":320,"output_tokens":42}}

@@ -1,0 +1,14 @@
+{
+  "provider": "groq",
+  "content": "LIVE",
+  "nonce_echoed": false,
+  "truncated": false,
+  "finish_reason": "stop",
+  "processing_time": "274.160617ms",
+  "usage": {
+    "prompt_tokens": 76,
+    "completion_tokens": 3,
+    "total_tokens": 79
+  },
+  "responded_at_utc": "2026-07-11T10:51:06.440292538Z"
+}

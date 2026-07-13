@@ -1,0 +1,29 @@
+{
+  "id": "e4359874-bae7-4b27-9103-dce733bfa1a3",
+  "challenge_id": "notes-project-001",
+  "interface": "rest",
+  "distribution": "single",
+  "provider": "ollama",
+  "model": "qwen2:0.5b",
+  "start_time": "2026-07-13T02:17:19.321923192+05:00",
+  "end_time": "2026-07-13T02:19:19.324712283+05:00",
+  "duration": 120002789101,
+  "status": "skipped",
+  "result_dir": "test-results/challenges/notes-project-001/rest_ollama_qwen2_0.5b_20260713_021719_e4359874",
+  "log_file": "test-results/logs/e4359874-bae7-4b27-9103-dce733bfa1a3/execution.log",
+  "request_log": "test-results/logs/e4359874-bae7-4b27-9103-dce733bfa1a3/requests.log",
+  "validation_log": "test-results/logs/e4359874-bae7-4b27-9103-dce733bfa1a3/validation.log",
+  "error": "HelixCode server API call failed: helixcode server unreachable: POST http://localhost:18080/api/v1/llm/generate: Post \"http://localhost:18080/api/v1/llm/generate\": EOF",
+  "validation_results": null,
+  "metrics": {
+    "files_generated": 0,
+    "lines_of_code": 0,
+    "requests": 0,
+    "tokens_used": 0,
+    "compilation_time": 0,
+    "test_execution_time": 0,
+    "placeholders_found": 0,
+    "empty_functions": 0,
+    "coverage_percent": 0
+  }
+}

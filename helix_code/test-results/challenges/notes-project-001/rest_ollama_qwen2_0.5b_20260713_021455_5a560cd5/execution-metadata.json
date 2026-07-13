@@ -1,0 +1,101 @@
+{
+  "id": "5a560cd5-6633-4f74-8175-c2a14c10c32e",
+  "challenge_id": "notes-project-001",
+  "interface": "rest",
+  "distribution": "single",
+  "provider": "ollama",
+  "model": "qwen2:0.5b",
+  "start_time": "2026-07-13T02:14:55.319239008+05:00",
+  "end_time": "2026-07-13T02:14:55.321877449+05:00",
+  "duration": 2638461,
+  "status": "failed",
+  "result_dir": "test-results/challenges/notes-project-001/rest_ollama_qwen2_0.5b_20260713_021455_5a560cd5",
+  "log_file": "test-results/logs/5a560cd5-6633-4f74-8175-c2a14c10c32e/execution.log",
+  "request_log": "test-results/logs/5a560cd5-6633-4f74-8175-c2a14c10c32e/requests.log",
+  "validation_log": "test-results/logs/5a560cd5-6633-4f74-8175-c2a14c10c32e/validation.log",
+  "error": "HelixCode server API call failed: HelixCode server generation failed (status 401): {\"message\":\"Authorization header required\",\"status\":\"error\"}",
+  "validation_results": [
+    {
+      "check_name": "directory_exists",
+      "passed": false,
+      "message": "Directory is empty",
+      "timestamp": "2026-07-13T02:14:55.321882347+05:00"
+    },
+    {
+      "check_name": "no_placeholders",
+      "passed": true,
+      "message": "No placeholders found",
+      "timestamp": "2026-07-13T02:14:55.321931801+05:00"
+    },
+    {
+      "check_name": "no_empty_implementations",
+      "passed": true,
+      "message": "No empty implementations found",
+      "timestamp": "2026-07-13T02:14:55.32196405+05:00"
+    },
+    {
+      "check_name": "file_exists_README.md",
+      "passed": false,
+      "message": "Required file README.md not found",
+      "timestamp": "2026-07-13T02:14:55.321991882+05:00"
+    },
+    {
+      "check_name": "file_exists_Dockerfile",
+      "passed": false,
+      "message": "Required file Dockerfile not found",
+      "timestamp": "2026-07-13T02:14:55.322004682+05:00"
+    },
+    {
+      "check_name": "compilation",
+      "passed": false,
+      "error": "no go.mod found",
+      "timestamp": "2026-07-13T02:14:55.322012854+05:00"
+    },
+    {
+      "check_name": "tests_pass",
+      "passed": false,
+      "error": "Tests failed: exit status 1",
+      "details": "STDOUT:\n\n\nSTDERR:\ngo: warning: \"./...\" matched no packages\nno packages to test\n",
+      "timestamp": "2026-07-13T02:14:55.322020445+05:00"
+    },
+    {
+      "check_name": "use_case_documentation",
+      "passed": false,
+      "error": "README.md not found",
+      "details": "Use cases should be documented in README.md",
+      "timestamp": "2026-07-13T02:14:55.327340013+05:00"
+    },
+    {
+      "check_name": "common_sense_crud_operations",
+      "passed": false,
+      "error": "Missing common CRUD operations",
+      "details": "Missing operations: create, read, update, delete, list, search",
+      "timestamp": "2026-07-13T02:14:55.327361275+05:00"
+    },
+    {
+      "check_name": "common_sense_data_model",
+      "passed": false,
+      "error": "Note model missing essential fields",
+      "details": "Note model should have at minimum: ID, Title, Content fields",
+      "timestamp": "2026-07-13T02:14:55.327373944+05:00"
+    },
+    {
+      "check_name": "common_sense_database",
+      "passed": false,
+      "error": "No database package found",
+      "details": "Project should have database connection setup",
+      "timestamp": "2026-07-13T02:14:55.327386002+05:00"
+    }
+  ],
+  "metrics": {
+    "files_generated": 0,
+    "lines_of_code": 0,
+    "requests": 0,
+    "tokens_used": 0,
+    "compilation_time": 0,
+    "test_execution_time": 0,
+    "placeholders_found": 0,
+    "empty_functions": 0,
+    "coverage_percent": 0
+  }
+}

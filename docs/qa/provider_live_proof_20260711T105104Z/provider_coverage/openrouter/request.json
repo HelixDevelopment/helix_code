@@ -1,0 +1,9 @@
+{
+  "provider": "openrouter",
+  "provider_type": "openrouter",
+  "model": "openai/gpt-oss-20b:free",
+  "model_source": "catalogue:cheap-match",
+  "nonce": "LIVEPROOF-a62120299830",
+  "prompt": "This is an automated liveness probe. Skip any reasoning, chain-of-thought, or explanation. Reply with EXACTLY this token and nothing else: LIVEPROOF-a62120299830",
+  "requested_at_utc": "2026-07-11T10:51:07.572535341Z"
+}

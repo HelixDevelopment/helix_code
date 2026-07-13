@@ -1,0 +1,74 @@
+{
+  "id": "bff97ef1-351c-4765-b24f-528c60790ff7",
+  "challenge_id": "ascii-art-generator-001",
+  "interface": "rest",
+  "distribution": "single",
+  "provider": "ollama",
+  "model": "qwen2:0.5b",
+  "start_time": "2026-07-13T02:15:16.024811932+05:00",
+  "end_time": "2026-07-13T02:15:16.025704131+05:00",
+  "duration": 892179,
+  "status": "failed",
+  "result_dir": "test-results/challenges/ascii-art-generator-001/rest_ollama_qwen2_0.5b_20260713_021516_bff97ef1",
+  "log_file": "test-results/logs/bff97ef1-351c-4765-b24f-528c60790ff7/execution.log",
+  "request_log": "test-results/logs/bff97ef1-351c-4765-b24f-528c60790ff7/requests.log",
+  "validation_log": "test-results/logs/bff97ef1-351c-4765-b24f-528c60790ff7/validation.log",
+  "error": "HelixCode server API call failed: HelixCode server generation failed (status 401): {\"message\":\"Authorization header required\",\"status\":\"error\"}",
+  "validation_results": [
+    {
+      "check_name": "directory_exists",
+      "passed": false,
+      "message": "Directory is empty",
+      "timestamp": "2026-07-13T02:15:16.025705944+05:00"
+    },
+    {
+      "check_name": "no_placeholders",
+      "passed": true,
+      "message": "No placeholders found",
+      "timestamp": "2026-07-13T02:15:16.025726365+05:00"
+    },
+    {
+      "check_name": "no_empty_implementations",
+      "passed": true,
+      "message": "No empty implementations found",
+      "timestamp": "2026-07-13T02:15:16.025740016+05:00"
+    },
+    {
+      "check_name": "file_exists_README.md",
+      "passed": false,
+      "message": "Required file README.md not found",
+      "timestamp": "2026-07-13T02:15:16.025752304+05:00"
+    },
+    {
+      "check_name": "compilation",
+      "passed": false,
+      "error": "no go.mod found",
+      "timestamp": "2026-07-13T02:15:16.025757592+05:00"
+    },
+    {
+      "check_name": "tests_pass",
+      "passed": false,
+      "error": "Tests failed: exit status 1",
+      "details": "STDOUT:\n\n\nSTDERR:\ngo: warning: \"./...\" matched no packages\nno packages to test\n",
+      "timestamp": "2026-07-13T02:15:16.025761097+05:00"
+    },
+    {
+      "check_name": "use_case_documentation",
+      "passed": false,
+      "error": "README.md not found",
+      "details": "Use cases should be documented in README.md",
+      "timestamp": "2026-07-13T02:15:16.030930958+05:00"
+    }
+  ],
+  "metrics": {
+    "files_generated": 0,
+    "lines_of_code": 0,
+    "requests": 0,
+    "tokens_used": 0,
+    "compilation_time": 0,
+    "test_execution_time": 0,
+    "placeholders_found": 0,
+    "empty_functions": 0,
+    "coverage_percent": 0
+  }
+}

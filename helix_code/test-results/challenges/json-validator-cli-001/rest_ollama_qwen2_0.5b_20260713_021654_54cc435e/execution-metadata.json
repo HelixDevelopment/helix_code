@@ -1,0 +1,29 @@
+{
+  "id": "54cc435e-4e21-41ec-a795-4cc8ae56dc52",
+  "challenge_id": "json-validator-cli-001",
+  "interface": "rest",
+  "distribution": "single",
+  "provider": "ollama",
+  "model": "qwen2:0.5b",
+  "start_time": "2026-07-13T02:16:54.891370371+05:00",
+  "end_time": "2026-07-13T02:17:56.831859939+05:00",
+  "duration": 61940489528,
+  "status": "skipped",
+  "result_dir": "test-results/challenges/json-validator-cli-001/rest_ollama_qwen2_0.5b_20260713_021654_54cc435e",
+  "log_file": "test-results/logs/54cc435e-4e21-41ec-a795-4cc8ae56dc52/execution.log",
+  "request_log": "test-results/logs/54cc435e-4e21-41ec-a795-4cc8ae56dc52/requests.log",
+  "validation_log": "test-results/logs/54cc435e-4e21-41ec-a795-4cc8ae56dc52/validation.log",
+  "error": "HelixCode server API call failed: helixcode server unreachable: POST http://localhost:18080/api/v1/llm/generate: Post \"http://localhost:18080/api/v1/llm/generate\": EOF",
+  "validation_results": null,
+  "metrics": {
+    "files_generated": 0,
+    "lines_of_code": 0,
+    "requests": 0,
+    "tokens_used": 0,
+    "compilation_time": 0,
+    "test_execution_time": 0,
+    "placeholders_found": 0,
+    "empty_functions": 0,
+    "coverage_percent": 0
+  }
+}

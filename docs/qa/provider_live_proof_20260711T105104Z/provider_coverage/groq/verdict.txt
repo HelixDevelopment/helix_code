@@ -1,0 +1,5 @@
+provider_live_proof verdict
+run_id: provider_live_proof_20260711T105104Z
+timestamp_utc: 2026-07-11T10:51:06Z
+verdict: FAIL
+detail: nonce "LIVEPROOF-da82afe80c8c" not found in response content "LIVE" — cannot prove this is a live, non-cached answer

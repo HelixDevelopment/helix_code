@@ -1,0 +1,255 @@
+{
+  "ascii-art-generator-001": {
+    "id": "ascii-art-generator-001",
+    "name": "ASCII Art Generator CLI",
+    "description": "Command-line ASCII art generator that converts text input to ASCII art in markdown format",
+    "type": "cli",
+    "prompt": "Create a command-line ASCII art generator that takes a text string as input and generates ASCII art representations in markdown format. The tool should support multiple ASCII art styles (banner, block, shadow, etc.), allow customization of font size, and output the result in markdown code blocks. Include proper argument parsing, input validation, error handling, and examples in the documentation.",
+    "prompt_file": "",
+    "language": "go",
+    "tags": [
+      "cli",
+      "ascii-art",
+      "text-processing",
+      "markdown"
+    ],
+    "timeout": "30m0s",
+    "priority": 2,
+    "requirements": {
+      "files": [
+        "main.go",
+        "generator/ascii.go",
+        "generator/styles.go"
+      ],
+      "directories": [
+        "generator"
+      ],
+      "min_files": 4,
+      "has_tests": true,
+      "has_readme": true,
+      "has_dockerfile": false,
+      "has_ci": false,
+      "compilation_check": true,
+      "tests_pass": true,
+      "run_check": true
+    }
+  },
+  "cli-task-manager-001": {
+    "id": "cli-task-manager-001",
+    "name": "CLI Task Manager",
+    "description": "Build a command-line task management application with local storage",
+    "type": "cli",
+    "prompt": "Create a CLI task manager application in Go using Cobra:\n\n1. Commands:\n   - task add \"description\" [--priority high|medium|low] [--due YYYY-MM-DD]\n   - task list [--status all|pending|done] [--priority high|medium|low]\n   - task show \u003cid\u003e\n   - task complete \u003cid\u003e\n   - task delete \u003cid\u003e\n   - task update \u003cid\u003e [--description \"...\"] [--priority ...] [--due ...]\n\n2. Features:\n   - Task persistence using JSON or SQLite\n   - Task attributes: ID, Description, Priority, Status, DueDate, CreatedAt, CompletedAt\n   - Colored output for better UX\n   - Table formatting for list view\n   - Search/filter capabilities\n   - Statistics (task count by status/priority)\n\n3. Requirements:\n   - Use Cobra framework\n   - Proper error handling\n   - Help text for all commands\n   - Input validation\n   - Unit tests for all commands\n   - README with usage examples\n   - Build script or Makefile\n\n4. Quality:\n   - Clean code structure\n   - No placeholders\n   - Proper package organization\n   - Edge case handling\n   - Cross-platform compatibility (Linux, macOS, Windows)",
+    "prompt_file": "",
+    "language": "go",
+    "tags": [
+      "cli",
+      "cobra",
+      "storage",
+      "beginner"
+    ],
+    "timeout": "20m0s",
+    "priority": 1,
+    "requirements": {
+      "files": [
+        "main.go",
+        "go.mod",
+        "README.md",
+        "Makefile"
+      ],
+      "directories": [
+        "cmd",
+        "internal"
+      ],
+      "min_files": 8,
+      "has_tests": true,
+      "has_readme": true,
+      "has_dockerfile": false,
+      "has_ci": false,
+      "compilation_check": true,
+      "tests_pass": true,
+      "run_check": false
+    },
+    "metadata": {
+      "category": "cli",
+      "difficulty": "beginner",
+      "estimated_time": "20m",
+      "framework": "cobra"
+    }
+  },
+  "json-validator-cli-001": {
+    "id": "json-validator-cli-001",
+    "name": "JSON Validator CLI",
+    "description": "Build a command-line JSON validator and formatter with schema support",
+    "type": "cli",
+    "prompt": "Create a CLI JSON validator and formatter in Go:\n\n1. Commands:\n   - validate \u003cfile\u003e - Validate JSON file\n   - format \u003cfile\u003e [--indent 2|4] [--compact] - Format JSON\n   - schema validate \u003cfile\u003e \u003cschema\u003e - Validate against JSON schema\n   - merge \u003cfile1\u003e \u003cfile2\u003e ... - Merge multiple JSON files\n   - diff \u003cfile1\u003e \u003cfile2\u003e - Show differences between JSON files\n\n2. Features:\n   - Syntax validation with detailed error messages\n   - Pretty printing and formatting\n   - JSON Schema (draft-07) validation\n   - Colorized output for errors\n   - Support for JSON Lines format\n   - Statistics (object count, depth, size)\n   - Streaming support for large files\n\n3. Requirements:\n   - Proper error messages with line/column numbers\n   - Support stdin and file input\n   - Exit codes (0=valid, 1=invalid)\n   - Unit tests with various JSON examples\n   - README with usage examples\n   - Help text for all commands\n\n4. Quality:\n   - Clean code structure\n   - No placeholders\n   - Edge case handling (empty files, malformed JSON)\n   - Performance for large files",
+    "prompt_file": "",
+    "language": "go",
+    "tags": [
+      "cli",
+      "json",
+      "validation",
+      "beginner"
+    ],
+    "timeout": "15m0s",
+    "priority": 1,
+    "requirements": {
+      "files": [
+        "main.go",
+        "go.mod",
+        "README.md"
+      ],
+      "directories": [
+        "cmd",
+        "pkg"
+      ],
+      "min_files": 6,
+      "has_tests": true,
+      "has_readme": true,
+      "has_dockerfile": false,
+      "has_ci": false,
+      "compilation_check": true,
+      "tests_pass": true,
+      "run_check": true
+    },
+    "metadata": {
+      "category": "cli",
+      "data_format": "json",
+      "difficulty": "beginner",
+      "estimated_time": "15m"
+    }
+  },
+  "notes-project-001": {
+    "id": "notes-project-001",
+    "name": "Simple Notes Application",
+    "description": "Build a complete notes application with CRUD operations, search functionality, and persistent storage",
+    "type": "crud",
+    "prompt": "Create a simple notes application in Go with the following features:\n\n1. RESTful API with endpoints for:\n   - GET /notes - List all notes\n   - GET /notes/:id - Get a specific note\n   - POST /notes - Create a new note\n   - PUT /notes/:id - Update a note\n   - DELETE /notes/:id - Delete a note\n   - GET /notes/search?q=query - Search notes\n\n2. Data Model:\n   - Note should have: ID (UUID), Title, Content, CreatedAt, UpdatedAt, Tags\n   - Use PostgreSQL for persistence\n   - Include proper database migrations\n\n3. Requirements:\n   - Use Gin web framework\n   - Implement proper error handling\n   - Add input validation\n   - Include comprehensive unit tests\n   - Add integration tests\n   - Provide a Dockerfile\n   - Include docker-compose.yml with PostgreSQL\n   - Add README with setup and usage instructions\n   - Implement logging using a structured logger\n   - Add proper CORS handling\n\n4. Code Quality:\n   - Follow Go best practices\n   - Use proper package structure\n   - Add comments for public functions\n   - Handle edge cases\n   - No TODO or placeholder comments\n   - All functions should be fully implemented\n\n5. Testing:\n   - Unit tests for all handlers\n   - Integration tests for API endpoints\n   - Database tests with test fixtures\n   - Minimum 80% code coverage\n\nThe application should be production-ready and follow best practices for Go web development.",
+    "prompt_file": "",
+    "language": "go",
+    "tags": [
+      "crud",
+      "web",
+      "api",
+      "database",
+      "beginner"
+    ],
+    "timeout": "30m0s",
+    "priority": 1,
+    "requirements": {
+      "files": [
+        "main.go",
+        "go.mod",
+        "go.sum",
+        "Dockerfile",
+        "docker-compose.yml",
+        "README.md",
+        ".gitignore"
+      ],
+      "directories": [
+        "internal",
+        "cmd",
+        "pkg",
+        "migrations",
+        "tests"
+      ],
+      "min_files": 15,
+      "has_tests": true,
+      "has_readme": true,
+      "has_dockerfile": true,
+      "has_ci": false,
+      "compilation_check": true,
+      "tests_pass": true,
+      "run_check": true
+    },
+    "metadata": {
+      "category": "web_development",
+      "database": "postgresql",
+      "difficulty": "beginner",
+      "estimated_time": "30m",
+      "framework": "gin"
+    }
+  },
+  "tic-tac-toe-tui-001": {
+    "id": "tic-tac-toe-tui-001",
+    "name": "Tic-Tac-Toe TUI Game",
+    "description": "Cross-platform terminal UI tic-tac-toe game for desktops and Harmony OS",
+    "type": "cli",
+    "prompt": "Create a cross-platform tic-tac-toe game with a terminal user interface (TUI) that works on Linux, macOS, Windows, and Harmony OS. The game should support two-player mode with alternating turns, display the game board in the terminal, detect wins/draws, and allow players to make moves by entering coordinates. Use the bubbletea TUI framework for a polished terminal experience. Include game state management, input validation, win condition checking, and clear visual feedback.",
+    "prompt_file": "",
+    "language": "go",
+    "tags": [
+      "game",
+      "tui",
+      "cross-platform",
+      "harmony-os"
+    ],
+    "timeout": "30m0s",
+    "priority": 2,
+    "requirements": {
+      "files": [
+        "main.go",
+        "game/board.go",
+        "game/player.go",
+        "ui/tui.go"
+      ],
+      "directories": [
+        "game",
+        "ui"
+      ],
+      "min_files": 5,
+      "has_tests": true,
+      "has_readme": true,
+      "has_dockerfile": false,
+      "has_ci": false,
+      "compilation_check": true,
+      "tests_pass": true,
+      "run_check": true
+    }
+  },
+  "url-shortener-001": {
+    "id": "url-shortener-001",
+    "name": "URL Shortener Service",
+    "description": "Build a URL shortener service with analytics and expiration support",
+    "type": "api",
+    "prompt": "Create a URL shortener microservice in Go with these features:\n\n1. API Endpoints:\n   - POST /shorten - Create short URL\n   - GET /:short_code - Redirect to original URL\n   - GET /stats/:short_code - Get URL statistics\n   - DELETE /:short_code - Delete short URL\n\n2. Features:\n   - Generate unique short codes (6-8 characters)\n   - Support custom short codes\n   - URL expiration (TTL)\n   - Click tracking and analytics\n   - Rate limiting\n   - URL validation\n\n3. Storage:\n   - Use Redis for fast lookups\n   - PostgreSQL for persistence and analytics\n   - Cache expiration handling\n\n4. Requirements:\n   - RESTful API design\n   - JSON responses\n   - Error handling with proper HTTP status codes\n   - Comprehensive tests\n   - Docker support\n   - API documentation (Swagger/OpenAPI)\n   - README with API examples\n\n5. Quality:\n   - Production-ready code\n   - No placeholders or TODOs\n   - Proper logging\n   - Graceful shutdown\n   - Health check endpoint",
+    "prompt_file": "",
+    "language": "go",
+    "tags": [
+      "api",
+      "redis",
+      "microservice",
+      "intermediate"
+    ],
+    "timeout": "45m0s",
+    "priority": 2,
+    "requirements": {
+      "files": [
+        "main.go",
+        "go.mod",
+        "Dockerfile",
+        "docker-compose.yml",
+        "README.md"
+      ],
+      "directories": [
+        "internal",
+        "api",
+        "pkg"
+      ],
+      "min_files": 12,
+      "has_tests": true,
+      "has_readme": true,
+      "has_dockerfile": true,
+      "has_ci": false,
+      "compilation_check": true,
+      "tests_pass": true,
+      "run_check": true
+    },
+    "metadata": {
+      "category": "microservices",
+      "database": "redis,postgresql",
+      "difficulty": "intermediate",
+      "estimated_time": "45m"
+    }
+  }
+}
