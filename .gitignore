@@ -207,4 +207,6 @@ tools/codegraph/package-lock.json
 
 # OpenDesign supervised bring-up runtime artifacts (§11.4.162, §11.4.30)
 scripts/opendesign/run/
-helix_code/scratchpad/flux_runtime/wan2.2_code/
+
+# Scratchpad: temp files, AI model downloads, discovery notes (§11.4.30)
+helix_code/scratchpad/
